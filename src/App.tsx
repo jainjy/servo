@@ -224,6 +224,7 @@ import SculpturePage from "./pages/SculpturePage";
 import PeinturePage from "./pages/PeinturePage";
 import ArtisanatPage from "./pages/ArtisanatPage";
 import MarketplaceCreateurs from "./pages/MarketplaceCreateurs";
+import EmploiFormationsPage from "./pages/EmploiFormationsPage";
 
 
                  
@@ -305,6 +306,10 @@ const App = () => {
               <Layout>
                 <Routes>
                   <Route path="/formations" element={<FormationsPage />} />
+                  <Route
+                    path="/emploi-formations"
+                    element={<EmploiFormationsPage />}
+                  />
                   <Route path="/emploi" element={<OffresEmploiPage />} />
                   <Route
                     path="/location-voiture"
@@ -360,8 +365,14 @@ const App = () => {
                   <Route path="/reprise" element={<CreationReprise />} />
                   <Route path="/auditMediation" element={<AuditMediation />} />
                   <Route path="/aideFonds" element={<AidesLeveesFonds />} />
-                  <Route path="/communicationMarketing" element={<CommunicationMarketing />} />
-                  <Route path="/Conseil_accompagnement" element={<ConseilsAccompagnement />} />
+                  <Route
+                    path="/communicationMarketing"
+                    element={<CommunicationMarketing />}
+                  />
+                  <Route
+                    path="/Conseil_accompagnement"
+                    element={<ConseilsAccompagnement />}
+                  />
                   <Route
                     path="/juridiqueLiquidation"
                     element={<JuridiqueLiquidation />}
@@ -517,19 +528,17 @@ const App = () => {
                     path="/produits-naturels/categorie/:categoryName"
                     element={<BoutiqueNaturel />}
                   />
+                  <Route path="/soin" element={<Soin />} />
+                  <Route path="/therapeute" element={<Therapeute />} />
                   <Route
-                    path="/soin"
-                    element={<Soin />}
+                    path="/huiles-essentielles"
+                    element={<HuilesEssentielles />}
                   />
                   <Route
-                    path="/therapeute"
-                    element={<Therapeute />}
+                    path="/huiles-essentielles/:categoryName"
+                    element={<HuilesEssentielles />}
                   />
-                  <Route path="/huiles-essentielles" element={<HuilesEssentielles />} />
-                  <Route path="/huiles-essentielles/:categoryName" element={<HuilesEssentielles />} />
-                  <Route path="/nutrition"
-                  element={<Nutrition />}
-                  />
+                  <Route path="/nutrition" element={<Nutrition />} />
                   <Route
                     path="/comptabilite"
                     element={
@@ -888,7 +897,6 @@ const App = () => {
                     path="/marketplace-createurs"
                     element={<MarketplaceCreateurs />}
                   />
-
                 </Routes>
 
                 {/* Pop-up publicité globale */}

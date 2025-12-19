@@ -2,8 +2,47 @@ import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Star, ChevronRight, Users, Building2, MessageCircle, X, Send, Navigation, Clock, Shield, Target, CheckCircle, Plus, TrendingUp, Coins, Handshake, Scale, Heart, FileText, BadgeDollarSign, ClipboardList, Search, ArrowRight } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  MapPin,
+  Star,
+  ChevronRight,
+  Users,
+  Building2,
+  MessageCircle,
+  X,
+  Send,
+  Navigation,
+  Clock,
+  Shield,
+  Target,
+  CheckCircle,
+  Plus,
+  TrendingUp,
+  Coins,
+  Handshake,
+  Scale,
+  Heart,
+  FileText,
+  BadgeDollarSign,
+  ClipboardList,
+  Search,
+  ArrowRight,
+  Briefcase,
+  Rocket,
+  BarChart3,
+  TargetIcon,
+  Megaphone,
+  Calculator,
+  ScaleIcon,
+  Brain,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Footer from "@/components/layout/Footer";
@@ -18,22 +57,23 @@ import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 
 // Palette de couleurs basée sur vos spécifications exactes
 const colors = {
-  logo: "#556B2F",           /* logo / accent - Olive green */
-  primaryDark: "#6B8E23",    /* Sruvol / fonds légers - Yellow-green */
-  lightBg: "#FFFFF0",        /* fond de page / bloc texte - White */
-  separator: "#D3D3D3",      /* séparateurs / bordures, UI - Light gray */
-  secondaryText: "#8B4513",  /* touche premium / titres secondaires - Saddle brown */
-  
+  logo: "#556B2F" /* logo / accent - Olive green */,
+  primaryDark: "#6B8E23" /* Sruvol / fonds légers - Yellow-green */,
+  lightBg: "#FFFFF0" /* fond de page / bloc texte - White */,
+  separator: "#D3D3D3" /* séparateurs / bordures, UI - Light gray */,
+  secondaryText:
+    "#8B4513" /* touche premium / titres secondaires - Saddle brown */,
+
   // Couleurs supplémentaires pour compléter la palette
-  primaryLight: "#8FBC8F",   // Version plus claire du primary
+  primaryLight: "#8FBC8F", // Version plus claire du primary
   secondaryLight: "#A0522D", // Version plus claire du secondary
-  cardBg: "#FFFFFF",         // Blanc pur pour les cartes
-  textPrimary: "#2C3E50",    // Texte principal foncé
-  textSecondary: "#5D6D7E",  // Texte secondaire
-  success: "#27AE60",        // Vert pour succès
-  warning: "#F39C12",        // Orange pour avertissements
-  error: "#E74C3C",          // Rouge pour erreurs
-  accentGold: "#D4AF37",     // Or pour éléments premium
+  cardBg: "#FFFFFF", // Blanc pur pour les cartes
+  textPrimary: "#2C3E50", // Texte principal foncé
+  textSecondary: "#5D6D7E", // Texte secondaire
+  success: "#27AE60", // Vert pour succès
+  warning: "#F39C12", // Orange pour avertissements
+  error: "#E74C3C", // Rouge pour erreurs
+  accentGold: "#D4AF37", // Or pour éléments premium
 };
 
 const partenaires = [
@@ -45,7 +85,7 @@ const partenaires = [
     projets: 127,
     badge: "Premium",
     badgeColor: "#D4AF37", // Gold
-    location: { lat: 48.8566, lng: 2.3522, address: "Paris, France" }
+    location: { lat: 48.8566, lng: 2.3522, address: "Paris, France" },
   },
   {
     id: 2,
@@ -55,7 +95,7 @@ const partenaires = [
     projets: 89,
     badge: "Recommandé",
     badgeColor: "#6B8E23", // primaryDark (Sruvol)
-    location: { lat: 45.7640, lng: 4.8357, address: "Lyon, France" }
+    location: { lat: 45.764, lng: 4.8357, address: "Lyon, France" },
   },
   {
     id: 3,
@@ -65,7 +105,7 @@ const partenaires = [
     projets: 203,
     badge: "Expert",
     badgeColor: "#8B4513", // secondaryText (Saddle brown)
-    location: { lat: 43.7102, lng: 7.2620, address: "Nice, France" }
+    location: { lat: 43.7102, lng: 7.262, address: "Nice, France" },
   },
   {
     id: 4,
@@ -75,102 +115,177 @@ const partenaires = [
     projets: 156,
     badge: "Partenaire Or",
     badgeColor: "#D4AF37", // Gold
-    location: { lat: 44.8378, lng: -0.5792, address: "Bordeaux, France" }
+    location: { lat: 44.8378, lng: -0.5792, address: "Bordeaux, France" },
   },
 ];
 
-// Nouvelles données pour les services d'entreprise
-const servicesEntreprise = [
+// NOUVELLES DONNÉES POUR LES SERVICES "ENTREPRISE & PRO"
+const servicesEntreprisePro = [
   {
     id: 1,
     nom: "Création d'entreprise",
-    description: "Accompagnement complet pour la création de votre entreprise",
-    icon: Plus,
+    description:
+      "Accompagnement complet pour la création de votre entreprise : choix du statut, formalités juridiques, immatriculation",
+    icon: Rocket,
     category: "creation",
-    details: "Formalités juridiques, choix du statut, immatriculation",
-    color: "#6B8E23" // primaryDark
+    details:
+      "Statuts juridiques, immatriculation, domiciliation, formalités administratives",
+    color: "#6B8E23", // primaryDark
+    features: [
+      "Choix du statut juridique",
+      "Rédaction des statuts",
+      "Immatriculation",
+      "Domiciliation d'entreprise",
+    ],
   },
   {
     id: 2,
-    nom: "Demande de subventions",
-    description: "Aide à l'obtention de financements et subventions",
-    icon: BadgeDollarSign,
-    category: "financement",
-    details: "Aides régionales, nationales et européennes",
-    color: "#27AE60" // success
+    nom: "Rachat d'entreprise",
+    description:
+      "Acquisition d'entreprises existantes : due diligence, négociation, transmission",
+    icon: Briefcase,
+    category: "rachat",
+    details:
+      "Évaluation, vérification comptable, négociation, transmission de fonds de commerce",
+    color: "#8B4513", // secondaryText
+    features: [
+      "Due diligence",
+      "Évaluation financière",
+      "Négociation",
+      "Transmission juridique",
+    ],
   },
   {
     id: 3,
-    nom: "Aides démarches administratives",
-    description: "Assistance pour toutes vos démarches administratives",
-    icon: ClipboardList,
-    category: "administratif",
-    details: "Accompagnement dans vos obligations légales",
-    color: "#556B2F" // logo
+    nom: "Cession & Liquidation",
+    description:
+      "Conseil et accompagnement pour la cession ou la liquidation de votre entreprise",
+    icon: Scale,
+    category: "cession",
+    details:
+      "Préparation à la cession, recherche d'acquéreurs, procédures de liquidation",
+    color: "#F39C12", // warning
+    features: [
+      "Évaluation de l'entreprise",
+      "Recherche d'acquéreurs",
+      "Négociations",
+      "Procédures légales",
+    ],
   },
   {
     id: 4,
-    nom: "Cession d'entreprise",
-    description: "Conseil et accompagnement pour la cession d'entreprise",
-    icon: Handshake,
-    category: "transmission",
-    details: "Évaluation, recherche d'acquéreurs, négociation",
-    color: "#8B4513" // secondaryText
+    nom: "Communication & Marketing",
+    description:
+      "Stratégies de communication et marketing digital pour développer votre entreprise",
+    icon: Megaphone,
+    category: "communication",
+    details:
+      "Stratégie digitale, branding, réseaux sociaux, publicité en ligne",
+    color: "#9B59B6", // Violet pour communication
+    features: [
+      "Stratégie digitale",
+      "Branding",
+      "Social Media",
+      "Campagnes publicitaires",
+    ],
   },
   {
     id: 5,
-    nom: "Entreprise à reprendre",
-    description: "Portfolio d'entreprises disponibles à la reprise",
-    icon: Search,
-    category: "transmission",
-    details: "Opportunités de reprise vérifiées et qualifiées",
-    color: "#A0522D" // secondaryLight
+    nom: "Comptabilité & Fiscalité",
+    description:
+      "Gestion comptable complète et optimisation fiscale pour votre entreprise",
+    icon: Calculator,
+    category: "comptabilite",
+    details: "Tenue de comptabilité, déclarations fiscales, TVA, bilan annuel",
+    color: "#2C3E50", // textPrimary
+    features: [
+      "Comptabilité générale",
+      "Déclarations fiscales",
+      "TVA",
+      "Bilans annuels",
+    ],
   },
   {
     id: 6,
-    nom: "Liquidation d'entreprise",
-    description: "Accompagnement dans les procédures de liquidation",
-    icon: Scale,
+    nom: "Conseil Juridique",
+    description: "Accompagnement juridique et conseil en droit des affaires",
+    icon: ScaleIcon,
     category: "juridique",
-    details: "Procédures légales et accompagnement juridique",
-    color: "#F39C12" // warning
+    details:
+      "Droit des sociétés, contrats commerciaux, propriété intellectuelle, litiges",
+    color: "#E74C3C", // error
+    features: [
+      "Droit des sociétés",
+      "Contrats commerciaux",
+      "Propriété intellectuelle",
+      "Résolution de litiges",
+    ],
   },
   {
     id: 7,
-    nom: "Entreprises partenaires",
-    description: "Réseau d'entreprises partenaires de la plateforme",
-    icon: Users,
-    category: "reseau",
-    details: "Mise en relation avec nos partenaires certifiés",
-    color: "#556B2F" // logo
+    nom: "Conseils & Accompagnement",
+    description:
+      "Coaching stratégique et accompagnement personnalisé pour entrepreneurs",
+    icon: Brain,
+    category: "conseil",
+    details:
+      "Stratégie d'entreprise, développement commercial, gestion d'équipe, pivot",
+    color: "#3498DB", // Bleu pour conseil
+    features: [
+      "Stratégie business",
+      "Développement commercial",
+      "Gestion opérationnelle",
+      "Coaching dirigeant",
+    ],
   },
   {
     id: 8,
-    nom: "Expertises comptables",
-    description: "Services d'expertise comptable professionnelle",
-    icon: FileText,
-    category: "comptabilite",
-    details: "Tenue de comptabilité, déclarations fiscales",
-    color: "#2C3E50" // textPrimary
+    nom: "Financement & Subventions",
+    description:
+      "Aide à l'obtention de financements, prêts et subventions pour entreprises",
+    icon: Coins,
+    category: "financement",
+    details:
+      "Business plan, recherche de financements, subventions, levée de fonds",
+    color: "#27AE60", // success
+    features: [
+      "Business plan",
+      "Recherche de financements",
+      "Subventions",
+      "Levée de fonds",
+    ],
   },
   {
     id: 9,
-    nom: "Commissariat aux comptes",
-    description: "Audit et certification des comptes",
-    icon: CheckCircle,
-    category: "comptabilite",
-    details: "Audit légal et certification des états financiers",
-    color: "#27AE60" // success
+    nom: "Transformation Digitale",
+    description: "Accompagnement dans la digitalisation de votre entreprise",
+    icon: BarChart3,
+    category: "digital",
+    details: "Solutions SaaS, automatisation, CRM, outils collaboratifs",
+    color: "#556B2F", // logo
+    features: [
+      "Solutions SaaS",
+      "Automatisation",
+      "CRM",
+      "Outils collaboratifs",
+    ],
   },
   {
     id: 10,
-    nom: "Service de médiation",
-    description: "Résolution amiable des conflits d'entreprise",
-    icon: Shield,
-    category: "juridique",
-    details: "Médiation commerciale et conflits internes",
-    color: "#F39C12" // warning
-  }
+    nom: "Développement International",
+    description: "Conseil pour l'expansion internationale de votre entreprise",
+    icon: TargetIcon,
+    category: "international",
+    details:
+      "Étude de marchés étrangers, implantation à l'étranger, douanes et taxes",
+    color: "#D35400", // Orange foncé
+    features: [
+      "Étude de marché",
+      "Implantation internationale",
+      "Logistique export",
+      "Fiscalité internationale",
+    ],
+  },
 ];
 
 // Animations
@@ -179,9 +294,9 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const itemVariants = {
@@ -191,9 +306,9 @@ const itemVariants = {
     opacity: 1,
     transition: {
       type: "spring",
-      stiffness: 100
-    }
-  }
+      stiffness: 100,
+    },
+  },
 };
 
 const cardHoverVariants = {
@@ -203,9 +318,9 @@ const cardHoverVariants = {
     scale: 1.02,
     transition: {
       type: "spring",
-      stiffness: 300
-    }
-  }
+      stiffness: 300,
+    },
+  },
 };
 
 const modalVariants = {
@@ -216,16 +331,16 @@ const modalVariants = {
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 25
-    }
+      damping: 25,
+    },
   },
   exit: {
     opacity: 0,
     scale: 0.8,
     transition: {
-      duration: 0.2
-    }
-  }
+      duration: 0.2,
+    },
+  },
 };
 
 const mapModalVariants = {
@@ -236,25 +351,25 @@ const mapModalVariants = {
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 30
-    }
+      damping: 30,
+    },
   },
   exit: {
     opacity: 0,
     y: 50,
     transition: {
-      duration: 0.3
-    }
-  }
+      duration: 0.3,
+    },
+  },
 };
 
 const Entreprise = () => {
   const { trackBusinessInteraction } = useInteractionTracking();
-  
+
   // Track l'affichage des services
   useEffect(() => {
-    servicesEntreprise.forEach(service => {
-      trackBusinessInteraction(service.id.toString(), service.nom, 'view');
+    servicesEntreprisePro.forEach((service) => {
+      trackBusinessInteraction(service.id.toString(), service.nom, "view");
     });
   }, [trackBusinessInteraction]);
 
@@ -272,43 +387,59 @@ const Entreprise = () => {
     telephone: "",
     message: "",
     service: "",
-    typeAvis: "positif"
+    typeAvis: "positif",
   });
 
   // États pour gérer le hover sur chaque carte
   const [hoveredCard, setHoveredCard] = useState(null);
 
   const handleServiceClick = (service) => {
-    trackBusinessInteraction(service.id.toString(), service.nom, 'click', {
-      category: service.category
+    trackBusinessInteraction(service.id.toString(), service.nom, "click", {
+      category: service.category,
     });
     setSelectedService(service);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       service: service.nom,
-      message: `Bonjour, je suis intéressé par le service "${service.nom}". ${service.details}`
+      message: `Bonjour,\n\nJe suis intéressé par le service "${
+        service.nom
+      }".\n\nPouvez-vous me renseigner sur :\n${service.features
+        .map((f) => `• ${f}`)
+        .join(
+          "\n"
+        )}\n\nMerci de me recontacter pour en discuter.\n\nCordialement,`,
     }));
     setShowMessageModal(true);
   };
 
   const handleContact = (partenaire) => {
-    trackBusinessInteraction(partenaire.id.toString(), partenaire.nom, 'contact_request', {
-      type: 'partenaire',
-      rating: partenaire.rating
-    });
+    trackBusinessInteraction(
+      partenaire.id.toString(),
+      partenaire.nom,
+      "contact_request",
+      {
+        type: "partenaire",
+        rating: partenaire.rating,
+      }
+    );
     setSelectedPartenaire(partenaire);
     setShowMessageModal(true);
   };
 
   const handleOpenMap = () => {
-    trackBusinessInteraction('map', 'Carte partenaires', 'open');
+    trackBusinessInteraction("map", "Carte partenaires", "open");
     setShowMapModal(true);
   };
 
   const handlePartnerLocation = (partenaire) => {
-    trackBusinessInteraction(partenaire.id.toString(), partenaire.nom, 'location_view', {
-      address: partenaire.location.address
-    });
+    trackBusinessInteraction(
+      partenaire.id.toString(),
+      partenaire.nom,
+      "location_view",
+      {
+        address: partenaire.location.address,
+      }
+    );
     setSelectedLocation(partenaire.location);
     setShowMapModal(true);
   };
@@ -318,27 +449,32 @@ const Entreprise = () => {
     setIsLoading(true);
 
     // Tracking de l'envoi du message
-    const trackingData = selectedPartenaire 
+    const trackingData = selectedPartenaire
       ? {
           id: selectedPartenaire.id.toString(),
           name: selectedPartenaire.nom,
-          action: 'contact_submit',
-          type: 'partenaire'
+          action: "contact_submit",
+          type: "partenaire",
         }
       : selectedService
       ? {
           id: selectedService.id.toString(),
           name: selectedService.nom,
-          action: 'service_request',
-          category: selectedService.category
+          action: "service_request",
+          category: selectedService.category,
         }
       : {
-          id: 'general_contact',
-          name: 'Contact général',
-          action: 'general_contact'
+          id: "general_contact",
+          name: "Contact général",
+          action: "general_contact",
         };
 
-    trackBusinessInteraction(trackingData.id, trackingData.name, trackingData.action, trackingData);
+    trackBusinessInteraction(
+      trackingData.id,
+      trackingData.name,
+      trackingData.action,
+      trackingData
+    );
 
     // Simulation d'envoi
     setTimeout(() => {
@@ -350,39 +486,78 @@ const Entreprise = () => {
         telephone: "",
         message: "",
         service: "",
-        typeAvis: "positif"
+        typeAvis: "positif",
       });
       setSelectedPartenaire(null);
       setSelectedService(null);
-      toast.info("Message envoyé avec succès !");
+      toast.success(
+        "Votre demande a été envoyée avec succès ! Un conseiller vous contactera dans les 24h."
+      );
     }, 2000);
   };
 
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   // Filtrage des services
-  const filteredServices = servicesEntreprise.filter(service => {
-    const matchesCategory = activeServiceCategory === "tous" || service.category === activeServiceCategory;
-    const matchesSearch = service.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredServices = servicesEntreprisePro.filter((service) => {
+    const matchesCategory =
+      activeServiceCategory === "tous" ||
+      service.category === activeServiceCategory;
+    const matchesSearch =
+      service.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.details.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  // Catégories uniques pour les filtres
+  // Catégories uniques pour les filtres basées sur les nouvelles données
   const serviceCategories = [
-    { value: "tous", label: "Tous les services", color: "#6B8E23" }, // primaryDark
-    { value: "creation", label: "Création", color: "#6B8E23" }, // primaryDark
-    { value: "financement", label: "Financement", color: "#27AE60" }, // success
-    { value: "administratif", label: "Administratif", color: "#556B2F" }, // logo
-    { value: "transmission", label: "Transmission", color: "#8B4513" }, // secondaryText
-    { value: "juridique", label: "Juridique", color: "#F39C12" }, // warning
-    { value: "comptabilite", label: "Comptabilité", color: "#2C3E50" }, // textPrimary
-    { value: "reseau", label: "Réseau", color: "#556B2F" } // logo
+    {
+      value: "tous",
+      label: "Tous les services",
+      color: "#6B8E23",
+      icon: Briefcase,
+    },
+    { value: "creation", label: "Création", color: "#6B8E23", icon: Rocket },
+    { value: "rachat", label: "Rachat", color: "#8B4513", icon: Briefcase },
+    { value: "cession", label: "Cession", color: "#F39C12", icon: Scale },
+    {
+      value: "communication",
+      label: "Communication",
+      color: "#9B59B6",
+      icon: Megaphone,
+    },
+    {
+      value: "comptabilite",
+      label: "Comptabilité",
+      color: "#2C3E50",
+      icon: Calculator,
+    },
+    {
+      value: "juridique",
+      label: "Juridique",
+      color: "#E74C3C",
+      icon: ScaleIcon,
+    },
+    { value: "conseil", label: "Conseil", color: "#3498DB", icon: Brain },
+    {
+      value: "financement",
+      label: "Financement",
+      color: "#27AE60",
+      icon: Coins,
+    },
+    { value: "digital", label: "Digital", color: "#556B2F", icon: BarChart3 },
+    {
+      value: "international",
+      label: "International",
+      color: "#D35400",
+      icon: TargetIcon,
+    },
   ];
 
   // Composant pour la carte Google Maps intégrée
@@ -392,13 +567,19 @@ const Entreprise = () => {
       : `https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=46.603354,1.888334&zoom=6&maptype=roadmap`;
 
     return (
-      <div className="w-full h-96 rounded-xl overflow-hidden border" style={{ borderColor: colors.separator }}>
+      <div
+        className="w-full h-96 rounded-xl overflow-hidden border"
+        style={{ borderColor: colors.separator }}
+      >
         <iframe
           width="100%"
           height="100%"
           frameBorder="0"
           style={{ border: 0 }}
-          src={mapUrl.replace('YOUR_API_KEY', 'AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8')}
+          src={mapUrl.replace(
+            "YOUR_API_KEY",
+            "AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
+          )}
           allowFullScreen
           title="Carte des partenaires"
         />
@@ -426,13 +607,17 @@ const Entreprise = () => {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            {/* TITRE MODIFIÉ - "Professionnelles" en vert #6B8E23 */}
+            {/* TITRE MODIFIÉ - "Entreprise & Pro" */}
             <h1 className="text-xl lg:text-4xl md:text-6xl font-bold mb-6 text-white">
-              Solutions <span style={{ color: colors.primaryDark }}>Professionnelles</span>
+              Solutions{" "}
+              <span style={{ color: colors.primaryDark }}>
+                Entreprise & Pro
+              </span>
             </h1>
             <p className="text-sm text-slate-200 mb-10 leading-relaxed">
-              Des services sur mesure pour répondre aux besoins spécifiques de
-              votre entreprise. Accompagnement personnalisé de A à Z.
+              Tous les services essentiels pour créer, développer et gérer votre
+              entreprise. Un accompagnement personnalisé de A à Z par nos
+              experts.
             </p>
 
             <div className="flex flex-wrap gap-2 lg:gap-5 justify-center">
@@ -452,14 +637,16 @@ const Entreprise = () => {
                     e.currentTarget.style.borderColor = "#334155"; // Retour à slate-700
                   }}
                   onClick={() => {
-                    trackBusinessInteraction('services_section', 'Services', 'navigate');
+                    trackBusinessInteraction(
+                      "services_section",
+                      "Services",
+                      "navigate"
+                    );
                     setActiveServiceCategory("tous");
                   }}
                 >
-                  <FileText className="h-5 w-5 mr-3" />
-                  <a href="#services">
-                    Découvrir nos services
-                  </a>
+                  <Briefcase className="h-5 w-5 mr-3" />
+                  <a href="#services">Découvrir nos services</a>
                 </Button>
               </motion.div>
 
@@ -470,9 +657,7 @@ const Entreprise = () => {
                   onClick={handleOpenMap}
                 >
                   <MapPin className="h-5 w-5 mr-3" />
-                  <a href="#partenaire">
-                    Voir nos partenaires
-                  </a>
+                  <a href="#partenaire">Voir nos partenaires</a>
                 </Button>
               </motion.div>
             </div>
@@ -480,7 +665,7 @@ const Entreprise = () => {
         </div>
       </section>
 
-      {/* Section Services d'entreprise */}
+      {/* Section Services Entreprise & Pro */}
       <motion.section
         className="container mx-auto px-4 py-8 lg:py-8"
         initial="hidden"
@@ -492,12 +677,21 @@ const Entreprise = () => {
           variants={itemVariants}
           className="text-center mb-0 lg:mb-8"
         >
-          <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6" style={{ color: colors.primaryDark }}>
-            Services <span style={{ color: colors.secondaryText }}>d'Entreprise</span>
+          <h1
+            className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6"
+            style={{ color: colors.primaryDark }}
+          >
+            Services{" "}
+            <span style={{ color: colors.secondaryText }}>
+              Entreprise & Pro
+            </span>
           </h1>
-          <p className="text-sm lg:text-sm" style={{ color: colors.textSecondary }}>
-            Tous les services essentiels pour le développement et la gestion de
-            votre entreprise
+          <p
+            className="text-sm lg:text-sm max-w-3xl mx-auto"
+            style={{ color: colors.textSecondary }}
+          >
+            Des solutions complètes pour chaque étape de la vie de votre
+            entreprise : création, développement, transmission et optimisation.
           </p>
         </motion.div>
 
@@ -510,25 +704,28 @@ const Entreprise = () => {
         >
           <div className="flex-1 relative">
             <Input
-              placeholder="Rechercher un service..."
+              placeholder="Rechercher un service (création, comptabilité, juridique...)"
               className="pl-12 pr-4 py-3 rounded-xl border-2 bg-white transition-all duration-300"
               style={{
                 borderColor: colors.separator,
-                backgroundColor: colors.cardBg
+                backgroundColor: colors.cardBg,
               }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Search className="absolute left-4 top-3.5 h-5 w-5" style={{ color: colors.textSecondary }} />
+            <Search
+              className="absolute left-4 top-3.5 h-5 w-5"
+              style={{ color: colors.textSecondary }}
+            />
           </div>
           {/* BOUTON RECHERCHE - Utilise #6B8E23 */}
           <motion.div>
-            <Button 
+            <Button
               className="rounded-xl px-8 py-3 font-semibold border-2 transition-all duration-300"
               style={{
                 backgroundColor: colors.primaryDark,
                 color: colors.lightBg,
-                borderColor: colors.primaryDark
+                borderColor: colors.primaryDark,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = colors.primaryLight;
@@ -539,10 +736,15 @@ const Entreprise = () => {
                 e.currentTarget.style.borderColor = colors.primaryDark;
               }}
               onClick={() => {
-                trackBusinessInteraction('search', 'Recherche services', 'search', {
-                  term: searchTerm,
-                  category: activeServiceCategory
-                });
+                trackBusinessInteraction(
+                  "search",
+                  "Recherche services",
+                  "search",
+                  {
+                    term: searchTerm,
+                    category: activeServiceCategory,
+                  }
+                );
               }}
             >
               Rechercher
@@ -551,52 +753,69 @@ const Entreprise = () => {
           </motion.div>
         </motion.div>
 
-        {/* Filtres des services */}
+        {/* Filtres des services avec icônes */}
         <motion.div variants={itemVariants} className="mb-12">
-          <div className="grid grid-cols-3 place-items-center lg:flex flex-wrap gap-3 mb-4 lg:mb-8 justify-center">
-            {serviceCategories.map((category, index) => (
-              <motion.div key={index}>
-                <Button
-                  variant={activeServiceCategory === category.value ? "default" : "outline"}
-                  className="rounded-xl font-semibold px-4 lg:px-6 py-3 transition-all duration-300"
-                  style={activeServiceCategory === category.value ? {
-                    backgroundColor: colors.primaryDark, // TOUS LES FILTRES ACTIFS utilisent #6B8E23
-                    color: colors.lightBg,
-                    borderColor: colors.primaryDark
-                  } : {
-                    borderColor: colors.separator,
-                    color: colors.textPrimary,
-                    backgroundColor: 'transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (activeServiceCategory !== category.value) {
-                      e.currentTarget.style.borderColor = colors.primaryDark;
-                      e.currentTarget.style.color = colors.primaryDark;
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex flex-wrap gap-3 mb-4 lg:mb-8 justify-center">
+            {serviceCategories.map((category, index) => {
+              const IconComponent = category.icon;
+              return (
+                <motion.div key={index}>
+                  <Button
+                    variant={
+                      activeServiceCategory === category.value
+                        ? "default"
+                        : "outline"
                     }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (activeServiceCategory !== category.value) {
-                      e.currentTarget.style.borderColor = colors.separator;
-                      e.currentTarget.style.color = colors.textPrimary;
+                    className="rounded-xl font-semibold px-4 lg:px-6 py-3 transition-all duration-300 flex items-center gap-2"
+                    style={
+                      activeServiceCategory === category.value
+                        ? {
+                            backgroundColor: colors.primaryDark, // TOUS LES FILTRES ACTIFS utilisent #6B8E23
+                            color: colors.lightBg,
+                            borderColor: colors.primaryDark,
+                          }
+                        : {
+                            borderColor: colors.separator,
+                            color: colors.textPrimary,
+                            backgroundColor: "transparent",
+                          }
                     }
-                  }}
-                  onClick={() => {
-                    trackBusinessInteraction('filter_category', category.label, 'filter_select', {
-                      category: category.value
-                    });
-                    setActiveServiceCategory(category.value);
-                  }}
-                >
-                  {category.label}
-                </Button>
-              </motion.div>
-            ))}
+                    onMouseEnter={(e) => {
+                      if (activeServiceCategory !== category.value) {
+                        e.currentTarget.style.borderColor = colors.primaryDark;
+                        e.currentTarget.style.color = colors.primaryDark;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activeServiceCategory !== category.value) {
+                        e.currentTarget.style.borderColor = colors.separator;
+                        e.currentTarget.style.color = colors.textPrimary;
+                      }
+                    }}
+                    onClick={() => {
+                      trackBusinessInteraction(
+                        "filter_category",
+                        category.label,
+                        "filter_select",
+                        {
+                          category: category.value,
+                        }
+                      );
+                      setActiveServiceCategory(category.value);
+                    }}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    <span className="hidden sm:inline">{category.label}</span>
+                  </Button>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
 
-        {/* Grille des services - MODIFIÉ POUR HOVER SUR TOUTE LA CARTE */}
+        {/* Grille des services Entreprise & Pro */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16"
           variants={containerVariants}
         >
           {filteredServices.map((service) => (
@@ -610,63 +829,108 @@ const Entreprise = () => {
             >
               <motion.div variants={cardHoverVariants} className="h-full">
                 <Card
-                  className="p-8 h-full rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-500 group"
+                  className="p-6 h-full rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-500 group border"
                   style={{
                     borderColor: colors.separator,
-                    backgroundColor: colors.cardBg
+                    backgroundColor: colors.cardBg,
                   }}
                   onClick={() => handleServiceClick(service)}
                 >
-                  {/* Icône du service - Hover déclenché par la carte */}
+                  {/* Icône du service */}
                   <motion.div
-                    className="w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center transition-colors duration-300"
+                    className="w-14 h-14 mb-5 rounded-xl flex items-center justify-center transition-all duration-300 mx-auto"
                     style={{
-                      backgroundColor: hoveredCard === service.id 
-                        ? colors.primaryDark  // Vert #6B8E23 au hover
-                        : `${service.color}15` // Couleur d'origine sans hover
+                      backgroundColor:
+                        hoveredCard === service.id
+                          ? colors.primaryDark
+                          : `${service.color}15`,
+                      transform:
+                        hoveredCard === service.id
+                          ? "rotate(5deg) scale(1.1)"
+                          : "none",
                     }}
                   >
-                    <service.icon 
-                      className="h-8 w-8 transition-colors duration-300" 
-                      style={{ 
-                        color: hoveredCard === service.id 
-                          ? colors.lightBg  // Blanc au hover
-                          : service.color   // Couleur d'origine sans hover
-                      }} 
+                    <service.icon
+                      className="h-7 w-7 transition-colors duration-300"
+                      style={{
+                        color:
+                          hoveredCard === service.id
+                            ? colors.lightBg
+                            : service.color,
+                      }}
                     />
                   </motion.div>
 
                   {/* Contenu */}
-                  <h3 className="text-2xl font-bold mb-4" style={{ color: colors.textPrimary }}>
+                  <h3
+                    className="text-lg font-bold mb-3 text-center"
+                    style={{ color: colors.textPrimary }}
+                  >
                     {service.nom}
                   </h3>
 
-                  <p className="leading-relaxed mb-4" style={{ color: colors.textSecondary }}>
+                  <p
+                    className="text-sm mb-4 leading-relaxed"
+                    style={{ color: colors.textSecondary }}
+                  >
                     {service.description}
                   </p>
 
-                  <p className="text-sm mb-6" style={{ color: colors.textSecondary, opacity: 0.8 }}>
-                    {service.details}
-                  </p>
+                  {/* Caractéristiques */}
+                  <div className="mb-5">
+                    <p
+                      className="text-xs font-semibold mb-2"
+                      style={{ color: colors.primaryDark }}
+                    >
+                      Ce service comprend :
+                    </p>
+                    <ul className="space-y-1">
+                      {service.features.slice(0, 3).map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle
+                            className="h-3 w-3 mt-0.5 flex-shrink-0"
+                            style={{ color: colors.success }}
+                          />
+                          <span
+                            className="text-xs"
+                            style={{ color: colors.textSecondary }}
+                          >
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                      {service.features.length > 3 && (
+                        <li
+                          className="text-xs italic"
+                          style={{ color: colors.textSecondary, opacity: 0.7 }}
+                        >
+                          + {service.features.length - 3} autres services
+                        </li>
+                      )}
+                    </ul>
+                  </div>
 
-                  {/* BOUTON D'ACTION - Hover déclenché par la carte */}
+                  {/* BOUTON D'ACTION */}
                   <motion.div>
                     <Button
-                      className="w-full font-semibold rounded-xl gap-3 py-4 border-2 transition-all duration-300"
+                      className="w-full font-semibold rounded-xl gap-2 py-3 border-2 transition-all duration-300 text-sm"
                       variant="outline"
                       style={{
-                        borderColor: hoveredCard === service.id 
-                          ? colors.primaryDark  // Bordure verte au hover
-                          : colors.primaryDark, // Bordure verte sans hover
-                        color: hoveredCard === service.id 
-                          ? colors.lightBg      // Texte blanc au hover
-                          : colors.primaryDark, // Texte vert sans hover
-                        backgroundColor: hoveredCard === service.id 
-                          ? colors.primaryDark  // Fond vert au hover
-                          : 'transparent'       // Transparent sans hover
+                        borderColor:
+                          hoveredCard === service.id
+                            ? colors.primaryDark
+                            : colors.primaryDark,
+                        color:
+                          hoveredCard === service.id
+                            ? colors.lightBg
+                            : colors.primaryDark,
+                        backgroundColor:
+                          hoveredCard === service.id
+                            ? colors.primaryDark
+                            : "transparent",
                       }}
                     >
-                      En savoir plus
+                      Demander un devis
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </motion.div>
@@ -683,7 +947,8 @@ const Entreprise = () => {
             animate={{ opacity: 1 }}
           >
             <p style={{ color: colors.textSecondary }}>
-              Aucun service trouvé pour votre recherche.
+              Aucun service ne correspond à votre recherche. Essayez avec
+              d'autres termes.
             </p>
           </motion.div>
         )}
@@ -703,10 +968,17 @@ const Entreprise = () => {
             variants={itemVariants}
             className="text-center mb-4 lg:mb-8"
           >
-            <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6" style={{ color: colors.primaryDark }}>
-              Devenir <span style={{ color: colors.secondaryText }}>Partenaire</span>
+            <h1
+              className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6"
+              style={{ color: colors.primaryDark }}
+            >
+              Devenir{" "}
+              <span style={{ color: colors.secondaryText }}>Partenaire</span>
             </h1>
-            <p className="text-sm lg:text-sm max-w-2xl mx-auto mb-4 lg:mb-8" style={{ color: colors.textSecondary }}>
+            <p
+              className="text-sm lg:text-sm max-w-2xl mx-auto mb-4 lg:mb-8"
+              style={{ color: colors.textSecondary }}
+            >
               Rejoignez notre réseau d'experts et développez votre activité
             </p>
           </motion.div>
@@ -722,11 +994,18 @@ const Entreprise = () => {
                 <motion.div key={index}>
                   <Select
                     onValueChange={(value) => {
-                      trackBusinessInteraction('partner_filter', filter.label, 'filter_select', {
-                        filter: filter.value,
-                        value: value
-                      });
-                      toast.info(`Filtre ${filter.label} sélectionné: ${value}`);
+                      trackBusinessInteraction(
+                        "partner_filter",
+                        filter.label,
+                        "filter_select",
+                        {
+                          filter: filter.value,
+                          value: value,
+                        }
+                      );
+                      toast.info(
+                        `Filtre ${filter.label} sélectionné: ${value}`
+                      );
                     }}
                   >
                     <SelectTrigger className="w-[240px] border-2 rounded-xl bg-white">
@@ -748,7 +1027,7 @@ const Entreprise = () => {
                   className="gap-2 border-2 font-semibold rounded-xl bg-white transition-all duration-300 px-6 py-3"
                   style={{
                     borderColor: colors.primaryDark,
-                    color: colors.primaryDark
+                    color: colors.primaryDark,
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = colors.primaryDark;
@@ -780,10 +1059,11 @@ const Entreprise = () => {
                 initial="initial"
               >
                 <motion.div variants={cardHoverVariants} className="h-full">
-                  <Card className="p-6 h-full rounded-2xl overflow-hidden relative hover:shadow-2xl transition-all duration-500 group"
+                  <Card
+                    className="p-6 h-full rounded-2xl overflow-hidden relative hover:shadow-2xl transition-all duration-500 group"
                     style={{
                       borderColor: colors.separator,
-                      backgroundColor: colors.cardBg
+                      backgroundColor: colors.cardBg,
                     }}
                   >
                     {/* Badge */}
@@ -791,7 +1071,7 @@ const Entreprise = () => {
                       className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10"
                       style={{
                         backgroundColor: partenaire.badgeColor,
-                        color: colors.lightBg
+                        color: colors.lightBg,
                       }}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -802,18 +1082,29 @@ const Entreprise = () => {
 
                     {/* Image spécifique */}
                     <motion.div
-                      className="w-full h-32 rounded-xl relative overflow-hidden"
+                      className="w-full h-32 rounded-xl relative overflow-hidden mb-4"
+                      style={{
+                        backgroundImage: `url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80')`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/30 group-hover:to-black/50 transition-colors duration-300" />
                     </motion.div>
 
                     {/* Contenu */}
                     <div className="p-4">
-                      <h3 className="text-xl font-bold mb-2" style={{ color: colors.textPrimary }}>
+                      <h3
+                        className="text-xl font-bold mb-2"
+                        style={{ color: colors.textPrimary }}
+                      >
                         {partenaire.nom}
                       </h3>
 
-                      <p className="leading-relaxed text-sm mb-4" style={{ color: colors.textSecondary }}>
+                      <p
+                        className="leading-relaxed text-sm mb-4"
+                        style={{ color: colors.textSecondary }}
+                      >
                         {partenaire.description}
                       </p>
 
@@ -822,8 +1113,14 @@ const Entreprise = () => {
                         className="flex items-center gap-2 cursor-pointer group mb-4"
                         onClick={() => handlePartnerLocation(partenaire)}
                       >
-                        <MapPin className="h-4 w-4" style={{ color: colors.textSecondary }} />
-                        <span className="text-sm transition-colors" style={{ color: colors.textSecondary }}>
+                        <MapPin
+                          className="h-4 w-4"
+                          style={{ color: colors.textSecondary }}
+                        />
+                        <span
+                          className="text-sm transition-colors"
+                          style={{ color: colors.textSecondary }}
+                        >
                           {partenaire.location.address}
                         </span>
                       </motion.div>
@@ -832,14 +1129,25 @@ const Entreprise = () => {
                       <div className="flex items-center justify-between text-sm mb-6">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4" style={{ color: colors.warning }} />
-                            <span className="font-semibold" style={{ color: colors.textPrimary }}>
+                            <Star
+                              className="h-4 w-4"
+                              style={{ color: colors.warning }}
+                            />
+                            <span
+                              className="font-semibold"
+                              style={{ color: colors.textPrimary }}
+                            >
                               {partenaire.rating}
                             </span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" style={{ color: colors.textSecondary }} />
-                            <span style={{ color: colors.textSecondary }}>{partenaire.projets} projets</span>
+                            <Users
+                              className="h-4 w-4"
+                              style={{ color: colors.textSecondary }}
+                            />
+                            <span style={{ color: colors.textSecondary }}>
+                              {partenaire.projets} projets
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -851,15 +1159,19 @@ const Entreprise = () => {
                           style={{
                             backgroundColor: colors.primaryDark,
                             color: colors.lightBg,
-                            borderColor: colors.primaryDark
+                            borderColor: colors.primaryDark,
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = colors.primaryLight;
-                            e.currentTarget.style.borderColor = colors.primaryLight;
+                            e.currentTarget.style.backgroundColor =
+                              colors.primaryLight;
+                            e.currentTarget.style.borderColor =
+                              colors.primaryLight;
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = colors.primaryDark;
-                            e.currentTarget.style.borderColor = colors.primaryDark;
+                            e.currentTarget.style.backgroundColor =
+                              colors.primaryDark;
+                            e.currentTarget.style.borderColor =
+                              colors.primaryDark;
                           }}
                           onClick={() => handleContact(partenaire)}
                         >
@@ -881,7 +1193,10 @@ const Entreprise = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <h2 className="text-2xl lg:text-3xl font-bold text-center mb-8 lg:mb-12" style={{ color: colors.primaryDark }}>
+            <h2
+              className="text-2xl lg:text-3xl font-bold text-center mb-8 lg:mb-12"
+              style={{ color: colors.primaryDark }}
+            >
               Avantages du partenariat
             </h2>
 
@@ -891,20 +1206,29 @@ const Entreprise = () => {
                 className="text-center p-6 rounded-2xl transition-all duration-300 hover:shadow-lg"
                 style={{
                   backgroundColor: colors.cardBg,
-                  border: `1px solid ${colors.separator}`
+                  border: `1px solid ${colors.separator}`,
                 }}
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${colors.primaryDark}15` }}>
-                  <TrendingUp className="h-8 w-8" style={{ color: colors.primaryDark }} />
+                <div
+                  className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${colors.primaryDark}15` }}
+                >
+                  <TrendingUp
+                    className="h-8 w-8"
+                    style={{ color: colors.primaryDark }}
+                  />
                 </div>
-                <h3 className="text-xl font-bold mb-3" style={{ color: colors.textPrimary }}>
+                <h3
+                  className="text-xl font-bold mb-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Visibilité accrue
                 </h3>
                 <p style={{ color: colors.textSecondary }}>
-                  Bénéficiez d'une exposition privilégiée auprès de notre communauté
+                  Bénéficiez d'une exposition privilégiée auprès de notre
+                  communauté
                 </p>
               </motion.div>
 
@@ -913,20 +1237,29 @@ const Entreprise = () => {
                 className="text-center p-6 rounded-2xl transition-all duration-300 hover:shadow-lg"
                 style={{
                   backgroundColor: colors.cardBg,
-                  border: `1px solid ${colors.separator}`
+                  border: `1px solid ${colors.separator}`,
                 }}
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${colors.secondaryText}15` }}>
-                  <Coins className="h-8 w-8" style={{ color: colors.secondaryText }} />
+                <div
+                  className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${colors.secondaryText}15` }}
+                >
+                  <Coins
+                    className="h-8 w-8"
+                    style={{ color: colors.secondaryText }}
+                  />
                 </div>
-                <h3 className="text-xl font-bold mb-3" style={{ color: colors.textPrimary }}>
+                <h3
+                  className="text-xl font-bold mb-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Opportunités business
                 </h3>
                 <p style={{ color: colors.textSecondary }}>
-                  Accédez à de nouveaux marchés et développez votre chiffre d'affaires
+                  Accédez à de nouveaux marchés et développez votre chiffre
+                  d'affaires
                 </p>
               </motion.div>
 
@@ -935,16 +1268,21 @@ const Entreprise = () => {
                 className="text-center p-6 rounded-2xl transition-all duration-300 hover:shadow-lg"
                 style={{
                   backgroundColor: colors.cardBg,
-                  border: `1px solid ${colors.separator}`
+                  border: `1px solid ${colors.separator}`,
                 }}
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${colors.logo}15` }}>
+                <div
+                  className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${colors.logo}15` }}
+                >
                   <Shield className="h-8 w-8" style={{ color: colors.logo }} />
                 </div>
-                <h3 className="text-xl font-bold mb-3" style={{ color: colors.textPrimary }}>
+                <h3
+                  className="text-xl font-bold mb-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Support dédié
                 </h3>
                 <p style={{ color: colors.textSecondary }}>
@@ -967,7 +1305,7 @@ const Entreprise = () => {
                 style={{
                   backgroundColor: colors.primaryDark,
                   color: colors.lightBg,
-                  borderColor: colors.primaryDark
+                  borderColor: colors.primaryDark,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = colors.primaryLight;
@@ -978,7 +1316,11 @@ const Entreprise = () => {
                   e.currentTarget.style.borderColor = colors.primaryDark;
                 }}
                 onClick={() => {
-                  trackBusinessInteraction('become_partner', 'Devenir partenaire', 'cta_click');
+                  trackBusinessInteraction(
+                    "become_partner",
+                    "Devenir partenaire",
+                    "cta_click"
+                  );
                   setShowMessageModal(true);
                 }}
               >
@@ -991,20 +1333,28 @@ const Entreprise = () => {
       </motion.section>
 
       {/* CTA Final Section */}
-      <section className="py-8 lg:py-20 shadow-inner"
-        style={{ backgroundColor: colors.lightBg }}>
+      <section
+        className="py-8 lg:py-20 shadow-inner"
+        style={{ backgroundColor: colors.lightBg }}
+      >
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-6" style={{ color: colors.primaryDark }}>
+            <h2
+              className="text-2xl lg:text-4xl font-bold mb-6"
+              style={{ color: colors.primaryDark }}
+            >
               Prêt à développer votre entreprise ?
             </h2>
-            <p className="text-sm mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: colors.textSecondary }}>
+            <p
+              className="text-sm mb-10 max-w-2xl mx-auto leading-relaxed"
+              style={{ color: colors.textSecondary }}
+            >
               Nos experts sont à votre écoute pour vous accompagner dans tous
-              vos projets d'entreprise
+              vos projets d'entreprise, de la création à la transmission.
             </p>
             {/* BOUTON FINAL - Utilise #6B8E23 */}
             <motion.div>
@@ -1013,7 +1363,7 @@ const Entreprise = () => {
                 style={{
                   backgroundColor: colors.primaryDark,
                   color: colors.lightBg,
-                  borderColor: colors.primaryDark
+                  borderColor: colors.primaryDark,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = colors.primaryLight;
@@ -1024,7 +1374,11 @@ const Entreprise = () => {
                   e.currentTarget.style.borderColor = colors.primaryDark;
                 }}
                 onClick={() => {
-                  trackBusinessInteraction('general_contact', 'Contact général', 'cta_click');
+                  trackBusinessInteraction(
+                    "general_contact",
+                    "Contact général",
+                    "cta_click"
+                  );
                   setShowMessageModal(true);
                 }}
               >
@@ -1040,7 +1394,7 @@ const Entreprise = () => {
       {showMapModal && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -1050,11 +1404,14 @@ const Entreprise = () => {
             className="rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto"
             style={{
               backgroundColor: colors.cardBg,
-              border: `1px solid ${colors.separator}`
+              border: `1px solid ${colors.separator}`,
             }}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: colors.textPrimary }}>
+              <h2
+                className="text-2xl font-bold"
+                style={{ color: colors.textPrimary }}
+              >
                 {selectedLocation
                   ? `Localisation - ${selectedLocation.address}`
                   : "Carte des partenaires"}
@@ -1068,13 +1425,13 @@ const Entreprise = () => {
                 }}
                 className="h-10 w-10 p-0 rounded-xl transition-all duration-300"
                 style={{
-                  color: colors.textSecondary
+                  color: colors.textSecondary,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
                 <X className="h-5 w-5" />
@@ -1085,7 +1442,10 @@ const Entreprise = () => {
 
             {!selectedLocation && (
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4" style={{ color: colors.textPrimary }}>
+                <h3
+                  className="text-lg font-semibold mb-4"
+                  style={{ color: colors.textPrimary }}
+                >
                   Nos partenaires sur la carte
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1095,43 +1455,66 @@ const Entreprise = () => {
                       className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors"
                       style={{
                         border: `1px solid ${colors.separator}`,
-                        color: colors.textPrimary
+                        color: colors.textPrimary,
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = `${colors.primaryDark}10`;
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.backgroundColor = "transparent";
                       }}
                       whileHover={{ scale: 1.02 }}
                       onClick={() => handlePartnerLocation(partenaire)}
                     >
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: `${colors.primaryDark}15` }}>
-                        <Building2 className="h-5 w-5" style={{ color: colors.primaryDark }} />
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: `${colors.primaryDark}15` }}
+                      >
+                        <Building2
+                          className="h-5 w-5"
+                          style={{ color: colors.primaryDark }}
+                        />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium" style={{ color: colors.textPrimary }}>
+                        <p
+                          className="font-medium"
+                          style={{ color: colors.textPrimary }}
+                        >
                           {partenaire.nom}
                         </p>
-                        <p className="text-sm flex items-center gap-1" style={{ color: colors.textSecondary }}>
+                        <p
+                          className="text-sm flex items-center gap-1"
+                          style={{ color: colors.textSecondary }}
+                        >
                           <MapPin className="h-3 w-3" />
                           {partenaire.location.address}
                         </p>
                       </div>
-                      <Navigation className="h-4 w-4" style={{ color: colors.textSecondary }} />
+                      <Navigation
+                        className="h-4 w-4"
+                        style={{ color: colors.textSecondary }}
+                      />
                     </motion.div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="mt-6 p-4 rounded-lg" style={{
-              backgroundColor: `${colors.primaryDark}08`,
-              border: `1px solid ${colors.separator}`
-            }}>
-              <p className="text-sm flex items-center gap-2" style={{ color: colors.textSecondary }}>
-                <MapPin className="h-4 w-4" style={{ color: colors.primaryDark }} />
+            <div
+              className="mt-6 p-4 rounded-lg"
+              style={{
+                backgroundColor: `${colors.primaryDark}08`,
+                border: `1px solid ${colors.separator}`,
+              }}
+            >
+              <p
+                className="text-sm flex items-center gap-2"
+                style={{ color: colors.textSecondary }}
+              >
+                <MapPin
+                  className="h-4 w-4"
+                  style={{ color: colors.primaryDark }}
+                />
                 {selectedLocation
                   ? "Cliquez sur les marqueurs pour voir les détails des partenaires"
                   : "Cliquez sur un partenaire pour voir sa localisation précise"}
@@ -1144,7 +1527,7 @@ const Entreprise = () => {
       {showMessageModal && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -1154,16 +1537,19 @@ const Entreprise = () => {
             className="rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto"
             style={{
               backgroundColor: colors.cardBg,
-              border: `1px solid ${colors.separator}`
+              border: `1px solid ${colors.separator}`,
             }}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: colors.textPrimary }}>
+              <h2
+                className="text-2xl font-bold"
+                style={{ color: colors.textPrimary }}
+              >
                 {selectedPartenaire
                   ? `Contacter ${selectedPartenaire.nom}`
                   : selectedService
-                    ? `Demander ${selectedService.nom}`
-                    : "Envoyer un message"}
+                  ? `Demander ${selectedService.nom}`
+                  : "Envoyer un message"}
               </h2>
               <Button
                 variant="ghost"
@@ -1175,13 +1561,13 @@ const Entreprise = () => {
                 }}
                 className="h-10 w-10 p-0 rounded-xl transition-all duration-300"
                 style={{
-                  color: colors.textSecondary
+                  color: colors.textSecondary,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
                 <X className="h-5 w-5" />
@@ -1190,7 +1576,10 @@ const Entreprise = () => {
 
             <form onSubmit={handleSubmitMessage} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>
+                <label
+                  className="block text-sm font-medium mb-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Nom complet *
                 </label>
                 <Input
@@ -1200,14 +1589,17 @@ const Entreprise = () => {
                   required
                   className="w-full rounded-xl"
                   style={{
-                    borderColor: colors.separator
+                    borderColor: colors.separator,
                   }}
                   placeholder="Votre nom"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>
+                <label
+                  className="block text-sm font-medium mb-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Email *
                 </label>
                 <Input
@@ -1218,14 +1610,17 @@ const Entreprise = () => {
                   required
                   className="w-full rounded-xl"
                   style={{
-                    borderColor: colors.separator
+                    borderColor: colors.separator,
                   }}
                   placeholder="votre@email.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>
+                <label
+                  className="block text-sm font-medium mb-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Téléphone
                 </label>
                 <Input
@@ -1234,14 +1629,17 @@ const Entreprise = () => {
                   onChange={handleInputChange}
                   className="w-full rounded-xl"
                   style={{
-                    borderColor: colors.separator
+                    borderColor: colors.separator,
                   }}
                   placeholder="Votre numéro"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>
+                <label
+                  className="block text-sm font-medium mb-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Message *
                 </label>
                 <textarea
@@ -1253,7 +1651,7 @@ const Entreprise = () => {
                   className="w-full px-4 py-3 rounded-xl resize-none transition-all duration-300"
                   style={{
                     border: `1px solid ${colors.separator}`,
-                    outline: 'none'
+                    outline: "none",
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = colors.primaryDark;
@@ -1261,14 +1659,14 @@ const Entreprise = () => {
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = colors.separator;
-                    e.target.style.boxShadow = 'none';
+                    e.target.style.boxShadow = "none";
                   }}
                   placeholder={
                     selectedService
                       ? `Je souhaite en savoir plus sur ${selectedService.nom}...`
                       : selectedPartenaire
-                        ? `Je souhaite rejoindre ${selectedPartenaire.nom}...`
-                        : "Votre message..."
+                      ? `Je souhaite rejoindre ${selectedPartenaire.nom}...`
+                      : "Votre message..."
                   }
                 />
               </div>
@@ -1280,7 +1678,7 @@ const Entreprise = () => {
                 style={{
                   backgroundColor: colors.primaryDark,
                   color: colors.lightBg,
-                  borderColor: colors.primaryDark
+                  borderColor: colors.primaryDark,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = colors.primaryLight;
@@ -1303,7 +1701,7 @@ const Entreprise = () => {
                     className="w-4 h-4 border-2 rounded-full"
                     style={{
                       borderColor: colors.lightBg,
-                      borderTopColor: 'transparent'
+                      borderTopColor: "transparent",
                     }}
                   />
                 ) : (

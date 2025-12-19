@@ -25,6 +25,8 @@ import {
   BookCheck,
   Loader2,
   Plus,
+  Wrench,
+  Boxes,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -454,20 +456,85 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
   const { user, isAuthenticated } = useAuth();
 
-  const sections = [
-    {
-      id: "interieurs", label: "Intérieur", icon: HomeIcon,
-      subsections: ["Rénovation", "Aménagement", "Plomberie", "Électricité", "Décoration", "Peinture"]
-    },
-    {
-      id: "exterieurs", label: "Extérieur", icon: TreePalm,
-      subsections: ["Jardinage", "Terrasse", "Piscine", "Clôture", "Toiture"]
-    },
-    {
-      id: "constructions", label: "Construction", icon: Building,
-      subsections: ["Gros œuvre", "Extension", "Maison neuve", "Garage", "Véranda"]
-    },
-  ];
+const sections = [
+  {
+    id: "interieurs",
+    label: "Intérieur",
+    icon: HomeIcon,
+    subsections: [
+      "Rénovation",
+      "Aménagement",
+      "Plomberie",
+      "Électricité",
+      "Décoration",
+      "Peinture",
+      "Revêtement sol & mur",
+      "Menuiserie intérieure",
+      "Isolation",
+    ],
+  },
+  {
+    id: "exterieurs",
+    label: "Extérieur",
+    icon: TreePalm,
+    subsections: [
+      "Jardinage",
+      "Terrasse",
+      "Piscine",
+      "Clôture",
+      "Toiture",
+      "Façade",
+      "Portail & clôture",
+      "Allée & pavage",
+    ],
+  },
+  {
+    id: "constructions",
+    label: "Construction",
+    icon: Building,
+    subsections: [
+      "Gros œuvre",
+      "Extension",
+      "Maison neuve",
+      "Garage",
+      "Véranda",
+      "Fondations",
+      "Maçonnerie",
+      "Charpente",
+    ],
+  },
+  {
+    id: "materiaux",
+    label: "Matériaux",
+    icon: Boxes, // icône à importer
+    subsections: [
+      "Ciment & béton",
+      "Briques & parpaings",
+      "Bois & dérivés",
+      "Carrelage",
+      "Peinture & enduits",
+      "Plomberie (tuyaux, sanitaires)",
+      "Électricité (câbles, tableaux)",
+      "Isolation thermique & phonique",
+    ],
+  },
+  {
+    id: "autres-services",
+    label: "Autres services travaux",
+    icon: Wrench, // icône à importer
+    subsections: [
+      "Devis & expertise",
+      "Diagnostic bâtiment",
+      "Démolition",
+      "Déblaiement",
+      "Nettoyage de fin de chantier",
+      "Maintenance & réparation",
+      "Rénovation énergétique",
+      "Assistance chantier",
+    ],
+  },
+];
+
 
   const currentCategory = categories[categorie];
 
