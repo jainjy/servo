@@ -220,11 +220,6 @@ import Therapeute from "./pages/Therapeute";
 import HuilesEssentielles from "./pages/HuilesEssentielles";
 import Nutrition from "./pages/Nutrition";
 
-import PhotographiePage from "./pages/PhotographiePage";
-import SculpturePage from "./pages/SculpturePage";
-import PeinturePage from "./pages/PeinturePage";
-import ArtisanatPage from "./pages/ArtisanatPage";
-import MarketplaceCreateurs from "./pages/MarketplaceCreateurs";
 import path from "path";
 import EmploiFormationsPage from "./pages/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
@@ -894,14 +889,14 @@ const App = () => {
                   {/* Onglets Arts et Creations */}
                   <Route path="/art-et-creation" element={<ArtETCreation />} />
 
-                  <Route path="/photographie" element={<PhotographiePage />} />
+                  {/* <Route path="/photographie" element={<PhotographiePage />} />
                   <Route path="/sculpture" element={<SculpturePage />} />
                   <Route path="/peinture" element={<PeinturePage />} />
                   <Route path="/artisanat" element={<ArtisanatPage />} />
                   <Route
                     path="/marketplace-createurs"
                     element={<MarketplaceCreateurs />}
-                  />
+                  /> */}
                 </Routes>
 
                 {/* Pop-up publicité globale */}
