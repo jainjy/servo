@@ -5,8 +5,9 @@ import EquipementSection from "@/components/produits/EquipementSection";
 import MateriauxSection from "@/components/produits/MateriauxSection";
 import DesignSection from "@/components/produits/DesignSection";
 import ProduitsGeneraux from "@/components/produits/ProduitsGeneraux";
-import ServicesMaison from "@/components/produits/ServiceMaison";
+import ServicesMaison from "../ServicesMaison";
 import UtilitiesProduits from "@/components/produits/UtilitiesProduits";
+import Marketplace from "../Marketplace";
 import Modal from "@/components/ui/modal";
 interface ItemDetails {
   title: string;
@@ -45,69 +46,7 @@ const DomicileLayout = () => {
   }, [location]);
   const sections = [
     {
-      title: "Produits & Commerces",
-      description: "Trouvez tout pour votre maison",
-      items: [
-        {
-          title: "Électroménager",
-          price: "299€ - 1299€",
-          image:
-            "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
-          description: "Large gamme d'appareils électroménagers",
-        },
-        {
-          title: "Mobilier",
-          price: "199€ - 999€",
-          image:
-            "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
-          description: "Meubles design et fonctionnels",
-        },
-        {
-          title: "Literie",
-          price: "399€ - 1499€",
-          image:
-            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
-          description: "Matelas et sommiers de qualité",
-        },
-        {
-          title: "Décoration",
-          price: "29€ - 299€",
-          image:
-            "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
-          description: "Accessoires décoratifs",
-        },
-        {
-          title: "Ustensiles Cuisine",
-          price: "19€ - 199€",
-          image:
-            "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg",
-          description: "Équipement de cuisine",
-        },
-        {
-          title: "Linge de Maison",
-          price: "39€ - 199€",
-          image:
-            "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg",
-          description: "Textiles et linges",
-        },
-        {
-          title: "Luminaires",
-          price: "49€ - 399€",
-          image:
-            "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg",
-          description: "Éclairage design",
-        },
-        {
-          title: "Rangement",
-          price: "79€ - 599€",
-          image:
-            "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg",
-          description: "Solutions de rangement",
-        },
-      ],
-    },
-    {
-      title: "Service & Maison",
+      title: "Service  Maison",
       description: "Services à domicile de qualité",
       items: [
         {
@@ -168,70 +107,8 @@ const DomicileLayout = () => {
         },
       ],
     },
-    {
-      title: "Équipements & Livraison",
-      description: "Solutions pour un domicile moderne",
-      items: [
-        {
-          title: "Smart Home",
-          price: "199€ - 999€",
-          image:
-            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
-          description: "Équipements connectés",
-        },
-        {
-          title: "Sécurité",
-          price: "299€ - 1499€",
-          image:
-            "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
-          description: "Systèmes de surveillance",
-        },
-        {
-          title: "Chauffage",
-          price: "499€ - 2999€",
-          image:
-            "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg",
-          description: "Solutions de chauffage",
-        },
-        {
-          title: "Purification Air",
-          price: "199€ - 799€",
-          image:
-            "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg",
-          description: "Purificateurs d'air",
-        },
-        {
-          title: "Domotique",
-          price: "399€ - 1999€",
-          image:
-            "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg",
-          description: "Automatisation maison",
-        },
-        {
-          title: "Audio/Vidéo",
-          price: "299€ - 2499€",
-          image:
-            "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg",
-          description: "Systèmes multimédia",
-        },
-        {
-          title: "Fitness",
-          price: "399€ - 1999€",
-          image:
-            "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
-          description: "Équipement sportif",
-        },
-        {
-          title: "Extérieur",
-          price: "199€ - 999€",
-          image:
-            "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
-          description: "Équipement jardin",
-        },
-      ],
-    },
-    {
-      title: "Design & Décoration",
+     {
+      title: "Décoration",
       description: "Inspirez-vous pour votre intérieur",
       items: [
         {
@@ -293,69 +170,69 @@ const DomicileLayout = () => {
       ],
     },
     {
-      title: "Cours & Formations",
-      description: "Apprenez de nouvelles compétences",
+      title: "Equipements",
+      description: "Solutions pour un domicile moderne",
       items: [
         {
-          title: "Décoration",
-          price: "99€/session",
+          title: "Smart Home",
+          price: "199€ - 999€",
           image:
             "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
-          description: "Cours de décoration",
+          description: "Équipements connectés",
         },
         {
-          title: "Bricolage",
-          price: "79€/session",
+          title: "Sécurité",
+          price: "299€ - 1499€",
           image:
             "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
-          description: "Ateliers bricolage",
+          description: "Systèmes de surveillance",
         },
         {
-          title: "Jardinage",
-          price: "89€/session",
+          title: "Chauffage",
+          price: "499€ - 2999€",
           image:
             "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg",
-          description: "Formation jardinage",
+          description: "Solutions de chauffage",
         },
         {
-          title: "Home Staging",
-          price: "149€/session",
+          title: "Purification Air",
+          price: "199€ - 799€",
           image:
             "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg",
-          description: "Mise en valeur",
-        },
-        {
-          title: "Cuisine",
-          price: "129€/session",
-          image:
-            "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg",
-          description: "Cours de cuisine",
+          description: "Purificateurs d'air",
         },
         {
           title: "Domotique",
-          price: "199€/session",
+          price: "399€ - 1999€",
+          image:
+            "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg",
+          description: "Automatisation maison",
+        },
+        {
+          title: "Audio/Vidéo",
+          price: "299€ - 2499€",
           image:
             "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg",
-          description: "Formation tech",
+          description: "Systèmes multimédia",
         },
         {
-          title: "Feng Shui",
-          price: "159€/session",
+          title: "Fitness",
+          price: "399€ - 1999€",
           image:
             "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
-          description: "Harmonie maison",
+          description: "Équipement sportif",
         },
         {
-          title: "Upcycling",
-          price: "89€/session",
+          title: "Extérieur",
+          price: "199€ - 999€",
           image:
             "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
-          description: "Recyclage créatif",
+          description: "Équipement jardin",
         },
       ],
     },
     {
-      title: "Utilities",
+      title: "Outillages",
       description: "Gestion efficace de votre domicile",
       items: [
         {
@@ -417,7 +294,7 @@ const DomicileLayout = () => {
       ],
     },
     {
-      title: "Matériaux",
+      title: "Marketplace d'occasion",
       description: " Fournitures de construction et rénovation",
       items: [
         {
@@ -519,18 +396,20 @@ const DomicileLayout = () => {
                 .replace(/ & | /g, "-")
                 .replace(/[()]/g, "")}
             >
-              {section.title === "Équipements & Livraison" ? (
-                <EquipementSection searchQuery="" />
+              {section.title === "Equipements" ? (
+                <EquipementSection />
               ) : section.title === "Matériaux" ? (
                 <MateriauxSection searchQuery="" />
               ) : section.title === "Produits & Commerces" ? (
                 <ProduitsGeneraux />
-              ) : section.title === "Design & Décoration" ? (
+              ) : section.title === "Décoration" ? (
                 <DesignSection searchQuery="" />
-              ) : section.title === "Service & Maison" ? (
+              ) : section.title === "Service  Maison" ? (
                 <ServicesMaison />
-              ) : section.title === "Utilities" ? (
+              ) : section.title === "Outillages" ? (
                 <UtilitiesProduits />
+                ) : section.title === "Marketplace d'occasion" ? (
+                <Marketplace />
               ) : section.title === "Produits & Commerces" ? (
                 <ProduitsGeneraux />
               ) : (

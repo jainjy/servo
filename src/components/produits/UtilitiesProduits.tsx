@@ -76,7 +76,7 @@ const UtilitiesProduits = () => {
                   <Zap className="h-10 w-10 text-[#556B2F]" />
                 </div>
                 <div>
-                  <h2 className="text-4xl font-bold text-[#0A0A0A]">Utilities & Énergie</h2>
+                  <h2 className="text-4xl font-bold text-[#0A0A0A]">Outillages</h2>
                   <p className="text-xl text-gray-600">Gestion complète de vos consommations</p>
                 </div>
               </div>
