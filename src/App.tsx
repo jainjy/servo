@@ -227,6 +227,7 @@ import ArtisanatPage from "./pages/ArtisanatPage";
 import MarketplaceCreateurs from "./pages/MarketplaceCreateurs";
 import path from "path";
 import EmploiFormationsPage from "./pages/EmploiFormationsPage";
+import ArtETCreation from "./pages/ArtETCreation";
 
 
                  
@@ -891,6 +892,7 @@ const App = () => {
                   <Route path="/contact-dpo" element={<ContactDPO />} />
 
                   {/* Onglets Arts et Creations */}
+                  <Route path="/art-et-creation" element={<ArtETCreation />} />
 
                   <Route path="/photographie" element={<PhotographiePage />} />
                   <Route path="/sculpture" element={<SculpturePage />} />
