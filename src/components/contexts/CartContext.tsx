@@ -221,10 +221,20 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   );
 };
 
-export const useCart = (): CartContextType => {
+export const useCart = () => {
   const context = useContext(CartContext);
+  
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error('useCart must be used within CartProvider');
   }
-  return context;
+
+  return {
+    cartItems: context.cartItems,
+    addToCart: context.addToCart,
+    removeFromCart: context.removeFromCart,
+    updateQuantity: context.updateQuantity,
+    clearCart: context.clearCart,
+    getCartItemsCount: () => context.cartItems?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0,
+    isLoading: context.isLoading,
+  };
 };

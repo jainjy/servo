@@ -712,7 +712,7 @@ const Header = () => {
         {
           title: "Entretien & Équipements",
           description: "Services maison, décoration et équipements",
-          href: "/entretien-equipements",
+          href: "/domicile",
           image:
             "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg", // Image d'illustration entretien
         },
@@ -1000,7 +1000,7 @@ const Header = () => {
         {
           title: "Produits et accessoires",
           description: "Tout pour votre domicile",
-          href: "/domicile#materiaux",
+          href: "/produits#equipement",
           image:
             "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
         },

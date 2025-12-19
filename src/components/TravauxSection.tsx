@@ -38,6 +38,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { useInteractionTracking } from "@/hooks/useInteractionTracking";
+import MateriauxTravauxSection from "./MateriauxTravauxSection";
 
 // Images de fond pour chaque catégorie
 const backgroundImages = {
@@ -1157,87 +1158,91 @@ const IntelligibleSection = ({ showAllPrestations }) => {
               ))}
             </TabsList>
 
-            {sections.map((section) => (
-              <TabsContent key={section.id} value={section.id}>
-                <div className="bg-white/90 backdrop-blur-md rounded-3xl px-8 py-4 mb-12 shadow-sm border border-[#D3D3D3] flex flex-col gap-6">
-                  {/* Section Recherche */}
-                  <div className="relative flex-1 md:min-w-[300px] w-24 mx-auto">
-                    <Input
-                      placeholder="Rechercher une prestation..."
-                      className="md:w-96 w-60 p-4 pl-12 pr-4 md:ml-0 -ml-12 bg-white border-2 border-[#556B2F] rounded-2xl shadow-sm 
+            {sections.map(
+              (section) =>
+                categorie !=
+                "materiaux" && (
+                  <TabsContent key={section.id} value={section.id}>
+                    <div className="bg-white/90 backdrop-blur-md rounded-3xl px-8 py-4 mb-12 shadow-sm border border-[#D3D3D3] flex flex-col gap-6">
+                      {/* Section Recherche */}
+                      <div className="relative flex-1 md:min-w-[300px] w-24 mx-auto">
+                        <Input
+                          placeholder="Rechercher une prestation..."
+                          className="md:w-96 w-60 p-4 pl-12 pr-4 md:ml-0 -ml-12 bg-white border-2 border-[#556B2F] rounded-2xl shadow-sm 
                transition-all duration-300 focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20
                disabled:opacity-50 disabled:cursor-not-allowed"
-                      value={searchFilter}
-                      onChange={search}
-                      disabled={isLoadingServices}
-                    />
-                    <Search className="absolute top-2 md:left-4 -left-8 transform h-5 w-5 text-[#556B2F]" />
-                  </div>
-
-                  {/* Section Filtres par type */}
-                  <div className="flex-1">
-                    <div className="flex justify-center items-start gap-3 mb-3">
-                      <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
-                      <span className="text-xs font-semibold text-[#8B4513]">
-                        {section.label.toUpperCase()} :
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 max-h-36 overflow-y-hidden mx-auto justify-center ">
-                      <FilterButton
-                        label="TOUS"
-                        isSelected={selectedType === "TOUS"}
-                        onClick={() => setSelectedType("TOUS")}
-                        disabled={isLoadingServices}
-                        isAllButton
-                      />
-
-                      {section.subsections.map((subsection) => (
-                        <FilterButton
-                          key={subsection}
-                          label={subsection}
-                          isSelected={selectedType === subsection}
-                          onClick={() => setSelectedType(subsection)}
+                          value={searchFilter}
+                          onChange={search}
                           disabled={isLoadingServices}
                         />
-                      ))}
-                    </div>
-                  </div>
+                        <Search className="absolute top-2 md:left-4 -left-8 transform h-5 w-5 text-[#556B2F]" />
+                      </div>
 
-                  {/* Filtre Métiers */}
-                  <div className="flex-1 border-t pt-4">
-                    <div className="flex justify-center items-start gap-3 mb-3">
-                      <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
-                      <span className="text-xs font-semibold text-[#8B4513]">
-                        MÉTIERS :
-                      </span>
-                    </div>
+                      {/* Section Filtres par type */}
+                      <div className="flex-1">
+                        <div className="flex justify-center items-start gap-3 mb-3">
+                          <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-[#8B4513]">
+                            {section.label.toUpperCase()} :
+                          </span>
+                        </div>
 
-                    <div className="flex flex-wrap gap-2 mx-auto justify-center">
-                      <FilterButton
-                        label="TOUS"
-                        isSelected={metierFilter === "TOUS"}
-                        onClick={() => setMetierFilter("TOUS")}
-                        disabled={isLoadingServices}
-                        isAllButton
-                      />
-                      <FilterButton
-                        label="Avec Métiers"
-                        isSelected={metierFilter === "AVEC_METIERS"}
-                        onClick={() => setMetierFilter("AVEC_METIERS")}
-                        disabled={isLoadingServices}
-                      />
-                      <FilterButton
-                        label="Sans Métiers"
-                        isSelected={metierFilter === "SANS_METIERS"}
-                        onClick={() => setMetierFilter("SANS_METIERS")}
-                        disabled={isLoadingServices}
-                      />
+                        <div className="flex flex-wrap gap-2 max-h-36 overflow-y-hidden mx-auto justify-center ">
+                          <FilterButton
+                            label="TOUS"
+                            isSelected={selectedType === "TOUS"}
+                            onClick={() => setSelectedType("TOUS")}
+                            disabled={isLoadingServices}
+                            isAllButton
+                          />
+
+                          {section.subsections.map((subsection) => (
+                            <FilterButton
+                              key={subsection}
+                              label={subsection}
+                              isSelected={selectedType === subsection}
+                              onClick={() => setSelectedType(subsection)}
+                              disabled={isLoadingServices}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Filtre Métiers */}
+                      <div className="flex-1 border-t pt-4">
+                        <div className="flex justify-center items-start gap-3 mb-3">
+                          <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-[#8B4513]">
+                            MÉTIERS :
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 mx-auto justify-center">
+                          <FilterButton
+                            label="TOUS"
+                            isSelected={metierFilter === "TOUS"}
+                            onClick={() => setMetierFilter("TOUS")}
+                            disabled={isLoadingServices}
+                            isAllButton
+                          />
+                          <FilterButton
+                            label="Avec Métiers"
+                            isSelected={metierFilter === "AVEC_METIERS"}
+                            onClick={() => setMetierFilter("AVEC_METIERS")}
+                            disabled={isLoadingServices}
+                          />
+                          <FilterButton
+                            label="Sans Métiers"
+                            isSelected={metierFilter === "SANS_METIERS"}
+                            onClick={() => setMetierFilter("SANS_METIERS")}
+                            disabled={isLoadingServices}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </TabsContent>
-            ))}
+                  </TabsContent>
+                )
+            )}
           </Tabs>
 
           {/* AFFICHAGE CONDITIONNEL : SPINNER OU CONTENU DE LA CATÉGORIE */}
@@ -1252,7 +1257,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
             <>
               {/* Si c'est l'onglet "Matériaux", afficher la section spéciale */}
               {categorie === "materiaux" ? (
-                <MateriauxSection />
+                <MateriauxTravauxSection />
               ) : (
                 <>
                   {/* Filtres pour les autres catégories */}

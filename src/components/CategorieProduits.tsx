@@ -32,7 +32,7 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useCart } from "./contexts/CartContext";
+import { useCart } from "@/hooks/useCart";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
@@ -51,7 +51,7 @@ const CategorieProduits = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { addToCart, cartItems, getCartItemsCount } = useCart();
+  const { addToCart } = useCart();
 
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,11 +104,6 @@ const CategorieProduits = () => {
       // Petit délai pour laisser le temps à l'état de se mettre à jour
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Trouver l'article dans le panier pour afficher la bonne quantité
-      const cartItem = cartItems.find(item => item.id === product.id);
-      const quantity = cartItem ? cartItem.quantity : 1;
-      const totalItems = getCartItemsCount();
-
       // Afficher une confirmation détaillée
       toast.info(`${product.name} ajouté au panier !`);
 
@@ -152,7 +147,7 @@ const CategorieProduits = () => {
                 )}
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/domicile')}
+                  onClick={() => navigate(-1)}
                   className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
                 >
                   <ArrowLeft className="h-4 w-4" />
