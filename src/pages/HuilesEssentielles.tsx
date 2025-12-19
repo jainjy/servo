@@ -196,12 +196,12 @@ const HuileEssentielleCard = ({ huile, onAddToCart, addingProductId }) => {
           </Badge>
         )}
 
-        {/* Badge Non-végétarien si applicable */}
+        {/* Badge Non-végétarien si applicable 
         {!huile.isVegan && !huile.isVegetarian && (
           <Badge variant="outline" className="text-xs text-gray-600 border-gray-300">
             Non-végétarien
           </Badge>
-        )}
+        )}*/}
       </div>
 
       {/* Informations supplémentaires */}
@@ -591,7 +591,7 @@ const HuilesEssentielles = () => {
             </div>
           </div>
 
-          {/* Légende des badges */}
+          {/* Légende des badges
           <div className="mt-8 p-4 bg-gray-50 rounded-xl">
             <h4 className="font-semibold text-gray-800 mb-3">Légende des badges :</h4>
             <div className="flex flex-wrap gap-4">
@@ -626,7 +626,7 @@ const HuilesEssentielles = () => {
                 <span className="text-sm text-gray-600">Populaire</span>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
