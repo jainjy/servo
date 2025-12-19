@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Tab } from "@headlessui/react";
 import { useLocation, useNavigate } from "react-router-dom";
-import EquipementSection from "@/components/produits/EquipementSection";
+import Equipements from "../Equipements";
 import MateriauxSection from "@/components/produits/MateriauxSection";
 import DesignSection from "@/components/produits/DesignSection";
 import ProduitsGeneraux from "@/components/produits/ProduitsGeneraux";
@@ -397,7 +397,7 @@ const DomicileLayout = () => {
                 .replace(/[()]/g, "")}
             >
               {section.title === "Equipements" ? (
-                <EquipementSection />
+                <Equipements />
               ) : section.title === "Matériaux" ? (
                 <MateriauxSection searchQuery="" />
               ) : section.title === "Produits & Commerces" ? (
