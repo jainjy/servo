@@ -719,7 +719,7 @@ const Header = () => {
         {
           title: "Art & Créations",
           description: "Œuvres d'art, artisanat et créateurs",
-          href: "/art-creations",
+          href: "/art-et-creation",
           image:
             "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg", // Image d'illustration art
         },

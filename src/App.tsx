@@ -219,11 +219,12 @@ import Therapeute from "./pages/Therapeute";
 import HuilesEssentielles from "./pages/HuilesEssentielles";
 import Nutrition from "./pages/Nutrition";
 
-import PhotographiePage from "./pages/PhotographiePage";
-import SculpturePage from "./pages/SculpturePage";
-import PeinturePage from "./pages/PeinturePage";
-import ArtisanatPage from "./pages/ArtisanatPage";
-import MarketplaceCreateurs from "./pages/MarketplaceCreateurs";
+import PhotographiePage from "./pages/ArtEtCreation/PhotographiePage";
+import SculpturePage from "./pages/ArtEtCreation/SculpturePage";
+import PeinturePage from "./pages/ArtEtCreation/PeinturePage";
+import ArtisanatPage from "./pages/ArtEtCreation/ArtisanatPage";
+import MarketplaceCreateurs from "./pages/ArtEtCreation/MarketplaceCreateurs";
+import ArtETCreation from "./pages/ArtETCreation";
 
 
                  
@@ -879,6 +880,7 @@ const App = () => {
                   <Route path="/contact-dpo" element={<ContactDPO />} />
 
                   {/* Onglets Arts et Creations */}
+                  <Route path="/art-et-creation" element={<ArtETCreation />} />
 
                   <Route path="/photographie" element={<PhotographiePage />} />
                   <Route path="/sculpture" element={<SculpturePage />} />
