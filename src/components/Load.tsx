@@ -361,7 +361,7 @@ export default function LoadingScreen({
   // Rendu du composant
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-black/50"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-black/50 backdrop-blur-xl"
       style={{
         opacity: fadeOutOpacity,
         transform: `scale(${scaleEffect})`,
