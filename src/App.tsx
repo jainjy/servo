@@ -188,6 +188,7 @@ import PropertyRent from "./pages/PropertyRent";
 import PropertyBuy from "./pages/PropertyBuy";
 import { SubscriptionStatusGuard } from "./components/SubscriptionStatusGuard";
 import Assurance from "./pages/Assurance";
+import MedecineNaturelle from "./pages/MedecineNaturelle";
 
 import Agence from "./components/NosPartenaires/Agence";
 import Constructeur from "./components/NosPartenaires/Constructeur";
@@ -224,6 +225,7 @@ import SculpturePage from "./pages/SculpturePage";
 import PeinturePage from "./pages/PeinturePage";
 import ArtisanatPage from "./pages/ArtisanatPage";
 import MarketplaceCreateurs from "./pages/MarketplaceCreateurs";
+import path from "path";
 
 
                  
@@ -328,6 +330,7 @@ const App = () => {
                   <Route path="/conseil" element={<ConseilPage />} />
                   <Route path="/payement-test" element={<PaymentTest />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
+                 <Route path="/medecines-naturelles" element={<MedecineNaturelle />} />
                   <Route path="/digitalisation" element={<Digitalisation />} />
                   <Route
                     path="/digitalisation/services"
