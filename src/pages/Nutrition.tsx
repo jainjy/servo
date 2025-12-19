@@ -1,8 +1,6 @@
-// pages/Nutrition.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { motion, LayoutGroup, AnimatePresence } from "framer-motion";
-import api from "@/lib/api"
-import { Apple, Utensils, Scale, Heart, Calendar, Clock, Star, Users, Award, CheckCircle, Leaf, Brain, Target, Zap, TrendingUp, Shield, GraduationCap } from "lucide-react";
+import { Apple, Utensils, Scale, Heart, Clock, Star, Users, Award, CheckCircle, Leaf, Brain, Target, Zap, TrendingUp, Shield, GraduationCap, Calendar, Search } from "lucide-react";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
 
 // Données de simulation pour la nutrition
@@ -93,180 +91,6 @@ const simulatedNutritionServices = [
     included: ["4 consultations", "Plan alimentaire personnalisé", "50+ recettes", "Groupe de support", "Suivi quotidien"],
     popular: true,
     tags: ["Complet", "Long terme", "Éducatif"]
-  },
-  {
-    id: 4,
-    libelle: "Nutrition Sportive Optimale",
-    description: "Optimisation de l'alimentation pour les sportifs : performance, récupération et composition corporelle.",
-    price: 85,
-    duration: "1h",
-    images: ["https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Sport" },
-    benefits: "Performance optimale, récupération améliorée, énergie",
-    nutritionist: {
-      name: "Alexandre Roux",
-      specialty: "Nutritionniste du sport",
-      experience: "12 ans d'expérience",
-      rating: 4.9,
-      reviews: 189,
-      languages: ["Français", "Anglais"],
-      availability: "Lun-Ven, 7h-21h",
-      certifications: ["Diplôme sportif", "Certification internationale"]
-    },
-    features: [
-      "Analyse des besoins spécifiques",
-      "Planning nutrition pré/post entraînement",
-      "Supplémentation adaptée",
-      "Optimisation de la récupération"
-    ],
-    included: ["Évaluation sportive", "Plan nutrition sportif", "Guide complémentation", "Suivi mensuel"],
-    popular: true,
-    tags: ["Sport", "Performance", "Récupération"]
-  },
-  {
-    id: 5,
-    libelle: "Atelier Cuisine Santé (Groupe)",
-    description: "Atelier pratique pour apprendre à préparer des repas équilibrés, savoureux et bons pour la santé.",
-    price: 75,
-    duration: "2h",
-    images: ["https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Atelier" },
-    benefits: "Compétences culinaires, recettes santé, autonomie",
-    nutritionist: {
-      name: "Clara Simon",
-      specialty: "Chef nutritionniste",
-      experience: "7 ans d'expérience",
-      rating: 4.7,
-      reviews: 132,
-      languages: ["Français", "Italien"],
-      availability: "Mer-Dim, 10h-19h",
-      certifications: ["Diplôme cuisine", "Certification nutrition"]
-    },
-    features: [
-      "Démonstration en direct",
-      "Participation pratique",
-      "Techniques culinaires saines",
-      "Dégustation des préparations"
-    ],
-    included: ["Matériel fourni", "Livre de recettes", "Dégustation", "Support PDF"],
-    popular: false,
-    tags: ["Pratique", "Groupe", "Culinaire"]
-  },
-  {
-    id: 6,
-    libelle: "Nutrition Prénatale & Postnatale",
-    description: "Accompagnement nutritionnel spécifique pour les femmes enceintes et jeunes mamans.",
-    price: 80,
-    duration: "1h",
-    images: ["https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Spécialisé" },
-    benefits: "Santé mère-enfant, allaitement, récupération",
-    nutritionist: {
-      name: "Laura Moreau",
-      specialty: "Nutrition périnatale",
-      experience: "9 ans d'expérience",
-      rating: 4.8,
-      reviews: 176,
-      languages: ["Français"],
-      availability: "Lun-Sam, 9h-18h",
-      certifications: ["Spécialisation périnatale"]
-    },
-    features: [
-      "Suivi grossesse trimestriel",
-      "Nutrition pour allaitement",
-      "Récupération post-accouchement",
-      "Alimentation du nourrisson"
-    ],
-    included: ["Consultation mensuelle", "Guide nutrition grossesse", "Menu post-accouchement", "Support allaitement"],
-    popular: true,
-    tags: ["Grossesse", "Allaitement", "Famille"]
-  },
-  {
-    id: 7,
-    libelle: "Régime Anti-inflammatoire",
-    description: "Programme alimentaire pour réduire l'inflammation chronique et améliorer la santé globale.",
-    price: 95,
-    duration: "1h15",
-    images: ["https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Santé" },
-    benefits: "Réduction inflammation, énergie, bien-être",
-    nutritionist: {
-      name: "Dr. Marc Bernard",
-      specialty: "Nutrition fonctionnelle",
-      experience: "15 ans d'expérience",
-      rating: 4.9,
-      reviews: 234,
-      languages: ["Français", "Anglais"],
-      availability: "Lun-Ven, 8h-17h",
-      certifications: ["Doctorat Nutrition", "Spécialisation inflammation"]
-    },
-    features: [
-      "Test d'inflammation",
-      "Plan alimentaire anti-inflammatoire",
-      "Supplémentation ciblée",
-      "Suivi des marqueurs biologiques"
-    ],
-    included: ["Analyse complète", "Menu 30 jours", "Guide anti-inflammatoire", "Suivi trimestriel"],
-    popular: false,
-    tags: ["Santé", "Fonctionnel", "Spécialisé"]
-  },
-  {
-    id: 8,
-    libelle: "Transition Végétarienne/Végétalienne",
-    description: "Accompagnement pour une transition vers une alimentation végétale équilibrée et nutritive.",
-    price: 70,
-    duration: "1h",
-    images: ["https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Végétal" },
-    benefits: "Transition en douceur, équilibre nutritionnel, diversité",
-    nutritionist: {
-      name: "Julie Chen",
-      specialty: "Nutrition végétale",
-      experience: "8 ans d'expérience",
-      rating: 4.8,
-      reviews: 167,
-      languages: ["Français", "Chinois"],
-      availability: "Mar-Dim, 10h-20h",
-      certifications: ["Spécialisation végétale"]
-    },
-    features: [
-      "Plan de transition progressif",
-      "Équilibre protéique végétal",
-      "Recettes diversifiées",
-      "Gestion des carences potentielles"
-    ],
-    included: ["Guide de transition", "100+ recettes végétales", "Liste de courses", "Suivi à 3 mois"],
-    popular: true,
-    tags: ["Végétal", "Transition", "Équilibré"]
-  },
-  {
-    id: 9,
-    libelle: "Défi 30 Jours Détox & Énergie",
-    description: "Programme d'un mois pour purifier votre organisme et réapprendre à manger sainement.",
-    price: 200,
-    duration: "30 jours",
-    images: ["https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Détox" },
-    benefits: "Purification, énergie, habitudes saines",
-    nutritionist: {
-      name: "Sophie Laurent",
-      specialty: "Détox et bien-être",
-      experience: "6 ans d'expérience",
-      rating: 4.7,
-      reviews: 145,
-      languages: ["Français"],
-      availability: "Lun-Dim, 8h-22h",
-      certifications: ["Certification détox"]
-    },
-    features: [
-      "Programme jour par jour",
-      "Recettes détoxifiantes",
-      "Routines quotidiennes",
-      "Groupe de motivation"
-    ],
-    included: ["Guide quotidien", "Menus complets", "Liste de courses", "Groupe WhatsApp", "Support quotidien"],
-    popular: true,
-    tags: ["Détox", "Énergie", "30 jours"]
   }
 ];
 
@@ -279,74 +103,6 @@ const globalStats = {
   avgRating: 4.8,
   consultationsPerMonth: 156
 };
-
-// Témoignages clients
-const clientTestimonials = [
-  {
-    id: 1,
-    name: "Marie D.",
-    service: "Programme Perte de Poids",
-    rating: 5,
-    comment: "J'ai perdu 8kg en 3 mois sans me sentir privée. Marie est une nutritionniste extraordinaire !",
-    results: "-8kg en 12 semaines",
-    duration: "Il y a 2 mois",
-    avatar: "https://i.pravatar.cc/150?img=1"
-  },
-  {
-    id: 2,
-    name: "Thomas L.",
-    service: "Nutrition Sportive",
-    rating: 5,
-    comment: "Ma performance a augmenté de 30% depuis que je suis le programme. Un accompagnement parfait !",
-    results: "+30% performance",
-    duration: "Il y a 3 semaines",
-    avatar: "https://i.pravatar.cc/150?img=2"
-  },
-  {
-    id: 3,
-    name: "Sophie M.",
-    service: "Transition Végétalienne",
-    rating: 4,
-    comment: "Transition réussie grâce à Julie. Je me sens mieux dans mon corps et ma conscience.",
-    results: "Transition réussie",
-    duration: "Il y a 1 mois",
-    avatar: "https://i.pravatar.cc/150?img=3"
-  }
-];
-
-// Nutritionnistes experts
-const expertNutritionists = [
-  {
-    id: 1,
-    name: "Dr. Sophie Martin",
-    specialty: "Diététicienne-nutritionniste",
-    experience: "10 ans",
-    rating: 4.9,
-    clients: 450,
-    image: "https://i.pravatar.cc/150?img=5",
-    specialties: ["Perte de poids", "Nutrition sportive", "Troubles alimentaires"]
-  },
-  {
-    id: 2,
-    name: "Thomas Leroy",
-    specialty: "Coach nutritionnel certifié",
-    experience: "6 ans",
-    rating: 4.8,
-    clients: 280,
-    image: "https://i.pravatar.cc/150?img=6",
-    specialties: ["Motivation", "Habitudes alimentaires", "Nutrition pratique"]
-  },
-  {
-    id: 3,
-    name: "Marie Dubois",
-    specialty: "Spécialiste perte de poids",
-    experience: "8 ans",
-    rating: 4.9,
-    clients: 320,
-    image: "https://i.pravatar.cc/150?img=7",
-    specialties: ["Obésité", "Rééducation alimentaire", "Comportement alimentaire"]
-  }
-];
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -403,7 +159,7 @@ const SlideIn = ({ children, direction = "left", delay = 0 }) => {
 
 // Composant Statistique amélioré
 const StatCard = ({ icon: Icon, value, label, description, color = "logo" }) => (
-  <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-separator dark:border-border hover:shadow-xl transition-all duration-300">
+  <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border hover:shadow-xl transition-all duration-300">
     <div className="flex items-start gap-4">
       <div className={`p-3 rounded-xl bg-${color}/10 flex-shrink-0`}>
         <Icon className={`w-8 h-8 text-${color}`} />
@@ -413,60 +169,6 @@ const StatCard = ({ icon: Icon, value, label, description, color = "logo" }) => 
         <div className="text-lg font-semibold text-gray-700 dark:text-gray-300 mt-1">{label}</div>
         <div className="text-sm text-gray-500 dark:text-muted-foreground mt-2">{description}</div>
       </div>
-    </div>
-  </div>
-);
-
-// Composant Expert Nutritionniste
-const ExpertCard = ({ expert }) => (
-  <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-separator dark:border-border hover:shadow-xl transition-all duration-300">
-    <div className="flex items-start gap-4">
-      <img src={expert.image} alt={expert.name} className="w-16 h-16 rounded-full object-cover" />
-      <div className="flex-1">
-        <h4 className="font-bold text-lg text-gray-800 dark:text-foreground">{expert.name}</h4>
-        <p className="text-sm text-gray-600 dark:text-muted-foreground">{expert.specialty}</p>
-        <div className="flex items-center mt-2">
-          <Star className="w-4 h-4 fill-amber-400 text-amber-400 mr-1" />
-          <span className="font-semibold text-gray-700 dark:text-gray-300">{expert.rating}</span>
-          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">({expert.clients} clients)</span>
-        </div>
-      </div>
-    </div>
-    <div className="mt-4 pt-4 border-t border-separator dark:border-border">
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Spécialités :</p>
-      <div className="flex flex-wrap gap-2">
-        {expert.specialties.map((spec, idx) => (
-          <span key={idx} className="text-xs bg-logo/10 text-logo px-3 py-1 rounded-full">
-            {spec}
-          </span>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
-// Composant Témoignage Client
-const TestimonialCard = ({ testimonial }) => (
-  <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-separator dark:border-border">
-    <div className="flex items-start gap-4 mb-4">
-      <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full" />
-      <div className="flex-1">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="font-semibold text-gray-800 dark:text-foreground">{testimonial.name}</div>
-            <div className="text-sm text-gray-500 dark:text-muted-foreground">{testimonial.service}</div>
-          </div>
-          <div className="flex items-center bg-logo/10 text-logo px-3 py-1 rounded-full">
-            <Star className="w-4 h-4 fill-current mr-1" />
-            <span className="font-bold">{testimonial.rating}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p className="text-gray-600 dark:text-muted-foreground mb-4 italic">"{testimonial.comment}"</p>
-    <div className="flex justify-between items-center text-sm">
-      <div className="text-gray-700 dark:text-gray-300 font-medium">{testimonial.results}</div>
-      <div className="text-gray-400 dark:text-gray-500">{testimonial.duration}</div>
     </div>
   </div>
 );
@@ -777,7 +479,7 @@ const NutritionCard = ({ service, index, onOpenModal }) => {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden border border-separator dark:border-border hover:border-primary-dark transform hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-200 dark:border-border hover:border-primary-dark transform hover:-translate-y-1">
 
       <div className="relative h-56 overflow-hidden">
         <img
@@ -880,11 +582,7 @@ const Nutrition = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { trackBienEtreView, trackBienEtreTabChange, trackBienEtreSearch } = useBienEtreTracking();
-
-  useEffect(() => {
-    trackBienEtreView();
-  }, []);
+  const { trackBienEtreTabChange, trackBienEtreSearch } = useBienEtreTracking();
 
   useEffect(() => {
     if (activeTab) {
@@ -895,10 +593,8 @@ const Nutrition = () => {
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      // Simulation de délai API
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Filtrage par catégorie
       const filteredServices = simulatedNutritionServices.filter(service => 
         activeTab === 'Consultation' 
           ? service.category.name === 'Consultation' || service.category.name === 'Suivi'
@@ -959,24 +655,6 @@ const Nutrition = () => {
       label: 'Programmes',
       icon: <Scale className="w-5 h-5" />,
       description: 'Accompagnements long terme'
-    },
-    {
-      id: 'Sport',
-      label: 'Sport',
-      icon: <Zap className="w-5 h-5" />,
-      description: 'Performance et récupération'
-    },
-    {
-      id: 'Atelier',
-      label: 'Ateliers',
-      icon: <Utensils className="w-5 h-5" />,
-      description: 'Apprentissage pratique'
-    },
-    {
-      id: 'Spécialisé',
-      label: 'Spécialités',
-      icon: <Heart className="w-5 h-5" />,
-      description: 'Besoins spécifiques'
     }
   ];
 
@@ -1011,73 +689,11 @@ const Nutrition = () => {
     }
   ];
 
-  const successStories = [
-    {
-      name: "Marc D.",
-      story: "Perte de 12kg en 4 mois",
-      details: "Retrouvé énergie et confiance"
-    },
-    {
-      name: "Julie T.",
-      story: "Performance +40%",
-      details: "Marathon en 3h20"
-    },
-    {
-      name: "Pauline M.",
-      story: "Transition végétale réussie",
-      details: "2 ans sans carences"
-    }
-  ];
-
   return (
-    <div className="font-sans text-foreground min-h-screen bg-light-bg dark:bg-background">
-
-      {/* HERO */}
-      <section
-        className="relative h-80 py-20 lg:py-32 text-center text-white overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(rgba(85, 107, 47, 0.8), rgba(107, 142, 35, 0.6)), url('https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-logo/20 to-primary-dark/40"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <SlideIn direction="up">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight" style={{ color: '#8B4513' }}>
-              Nutrition & Diététique
-            </h1>
-          </SlideIn>
-          <SlideIn direction="up" delay={200}>
-            <p className="text-sm sm:text-base text-slate-200 max-w-2xl mx-auto leading-relaxed px-4 mb-8">
-              Transformez votre alimentation, boostez votre santé. Un accompagnement personnalisé pour des résultats durables.
-            </p>
-          </SlideIn>
-          
-          {/* Badges d'expertise */}
-          <SlideIn direction="up" delay={400}>
-            <div className="flex flex-wrap justify-center gap-4 mt-8">
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-lg rounded-full">
-                <Award className="w-4 h-4 text-white" />
-                <span className="text-sm text-white">Diététiciens diplômés</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-lg rounded-full">
-                <Shield className="w-4 h-4 text-white" />
-                <span className="text-sm text-white">Approche scientifique</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-lg rounded-full">
-                <CheckCircle className="w-4 h-4 text-white" />
-                <span className="text-sm text-white">97% de satisfaction</span>
-              </div>
-            </div>
-          </SlideIn>
-        </div>
-      </section>
-
-      {/* STATISTIQUES */}
+    <div className="font-sans text-foreground">
+      {/* STATISTIQUES 
       <SlideIn direction="up">
-        <div className="container mx-auto px-4 -mt-10 relative z-20 mb-12">
+        <div className="mb-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
               <div key={index} className="transform hover:-translate-y-2 transition-transform duration-300">
@@ -1086,222 +702,165 @@ const Nutrition = () => {
             ))}
           </div>
         </div>
+      </SlideIn>*/}
+
+      {/* TABULATION INTERNE */}
+      <SlideIn direction="down">
+        <LayoutGroup>
+          <div className="bg-white dark:bg-card rounded-3xl shadow-lg px-4 py-6 mb-8 w-full mx-auto border border-gray-200 dark:border-gray-700/40">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="lg:w-1/3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Rechercher un service..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    className="w-full px-6 py-4 pl-12 border border-gray-200 rounded-2xl bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
+                  />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                </div>
+              </div>
+              
+              <div className="lg:w-2/3">
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`group relative flex flex-col items-center px-4 py-3 rounded-2xl font-semibold transition-all duration-300 overflow-hidden min-w-[120px] ${activeTab === tab.id
+                          ? 'bg-logo text-white shadow-md'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60'
+                        }`}
+                    >
+                      <motion.span
+                        animate={{
+                          scale: activeTab === tab.id ? 1.1 : 1,
+                        }}
+                        transition={{ duration: 0.3 }}
+                        className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}
+                      >
+                        {tab.icon}
+                      </motion.span>
+
+                      <motion.span
+                        animate={{
+                          y: activeTab === tab.id ? 2 : 0,
+                        }}
+                        transition={{ duration: 0.3 }}
+                        className="text-sm font-bold relative z-10 mt-1"
+                      >
+                        {tab.label}
+                      </motion.span>
+                      
+                      <span className="text-xs opacity-75 mt-1">{tab.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </LayoutGroup>
       </SlideIn>
 
-      {/* CONTAINER AVEC TABULATION */}
-      <div className="bg-gray-50 dark:bg-background p-4 sm:p-6 lg:p-8">
-        <div className="mx-auto max-w-7xl">
-          {/* Menu de tabulation amélioré */}
-          <SlideIn direction="down">
-            <LayoutGroup>
-              <div className="bg-white dark:bg-card rounded-3xl shadow-lg px-4 py-6 mb-8 w-full mx-auto border border-separator dark:border-gray-700/40">
-                <div className="flex flex-col lg:flex-row gap-4">
-                  <div className="lg:w-1/3">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Rechercher un service, un nutritionniste..."
-                        value={searchTerm}
-                        onChange={handleSearch}
-                        className="w-full px-6 py-4 pl-12 border border-separator rounded-2xl bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                      />
-                      <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+      {/* CONTENU DES TABS */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 md:p-12 min-h-[500px] border border-gray-200 dark:border-gray-700/40"
+        >
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-logo mb-4"></div>
+              <div className="text-gray-600 dark:text-muted-foreground">Chargement des services...</div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                  {filteredServices.length > 0 ? (
+                    filteredServices.map((service, index) => (
+                      <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                        <NutritionCard
+                          service={service}
+                          index={index}
+                          onOpenModal={handleOpenModal}
+                        />
+                      </SlideIn>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
+                      {searchTerm ? 'Aucun service correspondant à votre recherche' : 'Aucun service disponible pour cette catégorie'}
                     </div>
-                  </div>
-                  
-                  <div className="lg:w-2/3">
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {tabs.map((tab) => (
-                        <button
-                          key={tab.id}
-                          onClick={() => setActiveTab(tab.id)}
-                          className={`group relative flex flex-col items-center px-4 py-3 rounded-2xl font-semibold transition-all duration-300 overflow-hidden min-w-[120px] ${activeTab === tab.id
-                              ? 'bg-logo text-white shadow-md'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-separator dark:border-gray-700/60'
-                            }`}
-                        >
-                          <motion.span
-                            animate={{
-                              scale: activeTab === tab.id ? 1.1 : 1,
-                            }}
-                            transition={{ duration: 0.3 }}
-                            className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}
-                          >
-                            {tab.icon}
-                          </motion.span>
-
-                          <motion.span
-                            animate={{
-                              y: activeTab === tab.id ? 2 : 0,
-                            }}
-                            transition={{ duration: 0.3 }}
-                            className="text-sm font-bold relative z-10 mt-1"
-                          >
-                            {tab.label}
-                          </motion.span>
-                          
-                          <span className="text-xs opacity-75 mt-1">{tab.description}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
-            </LayoutGroup>
-          </SlideIn>
+            </>
+          )}
+        </motion.div>
+      </AnimatePresence>
 
-          {/* Contenu des tabs */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 md:p-12 min-h-[500px] border border-separator dark:border-gray-700/40"
-            >
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-logo mb-4"></div>
-                  <div className="text-gray-600 dark:text-muted-foreground">Chargement des services...</div>
-                </div>
-              ) : (
-                <>
-                  <div className="mb-12">
-                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold" style={{ color: '#8B4513' }}>
-                      {activeTab === 'Consultation' && 'Consultations Nutritionnelles'}
-                      {activeTab === 'Programme' && 'Programmes Complets'}
-                      {activeTab === 'Sport' && 'Nutrition Sportive'}
-                      {activeTab === 'Atelier' && 'Ateliers Pratiques'}
-                      {activeTab === 'Spécialisé' && 'Nutrition Spécialisée'}
-                    </h2>
-                    
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
-                      {activeTab === 'Consultation' && 'Des consultations individuelles pour un bilan complet et un suivi personnalisé. Analyse de vos habitudes, définition d\'objectifs et création d\'un plan adapté à votre mode de vie.'}
-                      {activeTab === 'Programme' && 'Des programmes structurés pour des transformations durables. Accompagnement sur plusieurs mois avec suivi régulier, ajustements et support continu.'}
-                      {activeTab === 'Sport' && 'Optimisez vos performances et votre récupération. Des plans nutritionnels adaptés à votre sport, vos objectifs et votre planning d\'entraînement.'}
-                      {activeTab === 'Atelier' && 'Apprenez par la pratique ! Ateliers en petit groupe pour maîtriser les bases d\'une alimentation saine et équilibrée au quotidien.'}
-                      {activeTab === 'Spécialisé' && 'Des solutions adaptées aux besoins spécifiques : grossesse, allaitement, troubles digestifs, maladies chroniques, etc.'}
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                      {filteredServices.length > 0 ? (
-                        filteredServices.map((service, index) => (
-                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <NutritionCard
-                              service={service}
-                              index={index}
-                              onOpenModal={handleOpenModal}
-                            />
-                          </SlideIn>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                          {searchTerm ? 'Aucun service correspondant à votre recherche' : 'Aucun service disponible pour cette catégorie'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          {/* TÉMOIGNAGES */}
-          <div className="mt-12">
-            <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Ils ont transformé leur santé</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              {clientTestimonials.map((testimonial) => (
-                <TestimonialCard key={testimonial.id} testimonial={testimonial} />
-              ))}
-            </div>
-          </div>
-
-          {/* NOS EXPERTS */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Nos nutritionnistes experts</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {expertNutritionists.map((expert) => (
-                <ExpertCard key={expert.id} expert={expert} />
-              ))}
-            </div>
-          </div>
-
-          {/* HISTOIRES DE RÉUSSITE */}
-          <div className="bg-gradient-to-r from-logo/10 to-primary-dark/10 rounded-3xl p-8 border border-logo/20 mb-12">
-            <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Histoires de réussite</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {successStories.map((story, index) => (
-                <div key={index} className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-separator dark:border-border">
-                  <div className="text-4xl font-bold text-logo mb-2">{story.story}</div>
-                  <div className="text-lg font-semibold text-gray-800 dark:text-foreground mb-1">{story.name}</div>
-                  <div className="text-gray-600 dark:text-muted-foreground">{story.details}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* POURQUOI NOUS CHOISIR */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-separator dark:border-gray-700/40">
-              <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Notre approche</h3>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-logo/10 rounded-xl">
-                    <Brain className="w-8 h-8 text-logo" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Approche personnalisée</h4>
-                    <p className="text-gray-600 dark:text-muted-foreground text-sm">Chaque programme est adapté à vos besoins spécifiques, objectifs et mode de vie.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-logo/10 rounded-xl">
-                    <Leaf className="w-8 h-8 text-logo" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Alimentation durable</h4>
-                    <p className="text-gray-600 dark:text-muted-foreground text-sm">Nous privilégions les habitudes alimentaires saines et durables plutôt que les régimes restrictifs.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-logo/10 rounded-xl">
-                    <Shield className="w-8 h-8 text-logo" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Suivi scientifique</h4>
-                    <p className="text-gray-600 dark:text-muted-foreground text-sm">Notre approche est basée sur les dernières recherches scientifiques en nutrition.</p>
-                  </div>
-                </div>
+      {/* POURQUOI NOUS CHOISIR */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+        <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-gray-200 dark:border-gray-700/40">
+          <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Notre approche</h3>
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-logo/10 rounded-xl">
+                <Brain className="w-8 h-8 text-logo" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Approche personnalisée</h4>
+                <p className="text-gray-600 dark:text-muted-foreground text-sm">Chaque programme est adapté à vos besoins spécifiques, objectifs et mode de vie.</p>
               </div>
             </div>
-
-            <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-separator dark:border-gray-700/40">
-              <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Nos engagements</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                  <span className="font-medium text-gray-700 dark:text-gray-300">Consultation initiale approfondie</span>
-                  <CheckCircle className="w-6 h-6 text-logo" />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                  <span className="font-medium text-gray-700 dark:text-gray-300">Plan nutritionnel personnalisé</span>
-                  <CheckCircle className="w-6 h-6 text-logo" />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                  <span className="font-medium text-gray-700 dark:text-gray-300">Suivi régulier inclus</span>
-                  <CheckCircle className="w-6 h-6 text-logo" />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                  <span className="font-medium text-gray-700 dark:text-gray-300">Support entre consultations</span>
-                  <CheckCircle className="w-6 h-6 text-logo" />
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                  <span className="font-medium text-gray-700 dark:text-gray-300">Ressources éducatives</span>
-                  <CheckCircle className="w-6 h-6 text-logo" />
-                </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-logo/10 rounded-xl">
+                <Leaf className="w-8 h-8 text-logo" />
               </div>
+              <div>
+                <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Alimentation durable</h4>
+                <p className="text-gray-600 dark:text-muted-foreground text-sm">Nous privilégions les habitudes alimentaires saines et durables plutôt que les régimes restrictifs.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-logo/10 rounded-xl">
+                <Shield className="w-8 h-8 text-logo" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Suivi scientifique</h4>
+                <p className="text-gray-600 dark:text-muted-foreground text-sm">Notre approche est basée sur les dernières recherches scientifiques en nutrition.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-gray-200 dark:border-gray-700/40">
+          <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Nos engagements</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Consultation initiale approfondie</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Plan nutritionnel personnalisé</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Suivi régulier inclus</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Support entre consultations</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Ressources éducatives</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
             </div>
           </div>
         </div>
@@ -1313,7 +872,6 @@ const Nutrition = () => {
         onClose={handleCloseModal}
         service={selectedService}
       />
-
     </div>
   );
 };
