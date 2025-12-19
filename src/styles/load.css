@@ -1,0 +1,196 @@
+  @keyframes servoZoom {
+    0% {
+      transform: scale(0.8) translateZ(0);
+      opacity: 0;
+    }
+
+    15% {
+      transform: scale(1) translateZ(0);
+      opacity: 1;
+    }
+
+    85% {
+      transform: scale(1.8) translateZ(0);
+      opacity: 1;
+    }
+
+    100% {
+      transform: scale(35) translateZ(0);
+      opacity: 0;
+    }
+  }
+
+  @keyframes circleDisappear {
+    0% {
+      transform: scale(1) translateZ(0);
+      opacity: 1;
+    }
+
+    100% {
+      transform: scale(0.01) translateZ(0);
+      opacity: 0;
+    }
+  }
+
+  @keyframes scan {
+    0% {
+      transform: translateY(-50vh);
+      opacity: 0;
+    }
+
+    10% {
+      opacity: 1;
+    }
+
+    90% {
+      opacity: 1;
+    }
+
+    100% {
+      transform: translateY(50vh);
+      opacity: 0;
+    }
+  }
+
+  .servo-animate {
+    animation: servoZoom 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  .glass-panel {
+    background: rgba(26, 31, 21, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  @keyframes pulse {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin {
+    animation: spin 4s linear infinite;
+  }
+
+  .animate-spin-reverse {
+    animation: spin 3s linear infinite reverse;
+  }
+
+  .circle-mask {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vmax;
+    height: 100vmax;
+    transform: translate(-50%, -50%) translateZ(0);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  .circle-mask.background-circle-disappear {
+    animation: circleDisappear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s forwards;
+  }
+
+  @keyframes floatOrb1 {
+
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+
+    50% {
+      transform: translate(30px, -20px) scale(1.1);
+    }
+  }
+
+  @keyframes floatOrb2 {
+
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+
+    50% {
+      transform: translate(-40px, 30px) scale(1.15);
+    }
+  }
+
+  .orb-float-1 {
+    animation: floatOrb1 8s ease-in-out infinite;
+  }
+
+  .orb-float-2 {
+    animation: floatOrb2 10s ease-in-out infinite;
+  }
+
+  /* Styles pour le défilement des cartes */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animation smooth pour le changement de background */
+.bg-transition {
+  transition: background-image 1s ease-in-out;
+}
+
+/* Animation pour le scan horizontal */
+@keyframes scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Animation pour les cartes actives */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  }
+}
+
+.scale-102 {
+  transform: scale(1.02);
+}
+
+/* Transition smooth pour le background */
+.smooth-bg-transition {
+  transition: background-image 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
