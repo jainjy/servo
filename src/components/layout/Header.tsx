@@ -705,7 +705,7 @@ const Header = () => {
         {
           title: "Travaux & Matériaux",
           description: "Construction, rénovation et fournitures",
-          href: "/travaux?categorie=constructions",
+          href: "/travaux?categorie=interieurs",
           image:
             "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg", // Image d'illustration travaux
         },
