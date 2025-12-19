@@ -1,34 +1,126 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import '../styles/load.css';
+import Home from '../../public/Home.mp4';
+import vid1 from '../../public/video/vid1.mp4';
+import vid2 from '../../public/video/vid2.mp4';
+import vid3 from '../../public/video/vid3.mp4';
 
 interface LoadingScreenProps {
   onLoadingComplete?: () => void;
   minimumLoadingTime?: number;
 }
 
+// Données pour les cartes
+const cardData = [
+  {
+    id: 1,
+    type: 'video',
+    src: Home,
+    title: 'Plages paradisiaques',
+    color: '#3A7CA5',
+  },
+  {
+    id: 2,
+    type: 'image',
+    src: 'https://i.pinimg.com/736x/fd/8c/53/fd8c53667cb821937c526bcb55e63271.jpg',
+    title: 'Montagnes verdoyantes',
+    color: '#2E933C',
+  },
+  {
+    id: 3,
+    type: 'video',
+    src: vid1,
+    title: 'Océan Indien',
+    color: '#0B5563',
+  },
+  {
+    id: 4,
+    type: 'image',
+    src: 'https://i.pinimg.com/1200x/49/10/51/4910519781331bda9add8a091379e426.jpg',
+    title: 'Culture locale',
+    color: '#7D4E57',
+  },
+  {
+    id: 5,
+    type: 'video',
+    src: vid2,
+    title: 'Couchers de soleil',
+    color: '#E28413',
+  },
+  {
+    id: 6,
+    type: 'image',
+    src: 'https://i.pinimg.com/736x/5c/10/24/5c102464cb7cd9ade5028239fb746a6f.jpg',
+    title: 'Plages paradisiaques',
+    color: '#3A7CA5',
+  },
+  {
+    id: 7,
+    type: 'image',
+    src: 'https://i.pinimg.com/736x/9b/09/40/9b094085219de8b43227a154e934d3ed.jpg',
+    title: 'Montagnes verdoyantes',
+    color: '#2E933C',
+  },
+  {
+    id: 8,
+    type: 'video',
+    src: vid3,
+    title: 'Océan Indien',
+    color: '#0B5563',
+  },
+  {
+    id: 9,
+    type: 'image',
+    src: 'https://i.pinimg.com/736x/b1/0d/5b/b10d5bf8e83151e3e73546d7ee4c6811.jpg',
+    title: 'Culture locale',
+    color: '#7D4E57',
+  },
+  {
+    id: 10,
+    type: 'image',
+    src: 'https://i.pinimg.com/736x/ac/35/aa/ac35aa6ed326403db1758183a49e6f34.jpg',
+    title: 'Couchers de soleil',
+    color: '#E28413',
+  },
+];
+
+// Variable globale pour empêcher le remontage
+let globalExitInitiated = false;
+
 export default function LoadingScreen({
   onLoadingComplete,
   minimumLoadingTime = 3500
 }: LoadingScreenProps) {
-  const [progress, setProgress] = useState(0);
+  // États de base
   const [isVisible, setIsVisible] = useState(true);
-  const [dots, setDots] = useState('');
-  const [startFadeOut, setStartFadeOut] = useState(false);
-  const [showServoZoom, setShowServoZoom] = useState(false);
-  const [typingComplete, setTypingComplete] = useState(false);
-  const [forceComplete, setForceComplete] = useState(false);
-  const [hideBackground, setHideBackground] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [showButton, setShowButton] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const [fadeOutOpacity, setFadeOutOpacity] = useState(1);
+  const [scaleEffect, setScaleEffect] = useState(1);
+  const [blurEffect, setBlurEffect] = useState(0);
+  const [brightnessEffect, setBrightnessEffect] = useState(1);
 
-  // Gestion du SessionStorage (inchangé)
+  // Références
+  const exitInitiatedRef = useRef(false);
+  const hasCalledCompleteRef = useRef(false);
+  const startTimeRef = useRef<number>(Date.now());
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const componentMountedRef = useRef(true);
+  const hasStartedExitProcessRef = useRef(false);
+  const animationRef = useRef<number>();
+
+  // Gestion du SessionStorage - lecture SEULEMENT au montage
   const [hasAnimationPlayed, setHasAnimationPlayed] = useState(() => {
     if (typeof window !== 'undefined') {
-      const played = sessionStorage.getItem('VisitAnimation') === 'true';
-      if (!played) sessionStorage.setItem('VisitAnimation', 'true');
+      const played = sessionStorage.getItem('VisitAnimation') === 'true' || globalExitInitiated;
       return played;
     }
     return false;
   });
 
-  // Palette de couleurs (inchangée)
+  // Palette de couleurs
   const colors = {
     logoAccent: '#556B2F',
     sruvol: '#6B8E23',
@@ -40,30 +132,23 @@ export default function LoadingScreen({
 
   const fullText = "Investir à La Réunion, c'est investir dans bien plus qu'un bien. C'est s'ancrer dans une terre d'authenticité, de rencontres et de dynamisme. Fort de plus de 10 ans d'expérience dans l'immobilier, Olivier Verguin a créé cette plateforme dédiée à l'investissement dans l'immobilier, à la location saisonnière, et à la mise en valeur des activités locales réunionnaises.";
 
-  // Simulation de TypeAnimation
+  // États pour l'animation de texte
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showCursor, setShowCursor] = useState(true);
+  const [typingComplete, setTypingComplete] = useState(false);
+  const [dots, setDots] = useState('');
 
+  // Nettoyage au démontage
   useEffect(() => {
-    const cursorInterval = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 500);
-    return () => clearInterval(cursorInterval);
+    return () => {
+      componentMountedRef.current = false;
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
   }, []);
 
-  useEffect(() => {
-    if (progress > 5 && currentIndex < fullText.length) {
-      const timeout = setTimeout(() => {
-        setDisplayedText(fullText.slice(0, currentIndex + 1));
-        setCurrentIndex(currentIndex + 1);
-      }, 30);
-      return () => clearTimeout(timeout);
-    } else if (currentIndex >= fullText.length && !typingComplete) {
-      setTypingComplete(true);
-    }
-  }, [currentIndex, progress, typingComplete]);
-
+  // Animation des points
   useEffect(() => {
     const dotsInterval = setInterval(() => {
       setDots(prev => prev.length >= 3 ? '' : prev + '.');
@@ -71,466 +156,582 @@ export default function LoadingScreen({
     return () => clearInterval(dotsInterval);
   }, []);
 
+  // Auto-défilement des cartes
   useEffect(() => {
-    if (hasAnimationPlayed) {
-      onLoadingComplete?.();
+    const interval = setInterval(() => {
+      setCurrentCardIndex((prev) => (prev + 1) % cardData.length);
+    }, 6500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Animation de texte
+  useEffect(() => {
+    if (progress > 5 && currentIndex < fullText.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(fullText.slice(0, currentIndex + 1));
+        setCurrentIndex(prev => prev + 1);
+      }, 30);
+      return () => clearTimeout(timeout);
+    } else if (currentIndex >= fullText.length && !typingComplete) {
+      setTypingComplete(true);
+    }
+  }, [currentIndex, fullText.length, progress, typingComplete]);
+
+  // LOGIQUE DE CHARGEMENT - exécutée une seule fois
+  useEffect(() => {
+    // Si déjà joué ou exit global, sortir immédiatement
+    if (hasAnimationPlayed || globalExitInitiated) {
+      if (!hasCalledCompleteRef.current && componentMountedRef.current) {
+        hasCalledCompleteRef.current = true;
+        onLoadingComplete?.();
+      }
+      if (componentMountedRef.current) {
+        setIsVisible(false);
+      }
       return;
     }
 
-    let startTime: number;
     let animationFrameId: number;
-    let hasCompleted = false;
-    let typingStarted = false;
-    let typingCompletedTime: number = 0;
-    let minTimeReached = false;
+    let isAnimationActive = true;
 
-    const animateProgress = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const elapsedTime = timestamp - startTime;
-
-      if (elapsedTime > 500 && !typingStarted) typingStarted = true;
-      if (typingComplete && typingCompletedTime === 0) typingCompletedTime = elapsedTime;
-      if (elapsedTime >= minimumLoadingTime && !minTimeReached) minTimeReached = true;
-
-      let calculatedProgress = 0;
-
-      if (!typingComplete) {
-        calculatedProgress = Math.min(70, (elapsedTime / minimumLoadingTime) * 70);
-      } else if (typingComplete && !minTimeReached) {
-        calculatedProgress = 70 + ((elapsedTime - typingCompletedTime) / (minimumLoadingTime - typingCompletedTime)) * 20;
-      } else if (typingComplete && minTimeReached && !forceComplete) {
-        calculatedProgress = 99;
-      } else if (forceComplete) {
-        calculatedProgress = 100;
+    const updateProgress = () => {
+      if (!isAnimationActive || !componentMountedRef.current || hasAnimationPlayed || globalExitInitiated) {
+        return;
       }
 
-      setProgress(Math.min(100, calculatedProgress));
+      const now = Date.now();
+      const elapsed = now - startTimeRef.current;
 
-      const shouldComplete = forceComplete || (typingComplete && minTimeReached && elapsedTime > minimumLoadingTime + 1000);
+      // Phase 1: Progresser jusqu'à 70% pendant minimumLoadingTime
+      let newProgress = Math.min(70, (elapsed / minimumLoadingTime) * 70);
 
-      if (!shouldComplete) {
-        animationFrameId = requestAnimationFrame(animateProgress);
-      } else if (!hasCompleted) {
-        hasCompleted = true;
-        // Déclenchement de la séquence de fin
+      // Phase 2: Si le texte est terminé, continuer vers 100%
+      if (typingComplete && elapsed > minimumLoadingTime) {
+        const timeAfterMin = elapsed - minimumLoadingTime;
+        const fadeTime = 2000;
+        const extraProgress = Math.min(30, (timeAfterMin / fadeTime) * 30);
+        newProgress = Math.min(100, 70 + extraProgress);
+      }
+
+      if (componentMountedRef.current) {
+        setProgress(newProgress);
+      }
+
+      // Quand on atteint 100%, montrer le bouton
+      if (newProgress >= 100 && !showButton && componentMountedRef.current) {
+        setShowButton(true);
+      }
+
+      // Continuer l'animation
+      if (newProgress < 100 && isAnimationActive && componentMountedRef.current) {
+        animationFrameId = requestAnimationFrame(updateProgress);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateProgress);
+
+    return () => {
+      isAnimationActive = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [minimumLoadingTime, typingComplete, showButton, hasAnimationPlayed, onLoadingComplete]);
+
+  // ANIMATION DE FADE-OUT SMOOTH
+  useEffect(() => {
+    if (!isExiting || !componentMountedRef.current) return;
+
+    let startTime: number;
+    const duration = 1200; // 1.2 secondes pour une animation plus fluide
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Courbe d'easing personnalisée pour un effet plus smooth
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+      const easeInOutQuad = progress < 0.5 
+        ? 2 * progress * progress 
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+      // Animation de l'opacité
+      const opacity = 1 - easeOutCubic;
+      setFadeOutOpacity(opacity);
+
+      // Animation du scale (léger zoom out)
+      const scale = 1 - (easeOutCubic * 0.1); // Réduction de 10%
+      setScaleEffect(scale);
+
+      // Animation du flou (augmentation progressive)
+      const blur = easeOutCubic * 20; // Jusqu'à 20px de flou
+      setBlurEffect(blur);
+
+      // Animation de la luminosité (assombrissement)
+      const brightness = 1 - (easeOutCubic * 0.7); // Réduction de 70%
+      setBrightnessEffect(brightness);
+
+      if (progress < 1 && componentMountedRef.current) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else if (componentMountedRef.current) {        
+        // Petit délai avant de masquer complètement
         setTimeout(() => {
-          setShowServoZoom(true); // Phase Zoom
-          setTimeout(() => {
-            setHideBackground(true); // Animation du background disparait en cercle
-            setTimeout(() => {
-              setStartFadeOut(true); // Fade global
-              setTimeout(() => {
-                setIsVisible(false); // Unmount visuel
-                setTimeout(() => {
-                  onLoadingComplete?.(); // Callback final
-                }, 200);
-              }, 600);
-            }, 300);
-          }, 600);
+          if (componentMountedRef.current) {
+            setIsVisible(false);
+          }
         }, 100);
       }
     };
 
-    animationFrameId = requestAnimationFrame(animateProgress);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [minimumLoadingTime, onLoadingComplete, typingComplete, forceComplete, hasAnimationPlayed]);
+    animationRef.current = requestAnimationFrame(animate);
 
-  useEffect(() => {
-    if (typingComplete && progress === 99) {
-      const timer = setTimeout(() => setForceComplete(true), 2000);
-      return () => clearTimeout(timer);
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isExiting]);
+
+  // Fonction de sortie - PROTECTION MAXIMALE
+  const handleExit = () => {
+    // PROTECTION MULTIPLE COUCHES
+    if (
+      exitInitiatedRef.current ||
+      globalExitInitiated ||
+      isExiting ||
+      !isVisible ||
+      hasStartedExitProcessRef.current ||
+      hasAnimationPlayed
+    ) {
+      return;
+    }    
+    // MARQUER COMME DÉBUTÉ À TOUS LES NIVEAUX
+    exitInitiatedRef.current = true;
+    globalExitInitiated = true;
+    hasStartedExitProcessRef.current = true;
+    
+    if (componentMountedRef.current) {
+      setIsExiting(true);
     }
-  }, [typingComplete, progress]);
 
-  if (hasAnimationPlayed) return null;
-  if (!isVisible) return null;
+    // 1. Sauvegarder dans sessionStorage IMMÉDIATEMENT
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('VisitAnimation', 'true');      
+      // Mettre à jour l'état local
+      if (componentMountedRef.current) {
+        setHasAnimationPlayed(true);
+      }
+    }
 
+    // 2. Arrêter toutes les vidéos
+    videoRefs.current.forEach(video => {
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    });
+
+    // 3. Arrêter l'animation des cartes
+    const cardsContainer = document.getElementById('cardsContainer');
+    if (cardsContainer) {
+      cardsContainer.style.animationPlayState = 'paused';
+    }
+
+    // 4. Appeler le callback pour rediriger après l'animation
+    setTimeout(() => {
+      if (!hasCalledCompleteRef.current && componentMountedRef.current) {
+        hasCalledCompleteRef.current = true;
+        onLoadingComplete?.();
+      }
+    }, 800); // Délai correspondant à l'animation
+  };
+
+  // SI DÉJÀ JOUÉ OU EXIT GLOBAL, NE RIEN AFFICHER
+  if (hasAnimationPlayed || globalExitInitiated) {
+    return null;
+  }
+
+  // SI PAS VISIBLE, NE RIEN AFFICHER
+  if (!isVisible) {
+    return null;
+  }
+
+  // Rendu du composant
   return (
-    <>
-      {/* Styles globaux pour l'animation de zoom spécifique */}
-      <style>{`
-        @keyframes servoZoom {
-          0% { transform: scale(0.8) translateZ(0); opacity: 0; }
-          15% { transform: scale(1) translateZ(0); opacity: 1; }
-          85% { transform: scale(1.8) translateZ(0); opacity: 1; }
-          100% { transform: scale(35) translateZ(0); opacity: 0; }
-        }
-        @keyframes circleDisappear {
-          0% { transform: scale(1) translateZ(0); opacity: 1; }
-          100% { transform: scale(0.01) translateZ(0); opacity: 0; }
-        }
-        @keyframes scan {
-          0% { transform: translateY(-50vh); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(50vh); opacity: 0; }
-        }
-        .servo-animate {
-          animation: servoZoom 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-          will-change: transform, opacity;
-          transform: translateZ(0);
-          backface-visibility: hidden;
-          perspective: 1000px;
-        }
-        .glass-panel {
-          background: rgba(26, 31, 21, 0.6);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-        .animate-pulse {
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin {
-          animation: spin 4s linear infinite;
-        }
-        .animate-spin-reverse {
-          animation: spin 3s linear infinite reverse;
-        }
-        .circle-mask {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          width: 100vmax;
-          height: 100vmax;
-          transform: translate(-50%, -50%) translateZ(0);
-          border-radius: 50%;
-          pointer-events: none;
-          z-index: 10000;
-          will-change: transform, opacity;
-          backface-visibility: hidden;
-        }
-        .circle-mask.background-circle-disappear {
-          animation: circleDisappear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s forwards;
-        }
-        @keyframes floatOrb1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(30px, -20px) scale(1.1); }
-        }
-        @keyframes floatOrb2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(-40px, 30px) scale(1.15); }
-        }
-        .orb-float-1 {
-          animation: floatOrb1 8s ease-in-out infinite;
-        }
-        .orb-float-2 {
-          animation: floatOrb2 10s ease-in-out infinite;
-        }
-      `}</style>
-
-      <div 
-        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-opacity duration-700 ease-out overflow-hidden"
-        style={{ 
-          background: 'transparent',
-          opacity: startFadeOut ? 0 : 1,
-          pointerEvents: startFadeOut ? 'none' : 'auto'
-        }}
-      >
-        {/* ARRIÈRE-PLAN MODERNE AVEC GRILLES EN PROFONDEUR */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ opacity: hideBackground ? 0 : 1, transition: 'opacity 0.8s ease-out' }}>
-          
-          {/* Fond de base dégradé */}
-          <div className="absolute inset-0" 
-               style={{ 
-                 background: 'linear-gradient(135deg, #0a0f08 0%, #1a1f15 25%, #12160f 50%, #1a1f15 75%, #0f1410 100%)',
-                 zIndex: 0
-               }} 
-          />
-
-          {/* Couche 1: Grille perspective lointaine (très subtile) */}
-          <div 
-            className="absolute inset-0"
+    <div
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-black/50"
+      style={{
+        opacity: fadeOutOpacity,
+        transform: `scale(${scaleEffect})`,
+        filter: `blur(${blurEffect}px)`,
+        transition: isExiting ? 'none' : 'opacity 0.3s ease-out',
+        pointerEvents: isExiting ? 'none' : 'auto',
+        willChange: 'opacity, transform, filter'
+      }}
+    >
+      {/* Background avec média */}
+      <div className="absolute inset-0 overflow-hidden">
+        {cardData[currentCardIndex]?.type === 'video' ? (
+          <video
+            key={`video-${currentCardIndex}`}
+            ref={el => {
+              if (el) videoRefs.current[currentCardIndex] = el;
+            }}
+            autoPlay
+            muted
+            loop
+            className="absolute inset-0 w-full h-full object-cover"
+            src={cardData[currentCardIndex].src}
             style={{
-              backgroundImage: `
-                linear-gradient(0deg, transparent 24%, rgba(107, 142, 35, 0.06) 25%, rgba(107, 142, 35, 0.06) 26%, transparent 27%, transparent 74%, rgba(107, 142, 35, 0.06) 75%, rgba(107, 142, 35, 0.06) 76%, transparent 77%, transparent),
-                linear-gradient(90deg, transparent 24%, rgba(107, 142, 35, 0.06) 25%, rgba(107, 142, 35, 0.06) 26%, transparent 27%, transparent 74%, rgba(107, 142, 35, 0.06) 75%, rgba(107, 142, 35, 0.06) 76%, transparent 77%, transparent)
-              `,
-              backgroundSize: '200px 200px',
+              filter: `brightness(${brightnessEffect})`,
+              transition: isExiting ? 'none' : 'filter 0.3s ease-out'
+            }}
+          />
+        ) : (
+          <div
+            className="absolute inset-0 w-full h-full"
+            style={{
+              backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${cardData[currentCardIndex]?.src})`,
+              backgroundSize: 'cover',
               backgroundPosition: 'center',
-              transform: 'perspective(800px) rotateX(65deg) translateZ(0)',
-              opacity: 0.3,
-              zIndex: 1
+              filter: `brightness(${brightnessEffect})`,
+              transition: isExiting ? 'none' : 'filter 0.3s ease-out'
+            }}
+          />
+        )}
+
+        {/* Overlay et effets visuels */}
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"
+          style={{
+            opacity: isExiting ? 0.5 : 1,
+            transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            opacity: isExiting ? 0.2 : 0.3,
+            backgroundImage: `
+              linear-gradient(0deg, transparent 24%, rgba(107, 142, 35, 0.06) 25%, rgba(107, 142, 35, 0.06) 26%, transparent 27%, transparent 74%, rgba(107, 142, 35, 0.06) 75%, rgba(107, 142, 35, 0.06) 76%, transparent 77%, transparent),
+              linear-gradient(90deg, transparent 24%, rgba(107, 142, 35, 0.06) 25%, rgba(107, 142, 35, 0.06) 26%, transparent 27%, transparent 74%, rgba(107, 142, 35, 0.06) 75%, rgba(107, 142, 35, 0.06) 76%, transparent 77%, transparent)
+            `,
+            backgroundSize: '200px 200px',
+            transform: 'perspective(800px) rotateX(65deg)',
+            transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+          }}
+        />
+      </div>
+
+      {/* Contenu principal */}
+      <div className="relative w-full max-w-6xl px-6 md:px-12 pb-16 flex flex-col h-full justify-center">
+        {/* Carte glassmorphism */}
+        <div
+          className="glass-panel rounded-2xl p-8 md:p-12 relative overflow-hidden border"
+          style={{
+            backgroundColor: isExiting ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.3)',
+            borderColor: isExiting ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)',
+            opacity: isExiting ? 0.7 : 1,
+            transform: isExiting ? `scale(${0.95 + (1 - scaleEffect)})` : 'scale(1)',
+            backdropFilter: `blur(${isExiting ? Math.min(blurEffect / 2, 10) : 20}px)`,
+            transition: isExiting ? 'none' : 'all 0.3s ease-out'
+          }}
+        >
+
+          {/* Indicateurs décoratifs */}
+          <div
+            className="absolute top-6 left-6 w-8 h-[1px]"
+            style={{ 
+              background: colors.sruvol,
+              opacity: isExiting ? 0.3 : 1,
+              transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+            }}
+          />
+          <div
+            className="absolute top-6 left-6 h-8 w-[1px]"
+            style={{ 
+              background: colors.sruvol,
+              opacity: isExiting ? 0.3 : 1,
+              transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
             }}
           />
 
-          {/* Couche 2: Grille moyenne (intermédiaire) */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                linear-gradient(0deg, transparent 19%, rgba(136, 69, 19, 0.08) 20%, rgba(136, 69, 19, 0.08) 21%, transparent 22%, transparent 78%, rgba(136, 69, 19, 0.08) 79%, rgba(136, 69, 19, 0.08) 80%, transparent 81%, transparent),
-                linear-gradient(90deg, transparent 19%, rgba(136, 69, 19, 0.08) 20%, rgba(136, 69, 19, 0.08) 21%, transparent 22%, transparent 78%, rgba(136, 69, 19, 0.08) 79%, rgba(136, 69, 19, 0.08) 80%, transparent 81%, transparent)
-              `,
-              backgroundSize: '120px 120px',
-              backgroundPosition: 'center',
-              opacity: 0.4,
-              zIndex: 2
-            }}
-          />
-
-          {/* Couche 3: Grille rapprochée (nette) */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                linear-gradient(0deg, transparent 14%, rgba(255, 255, 255, 0.05) 15%, rgba(255, 255, 255, 0.05) 16%, transparent 17%, transparent 83%, rgba(255, 255, 255, 0.05) 84%, rgba(255, 255, 255, 0.05) 85%, transparent 86%, transparent),
-                linear-gradient(90deg, transparent 14%, rgba(255, 255, 255, 0.05) 15%, rgba(255, 255, 255, 0.05) 16%, transparent 17%, transparent 83%, rgba(255, 255, 255, 0.05) 84%, rgba(255, 255, 255, 0.05) 85%, transparent 86%, transparent)
-              `,
-              backgroundSize: '60px 60px',
-              backgroundPosition: 'center',
-              opacity: 0.5,
-              zIndex: 3
-            }}
-          />
-
-          {/* Couche 4: Lignes diagonales croisées pour effet dynamique */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                repeating-linear-gradient(45deg, transparent, transparent 90px, rgba(107, 142, 35, 0.04) 90px, rgba(107, 142, 35, 0.04) 92px),
-                repeating-linear-gradient(-45deg, transparent, transparent 90px, rgba(136, 69, 19, 0.04) 90px, rgba(136, 69, 19, 0.04) 92px)
-              `,
-              opacity: 0.6,
-              zIndex: 4
-            }}
-          />
-
-          {/* Couche 5: Accents hexagonaux subtils */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:rgba(107,142,35,0.08)'/%3E%3Cstop offset='100%25' style='stop-color:rgba(136,69,19,0.08)'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg stroke='url(%23grad1)' stroke-width='1' fill='none'%3E%3Cpath d='M 50 10 L 90 30 L 90 70 L 50 90 L 10 70 L 10 30 Z'/%3E%3Ccircle cx='50' cy='50' r='8'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '150px 150px',
-              backgroundPosition: '0 0',
-              opacity: 0.25,
-              zIndex: 5
-            }}
-          />
-
-          {/* Couche 6: Orbes radiales en arrière-plan */}
-          <div 
-            className="absolute orb-float-1"
-            style={{
-              top: '-10%',
-              left: '5%',
-              width: '600px',
-              height: '600px',
-              borderRadius: '50%',
-              background: `radial-gradient(circle at center, ${colors.sruvol} 0%, rgba(107, 142, 35, 0.3) 25%, transparent 70%)`,
-              filter: 'blur(130px)',
-              opacity: 0.2,
-              zIndex: 6
-            }}
-          />
-
-          <div 
-            className="absolute orb-float-2"
-            style={{
-              bottom: '-5%',
-              right: '8%',
-              width: '700px',
-              height: '700px',
-              borderRadius: '50%',
-              background: `radial-gradient(circle at center, ${colors.premium} 0%, rgba(136, 69, 19, 0.2) 25%, transparent 70%)`,
-              filter: 'blur(150px)',
-              opacity: 0.15,
-              zIndex: 6
-            }}
-          />
-
-          {/* Couche 7: Effet de profondeur centrale */}
-          <div 
-            className="absolute"
-            style={{
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '90vw',
-              height: '90vh',
-              borderRadius: '50%',
-              background: `radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, transparent 50%)`,
-              filter: 'blur(100px)',
-              zIndex: 7
-            }}
-          />
-
-          {/* Couche 8: Points d'accent lumineux dispersés */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.5) 1.5px, transparent 1.5px),
-                radial-gradient(circle at 85% 15%, rgba(107, 142, 35, 0.4) 1px, transparent 1px),
-                radial-gradient(circle at 25% 60%, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
-                radial-gradient(circle at 95% 70%, rgba(136, 69, 19, 0.4) 1.5px, transparent 1.5px),
-                radial-gradient(circle at 10% 85%, rgba(255, 255, 255, 0.5) 1px, transparent 1px),
-                radial-gradient(circle at 70% 10%, rgba(107, 142, 35, 0.3) 1.5px, transparent 1.5px),
-                radial-gradient(circle at 45% 35%, rgba(255, 255, 255, 0.25) 1px, transparent 1px),
-                radial-gradient(circle at 80% 80%, rgba(136, 69, 19, 0.35) 1px, transparent 1px)
-              `,
-              backgroundSize: '100% 100%',
-              backgroundPosition: 'center',
-              opacity: 0.4,
-              zIndex: 8
-            }}
-          />
-
-          {/* Couche 9: Vignette élégante */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: 'radial-gradient(ellipse 1400px 900px at center, transparent 15%, rgba(0, 0, 0, 0.15) 60%, rgba(0, 0, 0, 0.5) 100%)',
-              zIndex: 9
-            }}
-          />
-
-          {/* Couche 10: Lueur supérieure subtile */}
-          <div 
-            className="absolute top-0 left-0 right-0"
-            style={{
-              height: '45%',
-              background: 'linear-gradient(to bottom, rgba(107, 142, 35, 0.1) 0%, rgba(107, 142, 35, 0.04) 30%, transparent 100%)',
-              zIndex: 10
-            }}
-          />
-
-          {/* Couche 11: Scan horizontal animé */}
-          <div 
-            className="absolute left-0 right-0 h-[2px]"
-            style={{
-              top: '50%',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(107, 142, 35, 0.1) 50%, transparent 100%)',
-              boxShadow: '0 0 20px rgba(107, 142, 35, 0.2)',
-              zIndex: 11,
-              animation: 'scan 6s linear infinite'
-            }}
-          />
-        </div>
-
-        {!showServoZoom ? (
-          <div className="relative w-full max-w-5xl px-6 md:px-12 flex flex-col h-full justify-center">
-            
-            {/* Conteneur Principal Glassmorphism */}
-            <div className="glass-panel rounded-2xl p-8 md:p-12 relative overflow-hidden transition-all duration-500">
-              
-              {/* Indicateur décoratif haut gauche */}
-              <div className="absolute top-6 left-6 w-8 h-[1px]" style={{ background: colors.sruvol }}></div>
-              <div className="absolute top-6 left-6 h-8 w-[1px]" style={{ background: colors.sruvol }}></div>
-
-              {/* Zone de texte Typer */}
-              <div className="min-h-[280px] flex items-center justify-center mb-8 relative">
-                {progress > 5 ? (
-                  <div className="font-serif text-sm md:text-2xl leading-relaxed text-justify tracking-wide opacity-90"
-                       style={{ color: '#E5E5E5' }}>
-                    <span className="text-4xl absolute -top-2 -left-2 opacity-30 font-serif">"</span>
-                    <p style={{ 
-                      whiteSpace: 'pre-wrap',
-                      textShadow: '0 2px 10px rgba(0,0,0,0.5)'
-                    }}>
-                      {displayedText}
-                      {!typingComplete && showCursor && <span className="border-r-2 border-white ml-1 animate-pulse"></span>}
-                    </p>
-                    {typingComplete && <span className="text-4xl align-bottom ml-2 opacity-30 font-serif">"</span>}
-                  </div>
-                ) : (
-                  <div className="animate-pulse flex flex-col items-center gap-4 opacity-40">
-                    <div className="h-0.5 w-12 bg-white/20"></div>
-                    <span className="text-xs uppercase tracking-[0.3em] text-white/40">Initialisation</span>
-                  </div>
-                )}
+          {/* Texte */}
+          <div className="min-h-[280px] flex items-center justify-center mb-8 relative">
+            {progress > 5 ? (
+              <div
+                className="font-serif text-sm md:text-2xl leading-relaxed text-justify tracking-wide"
+                style={{
+                  color: '#E5E5E5',
+                  opacity: isExiting ? 0.5 : 0.9,
+                  transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                }}
+              >
+                <span 
+                  className="text-4xl absolute -top-2 -left-2 font-serif"
+                  style={{ 
+                    opacity: isExiting ? 0.1 : 0.3,
+                    transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                  }}
+                >"</span>
+                <p style={{
+                  whiteSpace: 'pre-wrap',
+                  textShadow: isExiting ? '0 1px 3px rgba(0,0,0,0.2)' : '0 2px 10px rgba(0,0,0,0.5)',
+                  transition: isExiting ? 'none' : 'text-shadow 0.3s ease-out'
+                }}>
+                  {displayedText}
+                  {!typingComplete && currentIndex < fullText.length && !isExiting && (
+                    <span className="border-r-2 border-white ml-1 animate-pulse" />
+                  )}
+                </p>
+                {typingComplete && <span
+                  className="text-4xl align-bottom ml-2 font-serif"
+                  style={{ 
+                    opacity: isExiting ? 0.1 : 0.3,
+                    transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                  }}
+                >"</span>}
               </div>
+            ) : (
+              <div 
+                className="flex flex-col items-center gap-4"
+                style={{ 
+                  opacity: isExiting ? 0.2 : 0.4,
+                  transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                }}
+              >
+                <div className="h-0.5 w-12 bg-white/20" />
+                <span className="text-xs uppercase tracking-[0.3em] text-white/40">
+                  Initialisation{dots}
+                </span>
+              </div>
+            )}
+          </div>
 
-              {/* Ligne de séparation fine */}
-              <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent mb-8"></div>
+          {/* Séparateur */}
+          <div
+            className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent mb-8"
+            style={{ 
+              opacity: isExiting ? 0.2 : 1,
+              transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+            }}
+          />
 
-              {/* Zone Footer : Logo & Progress */}
-              <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-                
-                {/* Logo & Status */}
-                <div className="flex items-center gap-4">
-                  <div className="relative w-10 h-10 flex items-center justify-center">
-                    <div className="absolute inset-0 border border-white/10 rounded-full animate-spin"></div>
-                    <div className="absolute inset-2 border-t border-r border-white/30 rounded-full animate-spin-reverse"></div>
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.sruvol }}></div>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold tracking-widest text-white">
-                      SER<span style={{ color: colors.sruvol }}>VO</span>
-                    </h2>
-                  </div>
-                </div>
+          {/* Footer avec logo et progression */}
+          <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+            {/* Logo */}
+            <div className="flex items-center gap-4">
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                <div
+                  className="absolute inset-0 border border-white/10 rounded-full"
+                  style={{
+                    animation: isExiting ? 'none' : 'spin 1.5s linear infinite',
+                    opacity: isExiting ? 0.2 : 1,
+                    transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                  }}
+                />
+                <div
+                  className="absolute inset-2 border-t border-r border-white/30 rounded-full"
+                  style={{
+                    animation: isExiting ? 'none' : 'spin-reverse 2s linear infinite',
+                    opacity: isExiting ? 0.1 : 1,
+                    transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                  }}
+                />
+                <div
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{
+                    backgroundColor: colors.sruvol,
+                    opacity: isExiting ? 0.3 : 1,
+                    transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                  }}
+                />
+              </div>
+              <h2
+                className="text-xl font-bold tracking-widest"
+                style={{
+                  color: '#FFFFFF',
+                  opacity: isExiting ? 0.5 : 1,
+                  transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                }}
+              >
+                OLI<span style={{ color: colors.sruvol }}>PLUS</span>
+              </h2>
+            </div>
 
-                {/* Barre de progression & Pourcentage */}
-                <div className="w-full md:w-1/2 flex flex-col gap-2">
-                  <div className="flex justify-between text-xs font-mono text-white/50 mb-1">
+            {/* Barre de progression ou bouton */}
+            <div className="w-full md:w-1/2 flex flex-col gap-2">
+              {!showButton ? (
+                <>
+                  <div
+                    className="flex justify-between text-xs font-mono mb-1"
+                    style={{
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      opacity: isExiting ? 0.3 : 1,
+                      transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                    }}
+                  >
                     <span>STATUS: {typingComplete ? 'EN COURS' : 'CHARGEMENT'}</span>
                     <span>{Math.round(progress)}%</span>
                   </div>
-                  
-                  <div className="relative h-[2px] w-full bg-white/5 overflow-hidden rounded-full">
+                  <div
+                    className="relative h-[2px] w-full overflow-hidden rounded-full"
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      opacity: isExiting ? 0.3 : 1,
+                      transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                    }}
+                  >
                     <div
-                      className="absolute top-0 left-0 h-full transition-all duration-300 ease-out shadow-[0_0_15px_rgba(107,142,35,0.8)]"
+                      className="absolute top-0 left-0 h-full"
                       style={{
                         width: `${progress}%`,
                         backgroundColor: colors.sruvol,
+                        boxShadow: isExiting ? 'none' : '0 0 15px rgba(107,142,35,0.8)',
+                        transition: isExiting ? 'none' : 'all 0.3s ease-out'
                       }}
                     >
-                      <div className="absolute right-0 top-0 h-full w-[100px] bg-gradient-to-r from-transparent to-white opacity-50"></div>
+                      <div
+                        className="absolute right-0 top-0 h-full w-[100px] bg-gradient-to-r from-transparent to-white"
+                        style={{ 
+                          opacity: isExiting ? 0.1 : 0.5,
+                          transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+                        }}
+                      />
                     </div>
                   </div>
-                </div>
-
-              </div>
-
-            </div>
-            
-            {/* Copyright discret */}
-            <div className="mt-6 text-center">
-              <p className="text-[10px] azonix uppercase tracking-[0.3em] opacity-30 text-white font-light">
-                © 2025 SERVO
-              </p>
-            </div>
-
-          </div>
-        ) : (
-          /* PHASE 2: ZOOM EFFECT */
-          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
-            <div className="servo-animate relative" style={{ transformOrigin: 'center center' }}>
-              <h1 className="text-8xl md:text-9xl azonix font-bold tracking-tighter text-white mix-blend-overlay select-none"
+                </>
+              ) : (
+                <button
+                  onClick={handleExit}
+                  disabled={exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed}
+                  className="px-8 py-3 rounded-lg font-mono text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_25px_rgba(107,142,35,0.6)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
                   style={{
-                    textShadow: '0 0 40px rgba(85, 107, 47, 0.6)',
-                    WebkitFontSmoothing: 'antialiased',
-                    WebkitTextStrokeWidth: '0.5px',
-                    WebkitTextStrokeColor: 'rgba(107, 142, 35, 0.3)'
-                  }}>
-                SERVO
-              </h1>
+                    backgroundColor: exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed ? '#888' : colors.sruvol,
+                    border: `1px solid ${exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed ? '#888' : colors.sruvol}`,
+                    boxShadow: isExiting 
+                      ? '0 0 10px rgba(136, 136, 136, 0.3)' 
+                      : exitInitiatedRef.current || globalExitInitiated || hasAnimationPlayed
+                      ? '0 0 5px rgba(136, 136, 136, 0.2)'
+                      : '0 0 15px rgba(107,142,35,0.4)',
+                    opacity: isExiting ? 0.7 : 1,
+                    transform: isExiting ? 'scale(0.97)' : 'scale(1)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  {/* Effet de brillance sur hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  
+                  <span className="relative z-10">
+                    {exitInitiatedRef.current || globalExitInitiated || isExiting ? 'REDIRECTION EN COURS...' : 'ACCÉDER AU SITE'}
+                  </span>
+                  
+                  {/* Indicateur de statut */}
+                  {(exitInitiatedRef.current || globalExitInitiated) && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse z-20">
+                      !
+                    </span>
+                  )}
+                </button>
+              )}
             </div>
           </div>
-        )}
-        
-        {/* Masque circulaire qui disparaît */}
-        {hideBackground && (
-          <div className={`circle-mask ${hideBackground ? 'background-circle-disappear' : ''}`}
-               style={{
-                 background: 'radial-gradient(circle at center, #0a0f08 0%, #1a1f15 50%)',
-                 boxShadow: 'inset 0 0 80px rgba(0, 0, 0, 0.9)',
-                 pointerEvents: 'none'
-               }}>
+        </div>
+
+        {/* Cartes défilantes */}
+        <div className="fixed bottom-2 right-6 z-[9998]">
+          <style>{`
+            @keyframes scroll-cards {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-${cardData.length * 96}px); }
+            }
+          `}</style>
+          <div
+            className="p-4 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]"
+            style={{
+              width: '380px',
+              maxWidth: '90vw',
+              overflow: 'hidden',
+              borderRadius: '8px',
+              backgroundColor: isExiting ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.2)',
+              opacity: isExiting ? 0.2 : 1,
+              transform: isExiting ? 'translateY(30px) scale(0.95)' : 'translateY(0) scale(1)',
+              backdropFilter: `blur(${isExiting ? Math.min(blurEffect / 3, 8) : 12}px)`,
+              transition: isExiting ? 'none' : 'all 0.3s ease-out'
+            }}
+          >
+            <div
+              id="cardsContainer"
+              className="flex gap-4"
+              style={{
+                animation: isExiting ? 'none' : 'scroll-cards 80s linear infinite',
+              }}
+            >
+              {[...cardData, ...cardData].map((card, index) => (
+                <div
+                  key={`${card.id}-${index}`}
+                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-pointer relative ${index % cardData.length === currentCardIndex
+                      ? 'ring-1 ring-white scale-110 shadow-xl'
+                      : 'hover:opacity-75'
+                    }`}
+                  onClick={() => !isExiting && setCurrentCardIndex(index % cardData.length)}
+                  style={{
+                    opacity: isExiting ? 0.3 : 1,
+                    transform: isExiting ? 'scale(0.85)' :
+                      (index % cardData.length === currentCardIndex ? 'scale(1.1)' : 'scale(1)'),
+                    transition: isExiting ? 'none' : 'all 0.3s ease-out'
+                  }}
+                >
+                  {card.type === 'video' ? (
+                    <video
+                      className="absolute inset-0 w-full h-full object-cover"
+                      src={card.src}
+                      style={{
+                        filter: isExiting ? 'brightness(0.2)' : 'brightness(0.5)',
+                        transition: isExiting ? 'none' : 'filter 0.3s ease-out'
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="absolute inset-0 w-full h-full"
+                      style={{
+                        backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${card.src})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
+                    />
+                  )}
+                  {card.type === 'video' && !isExiting && (
+                    <div className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 z-10">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  )}
+                  {index % cardData.length === currentCardIndex && !isExiting && (
+                    <div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-white z-10" />
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Copyright */}
+        <div className="mt-6 text-center">
+          <p
+            className="text-[10px] azonix uppercase tracking-[0.3em] text-white font-light"
+            style={{ 
+              opacity: isExiting ? 0.05 : 0.3,
+              transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
+            }}
+          >
+            © 2025 OLIPLUS
+          </p>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
