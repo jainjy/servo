@@ -13,6 +13,40 @@ import { toast } from "sonner";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
+// Fonction de validation des mots de passe
+const validatePassword = (password: string) => {
+  return {
+    minLength: password.length >= 8,
+    maxLength: password.length <= 12,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\;/]/.test(password),
+  };
+};
+
+const isPasswordValid = (password: string) => {
+  const validation = validatePassword(password);
+  return Object.values(validation).every((v) => v === true);
+};
+
+const PasswordRequirement = ({
+  met,
+  text,
+}: {
+  met: boolean;
+  text: string;
+}) => (
+  <div className="flex items-center gap-2 text-xs">
+    <div
+      className={`w-3 h-3 rounded-full ${
+        met ? "bg-green-500" : "bg-gray-300"
+      }`}
+    />
+    <span className={met ? "text-green-600" : "text-gray-600"}>{text}</span>
+  </div>
+);
+
 export default function ResetPasswordPage() {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -28,6 +62,14 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState({
     newPassword: false,
     confirmPassword: false
+  });
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    maxLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,6 +122,11 @@ export default function ResetPasswordPage() {
       [name]: value
     }));
     
+    // Mettre à jour la validation du mot de passe en temps réel
+    if (name === "newPassword") {
+      setPasswordValidation(validatePassword(value));
+    }
+    
     // Effacer l'erreur quand l'utilisateur tape
     if (errors[name]) {
       setErrors(prev => ({
@@ -94,8 +141,8 @@ export default function ResetPasswordPage() {
     
     if (!formData.newPassword) {
       newErrors.newPassword = 'Nouveau mot de passe requis';
-    } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword = 'Le mot de passe doit contenir au moins 6 caractères';
+    } else if (!isPasswordValid(formData.newPassword)) {
+      newErrors.newPassword = 'Le mot de passe ne respecte pas les conditions requises (8-12 caractères, majuscule, minuscule, chiffre et caractère spécial)';
     }
     
     if (!formData.confirmPassword) {
@@ -236,12 +283,12 @@ export default function ResetPasswordPage() {
             <CardContent className="px-8 pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Nouveau mot de passe */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <label
                     htmlFor="newPassword"
                     className="text-sm font-medium text-gray-700 block"
                   >
-                    Nouveau mot de passe
+                    Nouveau mot de passe *
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -249,7 +296,7 @@ export default function ResetPasswordPage() {
                       id="newPassword"
                       name="newPassword"
                       type={showPassword.newPassword ? "text" : "password"}
-                      placeholder="Minimum 6 caractères"
+                      placeholder="Créez un mot de passe sécurisé"
                       className={`pl-10 pr-10 h-11 bg-[#FFFFFF] ${
                         errors.newPassword 
                           ? "border-red-300 focus:border-red-500" 
@@ -257,6 +304,7 @@ export default function ResetPasswordPage() {
                       } rounded-md`}
                       value={formData.newPassword}
                       onChange={handleChange}
+                      required
                     />
                     <button
                       type="button"
@@ -270,18 +318,47 @@ export default function ResetPasswordPage() {
                       )}
                     </button>
                   </div>
+                  <div className="bg-gray-50 p-3 rounded-lg space-y-2 mt-2">
+                    <p className="text-xs font-medium text-gray-700">
+                      Critères du mot de passe :
+                    </p>
+                    <PasswordRequirement
+                      met={passwordValidation.minLength}
+                      text="Au moins 8 caractères"
+                    />
+                    <PasswordRequirement
+                      met={passwordValidation.maxLength}
+                      text="Maximum 12 caractères"
+                    />
+                    <PasswordRequirement
+                      met={passwordValidation.hasUpperCase}
+                      text="Au moins une majuscule (A-Z)"
+                    />
+                    <PasswordRequirement
+                      met={passwordValidation.hasLowerCase}
+                      text="Au moins une minuscule (a-z)"
+                    />
+                    <PasswordRequirement
+                      met={passwordValidation.hasNumber}
+                      text="Au moins un chiffre (0-9)"
+                    />
+                    <PasswordRequirement
+                      met={passwordValidation.hasSpecialChar}
+                      text="Au moins un caractère spécial (!@#$%^&*...)"
+                    />
+                  </div>
                   {errors.newPassword && (
                     <p className="text-sm text-red-600 mt-1">{errors.newPassword}</p>
                   )}
                 </div>
 
                 {/* Confirmation mot de passe */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <label
                     htmlFor="confirmPassword"
                     className="text-sm font-medium text-gray-700 block"
                   >
-                    Confirmer le mot de passe
+                    Confirmer le mot de passe *
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -297,6 +374,7 @@ export default function ResetPasswordPage() {
                       } rounded-md`}
                       value={formData.confirmPassword}
                       onChange={handleChange}
+                      required
                     />
                     <button
                       type="button"
@@ -313,18 +391,6 @@ export default function ResetPasswordPage() {
                   {errors.confirmPassword && (
                     <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>
                   )}
-                </div>
-
-                {/* Conseils de sécurité */}
-                <div className="text-sm text-gray-600 bg-[#556B2F]/10 p-4 rounded-lg border border-[#556B2F]/20">
-                  <p className="font-medium text-[#556B2F] mb-1">
-                    Conseils de sécurité :
-                  </p>
-                  <ul className="space-y-1 list-disc list-inside">
-                    <li>Utilisez au moins 6 caractères</li>
-                    <li>Mélangez lettres, chiffres et caractères spéciaux</li>
-                    <li>Évitez les mots de passe faciles à deviner</li>
-                  </ul>
                 </div>
 
                 {/* Bouton de soumission */}

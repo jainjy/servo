@@ -229,6 +229,22 @@ class AuthService {
       const response = await api.post("/auth/forgot-password", { email });
       return response.data;
     } catch (error) {
+      // 🔥 AMÉLIORATION: Gestion spécifique des erreurs de rate limiting
+      if (error.response?.status === 429) {
+        const errorMessage =
+          error.response?.data?.message ||
+          "Trop de tentatives. Veuillez réessayer dans 1 heure.";
+
+        // Créer une erreur spécifique pour le rate limiting
+        const rateLimitError = new Error(errorMessage);
+        rateLimitError.name = "RateLimitError";
+        rateLimitError.status = 429;
+        rateLimitError.retryAfter = 3600; // 1 heure en secondes
+
+        throw rateLimitError;
+      }
+
+      // Pour les autres erreurs, utiliser le gestionnaire existant
       throw this.handleError(
         error,
         "Erreur lors de la demande de réinitialisation"

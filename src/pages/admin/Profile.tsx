@@ -106,6 +106,14 @@ const ProfilePage = () => {
     new: false,
     confirm: false,
   });
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    maxLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -278,15 +286,56 @@ const ProfilePage = () => {
     setIsPasswordModalOpen(true);
   };
 
+  // Fonction de validation des mots de passe
+  const validatePassword = (password: string) => {
+    return {
+      minLength: password.length >= 8,
+      maxLength: password.length <= 12,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\;/]/.test(password),
+    };
+  };
+
+  const isPasswordValid = (password: string) => {
+    const validation = validatePassword(password);
+    return Object.values(validation).every((v) => v === true);
+  };
+
+  const PasswordRequirement = ({
+    met,
+    text,
+  }: {
+    met: boolean;
+    text: string;
+  }) => (
+    <div className="flex items-center gap-2 text-xs">
+      <div
+        className={`w-3 h-3 rounded-full ${
+          met ? "bg-green-500" : "bg-gray-300"
+        }`}
+      />
+      <span className={met ? "text-green-600" : "text-gray-600"}>{text}</span>
+    </div>
+  );
+
   const handlePasswordSubmit = async () => {
     // Validation
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("Les nouveaux mots de passe ne correspondent pas");
+    if (!passwordData.currentPassword || !passwordData.newPassword) {
+      toast.error("Veuillez remplir tous les champs");
       return;
     }
 
-    if (passwordData.newPassword.length < 6) {
-      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+    if (!isPasswordValid(passwordData.newPassword)) {
+      toast.error(
+        "Le mot de passe ne respecte pas les conditions requises (8-12 caractères, majuscule, minuscule, chiffre et caractère spécial)"
+      );
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Les nouveaux mots de passe ne correspondent pas");
       return;
     }
 
@@ -303,6 +352,14 @@ const ProfilePage = () => {
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
+      });
+      setPasswordValidation({
+        minLength: false,
+        maxLength: false,
+        hasUpperCase: false,
+        hasLowerCase: false,
+        hasNumber: false,
+        hasSpecialChar: false,
       });
     } catch (error: any) {
       console.error("Erreur lors du changement de mot de passe:", error);
@@ -945,12 +1002,14 @@ const ProfilePage = () => {
                   id="newPassword"
                   type={showPasswords.new ? "text" : "password"}
                   value={passwordData.newPassword}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const newPass = e.target.value;
                     setPasswordData((prev) => ({
                       ...prev,
-                      newPassword: e.target.value,
-                    }))
-                  }
+                      newPassword: newPass,
+                    }));
+                    setPasswordValidation(validatePassword(newPass));
+                  }}
                   placeholder="Votre nouveau mot de passe"
                 />
                 <Button
@@ -966,6 +1025,35 @@ const ProfilePage = () => {
                     <Eye className="h-4 w-4" />
                   )}
                 </Button>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg space-y-2 mt-2">
+                <p className="text-xs font-medium text-gray-700">
+                  Critères du mot de passe :
+                </p>
+                <PasswordRequirement
+                  met={passwordValidation.minLength}
+                  text="Au moins 8 caractères"
+                />
+                <PasswordRequirement
+                  met={passwordValidation.maxLength}
+                  text="Maximum 12 caractères"
+                />
+                <PasswordRequirement
+                  met={passwordValidation.hasUpperCase}
+                  text="Au moins une majuscule (A-Z)"
+                />
+                <PasswordRequirement
+                  met={passwordValidation.hasLowerCase}
+                  text="Au moins une minuscule (a-z)"
+                />
+                <PasswordRequirement
+                  met={passwordValidation.hasNumber}
+                  text="Au moins un chiffre (0-9)"
+                />
+                <PasswordRequirement
+                  met={passwordValidation.hasSpecialChar}
+                  text="Au moins un caractère spécial (!@#$%^&*...)"
+                />
               </div>
             </div>
 
@@ -1013,7 +1101,7 @@ const ProfilePage = () => {
             </Button>
             <Button
               onClick={handlePasswordSubmit}
-              disabled={isChangingPassword}
+              disabled={isChangingPassword || !isPasswordValid(passwordData.newPassword)}
               className="gap-2"
             >
               {isChangingPassword ? (

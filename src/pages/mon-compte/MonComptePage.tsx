@@ -38,6 +38,41 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
+
+// Fonction de validation des mots de passe
+const validatePassword = (password: string) => {
+  return {
+    minLength: password.length >= 8,
+    maxLength: password.length <= 12,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\;/]/.test(password),
+  };
+};
+
+const isPasswordValid = (password: string) => {
+  const validation = validatePassword(password);
+  return Object.values(validation).every((v) => v === true);
+};
+
+const PasswordRequirement = ({
+  met,
+  text,
+}: {
+  met: boolean;
+  text: string;
+}) => (
+  <div className="flex items-center gap-2 text-xs">
+    <div
+      className={`w-3 h-3 rounded-full ${
+        met ? "bg-green-500" : "bg-gray-300"
+      }`}
+    />
+    <span className={met ? "text-green-600" : "text-gray-600"}>{text}</span>
+  </div>
+);
+
 export default function MonComptePage() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -53,6 +88,14 @@ export default function MonComptePage() {
     confirmPassword: "",
   });
   const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    maxLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     firstName: "",
@@ -255,17 +298,20 @@ export default function MonComptePage() {
       });
       return;
     }
+
+    // Validation stricte du mot de passe
+    if (!isPasswordValid(passwordData.newPassword)) {
+      toast({
+        title: "Erreur",
+        description: "Le mot de passe ne respecte pas les conditions requises",
+      });
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
         title: "Erreur",
         description: "Les mots de passe ne correspondent pas",
-      });
-      return;
-    }
-    if (passwordData.newPassword.length < 6) {
-      toast({
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 6 caractères",
       });
       return;
     }
@@ -279,6 +325,14 @@ export default function MonComptePage() {
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
+      });
+      setPasswordValidation({
+        minLength: false,
+        maxLength: false,
+        hasUpperCase: false,
+        hasLowerCase: false,
+        hasNumber: false,
+        hasSpecialChar: false,
       });
       toast({
         title: "Succès",
@@ -794,12 +848,12 @@ export default function MonComptePage() {
                       <Input
                         type="password"
                         value={passwordData.currentPassword}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setPasswordData((prev) => ({
                             ...prev,
                             currentPassword: e.target.value,
-                          }))
-                        }
+                          }));
+                        }}
                         placeholder="••••••••"
                         className="border-[#D3D3D3]"
                       />
@@ -811,15 +865,46 @@ export default function MonComptePage() {
                       <Input
                         type="password"
                         value={passwordData.newPassword}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const newPass = e.target.value;
                           setPasswordData((prev) => ({
                             ...prev,
-                            newPassword: e.target.value,
-                          }))
-                        }
+                            newPassword: newPass,
+                          }));
+                          setPasswordValidation(validatePassword(newPass));
+                        }}
                         placeholder="••••••••"
                         className="border-[#D3D3D3]"
                       />
+                      <div className="bg-gray-50 p-3 rounded-lg space-y-2 mt-2">
+                        <p className="text-xs font-medium text-gray-700">
+                          Critères du mot de passe :
+                        </p>
+                        <PasswordRequirement
+                          met={passwordValidation.minLength}
+                          text="Au moins 8 caractères"
+                        />
+                        <PasswordRequirement
+                          met={passwordValidation.maxLength}
+                          text="Maximum 12 caractères"
+                        />
+                        <PasswordRequirement
+                          met={passwordValidation.hasUpperCase}
+                          text="Au moins une majuscule (A-Z)"
+                        />
+                        <PasswordRequirement
+                          met={passwordValidation.hasLowerCase}
+                          text="Au moins une minuscule (a-z)"
+                        />
+                        <PasswordRequirement
+                          met={passwordValidation.hasNumber}
+                          text="Au moins un chiffre (0-9)"
+                        />
+                        <PasswordRequirement
+                          met={passwordValidation.hasSpecialChar}
+                          text="Au moins un caractère spécial (!@#$%^&*...)"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#8B4513] font-semibold">
@@ -844,7 +929,8 @@ export default function MonComptePage() {
                         disabled={
                           changingPassword ||
                           !passwordData.currentPassword ||
-                          !passwordData.newPassword
+                          !passwordData.newPassword ||
+                          !isPasswordValid(passwordData.newPassword)
                         }
                         className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                       >

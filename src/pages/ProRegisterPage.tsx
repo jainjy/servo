@@ -39,9 +39,11 @@ import ServoLogo from "@/components/components/ServoLogo";
 const validatePassword = (password: string) => {
   return {
     minLength: password.length >= 8,
+    maxLength: password.length <= 12,
     hasUpperCase: /[A-Z]/.test(password),
     hasLowerCase: /[a-z]/.test(password),
     hasNumber: /\d/.test(password),
+    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\;/]/.test(password),
   };
 };
 
@@ -49,6 +51,23 @@ const isPasswordValid = (password: string) => {
   const validation = validatePassword(password);
   return Object.values(validation).every((v) => v === true);
 };
+
+const PasswordRequirement = ({
+  met,
+  text,
+}: {
+  met: boolean;
+  text: string;
+}) => (
+  <div className="flex items-center gap-2 text-xs">
+    <div
+      className={`w-3 h-3 rounded-full ${
+        met ? "bg-green-500" : "bg-gray-300"
+      }`}
+    />
+    <span className={met ? "text-green-600" : "text-gray-600"}>{text}</span>
+  </div>
+);
 
 const ProRegisterPage = () => {
   const navigate = useNavigate();
@@ -62,9 +81,11 @@ const ProRegisterPage = () => {
   const [metiersSearchQuery, setMetiersSearchQuery] = useState("");
   const [passwordValidation, setPasswordValidation] = useState({
     minLength: false,
+    maxLength: false,
     hasUpperCase: false,
     hasLowerCase: false,
     hasNumber: false,
+    hasSpecialChar: false,
   });
   const { signupPro } = useAuth();
   const [formData, setFormData] = useState({
@@ -806,6 +827,10 @@ const ProRegisterPage = () => {
                                 text="Au moins 8 caractères"
                               />
                               <PasswordRequirement
+                                met={passwordValidation.maxLength}
+                                text="Maximum 12 caractères"
+                              />
+                              <PasswordRequirement
                                 met={passwordValidation.hasUpperCase}
                                 text="Au moins une majuscule (A-Z)"
                               />
@@ -816,6 +841,10 @@ const ProRegisterPage = () => {
                               <PasswordRequirement
                                 met={passwordValidation.hasNumber}
                                 text="Au moins un chiffre (0-9)"
+                              />
+                              <PasswordRequirement
+                                met={passwordValidation.hasSpecialChar}
+                                text="Au moins un caractère spécial (!@#$%^&*...)"
                               />
                             </div>
                           </div>

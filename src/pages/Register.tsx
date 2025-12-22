@@ -34,9 +34,11 @@ import ServoLogo from "@/components/components/ServoLogo";
 const validatePassword = (password: string) => {
   return {
     minLength: password.length >= 8,
+    maxLength: password.length <= 12,
     hasUpperCase: /[A-Z]/.test(password),
     hasLowerCase: /[a-z]/.test(password),
     hasNumber: /\d/.test(password),
+    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\;/]/.test(password),
   };
 };
 
@@ -51,9 +53,11 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState({
     minLength: false,
+    maxLength: false,
     hasUpperCase: false,
     hasLowerCase: false,
     hasNumber: false,
+    hasSpecialChar: false,
   });
   const [formData, setFormData] = useState({
     // Informations de base
@@ -104,7 +108,7 @@ const RegisterPage = () => {
     // Validation stricte du mot de passe
     if (!isPasswordValid(formData.password)) {
       toast.error(
-        "Le mot de passe ne respecte pas les conditions requises (minimum 8 caractères, majuscule, minuscule, chiffre)"
+        "Le mot de passe ne respecte pas les conditions requises (8-12 caractères, majuscule, minuscule, chiffre et caractère spécial)"
       );
       return;
     }
@@ -458,6 +462,10 @@ const RegisterPage = () => {
                             text="Au moins 8 caractères"
                           />
                           <PasswordRequirement
+                            met={passwordValidation.maxLength}
+                            text="Maximum 12 caractères"
+                          />
+                          <PasswordRequirement
                             met={passwordValidation.hasUpperCase}
                             text="Au moins une majuscule (A-Z)"
                           />
@@ -468,6 +476,10 @@ const RegisterPage = () => {
                           <PasswordRequirement
                             met={passwordValidation.hasNumber}
                             text="Au moins un chiffre (0-9)"
+                          />
+                          <PasswordRequirement
+                            met={passwordValidation.hasSpecialChar}
+                            text="Au moins un caractère spécial (!@#$%^&*...)"
                           />
                         </div>
                       </div>
@@ -507,7 +519,6 @@ const RegisterPage = () => {
                           </Button>
                         </div>
                       </div>
-
                     </div>
                   </div>
                   {/* Conditions */}
