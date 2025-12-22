@@ -35,6 +35,21 @@ import api from "@/lib/api";
 import { formatDate } from "date-fns";
 import ServoLogo from "@/components/components/ServoLogo";
 
+// Fonction de validation des mots de passe
+const validatePassword = (password: string) => {
+  return {
+    minLength: password.length >= 8,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+  };
+};
+
+const isPasswordValid = (password: string) => {
+  const validation = validatePassword(password);
+  return Object.values(validation).every((v) => v === true);
+};
+
 const ProRegisterPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +60,12 @@ const ProRegisterPage = () => {
   const [metiersList, setMetiersList] = useState([]);
   const [metiersLoading, setMetiersLoading] = useState(false);
   const [metiersSearchQuery, setMetiersSearchQuery] = useState("");
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+  });
   const { signupPro } = useAuth();
   const [formData, setFormData] = useState({
     // Informations de base
@@ -144,6 +165,14 @@ const ProRegisterPage = () => {
       return;
     }
 
+    // Validation stricte du mot de passe
+    if (!isPasswordValid(formData.password)) {
+      toast.error(
+        "Le mot de passe ne respecte pas les conditions requises (minimum 8 caractères, majuscule, minuscule, chiffre)"
+      );
+      return;
+    }
+
     // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
@@ -232,6 +261,11 @@ const ProRegisterPage = () => {
     value: string | boolean | number[]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // Mettre à jour la validation du mot de passe en temps réel
+    if (field === "password") {
+      setPasswordValidation(validatePassword(value as string));
+    }
   };
 
   const handleMetierToggle = (metierId: number) => {
@@ -733,7 +767,6 @@ const ProRegisterPage = () => {
                       {/* Mot de passe */}
                       <div className="space-y-4">
                         <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
-
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Mot de passe *
@@ -764,10 +797,27 @@ const ProRegisterPage = () => {
                                 )}
                               </Button>
                             </div>
-                            <p className="text-[10px] text-gray-500">
-                              Minimum 8 caractères avec majuscules, minuscules et
-                              chiffres
-                            </p>
+                            <div className="bg-gray-50 p-3 rounded-lg space-y-2 mt-2">
+                              <p className="text-xs font-medium text-gray-700">
+                                Critères du mot de passe :
+                              </p>
+                              <PasswordRequirement
+                                met={passwordValidation.minLength}
+                                text="Au moins 8 caractères"
+                              />
+                              <PasswordRequirement
+                                met={passwordValidation.hasUpperCase}
+                                text="Au moins une majuscule (A-Z)"
+                              />
+                              <PasswordRequirement
+                                met={passwordValidation.hasLowerCase}
+                                text="Au moins une minuscule (a-z)"
+                              />
+                              <PasswordRequirement
+                                met={passwordValidation.hasNumber}
+                                text="Au moins un chiffre (0-9)"
+                              />
+                            </div>
                           </div>
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">

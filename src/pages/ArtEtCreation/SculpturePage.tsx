@@ -284,30 +284,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ searchQuery, onContactCli
       </div>
 
       {/* Workshop Section */}
-      <div className="rounded-lg border p-6 mb-10 flex items-center justify-center"
-        style={{ borderColor: '#D3D3D3', backgroundColor: '#F9F9F9' }}>
-          <div className="text-center max-w-2xl">
-            <div className="flex justify-center items-center mb-4">
-              <GraduationCap size={26} className="mr-3" style={{ color: '#8B4513' }} />
-              <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-                Ateliers et formations
-              </h2>
-            </div>
-            <p className="text-lg mb-5 mx-auto max-w-xl">
-              Apprenez la sculpture auprès de maîtres artisans. Stages, cours réguliers et formations professionnelles.
-            </p>
-            <div className="flex justify-center">
-              <button 
-                className="flex items-center px-5 py-2.5 rounded-lg text-white font-medium hover:bg-[#485826] transition-colors"
-                style={{ backgroundColor: '#556B2F' }}
-                onClick={() => onContactClick("Demande d'information atelier", "Équipe des ateliers")}
-              >
-                <BookOpen size={18} className="mr-2" />
-                Trouver un atelier
-              </button>
-            </div>
-          </div>
-        </div>
+
       
       {/* Modal des œuvres */}
       {showArtworks && selectedArtist && (

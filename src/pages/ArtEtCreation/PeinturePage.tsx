@@ -410,26 +410,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ searchQuery, onContactClick
         </div>
       </div>
 
-      {/* Commission Section - TOUS LES BOUTONS FONCTIONNELS */}
-      <div className="rounded-lg border p-8 text-center"
-           style={{ borderColor: '#D3D3D3', backgroundColor: '#F9F9F9' }}>
-        <h2 className="text-3xl font-bold mb-4" style={{ color: '#8B4513' }}>
-          Une œuvre sur mesure ?
-        </h2>
-        <p className="text-xl mb-8 max-w-2xl mx-auto">
-          Commandez une peinture personnalisée à l'un de nos artistes. Portraits, paysages, ou création unique selon vos envies.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button 
-            onClick={() => onContactClick && onContactClick('Commande d\'œuvre sur mesure', 'Équipe des commandes')}
-            className="px-8 py-3 rounded-lg text-white font-bold text-lg hover:bg-[#485826] transition-colors"
-            style={{ backgroundColor: '#556B2F' }}
-          >
-            Commander une œuvre
-          </button>
-        
-        </div>
-      </div>
+
 
       {/* Modal Détail Peinture - COMPLET ET FONCTIONNEL */}
       {showPaintingDetail && selectedPainting && (

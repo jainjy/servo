@@ -29,10 +29,32 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ServoLogo from "@/components/components/ServoLogo";
+
+// Fonction de validation des mots de passe
+const validatePassword = (password: string) => {
+  return {
+    minLength: password.length >= 8,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+  };
+};
+
+const isPasswordValid = (password: string) => {
+  const validation = validatePassword(password);
+  return Object.values(validation).every((v) => v === true);
+};
+
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+  });
   const [formData, setFormData] = useState({
     // Informations de base
     firstName: "",
@@ -62,6 +84,7 @@ const RegisterPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Vérification des champs obligatoires
@@ -75,6 +98,13 @@ const RegisterPage = () => {
     ) {
       toast.error(
         "Veuillez remplir tous les champs obligatoires"
+      );
+      return;
+    }
+    // Validation stricte du mot de passe
+    if (!isPasswordValid(formData.password)) {
+      toast.error(
+        "Le mot de passe ne respecte pas les conditions requises (minimum 8 caractères, majuscule, minuscule, chiffre)"
       );
       return;
     }
@@ -120,6 +150,11 @@ const RegisterPage = () => {
     value: string | boolean | number[]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // Mettre à jour la validation du mot de passe en temps réel
+    if (field === "password") {
+      setPasswordValidation(validatePassword(value as string));
+    }
   };
   const features = [
     {
@@ -143,6 +178,22 @@ const RegisterPage = () => {
       description: "Tout votre habitat géré depuis une seule plateforme",
     },
   ];
+  const PasswordRequirement = ({
+    met,
+    text,
+  }: {
+    met: boolean;
+    text: string;
+  }) => (
+    <div className="flex items-center gap-2 text-xs">
+      <div
+        className={`w-3 h-3 rounded-full ${
+          met ? "bg-green-500" : "bg-gray-300"
+        }`}
+      />
+      <span className={met ? "text-green-600" : "text-gray-600"}>{text}</span>
+    </div>
+  );
   return (
     <div className="min-h-screen flex">
       {/* Background */}
@@ -398,10 +449,27 @@ const RegisterPage = () => {
                             )}
                           </Button>
                         </div>
-                        <p className="text-[10px] text-gray-500">
-                          * Minimum 8 caractères avec majuscules, minuscules
-                          et chiffres
-                        </p>
+                        <div className="bg-gray-50 p-3 rounded-lg space-y-2 mt-2">
+                          <p className="text-xs font-medium text-gray-700">
+                            Critères du mot de passe :
+                          </p>
+                          <PasswordRequirement
+                            met={passwordValidation.minLength}
+                            text="Au moins 8 caractères"
+                          />
+                          <PasswordRequirement
+                            met={passwordValidation.hasUpperCase}
+                            text="Au moins une majuscule (A-Z)"
+                          />
+                          <PasswordRequirement
+                            met={passwordValidation.hasLowerCase}
+                            text="Au moins une minuscule (a-z)"
+                          />
+                          <PasswordRequirement
+                            met={passwordValidation.hasNumber}
+                            text="Au moins un chiffre (0-9)"
+                          />
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">

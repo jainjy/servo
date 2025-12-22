@@ -165,30 +165,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ searchQuery, onCont
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="text-center py-12 px-4 rounded-lg border"
-           style={{ borderColor: '#D3D3D3', backgroundColor: '#F9F9F9' }}>
-        <div className="flex justify-center mb-4">
-          <TrendingUp size={48} style={{ color: '#8B4513' }} />
-        </div>
-        <h2 className="text-3xl font-bold mb-4" style={{ color: '#8B4513' }}>
-          Vous êtes photographe ?
-        </h2>
-        <p className="text-xl mb-8 max-w-2xl mx-auto">
-          Rejoignez notre plateforme et augmentez votre visibilité auprès de clients passionnés
-        </p>
-        <button 
-          className="flex items-center justify-center mx-auto px-8 py-3 rounded-lg text-white font-bold text-lg"
-          style={{ backgroundColor: '#556B2F' }}
-          onClick={() => onContactClick(
-            "Demande pour rejoindre la plateforme photographe",
-            "Équipe Art & Création"
-          )}
-        >
-          <Camera size={20} className="mr-2" />
-          Proposer mes services
-        </button>
-      </div>
+
     </div>
   );
 };

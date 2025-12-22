@@ -542,50 +542,7 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactCli
         </div>
       </div>
 
-      {/* Heritage Section - TOUS LES BOUTONS FONCTIONNELS */}
-      <div className="rounded-lg border p-8"
-           style={{ borderColor: '#D3D3D3', backgroundColor: '#F9F9F9' }}>
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="md:w-2/3 mb-6 md:mb-0 md:pr-12">
-            <div className="flex items-center mb-4">
-              <Shield size={28} className="mr-3" style={{ color: '#8B4513' }} />
-              <h2 className="text-3xl font-bold" style={{ color: '#8B4513' }}>
-                Patrimoine vivant
-              </h2>
-            </div>
-            <p className="text-lg mb-6">
-              Notre plateforme soutient les artisans détenteurs de savoir-faire rares et reconnus 
-              Maître Artisan et Entreprise du Patrimoine Vivant.
-            </p>
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full mr-3 flex items-center justify-center"
-                     style={{ backgroundColor: '#8B4513' }}>
-                  <Award size={20} className="text-white" />
-                </div>
-                <span className="font-medium">Maître Artisan</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full mr-3 flex items-center justify-center"
-                     style={{ backgroundColor: '#556B2F' }}>
-                  <Shield size={20} className="text-white" />
-                </div>
-                <span className="font-medium">EPV Label</span>
-              </div>
-            </div>
-          </div>
-          <div className="md:w-1/3 text-center">
-            <button 
-              onClick={() => onContactClick && onContactClick('Soutien à l\'artisanat', 'Équipe du patrimoine')}
-              className="flex items-center justify-center px-8 py-3 rounded-lg text-white font-bold text-lg hover:bg-[#485826] transition-colors"
-              style={{ backgroundColor: '#556B2F' }}
-            >
-              <Heart size={20} className="mr-2" />
-              Soutenir l'artisanat
-            </button>
-          </div>
-        </div>
-      </div>
+
 
       {/* Modal Détail Artisan - COMPLET ET FONCTIONNEL */}
       {showArtisanDetail && selectedArtisan && (
