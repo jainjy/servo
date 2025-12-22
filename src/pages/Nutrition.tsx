@@ -203,11 +203,11 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (type === 'checkbox') {
       setFormData(prev => ({
         ...prev,
-        objectives: checked 
+        objectives: checked
           ? [...prev.objectives, value]
           : prev.objectives.filter(obj => obj !== value)
       }));
@@ -225,13 +225,13 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
 
     try {
       trackBienEtreServiceBook(service.id, service.libelle, service.category?.name || 'general');
-      
+
       // Simulation d'envoi
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       alert("✅ Consultation confirmée ! Vous recevrez un email avec toutes les informations.");
       onClose();
-      
+
       setFormData({
         name: "",
         email: "",
@@ -499,7 +499,7 @@ const NutritionCard = ({ service, index, onOpenModal }) => {
             </div>
           )}
         </div>
-        
+
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           <div className="bg-primary-dark text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
             <Clock className="w-3 h-3" />
@@ -594,19 +594,19 @@ const Nutrition = () => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const filteredServices = simulatedNutritionServices.filter(service => 
-        activeTab === 'Consultation' 
+
+      const filteredServices = simulatedNutritionServices.filter(service =>
+        activeTab === 'Consultation'
           ? service.category.name === 'Consultation' || service.category.name === 'Suivi'
           : service.category.name === activeTab
       );
-      
+
       setServices(filteredServices);
-      
+
     } catch (error) {
       console.error('Erreur simulation:', error);
-      const filteredServices = simulatedNutritionServices.filter(service => 
-        activeTab === 'Consultation' 
+      const filteredServices = simulatedNutritionServices.filter(service =>
+        activeTab === 'Consultation'
           ? service.category.name === 'Consultation' || service.category.name === 'Suivi'
           : service.category.name === activeTab
       );
@@ -721,16 +721,16 @@ const Nutrition = () => {
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 </div>
               </div>
-              
+
               <div className="lg:w-2/3">
                 <div className="flex flex-wrap gap-2 justify-center">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`group relative flex flex-col items-center px-4 py-3 rounded-2xl font-semibold transition-all duration-300 overflow-hidden min-w-[120px] ${activeTab === tab.id
-                          ? 'bg-logo text-white shadow-md'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60'
+                      className={`group relative flex gap-2 items-center px-4 py-3 rounded-2xl font-semibold transition-all duration-300 overflow-hidden min-w-[120px] ${activeTab === tab.id
+                        ? 'bg-logo text-white shadow-md'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60'
                         }`}
                     >
                       <motion.span
@@ -742,18 +742,19 @@ const Nutrition = () => {
                       >
                         {tab.icon}
                       </motion.span>
+                      <div className="flex flex-col items-start text-left">
+                        <motion.span
+                          animate={{
+                            y: activeTab === tab.id ? 2 : 0,
+                          }}
+                          transition={{ duration: 0.3 }}
+                          className="text-sm font-bold relative z-10 mt-1"
+                        >
+                          {tab.label}
+                        </motion.span>
 
-                      <motion.span
-                        animate={{
-                          y: activeTab === tab.id ? 2 : 0,
-                        }}
-                        transition={{ duration: 0.3 }}
-                        className="text-sm font-bold relative z-10 mt-1"
-                      >
-                        {tab.label}
-                      </motion.span>
-                      
-                      <span className="text-xs opacity-75 mt-1">{tab.description}</span>
+                        <span className="text-xs opacity-75 mt-1">{tab.description}</span>
+                      </div>
                     </button>
                   ))}
                 </div>

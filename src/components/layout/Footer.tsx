@@ -2,13 +2,26 @@ import React, { useState } from 'react';
 import logo from '../../assets/logo.png';
 import ServoLogo from "../components/ServoLogo";
 import "../../styles/font.css";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ApkDownloadModal from '../ApkDownloadModal';
 import { MapPin, Phone, Mail } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
   const [isApkModalOpen, setIsApkModalOpen] = useState(false);
+  const partners = [
+    { name: "Olimmo Réunion", url: "/professional/89220134-7f2f-4a82-9660-1e422cad9b0d" },
+    { name: "Agence Partenaire", url: "#" },
+    { name: "Expert Immobilier", url: "#" },
+    { name: "Banque Partenaire", url: "#" },
+  ];
+
+  const handlePartnerClick = (url: string) => {
+    if (url !== "#") {
+      navigate(url);
+    }
+  };
 
   return (
     <footer className="bg-gradient-to-br from-[#556B2F] to-[#6B8E23] text-white py-16 relative overflow-hidden">
@@ -74,18 +87,11 @@ const Footer: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              {[
-                { name: "Olimmo Réunion", url: "https://www.olimmoreunion.re/" },
-                { name: "Agence Partenaire", url: "#" },
-                { name: "Expert Immobilier", url: "#" },
-                { name: "Banque Partenaire", url: "#" },
-              ].map((partner, index) => (
-                <a
+              {partners.map((partner, index) => (
+                <button
                   key={index}
-                  href={partner.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative flex items-center justify-between py-3 px-4 hover:bg-gradient-to-r from-white/10 to-transparent rounded-xl transition-all duration-300 hover:pl-6 hover:shadow-lg"
+                  onClick={() => handlePartnerClick(partner.url)}
+                  className="group relative flex items-center justify-between py-3 px-4 hover:bg-gradient-to-r from-white/10 to-transparent rounded-xl transition-all duration-300 hover:pl-6 hover:shadow-lg w-full text-left"
                 >
                   <div className="relative overflow-hidden">
                     <div className="flex items-center gap-3">
@@ -104,7 +110,7 @@ const Footer: React.FC = () => {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                   </svg>
-                </a>
+                </button>
               ))}
             </div>
           </div>
@@ -157,7 +163,7 @@ const Footer: React.FC = () => {
 
                 <div className="overflow-hidden flex-1">
                   <span className="text-white/90 hover:text-[#8B4513] transition-colors duration-200 text-sm block relative overflow-hidden font-medium">
-                    contact@servo.fr
+                    contact@oliplus.fr
                   </span>
                 </div>
               </a>

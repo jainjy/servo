@@ -9,6 +9,7 @@ import {
   Briefcase,
   Calendar,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 import CarteBoutton from "./CarteBoutton";
 
@@ -326,6 +327,8 @@ const ProfessionalCardTLP: React.FC<{
   professional: Professional;
   renderStars: (rating: number) => React.ReactNode;
 }> = ({ professional, renderStars }) => {
+  const navigate = useNavigate();
+
   const getName = () =>
     professional.firstName && professional.lastName
       ? `${professional.firstName} ${professional.lastName}`
@@ -340,7 +343,7 @@ const ProfessionalCardTLP: React.FC<{
     "Métier non spécifié";
 
   const handleClick = () => {
-    window.location.href = `/professional/${professional.id}`;
+    navigate(`/professional/${professional.id}`);
   };
 
   const formatDate = (dateString: string) => {
@@ -505,36 +508,40 @@ const ProfessionalCardTLP: React.FC<{
 const NoResultsTLP: React.FC<{ searchTerm: string; onReset: () => void }> = ({
   searchTerm,
   onReset,
-}) => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-    <div className="max-w-md mx-auto">
-      <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
-        <Users size={40} className="text-gray-400" />
-      </div>
-      <h3 className="text-2xl font-bold text-gray-900 mb-3">
-        Aucun partenaire trouvé
-      </h3>
-      <p className="text-gray-600 mb-8">
-        {searchTerm
-          ? `Aucun résultat ne correspond à votre recherche "${searchTerm}"`
-          : "Aucun partenaire n'est actuellement disponible avec ces critères"}
-      </p>
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <button
-          onClick={onReset}
-          className="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
-        >
-          Réinitialiser les filtres
-        </button>
-        <button
-          onClick={() => (window.location.href = "/contact")}
-          className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          Nous contacter
-        </button>
+}) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+      <div className="max-w-md mx-auto">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+          <Users size={40} className="text-gray-400" />
+        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">
+          Aucun partenaire trouvé
+        </h3>
+        <p className="text-gray-600 mb-8">
+          {searchTerm
+            ? `Aucun résultat ne correspond à votre recherche "${searchTerm}"`
+            : "Aucun partenaire n'est actuellement disponible avec ces critères"}
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            onClick={onReset}
+            className="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Réinitialiser les filtres
+          </button>
+          <button
+            onClick={() => navigate("/contact")}
+            className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Nous contacter
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default TousLesPartenaires;

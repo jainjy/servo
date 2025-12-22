@@ -18,6 +18,12 @@ const Slider = lazy(() => import("@/components/Slider"));
 const RecommendationsSection = lazy(
   () => import("@/components/RecommendationsSection")
 );
+const ArtETCreationShowcase = lazy(
+  () => import("@/components/ArtETCreationShowcase")
+);
+const BienEtreShowcase = lazy(
+  () => import("@/components/BienEtreShowcase")
+);
 
 // Thème de couleurs
 const colors = {
@@ -115,9 +121,14 @@ const Index = () => {
 
           {/* <EmplacementPub /> */}
 
+          {/* Section Art & Création */}
+          <ArtETCreationShowcase />
 
           {/* Section biens immobiliers */}
           <CardCarte />
+          
+          {/* Section Bien-Être */}
+          <BienEtreShowcase />
           <>
             <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
               <h2
