@@ -1,35 +1,35 @@
-import { Home, Wrench, TrendingUp, Package } from "lucide-react";
+import { Home, Wrench, TrendingUp, Package, User2Icon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
 const services = [
   {
     icon: Home,
-    title: "Acheter",
-    description: "Parcourez nos milliers de biens",
+    title: "Annonces Immobilières",
+    description: "Trouver votre futur logement",
     color: "text-slate-900",
     href: "/immobilier"
   },
   {
-    icon: Wrench,
-    title: "Services",
+    icon: TrendingUp,
+    title: "Services professionnels",
     description: "Trouver un professionnel",
     color: "text-slate-900",
     href: "/service"
   },
   {
-    icon: TrendingUp,
-    title: "Vendre",
-    description: "Estimez votre bien",
-    color: "text-slate-900",
-    href: "/estimations"
-  },
-  {
     icon: Package,
-    title: "Produits",
+    title: "Décoration & Mobilier",
     description: "Tous les produits pour la maison",
     color: "text-slate-900",
     href: "/produits"
+  },
+  {
+    icon: User2Icon,
+    title: "Vivre à la réunion",
+    description: "Une douceur de vie tropicale",
+    color: "text-slate-900",
+    href: "/tourisme"
   },
 ];
 

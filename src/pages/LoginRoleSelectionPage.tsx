@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ServoLogo from "../components/components/ServoLogo";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
+
 const LoginRoleSelectionPage = () => {
   const navigate = useNavigate();
 
@@ -72,8 +74,12 @@ const LoginRoleSelectionPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex overflow-hidden ">
+    <div className="relative min-h-screen flex overflow-hidden pt-10">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-4 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <div className="absolute inset-0 -z-20">
         {/* Remplace cette image par un élément img classique */}
         <img
@@ -89,7 +95,7 @@ const LoginRoleSelectionPage = () => {
           variant="outline"
           className="px-6 py-3 border-white/30 bg-black/40 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:border-white/50 transition-all duration-300 rounded-2xl shadow-2xl group"
           onClick={() => {
-            navigate("/");
+            navigate(-1);
           }}
         >
           <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
@@ -99,19 +105,21 @@ const LoginRoleSelectionPage = () => {
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
       <div className="w-full">
-       
-        <Link to="/">
-          <div className="text-center">
-               <ServoLogo />
-            <CardTitle className="text-xl lg:text-4xl font-bold text-white tracking-wide mb-2">
-              Connectez-vous à votre compte
-            </CardTitle>
-            <CardDescription className="mb-5 text-sm lg:text-md text-gray-400 font-extralight max-w-2xl mx-auto">
-              Sélectionnez le type de compte avec lequel vous souhaitez vous
-              connecter. Votre expérience sera adaptée à votre profil.
-            </CardDescription>
-          </div>
-        </Link>
+
+
+        <div className="text-center">
+          <Link to="/">
+            <ServoLogo />
+          </Link>
+          <CardTitle className="text-xl lg:text-4xl font-bold text-white tracking-wide mb-2">
+            Connectez-vous à votre compte
+          </CardTitle>
+          <CardDescription className="mb-5 text-sm lg:text-md text-gray-400 font-extralight max-w-2xl mx-auto">
+            Sélectionnez le type de compte avec lequel vous souhaitez vous
+            connecter. Votre expérience sera adaptée à votre profil.
+          </CardDescription>
+        </div>
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
           {roleOptions.map((role) => {

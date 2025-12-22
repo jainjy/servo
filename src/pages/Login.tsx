@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { useRedirectPath } from "@/hooks/useRedirectPath";
 import { toast } from "sonner";
 import ServoLogo from "@/components/components/ServoLogo";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 const LoginPage = () => {
   const navigate = useNavigate();
   const redirectPath = useRedirectPath();
@@ -68,8 +69,21 @@ const LoginPage = () => {
       </div>
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 -z-10 bg-white/5 rounded-full"></div>
+
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-4 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
+
       <div className="w-[80vw] lg:w-[60vw] h-[80vh] m-auto rounded-3xl shadow-xl flex flex-col lg:flex-row overflow-hidden bg-white/0">
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 bg-gray-700 w-28 py-3 px-4 rounded-full text-gray-100 hover:text-gray-100 mb-4 mx-2 transition-colors duration-200"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Retour</span>
+          </button>
           <div className="relative z-10 flex flex-col justify-center h-full">
             <div className="mb-8">
               <Link to="/">
@@ -123,13 +137,7 @@ const LoginPage = () => {
         <div className=" flex items-center justify-center bg-[#FFFFFF] overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
           <div className="w-full max-w-md">
             <Card className="border-0 shadow-none px-0 lg:px-5 py-4 lg:py-0 bg-[#FFFFFF]">
-              <Link
-                to="/"
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 mx-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Retour à l'accueil</span>
-              </Link>
+
               <CardHeader className="space-y-0">
                 <div className="flex justify-center mb-4 lg:hidden">
                   <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">

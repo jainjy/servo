@@ -537,20 +537,9 @@ const Hero = () => {
                 textShadow: '0 2px 10px rgba(0,0,0,0.3)'
               }}
             >
-              de l'habitat
+              du quotidien
             </span>
           </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="mb-12 text-md lg:text-2xl text-white/90 font-light tracking-wide"
-            style={{ textShadow: '0 1px 5px rgba(0,0,0,0.3)' }}
-          >
-            Immobilier, services et produits — tout en un, guidé par l'IA
-          </motion.p>
-
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}

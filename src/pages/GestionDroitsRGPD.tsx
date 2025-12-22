@@ -19,6 +19,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import Lottie from "lottie-react";
+import loginAnimation from "@/assets/login.json"
 
 export default function GestionDroitsRGPD() {
   const navigate = useNavigate();
@@ -28,8 +30,26 @@ export default function GestionDroitsRGPD() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Button onClick={() => navigate("/login")}>Se connecter</Button>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="max-w-md w-full flex flex-col items-center text-center gap-6 px-4">
+          <div className="w-56 h-56">
+            <Lottie
+              animationData={loginAnimation}
+              loop
+              autoplay
+            />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold text-slate-900">
+              Vous n&apos;êtes pas encore connecté. Identifiez-vous pour continuer.
+            </h1>
+          </div>
+
+          <Button className="bg-logo hover:bg-logo/50" onClick={() => navigate("/login")}>
+            Se connecter
+          </Button>
+        </div>
       </div>
     );
   }
@@ -127,9 +147,9 @@ export default function GestionDroitsRGPD() {
     try {
       setLoading(true);
       setActionStatus({ ...actionStatus, export: "loading" });
-      
+
       const response = await api.get("/users/export-data");
-      
+
       const blob = new Blob([JSON.stringify(response.data, null, 2)], {
         type: "application/json",
       });
@@ -144,7 +164,7 @@ export default function GestionDroitsRGPD() {
 
       setActionStatus({ ...actionStatus, export: "success" });
       toast.success("✅ Vos données ont été exportées avec succès");
-      
+
       setTimeout(() => {
         setActionStatus({ ...actionStatus, export: "idle" });
       }, 3000);
@@ -178,12 +198,12 @@ export default function GestionDroitsRGPD() {
     try {
       setLoading(true);
       setActionStatus({ ...actionStatus, limit: "loading" });
-      
+
       await api.post("/users/request-limitation");
-      
+
       setActionStatus({ ...actionStatus, limit: "success" });
       toast.success("✅ Demande de limitation enregistrée");
-      
+
       setTimeout(() => {
         setActionStatus({ ...actionStatus, limit: "idle" });
       }, 3000);
@@ -256,7 +276,7 @@ export default function GestionDroitsRGPD() {
         <Alert className="mb-8 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
           <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <AlertDescription className="text-blue-800 dark:text-blue-200">
-            Conformément au RGPD, vous disposez de droits essentiels sur vos données personnelles. 
+            Conformément au RGPD, vous disposez de droits essentiels sur vos données personnelles.
             Utilisez cette page pour les exercer.
           </AlertDescription>
         </Alert>
@@ -272,27 +292,24 @@ export default function GestionDroitsRGPD() {
             return (
               <Card
                 key={right.id}
-                className={`flex flex-col transition-all ${
-                  right.dangerous
-                    ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10"
-                    : ""
-                }`}
+                className={`flex flex-col transition-all ${right.dangerous
+                  ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10"
+                  : ""
+                  }`}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <div
-                      className={`p-2 rounded-lg ${
-                        right.dangerous
-                          ? "bg-red-100 dark:bg-red-900"
-                          : "bg-blue-100 dark:bg-blue-900"
-                      }`}
+                      className={`p-2 rounded-lg ${right.dangerous
+                        ? "bg-red-100 dark:bg-red-900"
+                        : "bg-blue-100 dark:bg-blue-900"
+                        }`}
                     >
                       <Icon
-                        className={`w-5 h-5 ${
-                          right.dangerous
-                            ? "text-red-600 dark:text-red-400"
-                            : "text-blue-600 dark:text-blue-400"
-                        }`}
+                        className={`w-5 h-5 ${right.dangerous
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-blue-600 dark:text-blue-400"
+                          }`}
                       />
                     </div>
                     {isSuccess && <CheckCircle className="w-5 h-5 text-green-500" />}
@@ -341,8 +358,8 @@ export default function GestionDroitsRGPD() {
             </h2>
           </div>
           <p className="text-gray-700 dark:text-gray-300 mb-6">
-            Si vous avez des questions concernant vos droits RGPD ou souhaitez exercer des droits 
-            qui ne sont pas disponibles ci-dessus, veuillez contacter notre Délégué à la Protection 
+            Si vous avez des questions concernant vos droits RGPD ou souhaitez exercer des droits
+            qui ne sont pas disponibles ci-dessus, veuillez contacter notre Délégué à la Protection
             des Données :
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -364,7 +381,7 @@ export default function GestionDroitsRGPD() {
           </div>
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <span className="font-semibold">Délai de réponse :</span> Nous nous engageons à répondre 
+              <span className="font-semibold">Délai de réponse :</span> Nous nous engageons à répondre
               à vos demandes dans un délai de 30 jours conformément au RGPD.
             </p>
           </div>

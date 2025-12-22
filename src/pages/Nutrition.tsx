@@ -103,11 +103,11 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (type === 'checkbox') {
       setFormData(prev => ({
         ...prev,
-        objectives: checked 
+        objectives: checked
           ? [...prev.objectives, value]
           : prev.objectives.filter(obj => obj !== value)
       }));
@@ -420,7 +420,7 @@ const NutritionCard = ({ service, index, onOpenModal }) => {
             </div>
           )}
         </div>
-        
+
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           <div className="bg-primary-dark text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
             <Clock className="w-3 h-3" />
