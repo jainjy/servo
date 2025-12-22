@@ -104,64 +104,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ searchQuery, onCont
         </div>
       </div>
 
-      {/* Section Artisans sélectionnés avec erreur */}
-      <div className="mb-12">
-        <div className="flex items-center mb-6">
-          <Briefcase size={24} className="mr-2" style={{ color: '#8B4513' }} />
-          <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-            Professionnels associés aux photographes
-          </h2>
-        </div>
-
-        {error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
-            <div className="flex flex-col items-center justify-center">
-              <AlertCircle size={48} className="text-red-500 mb-4" />
-              <h3 className="text-xl font-bold text-red-700 mb-2">
-                Erreur de chargement
-              </h3>
-              <p className="text-red-600 mb-4">
-                {error}
-              </p>
-              <div className="text-sm text-gray-500 mb-6">
-                <p>Les professionnels suivants ne peuvent pas être affichés :</p>
-                <ul className="mt-2 space-y-1">
-                  <li>• Galeristes spécialisés photo</li>
-                  <li>• Agents artistiques</li>
-                  <li>• Éditeurs d'art</li>
-                  <li>• Marchands de photographie</li>
-                </ul>
-              </div>
-              <button
-                onClick={fetchProArtisans}
-                disabled={loading}
-                className="flex items-center px-6 py-3 bg-[#8B4513] text-white rounded-lg hover:bg-[#6B3410] transition-colors disabled:opacity-50"
-              >
-                <RefreshCw size={18} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Tentative de connexion...' : 'Réessayer la connexion'}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B4513] mx-auto mb-4"></div>
-            <p className="text-gray-600">Chargement des professionnels associés...</p>
-          </div>
-        )}
-
-        {/* Message d'information */}
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start">
-            <Building size={20} className="text-blue-500 mr-3 mt-1" />
-            <div>
-              <p className="text-sm text-blue-800">
-                <strong>Information :</strong> Cette section affiche les professionnels (galeristes, agents, éditeurs) 
-                qui sont associés au métier de photographe via l'API. Actuellement, l'API ne répond pas correctement.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Section vide pour Photographes recommandés */}
       <div className="mb-12">
@@ -181,11 +124,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ searchQuery, onCont
           </button>
         </div>
         
-        <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500">
-            Les données des photographes ne peuvent pas être chargées en raison de l'erreur API
-          </p>
-        </div>
+        
       </div>
     </div>
   );
