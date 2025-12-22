@@ -27,6 +27,7 @@ import {
   DollarSign,
   Eye,
 } from "lucide-react";
+import { vehiculesApi } from "@/lib/api/vehicules";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -497,19 +498,41 @@ const LocationVoiturePage = () => {
   ];
 
   useEffect(() => {
-    // Simulation de chargement
-    setTimeout(() => {
-      setVehicules(vehiculesList);
-      setLoading(false);
-      // Dates par défaut
-      const today = new Date();
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
+    const fetchVehicules = async () => {
+      setLoading(true);
+      try {
+        const params = {
+          type: selectedType !== "tous" ? selectedType : undefined,
+          transmission:
+            selectedTransmission !== "tous" ? selectedTransmission : undefined,
+          carburant: selectedFuel !== "tous" ? selectedFuel : undefined,
+          ville: selectedCity !== "tous" ? selectedCity : undefined,
+          minPrice: priceRange[0],
+          maxPrice: priceRange[1],
+          search: searchTerm || undefined,
+        };
 
-      setPickupDate(today.toISOString().split("T")[0]);
-      setReturnDate(nextWeek.toISOString().split("T")[0]);
-    }, 1000);
-  }, []);
+        const response = await vehiculesApi.getVehicules(params);
+        setVehicules(response.data.data || []);
+      } catch (error) {
+        console.error("Erreur chargement véhicules:", error);
+        toast.error("Erreur lors du chargement des véhicules");
+        // Charger les données fictives en cas d'erreur
+        setVehicules(vehiculesList);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicules();
+  }, [
+    selectedType,
+    selectedTransmission,
+    selectedFuel,
+    selectedCity,
+    priceRange,
+    searchTerm,
+  ]);
 
   // Gestion du tri
   const sortVehicules = (vehiculesList, sortMethod) => {
@@ -581,14 +604,35 @@ const LocationVoiturePage = () => {
   };
 
   // Réserver un véhicule
-  const handleReserve = (vehicule) => {
+  const handleReserve = async (vehicule) => {
     setSelectedVehicule(vehicule);
-    setShowReservation(true);
-    toast.info(`Réservation de ${vehicule.marque} ${vehicule.modele}`);
+
+    // Vérifier la disponibilité pour les dates sélectionnées
+    if (pickupDate && returnDate) {
+      try {
+        const response = await vehiculesApi.checkDisponibilite(
+          vehicule.id,
+          pickupDate,
+          returnDate
+        );
+
+        if (response.data.data.disponible) {
+          setShowReservation(true);
+          toast.info(`Réservation de ${vehicule.marque} ${vehicule.modele}`);
+        } else {
+          toast.error("Le véhicule n'est pas disponible pour ces dates");
+        }
+      } catch (error) {
+        console.error("Erreur vérification disponibilité:", error);
+        setShowReservation(true);
+      }
+    } else {
+      toast.error("Veuillez sélectionner des dates de location");
+    }
   };
 
   // Soumission de réservation
-  const handleSubmitReservation = (e) => {
+  const handleSubmitReservation = async (e) => {
     e.preventDefault();
 
     if (
@@ -605,32 +649,49 @@ const LocationVoiturePage = () => {
       return;
     }
 
-    // Calcul du prix total
-    const start = new Date(pickupDate);
-    const end = new Date(returnDate);
-    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-    const basePrice = selectedVehicule.prixJour * days;
-    const extrasPrice = reservationForm.extras.reduce((total, extraId) => {
-      const extra = extras.find((e) => e.id === extraId);
-      return total + (extra ? extra.price * days : 0);
-    }, 0);
-    const totalPrice = basePrice + extrasPrice;
+    try {
+      const reservationData = {
+        vehiculeId: selectedVehicule.id,
+        datePrise: pickupDate,
+        dateRetour: returnDate,
+        lieuPrise: selectedCity,
+        lieuRetour: selectedCity,
+        nombreConducteurs: 1,
+        kilometrageOption: reservationForm.kilometrage,
+        extras: reservationForm.extras,
+        nomClient: reservationForm.nom,
+        emailClient: reservationForm.email,
+        telephoneClient: reservationForm.telephone,
+        numeroPermis: reservationForm.permis,
+        adresseClient: "",
+      };
 
-    toast.success(
-      `Réservation confirmée ! Total : ${totalPrice}€ pour ${days} jours. Un email de confirmation vous a été envoyé.`
-    );
+      const response = await vehiculesApi.createReservation(reservationData);
 
-    // Réinitialisation
-    setReservationForm({
-      nom: "",
-      email: "",
-      telephone: "",
-      permis: "",
-      assurance: false,
-      kilometrage: "illimité",
-      extras: [],
-    });
-    setShowReservation(false);
+      toast.success(
+        `Réservation confirmée ! Un email de confirmation vous a été envoyé.`
+      );
+
+      // Réinitialisation
+      setReservationForm({
+        nom: "",
+        email: "",
+        telephone: "",
+        permis: "",
+        assurance: false,
+        kilometrage: "illimité",
+        extras: [],
+      });
+      setShowReservation(false);
+
+      // Rediriger vers la page de confirmation
+      navigate(`/reservation-confirmation/${response.data.data.id}`);
+    } catch (error) {
+      console.error("Erreur création réservation:", error);
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la réservation"
+      );
+    }
   };
 
   // Recherche avec entrée
@@ -1356,15 +1417,24 @@ const LocationVoiturePage = () => {
                                                 Équipements inclus
                                               </h4>
                                               <div className="flex flex-wrap gap-2">
-                                                {selectedVehicule.equipements.map(
-                                                  (equip, idx) => (
-                                                    <Badge
-                                                      key={idx}
-                                                      variant="outline"
-                                                    >
-                                                      {equip}
-                                                    </Badge>
+                                                {selectedVehicule?.equipements &&
+                                                Array.isArray(
+                                                  selectedVehicule.equipements
+                                                ) ? (
+                                                  selectedVehicule.equipements.map(
+                                                    (equip, idx) => (
+                                                      <Badge
+                                                        key={idx}
+                                                        variant="outline"
+                                                      >
+                                                        {equip}
+                                                      </Badge>
+                                                    )
                                                   )
+                                                ) : (
+                                                  <p className="text-sm text-gray-500">
+                                                    Aucun équipement spécifié
+                                                  </p>
                                                 )}
                                               </div>
                                             </div>

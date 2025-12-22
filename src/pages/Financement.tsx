@@ -1748,7 +1748,7 @@ export default function Financement() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-10 py-8 lg:pb-5 bg-[#FAFAFA]" id="audit">
+      {/* <section className="px-10 py-8 lg:pb-5 bg-[#FAFAFA]" id="audit">
         <div className="container mx-auto rounded-lg px-4 py-10 bg-logo text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1772,7 +1772,7 @@ export default function Financement() {
             </motion.div>
           </motion.div>
         </div>
-      </section>
+      </section> */}
 
       {/* Modal Unique */}
       {activeModal && (

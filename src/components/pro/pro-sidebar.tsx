@@ -34,9 +34,14 @@ const navigation = [
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
+  // {
+  //   name: "Art et commerce Services",
+  //   href: "/pro/Art-commerce-services",
+  //   icon: Wrench,
+  // },
   {
-    name: "Art et commerce Services",
-    href: "/pro/Art-commerce-services",
+    name: "Art et Creation",
+    href: "/pro/art-et-creation-page",
     icon: Wrench,
   },
   { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },

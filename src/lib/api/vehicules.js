@@ -1,0 +1,46 @@
+import api from "../api";
+
+export const vehiculesApi = {
+  // Récupérer tous les véhicules avec filtres
+  getVehicules: (params) => api.get("/vehicules", { params }),
+
+  // Récupérer un véhicule par ID
+  getVehiculeById: (id) => api.get(`/vehicules/${id}`),
+
+  // Récupérer les véhicules d'un prestataire
+  getVehiculesByPrestataire: (prestataireId) =>
+    api.get(`/vehicules/prestataire/${prestataireId}`),
+
+  // Créer une réservation
+  createReservation: (data) => api.post("/reservations-vehicules", data),
+
+  // Récupérer les réservations de l'utilisateur
+  getMesReservations: (params) =>
+    api.get("/reservations-vehicules/mes-reservations", { params }),
+
+  // Récupérer une réservation par ID
+  getReservationById: (id) => api.get(`/reservations-vehicules/${id}`),
+
+  // Mettre à jour le statut d'une réservation
+  updateReservationStatus: (id, data) =>
+    api.put(`/reservations-vehicules/${id}/statut`, data),
+
+  // Vérifier la disponibilité
+  checkDisponibilite: (vehiculeId, dateDebut, dateFin) =>
+    api.get(`/reservations-vehicules/vehicule/${vehiculeId}/disponibilite`, {
+      params: { dateDebut, dateFin },
+    }),
+
+  // Récupérer les avis d'un véhicule
+  getAvisVehicule: (vehiculeId, params) =>
+    api.get(`/avis-vehicules/vehicule/${vehiculeId}`, { params }),
+
+  // Créer un avis
+  createAvis: (data) => api.post("/avis-vehicules", data),
+
+  // Supprimer un avis
+  deleteAvis: (id) => api.delete(`/avis-vehicules/${id}`),
+
+  // Statistiques globales
+  getStats: () => api.get("/vehicules/stats/global"),
+};
