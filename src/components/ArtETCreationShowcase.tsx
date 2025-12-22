@@ -8,20 +8,10 @@ interface ArtCard {
   title: string;
   description: string;
   icon: React.ReactNode;
-  bgColor: string;
-  borderColor: string;
+  gradient: string;
   category: string;
   link: string;
 }
-
-const colors = {
-  logo: "#556B2F",
-  "primary-dark": "#6B8E23",
-  "light-bg": "#FFFFFF",
-  separator: "#D3D3D3",
-  "secondary-text": "#8B4513",
-  "neutral-dark": "#2F4F4F",
-};
 
 const ArtETCreationShowcase = () => {
   const navigate = useNavigate();
@@ -31,50 +21,45 @@ const ArtETCreationShowcase = () => {
     {
       id: 'photographie',
       title: 'Photographie',
-      description: 'Trouvez des photographes professionnels pour capturer vos moments précieux',
-      icon: <Camera size={20} />,
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
+      description: 'Des photographes talentueux pour sublimer vos souvenirs.',
+      icon: <Camera size={22} />,
+      gradient: 'from-cyan-100 via-blue-100 to-indigo-100',
       category: 'photographie',
       link: 'photographie'
     },
     {
       id: 'sculpture',
       title: 'Sculpture',
-      description: 'Découvrez des œuvres uniques façonnées par des sculpteurs talentueux',
-      icon: <Hammer size={20} />,
-      bgColor: 'bg-amber-50',
-      borderColor: 'border-amber-200',
+      description: 'Des formes et des textures au service de la créativité.',
+      icon: <Hammer size={22} />,
+      gradient: 'from-amber-100 via-orange-50 to-yellow-100',
       category: 'sculpture',
       link: 'sculpture'
     },
     {
       id: 'peinture',
       title: 'Peinture',
-      description: "Explorez l'univers des artistes contemporains et techniques traditionnelles",
-      icon: <Palette size={20} />,
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
+      description: 'Couleurs, émotions et styles pour tous les goûts.',
+      icon: <Palette size={22} />,
+      gradient: 'from-fuchsia-100 via-pink-100 to-rose-100',
       category: 'peinture',
       link: 'peinture'
     },
     {
       id: 'artisanat',
       title: 'Artisanat',
-      description: 'Des artisans passionnés et créations uniques avec un savoir-faire à préserver',
-      icon: <Brush size={20} />,
-      bgColor: 'bg-rose-50',
-      borderColor: 'border-rose-200',
+      description: 'L’art du fait main, élégant et durable.',
+      icon: <Brush size={22} />,
+      gradient: 'from-rose-100 via-pink-50 to-red-100',
       category: 'artisanat',
       link: 'artisanat'
     },
     {
       id: 'marketplace',
       title: 'Marketplace',
-      description: 'Pièces uniques, histoires authentiques et créateurs indépendants',
-      icon: <ShoppingBag size={20} />,
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
+      description: 'Explorez un univers d’objets uniques et authentiques.',
+      icon: <ShoppingBag size={22} />,
+      gradient: 'from-emerald-100 via-green-50 to-lime-100',
       category: 'marketplace',
       link: 'marketplace'
     }
@@ -89,109 +74,64 @@ const ArtETCreationShowcase = () => {
     setDisplayedCards(getRandomCards());
   }, []);
 
-  const handleRefresh = () => {
-    setDisplayedCards(getRandomCards());
-  };
+  const handleRefresh = () => setDisplayedCards(getRandomCards());
 
   const handleCardClick = (link: string) => {
     navigate('/art-et-creation', { state: { activeTab: link } });
   };
 
   return (
-    <div className="py-8 bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-7xl mx-auto">
-        {/* En-tête compact */}
-        <div className="text-center mb-8">
-          <h2
-            className="text-2xl font-bold mb-2"
-            style={{ color: colors["neutral-dark"] }}
+    <section className="py-16 bg-gradient-to-b from-gray-50 via-white to-gray-100">
+      <div className="max-w-4xl mx-auto text-center mb-12">
+        <h2 className="text-3xl font-semibold text-gray-800 mb-3 tracking-tight">
+          Art & Création
+        </h2>
+        <p className="text-gray-500 text-sm">
+          Découvrez nos univers créatifs et rencontrez les artistes de demain.
+        </p>
+        <div className="flex justify-center mt-6 gap-3">
+          <button
+            onClick={handleRefresh}
+            className="px-4 py-2 flex items-center gap-2 text-sm font-medium text-logo bg-olive-600 border border-logo rounded-lg hover:bg-olive-700 transition-all"
           >
-            Art & Création
-          </h2>
-          <p
-            className="text-sm mb-6"
-            style={{ color: colors["secondary-text"] }}
+            <RefreshCw size={16} />
+            Autres catégories
+          </button>
+          <Button
+            className="px-4 py-2 flex items-center gap-2 text-sm rounded-lg bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
+            onClick={() => navigate('/art-et-creation')}
           >
-            Découvrez nos catégories d'art et création
-          </p>
-
-          {/* Boutons côte à côte */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-8">
-            <button
-              onClick={handleRefresh}
-              className="inline-flex items-center gap-2 p-4 text-sm rounded-lg font-semibold transition-all duration-300 hover:shadow-md"
-              style={{
-                backgroundColor: colors["primary-dark"],
-                color: 'white'
-              }}
-            >
-              <RefreshCw size={14} />
-              Autres catégories
-            </button>
-            
-            <Button
-              className="px-4 flex items-center gap-2 py-2 text-sm rounded-lg transition-all duration-300 hover:shadow-md"
-              onClick={() => navigate('/art-et-creation')}
-              style={{ backgroundColor: colors["logo"] }}
-            >
-              <span className="font-semibold">
-                Toutes les catégories
-              </span>
-              <ArrowRight size={14} />
-            </Button>
-          </div>
-        </div>
-
-        {/* Grille de cartes compacte */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          {displayedCards.map((card) => (
-            <div
-              key={card.id}
-              onClick={() => handleCardClick(card.link)}
-              className={`${card.bgColor} border ${card.borderColor} rounded-lg p-4 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02]`}
-            >
-              {/* En-tête carte */}
-              <div className="flex items-start gap-3 mb-3">
-                <div
-                  className="p-2 rounded-md flex-shrink-0"
-                  style={{ backgroundColor: colors["primary-dark"] + "20" }}
-                >
-                  <div style={{ color: colors["primary-dark"] }}>
-                    {card.icon}
-                  </div>
-                </div>
-                
-                <div>
-                  <h3
-                    className="font-bold text-base mb-1"
-                    style={{ color: colors["neutral-dark"] }}
-                  >
-                    {card.title}
-                  </h3>
-                  <p
-                    className="text-xs text-gray-600 leading-snug"
-                  >
-                    {card.description}
-                  </p>
-                </div>
-              </div>
-
-              {/* Lien */}
-              <div
-                className="flex items-center gap-1 text-sm font-semibold mt-2 group"
-                style={{ color: colors["primary-dark"] }}
-              >
-                <span>Explorer</span>
-                <ArrowRight
-                  size={14}
-                  className="group-hover:translate-x-0.5 transition-transform duration-300"
-                />
-              </div>
-            </div>
-          ))}
+            Toutes les catégories
+            <ArrowRight size={16} />
+          </Button>
         </div>
       </div>
-    </div>
+
+      <div className="grid md:grid-cols-3 gap-6 px-4">
+        {displayedCards.map((card) => (
+          <div
+            key={card.id}
+            onClick={() => handleCardClick(card.link)}
+            className={`relative overflow-hidden rounded-xl p-6 cursor-pointer shadow-md transition-transform transform hover:scale-[1.01] hover:shadow-xl bg-gradient-to-tr ${card.gradient}`}
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_left,_#00000020,_transparent_70%)]"></div>
+            <div className="relative flex items-start gap-4">
+              <div className="p-3 bg-white/80 backdrop-blur-sm rounded-md text-gray-700">
+                {card.icon}
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-800 mb-1">{card.title}</h3>
+                <p className="text-gray-600 text-sm leading-snug">{card.description}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-sm font-medium mt-4 text-[#556B2F] group">
+              Explorer
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
 

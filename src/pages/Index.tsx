@@ -126,9 +126,7 @@ const Index = () => {
 
           {/* Section biens immobiliers */}
           <CardCarte />
-          
-          {/* Section Bien-Être */}
-          <BienEtreShowcase />
+
           <>
             <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
               <h2
@@ -164,8 +162,11 @@ const Index = () => {
               </Button>
             </div>
             <PropertyListings cardsOnly maxItems={4} />
+
+            {/* Section Bien-Être */}
+            <BienEtreShowcase />
             <Slider />
-           <AdvertisementPopup />
+            <AdvertisementPopup />
             <AnnoncesImmobilieres />
           </>
         </Suspense>
