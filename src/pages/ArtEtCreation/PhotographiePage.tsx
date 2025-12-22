@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Camera, 
   User, 
-  Heart, 
   Mountain, 
   Palette, 
   Calendar, 
@@ -10,9 +9,11 @@ import {
   Star,
   MapPin,
   Phone,
-  Mail,
   Users,
-  TrendingUp
+  AlertCircle,
+  RefreshCw,
+  Briefcase,
+  Building
 } from 'lucide-react';
 
 interface PhotographiePageProps {
@@ -20,7 +21,10 @@ interface PhotographiePageProps {
   onContactClick: (subject: string, recipientName?: string) => void;
 }
 
-const PhotographiePage: React.FC<PhotographiePageProps> = ({ searchQuery, onContactClick  }) => {
+const PhotographiePage: React.FC<PhotographiePageProps> = ({ searchQuery, onContactClick }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const categories = [
     { name: 'Photographes portrait', count: 45, icon: <User size={20} /> },
     { name: 'Photographes paysage', count: 28, icon: <Mountain size={20} /> },
@@ -29,31 +33,40 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ searchQuery, onCont
     { name: 'Cours de photographie', count: 15, icon: <GraduationCap size={20} /> },
   ];
 
-  const featuredPhotographers = [
-    {
-      id: 1,
-      name: 'Marie Laurent',
-      specialty: 'Portrait artistique',
-      location: 'Paris',
-      rating: 4.9,
-      price: 'À partir de 150€/séance',
-      image: 'https://picsum.photos/id/433/300/200',
-    },
+  // Fonction pour tenter de récupérer les pros via API
+  const fetchProArtisans = async () => {
+    setLoading(true);
+    setError(null);
     
-    {
-      id: 3,
-      name: 'Sophie Martin',
-      specialty: 'Paysage urbain',
-      location: 'Marseille',
-      rating: 4.8,
-      price: 'Expositions sur demande',
-      image: 'https://picsum.photos/id/456/300/200',
-    },
-  ];
+    try {
+      // Appel à l'API - cette URL devrait échouer
+      const response = await fetch(`/api/art-creation/products?metierId=photographe`);
+      
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data || data.length === 0) {
+        setError('Aucun professionnel associé trouvé pour cette catégorie');
+      }
+      
+    } catch (err) {
+      setError('Erreur de connexion à l\'API : Impossible de récupérer les professionnels associés aux photographes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Appel initial
+  useEffect(() => {
+    fetchProArtisans();
+  }, []);
 
   return (
     <div>
-      {/* Categories */}
+      {/* Catégories */}
       <div className="mb-12">
         <div className="flex items-center mb-6">
           <Camera size={24} className="mr-2" style={{ color: '#8B4513' }} />
@@ -91,7 +104,66 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ searchQuery, onCont
         </div>
       </div>
 
-      {/* Featured Photographers */}
+      {/* Section Artisans sélectionnés avec erreur */}
+      <div className="mb-12">
+        <div className="flex items-center mb-6">
+          <Briefcase size={24} className="mr-2" style={{ color: '#8B4513' }} />
+          <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
+            Professionnels associés aux photographes
+          </h2>
+        </div>
+
+        {error ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+            <div className="flex flex-col items-center justify-center">
+              <AlertCircle size={48} className="text-red-500 mb-4" />
+              <h3 className="text-xl font-bold text-red-700 mb-2">
+                Erreur de chargement
+              </h3>
+              <p className="text-red-600 mb-4">
+                {error}
+              </p>
+              <div className="text-sm text-gray-500 mb-6">
+                <p>Les professionnels suivants ne peuvent pas être affichés :</p>
+                <ul className="mt-2 space-y-1">
+                  <li>• Galeristes spécialisés photo</li>
+                  <li>• Agents artistiques</li>
+                  <li>• Éditeurs d'art</li>
+                  <li>• Marchands de photographie</li>
+                </ul>
+              </div>
+              <button
+                onClick={fetchProArtisans}
+                disabled={loading}
+                className="flex items-center px-6 py-3 bg-[#8B4513] text-white rounded-lg hover:bg-[#6B3410] transition-colors disabled:opacity-50"
+              >
+                <RefreshCw size={18} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Tentative de connexion...' : 'Réessayer la connexion'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B4513] mx-auto mb-4"></div>
+            <p className="text-gray-600">Chargement des professionnels associés...</p>
+          </div>
+        )}
+
+        {/* Message d'information */}
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start">
+            <Building size={20} className="text-blue-500 mr-3 mt-1" />
+            <div>
+              <p className="text-sm text-blue-800">
+                <strong>Information :</strong> Cette section affiche les professionnels (galeristes, agents, éditeurs) 
+                qui sont associés au métier de photographe via l'API. Actuellement, l'API ne répond pas correctement.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section vide pour Photographes recommandés */}
       <div className="mb-12">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center">
@@ -100,72 +172,21 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ searchQuery, onCont
               Photographes recommandés
             </h2>
           </div>
-          <button className="flex items-center px-4 py-2 rounded-md border font-medium"
-                  style={{ borderColor: '#556B2F', color: '#556B2F' }}>
+          <button 
+            className="flex items-center px-4 py-2 rounded-md border font-medium"
+            style={{ borderColor: '#556B2F', color: '#556B2F' }}
+          >
             <Users size={18} className="mr-2" />
             Voir tous les photographes
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredPhotographers.map((photographer) => (
-            <div
-              key={photographer.id}
-              className="rounded-lg overflow-hidden border hover:shadow-xl transition-shadow group"
-              style={{ borderColor: '#D3D3D3' }}
-            >
-              <div className="h-48 overflow-hidden">
-                <img
-                  src={photographer.image}
-                  alt={photographer.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-bold text-xl mb-1">{photographer.name}</h3>
-                    <div className="flex items-center text-gray-600 mb-2">
-                      <MapPin size={16} className="mr-1" />
-                      {photographer.location}
-                    </div>
-                  </div>
-                  <div className="flex items-center" style={{ color: '#8B4513' }}>
-                    <Star size={16} className="fill-current mr-1" />
-                    <span className="font-bold">{photographer.rating}</span>
-                  </div>
-                </div>
-                
-                <div className="mb-4">
-                  <span className="inline-block px-3 py-1 rounded-full text-sm font-medium mb-2"
-                        style={{ backgroundColor: '#F0F0F0', color: '#556B2F' }}>
-                    {photographer.specialty}
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
-                  <div className="font-semibold">{photographer.price}</div>
-                </div>
-                
-                <div className="flex space-x-2">
-                  <button 
-                    className="flex-1 py-2 rounded-md border text-center font-medium flex items-center justify-center"
-                    style={{ borderColor: '#556B2F', color: '#556B2F' }}
-                    onClick={() => onContactClick(
-                      `Contact avec ${photographer.name} - ${photographer.specialty}`,
-                      photographer.name
-                    )}
-                  >
-                    <Phone size={18} className="mr-2" />
-                    Contacter
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+        
+        <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg">
+          <p className="text-gray-500">
+            Les données des photographes ne peuvent pas être chargées en raison de l'erreur API
+          </p>
         </div>
       </div>
-
-
     </div>
   );
 };
