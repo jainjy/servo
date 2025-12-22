@@ -223,7 +223,7 @@ import Nutrition from "./pages/Nutrition";
 import path from "path";
 import EmploiFormationsPage from "./pages/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
-
+import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
 
                  
 const queryClient = new QueryClient();
@@ -769,6 +769,12 @@ const App = () => {
                       path="reservations-cours"
                       element={<ProReservations />}
                     />
+
+                    <Route
+                      path="art-et-creation-page"
+                      element={<ArtCreationProduct />}
+                    />
+
                     {/* <Route path="media" element={<AdminMedia />} /> */}
 
                     <Route
