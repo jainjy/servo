@@ -45,6 +45,8 @@ const TousLesPartenaires = () => {
   const [metiers, setMetiers] = useState<MetierOption[]>([]);
   const [loadingMetiers, setLoadingMetiers] = useState(true);
   const [sortBy, setSortBy] = useState("newest");
+  const [isMetierModalOpen, setIsMetierModalOpen] = useState(false);
+  const [metierSearchTerm, setMetierSearchTerm] = useState("");
 
   // Charger les métiers disponibles
   useEffect(() => {
@@ -148,7 +150,7 @@ const TousLesPartenaires = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen pt-16">
+    <div className="bg-white min-h-screen pt-8 pb-4">
       <main className="container mx-auto px-0 py-2 max-w-7xl">
         {/* En-tête */}
         <div className="relative mb-2">
@@ -163,11 +165,11 @@ const TousLesPartenaires = () => {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(0,0,0,0.3)_80%)]" />
           </div>
 
-          <div className="relative text-center py-20 px-0">
+          <div className="relative text-center py-10 px-0">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
               Tous Nos Partenaires
             </h1>
-            <p className="text-lg md:text-xl text-gray-100 max-w-3xl mx-auto drop-shadow-md">
+            <p className="text-sm md:text-md text-gray-100 max-w-3xl mx-auto drop-shadow-md">
               Découvrez notre réseau complet de professionnels et partenaires de
               confiance
             </p>
@@ -177,17 +179,17 @@ const TousLesPartenaires = () => {
         {/* Filtres */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           {/* Métiers */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Métiers
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <h3 className="text-lg font-semibold underline text-gray-900 ">
+              Métiers :
             </h3>
             {loadingMetiers ? (
               <div className="text-gray-500">Chargement des métiers...</div>
             ) : metiers.length > 0 ? (
-              <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedMetier("")}
-                  className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  className={`px-4 py-2 text-xs rounded-lg border-2 transition-all ${
                     selectedMetier === ""
                       ? "border-green-600 bg-green-50 text-green-700"
                       : "border-gray-300 bg-white text-gray-700 hover:border-green-500 hover:bg-green-50"
@@ -195,11 +197,11 @@ const TousLesPartenaires = () => {
                 >
                   Tous les métiers
                 </button>
-                {metiers.map((metier) => (
+                {metiers.slice(0, 4).map((metier) => (
                   <button
                     key={metier.id}
                     onClick={() => setSelectedMetier(metier.id.toString())}
-                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                    className={`px-2 py-1 text-xs rounded-lg border-2 transition-all ${
                       selectedMetier === metier.id.toString()
                         ? "border-green-600 bg-green-50 text-green-700"
                         : "border-gray-300 bg-white text-gray-700 hover:border-green-500 hover:bg-green-50"
@@ -208,6 +210,14 @@ const TousLesPartenaires = () => {
                     {metier.libelle} ({metier.count})
                   </button>
                 ))}
+                {metiers.length > 5 && (
+                  <button
+                    onClick={() => setIsMetierModalOpen(true)}
+                    className="px-4 py-2 text-xs rounded-lg border-2 border-green-600 bg-green-50 text-green-600 hover:bg-green-100 transition-all font-semibold"
+                  >
+                    + {metiers.length - 5} métiers
+                  </button>
+                )}
               </div>
             ) : (
               <p className="text-gray-500">Aucun métier disponible</p>
@@ -290,7 +300,7 @@ const TousLesPartenaires = () => {
             <p className="text-gray-600">Chargement des partenaires...</p>
           </div>
         ) : professionals.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
             {professionals.map((p) => (
               <ProfessionalCardTLP
                 key={p.id}
@@ -318,9 +328,97 @@ const TousLesPartenaires = () => {
         className="bg-green-600 hover:bg-green-700"
         category="all"
       />
+
+      {/* Modal pour afficher tous les métiers */}
+      {isMetierModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+            {/* En-tête du modal */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">Tous les métiers</h2>
+              <button
+                onClick={() => {
+                  setIsMetierModalOpen(false);
+                  setMetierSearchTerm("");
+                }}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Barre de recherche */}
+            <div className="p-4 border-b border-gray-200 bg-gray-50">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Rechercher un métier..."
+                  value={metierSearchTerm}
+                  onChange={(e) => setMetierSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* Liste des métiers */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {metiers
+                  .filter((metier) =>
+                    metier.libelle.toLowerCase().includes(metierSearchTerm.toLowerCase())
+                  )
+                  .map((metier) => (
+                    <button
+                      key={metier.id}
+                      onClick={() => {
+                        setSelectedMetier(metier.id.toString());
+                        setIsMetierModalOpen(false);
+                        setMetierSearchTerm("");
+                      }}
+                      className={`p-4 rounded-lg border-2 transition-all text-left ${
+                        selectedMetier === metier.id.toString()
+                          ? "border-green-600 bg-green-50"
+                          : "border-gray-200 bg-white hover:border-green-500 hover:bg-green-50"
+                      }`}
+                    >
+                      <p className="font-semibold text-gray-900">{metier.libelle}</p>
+                      <p className="text-sm text-gray-600 mt-1">{metier.count} professionnel{metier.count > 1 ? "s" : ""}</p>
+                    </button>
+                  ))}
+              </div>
+
+              {metiers.filter((m) =>
+                m.libelle.toLowerCase().includes(metierSearchTerm.toLowerCase())
+              ).length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Aucun métier ne correspond à votre recherche</p>
+                </div>
+              )}
+            </div>
+
+            {/* Pied du modal */}
+            <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setIsMetierModalOpen(false);
+                  setMetierSearchTerm("");
+                }}
+                className="px-6 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 // Composant Carte Professionnel amélioré
 const ProfessionalCardTLP: React.FC<{
@@ -354,154 +452,150 @@ const ProfessionalCardTLP: React.FC<{
     }).format(date);
   };
 
-  return (
-    <div
-      onClick={handleClick}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group"
-    >
-      {/* En-tête avec avatar */}
-      <div className="p-6">
-        <div className="flex items-start gap-4">
-          {/* Avatar */}
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full border-4 border-green-100 overflow-hidden bg-gradient-to-br from-green-50 to-blue-50">
-              {professional.avatar ? (
-                <img
-                  src={professional.avatar}
-                  alt={getName()}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const parent = e.currentTarget.parentElement;
-                    if (parent) {
-                      const initial = document.createElement("div");
-                      initial.className =
-                        "w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 text-white text-2xl font-bold";
+ return (
+  <div
+    onClick={handleClick}
+    className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-sm transition-shadow duration-200 cursor-pointer group"
+  >
+    {/* En-tête compact */}
+    <div className="p-3">
+      <div className="flex items-start gap-3">
+        {/* Avatar réduit */}
+        <div className="relative flex-shrink-0">
+          <div className="w-12 h-12 rounded-full border-2 border-green-100 overflow-hidden bg-gradient-to-br from-green-50 to-blue-50">
+            {professional.avatar ? (
+              <img
+                src={professional.avatar}
+                alt={getName()}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  const parent = e.currentTarget.parentElement;
+                  if (parent) {
+                    const initial = document.createElement("div");
+                    initial.className =
+                      "w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 text-white text-base font-bold";
                       initial.textContent =
                         professional.firstName?.[0]?.toUpperCase() ||
                         professional.companyName?.[0]?.toUpperCase() ||
                         "P";
-                      parent.appendChild(initial);
-                    }
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 text-white text-2xl font-bold">
-                  {professional.firstName?.[0]?.toUpperCase() ||
-                    professional.companyName?.[0]?.toUpperCase() ||
-                    "P"}
-                </div>
-              )}
-            </div>
-            {/* Badge de vérification */}
-            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-1 rounded-full">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-          </div>
-
-          {/* Informations principales */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 truncate group-hover:text-green-600 transition-colors">
-                  {getName()}
-                </h3>
-                <p className="text-sm text-green-600 font-medium truncate">
-                  {getJob()}
-                </p>
+                    parent.appendChild(initial);
+                  }
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 text-white text-base font-bold">
+                {professional.firstName?.[0]?.toUpperCase() ||
+                  professional.companyName?.[0]?.toUpperCase() ||
+                  "P"}
               </div>
-              {/* Note */}
-              {professional.rating && (
-                <div className="flex flex-col items-end">
-                  <div className="flex items-center bg-green-50 px-2 py-1 rounded">
-                    <Star
-                      size={16}
-                      className="text-yellow-500 fill-yellow-500"
-                    />
-                    <span className="ml-1 font-bold text-gray-900">
-                      {professional.rating.toFixed(1)}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500 mt-1">
-                    {professional.reviewCount} avis
+            )}
+          </div>
+          {/* Badge mini */}
+          <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
+
+        {/* Informations compactes */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between mb-1">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-green-600 transition-colors">
+                {getName()}
+              </h3>
+              <p className="text-xs text-green-600 font-medium truncate">
+                {getJob()}
+              </p>
+            </div>
+            
+            {/* Note compacte */}
+            {professional.rating && (
+              <div className="flex flex-col items-end ml-2">
+                <div className="flex items-center bg-green-50 px-1.5 py-0.5 rounded text-xs">
+                  <Star
+                    size={12}
+                    className="text-yellow-500 fill-yellow-500"
+                  />
+                  <span className="ml-0.5 font-bold text-gray-900">
+                    {professional.rating.toFixed(1)}
                   </span>
                 </div>
-              )}
-            </div>
-
-            {/* Métier */}
-            <div className="flex items-center gap-2 mb-3">
-              <Briefcase size={14} className="text-gray-400" />
-              <span className="text-sm text-gray-600">
-                {professional.metiers?.[0]?.metier.libelle ||
-                  "Métier non spécifié"}
-              </span>
-            </div>
-
-            {/* Localisation */}
-            {professional.city && (
-              <div className="flex items-center gap-2 mb-4">
-                <MapPin size={14} className="text-gray-400" />
-                <span className="text-sm text-gray-600">
-                  {professional.city}
+                <span className="text-xs text-gray-500 mt-0.5">
+                  {professional.reviewCount} avis
                 </span>
               </div>
             )}
+          </div>
 
-            {/* Date d'inscription */}
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Calendar size={14} />
-              <span>Inscrit {formatDate(professional.createdAt)}</span>
+          {/* Métier et localisation en ligne */}
+          <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
+            <Briefcase size={10} className="text-gray-400 flex-shrink-0" />
+            <span className="truncate">
+              {professional.metiers?.[0]?.metier.libelle ||
+                "Métier non spécifié"}
+            </span>
+          </div>
+
+          {professional.city && (
+            <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
+              <MapPin size={10} className="text-gray-400 flex-shrink-0" />
+              <span className="truncate">{professional.city}</span>
             </div>
+          )}
+
+          {/* Date mini */}
+          <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+            <Calendar size={10} className="flex-shrink-0" />
+            <span>Inscrit {formatDate(professional.createdAt)}</span>
           </div>
         </div>
       </div>
-
-      {/* Séparateur */}
-      <div className="border-t border-gray-100"></div>
-
-      {/* Pied de carte - Contact */}
-      <div className="p-4 bg-gray-50">
-        <div className="grid grid-cols-2 gap-4">
-          {/* Téléphone */}
-          {professional.phone && (
-            <a
-              href={`tel:${professional.phone}`}
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-2 text-sm text-gray-700 hover:text-green-600 transition-colors p-2 hover:bg-white rounded"
-            >
-              <Phone size={16} className="text-gray-400" />
-              <span className="truncate">{professional.phone}</span>
-            </a>
-          )}
-
-          {/* Email */}
-          <a
-            href={`mailto:${professional.email}`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2 text-sm text-gray-700 hover:text-green-600 transition-colors p-2 hover:bg-white rounded col-span-2"
-          >
-            <Mail size={16} className="text-gray-400" />
-            <span className="truncate">{professional.email}</span>
-          </a>
-        </div>
-
-        {/* Bouton action */}
-        <button
-          onClick={handleClick}
-          className="w-full mt-4 py-2.5 bg-white border border-green-600 text-green-600 font-medium rounded-lg hover:bg-green-50 transition-colors group-hover:bg-green-600 group-hover:text-white"
-        >
-          Voir le profil
-        </button>
-      </div>
     </div>
-  );
+
+    {/* Pied de carte compact */}
+    <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
+      {/* Contact en ligne */}
+      <div className="flex items-center justify-between mb-2">
+        {professional.phone && (
+          <a
+            href={`tel:${professional.phone}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-green-600 transition-colors"
+            title={professional.phone}
+          >
+            <Phone size={12} className="text-gray-400 flex-shrink-0" />
+            <span className="truncate max-w-[80px]">{professional.phone}</span>
+          </a>
+        )}
+
+        <a
+          href={`mailto:${professional.email}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-green-600 transition-colors"
+          title={professional.email}
+        >
+          <Mail size={12} className="text-gray-400 flex-shrink-0" />
+          <span className="truncate max-w-[120px]">{professional.email}</span>
+        </a>
+      </div>
+
+      {/* Bouton mini */}
+      <button
+        onClick={handleClick}
+        className="w-full py-1.5 bg-white border border-green-600 text-green-600 text-xs font-medium rounded hover:bg-green-50 transition-colors group-hover:bg-green-600 group-hover:text-white"
+      >
+        Voir le profil
+      </button>
+    </div>
+  </div>
+);
 };
 
 // Composant Aucun résultat amélioré
