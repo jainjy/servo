@@ -1640,7 +1640,7 @@ const Header = () => {
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <Car className="h-4 w-4" />
-                  <span>Mes Locations de voitires </span>
+                  <span>Mes Locations de voitures </span>
                 </button>
                 <button
                   onClick={() => {
@@ -2263,7 +2263,7 @@ const Header = () => {
                           navigate("/mon-compte/location-voiture")
                         }
                       >
-                        <List className="mr-2 h-4 w-4" />
+                        <Car className="mr-2 h-4 w-4" />
                         Mes Locations de voitures
                       </DropdownMenuItem>
                       <DropdownMenuItem

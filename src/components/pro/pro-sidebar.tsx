@@ -46,7 +46,7 @@ const navigation = [
     href: "/pro/art-et-creation-page",
     icon: Brush, // Changé de Wrench à Brush pour mieux représenter l'art
   },
-  { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
+  // { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
 
   // === GESTION DES RÉSERVATIONS & COMMANDES ===
   { name: "Mon Agenda", href: "/pro/calendar", icon: Calendar },
