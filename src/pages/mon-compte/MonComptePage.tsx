@@ -38,6 +38,8 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
+import Lottie from "lottie-react";
+import successAnimation from "@/assets/Meeting Time.json";
 
 // Fonction de validation des mots de passe
 const validatePassword = (password: string) => {
@@ -65,9 +67,8 @@ const PasswordRequirement = ({
 }) => (
   <div className="flex items-center gap-2 text-xs">
     <div
-      className={`w-3 h-3 rounded-full ${
-        met ? "bg-green-500" : "bg-gray-300"
-      }`}
+      className={`w-3 h-3 rounded-full ${met ? "bg-green-500" : "bg-gray-300"
+        }`}
     />
     <span className={met ? "text-green-600" : "text-gray-600"}>{text}</span>
   </div>
@@ -146,14 +147,14 @@ export default function MonComptePage() {
     user?.role === "admin"
       ? "Administrateur"
       : user?.role === "professional"
-      ? "Professionnel"
-      : "Utilisateur";
+        ? "Professionnel"
+        : "Utilisateur";
   const roleColor =
     user?.role === "admin"
       ? "bg-[#8B4513]"
       : user?.role === "professional"
-      ? "bg-[#556B2F]"
-      : "bg-[#6B8E23]";
+        ? "bg-[#556B2F]"
+        : "bg-[#6B8E23]";
   const createdAt = user?.createdAt ? new Date(user.createdAt) : null;
   const onChange =
     (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -381,28 +382,36 @@ export default function MonComptePage() {
     <>
       <main className="min-h-screen bg-gradient-to-br from-[#556B2F]/10 via-[#6B8E23]/10 to-[#8B4513]/10 pt-16">
         {/* Couverture style Facebook */}
-        <div className="h-64 relative">
-          <div className="absolute flex justify-around inset-0 opacity-50 ">
+        <div className="h-64 relative overflow-hidden">
+          <div className="relative w-full h-full">
+            {/* Image de fond */}
             <img
-              src="https://i.pinimg.com/1200x/c3/ef/8b/c3ef8ba8a70511021f9b3f0a50a852f7.jpg"
-              className="w-64 h-64 overflow-hidden rounded-full"
+              className="w-full h-full object-cover"
+              src="https://i.pinimg.com/1200x/9f/d6/46/9fd646e05df29178a37c9676b508fb80.jpg"
               alt=""
             />
-            <img
-              src="https://i.pinimg.com/736x/43/b9/1c/43b91c953ebadc481316a2f9230ddf8a.jpg"
-              className="w-64 h-64"
-              alt=""
-            />
-            <img
-              src="https://i.pinimg.com/1200x/c3/ef/8b/c3ef8ba8a70511021f9b3f0a50a852f7.jpg"
-              className="w-64 h-64"
-              alt=""
-            />
+
+            {/* Overlay noir semi-transparent */}
+            <div className="absolute inset-0 backdrop-blur-sm bg-black/60"></div>
+
+            {/* Contenu au-dessus (Lottie, texte, etc.) */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              {/* Exemple Lottie */}
+              {/* 
+    <Lottie
+      animationData={successAnimation}
+      loop
+      autoplay
+      className="w-40 h-40"
+    />
+    */}
+            </div>
           </div>
+
         </div>
         {/* Conteneur principal */}
-        <div className="px-4 sm:px-6 lg:px-8 pb-8">
-          <div className="max-w-7xl mx-auto -mt-28 relative z-10">
+        <div className="px-4 -mt-40 sm:px-6 lg:px-8 pb-8">
+          <div className="max-w-7xl mx-auto  relative z-10">
             {/* Grille 2 colonnes : Gauche (Profil) + Droite (Édition) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* COLONNE GAUCHE - Profil et infos */}

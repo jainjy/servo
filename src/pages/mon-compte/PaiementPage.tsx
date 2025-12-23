@@ -449,13 +449,13 @@ export default function PaiementPage() {
             className="mb-4"
             style={{ background: theme.primaryDark, borderColor: theme.separator }}
           >
-            <TabsTrigger value="historique" style={{ color: theme.logo }}>
+            <TabsTrigger value="historique" className="text-slate-900/90" >
               Historique
             </TabsTrigger>
-            <TabsTrigger value="factures" style={{ color: theme.logo }}>
+            <TabsTrigger value="factures" className="text-slate-900/90">
               Factures
             </TabsTrigger>
-            <TabsTrigger value="methods" style={{ color: theme.logo }}>
+            <TabsTrigger value="methods" className="text-slate-900/90">
               Moyens de paiement
             </TabsTrigger>
           </TabsList>

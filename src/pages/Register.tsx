@@ -14,6 +14,7 @@ import {
   MapPin,
   Hash,
   Briefcase,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -191,9 +192,8 @@ const RegisterPage = () => {
   }) => (
     <div className="flex items-center gap-2 text-xs">
       <div
-        className={`w-3 h-3 rounded-full ${
-          met ? "bg-green-500" : "bg-gray-300"
-        }`}
+        className={`w-3 h-3 rounded-full ${met ? "bg-green-500" : "bg-gray-300"
+          }`}
       />
       <span className={met ? "text-green-600" : "text-gray-600"}>{text}</span>
     </div>
@@ -209,6 +209,10 @@ const RegisterPage = () => {
           className="w-full h-full object-cover"
         />
       </div>
+      <button className="absolute top-1 bg-gray-600 px-4 py-2 rounded-full left-1 flex items-center gap-2  text-white hover:text-gray-200 font-medium" onClick={() => navigate(-1)}>
+        <ArrowLeft />
+        Retour
+      </button>
       <div className="w-[80vw] lg:w-[80vw] flex h-[90vh] m-auto rounded-3xl shadow-xl overflow-hidden">
         {/* Sidebar */}
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden">
@@ -457,30 +461,32 @@ const RegisterPage = () => {
                           <p className="text-xs font-medium text-gray-700">
                             Critères du mot de passe :
                           </p>
-                          <PasswordRequirement
-                            met={passwordValidation.minLength}
-                            text="Au moins 8 caractères"
-                          />
-                          <PasswordRequirement
-                            met={passwordValidation.maxLength}
-                            text="Maximum 12 caractères"
-                          />
-                          <PasswordRequirement
-                            met={passwordValidation.hasUpperCase}
-                            text="Au moins une majuscule (A-Z)"
-                          />
-                          <PasswordRequirement
-                            met={passwordValidation.hasLowerCase}
-                            text="Au moins une minuscule (a-z)"
-                          />
-                          <PasswordRequirement
-                            met={passwordValidation.hasNumber}
-                            text="Au moins un chiffre (0-9)"
-                          />
-                          <PasswordRequirement
-                            met={passwordValidation.hasSpecialChar}
-                            text="Au moins un caractère spécial (!@#$%^&*...)"
-                          />
+                          <div className="w-96 grid grid-cols-1 lg:grid-cols-2">
+                            <PasswordRequirement
+                              met={passwordValidation.minLength}
+                              text="Au moins 8 caractères"
+                            />
+                            <PasswordRequirement
+                              met={passwordValidation.maxLength}
+                              text="Maximum 12 caractères"
+                            />
+                            <PasswordRequirement
+                              met={passwordValidation.hasUpperCase}
+                              text="Au moins une majuscule (A-Z)"
+                            />
+                            <PasswordRequirement
+                              met={passwordValidation.hasLowerCase}
+                              text="Au moins une minuscule (a-z)"
+                            />
+                            <PasswordRequirement
+                              met={passwordValidation.hasNumber}
+                              text="Au moins un chiffre (0-9)"
+                            />
+                            <PasswordRequirement
+                              met={passwordValidation.hasSpecialChar}
+                              text="Au moins un caractère spécial (!@#$%^&*...)"
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -587,7 +593,7 @@ const RegisterPage = () => {
                   </div>
 
                   {/* Boutons de navigation - sticky en bas */}
-                  <div className="sticky bottom-0 z-10 bg-[#FFFFFF] border-t border-gray-400 px-6 pt-5 space-y-3">
+                  <div className="sticky -bottom-5 z-10 bg-[#FFFFFF] border-t border-gray-400 px-6 pt-5 space-y-3">
                     <Button
                       type="submit"
                       className="w-full h-11 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#556B2F]/90 hover:to-[#6B8E23]/90 text-white font-semibold"

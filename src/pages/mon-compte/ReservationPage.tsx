@@ -233,6 +233,7 @@ function TourismStatusBadge({ status }: { status: TourismBooking["status"] }) {
 
   return (
     <Badge
+    className="text-white"
       style={{
         backgroundColor: colorMap[status],
         color: status === "annulee" ? "#fff" : theme.logo,
@@ -262,9 +263,9 @@ function ServiceStatusBadge({ status }: { status: ServiceBooking["status"] }) {
 
   return (
     <Badge
+    className="text-white"
       style={{
         backgroundColor: colorMap[status],
-        color: status === "cancelled" ? "#fff" : theme.logo,
         border: "none",
       }}
     >
@@ -291,6 +292,7 @@ function TouristicPlaceStatusBadge({ status }: { status: TouristicPlaceBooking["
 
   return (
     <Badge
+    className="text-white"
       style={{
         backgroundColor: colorMap[status],
         color: status === "cancelled" ? "#fff" : theme.logo,
@@ -327,6 +329,7 @@ function FlightStatusBadge({ status }: { status: FlightReservation["status"] }) 
 
   return (
     <Badge
+    className="text-white"
       style={{
         backgroundColor: colorMap[status] || theme.info,
         color: ["cancelled", "failed"].includes(status) ? "#fff" : theme.logo,
@@ -540,9 +543,9 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
                 {type === "touristic_place" && <TouristicPlaceStatusBadge status={booking.status} />}
                 {type === "flight" && <FlightStatusBadge status={booking.status} />}
                 <Badge variant="outline" className="text-xs">
-                  {type === "tourisme" ? "🏠 Hébergement" : 
-                   type === "service" ? "💆 Service" : 
-                   type === "touristic_place" ? "🎫 Billet" : "✈️ Vol"}
+                  {type === "tourisme" ? " Hébergement" : 
+                   type === "service" ? " Service" : 
+                   type === "touristic_place" ? " Billet" : " Vol"}
                 </Badge>
               </div>
             </div>
@@ -657,9 +660,9 @@ function BookingCard({
                     background: theme.accent,
                   }}
                 >
-                  {type === "tourisme" ? "🏠 Hébergement" : 
-                   type === "service" ? "💆 Service" : 
-                   type === "touristic_place" ? "🎫 Billet" : "✈️ Vol"}
+                  {type === "tourisme" ? " Hébergement" : 
+                   type === "service" ? " Service" : 
+                   type === "touristic_place" ? " Billet" : " Vol"}
                 </Badge>
               </div>
               <h3
@@ -777,16 +780,14 @@ function BookingCard({
                 {getStatusBadge(booking.status)}
                 <Badge
                   variant="outline"
-                  className="text-xs"
+                  className="text-xs bg-secondary-text text-white"
                   style={{
                     borderColor: theme.logo,
-                    color: theme.logo,
-                    background: theme.accent,
                   }}
                 >
-                  {type === "tourisme" ? "🏠 Hébergement" : 
-                   type === "service" ? "💆 Service" : 
-                   type === "touristic_place" ? "🎫 Billet" : "✈️ Vol"}
+                  {type === "tourisme" ? " Hébergement" : 
+                   type === "service" ? " Service" : 
+                   type === "touristic_place" ? " Billet" : " Vol"}
                 </Badge>
               </div>
               <h3
@@ -1431,12 +1432,12 @@ export default function UnifiedReservationPage() {
                 </div>
                 <Select value={serviceFilter} onValueChange={setServiceFilter}>
                   <SelectTrigger
-                    className="w-48"
-                    style={{ background: theme.accent, color: theme.logo }}
+                    className="w-48 bg-logo text-white"
+                    
                   >
                     <SelectValue placeholder="Filtrer par statut" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: theme.lightBg }}>
+                  <SelectContent className="" style={{ background: theme.lightBg }}>
                     <SelectItem value="all">Toutes</SelectItem>
                     <SelectItem value="pending">En attente</SelectItem>
                     <SelectItem value="confirmed">Confirmées</SelectItem>

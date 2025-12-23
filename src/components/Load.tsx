@@ -211,7 +211,7 @@ export default function LoadingScreen({
       {
         scale: 0,
         opacity: 0,
-        rotation: -180
+        
       },
       {
         scale: 1.2, // Plus grand pour l'effet initial
@@ -228,7 +228,7 @@ export default function LoadingScreen({
         {
           scale: 0.5,
           opacity: 0,
-          rotation: -360
+          
         },
         {
           scale: 1.3, // Taille agrandie pour l'animation initiale
@@ -641,7 +641,7 @@ export default function LoadingScreen({
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
 
                     <span className="relative z-10">
-                      {exitInitiatedRef.current || globalExitInitiated || isExiting ? 'REDIRECTION EN COURS...' : 'ACCÉDER AU SITE'}
+                      {exitInitiatedRef.current || globalExitInitiated || isExiting ? 'REDIRECTION EN COURS...' : 'ACCÉDER A L\'APPLICATION'}
                     </span>
 
                     {/* Indicateur de statut */}

@@ -453,148 +453,161 @@ const ProfessionalCardTLP: React.FC<{
   };
 
  return (
-  <div
-    onClick={handleClick}
-    className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-sm transition-shadow duration-200 cursor-pointer group"
-  >
-    {/* En-tête compact */}
-    <div className="p-3">
-      <div className="flex items-start gap-3">
-        {/* Avatar réduit */}
-        <div className="relative flex-shrink-0">
-          <div className="w-12 h-12 rounded-full border-2 border-green-100 overflow-hidden bg-gradient-to-br from-green-50 to-blue-50">
-            {professional.avatar ? (
-              <img
-                src={professional.avatar}
-                alt={getName()}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                  const parent = e.currentTarget.parentElement;
-                  if (parent) {
-                    const initial = document.createElement("div");
-                    initial.className =
-                      "w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 text-white text-base font-bold";
-                      initial.textContent =
-                        professional.firstName?.[0]?.toUpperCase() ||
-                        professional.companyName?.[0]?.toUpperCase() ||
-                        "P";
-                    parent.appendChild(initial);
-                  }
-                }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500 text-white text-base font-bold">
-                {professional.firstName?.[0]?.toUpperCase() ||
+<div
+  onClick={handleClick}
+  className="relative bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col items-center text-center p-0"
+>
+  {/* Bannière incurvée compacte */}
+  <div className="relative w-full h-24 bg-secondary-text rounded-b-3xl mb-10 overflow-hidden">
+    {/* Éléments décoratifs d'arrière-plan */}
+    <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+    <div className="absolute top-4 right-4 w-16 h-16 bg-white/10 rounded-full"></div>
+    
+    {/* Badge "PRO" en haut à droite */}
+    <div className="absolute top-4 right-4 bg-white text-emerald-700 px-3 py-1 rounded-full text-xs font-bold shadow-md">
+      PRO
+    </div>
+    
+  </div>
+
+  {/* Avatar compact */}
+  <div className="relative -mt-20 mb-3 z-10">
+    <div className="w-24 h-24 rounded-full border-8 border-white overflow-hidden bg-white mx-auto shadow-sm">
+      {professional.avatar ? (
+        <img
+          src={professional.avatar}
+          alt={getName()}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+            const parent = e.currentTarget.parentElement;
+            if (parent) {
+              const initial = document.createElement("div");
+              initial.className =
+                "w-full h-full flex items-center justify-center bg-logo text-white text-xl font-bold";
+                initial.textContent =
+                  professional.firstName?.[0]?.toUpperCase() ||
                   professional.companyName?.[0]?.toUpperCase() ||
-                  "P"}
-              </div>
-            )}
-          </div>
-          {/* Badge mini */}
-          <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full">
-            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
+                  "P";
+              parent.appendChild(initial);
+            }
+          }}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-logo text-white text-xl font-bold">
+          {professional.firstName?.[0]?.toUpperCase() ||
+            professional.companyName?.[0]?.toUpperCase() ||
+            "P"}
         </div>
+      )}
+    </div>
+    
+    {/* Badge de vérification compact */}
+    <div className="absolute bottom-1 right-1 bg-green-500 text-white p-1 rounded-full border-2 border-white shadow-sm">
+      <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          fillRule="evenodd"
+          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </div>
+  </div>
 
-        {/* Informations compactes */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-1">
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-green-600 transition-colors">
-                {getName()}
-              </h3>
-              <p className="text-xs text-green-600 font-medium truncate">
-                {getJob()}
-              </p>
-            </div>
-            
-            {/* Note compacte */}
-            {professional.rating && (
-              <div className="flex flex-col items-end ml-2">
-                <div className="flex items-center bg-green-50 px-1.5 py-0.5 rounded text-xs">
-                  <Star
-                    size={12}
-                    className="text-yellow-500 fill-yellow-500"
-                  />
-                  <span className="ml-0.5 font-bold text-gray-900">
-                    {professional.rating.toFixed(1)}
-                  </span>
-                </div>
-                <span className="text-xs text-gray-500 mt-0.5">
-                  {professional.reviewCount} avis
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Métier et localisation en ligne */}
-          <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
-            <Briefcase size={10} className="text-gray-400 flex-shrink-0" />
-            <span className="truncate">
-              {professional.metiers?.[0]?.metier.libelle ||
-                "Métier non spécifié"}
-            </span>
-          </div>
-
-          {professional.city && (
-            <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
-              <MapPin size={10} className="text-gray-400 flex-shrink-0" />
-              <span className="truncate">{professional.city}</span>
-            </div>
-          )}
-
-          {/* Date mini */}
-          <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-            <Calendar size={10} className="flex-shrink-0" />
-            <span>Inscrit {formatDate(professional.createdAt)}</span>
-          </div>
-        </div>
-      </div>
+  {/* Contenu principal compact */}
+  <div className="px-4 pb-4 w-full">
+    {/* Nom et prénom compacts */}
+    <div className="mb-2">
+      <h3 className="text-sm font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+        {professional.firstName || ""}
+      </h3>
+      <h3 className="text-sm font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+        {professional.lastName || ""}
+      </h3>
     </div>
 
-    {/* Pied de carte compact */}
-    <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
-      {/* Contact en ligne */}
-      <div className="flex items-center justify-between mb-2">
-        {professional.phone && (
-          <a
-            href={`tel:${professional.phone}`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-green-600 transition-colors"
-            title={professional.phone}
-          >
-            <Phone size={12} className="text-gray-400 flex-shrink-0" />
-            <span className="truncate max-w-[80px]">{professional.phone}</span>
-          </a>
-        )}
+    {/* Titre/Poste compact */}
+    <div className="mb-3">
+      <p className="text-xs font-semibold text-emerald-700 px-3 py-1 rounded-full bg-emerald-50 inline-block">
+        {getJob()}
+      </p>
+    </div>
 
+    {/* Note compacte */}
+    {professional.rating && (
+      <div className="absolute top-3 left-4 flex items-center justify-center mb-3">
+        <div className="flex items-center bg-amber-50 px-2 py-1 rounded-full border border-amber-100 text-xs">
+          <Star size={12} className="text-amber-500 fill-amber-500" />
+          <span className="ml-1 font-bold text-gray-900">
+            {professional.rating.toFixed(1)}
+          </span>
+          <span className="ml-1 text-gray-500">
+            ({professional.reviewCount})
+          </span>
+        </div>
+      </div>
+    )}
+
+    {/* Métier et localisation compacts */}
+    <div className="space-y-2 mb-3 grid grid-cols-1 lg:grid-cols-2 w-full">
+      {professional.metiers?.[0]?.metier.libelle && (
+        <div className="flex items-center justify-center gap-2 text-xs">
+          <Briefcase size={10} className="text-emerald-600 flex-shrink-0" />
+          <span className="text-gray-600 truncate">
+            {professional.metiers[0].metier.libelle}
+          </span>
+        </div>
+      )}
+
+      {professional.city && (
+        <div className="flex items-center justify-center gap-2 text-xs">
+          <MapPin size={10} className="text-blue-600 flex-shrink-0" />
+          <span className="text-gray-600 truncate">{professional.city}</span>
+        </div>
+      )}
+    </div>
+
+    {/* Contact compact */}
+    <div className="space-y-2 grid grid-cols-1 lg:grid-cols-2 mb-3 w-full">
+      {professional.phone && (
+        <a
+          href={`tel:${professional.phone}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center justify-center gap-2 text-xs text-gray-600 hover:text-emerald-600 transition-colors"
+        >
+          <Phone size={10} className="text-gray-500 flex-shrink-0" />
+          <span className="truncate font-medium">{professional.phone}</span>
+        </a>
+      )}
+
+      {professional.email && (
         <a
           href={`mailto:${professional.email}`}
           onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-green-600 transition-colors"
-          title={professional.email}
+          className="flex items-center justify-center gap-2 text-xs text-gray-600 hover:text-emerald-600 transition-colors"
         >
-          <Mail size={12} className="text-gray-400 flex-shrink-0" />
-          <span className="truncate max-w-[120px]">{professional.email}</span>
+          <Mail size={10} className="text-gray-500 flex-shrink-0" />
+          <span className="truncate max-w-full font-medium">{professional.email}</span>
         </a>
-      </div>
+      )}
+    </div>
 
-      {/* Bouton mini */}
-      <button
-        onClick={handleClick}
-        className="w-full py-1.5 bg-white border border-green-600 text-green-600 text-xs font-medium rounded hover:bg-green-50 transition-colors group-hover:bg-green-600 group-hover:text-white"
-      >
-        Voir le profil
-      </button>
+    {/* Bouton principal compact */}
+    <button
+      onClick={handleClick}
+      className="w-full py-2 bg-logo text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-sm hover:shadow-md"
+    >
+      Voir profil
+    </button>
+    
+    {/* Footer minimaliste */}
+    <div className="mt-3 pt-3 border-t border-gray-100">
+      <p className="text-[10px] text-gray-400">
+        Membre depuis {formatDate(professional.createdAt)}
+      </p>
     </div>
   </div>
+</div>
 );
 };
 

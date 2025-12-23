@@ -27,7 +27,11 @@ import {
   Rocket,
   Lightbulb,
   BarChart3,
+  Map,
 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -435,7 +439,7 @@ const ProfessionalProfilePage = () => {
                           <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
                             <MapPin className="w-4 h-4 text-[#556B2F]" />
                           </div>
-                          <span className="text-sm font-medium">
+                          <span className="text-xs font-medium">
                             {settings.adresse}
                           </span>
                         </div>
@@ -511,12 +515,13 @@ const ProfessionalProfilePage = () => {
                   onValueChange={setActiveTab}
                   className="w-full"
                 >
-                  <TabsList className="grid grid-cols-4 bg-[#6B8E23]/5 p-1">
+                  <TabsList className="grid grid-cols-5 bg-[#6B8E23]/5 p-1">
                     {[
                       { id: "overview", label: "Aperçu", icon: Building },
                       { id: "services", label: "Services", icon: Briefcase },
                       { id: "reviews", label: "Avis", icon: Star },
                       { id: "schedule", label: "Horaires", icon: CalendarDays },
+                      { id: "location", label: "Localisation", icon: MapPin },
                     ].map((tab) => {
                       const Icon = tab.icon;
                       return (
@@ -547,6 +552,9 @@ const ProfessionalProfilePage = () => {
                     </TabsContent>
                     <TabsContent value="schedule">
                       <ScheduleTab horaires={horaires} />
+                    </TabsContent>
+                    <TabsContent value="location">
+                      <LocationTab profile={profile} />
                     </TabsContent>
                   </div>
                 </Tabs>
@@ -708,6 +716,128 @@ const OverviewTab = ({
     )}
   </div>
 );
+
+// Composant pour la section Localisation avec Map
+const LocationTab = ({ profile }: { profile: ProfessionalProfile }) => {
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [loadingMap, setLoadingMap] = useState(true);
+  const [mapError, setMapError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const geocodeAddress = async () => {
+      try {
+        setLoadingMap(true);
+        setMapError(null);
+
+        const address = profile.ProfessionalSettings?.adresse || profile.address;
+        const city = profile.city;
+        const fullAddress = `${address}, ${city}`;
+
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            fullAddress
+          )}`
+        );
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          const { lat, lon } = data[0];
+          setCoordinates([parseFloat(lat), parseFloat(lon)]);
+        } else {
+          setMapError("Adresse non trouvée");
+        }
+      } catch (error) {
+        console.error("Erreur géocodage:", error);
+        setMapError("Impossible de charger la localisation");
+      } finally {
+        setLoadingMap(false);
+      }
+    };
+
+    if (profile.ProfessionalSettings?.adresse || profile.address) {
+      geocodeAddress();
+    } else {
+      setMapError("Adresse non disponible");
+      setLoadingMap(false);
+    }
+  }, [profile]);
+
+  // Fix pour les icones Leaflet
+  useEffect(() => {
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+      iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+      shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+    });
+  }, []);
+
+  const address = profile.ProfessionalSettings?.adresse || profile.address;
+  const zipCode = profile.zipCode;
+
+  return (
+    <Card className="p-8 bg-[#FFFFFF] border border-[#D3D3D3] shadow-sm">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-2 bg-[#6B8E23]/10 rounded-xl">
+          <MapPin className="w-6 h-6 text-[#556B2F]" />
+        </div>
+        <h2 className="text-md lg:text-2xl font-bold text-gray-900">
+          Localisation
+        </h2>
+      </div>
+
+      {loadingMap ? (
+        <div className="p-12 bg-[#FFFFFF] border border-[#D3D3D3] text-center rounded-lg">
+          <Skeleton className="h-96 w-full bg-[#6B8E23]/10 rounded-lg" />
+          <p className="text-[#8B4513] mt-4">Chargement de la carte...</p>
+        </div>
+      ) : mapError || !coordinates ? (
+        <div className="p-12 bg-[#FFFFFF] border border-[#D3D3D3] text-center rounded-lg">
+          <MapPin className="w-16 h-16 text-[#8B4513] mx-auto mb-4" />
+          <p className="text-[#8B4513]">{mapError || "Impossible de charger la carte"}</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Information d'adresse */}
+          <div className="flex items-start gap-4 p-6 bg-[#6B8E23]/5 rounded-lg border border-[#D3D3D3]">
+            <div className="p-3 bg-[#6B8E23]/10 rounded-xl">
+              <MapPin className="w-5 h-5 text-[#556B2F]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-gray-900 mb-2">Adresse</h3>
+              <p className="text-[#8B4513] text-sm font-medium">{address}</p>
+              {zipCode && (
+                <p className="text-[#8B4513]">{zipCode}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Carte */}
+          <div className="w-full h-96 rounded-lg overflow-hidden border border-[#D3D3D3] shadow-md">
+            <MapContainer
+              center={coordinates}
+              zoom={15}
+              style={{ width: "100%", height: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              />
+              <Marker position={coordinates}>
+                <Popup>
+                  <div className="text-center">
+                    <p className="font-bold text-sm">{profile.firstName} {profile.lastName}</p>
+                    <p className="text-xs text-gray-600">{address}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+};
 
 // Composant pour l'onglet Services
 interface ServicesTabProps {

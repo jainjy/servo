@@ -2225,7 +2225,7 @@ const Header = () => {
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/conseil")}
                       >
-                        <Briefcase className="h-4 w-4" />
+                        <Briefcase className="mr-2 h-4 w-4" />
                         Mes demandes Conseils
                       </DropdownMenuItem>
                       <DropdownMenuItem
