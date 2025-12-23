@@ -449,21 +449,6 @@ const LocationVoiturePage = () => {
     }
   };
 
-  // Partager un véhicule
-  const handleShare = (vehicule) => {
-    if (navigator.share) {
-      navigator.share({
-        title: `${vehicule.marque} ${vehicule.modele}`,
-        text: `Découvrez ce véhicule à louer sur OLIPLUS Réunion`,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(
-        `${vehicule.marque} ${vehicule.modele} - ${window.location.href}`
-      );
-      toast.success("Lien copié dans le presse-papier");
-    }
-  };
 
   // Réinitialiser les filtres
   const handleResetFilters = () => {
@@ -1282,16 +1267,6 @@ const LocationVoiturePage = () => {
                                       )}
                                     </SheetContent>
                                   </Sheet>
-
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="border-gray-300"
-                                    onClick={() => handleShare(vehicule)}
-                                  >
-                                    <Share2 className="h-4 w-4 mr-1" />
-                                    Partager
-                                  </Button>
 
                                   <Dialog>
                                     <DialogTrigger asChild>
