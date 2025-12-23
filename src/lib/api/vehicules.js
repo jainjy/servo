@@ -75,4 +75,11 @@ export const vehiculesApi = {
       },
     });
   },
+
+  // Itinéraires
+  updateReservationItinerary: (reservationId, data) =>
+    api.put(`/reservations-vehicules/${reservationId}/itinerary`, data),
+
+  getReservationItinerary: (reservationId) =>
+    api.get(`/reservations-vehicules/${reservationId}/itinerary`),
 };

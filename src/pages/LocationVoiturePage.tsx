@@ -26,8 +26,10 @@ import {
   Zap,
   DollarSign,
   Eye,
+  X,
 } from "lucide-react";
 import { vehiculesApi } from "@/lib/api/vehicules";
+import { LocationPickerModal } from "@/components/location-picker-modal";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -88,6 +90,18 @@ const LocationVoiturePage = () => {
   const [returnDate, setReturnDate] = useState("");
   const [selectedVehicule, setSelectedVehicule] = useState(null);
   const [showReservation, setShowReservation] = useState(false);
+  const [showLocationPickerPickup, setShowLocationPickerPickup] = useState(false);
+  const [showLocationPickerReturn, setShowLocationPickerReturn] = useState(false);
+  const [pickupLocation, setPickupLocation] = useState({
+    latitude: null,
+    longitude: null,
+    address: "",
+  });
+  const [returnLocation, setReturnLocation] = useState({
+    latitude: null,
+    longitude: null,
+    address: "",
+  });
   const [reservationForm, setReservationForm] = useState({
     nom: "",
     email: "",
@@ -339,16 +353,6 @@ const LocationVoiturePage = () => {
     sortBy
   );
 
-  // Gestion des favoris
-  const toggleSavedVehicule = (vehiculeId) => {
-    if (savedVehicules.includes(vehiculeId)) {
-      setSavedVehicules(savedVehicules.filter((id) => id !== vehiculeId));
-      toast.success("Véhicule retiré des favoris");
-    } else {
-      setSavedVehicules([...savedVehicules, vehiculeId]);
-      toast.success("Véhicule ajouté aux favoris");
-    }
-  };
 
   // Réserver un véhicule
   const handleReserve = async (vehicule) => {
@@ -899,16 +903,6 @@ const LocationVoiturePage = () => {
                   <Star className="h-4 w-4 mr-2" />
                   Premium
                 </TabsTrigger>
-                <TabsTrigger value="favoris">
-                  <Heart
-                    className={`h-4 w-4 mr-2 ${
-                      savedVehicules.length > 0
-                        ? "fill-red-500 text-red-500"
-                        : ""
-                    }`}
-                  />
-                  Favoris ({savedVehicules.length})
-                </TabsTrigger>
               </TabsList>
 
               <TabsContent value={activeTab} className="space-y-4">
@@ -949,20 +943,7 @@ const LocationVoiturePage = () => {
                                 alt={`${vehicule.marque} ${vehicule.modele}`}
                                 className="w-full h-full object-cover rounded-lg"
                               />
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-                                onClick={() => toggleSavedVehicule(vehicule.id)}
-                              >
-                                <Heart
-                                  className={`h-4 w-4 ${
-                                    savedVehicules.includes(vehicule.id)
-                                      ? "fill-red-500 text-red-500"
-                                      : ""
-                                  }`}
-                                />
-                              </Button>
+
                               {vehicule.carburant === "electrique" && (
                                 <Badge className="absolute top-2 left-2 bg-green-500 text-white">
                                   <Zap className="h-3 w-3 mr-1" />
@@ -1323,10 +1304,10 @@ const LocationVoiturePage = () => {
                                         Réserver
                                       </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-2xl">
+                                    <DialogContent className="max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col p-4 sm:p-6">
                                       {selectedVehicule && (
                                         <>
-                                          <DialogHeader>
+                                          <DialogHeader className="sticky top-0 bg-white z-10">
                                             <DialogTitle>
                                               Réserver :{" "}
                                               {selectedVehicule.marque}{" "}
@@ -1341,12 +1322,13 @@ const LocationVoiturePage = () => {
 
                                           <form
                                             onSubmit={handleSubmitReservation}
+                                            className="flex flex-col flex-1"
                                           >
-                                            <div className="space-y-6 py-4">
+                                            <div className="space-y-4 flex-1 py-4">
                                               {/* Dates */}
-                                              <div className="grid grid-cols-2 gap-4">
+                                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                  <Label>
+                                                  <Label className="text-sm">
                                                     Date de prise en charge
                                                   </Label>
                                                   <Input
@@ -1358,10 +1340,11 @@ const LocationVoiturePage = () => {
                                                       )
                                                     }
                                                     required
+                                                    className="text-sm"
                                                   />
                                                 </div>
                                                 <div>
-                                                  <Label>Date de retour</Label>
+                                                  <Label className="text-sm">Date de retour</Label>
                                                   <Input
                                                     type="date"
                                                     value={returnDate}
@@ -1372,18 +1355,70 @@ const LocationVoiturePage = () => {
                                                     }
                                                     min={pickupDate}
                                                     required
+                                                    className="text-sm"
                                                   />
                                                 </div>
                                               </div>
 
+                                              {/* Lieux de prise en charge et retour */}
+                                              <div className="space-y-2">
+                                                <h4 className="font-semibold text-[#8B4513] text-sm">
+                                                  Lieux de location
+                                                </h4>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                  <div>
+                                                    <Label className="text-sm">
+                                                      Prise en charge
+                                                    </Label>
+                                                    <Button
+                                                      type="button"
+                                                      variant="outline"
+                                                      className="w-full justify-start text-left font-normal mt-1 text-sm h-9"
+                                                      onClick={() =>
+                                                        setShowLocationPickerPickup(
+                                                          true
+                                                        )
+                                                      }
+                                                    >
+                                                      <MapPin className="h-3 w-3 mr-2 flex-shrink-0" />
+                                                      <span className="truncate">
+                                                        {pickupLocation.address ||
+                                                          "Sélectionner"}
+                                                      </span>
+                                                    </Button>
+                                                  </div>
+                                                  <div>
+                                                    <Label className="text-sm">
+                                                      Retour
+                                                    </Label>
+                                                    <Button
+                                                      type="button"
+                                                      variant="outline"
+                                                      className="w-full justify-start text-left font-normal mt-1 text-sm h-9"
+                                                      onClick={() =>
+                                                        setShowLocationPickerReturn(
+                                                          true
+                                                        )
+                                                      }
+                                                    >
+                                                      <MapPin className="h-3 w-3 mr-2 flex-shrink-0" />
+                                                      <span className="truncate">
+                                                        {returnLocation.address ||
+                                                          "Sélectionner"}
+                                                      </span>
+                                                    </Button>
+                                                  </div>
+                                                </div>
+                                              </div>
+
                                               {/* Informations personnelles */}
-                                              <div className="space-y-4">
-                                                <h4 className="font-semibold text-[#8B4513]">
+                                              <div className="space-y-2">
+                                                <h4 className="font-semibold text-[#8B4513] text-sm">
                                                   Informations personnelles
                                                 </h4>
-                                                <div className="grid grid-cols-2 gap-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                   <div>
-                                                    <Label>Nom complet *</Label>
+                                                    <Label className="text-sm">Nom complet *</Label>
                                                     <Input
                                                       value={
                                                         reservationForm.nom
@@ -1395,10 +1430,11 @@ const LocationVoiturePage = () => {
                                                         })
                                                       }
                                                       required
+                                                      className="text-sm"
                                                     />
                                                   </div>
                                                   <div>
-                                                    <Label>Email *</Label>
+                                                    <Label className="text-sm">Email *</Label>
                                                     <Input
                                                       type="email"
                                                       value={
@@ -1411,12 +1447,13 @@ const LocationVoiturePage = () => {
                                                         })
                                                       }
                                                       required
+                                                      className="text-sm"
                                                     />
                                                   </div>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                   <div>
-                                                    <Label>Téléphone *</Label>
+                                                    <Label className="text-sm">Téléphone *</Label>
                                                     <Input
                                                       type="tel"
                                                       value={
@@ -1430,11 +1467,12 @@ const LocationVoiturePage = () => {
                                                         })
                                                       }
                                                       required
+                                                      className="text-sm"
                                                     />
                                                   </div>
                                                   <div>
-                                                    <Label>
-                                                      Numéro de permis
+                                                    <Label className="text-sm">
+                                                      N° permis
                                                     </Label>
                                                     <Input
                                                       value={
@@ -1447,17 +1485,18 @@ const LocationVoiturePage = () => {
                                                             e.target.value,
                                                         })
                                                       }
+                                                      className="text-sm"
                                                     />
                                                   </div>
                                                 </div>
                                               </div>
 
                                               {/* Options supplémentaires */}
-                                              <div className="space-y-4">
-                                                <h4 className="font-semibold text-[#8B4513]">
+                                              <div className="space-y-2">
+                                                <h4 className="font-semibold text-[#8B4513] text-sm">
                                                   Options supplémentaires
                                                 </h4>
-                                                <div className="space-y-2">
+                                                <div className="space-y-1 max-h-32 overflow-y-auto">
                                                   {extras.map((extra) => {
                                                     const ExtraIcon =
                                                       extra.icon;
@@ -1471,7 +1510,7 @@ const LocationVoiturePage = () => {
                                                     return (
                                                       <div
                                                         key={extra.id}
-                                                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer ${
+                                                        className={`flex items-center justify-between p-2 border rounded text-sm cursor-pointer ${
                                                           isSelected
                                                             ? "border-[#556B2F] bg-[#556B2F]/5"
                                                             : "border-gray-200"
@@ -1498,37 +1537,27 @@ const LocationVoiturePage = () => {
                                                           }
                                                         }}
                                                       >
-                                                        <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-2">
                                                           <div
-                                                            className={`p-2 rounded ${
+                                                            className={`p-1 rounded ${
                                                               isSelected
                                                                 ? "bg-[#556B2F] text-white"
                                                                 : "bg-gray-100"
                                                             }`}
                                                           >
-                                                            <ExtraIcon className="h-4 w-4" />
+                                                            <ExtraIcon className="h-3 w-3" />
                                                           </div>
                                                           <div>
                                                             <p className="font-medium">
                                                               {extra.label}
                                                             </p>
-                                                            <p className="text-sm text-gray-500">
-                                                              {extra.price}
-                                                              €/jour
-                                                            </p>
                                                           </div>
                                                         </div>
-                                                        <div className="text-right">
+                                                        <div className="text-right text-xs">
                                                           <p className="font-semibold">
                                                             {formatPrice(
                                                               extraTotal
                                                             )}
-                                                          </p>
-                                                          <p className="text-sm text-gray-500">
-                                                            pour {duration} jour
-                                                            {duration > 1
-                                                              ? "s"
-                                                              : ""}
                                                           </p>
                                                         </div>
                                                       </div>
@@ -1538,11 +1567,11 @@ const LocationVoiturePage = () => {
                                               </div>
 
                                               {/* Récapitulatif */}
-                                              <div className="bg-gray-50 p-4 rounded-lg">
-                                                <h4 className="font-semibold text-[#8B4513] mb-3">
-                                                  Récapitulatif de la location
+                                              <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                                                <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                  Récapitulatif
                                                 </h4>
-                                                <div className="space-y-2">
+                                                <div className="space-y-1 text-sm">
                                                   <div className="flex justify-between">
                                                     <span>
                                                       Location ({duration}{" "}
@@ -1565,10 +1594,10 @@ const LocationVoiturePage = () => {
                                                           key={extraId}
                                                           className="flex justify-between"
                                                         >
-                                                          <span>
+                                                          <span className="truncate">
                                                             {extra?.label}
                                                           </span>
-                                                          <span>
+                                                          <span className="flex-shrink-0 ml-2">
                                                             +
                                                             {formatPrice(
                                                               extraTotal
@@ -1578,8 +1607,8 @@ const LocationVoiturePage = () => {
                                                       );
                                                     }
                                                   )}
-                                                  <Separator />
-                                                  <div className="flex justify-between text-lg font-bold">
+                                                  <Separator className="my-1" />
+                                                  <div className="flex justify-between font-bold">
                                                     <span>Total</span>
                                                     <span className="text-[#8B4513]">
                                                       {formatPrice(
@@ -1612,22 +1641,23 @@ const LocationVoiturePage = () => {
                                               </div>
                                             </div>
 
-                                            <DialogFooter>
+                                            <DialogFooter className="sticky bottom-0 bg-white pt-4 gap-2 flex flex-col sm:flex-row">
                                               <Button
                                                 type="button"
                                                 variant="outline"
                                                 onClick={() =>
                                                   setShowReservation(false)
                                                 }
+                                                className="text-sm"
                                               >
                                                 Annuler
                                               </Button>
                                               <Button
                                                 type="submit"
-                                                className="bg-[#556B2F] hover:bg-[#6B8E23]"
+                                                className="bg-[#556B2F] hover:bg-[#6B8E23] text-sm"
                                               >
                                                 <CreditCard className="h-4 w-4 mr-2" />
-                                                Confirmer la réservation
+                                                Confirmer
                                               </Button>
                                             </DialogFooter>
                                           </form>
@@ -1665,6 +1695,39 @@ const LocationVoiturePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Location Picker Modals */}
+      <LocationPickerModal
+        open={showLocationPickerPickup}
+        onOpenChange={setShowLocationPickerPickup}
+        latitude={pickupLocation.latitude}
+        longitude={pickupLocation.longitude}
+        onLocationChange={(lat, lng) => {
+          setPickupLocation({
+            latitude: lat,
+            longitude: lng,
+            address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+          });
+          setShowLocationPickerPickup(false);
+          toast.success("Lieu de prise en charge défini");
+        }}
+      />
+
+      <LocationPickerModal
+        open={showLocationPickerReturn}
+        onOpenChange={setShowLocationPickerReturn}
+        latitude={returnLocation.latitude}
+        longitude={returnLocation.longitude}
+        onLocationChange={(lat, lng) => {
+          setReturnLocation({
+            latitude: lat,
+            longitude: lng,
+            address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+          });
+          setShowLocationPickerReturn(false);
+          toast.success("Lieu de retour défini");
+        }}
+      />
     </div>
   );
 };

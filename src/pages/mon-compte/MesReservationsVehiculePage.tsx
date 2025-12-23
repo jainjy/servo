@@ -14,6 +14,9 @@ import {
   Star,
   Eye,
   FileText,
+  ChevronLeft,
+  ChevronRight,
+  Navigation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +44,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { vehiculesApi } from "@/lib/api/vehicules";
+import { ItineraryModal } from "@/components/itinerary-modal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -51,6 +55,8 @@ const MesReservationsVehiculePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showItineraryModal, setShowItineraryModal] = useState(false);
+  const [selectedReservationForItinerary, setSelectedReservationForItinerary] = useState(null);
   const [reviewForm, setReviewForm] = useState({
     rating: 5,
     titre: "",
@@ -205,6 +211,59 @@ const MesReservationsVehiculePage = () => {
     const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
     return days;
   };
+
+  // Calendrier
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const getDaysInMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const getReservationsForDate = (date) => {
+    return reservations.filter((reservation) => {
+      const start = new Date(reservation.datePrise);
+      const end = new Date(reservation.dateRetour);
+      const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      return checkDate >= start && checkDate <= end;
+    });
+  };
+
+  const previousMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
+    );
+  };
+
+  const nextMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
+    );
+  };
+
+  const renderCalendar = () => {
+    const daysInMonth = getDaysInMonth(currentDate);
+    const firstDay = getFirstDayOfMonth(currentDate);
+    const days = [];
+
+    // Jours vides du mois précédent
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+
+    // Jours du mois
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(currentDate.getFullYear(), currentDate.getMonth(), i));
+    }
+
+    return days;
+  };
+
+  const calendarDays = renderCalendar();
+  const weekDays = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
   return (
     <div className="min-h-screen bg-gray-50 mt-16">
@@ -550,7 +609,15 @@ const MesReservationsVehiculePage = () => {
                               </Button>
                             )}
 
-                            <Button size="sm" className="ml-auto">
+                            <Button 
+                              size="sm" 
+                              className="ml-auto bg-blue-600 hover:bg-blue-700 text-white"
+                              onClick={() => {
+                                setSelectedReservationForItinerary(reservation);
+                                setShowItineraryModal(true);
+                              }}
+                            >
+                              <Navigation className="h-4 w-4 mr-2" />
                               Voir l'itinéraire
                             </Button>
                           </div>
@@ -585,14 +652,195 @@ const MesReservationsVehiculePage = () => {
           <TabsContent value="calendrier">
             <Card>
               <CardContent className="pt-6">
-                <div className="text-center py-12">
-                  <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                    Calendrier des réservations
-                  </h3>
-                  <p className="text-gray-500">
-                    Fonctionnalité bientôt disponible
-                  </p>
+                <div className="space-y-6">
+                  {/* En-tête du calendrier */}
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold">
+                      {format(currentDate, "MMMM yyyy", { locale: fr })}
+                    </h2>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={previousMonth}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentDate(new Date())}
+                      >
+                        Aujourd'hui
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={nextMonth}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Grille du calendrier */}
+                  <div className="grid grid-cols-7 gap-2">
+                    {/* En-têtes des jours */}
+                    {weekDays.map((day) => (
+                      <div
+                        key={day}
+                        className="text-center font-semibold text-gray-600 py-2"
+                      >
+                        {day}
+                      </div>
+                    ))}
+
+                    {/* Jours du calendrier */}
+                    {calendarDays.map((day, index) => {
+                      const reservationsForDay = day
+                        ? getReservationsForDate(day)
+                        : [];
+                      const isToday =
+                        day &&
+                        day.toDateString() === new Date().toDateString();
+                      const isCurrentMonth =
+                        day && day.getMonth() === currentDate.getMonth();
+
+                      return (
+                        <div
+                          key={index}
+                          className={`min-h-24 p-2 rounded-lg border-2 transition-all ${
+                            !day
+                              ? "bg-gray-50 border-transparent"
+                              : isToday
+                              ? "border-blue-500 bg-blue-50"
+                              : isCurrentMonth
+                              ? "border-gray-200 bg-white hover:border-gray-300"
+                              : "border-gray-100 bg-gray-50"
+                          }`}
+                        >
+                          {day && (
+                            <>
+                              <div
+                                className={`text-sm font-semibold mb-1 ${
+                                  isToday
+                                    ? "text-blue-600"
+                                    : isCurrentMonth
+                                    ? "text-gray-900"
+                                    : "text-gray-400"
+                                }`}
+                              >
+                                {day.getDate()}
+                              </div>
+
+                              {/* Réservations du jour */}
+                              <div className="space-y-1">
+                                {reservationsForDay.slice(0, 2).map((res) => (
+                                  <Dialog key={res.id}>
+                                    <DialogTrigger asChild>
+                                      <div
+                                        className={`text-xs p-1 rounded cursor-pointer truncate ${
+                                          statusConfig[res.statut]?.color
+                                        } text-white hover:opacity-80 transition-opacity`}
+                                        title={`${res.vehicule.marque} ${res.vehicule.modele}`}
+                                      >
+                                        {res.vehicule.marque}
+                                      </div>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-2xl">
+                                      <DialogHeader>
+                                        <DialogTitle>
+                                          Détails de la réservation
+                                        </DialogTitle>
+                                      </DialogHeader>
+                                      <div className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <Label className="text-gray-500 text-sm">
+                                              Véhicule
+                                            </Label>
+                                            <p className="font-semibold">
+                                              {res.vehicule.marque}{" "}
+                                              {res.vehicule.modele}
+                                            </p>
+                                          </div>
+                                          <div>
+                                            <Label className="text-gray-500 text-sm">
+                                              Statut
+                                            </Label>
+                                            <Badge
+                                              className={
+                                                statusConfig[res.statut]
+                                                  ?.color + " text-white"
+                                              }
+                                            >
+                                              {
+                                                statusConfig[res.statut]
+                                                  ?.label
+                                              }
+                                            </Badge>
+                                          </div>
+                                          <div>
+                                            <Label className="text-gray-500 text-sm">
+                                              Dates
+                                            </Label>
+                                            <p className="font-semibold text-sm">
+                                              {format(
+                                                new Date(res.datePrise),
+                                                "dd MMM",
+                                                { locale: fr }
+                                              )}{" "}
+                                              -{" "}
+                                              {format(
+                                                new Date(res.dateRetour),
+                                                "dd MMM",
+                                                { locale: fr }
+                                              )}
+                                            </p>
+                                          </div>
+                                          <div>
+                                            <Label className="text-gray-500 text-sm">
+                                              Montant
+                                            </Label>
+                                            <p className="font-semibold text-[#8B4513]">
+                                              {res.totalTTC?.toFixed(2)}€
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                ))}
+
+                                {reservationsForDay.length > 2 && (
+                                  <div className="text-xs text-gray-500 px-1">
+                                    +{reservationsForDay.length - 2} autre(s)
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Légende */}
+                  <div className="mt-6 pt-6 border-t">
+                    <h3 className="font-semibold mb-3">Légende des statuts</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                      {Object.entries(statusConfig).map(([key, config]) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <div
+                            className={`w-3 h-3 rounded-full ${config.color}`}
+                          ></div>
+                          <span className="text-sm text-gray-600">
+                            {config.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -725,6 +973,53 @@ const MesReservationsVehiculePage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Modal pour l'itinéraire */}
+      {selectedReservationForItinerary && (
+        <ItineraryModal
+          open={showItineraryModal}
+          onOpenChange={setShowItineraryModal}
+          reservationId={selectedReservationForItinerary.id}
+          pickupLocation={
+            selectedReservationForItinerary.coordonneesPrise
+              ? JSON.parse(selectedReservationForItinerary.coordonneesPrise)
+              : {
+                  latitude: -20.8789,
+                  longitude: 55.4481,
+                  address: selectedReservationForItinerary.lieuPrise,
+                }
+          }
+          returnLocation={
+            selectedReservationForItinerary.coordonneesRetour
+              ? JSON.parse(selectedReservationForItinerary.coordonneesRetour)
+              : {
+                  latitude: -20.8789,
+                  longitude: 55.4481,
+                  address: selectedReservationForItinerary.lieuRetour,
+                }
+          }
+          existingItinerary={
+            selectedReservationForItinerary.itineraire
+              ? JSON.parse(selectedReservationForItinerary.itineraire)
+              : undefined
+          }
+          onSave={async (itinerary) => {
+            try {
+              await vehiculesApi.updateReservationItinerary(
+                selectedReservationForItinerary.id,
+                { itineraire: itinerary }
+              );
+              fetchReservations();
+            } catch (error) {
+              console.error("Erreur sauvegarde itinéraire:", error);
+              throw error;
+            }
+          }}
+          isEditable={["en_attente", "confirmee"].includes(
+            selectedReservationForItinerary.statut
+          )}
+        />
+      )}
     </div>
   );
 };
