@@ -25,6 +25,7 @@ import {
   MapPin,
   MessageSquare,
   Briefcase,
+  Car,
 } from "lucide-react";
 // Import des icônes
 import {
@@ -1621,7 +1622,7 @@ const Header = () => {
                   <BookDashed className="h-4 w-4" />
                   <span>Mes demandes immobilières</span>
                 </button>
-                {/* <button
+                <button
                   onClick={() => {
                     navigate("/mon-compte/mes-reservations-cours");
                     setIsMobileMenuOpen(false);
@@ -1629,8 +1630,18 @@ const Header = () => {
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <List className="h-4 w-4" />
-                  <span>Mes réservations en cours</span>
-                </button> */}
+                  <span>Mes réservations de cours</span>
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/location-voiture");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Car className="h-4 w-4" />
+                  <span>Mes Locations de voitires </span>
+                </button>
                 <button
                   onClick={() => {
                     navigate("/mon-compte/reservation");
@@ -1639,7 +1650,7 @@ const Header = () => {
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <Calendar className="h-4 w-4" />
-                  <span>Réservations</span>
+                  <span>Réservations tourisme et bien etre</span>
                 </button>
                 <button
                   onClick={() => {
@@ -2239,19 +2250,27 @@ const Header = () => {
                         <BookDashed className="mr-2 h-4 w-4" />
                         Gestion des locations saisonnières
                       </DropdownMenuItem>
-                      {/* <DropdownMenuItem
+                      <DropdownMenuItem
                         onClick={() =>
                           navigate("/mon-compte/mes-reservations-cours")
                         }
                       >
                         <List className="mr-2 h-4 w-4" />
-                        Mes réservations en cours
-                      </DropdownMenuItem> */}
+                        Mes réservations de cours
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          navigate("/mon-compte/location-voiture")
+                        }
+                      >
+                        <List className="mr-2 h-4 w-4" />
+                        Mes Locations de voitures
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/reservation")}
                       >
                         <Calendar className="mr-2 h-4 w-4" />
-                        Réservations
+                        Réservations tourisme et bien etre
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/payement")}

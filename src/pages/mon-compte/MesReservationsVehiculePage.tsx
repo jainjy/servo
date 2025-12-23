@@ -1,0 +1,732 @@
+import { useState, useEffect } from "react";
+import {
+  Calendar,
+  Car,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  MapPin,
+  CreditCard,
+  MessageCircle,
+  Filter,
+  Search,
+  Star,
+  Eye,
+  FileText,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { vehiculesApi } from "@/lib/api/vehicules";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+const MesReservationsVehiculePage = () => {
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedStatus, setSelectedStatus] = useState("tous");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedReservation, setSelectedReservation] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    titre: "",
+    commentaire: "",
+    avantages: [],
+    inconvenients: [],
+    recommandation: true,
+  });
+
+  const statusConfig = {
+    en_attente: {
+      label: "En attente",
+      color: "bg-yellow-500",
+      icon: Clock,
+    },
+    confirmee: {
+      label: "Confirmée",
+      color: "bg-blue-500",
+      icon: CheckCircle,
+    },
+    en_cours: {
+      label: "En cours",
+      color: "bg-purple-500",
+      icon: Car,
+    },
+    terminee: {
+      label: "Terminée",
+      color: "bg-green-500",
+      icon: CheckCircle,
+    },
+    annulee: {
+      label: "Annulée",
+      color: "bg-red-500",
+      icon: XCircle,
+    },
+  };
+
+  const fetchReservations = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        statut: selectedStatus !== "tous" ? selectedStatus : undefined,
+      };
+      const response = await vehiculesApi.getMesReservations(params);
+      setReservations(response.data.data || []);
+      console.log("Réservations récupérées:", response);
+    } catch (error) {
+      console.error("Erreur récupération réservations:", error);
+      toast.error("Erreur lors du chargement des réservations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReservations();
+  }, [selectedStatus]);
+
+  const handleCancelReservation = async (reservationId) => {
+    if (
+      !window.confirm("Êtes-vous sûr de vouloir annuler cette réservation ?")
+    ) {
+      return;
+    }
+
+    try {
+      await vehiculesApi.updateReservationStatus(reservationId, {
+        statut: "annulee",
+        raisonAnnulation: "Annulé par le client",
+      });
+
+      toast.success("Réservation annulée avec succès");
+      fetchReservations();
+    } catch (error) {
+      console.error("Erreur annulation:", error);
+      toast.error("Erreur lors de l'annulation");
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!selectedReservation) return;
+
+    if (!reviewForm.titre || !reviewForm.commentaire) {
+      toast.error("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    try {
+      await vehiculesApi.createAvis({
+        vehiculeId: selectedReservation.vehicule.id,
+        reservationId: selectedReservation.id,
+        rating: reviewForm.rating,
+        titre: reviewForm.titre,
+        commentaire: reviewForm.commentaire,
+        avantages: reviewForm.avantages,
+        inconvenients: reviewForm.inconvenients,
+        recommandation: reviewForm.recommandation,
+        dateExperience: selectedReservation.datePrise,
+      });
+
+      toast.success("Avis publié avec succès !");
+      setShowReviewModal(false);
+      setReviewForm({
+        rating: 5,
+        titre: "",
+        commentaire: "",
+        avantages: [],
+        inconvenients: [],
+        recommandation: true,
+      });
+      fetchReservations();
+    } catch (error) {
+      console.error("Erreur publication avis:", error);
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la publication"
+      );
+    }
+  };
+
+  const handleDownloadContract = (reservation) => {
+    toast.info("Téléchargement du contrat...");
+    // Générer et télécharger le contrat PDF
+    const contractData = {
+      reservationId: reservation.id,
+      client: `${reservation.client?.firstName} ${reservation.client?.lastName}`,
+      vehicule: `${reservation.vehicule.marque} ${reservation.vehicule.modele}`,
+      dates: `${format(
+        new Date(reservation.datePrise),
+        "dd/MM/yyyy"
+      )} - ${format(new Date(reservation.dateRetour), "dd/MM/yyyy")}`,
+      prixTotal: reservation.totalTTC,
+    };
+    console.log("Contrat généré:", contractData);
+  };
+
+  const filteredReservations = reservations.filter((reservation) => {
+    const matchesSearch =
+      reservation.vehicule.marque
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      reservation.vehicule.modele
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      reservation.id.includes(searchTerm);
+
+    return matchesSearch;
+  });
+
+  const calculateDuration = (datePrise, dateRetour) => {
+    const start = new Date(datePrise);
+    const end = new Date(dateRetour);
+    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    return days;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 mt-16">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Mes réservations de véhicules
+          </h1>
+          <p className="text-gray-600">
+            Gérez toutes vos locations de voitures et utilitaires
+          </p>
+        </div>
+
+        {/* Statistiques rapides */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Total réservations</p>
+                  <p className="text-2xl font-bold">{reservations.length}</p>
+                </div>
+                <Calendar className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">En cours</p>
+                  <p className="text-2xl font-bold">
+                    {reservations.filter((r) => r.statut === "en_cours").length}
+                  </p>
+                </div>
+                <Car className="h-8 w-8 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">À venir</p>
+                  <p className="text-2xl font-bold">
+                    {
+                      reservations.filter(
+                        (r) =>
+                          ["en_attente", "confirmee"].includes(r.statut) &&
+                          new Date(r.datePrise) > new Date()
+                      ).length
+                    }
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Dépensé</p>
+                  <p className="text-2xl font-bold">
+                    {reservations
+                      .reduce((sum, r) => sum + (r.totalTTC || 0), 0)
+                      .toFixed(0)}
+                    €
+                  </p>
+                </div>
+                <CreditCard className="h-8 w-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filtres et recherche */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Rechercher par véhicule, marque ou référence..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Select
+                  value={selectedStatus}
+                  onValueChange={setSelectedStatus}
+                >
+                  <SelectTrigger className="w-40">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tous">Tous les statuts</SelectItem>
+                    {Object.entries(statusConfig).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center gap-2">
+                          <config.icon className="h-4 w-4" />
+                          {config.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button variant="outline" onClick={fetchReservations}>
+                  Actualiser
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Liste des réservations */}
+        <Tabs defaultValue="liste" className="mb-8">
+          <TabsList className="grid grid-cols-2 w-full max-w-md">
+            <TabsTrigger value="liste">Vue liste</TabsTrigger>
+            <TabsTrigger value="calendrier">Vue calendrier</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="liste" className="space-y-4">
+            {loading ? (
+              // Squelettes de chargement
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="pt-6">
+                    <div className="flex gap-4">
+                      <div className="h-24 w-32 bg-gray-200 rounded"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-full"></div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : filteredReservations.length > 0 ? (
+              filteredReservations.map((reservation) => {
+                const StatusIcon =
+                  statusConfig[reservation.statut]?.icon || AlertCircle;
+                const duration = calculateDuration(
+                  reservation.datePrise,
+                  reservation.dateRetour
+                );
+                const canReview =
+                  reservation.statut === "terminee" &&
+                  !reservation.avisVehicule?.length;
+                const canCancel =
+                  ["en_attente", "confirmee"].includes(reservation.statut) &&
+                  new Date(reservation.datePrise) > new Date();
+
+                return (
+                  <Card
+                    key={reservation.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        {/* Image véhicule */}
+                        <div className="w-full md:w-48 h-36">
+                          <img
+                            src={
+                              reservation.vehicule.images?.[0] ||
+                              "https://images.unsplash.com/photo-1593941707882-a5bba5338fe2?w=400&auto=format&fit=crop"
+                            }
+                            alt={reservation.vehicule.marque}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
+
+                        {/* Détails */}
+                        <div className="flex-1">
+                          <div className="flex flex-col md:flex-row justify-between mb-4">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge
+                                  className={
+                                    statusConfig[reservation.statut]?.color +
+                                    " text-white"
+                                  }
+                                >
+                                  <StatusIcon className="h-3 w-3 mr-1" />
+                                  {statusConfig[reservation.statut]?.label}
+                                </Badge>
+                                <Badge variant="outline">
+                                  Réf: {reservation.id.slice(0, 8)}
+                                </Badge>
+                              </div>
+
+                              <h3 className="text-xl font-bold text-gray-900 mb-1">
+                                {reservation.vehicule.marque}{" "}
+                                {reservation.vehicule.modele}
+                              </h3>
+
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  {format(
+                                    new Date(reservation.datePrise),
+                                    "dd MMM yyyy",
+                                    { locale: fr }
+                                  )}{" "}
+                                  -{" "}
+                                  {format(
+                                    new Date(reservation.dateRetour),
+                                    "dd MMM yyyy",
+                                    { locale: fr }
+                                  )}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  {duration} jour{duration > 1 ? "s" : ""}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-4 w-4" />
+                                  {reservation.lieuPrise}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="text-right">
+                              <div className="text-2xl font-bold text-[#8B4513] mb-1">
+                                {reservation.totalTTC?.toFixed(2)}€
+                              </div>
+                              <p className="text-sm text-gray-500">
+                                Paiement: {reservation.statutPaiement}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Informations agence */}
+                          <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-semibold">
+                                  {reservation.prestataire?.companyName ||
+                                    reservation.prestataire?.commercialName}
+                                </p>
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <span>{reservation.prestataire?.email}</span>
+                                  <span>•</span>
+                                  <span>{reservation.prestataire?.phone}</span>
+                                </div>
+                              </div>
+                              <Button variant="outline" size="sm">
+                                <MessageCircle className="h-4 w-4 mr-2" />
+                                Contacter
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex flex-wrap gap-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Détails
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-3xl">
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    Détails de la réservation #
+                                    {reservation.id.slice(0, 8)}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-6">
+                                  {/* Contenu détaillé */}
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label className="text-gray-500 text-sm">
+                                        Véhicule
+                                      </Label>
+                                      <p className="font-semibold">
+                                        {reservation.vehicule.marque}{" "}
+                                        {reservation.vehicule.modele}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-gray-500 text-sm">
+                                        Catégorie
+                                      </Label>
+                                      <p className="font-semibold">
+                                        {reservation.vehicule.typeVehicule}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  {/* Ajouter plus de détails */}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleDownloadContract(reservation)
+                              }
+                            >
+                              <FileText className="h-4 w-4 mr-2" />
+                              Contrat
+                            </Button>
+
+                            {canReview && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedReservation(reservation);
+                                  setShowReviewModal(true);
+                                }}
+                              >
+                                <Star className="h-4 w-4 mr-2" />
+                                Laisser un avis
+                              </Button>
+                            )}
+
+                            {canCancel && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                                onClick={() =>
+                                  handleCancelReservation(reservation.id)
+                                }
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Annuler
+                              </Button>
+                            )}
+
+                            <Button size="sm" className="ml-auto">
+                              Voir l'itinéraire
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            ) : (
+              <Card>
+                <CardContent className="pt-12 pb-12 text-center">
+                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                    Aucune réservation trouvée
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    {searchTerm
+                      ? "Aucune réservation ne correspond à votre recherche"
+                      : "Vous n'avez pas encore de réservation de véhicule"}
+                  </p>
+                  <Button
+                    onClick={() => (window.location.href = "/location-voiture")}
+                  >
+                    Réserver un véhicule
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="calendrier">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                    Calendrier des réservations
+                  </h3>
+                  <p className="text-gray-500">
+                    Fonctionnalité bientôt disponible
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Modal pour laisser un avis */}
+      <Dialog open={showReviewModal} onOpenChange={setShowReviewModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Laisser un avis pour {selectedReservation?.vehicule.marque}{" "}
+              {selectedReservation?.vehicule.modele}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedReservation && (
+            <div className="space-y-6">
+              {/* Note */}
+              <div>
+                <Label className="block mb-2">Note générale</Label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() =>
+                        setReviewForm({ ...reviewForm, rating: star })
+                      }
+                      className="text-2xl"
+                    >
+                      {star <= reviewForm.rating ? "★" : "☆"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Titre */}
+              <div>
+                <Label>Titre de votre avis *</Label>
+                <Input
+                  value={reviewForm.titre}
+                  onChange={(e) =>
+                    setReviewForm({ ...reviewForm, titre: e.target.value })
+                  }
+                  placeholder="Ex: Excellent véhicule, agence sérieuse"
+                />
+              </div>
+
+              {/* Commentaire */}
+              <div>
+                <Label>Commentaire détaillé *</Label>
+                <Textarea
+                  value={reviewForm.commentaire}
+                  onChange={(e) =>
+                    setReviewForm({
+                      ...reviewForm,
+                      commentaire: e.target.value,
+                    })
+                  }
+                  placeholder="Décrivez votre expérience avec ce véhicule et l'agence..."
+                  rows={4}
+                />
+              </div>
+
+              {/* Points positifs/négatifs */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Points positifs (optionnel)</Label>
+                  <Textarea
+                    placeholder="Ex: Véhicule propre, accueil chaleureux..."
+                    rows={3}
+                    value={reviewForm.avantages.join(", ")}
+                    onChange={(e) =>
+                      setReviewForm({
+                        ...reviewForm,
+                        avantages: e.target.value.split(", ").filter(Boolean),
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label>Points à améliorer (optionnel)</Label>
+                  <Textarea
+                    placeholder="Ex: Retard à la livraison, options manquantes..."
+                    rows={3}
+                    value={reviewForm.inconvenients.join(", ")}
+                    onChange={(e) =>
+                      setReviewForm({
+                        ...reviewForm,
+                        inconvenients: e.target.value
+                          .split(", ")
+                          .filter(Boolean),
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Recommandation */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="recommandation"
+                  checked={reviewForm.recommandation}
+                  onChange={(e) =>
+                    setReviewForm({
+                      ...reviewForm,
+                      recommandation: e.target.checked,
+                    })
+                  }
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="recommandation">
+                  Je recommande ce véhicule et cette agence
+                </Label>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowReviewModal(false)}
+                >
+                  Annuler
+                </Button>
+                <Button onClick={handleSubmitReview}>Publier l'avis</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default MesReservationsVehiculePage;

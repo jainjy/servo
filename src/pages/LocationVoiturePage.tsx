@@ -97,63 +97,64 @@ const LocationVoiturePage = () => {
     kilometrage: "illimité",
     extras: [],
   });
+  const [villes, setVilles] = useState([]);
+  const [stats, setStats] = useState({
+    totalVehicules: 0,
+    disponibles: 0,
+    electriques: 0,
+    hybrides: 0,
+    prixMoyen: 0,
+  });
 
+  // Types de véhicules basés sur votre modèle
   const typesVehicules = [
     {
       id: "economique",
       label: "Économique",
       icon: Car,
       description: "Petites voitures éco",
-      count: 12,
     },
     {
       id: "compacte",
       label: "Compacte",
       icon: Car,
       description: "Voitures citadines",
-      count: 18,
     },
     {
       id: "berline",
       label: "Berline",
       icon: Car,
       description: "Confort et espace",
-      count: 15,
     },
     {
       id: "suv",
       label: "SUV & 4x4",
       icon: Car,
       description: "Aventures et famille",
-      count: 22,
-    },
-    {
-      id: "utilitaire",
-      label: "Utilitaire",
-      icon: Truck,
-      description: "Petits utilitaires",
-      count: 8,
-    },
-    {
-      id: "camion",
-      label: "Camion",
-      icon: Truck,
-      description: "Grands volumes",
-      count: 6,
     },
     {
       id: "luxe",
       label: "Luxe & Premium",
       icon: Car,
       description: "Haut de gamme",
-      count: 9,
+    },
+    {
+      id: "utilitaire",
+      label: "Utilitaire",
+      icon: Truck,
+      description: "Petits utilitaires",
+    },
+    {
+      id: "camion",
+      label: "Camion",
+      icon: Truck,
+      description: "Grands volumes",
     },
     {
       id: "minibus",
       label: "Minibus",
       icon: Users,
       description: "Groupes et familles",
-      count: 5,
     },
   ];
 
@@ -167,17 +168,6 @@ const LocationVoiturePage = () => {
     { id: "diesel", label: "Diesel", icon: Fuel },
     { id: "electrique", label: "Électrique", icon: Zap },
     { id: "hybride", label: "Hybride", icon: Fuel },
-  ];
-
-  const villes = [
-    { id: "saint-denis", label: "Saint-Denis", count: 25 },
-    { id: "saint-pierre", label: "Saint-Pierre", count: 18 },
-    { id: "saint-paul", label: "Saint-Paul", count: 15 },
-    { id: "le-tampon", label: "Le Tampon", count: 12 },
-    { id: "saint-louis", label: "Saint-Louis", count: 10 },
-    { id: "saint-joseph", label: "Saint-Joseph", count: 8 },
-    { id: "sainte-marie", label: "Sainte-Marie", count: 7 },
-    { id: "sainte-suzanne", label: "Sainte-Suzanne", count: 5 },
   ];
 
   const extras = [
@@ -199,331 +189,13 @@ const LocationVoiturePage = () => {
     },
   ];
 
-  const vehiculesList = [
-    {
-      id: 1,
-      marque: "Toyota",
-      modele: "Yaris",
-      type: "economique",
-      transmission: "manuelle",
-      carburant: "essence",
-      city: "saint-denis",
-      prixJour: 35,
-      prixSemaine: 210,
-      rating: 4.6,
-      reviews: 128,
-      image:
-        "https://images.unsplash.com/photo-1593941707882-a5bba5338fe2?w=800&auto=format&fit=crop",
-      description:
-        "Voiture économique parfaite pour la ville, consommation réduite.",
-      caracteristiques: [
-        "4 places",
-        "Climatisation",
-        "Bluetooth",
-        "Airbags",
-        "ABS",
-      ],
-      disponible: true,
-      agence: "Location Réunion Auto",
-      agenceRating: 4.8,
-      kilometrage: "300 km/jour inclus",
-      annee: 2023,
-      puissance: "75ch",
-      couleur: "Blanc",
-      equipements: [
-        "Climatisation automatique",
-        "Caméra de recul",
-        "Système audio Bluetooth",
-        "Contrôle de stabilité",
-      ],
-    },
-    {
-      id: 2,
-      marque: "Renault",
-      modele: "Clio",
-      type: "compacte",
-      transmission: "automatique",
-      carburant: "diesel",
-      city: "saint-pierre",
-      prixJour: 45,
-      prixSemaine: 270,
-      rating: 4.7,
-      reviews: 156,
-      image:
-        "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w-800&auto=format&fit=crop",
-      description:
-        "Compacte spacieuse avec transmission automatique, idéale pour la famille.",
-      caracteristiques: [
-        "5 places",
-        "Climatisation",
-        "GPS",
-        "Toit ouvrant",
-        "Régulateur",
-      ],
-      disponible: true,
-      agence: "Auto Loc 974",
-      agenceRating: 4.5,
-      kilometrage: "illimité",
-      annee: 2024,
-      puissance: "90ch",
-      couleur: "Gris",
-      equipements: [
-        "Toit ouvrant panoramique",
-        "Système infodivertissement",
-        "Aide au stationnement",
-        "Limiteur de vitesse",
-      ],
-    },
-    {
-      id: 3,
-      marque: "Peugeot",
-      modele: "3008",
-      type: "suv",
-      transmission: "automatique",
-      carburant: "hybride",
-      city: "saint-paul",
-      prixJour: 75,
-      prixSemaine: 450,
-      rating: 4.9,
-      reviews: 89,
-      image:
-        "https://images.unsplash.com/photo-1563720223486-7a472e5c7b52?w-800&auto=format&fit=crop",
-      description:
-        "SUV familial hybride, confort et espace pour vos aventures réunionnaises.",
-      caracteristiques: [
-        "5 places",
-        "Climatisation bi-zone",
-        "GPS",
-        "Toit panoramique",
-        "4x4",
-      ],
-      disponible: true,
-      agence: "Premium Location",
-      agenceRating: 4.9,
-      kilometrage: "400 km/jour inclus",
-      annee: 2023,
-      puissance: "180ch",
-      couleur: "Bleu",
-      equipements: [
-        "Système hybride",
-        "Toit panoramique électrique",
-        "Système audio premium",
-        "Aides à la conduite",
-      ],
-    },
-    {
-      id: 4,
-      marque: "Mercedes",
-      modele: "Classe C",
-      type: "luxe",
-      transmission: "automatique",
-      carburant: "essence",
-      city: "saint-denis",
-      prixJour: 120,
-      prixSemaine: 720,
-      rating: 4.8,
-      reviews: 67,
-      image:
-        "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w-800&auto=format&fit=crop",
-      description: "Berline premium avec tous les équipements haut de gamme.",
-      caracteristiques: [
-        "5 places",
-        "Climatisation 4 zones",
-        "GPS premium",
-        "Cuir",
-        "Assistance conduite",
-      ],
-      disponible: true,
-      agence: "Luxe Auto Réunion",
-      agenceRating: 4.7,
-      kilometrage: "illimité",
-      annee: 2024,
-      puissance: "258ch",
-      couleur: "Noir",
-      equipements: [
-        "Intérieur cuir",
-        "Système Burmester",
-        "Phares LED matriciels",
-        "Pilotage automatique",
-      ],
-    },
-    {
-      id: 5,
-      marque: "Renault",
-      modele: "Kangoo",
-      type: "utilitaire",
-      transmission: "manuelle",
-      carburant: "diesel",
-      city: "le-tampon",
-      prixJour: 55,
-      prixSemaine: 330,
-      rating: 4.4,
-      reviews: 92,
-      image:
-        "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w-800&auto=format&fit=crop",
-      description:
-        "Utilitaire pratique pour le transport de marchandises, volume important.",
-      caracteristiques: [
-        "3 places",
-        "Climatisation",
-        "Grand volume",
-        "Hayon",
-        "ABS",
-      ],
-      disponible: true,
-      agence: "Pro Location 974",
-      agenceRating: 4.6,
-      kilometrage: "300 km/jour inclus",
-      annee: 2022,
-      puissance: "95ch",
-      couleur: "Blanc",
-      equipements: [
-        "Hayon électrique",
-        "Caméra de recul",
-        "Aide au chargement",
-        "Grand volume (3,9m³)",
-      ],
-    },
-    {
-      id: 6,
-      marque: "Ford",
-      modele: "Ranger",
-      type: "camion",
-      transmission: "automatique",
-      carburant: "diesel",
-      city: "saint-louis",
-      prixJour: 85,
-      prixSemaine: 510,
-      rating: 4.5,
-      reviews: 45,
-      image:
-        "https://images.unsplash.com/photo-1566474591191-8a583d6af81b?w-800&auto=format&fit=crop",
-      description:
-        "Pick-up robuste pour travaux et transport de matériel en tout terrain.",
-      caracteristiques: [
-        "5 places",
-        "Climatisation",
-        "4x4",
-        "Grande benne",
-        "Treuil",
-      ],
-      disponible: true,
-      agence: "Location Pro Réunion",
-      agenceRating: 4.4,
-      kilometrage: "250 km/jour inclus",
-      annee: 2023,
-      puissance: "213ch",
-      couleur: "Gris",
-      equipements: [
-        "4x4 permanent",
-        "Treuil électrique",
-        "Protections sous caisse",
-        "Benne de 1 tonne",
-      ],
-    },
-    {
-      id: 7,
-      marque: "Nissan",
-      modele: "Leaf",
-      type: "compacte",
-      transmission: "automatique",
-      carburant: "electrique",
-      city: "saint-pierre",
-      prixJour: 60,
-      prixSemaine: 360,
-      rating: 4.8,
-      reviews: 78,
-      image:
-        "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w-800&auto=format&fit=crop",
-      description:
-        "Voiture électrique silencieuse et économique, parfaite pour l'île.",
-      caracteristiques: [
-        "5 places",
-        "Climatisation",
-        "Autonomie 270km",
-        "Recharge rapide",
-        "Écran tactile",
-      ],
-      disponible: true,
-      agence: "Eco Location Réunion",
-      agenceRating: 4.9,
-      kilometrage: "illimité",
-      annee: 2024,
-      puissance: "150ch",
-      couleur: "Bleu",
-      equipements: [
-        "Autonomie 270km",
-        "Recharge rapide 80% en 30min",
-        "Écran tactile 8 pouces",
-        "Aides à la conduite",
-      ],
-    },
-    {
-      id: 8,
-      marque: "Volkswagen",
-      modele: "Caravelle",
-      type: "minibus",
-      transmission: "manuelle",
-      carburant: "diesel",
-      city: "saint-denis",
-      prixJour: 95,
-      prixSemaine: 570,
-      rating: 4.7,
-      reviews: 56,
-      image:
-        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w-800&auto=format&fit=crop",
-      description:
-        "Minibus 9 places idéal pour les groupes, familles ou équipes.",
-      caracteristiques: [
-        "9 places",
-        "Climatisation",
-        "Grand espace",
-        "Sièges amovibles",
-        "Toit élevé",
-      ],
-      disponible: true,
-      agence: "Family Location",
-      agenceRating: 4.7,
-      kilometrage: "300 km/jour inclus",
-      annee: 2023,
-      puissance: "150ch",
-      couleur: "Blanc",
-      equipements: [
-        "Sièges amovibles",
-        "Climatisation double zone",
-        "Portes coulissantes",
-        "Grand volume",
-      ],
-    },
-  ];
+  useEffect(() => {
+    fetchVehicules();
+    fetchStats();
+    fetchVilles();
+  }, []);
 
   useEffect(() => {
-    const fetchVehicules = async () => {
-      setLoading(true);
-      try {
-        const params = {
-          type: selectedType !== "tous" ? selectedType : undefined,
-          transmission:
-            selectedTransmission !== "tous" ? selectedTransmission : undefined,
-          carburant: selectedFuel !== "tous" ? selectedFuel : undefined,
-          ville: selectedCity !== "tous" ? selectedCity : undefined,
-          minPrice: priceRange[0],
-          maxPrice: priceRange[1],
-          search: searchTerm || undefined,
-        };
-
-        const response = await vehiculesApi.getVehicules(params);
-        setVehicules(response.data.data || []);
-      } catch (error) {
-        console.error("Erreur chargement véhicules:", error);
-        toast.error("Erreur lors du chargement des véhicules");
-        // Charger les données fictives en cas d'erreur
-        setVehicules(vehiculesList);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchVehicules();
   }, [
     selectedType,
@@ -532,7 +204,75 @@ const LocationVoiturePage = () => {
     selectedCity,
     priceRange,
     searchTerm,
+    activeTab,
   ]);
+
+  const fetchVehicules = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        type: selectedType !== "tous" ? selectedType : undefined,
+        transmission:
+          selectedTransmission !== "tous" ? selectedTransmission : undefined,
+        carburant: selectedFuel !== "tous" ? selectedFuel : undefined,
+        ville: selectedCity !== "tous" ? selectedCity : undefined,
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
+        search: searchTerm || undefined,
+      };
+
+      const response = await vehiculesApi.getVehicules(params);
+      setVehicules(response.data.data || []);
+    } catch (error) {
+      console.error("Erreur chargement véhicules:", error);
+      toast.error("Erreur lors du chargement des véhicules");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await vehiculesApi.getStats();
+      setStats(response.data.data || {});
+    } catch (error) {
+      console.error("Erreur chargement stats:", error);
+    }
+  };
+
+  const fetchVilles = async () => {
+    try {
+      // Récupérer les villes uniques depuis les véhicules
+      const response = await vehiculesApi.getVehicules({ limit: 100 });
+      const vehiculesData = response.data.data || [];
+
+      // Compter les véhicules par ville
+      const villeCounts = {};
+      vehiculesData.forEach((vehicule) => {
+        if (vehicule.ville) {
+          villeCounts[vehicule.ville] = (villeCounts[vehicule.ville] || 0) + 1;
+        }
+      });
+
+      // Transformer en format pour le select
+      const villesList = Object.entries(villeCounts).map(([ville, count]) => ({
+        id: ville.toLowerCase().replace(/\s+/g, "-"),
+        label: ville,
+        count,
+      }));
+
+      setVilles(villesList);
+    } catch (error) {
+      console.error("Erreur chargement villes:", error);
+      // Villes par défaut en cas d'erreur
+      setVilles([
+        { id: "saint-denis", label: "Saint-Denis", count: 0 },
+        { id: "saint-pierre", label: "Saint-Pierre", count: 0 },
+        { id: "saint-paul", label: "Saint-Paul", count: 0 },
+        { id: "le-tampon", label: "Le Tampon", count: 0 },
+      ]);
+    }
+  };
 
   // Gestion du tri
   const sortVehicules = (vehiculesList, sortMethod) => {
@@ -557,17 +297,22 @@ const LocationVoiturePage = () => {
       const matchesSearch =
         vehicule.marque.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicule.modele.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicule.description.toLowerCase().includes(searchTerm.toLowerCase());
+        (vehicule.description &&
+          vehicule.description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()));
 
       const matchesType =
         selectedType === "tous" ||
         (activeTab === "voitures" &&
           ["economique", "compacte", "berline", "suv", "luxe"].includes(
-            vehicule.type
+            vehicule.typeVehicule
           )) ||
         (activeTab === "utilitaires" &&
-          ["utilitaire", "camion", "minibus"].includes(vehicule.type)) ||
-        vehicule.type === selectedType;
+          ["utilitaire", "camion", "minibus"].includes(
+            vehicule.typeVehicule
+          )) ||
+        vehicule.typeVehicule === selectedType;
 
       const matchesTransmission =
         selectedTransmission === "tous" ||
@@ -575,7 +320,7 @@ const LocationVoiturePage = () => {
       const matchesFuel =
         selectedFuel === "tous" || vehicule.carburant === selectedFuel;
       const matchesCity =
-        selectedCity === "tous" || vehicule.city === selectedCity;
+        selectedCity === "tous" || vehicule.ville === selectedCity;
       const matchesPrice =
         vehicule.prixJour >= priceRange[0] &&
         vehicule.prixJour <= priceRange[1];
@@ -586,7 +331,9 @@ const LocationVoiturePage = () => {
         matchesTransmission &&
         matchesFuel &&
         matchesCity &&
-        matchesPrice
+        matchesPrice &&
+        vehicule.disponible &&
+        vehicule.statut === "active"
       );
     }),
     sortBy
@@ -607,7 +354,6 @@ const LocationVoiturePage = () => {
   const handleReserve = async (vehicule) => {
     setSelectedVehicule(vehicule);
 
-    // Vérifier la disponibilité pour les dates sélectionnées
     if (pickupDate && returnDate) {
       try {
         const response = await vehiculesApi.checkDisponibilite(
@@ -654,8 +400,8 @@ const LocationVoiturePage = () => {
         vehiculeId: selectedVehicule.id,
         datePrise: pickupDate,
         dateRetour: returnDate,
-        lieuPrise: selectedCity,
-        lieuRetour: selectedCity,
+        lieuPrise: selectedVehicule.ville,
+        lieuRetour: selectedVehicule.ville,
         nombreConducteurs: 1,
         kilometrageOption: reservationForm.kilometrage,
         extras: reservationForm.extras,
@@ -683,9 +429,6 @@ const LocationVoiturePage = () => {
         extras: [],
       });
       setShowReservation(false);
-
-      // Rediriger vers la page de confirmation
-      navigate(`/reservation-confirmation/${response.data.data.id}`);
     } catch (error) {
       console.error("Erreur création réservation:", error);
       toast.error(
@@ -697,6 +440,7 @@ const LocationVoiturePage = () => {
   // Recherche avec entrée
   const handleSearch = (e) => {
     if (e.key === "Enter" || e.type === "click") {
+      fetchVehicules();
       toast.info(`Recherche de "${searchTerm}" en cours...`);
     }
   };
@@ -725,6 +469,7 @@ const LocationVoiturePage = () => {
     setSelectedCity("tous");
     setPriceRange([30, 150]);
     setSearchTerm("");
+    fetchVehicules();
     toast.success("Filtres réinitialisés");
   };
 
@@ -739,9 +484,53 @@ const LocationVoiturePage = () => {
 
   // Contacter l'agence
   const handleContactAgency = (vehicule) => {
-    toast.info(`Ouverture de la conversation avec ${vehicule.agence}`);
-    // Redirection vers les messages
+    toast.info(
+      `Ouverture de la conversation avec ${
+        vehicule.agence || vehicule.prestataire?.companyName
+      }`
+    );
     navigate("/mon-compte/messages");
+  };
+
+  // Formater le prix
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  // Récupérer l'image du véhicule
+  const getVehicleImage = (vehicule) => {
+    if (vehicule.images && vehicule.images.length > 0) {
+      return vehicule.images[0];
+    }
+
+    // Image par défaut basée sur le type
+    const defaultImages = {
+      suv: "https://images.unsplash.com/photo-1563720223486-7a472e5c7b52?w=800&auto=format&fit=crop",
+      economique:
+        "https://images.unsplash.com/photo-1593941707882-a5bba5338fe2?w=800&auto=format&fit=crop",
+      compacte:
+        "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&auto=format&fit=crop",
+      berline:
+        "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&auto=format&fit=crop",
+      luxe: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&auto=format&fit=crop",
+      utilitaire:
+        "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800&auto=format&fit=crop",
+      camion:
+        "https://images.unsplash.com/photo-1566474591191-8a583d6af81b?w=800&auto=format&fit=crop",
+      electrique:
+        "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&auto=format&fit=crop",
+      minibus:
+        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop",
+    };
+
+    return (
+      defaultImages[vehicule.typeVehicule] ||
+      "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop"
+    );
   };
 
   return (
@@ -763,8 +552,7 @@ const LocationVoiturePage = () => {
               Location de Voitures & Utilitaires à La Réunion
             </h1>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Plus de 100 véhicules disponibles • Livraison partout sur l'île •
-              Meilleur prix garanti
+              Livraison partout sur l'île • Meilleur prix garanti
             </p>
           </div>
 
@@ -782,7 +570,7 @@ const LocationVoiturePage = () => {
                   <SelectContent>
                     <SelectItem value="tous">Toutes les villes</SelectItem>
                     {villes.map((ville) => (
-                      <SelectItem key={ville.id} value={ville.id}>
+                      <SelectItem key={ville.id} value={ville.label}>
                         {ville.label}
                       </SelectItem>
                     ))}
@@ -819,7 +607,7 @@ const LocationVoiturePage = () => {
               <div className="flex items-end">
                 <Button
                   className="w-full bg-[#8B4513] hover:bg-[#6B3410] text-white py-6 text-lg"
-                  onClick={() => toast.info("Recherche en cours...")}
+                  onClick={handleSearch}
                 >
                   <Search className="h-5 w-5 mr-2" />
                   Rechercher
@@ -828,33 +616,7 @@ const LocationVoiturePage = () => {
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-8">
-            <Card className="bg-white/10 border-white/20 text-white">
-              <CardContent className="pt-6 text-center">
-                <div className="text-2xl font-bold">100+</div>
-                <div className="text-sm opacity-90">Véhicules</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/10 border-white/20 text-white">
-              <CardContent className="pt-6 text-center">
-                <div className="text-2xl font-bold">8</div>
-                <div className="text-sm opacity-90">Villes</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/10 border-white/20 text-white">
-              <CardContent className="pt-6 text-center">
-                <div className="text-2xl font-bold">24/7</div>
-                <div className="text-sm opacity-90">Assistance</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/10 border-white/20 text-white">
-              <CardContent className="pt-6 text-center">
-                <div className="text-2xl font-bold">4.8★</div>
-                <div className="text-sm opacity-90">Avis clients</div>
-              </CardContent>
-            </Card>
-          </div>
+
         </div>
       </div>
 
@@ -894,7 +656,6 @@ const LocationVoiturePage = () => {
                               {type.label}
                             </span>
                           </div>
-                          <Badge variant="outline">{type.count}</Badge>
                         </div>
                       );
                     })}
@@ -1006,8 +767,8 @@ const LocationVoiturePage = () => {
                     <SelectContent>
                       <SelectItem value="tous">Toutes les villes</SelectItem>
                       {villes.map((ville) => (
-                        <SelectItem key={ville.id} value={ville.id}>
-                          {ville.label} ({ville.count})
+                        <SelectItem key={ville.id} value={ville.label}>
+                          {ville.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1171,7 +932,8 @@ const LocationVoiturePage = () => {
                   filteredVehicules.map((vehicule) => {
                     const duration = calculateDuration();
                     const totalPrice = vehicule.prixJour * duration;
-                    const weeklyPrice = vehicule.prixSemaine;
+                    const weeklyPrice =
+                      vehicule.prixSemaine || vehicule.prixJour * 7 * 0.85; // 15% de réduction pour la semaine
 
                     return (
                       <Card
@@ -1183,7 +945,7 @@ const LocationVoiturePage = () => {
                             {/* Image véhicule */}
                             <div className="w-full md:w-64 h-48 relative">
                               <img
-                                src={vehicule.image}
+                                src={getVehicleImage(vehicule)}
                                 alt={`${vehicule.marque} ${vehicule.modele}`}
                                 className="w-full h-full object-cover rounded-lg"
                               />
@@ -1215,11 +977,9 @@ const LocationVoiturePage = () => {
                                 <div>
                                   <div className="flex items-center gap-2 mb-2">
                                     <Badge className="bg-[#556B2F] text-white">
-                                      {
-                                        typesVehicules.find(
-                                          (t) => t.id === vehicule.type
-                                        )?.label
-                                      }
+                                      {typesVehicules.find(
+                                        (t) => t.id === vehicule.typeVehicule
+                                      )?.label || vehicule.typeVehicule}
                                     </Badge>
                                     <Badge
                                       variant="outline"
@@ -1238,40 +998,35 @@ const LocationVoiturePage = () => {
                                   </h3>
                                   <div className="flex items-center gap-2 text-gray-600 mb-2">
                                     <MapPin className="h-4 w-4" />
-                                    <span>
-                                      {
-                                        villes.find(
-                                          (v) => v.id === vehicule.city
-                                        )?.label
-                                      }
-                                    </span>
+                                    <span>{vehicule.ville}</span>
                                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                                     <span className="font-semibold">
-                                      {vehicule.rating}
+                                      {vehicule.rating.toFixed(1)}
                                     </span>
                                     <span className="text-gray-500 text-sm">
-                                      ({vehicule.reviews} avis)
+                                      ({vehicule.nombreAvis || 0} avis)
                                     </span>
                                   </div>
                                 </div>
                                 <div className="text-right">
                                   <div className="text-2xl font-bold text-[#8B4513] mb-1">
-                                    {vehicule.prixJour}€
+                                    {formatPrice(vehicule.prixJour)}
                                     <span className="text-sm font-normal text-gray-500">
                                       /jour
                                     </span>
                                   </div>
                                   <p className="text-sm text-gray-500">
-                                    {weeklyPrice}€ la semaine
+                                    {formatPrice(weeklyPrice)} la semaine
                                   </p>
                                   <p className="text-lg font-bold text-green-600">
-                                    Total : {totalPrice}€
+                                    Total : {formatPrice(totalPrice)}
                                   </p>
                                 </div>
                               </div>
 
                               <p className="text-gray-700 mb-4 line-clamp-2">
-                                {vehicule.description}
+                                {vehicule.description ||
+                                  "Véhicule de qualité disponible à la location."}
                               </p>
 
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
@@ -1296,36 +1051,62 @@ const LocationVoiturePage = () => {
                                 <div className="flex items-center gap-2">
                                   <Users className="h-4 w-4 text-[#556B2F]" />
                                   <span className="text-sm">
-                                    {vehicule.caracteristiques[0]}
+                                    {vehicule.places} places
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Clock className="h-4 w-4 text-[#556B2F]" />
                                   <span className="text-sm">
-                                    {vehicule.kilometrage}
+                                    {vehicule.kilometrageInclus}
                                   </span>
                                 </div>
                               </div>
 
                               <div className="flex flex-wrap gap-2 mb-4">
-                                {vehicule.caracteristiques
-                                  .slice(0, 4)
-                                  .map((caract, idx) => (
+                                {vehicule.caracteristiques &&
+                                vehicule.caracteristiques.length > 0 ? (
+                                  vehicule.caracteristiques
+                                    .slice(0, 4)
+                                    .map((caract, idx) => (
+                                      <Badge
+                                        key={idx}
+                                        variant="secondary"
+                                        className="bg-gray-100"
+                                      >
+                                        {caract}
+                                      </Badge>
+                                    ))
+                                ) : (
+                                  <>
                                     <Badge
-                                      key={idx}
                                       variant="secondary"
                                       className="bg-gray-100"
                                     >
-                                      {caract}
+                                      {vehicule.places} places
                                     </Badge>
-                                  ))}
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-gray-100"
+                                    >
+                                      {vehicule.portes} portes
+                                    </Badge>
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-gray-100"
+                                    >
+                                      {vehicule.transmission}
+                                    </Badge>
+                                  </>
+                                )}
                               </div>
 
                               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div className="flex items-center gap-2">
                                   <Shield className="h-4 w-4 text-green-600" />
                                   <span className="text-sm font-medium">
-                                    {vehicule.agence} • {vehicule.agenceRating}★
+                                    {vehicule.agence ||
+                                      vehicule.prestataire?.companyName}{" "}
+                                    • {vehicule.prestataire?.rating || 4.5}★
                                   </span>
                                 </div>
                                 <div className="flex gap-2">
@@ -1358,7 +1139,9 @@ const LocationVoiturePage = () => {
                                           </SheetHeader>
                                           <div className="mt-6 space-y-6">
                                             <img
-                                              src={selectedVehicule.image}
+                                              src={getVehicleImage(
+                                                selectedVehicule
+                                              )}
                                               alt={`${selectedVehicule.marque} ${selectedVehicule.modele}`}
                                               className="w-full h-64 object-cover rounded-lg"
                                             />
@@ -1368,7 +1151,8 @@ const LocationVoiturePage = () => {
                                                 Description
                                               </h4>
                                               <p className="text-gray-700">
-                                                {selectedVehicule.description}
+                                                {selectedVehicule.description ||
+                                                  "Véhicule de qualité disponible à la location."}
                                               </p>
                                             </div>
 
@@ -1409,33 +1193,59 @@ const LocationVoiturePage = () => {
                                                     {selectedVehicule.couleur}
                                                   </p>
                                                 </div>
+                                                <div className="bg-gray-50 p-3 rounded">
+                                                  <p className="text-sm text-gray-600">
+                                                    Places
+                                                  </p>
+                                                  <p className="font-semibold">
+                                                    {selectedVehicule.places}
+                                                  </p>
+                                                </div>
+                                                <div className="bg-gray-50 p-3 rounded">
+                                                  <p className="text-sm text-gray-600">
+                                                    Transmission
+                                                  </p>
+                                                  <p className="font-semibold">
+                                                    {
+                                                      selectedVehicule.transmission
+                                                    }
+                                                  </p>
+                                                </div>
                                               </div>
                                             </div>
 
                                             <div>
                                               <h4 className="font-semibold text-[#8B4513] mb-2">
-                                                Équipements inclus
+                                                Conditions de location
                                               </h4>
-                                              <div className="flex flex-wrap gap-2">
-                                                {selectedVehicule?.equipements &&
-                                                Array.isArray(
-                                                  selectedVehicule.equipements
-                                                ) ? (
-                                                  selectedVehicule.equipements.map(
-                                                    (equip, idx) => (
-                                                      <Badge
-                                                        key={idx}
-                                                        variant="outline"
-                                                      >
-                                                        {equip}
-                                                      </Badge>
-                                                    )
-                                                  )
-                                                ) : (
-                                                  <p className="text-sm text-gray-500">
-                                                    Aucun équipement spécifié
-                                                  </p>
-                                                )}
+                                              <div className="bg-yellow-50 p-4 rounded-lg">
+                                                <div className="space-y-2">
+                                                  <div className="flex justify-between">
+                                                    <span>
+                                                      Kilométrage inclus:
+                                                    </span>
+                                                    <span className="font-semibold">
+                                                      {
+                                                        selectedVehicule.kilometrageInclus
+                                                      }
+                                                    </span>
+                                                  </div>
+                                                  <div className="flex justify-between">
+                                                    <span>Caution:</span>
+                                                    <span className="font-semibold">
+                                                      {formatPrice(
+                                                        selectedVehicule.caution
+                                                      )}
+                                                    </span>
+                                                  </div>
+                                                  {selectedVehicule.conditionsLocation && (
+                                                    <p className="text-sm text-gray-600 mt-2">
+                                                      {
+                                                        selectedVehicule.conditionsLocation
+                                                      }
+                                                    </p>
+                                                  )}
+                                                </div>
                                               </div>
                                             </div>
 
@@ -1447,21 +1257,18 @@ const LocationVoiturePage = () => {
                                                 <div className="flex items-center justify-between">
                                                   <div>
                                                     <p className="font-semibold">
-                                                      {selectedVehicule.agence}
+                                                      {selectedVehicule.agence ||
+                                                        selectedVehicule
+                                                          .prestataire
+                                                          ?.companyName ||
+                                                        "Professionnel OLIPLUS"}
                                                     </p>
                                                     <div className="flex items-center gap-1">
                                                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                                                       <span>
-                                                        {
-                                                          selectedVehicule.agenceRating
-                                                        }
-                                                      </span>
-                                                      <span className="text-gray-500 text-sm">
-                                                        (
-                                                        {
-                                                          selectedVehicule.reviews
-                                                        }{" "}
-                                                        avis)
+                                                        {selectedVehicule.prestataire?.rating?.toFixed(
+                                                          1
+                                                        ) || 4.5}
                                                       </span>
                                                     </div>
                                                   </div>
@@ -1528,7 +1335,7 @@ const LocationVoiturePage = () => {
                                             <div className="text-sm text-gray-600">
                                               {duration} jour
                                               {duration > 1 ? "s" : ""} • Total
-                                              : {totalPrice}€
+                                              : {formatPrice(totalPrice)}
                                             </div>
                                           </DialogHeader>
 
@@ -1713,7 +1520,9 @@ const LocationVoiturePage = () => {
                                                         </div>
                                                         <div className="text-right">
                                                           <p className="font-semibold">
-                                                            {extraTotal}€
+                                                            {formatPrice(
+                                                              extraTotal
+                                                            )}
                                                           </p>
                                                           <p className="text-sm text-gray-500">
                                                             pour {duration} jour
@@ -1740,7 +1549,7 @@ const LocationVoiturePage = () => {
                                                       jours)
                                                     </span>
                                                     <span className="font-semibold">
-                                                      {totalPrice}€
+                                                      {formatPrice(totalPrice)}
                                                     </span>
                                                   </div>
                                                   {reservationForm.extras.map(
@@ -1760,7 +1569,10 @@ const LocationVoiturePage = () => {
                                                             {extra?.label}
                                                           </span>
                                                           <span>
-                                                            +{extraTotal}€
+                                                            +
+                                                            {formatPrice(
+                                                              extraTotal
+                                                            )}
                                                           </span>
                                                         </div>
                                                       );
@@ -1770,26 +1582,30 @@ const LocationVoiturePage = () => {
                                                   <div className="flex justify-between text-lg font-bold">
                                                     <span>Total</span>
                                                     <span className="text-[#8B4513]">
-                                                      {totalPrice +
-                                                        reservationForm.extras.reduce(
-                                                          (total, extraId) => {
-                                                            const extra =
-                                                              extras.find(
-                                                                (e) =>
-                                                                  e.id ===
-                                                                  extraId
+                                                      {formatPrice(
+                                                        totalPrice +
+                                                          reservationForm.extras.reduce(
+                                                            (
+                                                              total,
+                                                              extraId
+                                                            ) => {
+                                                              const extra =
+                                                                extras.find(
+                                                                  (e) =>
+                                                                    e.id ===
+                                                                    extraId
+                                                                );
+                                                              return (
+                                                                total +
+                                                                (extra
+                                                                  ? extra.price *
+                                                                    duration
+                                                                  : 0)
                                                               );
-                                                            return (
-                                                              total +
-                                                              (extra
-                                                                ? extra.price *
-                                                                  duration
-                                                                : 0)
-                                                            );
-                                                          },
-                                                          0
-                                                        )}
-                                                      €
+                                                            },
+                                                            0
+                                                          )
+                                                      )}
                                                     </span>
                                                   </div>
                                                 </div>
@@ -1846,86 +1662,6 @@ const LocationVoiturePage = () => {
                 )}
               </TabsContent>
             </Tabs>
-
-            {/* FAQ et informations */}
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <Card className="border-[#556B2F]">
-                <CardHeader>
-                  <CardTitle className="text-[#8B4513]">
-                    Questions fréquentes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-1">
-                        Quels documents sont nécessaires ?
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Permis de conduire valide, pièce d'identité et carte
-                        bancaire. Le permis doit être valide depuis au moins 1
-                        an.
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-1">
-                        Y a-t-il une caution ?
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Oui, une préautorisation sur carte bancaire est
-                        demandée. Le montant varie selon le véhicule
-                        (300-1500€).
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-1">
-                        Peut-on louer sans carte de crédit ?
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Non, une carte de crédit est obligatoire pour la caution
-                        et la garantie.
-                      </p>
-                    </div>
-                    <Button variant="link" className="text-[#556B2F] p-0">
-                      Voir toutes les questions
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-[#6B8E23] bg-gradient-to-br from-[#556B2F]/5 to-[#6B8E23]/5">
-                <CardHeader>
-                  <CardTitle className="text-[#8B4513]">
-                    Conseils location
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="border-l-4 border-[#556B2F] pl-4 py-2">
-                      <h4 className="font-medium">Vérifiez le véhicule</h4>
-                      <p className="text-sm text-gray-600">
-                        Inspectez le véhicule avant départ et signez l'état des
-                        lieux.
-                      </p>
-                    </div>
-                    <div className="border-l-4 border-[#6B8E23] pl-4 py-2">
-                      <h4 className="font-medium">Kilométrage inclus</h4>
-                      <p className="text-sm text-gray-600">
-                        Vérifiez le kilométrage quotidien inclus pour éviter les
-                        frais supplémentaires.
-                      </p>
-                    </div>
-                    <div className="border-l-4 border-[#8B4513] pl-4 py-2">
-                      <h4 className="font-medium">Assurance optionnelle</h4>
-                      <p className="text-sm text-gray-600">
-                        L'assurance tous risques réduit considérablement votre
-                        franchise en cas d'accident.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </div>

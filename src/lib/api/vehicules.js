@@ -43,4 +43,36 @@ export const vehiculesApi = {
 
   // Statistiques globales
   getStats: () => api.get("/vehicules/stats/global"),
+
+  // Créer un véhicule (avec FormData pour les images)
+  createVehicule: (formData) =>
+    api.post("/vehicules", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+
+  // Mettre à jour un véhicule (avec FormData pour les images)
+  updateVehicule: (id, formData) =>
+    api.put(`/vehicules/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+
+  // Supprimer un véhicule
+  deleteVehicule: (id) => api.delete(`/vehicules/${id}`),
+
+  // Upload d'images vers Supabase (nouvelle fonction)
+  uploadImages: (files) => {
+    const formData = new FormData();
+    files.forEach((file, index) => {
+      formData.append(`image_${index}`, file);
+    });
+    return api.post("/api/upload/multiple", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };

@@ -224,6 +224,8 @@ import path from "path";
 import EmploiFormationsPage from "./pages/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
+import MesReservationsVehiculePage from "./pages/mon-compte/MesReservationsVehiculePage";
+import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
 
                  
 const queryClient = new QueryClient();
@@ -702,6 +704,7 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
+                    <Route path="vehicules" element={<PrestataireVehiculesPage />} />
                     <Route
                       path="contact-messages"
                       element={<ContactMessagesPage />}
@@ -820,6 +823,7 @@ const App = () => {
                       element={<MesDemandesImmobilier />}
                     />
                     <Route path="mes-commandes" element={<UserOrders />} />
+                    <Route path="location-voiture" element={<MesReservationsVehiculePage />} />
                   </Route>
                   {/* Section Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>

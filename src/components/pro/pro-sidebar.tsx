@@ -24,6 +24,8 @@ import {
   Wallet2Icon,
   UserCircle2,
   Contact2Icon,
+  Car,
+  Brush,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -42,7 +44,7 @@ const navigation = [
   {
     name: "Art et Creation",
     href: "/pro/art-et-creation-page",
-    icon: Wrench,
+    icon: Brush, // Changé de Wrench à Brush pour mieux représenter l'art
   },
   { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
 
@@ -52,6 +54,11 @@ const navigation = [
     name: "Reservations tourisme",
     href: "/pro/reservations",
     icon: ShoppingBag,
+  },
+  {
+    name: "Gestion de locations des vehicules",
+    href: "/pro/vehicules",
+    icon: Car,
   },
   {
     name: "Reservations bien-être",
@@ -129,6 +136,80 @@ const navigation = [
   { name: "Paramètres", href: "/pro/settings", icon: Settings },
 ];
 
+// Configuration des catégories pour un regroupement flexible
+const categoryConfig = {
+  // Définir les catégories et leurs règles d'appartenance
+  categories: {
+    tableauDeBord: {
+      title: "Tableau de bord",
+      matcher: (item) => item.name === "Tableau de Bord",
+    },
+    annoncesServices: {
+      title: "Annonces & Services",
+      matcher: (item) =>
+        [
+          "Mes Annonces",
+          "Mes Services",
+          "Art et Creation",
+          "Mes services Bien-etre",
+        ].includes(item.name),
+    },
+    reservationsCommandes: {
+      title: "Réservations & Commandes",
+      matcher: (item) =>
+        [
+          "Mon Agenda",
+          "Reservations tourisme",
+          "Gestion de locations des vehicules",
+          "Reservations bien-être",
+          "Mes Commandes",
+          "Reservations Cours",
+        ].includes(item.name),
+    },
+    produits: {
+      title: "Produits",
+      matcher: (item) => ["Tourisme", "Mes Produits"].includes(item.name),
+    },
+    demandes: {
+      title: "Demandes",
+      matcher: (item) =>
+        item.name.toLowerCase().includes("demande") ||
+        item.name.toLowerCase().includes("devis"),
+    },
+    financier: {
+      title: "Financier",
+      matcher: (item) =>
+        [
+          "Mon abonnements",
+          "Devis & Factures",
+          "Liste des services financiers",
+        ].includes(item.name),
+    },
+    contacts: {
+      title: "Contacts",
+      matcher: (item) => item.name.includes("Contacts"),
+    },
+    documentsMedias: {
+      title: "Documents & Médias",
+      matcher: (item) => ["Mes Documents"].includes(item.name),
+    },
+    education: {
+      title: "Éducation",
+      matcher: (item) => item.name.includes("Cours"),
+    },
+    avisParametres: {
+      title: "Avis & Paramètres",
+      matcher: (item) => ["Avis", "Paramètres"].includes(item.name),
+    },
+  },
+
+  // Catégorie par défaut pour les éléments non classés
+  defaultCategory: {
+    title: "Autres",
+    matcher: () => true, // Attrape tout ce qui n'est pas déjà classé
+  },
+};
+
 export function ProSidebar() {
   const location = useLocation();
   const pathname = location.pathname;
@@ -172,90 +253,49 @@ export function ProSidebar() {
     }
   };
 
-  // Fonction pour grouper les éléments par catégorie
+  // Fonction améliorée pour grouper les éléments par catégorie
   const getNavigationSections = () => {
-    const sections = {
-      tableauDeBord: [],
-      annoncesServices: [],
-      reservationsCommandes: [],
-      produits: [],
-      demandes: [],
-      financier: [],
-      contacts: [],
-      documentsMedias: [],
-      education: [],
-      avisParametres: [],
-    };
+    const sections = {};
 
-    navigation.forEach((item) => {
-      // Tableau de bord
-      if (item.name === "Tableau de Bord") {
-        sections.tableauDeBord.push(item);
-      }
-      // Annonces & Services
-      else if (
-        ["Mes Annonces", "Mes Services", "Mes services Bien-etre"].includes(
-          item.name
-        )
-      ) {
-        sections.annoncesServices.push(item);
-      }
-      // Réservations & Commandes
-      else if (
-        [
-          "Mon Agenda",
-          "Reservations tourisme",
-          "Reservations bien-être",
-          "Mes Commandes",
-        ].includes(item.name)
-      ) {
-        sections.reservationsCommandes.push(item);
-      }
-      // Produits
-      else if (["Tourisme", "Mes Produits"].includes(item.name)) {
-        sections.produits.push(item);
-      }
-      // Demandes
-      else if (
-        item.name.includes("Demandes") ||
-        item.name.includes("demandes")
-      ) {
-        sections.demandes.push(item);
-      }
-      // Financier
-      else if (
-        [
-          "Mon abonnements",
-          "Devis & Factures",
-          "Liste des services financiers",
-        ].includes(item.name)
-      ) {
-        sections.financier.push(item);
-      }
-      // Contacts
-      else if (["Listes des Contacts messages"].includes(item.name)) {
-        sections.contacts.push(item);
-      }
-      // Documents & Médias
-      else if (["Mes Documents"].includes(item.name)) {
-        sections.documentsMedias.push(item);
-      }
-      // Éducation (commenté)
-      else if (item.name.includes("Cours")) {
-        sections.education.push(item);
-      }
-      // Avis & Paramètres
-      else if (["Avis", "Paramètres"].includes(item.name)) {
-        sections.avisParametres.push(item);
-      }
+    // Initialiser toutes les sections
+    Object.keys(categoryConfig.categories).forEach((categoryKey) => {
+      sections[categoryKey] = [];
     });
+    sections.default = [];
+
+    // Trier les éléments non classés
+    const unassignedItems = [...navigation];
+    const assignedItems = new Set();
+
+    // Assigner chaque élément à sa catégorie
+    Object.entries(categoryConfig.categories).forEach(
+      ([categoryKey, config]) => {
+        navigation.forEach((item) => {
+          if (!assignedItems.has(item.name) && config.matcher(item)) {
+            sections[categoryKey].push(item);
+            assignedItems.add(item.name);
+
+            // Retirer de la liste des non assignés
+            const index = unassignedItems.findIndex(
+              (i) => i.name === item.name
+            );
+            if (index !== -1) {
+              unassignedItems.splice(index, 1);
+            }
+          }
+        });
+      }
+    );
+
+    // Ajouter les éléments non classés à la catégorie par défaut
+    sections.default = [...unassignedItems];
 
     return sections;
   };
 
   const sections = getNavigationSections();
 
-  const Section = ({ title, items }) => {
+  const Section = ({ title, items, categoryKey }) => {
     if (items.length === 0) return null;
 
     return (
@@ -330,24 +370,26 @@ export function ProSidebar() {
 
       {/* Navigation avec sections */}
       <nav className="flex-1 space-y-1 overflow-y-auto h-screen p-4">
-        <Section title="Tableau de bord" items={sections.tableauDeBord} />
-        <Section
-          title="Annonces & Services"
-          items={sections.annoncesServices}
-        />
-        <Section
-          title="Réservations & Commandes"
-          items={sections.reservationsCommandes}
-        />
-        <Section title="Produits" items={sections.produits} />
-        <Section title="Demandes" items={sections.demandes} />
-        <Section title="Financier" items={sections.financier} />
-        <Section title="Contacts" items={sections.contacts} />
-        <Section title="Documents & Médias" items={sections.documentsMedias} />
-        {sections.education.length > 0 && (
-          <Section title="Éducation" items={sections.education} />
+        {/* Afficher toutes les sections qui ont des éléments */}
+        {Object.entries(categoryConfig.categories).map(
+          ([categoryKey, config]) => (
+            <Section
+              key={categoryKey}
+              title={config.title}
+              items={sections[categoryKey] || []}
+              categoryKey={categoryKey}
+            />
+          )
         )}
-        <Section title="Avis & Paramètres" items={sections.avisParametres} />
+
+        {/* Afficher la section "Autres" si elle contient des éléments */}
+        {sections.default && sections.default.length > 0 && (
+          <Section
+            title={categoryConfig.defaultCategory.title}
+            items={sections.default}
+            categoryKey="default"
+          />
+        )}
       </nav>
     </>
   );
