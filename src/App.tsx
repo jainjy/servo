@@ -99,24 +99,21 @@ import ProBookings from "./components/admin/tourism/ProBookings";
 import Recherche from "./pages/Recherche";
 import "leaflet/dist/leaflet.css";
 import LoadingScreen from "./components/Load";
-//tracking page
 import GlobalTracking from "@/components/GlobalTracking";
 import NetworkStatus from "./components/NetworkStatus";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
-
 import ReservationTable from "./pages/pro/ReservationBien-etre";
-// Import des nouveaux composants immobilier
+import GestionFormationsPage from "./components/pro/Gestion-Emploi-Formations/GestionFormationsPage";
+import GestionEmploisPage from "./components/pro/Gestion-Emploi-Formations/GestionEmploisPage";
+import GestionAlternancePage from "./components/pro/Gestion-Emploi-Formations/GestionAlternancePage";
 import FinancementDemandesPro from "./pages/pro/FinancementDemandesPro";
-// Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
 import PodcastsBatiment from "./components/PodcastsBatiment";
 import PodcastsAssuranceFinance from "./components/PodcastsCreditAssurance";
 import PodcastsAlimentation from "./components/PodcastsAlimentation";
 import PodcastsInvestissement from "./components/PodcastsInvestissement";
 import PodcastsTourisme from "./components/PodcastsTourisme";
-
-// Import des composants domicile
 import DomicileLayout from "./pages/domicile/DomicileLayout";
 import ImmobilierSections from "./components/ImmobilierSections";
 import StripeConnectButton from "./pages/CreateStripeAccount";
@@ -137,7 +134,6 @@ import FormationsTourisme from "./components/components/ToursimeFormation";
 import ActivitesLoisirsFAQ from "./components/components/ActiviteLoisirs";
 import AdminMedia from "./pages/pro/adminMedia";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
-
 import AuditsPage from "./pages/admin/AdminAuditPage";
 import AidesFinancement from "./components/components/Aide_finance";
 import FormationsFinancement from "./components/components/Formation_finance";
@@ -189,14 +185,10 @@ import PropertyBuy from "./pages/PropertyBuy";
 import { SubscriptionStatusGuard } from "./components/SubscriptionStatusGuard";
 import Assurance from "./pages/Assurance";
 import MedecineNaturelle from "./pages/MedecineNaturelle";
-
 import Agence from "./components/NosPartenaires/Agence";
 import Constructeur from "./components/NosPartenaires/Constructeur";
 import Plombier from "./components/NosPartenaires/Plombier";
-
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-
-// IMPORT DE LA NOUVELLE PAGE D'ACCOMPAGNEMENT
 import AccompagnementPage from "./pages/AccompagnementPage";
 import ConseilPage from "./pages/ConseilPage";
 import PaymentTest from "./pages/PaymentTest";
@@ -219,18 +211,16 @@ import Soin from "./pages/Soin";
 import Therapeute from "./pages/Therapeute";
 import HuilesEssentielles from "./pages/HuilesEssentielles";
 import Nutrition from "./pages/Nutrition";
-
 import path from "path";
-import EmploiFormationsPage from "./pages/EmploiFormationsPage";
+import EmploiFormationsPage from "./pages/EmploiFormationsPage/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
 import MesReservationsVehiculePage from "./pages/mon-compte/MesReservationsVehiculePage";
 import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
+         
 
-                 
-                 
+
 const queryClient = new QueryClient();
-
 const ScrollToHash = () => {
   const location = useLocation();
   const { scrollToSection } = useSmoothScroll();
@@ -335,7 +325,10 @@ const App = () => {
                   <Route path="/conseil" element={<ConseilPage />} />
                   <Route path="/payement-test" element={<PaymentTest />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
-                 <Route path="/medecines-naturelles" element={<MedecineNaturelle />} />
+                  <Route
+                    path="/medecines-naturelles"
+                    element={<MedecineNaturelle />}
+                  />
                   <Route path="/digitalisation" element={<Digitalisation />} />
                   <Route
                     path="/digitalisation/services"
@@ -706,7 +699,10 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
-                    <Route path="vehicules" element={<PrestataireVehiculesPage />} />
+                    <Route
+                      path="vehicules"
+                      element={<PrestataireVehiculesPage />}
+                    />
                     <Route
                       path="contact-messages"
                       element={<ContactMessagesPage />}
@@ -781,7 +777,18 @@ const App = () => {
                     />
 
                     {/* <Route path="media" element={<AdminMedia />} /> */}
-
+                    <Route
+                      path="gestion-formations"
+                      element={<GestionFormationsPage />}
+                    />
+                    <Route
+                      path="gestion-emplois"
+                      element={<GestionEmploisPage />}
+                    />
+                    <Route
+                      path="gestion-alternance"
+                      element={<GestionAlternancePage />}
+                    />
                     <Route
                       path="delete-account"
                       element={<DeleteAccountPage />}
@@ -825,7 +832,10 @@ const App = () => {
                       element={<MesDemandesImmobilier />}
                     />
                     <Route path="mes-commandes" element={<UserOrders />} />
-                    <Route path="location-voiture" element={<MesReservationsVehiculePage />} />
+                    <Route
+                      path="location-voiture"
+                      element={<MesReservationsVehiculePage />}
+                    />
                   </Route>
                   {/* Section Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
@@ -909,7 +919,10 @@ const App = () => {
                     path="/marketplace-createurs"
                     element={<MarketplaceCreateurs />}
                   /> */}
-                  <Route path="/art-et-creation/photographie/:categorySlug" element={<ArtETCreation />} />
+                  <Route
+                    path="/art-et-creation/photographie/:categorySlug"
+                    element={<ArtETCreation />}
+                  />
                 </Routes>
 
                 {/* Pop-up publicité globale */}

@@ -26,6 +26,9 @@ import {
   Contact2Icon,
   Car,
   Brush,
+  Briefcase,
+  GraduationCap,
+  Book,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -36,17 +39,28 @@ const navigation = [
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
-  // {
-  //   name: "Art et commerce Services",
-  //   href: "/pro/Art-commerce-services",
-  //   icon: Wrench,
-  // },
   {
     name: "Art et Creation",
     href: "/pro/art-et-creation-page",
-    icon: Brush, // Changé de Wrench à Brush pour mieux représenter l'art
+    icon: Brush,
   },
-  // { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
+
+  // === EMPLOI & FORMATIONS ===
+  {
+    name: "Gestion des Formations",
+    href: "/pro/gestion-formations",
+    icon: GraduationCap,
+  },
+  {
+    name: "Gestion des Offres d'Emploi",
+    href: "/pro/gestion-emplois",
+    icon: Briefcase,
+  },
+  {
+    name: "Gestion Alternance/Stages",
+    href: "/pro/gestion-alternance",
+    icon: Book,
+  },
 
   // === GESTION DES RÉSERVATIONS & COMMANDES ===
   { name: "Mon Agenda", href: "/pro/calendar", icon: Calendar },
@@ -113,16 +127,9 @@ const navigation = [
     href: "/pro/contact-messages",
     icon: Contact2Icon,
   },
-  // { name: "Mes Clients", href: "/pro/clients", icon: Users },
 
   // === DOCUMENTS & MÉDIAS ===
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
-  // 🔥 NOUVEL ITEM : Gestion des Médias
-  // {
-  //   name: "Gestion des Médias",
-  //   href: "/pro/media",
-  //   icon: Video,
-  // },
 
   // === ÉDUCATION ===
   {
@@ -147,11 +154,15 @@ const categoryConfig = {
     annoncesServices: {
       title: "Annonces & Services",
       matcher: (item) =>
+        ["Mes Annonces", "Mes Services", "Art et Creation"].includes(item.name),
+    },
+    emploiFormations: {
+      title: "Emploi & Formations",
+      matcher: (item) =>
         [
-          "Mes Annonces",
-          "Mes Services",
-          "Art et Creation",
-          "Mes services Bien-etre",
+          "Gestion des Formations",
+          "Gestion des Offres d'Emploi",
+          "Gestion Alternance/Stages",
         ].includes(item.name),
     },
     reservationsCommandes: {
@@ -206,7 +217,7 @@ const categoryConfig = {
   // Catégorie par défaut pour les éléments non classés
   defaultCategory: {
     title: "Autres",
-    matcher: () => true, // Attrape tout ce qui n'est pas déjà classé
+    matcher: () => true,
   },
 };
 
