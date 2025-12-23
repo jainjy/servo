@@ -5,6 +5,17 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: auto !important;
+  -webkit-scroll-behavior: auto !important;
+  overflow-y: scroll;
+}
+
+body {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
 @layer utilities {
   .animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;

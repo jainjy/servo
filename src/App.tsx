@@ -224,7 +224,6 @@ import path from "path";
 import EmploiFormationsPage from "./pages/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
-
                  
 const queryClient = new QueryClient();
 
@@ -258,6 +257,7 @@ const ScrollToHash = () => {
 
 const App = () => {
   const { user } = useAuth();
+  
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
