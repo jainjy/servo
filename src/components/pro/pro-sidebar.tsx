@@ -29,6 +29,7 @@ import {
   Briefcase,
   GraduationCap,
   Book,
+  Users,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -39,11 +40,17 @@ const navigation = [
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
+  // {
+  //   name: "Art et commerce Services",
+  //   href: "/pro/Art-commerce-services",
+  //   icon: Wrench,
+  // },
   {
     name: "Art et Creation",
     href: "/pro/art-et-creation-page",
     icon: Brush,
   },
+  // { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
 
   // === EMPLOI & FORMATIONS ===
   {
@@ -127,9 +134,16 @@ const navigation = [
     href: "/pro/contact-messages",
     icon: Contact2Icon,
   },
+  // { name: "Mes Clients", href: "/pro/clients", icon: Users },
 
   // === DOCUMENTS & MÉDIAS ===
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
+  // 🔥 NOUVEL ITEM : Gestion des Médias
+  // {
+  //   name: "Gestion des Médias",
+  //   href: "/pro/media",
+  //   icon: Video,
+  // },
 
   // === ÉDUCATION ===
   {
@@ -154,7 +168,12 @@ const categoryConfig = {
     annoncesServices: {
       title: "Annonces & Services",
       matcher: (item) =>
-        ["Mes Annonces", "Mes Services", "Art et Creation"].includes(item.name),
+        [
+          "Mes Annonces",
+          "Mes Services",
+          "Art et Creation",
+          "Mes services Bien-etre",
+        ].includes(item.name),
     },
     emploiFormations: {
       title: "Emploi & Formations",
