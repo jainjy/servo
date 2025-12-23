@@ -100,7 +100,19 @@ const RoleSelectionPage = () => {
 
   return (
     <div className="min-h-screen flex overflow-hidden relative">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
+      <div className="absolute inset-0 -z-10">
+        <video
+          className="absolute inset-0 w-full h-full object-cover -z-20"
+          src="/wave.mp4" // ou une URL externe
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+
+        {/* Overlay (ton div existant) */}
+        <div className="absolute inset-0 backdrop-blur-md z-0" />
+      </div>
       <div className="absolute inset-0 -z-20">
         {/* Remplace cette image par un élément img classique */}
         <img
