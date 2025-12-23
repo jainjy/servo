@@ -1275,12 +1275,12 @@ export default function UnifiedReservationPage() {
 
   return (
     <div
-      className="container mx-auto max-w-6xl py-8 mt-12"
+      className="mx-5 py-8 mt-12"
       style={{ background: theme.lightBg }}
     >
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2" style={{ color: theme.logo }}>
-          Mes Réservations
+          Mes Réservations tourisme et Bien-être
         </h1>
         <p style={{ color: theme.secondaryText }}>
           {user?.firstName ? `Bonjour ${user.firstName}, ` : ""}
@@ -1301,7 +1301,7 @@ export default function UnifiedReservationPage() {
             className="flex items-center gap-2 text-white"
           >
             <Scissors className="w-4 h-4" />
-            Services
+            Services de bien-être
             <Badge variant="secondary" className="ml-2">
               {serviceBookings.length}
             </Badge>
@@ -1423,7 +1423,7 @@ export default function UnifiedReservationPage() {
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                   <CardTitle style={{ color: theme.logo }}>
-                    Mes réservations de services
+                    Mes réservations de services bien-être
                   </CardTitle>
                   <CardDescription style={{ color: theme.secondaryText }}>
                     Historique et réservations à venir
