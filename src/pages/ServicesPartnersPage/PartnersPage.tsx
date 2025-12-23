@@ -364,52 +364,6 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
 
     return (
       <div className="space-y-8">
-        {/* Barre de recherche pour les métiers */}
-        <div className="mb-2 mt-6 animate-fade-in">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-            {/* Recherche avec dropdown */}
-            <div className="relative min-w-[300px] max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#556B2F]" />
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="RECHERCHER UN MÉTIER..."
-                value={metierSearchQuery}
-                onChange={(e) => setMetierSearchQuery(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={(e) => {
-                  if (metierSearchQuery.length > 0 || document.activeElement === e.target) {
-                    setTimeout(() => {
-                      inputRef.current?.focus();
-                    }, 0);
-                  } else {
-                    setIsFocused(false);
-                  }
-                }}
-                onMouseDown={(e) => {
-                  if (document.activeElement !== e.currentTarget) {
-                    e.preventDefault();
-                    e.currentTarget.focus();
-                  }
-                }}
-                className="search-input pl-10 pr-4 py-3 border border-[#D3D3D3] rounded-full bg-white text-gray-900 placeholder-gray-500 text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] transition-all"
-                autoComplete="off"
-                autoFocus
-              />
-              
-              {/* Bouton Effacer la recherche */}
-              {metierSearchQuery && (
-                <button
-                  onClick={() => setMetierSearchQuery("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#556B2F] hover:text-[#6B8E23] transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
         {filteredMetiers.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">
