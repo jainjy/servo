@@ -201,7 +201,19 @@ const RegisterPage = () => {
   return (
     <div className="min-h-screen flex">
       {/* Background */}
-      <div className="w-screen h-screen bg-black/80 backdrop-blur-lg -z-10 top-0 absolute"></div>
+      <div className="absolute inset-0 -z-10">
+        <video
+          className="absolute inset-0 w-full h-full object-cover -z-20"
+          src="/wave.mp4" // ou une URL externe
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+
+        {/* Overlay (ton div existant) */}
+        <div className="absolute inset-0 backdrop-blur-md z-0" />
+      </div>
       <div className="absolute w-screen h-screen top-0 left-0 -z-20 opacity-70">
         <img
           src="/nature.jpeg"

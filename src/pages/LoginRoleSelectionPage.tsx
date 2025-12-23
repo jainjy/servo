@@ -75,7 +75,19 @@ const LoginRoleSelectionPage = () => {
 
   return (
     <div className="relative min-h-screen flex overflow-hidden pt-10">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
+      <div className="absolute inset-0 -z-10">
+        <video
+          className="absolute inset-0 w-full h-full object-cover -z-20"
+          src="/wave.mp4" // ou une URL externe
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+
+        {/* Overlay (ton div existant) */}
+        <div className="absolute inset-0 backdrop-blur-md z-0" />
+      </div>
       {/* Advertisement Popup - Absolute Position */}
       <div className="absolute top-4 left-4 right-4 z-50">
         <AdvertisementPopup />

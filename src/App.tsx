@@ -228,6 +228,7 @@ import MesReservationsVehiculePage from "./pages/mon-compte/MesReservationsVehic
 import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
 
                  
+                 
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -260,6 +261,7 @@ const ScrollToHash = () => {
 
 const App = () => {
   const { user } = useAuth();
+  
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
