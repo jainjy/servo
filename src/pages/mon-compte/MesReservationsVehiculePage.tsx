@@ -521,10 +521,7 @@ const MesReservationsVehiculePage = () => {
                                   <span>{reservation.prestataire?.phone}</span>
                                 </div>
                               </div>
-                              <Button variant="outline" size="sm">
-                                <MessageCircle className="h-4 w-4 mr-2" />
-                                Contacter
-                              </Button>
+
                             </div>
                           </div>
 
