@@ -24,6 +24,10 @@ import {
   Wallet2Icon,
   UserCircle2,
   Contact2Icon,
+  Briefcase,
+  GraduationCap,
+  Book,
+  Users,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -72,6 +76,23 @@ const navigation = [
   // === GESTION DES PRODUITS ===
   { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
+
+  // === EMPLOI & FORMATIONS ===
+  {
+    name: "Gestion des Formations",
+    href: "/pro/gestion-formations",
+    icon: GraduationCap,
+  },
+  {
+    name: "Gestion des Offres d'Emploi",
+    href: "/pro/gestion-emplois",
+    icon: Briefcase,
+  },
+  {
+    name: "Gestion Alternance/Stages",
+    href: "/pro/gestion-alternance",
+    icon: Book,
+  },
 
   // === GESTION DES DEMANDES ===
   {
@@ -179,6 +200,7 @@ export function ProSidebar() {
       annoncesServices: [],
       reservationsCommandes: [],
       produits: [],
+      emploiFormations: [],
       demandes: [],
       financier: [],
       contacts: [],
@@ -215,6 +237,16 @@ export function ProSidebar() {
       else if (["Tourisme", "Mes Produits"].includes(item.name)) {
         sections.produits.push(item);
       }
+      // Emploi & Formations
+      else if (
+        [
+          "Gestion des Formations",
+          "Gestion des Offres d'Emploi",
+          "Gestion Alternance/Stages",
+        ].includes(item.name)
+      ) {
+        sections.emploiFormations.push(item);
+      }
       // Demandes
       else if (
         item.name.includes("Demandes") ||
@@ -240,7 +272,7 @@ export function ProSidebar() {
       else if (["Mes Documents"].includes(item.name)) {
         sections.documentsMedias.push(item);
       }
-      // Éducation (commenté)
+      // Éducation
       else if (item.name.includes("Cours")) {
         sections.education.push(item);
       }
@@ -340,6 +372,10 @@ export function ProSidebar() {
           items={sections.reservationsCommandes}
         />
         <Section title="Produits" items={sections.produits} />
+        <Section 
+          title="Emploi & Formations" 
+          items={sections.emploiFormations} 
+        />
         <Section title="Demandes" items={sections.demandes} />
         <Section title="Financier" items={sections.financier} />
         <Section title="Contacts" items={sections.contacts} />

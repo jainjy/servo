@@ -106,6 +106,15 @@ import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
 
 import ReservationTable from "./pages/pro/ReservationBien-etre";
+
+
+
+// Ajouter après les autres imports
+import GestionFormationsPage from "./components/pro/Gestion-Emploi-Formations/GestionFormationsPage";
+import GestionEmploisPage from "./components/pro/Gestion-Emploi-Formations/GestionEmploisPage";
+import GestionAlternancePage from "./components/pro/Gestion-Emploi-Formations/GestionAlternancePage";
+
+
 // Import des nouveaux composants immobilier
 import FinancementDemandesPro from "./pages/pro/FinancementDemandesPro";
 // Import des composants bâtiments
@@ -221,7 +230,7 @@ import HuilesEssentielles from "./pages/HuilesEssentielles";
 import Nutrition from "./pages/Nutrition";
 
 import path from "path";
-import EmploiFormationsPage from "./pages/EmploiFormationsPage";
+import EmploiFormationsPage from "./pages/EmploiFormationsPage/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
 
@@ -689,99 +698,109 @@ const App = () => {
                     element={<InvestissementDetail />}
                   />
                   {/* Section pro Routes */}
-                  <Route
-                    path="/pro"
-                    element={
-                      <AccountStatusGuard>
-                        <SubscriptionStatusGuard>
-                          <ProLayout />
-                        </SubscriptionStatusGuard>
-                      </AccountStatusGuard>
-                    }
-                  >
-                    <Route index element={<Dashboard />} />
-                    <Route path="listings" element={<ListingsPage />} />
-                    <Route path="calendar" element={<CalendarPage />} />
-                    <Route
-                      path="contact-messages"
-                      element={<ContactMessagesPage />}
-                    />
-                    <Route
-                      path="financement-demandes"
-                      element={<FinancementDemandesPro />}
-                    />
-                    <Route
-                      path="financement-services"
-                      element={<FinancementServicesPro />}
-                    />
-                    <Route
-                      path="reservationbien-etre"
-                      element={<ReservationTable />}
-                    />
-                    <Route path="documents" element={<DocumentsPage />} />
-                    <Route path="reviews" element={<ReviewsPage />} />
-                    <Route path="tourisme" element={<TourismPage />} />
-                    <Route path="reservations" element={<ProBookings />} />
-                    <Route
-                      path="reservationPro"
-                      element={<ProTouristicPlaceBookings />}
-                    />
-                    <Route path="conseil" element={<ExpertDashboardPage />} />
-                    <Route
-                      path="subscription"
-                      element={<SubscriptionStatusPage />}
-                    />
-                    <Route
-                      path="subscription/payment"
-                      element={<SubscriptionPaymentPage />}
-                    />
-                    <Route
-                      path="services"
-                      element={<ProfessionalServicesPage />}
-                    />
-                    <Route
-                      path="Art-commerce-services"
-                      element={<ArtCommerceService />}
-                    />
-                    <Route path="billing" element={<BillingSection />} />
-                    <Route path="settings" element={<ParametresPage />} />
-                    <Route
-                      path="Art-commerce-services"
-                      element={<ParametresPage />}
-                    />
-                    <Route path="orders" element={<ProOrders />} />
-                    <Route
-                      path="demandes-immobilier"
-                      element={<ListeDemandesImmobilier />}
-                    />
-                    <Route path="products" element={<Products />} />
-                    <Route path="demandes" element={<ArtisanDemandesPage />} />
-                    <Route path="messages/:id" element={<MessagesLayout />} />
-                    <Route path="profile" element={<Profile />} />
-                    <Route path="settings" element={<Settings />} />
-                    <Route path="harmonie" element={<HarmoniePage />} />
-                    <Route
-                      path="demandes-devis"
-                      element={<ListeDemandesDevis />}
-                    />
-                    <Route path="cours-domicile" element={<CoursDomicile />} />
-                    <Route
-                      path="reservations-cours"
-                      element={<ProReservations />}
-                    />
+<Route
+  path="/pro"
+  element={
+    <AccountStatusGuard>
+      <SubscriptionStatusGuard>
+        <ProLayout />
+      </SubscriptionStatusGuard>
+    </AccountStatusGuard>
+  }
+>
+  <Route index element={<Dashboard />} />
+  <Route path="listings" element={<ListingsPage />} />
+  <Route path="calendar" element={<CalendarPage />} />
+  <Route
+    path="contact-messages"
+    element={<ContactMessagesPage />}
+  />
+  <Route
+    path="financement-demandes"
+    element={<FinancementDemandesPro />}
+  />
+  <Route
+    path="financement-services"
+    element={<FinancementServicesPro />}
+  />
+  <Route
+    path="reservationbien-etre"
+    element={<ReservationTable />}
+  />
+  <Route path="documents" element={<DocumentsPage />} />
+  <Route path="reviews" element={<ReviewsPage />} />
+  <Route path="tourisme" element={<TourismPage />} />
+  <Route path="reservations" element={<ProBookings />} />
+  <Route
+    path="reservationPro"
+    element={<ProTouristicPlaceBookings />}
+  />
+  <Route path="conseil" element={<ExpertDashboardPage />} />
+  <Route
+    path="subscription"
+    element={<SubscriptionStatusPage />}
+  />
+  <Route
+    path="subscription/payment"
+    element={<SubscriptionPaymentPage />}
+  />
+  <Route
+    path="services"
+    element={<ProfessionalServicesPage />}
+  />
+  <Route
+    path="Art-commerce-services"
+    element={<ArtCommerceService />}
+  />
+  <Route path="billing" element={<BillingSection />} />
+  <Route path="settings" element={<ParametresPage />} />
+  <Route
+    path="Art-commerce-services"
+    element={<ParametresPage />}
+  />
+  <Route path="orders" element={<ProOrders />} />
+  <Route
+    path="demandes-immobilier"
+    element={<ListeDemandesImmobilier />}
+  />
+  <Route path="products" element={<Products />} />
+  <Route path="demandes" element={<ArtisanDemandesPage />} />
+  <Route path="messages/:id" element={<MessagesLayout />} />
+  <Route path="profile" element={<Profile />} />
+  <Route path="settings" element={<Settings />} />
+  <Route path="harmonie" element={<HarmoniePage />} />
+  <Route
+    path="demandes-devis"
+    element={<ListeDemandesDevis />}
+  />
+  <Route path="cours-domicile" element={<CoursDomicile />} />
+  <Route
+    path="reservations-cours"
+    element={<ProReservations />}
+  />
+  <Route
+    path="art-et-creation-page"
+    element={<ArtCreationProduct />}
+  />
+  <Route
+    path="delete-account"
+    element={<DeleteAccountPage />}
+  />
 
-                    <Route
-                      path="art-et-creation-page"
-                      element={<ArtCreationProduct />}
-                    />
-
-                    {/* <Route path="media" element={<AdminMedia />} /> */}
-
-                    <Route
-                      path="delete-account"
-                      element={<DeleteAccountPage />}
-                    />
-                  </Route>
+  {/* NOUVELLES ROUTES AJOUTÉES ICI */}
+  <Route
+    path="gestion-formations"
+    element={<GestionFormationsPage />}
+  />
+  <Route
+    path="gestion-emplois"
+    element={<GestionEmploisPage />}
+  />
+  <Route
+    path="gestion-alternance"
+    element={<GestionAlternancePage />}
+  />
+</Route>
                   {/* Section Mon Compte Routes */}
                   <Route
                     path="/mon-compte"
