@@ -25,7 +25,7 @@ import { toast } from 'sonner'; // Ajoutez cette importation si vous utilisez so
 import { useAuth } from '@/hooks/useAuth'; // Ou créez votre propre hook
 
 const ArtEtCreation = () => {
-  const [activeTab, setActiveTab] = useState('artisanat');
+  const [activeTab, setActiveTab] = useState('photographie');
   const [searchQuery, setSearchQuery] = useState('');
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactData, setContactData] = useState({
@@ -131,7 +131,7 @@ const ArtEtCreation = () => {
       case 'marketplace':
         return <MarketplaceCreateurs {...commonProps} />;
       default:
-        return <ArtisanatPage {...commonProps} />;
+              return <PhotographiePage {...commonProps} />;
     }
   };
 
