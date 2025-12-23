@@ -1,37 +1,25 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   ChevronDown,
-  Camera,
-  Star,
   Clock,
   MapPin,
   Bed,
-  Bath,
   Ruler,
   Wrench,
   Home,
   Car,
   Utensils,
   Search,
-  Filter,
-  SlidersHorizontal,
-  X,
-  Building2,
   Users,
-  Truck,
-  ShoppingBag,
-  Apple,
-  ChefHat,
+  Star,
   Heart,
   Eye,
   Share2,
-  Calendar,
-  CheckCircle,
 } from "lucide-react";
 import PartnersPage from "./ServicesPartnersPage/PartnersPage";
 import ServicesPage from "./ServicesPartnersPage/ServicesPages";
-
+import ResultatSearch from "../pages/ResultatSearch";
 // Types pour TypeScript
 interface Service {
   id: string;
@@ -106,6 +94,9 @@ const ServicesPartnersPage = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const section = params.get("section");
+const [searchLoading, setSearchLoading] = useState(false);
+const [searchResults, setSearchResults] = useState<Service[] | null>(null);
+const inputRef = useRef<HTMLInputElement>(null);
 
   const [view, setView] = useState("default");
   const [services, setServices] = useState<Service[]>([]);
@@ -211,6 +202,15 @@ const ServicesPartnersPage = () => {
     fetchAllData();
   }, []);
 
+  // Sync local `searchQuery` to `filters.search` with debounce
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setFilters((prev) => ({ ...prev, search: searchQuery }));
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   // Gestion de la section URL
   useEffect(() => {
     if (section) {
@@ -221,11 +221,63 @@ const ServicesPartnersPage = () => {
     }
   }, [section]);
 
-  // Tous les items combinés
-  const allItems: Item[] = useMemo(
-    () => [...services, ...properties, ...products, ...aliments],
-    [services, properties, products, aliments]
-  );
+  const allItems: Item[] = useMemo(() => {
+    if (searchResults) {
+      return searchResults;
+    }
+    return [...services, ...properties, ...products, ...aliments];
+  }, [services, properties, products, aliments, searchResults]);
+
+    const handleSearch = async () => {
+      const query = searchQuery.trim();
+      
+      if (!query) {
+        // Si la recherche est vide, réinitialiser aux données d'origine
+        setSearchResults(null);
+        // Optionnel : vider aussi l'input
+        // setSearchQuery('');
+        return;
+      }
+
+      try {
+        setSearchLoading(true);
+        const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+        
+        const response = await fetch(`${API_BASE_URL}/searchservice`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ query }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data.services.map((s: any) => ({ 
+            ...s, 
+            type: "service",
+            name: s.libelle || s.name || "",
+            images: s.images || [], 
+            price: s.price || 0,
+            metiers: s.metiers ? (typeof s.metiers === 'string' ? s.metiers.split(", ").map((m: string) => ({ libelle: m })) : s.metiers) : []
+          })));
+        }
+      } catch (error) {
+        console.error("Erreur recherche:", error);
+        setError("Erreur lors de la recherche");
+      } finally {
+        setSearchLoading(false);
+      }
+    };
+
+// Optionnel : Ajouter une recherche automatique avec debounce
+useEffect(() => {
+  if (searchQuery.trim() === '') {
+    setSearchResults(null);
+    return;
+  }
+
+}, [searchQuery]);
+
 
   // Appliquer les filtres et la recherche
   const filteredItems = useMemo(() => {
@@ -284,7 +336,7 @@ const ServicesPartnersPage = () => {
           (a, b) => ((b as any).rating || 0) - ((a as any).rating || 0)
         );
       case "newest":
-        return items.reverse(); // Simpler: newest first
+        return items.reverse();
       default:
         return items;
     }
@@ -307,7 +359,7 @@ const ServicesPartnersPage = () => {
   const getTypeConfig = (type: string) => {
     const configs = {
       service: {
-        color: "#10B981", // Emerald
+        color: "#10B981",
         lightColor: "#D1FAE5",
         icon: Wrench,
         label: "Service",
@@ -316,7 +368,7 @@ const ServicesPartnersPage = () => {
         badge: "bg-emerald-100 text-emerald-800",
       },
       property: {
-        color: "#8B5CF6", // Violet
+        color: "#8B5CF6",
         lightColor: "#EDE9FE",
         icon: Home,
         label: "Immobilier",
@@ -325,7 +377,7 @@ const ServicesPartnersPage = () => {
         badge: "bg-violet-100 text-violet-800",
       },
       product: {
-        color: "#3B82F6", // Blue
+        color: "#3B82F6",
         lightColor: "#DBEAFE",
         icon: Car,
         label: "Produit",
@@ -334,7 +386,7 @@ const ServicesPartnersPage = () => {
         badge: "bg-blue-100 text-blue-800",
       },
       aliment: {
-        color: "#EF4444", // Red
+        color: "#EF4444",
         lightColor: "#FEE2E2",
         icon: Utensils,
         label: "Aliment",
@@ -346,198 +398,110 @@ const ServicesPartnersPage = () => {
     return configs[type as keyof typeof configs] || configs.service;
   };
 
-  // Composant de barre de recherche avancée
-  const AdvancedSearchBar = () => (
+  // Composant de barre de recherche avancée simplifié
+    const AdvancedSearchBar = () => {
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+  
+  // Gérer la saisie et déclencher la recherche automatiquement
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocalSearchQuery(value);
+    setSearchQuery(value); // Mettre à jour l'état principal
+    
+    // Si la recherche est vide, réinitialiser
+    if (!value.trim()) {
+      setSearchResults(null);
+      return;
+    }
+  };
+
+  // Gérer la touche Entrée
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
+  // Recherche automatique avec debounce (optionnel)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localSearchQuery.trim()) {
+        handleSearch();
+      }
+    }, 500); // Augmenter le délai à 500ms pour éviter les recherches trop fréquentes
+
+    return () => clearTimeout(handler);
+  }, [localSearchQuery]);
+
+  return (
     <div className="mb-8">
       <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
         <div className="flex flex-col md:flex-row gap-4">
-          {/* Barre de recherche principale */}
+          {/* INPUT SEARCH */}
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
             <input
-              type="text"
-              placeholder="Rechercher un service, un bien, un produit..."
-              className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-              value={filters.search}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, search: e.target.value }))
-              }
+              ref={inputRef}
+              type="search"
+              placeholder="Rechercher des services, biens, produits..."
+              value={localSearchQuery}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              disabled={searchLoading}
             />
+            {searchLoading && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600"></div>
+              </div>
+            )}
           </div>
-
-          {/* Filtres rapides */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-3 rounded-xl flex items-center gap-2 transition-all ${
-                showFilters
-                  ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              <SlidersHorizontal className="w-5 h-5" />
-              Filtres
-              {Object.values(filters).some((v) =>
-                Array.isArray(v)
-                  ? v.length > 0
-                  : v > 0 || (typeof v === "string" && v.length > 0)
-              ) && (
-                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-              )}
-            </button>
-
-            <select
-              className="px-4 py-3 bg-gray-100 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-            >
-              <option value="default">Trier par</option>
-              <option value="price-asc">Prix croissant</option>
-              <option value="price-desc">Prix décroissant</option>
-              <option value="rating">Meilleures notes</option>
-              <option value="newest">Plus récents</option>
-            </select>
-          </div>
+          
+          <button 
+            onClick={handleSearch}
+            disabled={searchLoading || !searchQuery.trim()}
+            className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[120px] transition-colors"
+          >
+            {searchLoading ? (
+              <span className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                Recherche...
+              </span>
+            ) : (
+              <>
+                <Search className="w-5 h-5" /> 
+               Rechercher
+              </>
+            )}
+          </button>
         </div>
-
-        {/* Panneau de filtres détaillés */}
-        {showFilters && (
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Type
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: "service", label: "Services", icon: Wrench },
-                  ].map((type) => (
-                    <button
-                      key={type.value}
-                      onClick={() => {
-                        setFilters((prev) => ({
-                          ...prev,
-                          type: prev.type.includes(type.value)
-                            ? prev.type.filter((t) => t !== type.value)
-                            : [...prev.type, type.value],
-                        }));
-                      }}
-                      className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition-all ${
-                        filters.type.includes(type.value)
-                          ? `bg-${getTypeConfig(type.value).color.replace(
-                              "#",
-                              ""
-                            )} text-white`
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      <type.icon className="w-4 h-4" />
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prix */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prix: {filters.priceRange[0]}€ - {filters.priceRange[1]}€
-                </label>
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="10000"
-                    step="100"
-                    value={filters.priceRange[0]}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        priceRange: [
-                          parseInt(e.target.value),
-                          prev.priceRange[1],
-                        ],
-                      }))
-                    }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max="10000"
-                    step="100"
-                    value={filters.priceRange[1]}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        priceRange: [
-                          prev.priceRange[0],
-                          parseInt(e.target.value),
-                        ],
-                      }))
-                    }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              {/* Note minimum */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Note minimum: {filters.rating}★
-                </label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() =>
-                        setFilters((prev) => ({ ...prev, rating: star }))
-                      }
-                      className={`text-2xl ${
-                        star <= filters.rating
-                          ? "text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-end">
-                <div className="flex gap-2 w-full">
-                  <button
-                    onClick={() =>
-                      setFilters({
-                        search: "",
-                        type: [],
-                        priceRange: [0, 10000],
-                        rating: 0,
-                        categories: [],
-                      })
-                    }
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex-1"
-                  >
-                    Réinitialiser
-                  </button>
-                  <button
-                    onClick={() => setShowFilters(false)}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex-1 flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle className="w-5 h-5" />
-                    Appliquer
-                  </button>
-                </div>
-              </div>
+        
+        {/* Affichage du statut de recherche */}
+        {searchResults !== null && (
+          <div className="mt-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+            <div className="flex justify-between items-center">
+              <span className="text-emerald-800 font-medium">
+                {searchResults.length} résultat(s) trouvé(s) pour "{searchQuery}"
+              </span>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setLocalSearchQuery("");
+                  setSearchResults(null);
+                }}
+                className="text-sm text-emerald-600 hover:text-emerald-800"
+              >
+                Effacer la recherche
+              </button>
             </div>
           </div>
         )}
       </div>
     </div>
   );
+};
+
 
   // Composant de carte d'item
   const ItemCard = ({ item, index }: { item: Item; index: number }) => {
@@ -696,7 +660,6 @@ const ServicesPartnersPage = () => {
             <button
               className="flex-1 bg-emerald-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-emerald-700 transition-colors duration-300 flex items-center justify-center gap-2 group/btn"
               onClick={() => {
-                // Navigation vers les détails
                 navigate(`/item/${item.type}/${item.id}`);
               }}
             >
@@ -706,7 +669,6 @@ const ServicesPartnersPage = () => {
             <button
               className="p-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
               onClick={() => {
-                // Partager
                 navigator.clipboard.writeText(window.location.href);
                 alert("Lien copié !");
               }}
@@ -767,7 +729,7 @@ const ServicesPartnersPage = () => {
               >
                 <Wrench className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 Tous nos services
-                {view === "services" && <ChevronDown className="w-5 h-5" />}
+                {view === "services"}
               </button>
 
               <button
@@ -784,7 +746,6 @@ const ServicesPartnersPage = () => {
                 Partenaires
                 {view === "partenaires" && <ChevronDown className="w-5 h-5" />}
               </button>
-
             </div>
           </div>
         </div>
@@ -817,30 +778,41 @@ const ServicesPartnersPage = () => {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {view === "partenaires" && (
-          <PartnersPage
-            filters={filters}
-            setFilters={setFilters}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            AdvancedSearchBar={AdvancedSearchBar}
-          />
-        )}
-        {view === "services" && (
-          <ServicesPage
-            filters={filters}
-            setFilters={setFilters}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            AdvancedSearchBar={AdvancedSearchBar}
-          />
-        )}
-      </main>
+     <main className="max-w-6xl mx-auto px-4 py-8">
+    {searchResults !== null ? (
+      <ResultatSearch
+        searchQuery={searchQuery}
+        searchResults={searchResults}
+        favorites={favorites}
+        setFavorites={setFavorites}
+      />
+    ) : (
+    <>
+      {view === "partenaires" && (
+        <PartnersPage
+          filters={filters}
+          setFilters={setFilters}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          AdvancedSearchBar={AdvancedSearchBar}
+        />
+      )}
+      {view === "services" && (
+        <ServicesPage
+          filters={filters}
+          setFilters={setFilters}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          AdvancedSearchBar={AdvancedSearchBar}
+        />
+      )}
+    </>
+  )}
+    </main>
     </div>
   );
 };
