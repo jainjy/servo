@@ -1,98 +1,10 @@
+// pages/Therapeute.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { motion, LayoutGroup, AnimatePresence } from "framer-motion";
-import { Video, Users, Heart, Clock, Star, CheckCircle, Award, Calendar, Search } from "lucide-react";
+import { Video, Users, Heart, Clock, Star, CheckCircle, Award, Calendar, Search, Filter, ChevronDown, X, Sparkles, Zap, Shield, Brain, Target, TrendingUp } from "lucide-react";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
-
-// Données de simulation pour les thérapeutes
-const simulatedTherapeutes = [
-  {
-    id: 1,
-    libelle: "Consultation Psychologie",
-    description: "Séance de psychothérapie en ligne avec un psychologue clinicien pour travailler sur le bien-être mental et émotionnel.",
-    price: 75,
-    duration: "1h",
-    images: ["https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Thérapeute" },
-    benefits: "Gestion du stress, anxiété, développement personnel",
-    therapist: {
-      name: "Dr. Sophie Martin",
-      specialty: "Psychologue clinicienne",
-      experience: "12 ans d'expérience",
-      rating: 4.9,
-      reviews: 234,
-      languages: ["Français", "Anglais"],
-      availability: "Lun-Ven, 9h-18h"
-    },
-    features: [
-      "Consultation sécurisée",
-      "Support entre séances",
-      "Exercices personnalisés"
-    ],
-    popular: true
-  },
-  {
-    id: 2,
-    libelle: "Thérapie Cognitive",
-    description: "Approche TCC pour modifier les schémas de pensée négatifs et améliorer la gestion des émotions.",
-    price: 85,
-    duration: "1h",
-    images: ["https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Thérapeute" },
-    benefits: "Techniques concrètes, résultats mesurables",
-    therapist: {
-      name: "Thomas Dubois",
-      specialty: "Thérapeute TCC",
-      experience: "8 ans d'expérience",
-      rating: 4.8,
-      reviews: 187,
-      languages: ["Français"],
-      availability: "Mar-Sam, 10h-20h"
-    },
-    features: [
-      "Feuilles de travail",
-      "Suivi des progrès",
-      "Accès aux ressources"
-    ],
-    popular: true
-  }
-];
-
-// Données de simulation pour les masseurs
-const simulatedMasseurs = [
-  {
-    id: 3,
-    libelle: "Massage Thérapeutique",
-    description: "Massage profond pour soulager les douleurs musculaires et les tensions chroniques.",
-    price: 90,
-    duration: "1h15",
-    images: ["https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Masseur" },
-    benefits: "Soulagement douleurs, mobilité améliorée",
-    therapist: {
-      name: "Pierre Moreau",
-      specialty: "Massothérapeute",
-      experience: "9 ans d'expérience",
-      rating: 4.9,
-      reviews: 198,
-      languages: ["Français"],
-      availability: "Lun-Sam, 8h-20h"
-    },
-    features: [
-      "Évaluation pré-massage",
-      "Techniques adaptées",
-      "Conseils post-massage"
-    ],
-    popular: true
-  }
-];
-
-// Statistiques globales
-const globalStats = {
-  totalTherapists: 15,
-  totalSessions: 1250,
-  satisfactionRate: 98,
-  avgResponseTime: "2h"
-};
+import api from '@/lib/api';
+import ReservationBienEtreModal from "@/components/ReservationBienEtreModal";
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -147,253 +59,21 @@ const SlideIn = ({ children, direction = "left", delay = 0 }) => {
   );
 };
 
-// Composant Statistiques
-const StatsSection = () => {
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-      <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border text-center">
-        <div className="text-3xl font-bold text-logo mb-2">{globalStats.totalTherapists}</div>
-        <div className="text-gray-600 dark:text-muted-foreground">Thérapeutes</div>
+// Composant Statistique amélioré
+const StatCard = ({ icon: Icon, value, label, description, color = "logo" }) => (
+  <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border hover:shadow-xl transition-all duration-300">
+    <div className="flex items-start gap-4">
+      <div className={`p-3 rounded-xl bg-logo/10 flex-shrink-0`}>
+        <Icon className={`w-8 h-8 text-${color}`} />
       </div>
-      <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border text-center">
-        <div className="text-3xl font-bold text-logo mb-2">{globalStats.totalSessions}+</div>
-        <div className="text-gray-600 dark:text-muted-foreground">Séances</div>
-      </div>
-      <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border text-center">
-        <div className="text-3xl font-bold text-logo mb-2">{globalStats.satisfactionRate}%</div>
-        <div className="text-gray-600 dark:text-muted-foreground">Satisfaction</div>
-      </div>
-      <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border text-center">
-        <div className="text-3xl font-bold text-logo mb-2">{globalStats.avgResponseTime}</div>
-        <div className="text-gray-600 dark:text-muted-foreground">Réponse moyenne</div>
+      <div className="flex-1">
+        <div className="text-3xl font-bold text-gray-800 dark:text-foreground">{value}</div>
+        <div className="text-lg font-semibold text-gray-700 dark:text-gray-300 mt-1">{label}</div>
+        <div className="text-sm text-gray-500 dark:text-muted-foreground mt-2">{description}</div>
       </div>
     </div>
-  );
-};
-
-// Composant formulaire de rendez-vous
-const AppointmentForm = ({ isOpen, onClose, service }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    date: "",
-    time: "",
-    message: ""
-  });
-
-  const [isLoading, setIsLoading] = useState(false);
-  const { trackBienEtreServiceBook } = useBienEtreTracking();
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      trackBienEtreServiceBook(service.id, service.libelle, service.category?.name || 'general');
-
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      alert("✅ Rendez-vous confirmé ! Un email de confirmation vous a été envoyé.");
-      onClose();
-
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        date: "",
-        time: "",
-        message: ""
-      });
-
-    } catch (error) {
-      console.error("Erreur création rendez-vous:", error);
-      alert("❌ Erreur lors de la création du rendez-vous. Veuillez réessayer.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
-        <div className="p-8">
-          <div className="flex justify-between items-start mb-8">
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold text-gray-900">
-                Prendre rendez-vous
-              </h2>
-              <p className="text-gray-600 mt-2 text-lg">
-                {service?.libelle}
-              </p>
-              {service?.therapist && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <p className="font-semibold text-gray-800">{service.therapist.name}</p>
-                  <p className="text-sm text-gray-600">{service.therapist.specialty}</p>
-                </div>
-              )}
-            </div>
-            <button
-              onClick={onClose}
-              className="h-12 w-12 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-200 flex items-center justify-center flex-shrink-0 ml-4"
-              disabled={isLoading}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                  Nom complet *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  disabled={isLoading}
-                  className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                  placeholder="Votre nom complet"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                    placeholder="votre@email.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                    Téléphone *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                    placeholder="06 12 34 56 78"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                    Date *
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    min={new Date().toISOString().split('T')[0]}
-                    max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                    Heure *
-                  </label>
-                  <select
-                    name="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                  >
-                    <option value="">Sélectionnez un créneau</option>
-                    <option value="09:00">09:00 - 10:00</option>
-                    <option value="10:30">10:30 - 11:30</option>
-                    <option value="14:00">14:00 - 15:00</option>
-                    <option value="15:30">15:30 - 16:30</option>
-                    <option value="17:00">17:00 - 18:00</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                  Message (optionnel)
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows={5}
-                  disabled={isLoading}
-                  className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200 resize-none"
-                  placeholder="Informations supplémentaires, préférences, questions..."
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-4 pt-6">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-logo hover:bg-primary-dark text-white rounded-xl py-5 text-lg font-semibold border-2 border-logo hover:border-primary-dark transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                    Création...
-                  </>
-                ) : (
-                  <>
-                    <Calendar className="w-6 h-6 mr-3" />
-                    Confirmer le rendez-vous
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isLoading}
-                className="flex-1 rounded-xl py-5 text-lg font-semibold border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-800 transition-all duration-300 disabled:opacity-50"
-              >
-                Annuler
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
+  </div>
+);
 
 // Composant de carte de service amélioré
 const ServiceCard = ({ service, index, onOpenModal }) => {
@@ -404,23 +84,39 @@ const ServiceCard = ({ service, index, onOpenModal }) => {
     onOpenModal(service);
   };
 
+  // Formater la durée
+  const formatDuration = (minutes) => {
+    if (!minutes) return "Sur mesure";
+    if (minutes < 60) return `${minutes}min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h${mins}` : `${hours}h`;
+  };
+
+  // Déterminer le type (thérapeute ou masseur)
+  const serviceType = service.type || service.category?.name || 'Thérapeute';
+
   return (
     <div className="group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-200 dark:border-border hover:border-primary-dark transform hover:-translate-y-1">
 
       <div className="relative h-56 overflow-hidden">
         <img
-          src={service.images[0]}
+          src={service.images?.[0] || "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
           alt={service.libelle}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
         <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
           <div className="bg-logo text-white px-4 py-2 rounded-full shadow-lg font-bold text-lg">
-            {service.price ? `${service.price}€` : "N/A"}
+            {service.price ? `${service.price}€` : "Sur devis"}
           </div>
           {service.popular && (
-            <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+            <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
               Populaire
             </div>
           )}
@@ -429,21 +125,28 @@ const ServiceCard = ({ service, index, onOpenModal }) => {
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           <div className="bg-primary-dark text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            {service.duration}
+            {service.durationFormatted || formatDuration(service.duration)}
           </div>
           {service.therapist?.rating && (
             <div className="bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm flex items-center gap-1">
               <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              {service.therapist.rating}
+              {service.therapist.rating.toFixed(1)}
             </div>
           )}
         </div>
       </div>
 
       <div className="p-6 space-y-4">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-foreground group-hover:text-logo transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
-          {service.libelle || "Titre non disponible"}
-        </h3>
+        <div className="flex justify-between items-start">
+          <h3 className="text-xl font-bold text-gray-800 dark:text-foreground group-hover:text-logo transition-colors duration-300 line-clamp-2 flex-1 min-h-[3.5rem]">
+            {service.libelle}
+          </h3>
+          <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${
+            serviceType === 'Masseur' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+          }`}>
+            {serviceType}
+          </span>
+        </div>
 
         {service.therapist && (
           <div className="flex items-center gap-3">
@@ -452,13 +155,20 @@ const ServiceCard = ({ service, index, onOpenModal }) => {
             </div>
             <div>
               <div className="font-medium text-gray-800 dark:text-foreground">{service.therapist.name}</div>
-              <div className="text-sm text-gray-500 dark:text-muted-foreground">{service.therapist.specialty}</div>
+              <div className="text-sm text-gray-500 dark:text-muted-foreground">
+                {service.therapist.specialty || "Spécialiste bien-être"}
+              </div>
+              {service.therapist.experience && (
+                <div className="text-xs text-gray-400 mt-1">
+                  {service.therapist.experience}
+                </div>
+              )}
             </div>
           </div>
         )}
 
         <p className="text-gray-600 dark:text-muted-foreground text-sm leading-relaxed line-clamp-3 min-h-[4rem]">
-          {service.description || "Description non disponible"}
+          {service.description}
         </p>
 
         {service.benefits && (
@@ -468,17 +178,27 @@ const ServiceCard = ({ service, index, onOpenModal }) => {
           </div>
         )}
 
-        {service.features && (
+        {service.features && service.features.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Inclus :</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="space-y-1">
               {service.features.slice(0, 2).map((feature, idx) => (
-                <div key={idx} className="text-xs bg-logo/10 text-logo px-2 py-1 rounded-full flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" />
-                  {feature}
+                <div key={idx} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <Zap className="w-4 h-4 text-logo flex-shrink-0" />
+                  <span>{feature}</span>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {service.tags && service.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {service.tags.slice(0, 3).map((tag, idx) => (
+              <span key={idx} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
+                {tag}
+              </span>
+            ))}
           </div>
         )}
 
@@ -501,9 +221,26 @@ const Therapeute = () => {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('Thérapeute');
+  const [activeTab, setActiveTab] = useState('Tous');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [stats, setStats] = useState({
+    totalTherapists: 0,
+    totalMasseurs: 0,
+    totalSessions: 1250,
+    satisfactionRate: 98,
+    avgResponseTime: "2h",
+    onlineTherapists: 12,
+    certifiedMasseurs: 8
+  });
+
+  // États pour les filtres avancés
+  const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+  const [sortBy, setSortBy] = useState('pertinence');
+  const [durationFilter, setDurationFilter] = useState('all');
+  const [serviceTypeFilter, setServiceTypeFilter] = useState('all');
 
   const { trackBienEtreTabChange, trackBienEtreSearch } = useBienEtreTracking();
 
@@ -513,33 +250,126 @@ const Therapeute = () => {
     }
   }, [activeTab]);
 
+  // Récupérer les services depuis l'API
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
+      console.log('📡 [Therapeute] Début récupération services');
+      
+      // Test d'abord la route simple
+      try {
+        console.log('🧪 Test route /test');
+        const testResponse = await api.get('/therapeutes-bienetre/test');
+        console.log('✅ Route test OK:', testResponse.data);
+      } catch (testError) {
+        console.warn('⚠️ Route test échouée, continuons...', testError.message);
+      }
 
-      const simulatedData = activeTab === 'Thérapeute' ? simulatedTherapeutes : simulatedMasseurs;
-      setServices(simulatedData);
+      // Ensuite la route principale avec filtres
+      const params = {
+        search: searchTerm,
+        category: activeTab !== 'Tous' ? activeTab : undefined,
+        minPrice: priceRange.min || undefined,
+        maxPrice: priceRange.max || undefined,
+        sortBy: sortBy,
+        limit: 20
+      };
 
+      console.log('📡 Envoi requête avec params:', params);
+      
+      const response = await api.get('/therapeutes-bienetre', { params });
+      
+      console.log('✅ Réponse reçue:', {
+        success: response.data.success,
+        count: response.data.services?.length,
+        hasServices: response.data.services && response.data.services.length > 0
+      });
+      
+      if (response.data.success) {
+        setServices(response.data.services);
+        if (response.data.stats) {
+          setStats(response.data.stats);
+        }
+        console.log(`✅ ${response.data.services.length} services chargés`);
+      } else {
+        console.error('❌ Erreur API:', response.data.message);
+        // Fallback aux données simulées
+        setServices(getSimulatedServices().filter(service => 
+          activeTab === 'Tous' || 
+          (service.category && service.category.name === activeTab)
+        ));
+      }
+      
     } catch (error) {
-      console.error('Erreur simulation:', error);
-      const simulatedData = activeTab === 'Thérapeute' ? simulatedTherapeutes : simulatedMasseurs;
-      setServices(simulatedData);
+      console.error('❌ Erreur récupération services thérapeutes:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url
+      });
+      
+      // Fallback aux données simulées
+      setServices(getSimulatedServices().filter(service => 
+        activeTab === 'Tous' || 
+        (service.category && service.category.name === activeTab)
+      ));
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Récupérer les catégories
+  const fetchCategories = async () => {
+    try {
+      console.log('📡 Récupération catégories thérapeutes...');
+      const response = await api.get('/therapeutes-bienetre/categories');
+      if (response.data.success) {
+        setCategories(response.data.categories);
+        console.log('✅ Catégories thérapeutes chargées:', response.data.categories);
+      } else {
+        console.warn('⚠️ Erreur chargement catégories, utilisation par défaut');
+        setCategories(['Tous', 'Thérapeute', 'Masseur', 'Psychologie', 'Massothérapie']);
+      }
+    } catch (error) {
+      console.error('❌ Erreur récupération catégories thérapeutes:', error.message);
+      setCategories(['Tous', 'Thérapeute', 'Masseur', 'Psychologie', 'Massothérapie']);
+    }
+  };
+
+  // Récupérer les statistiques
+  const fetchStats = async () => {
+    try {
+      console.log('📡 Récupération statistiques thérapeutes...');
+      const response = await api.get('/therapeutes-bienetre/stats');
+      if (response.data.success) {
+        setStats(response.data.stats);
+        console.log('✅ Statistiques thérapeutes mises à jour');
+      }
+    } catch (error) {
+      console.error('❌ Erreur récupération statistiques thérapeutes:', error.message);
+    }
+  };
+
   useEffect(() => {
+    console.log('🔄 Therapeute component mounted, chargement initial...');
     fetchServices();
-  }, [activeTab]);
+    fetchCategories();
+    fetchStats();
+  }, []);
+
+  useEffect(() => {
+    console.log('🔄 Déclenchement rechargement services:', { activeTab, searchTerm, priceRange, sortBy });
+    fetchServices();
+  }, [activeTab, searchTerm, priceRange, sortBy]);
 
   const handleOpenModal = (service) => {
+    console.log('📋 Ouverture modal pour service:', service.libelle);
     setSelectedService(service);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    console.log('❌ Fermeture modal');
     setIsModalOpen(false);
     setSelectedService(null);
   };
@@ -550,93 +380,325 @@ const Therapeute = () => {
     trackBienEtreSearch(value);
   };
 
-  const filteredServices = services.filter(service =>
-    service.libelle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.therapist?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleClearFilters = () => {
+    console.log('🗑️ Réinitialisation des filtres');
+    setSearchTerm('');
+    setPriceRange({ min: '', max: '' });
+    setSortBy('pertinence');
+    setDurationFilter('all');
+    setServiceTypeFilter('all');
+    setActiveTab('Tous');
+  };
 
-  const tabs = [
+  const filteredServices = services.filter(service => {
+    // Filtre par durée si spécifié
+    if (durationFilter !== 'all') {
+      if (durationFilter === 'short' && (!service.duration || service.duration > 60)) {
+        return false;
+      }
+      if (durationFilter === 'medium' && (!service.duration || service.duration < 60 || service.duration > 120)) {
+        return false;
+      }
+      if (durationFilter === 'long' && (!service.duration || service.duration < 120)) {
+        return false;
+      }
+    }
+
+    // Filtre par type de service
+    if (serviceTypeFilter !== 'all') {
+      const serviceType = service.type || service.category?.name;
+      if (serviceTypeFilter === 'therapeute' && serviceType !== 'Thérapeute' && serviceType !== 'Psychologie') {
+        return false;
+      }
+      if (serviceTypeFilter === 'masseur' && serviceType !== 'Masseur' && serviceType !== 'Massothérapie') {
+        return false;
+      }
+    }
+
+    return (
+      service.libelle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (service.therapist?.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (service.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) ||
+      (service.category?.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  });
+
+  // Trier les services selon le critère sélectionné
+  const sortedServices = [...filteredServices].sort((a, b) => {
+    switch(sortBy) {
+      case 'price-asc':
+        return (a.price || 0) - (b.price || 0);
+      case 'price-desc':
+        return (b.price || 0) - (a.price || 0);
+      case 'name-az':
+        return a.libelle.localeCompare(b.libelle);
+      case 'duration':
+        return (a.duration || 0) - (b.duration || 0);
+      case 'popular':
+        return (b.popular ? 1 : 0) - (a.popular ? 1 : 0);
+      case 'rating':
+        return (b.therapist?.rating || 0) - (a.therapist?.rating || 0);
+      default:
+        return 0; // pertinence
+    }
+  });
+
+  // Statistiques cards
+  const statCards = [
     {
-      id: 'Thérapeute',
-      label: 'Thérapeutes',
-      icon: <Users className="w-5 h-5" />,
-      count: simulatedTherapeutes.length
+      icon: Users,
+      value: stats.totalTherapists || 0,
+      label: "Thérapeutes",
+      description: "Spécialistes disponibles",
+      color: "logo"
     },
     {
-      id: 'Masseur',
-      label: 'Masseurs',
-      icon: <Heart className="w-5 h-5" />,
-      count: simulatedMasseurs.length
+      icon: Heart,
+      value: stats.totalMasseurs || 0,
+      label: "Masseurs",
+      description: "Professionnels certifiés",
+      color: "primary-dark"
+    },
+    {
+      icon: TrendingUp,
+      value: stats.satisfactionRate ? `${stats.satisfactionRate}%` : "98%",
+      label: "Satisfaction",
+      description: "Taux de satisfaction client",
+      color: "logo"
+    },
+    {
+      icon: Clock,
+      value: stats.avgResponseTime || "2h",
+      label: "Réponse moyenne",
+      description: "Temps de réponse",
+      color: "primary-dark"
     }
+  ];
+
+  // Tabs dynamiques basées sur les catégories
+  const tabs = categories.map(category => ({
+    id: category,
+    label: category === 'Tous' ? 'Tous les services' : category,
+    icon: category === 'Tous' ? <Users className="w-5 h-5" /> : 
+           category === 'Thérapeute' ? <Brain className="w-5 h-5" /> :
+           category === 'Masseur' ? <Heart className="w-5 h-5" /> :
+           category === 'Psychologie' ? <Target className="w-5 h-5" /> :
+           <Award className="w-5 h-5" />,
+    description: category === 'Tous' ? 'Tous nos services' : 
+                 `Services de ${category.toLowerCase()}`
+  }));
+
+  // Options de tri
+  const sortOptions = [
+    { value: 'pertinence', label: 'Pertinence' },
+    { value: 'price-asc', label: 'Prix croissant' },
+    { value: 'price-desc', label: 'Prix décroissant' },
+    { value: 'name-az', label: 'Nom A-Z' },
+    { value: 'duration', label: 'Durée' },
+    { value: 'popular', label: 'Populaire' },
+    { value: 'rating', label: 'Meilleures notes' }
+  ];
+
+  // Options de durée
+  const durationOptions = [
+    { value: 'all', label: 'Toutes durées' },
+    { value: 'short', label: '≤ 1h' },
+    { value: 'medium', label: '1h-2h' },
+    { value: 'long', label: '≥ 2h' }
+  ];
+
+  // Options de type de service
+  const serviceTypeOptions = [
+    { value: 'all', label: 'Tous les types' },
+    { value: 'therapeute', label: 'Thérapeutes uniquement' },
+    { value: 'masseur', label: 'Masseurs uniquement' }
   ];
 
   return (
     <div className="font-sans text-foreground">
-      {/* Statistiques
-      <StatsSection />
- */}
-      {/* TABULATION INTERNE */}
+      {/* STATISTIQUES */}
+      <SlideIn direction="up">
+        <div className="mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {statCards.map((stat, index) => (
+              <div key={index} className="transform hover:-translate-y-2 transition-transform duration-300">
+                <StatCard {...stat} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </SlideIn>
+
+      {/* BARRE DE RECHERCHE ET FILTRES AMÉLIORÉE */}
       <SlideIn direction="down">
         <LayoutGroup>
           <div className="bg-white dark:bg-card rounded-3xl shadow-lg px-4 py-6 mb-8 w-full mx-auto border border-gray-200 dark:border-gray-700/40">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
+            <div className="flex flex-col lg:flex-row gap-4 mb-4">
+              <div className="lg:w-1/3">
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Rechercher un service, un thérapeute..."
+                    placeholder="Rechercher un thérapeute, un massage..."
                     value={searchTerm}
                     onChange={handleSearch}
                     className="w-full px-6 py-4 pl-12 border border-gray-200 rounded-2xl bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
                   />
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
               </div>
-
-              <div className="flex sm:flex-row gap-4 justify-center items-center">
-                {tabs.map((tab) => (
+              
+              <div className="lg:w-2/3 flex flex-col gap-4">
+                {/* Boutons de filtre et tri */}
+                <div className="flex flex-wrap gap-2 justify-between items-center">
                   <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`group relative flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all duration-300 overflow-hidden flex-1 sm:flex-none justify-center ${activeTab === tab.id
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <Filter className="w-4 h-4" />
+                    Filtres avancés
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Trier par:</span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-logo focus:border-logo"
+                    >
+                      {sortOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Filtres avancés */}
+                {showFilters && (
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Prix (€)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            placeholder="Min"
+                            value={priceRange.min}
+                            onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                          />
+                          <span className="text-gray-500">-</span>
+                          <input
+                            type="number"
+                            placeholder="Max"
+                            value={priceRange.max}
+                            onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Durée
+                        </label>
+                        <select
+                          value={durationFilter}
+                          onChange={(e) => setDurationFilter(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                        >
+                          {durationOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Type de service
+                        </label>
+                        <select
+                          value={serviceTypeFilter}
+                          onChange={(e) => setServiceTypeFilter(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                        >
+                          {serviceTypeOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex items-end gap-2">
+                        <button
+                          onClick={handleClearFilters}
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          Réinitialiser
+                        </button>
+                        <button
+                          onClick={() => setShowFilters(false)}
+                          className="px-4 py-2 bg-logo text-white rounded-lg hover:bg-primary-dark transition-colors"
+                        >
+                          Appliquer
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Onglets de catégories */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`group relative flex flex-col items-center px-4 py-3 rounded-2xl font-semibold transition-all duration-300 overflow-hidden min-w-[120px] ${activeTab === tab.id
                       ? 'bg-logo text-white shadow-md'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60'
-                      }`}
+                    }`}
+                >
+                  <motion.span
+                    animate={{
+                      scale: activeTab === tab.id ? 1.1 : 1,
+                    }}
+                    transition={{ duration: 0.3 }}
+                    className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}
                   >
-                    {activeTab === tab.id && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute inset-0 bg-logo rounded-2xl -z-10"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
+                    {tab.icon}
+                  </motion.span>
 
-                    <motion.span
-                      animate={{
-                        scale: activeTab === tab.id ? 1.1 : 1,
-                      }}
-                      transition={{ duration: 0.3 }}
-                      className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}
-                    >
-                      {tab.icon}
-                    </motion.span>
-
-                    <motion.span
-                      animate={{
-                        x: activeTab === tab.id ? 2 : 0,
-                      }}
-                      transition={{ duration: 0.3 }}
-                      className="text-xs sm:text-base font-bold relative z-10 whitespace-nowrap"
-                    >
-                      {tab.label}
-                      <span className={`ml-2 px-2 py-1 rounded-full text-xs ${activeTab === tab.id ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                        {tab.count}
-                      </span>
-                    </motion.span>
-                  </button>
-                ))}
-              </div>
+                  <motion.span
+                    animate={{
+                      y: activeTab === tab.id ? 2 : 0,
+                    }}
+                    transition={{ duration: 0.3 }}
+                    className="text-sm font-bold relative z-10 mt-1"
+                  >
+                    {tab.label}
+                  </motion.span>
+                  
+                  <span className="text-xs opacity-75 mt-1">{tab.description}</span>
+                </button>
+              ))}
             </div>
           </div>
         </LayoutGroup>
@@ -656,67 +718,244 @@ const Therapeute = () => {
             <div className="flex flex-col items-center justify-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-logo mb-4"></div>
               <div className="text-gray-600 dark:text-muted-foreground">Chargement des services...</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                {services.length === 0 ? 'Aucun service trouvé' : `${services.length} services disponibles`}
+              </div>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {filteredServices.length > 0 ? (
-                  filteredServices.map((service, index) => (
-                    <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                      <ServiceCard
-                        service={service}
-                        index={index}
-                        onOpenModal={handleOpenModal}
-                      />
-                    </SlideIn>
-                  ))
+              {/* En-tête avec compteur */}
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h3 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
+                    {activeTab === 'Tous' ? 'Thérapeutes & Masseurs' : activeTab}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">
+                    {sortedServices.length} service{sortedServices.length !== 1 ? 's' : ''} disponible{sortedServices.length !== 1 ? 's' : ''}
+                    {searchTerm && ` pour "${searchTerm}"`}
+                  </p>
+                </div>
+                
+                {(searchTerm || priceRange.min || priceRange.max || durationFilter !== 'all' || serviceTypeFilter !== 'all' || sortBy !== 'pertinence') && (
+                  <button
+                    onClick={handleClearFilters}
+                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-1"
+                  >
+                    <X className="w-4 h-4" />
+                    Effacer les filtres
+                  </button>
+                )}
+              </div>
+
+              {/* Liste des services */}
+              <div className="mb-12">
+                {sortedServices.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    {sortedServices.map((service, index) => (
+                      <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                        <ServiceCard
+                          service={service}
+                          index={index}
+                          onOpenModal={handleOpenModal}
+                        />
+                      </SlideIn>
+                    ))}
+                  </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                    {searchTerm ? 'Aucun service correspondant à votre recherche' : 'Aucun service disponible pour cette catégorie'}
+                  <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/30 rounded-2xl">
+                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      {searchTerm ? 'Aucun service ne correspond à votre recherche' : 'Aucun service disponible'}
+                    </h4>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      {searchTerm 
+                        ? "Essayez de modifier vos critères de recherche ou vos filtres." 
+                        : "Les services seront bientôt disponibles."}
+                    </p>
+                    {searchTerm && (
+                      <button
+                        onClick={handleClearFilters}
+                        className="mt-4 bg-logo hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition-colors"
+                      >
+                        Voir tous les services
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* Pagination (si nécessaire) */}
+              {sortedServices.length > 0 && sortedServices.length >= 20 && (
+                <div className="flex justify-center mt-8">
+                  <button className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    Charger plus de services
+                  </button>
+                </div>
+              )}
             </>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* Pourquoi nous choisir */}
-      <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 md:p-12 mt-12 border border-gray-200 dark:border-gray-700/40">
-        <h3 className="text-2xl font-bold mb-8" style={{ color: '#8B4513' }}>Pourquoi nous choisir ?</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-logo/10 rounded-xl">
-              <Award className="w-8 h-8 text-logo" />
+      {/* POURQUOI NOUS CHOISIR */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+        <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-gray-200 dark:border-gray-700/40">
+          <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Notre approche thérapeutique</h3>
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-logo/10 rounded-xl">
+                <Brain className="w-8 h-8 text-logo" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Approches validées scientifiquement</h4>
+                <p className="text-gray-600 dark:text-muted-foreground text-sm">Nous utilisons des méthodes thérapeutiques dont l'efficacité est démontrée par la recherche.</p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Professionnels certifiés</h4>
-              <p className="text-gray-600 dark:text-muted-foreground text-sm">Tous nos thérapeutes sont diplômés et régulièrement supervisés.</p>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-logo/10 rounded-xl">
+                <Shield className="w-8 h-8 text-logo" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Confidentialité absolue</h4>
+                <p className="text-gray-600 dark:text-muted-foreground text-sm">Votre intimité est protégée selon les normes éthiques les plus strictes.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-logo/10 rounded-xl">
+                <Video className="w-8 h-8 text-logo" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Flexibilité horaire</h4>
+                <p className="text-gray-600 dark:text-muted-foreground text-sm">Séances en ligne disponibles 7j/7 selon vos disponibilités.</p>
+              </div>
             </div>
           </div>
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-logo/10 rounded-xl">
-              <CheckCircle className="w-8 h-8 text-logo" />
+        </div>
+
+        <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-gray-200 dark:border-gray-700/40">
+          <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Nos engagements qualité</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Diplômes reconnus</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
             </div>
-            <div>
-              <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Approche personnalisée</h4>
-              <p className="text-gray-600 dark:text-muted-foreground text-sm">Chaque accompagnement est adapté à vos besoins spécifiques.</p>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Supervision régulière</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
             </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-logo/10 rounded-xl">
-              <Video className="w-8 h-8 text-logo" />
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Formation continue</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
             </div>
-            <div>
-              <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Flexibilité horaire</h4>
-              <p className="text-gray-600 dark:text-muted-foreground text-sm">Séances en ligne disponibles 7j/7 selon vos disponibilités.</p>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Approche personnalisée</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Suivi progressif</span>
+              <CheckCircle className="w-6 h-6 text-logo" />
             </div>
           </div>
         </div>
       </div>
 
+      {/* SECTION FORFAITS */}
+      <SlideIn direction="up" delay={400}>
+        <div className="mt-12 bg-gradient-to-r from-logo/10 to-primary-dark/10 rounded-2xl p-8 border border-logo/20">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-3 rounded-xl bg-logo">
+              <Award className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold" style={{ color: '#8B4513' }}>Forfaits d'Accompagnement</h3>
+              <p className="text-gray-600 dark:text-gray-400">Suivis à long terme pour des résultats durables</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-card rounded-2xl p-6 border border-separator dark:border-border">
+              <div className="font-bold text-lg mb-2">Forfait Découverte</div>
+              <div className="text-2xl font-bold text-logo mb-2">200€<span className="text-sm text-gray-500">/3 séances</span></div>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>3 séances de 1h</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>Bilan initial complet</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>Valable 2 mois</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-white dark:bg-card rounded-2xl p-6 border border-separator dark:border-border relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                Recommandé
+              </div>
+              <div className="font-bold text-lg mb-2">Forfait Équilibre</div>
+              <div className="text-2xl font-bold text-logo mb-2">350€<span className="text-sm text-gray-500">/6 séances</span></div>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>Séances hebdomadaires</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>Support entre séances</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>Valable 3 mois</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-white dark:bg-card rounded-2xl p-6 border border-separator dark:border-border">
+              <div className="font-bold text-lg mb-2">Forfait Transformation</div>
+              <div className="text-2xl font-bold text-logo mb-2">600€<span className="text-sm text-gray-500">/12 séances</span></div>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>Accompagnement complet</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>Priorité des rendez-vous</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs">
+                    ✓
+                  </div>
+                  <span>Valable 6 mois</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </SlideIn>
+
       {/* MODAL */}
-      <AppointmentForm
+      <ReservationBienEtreModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         service={selectedService}
@@ -724,5 +963,68 @@ const Therapeute = () => {
     </div>
   );
 };
+
+// Fonction de fallback pour les données simulées
+function getSimulatedServices() {
+  console.log('🔄 Chargement des données simulées');
+  return [
+    {
+      id: 1,
+      libelle: "Consultation Psychologie en ligne",
+      description: "Séance de psychothérapie en ligne avec un psychologue clinicien pour travailler sur le bien-être mental et émotionnel.",
+      price: 75,
+      duration: 60,
+      durationFormatted: "1h",
+      images: ["https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
+      category: { name: "Thérapeute" },
+      benefits: "Gestion du stress, anxiété, développement personnel",
+      therapist: {
+        name: "Dr. Sophie Martin",
+        specialty: "Psychologue clinicienne",
+        experience: "12 ans d'expérience",
+        rating: 4.9,
+        reviews: 234,
+        languages: ["Français", "Anglais"],
+        availability: "Lun-Ven, 9h-18h"
+      },
+      features: [
+        "Consultation sécurisée",
+        "Support entre séances",
+        "Exercices personnalisés"
+      ],
+      tags: ["psychologie", "en ligne", "thérapie"],
+      popular: true,
+      type: "Thérapeute"
+    },
+    {
+      id: 2,
+      libelle: "Massage Thérapeutique Professionnel",
+      description: "Massage profond pour soulager les douleurs musculaires, les tensions chroniques et améliorer la mobilité articulaire.",
+      price: 90,
+      duration: 75,
+      durationFormatted: "1h15",
+      images: ["https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
+      category: { name: "Masseur" },
+      benefits: "Soulagement douleurs, mobilité améliorée",
+      therapist: {
+        name: "Pierre Moreau",
+        specialty: "Massothérapeute",
+        experience: "9 ans d'expérience",
+        rating: 4.9,
+        reviews: 198,
+        languages: ["Français"],
+        availability: "Lun-Sam, 8h-20h"
+      },
+      features: [
+        "Évaluation pré-massage",
+        "Techniques adaptées",
+        "Conseils post-massage"
+      ],
+      tags: ["massage", "thérapeutique", "douleurs"],
+      popular: true,
+      type: "Masseur"
+    }
+  ];
+}
 
 export default Therapeute;

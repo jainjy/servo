@@ -1,104 +1,10 @@
+// pages/MedecinesNaturelles.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { motion, LayoutGroup, AnimatePresence } from "framer-motion";
-import { Sprout, Leaf, Heart, Pill, Flower, Shield, Apple, Thermometer, Coffee, Brain, Zap, Star, Users, Clock, Award, CheckCircle, Calendar, Search } from "lucide-react";
+import { Sprout, Leaf, Heart, Flower, Shield, Brain, Zap, Star, Users, Clock, Award, CheckCircle, Calendar, Search, Filter, ChevronDown, X, Sparkles, Thermometer, Apple, Coffee } from "lucide-react";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
-
-// Données de simulation pour les médecines naturelles
-const simulatedMedecinesNaturelles = [
-  {
-    id: 1,
-    libelle: "Consultation Phytothérapie",
-    description: "Bilan personnalisé et conseils en plantes médicinales pour traiter vos troubles de santé naturellement.",
-    price: 75,
-    duration: "1h",
-    images: ["https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Consultation" },
-    benefits: "Solutions naturelles, approche holistique, résultats durables",
-    specialist: {
-      name: "Dr. Sophie Laurent",
-      specialty: "Phytothérapeute",
-      experience: "12 ans d'expérience",
-      rating: 4.9,
-      reviews: 198,
-      languages: ["Français", "Anglais"],
-      availability: "Lun-Ven, 9h-18h"
-    },
-    features: [
-      "Bilan de santé complet",
-      "Prescription de plantes adaptées",
-      "Préparation de tisanes personnalisées",
-      "Suivi mensuel"
-    ],
-    included: ["Consultation initiale", "Formule personnalisée", "Guide d'utilisation", "Suivi à 1 mois"],
-    popular: true,
-    tags: ["Plantes", "Personnalisé", "Complet"]
-  },
-  {
-    id: 2,
-    libelle: "Atelier Plantes Médicinales",
-    description: "Apprenez à reconnaître et utiliser les plantes médicinales locales pour votre santé au quotidien.",
-    price: 60,
-    duration: "2h",
-    images: ["https://images.unsplash.com/photo-1544787219-7f47ccb76574?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Atelier" },
-    benefits: "Autonomie santé, connaissances pratiques, approche locale",
-    specialist: {
-      name: "Thomas Dubois",
-      specialty: "Herboriste",
-      experience: "8 ans d'expérience",
-      rating: 4.7,
-      reviews: 134,
-      languages: ["Français"],
-      availability: "Sam-Dim, 10h-17h"
-    },
-    features: [
-      "Reconnaissance des plantes",
-      "Techniques de récolte",
-      "Préparation de remèdes",
-      "Guide de cueillette"
-    ],
-    included: ["Matériel fourni", "Cahier de notes", "Échantillons de plantes", "Guide pratique"],
-    popular: true,
-    tags: ["Pratique", "Atelier", "Éducatif"]
-  },
-  {
-    id: 3,
-    libelle: "Programme Dépuration Naturelle",
-    description: "Cure de 21 jours pour détoxifier l'organisme avec des plantes spécifiques et une alimentation adaptée.",
-    price: 150,
-    duration: "3 semaines",
-    images: ["https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-    category: { name: "Programme" },
-    benefits: "Détoxification, énergie retrouvée, santé renforcée",
-    specialist: {
-      name: "Marie Lambert",
-      specialty: "Naturopathe",
-      experience: "10 ans d'expérience",
-      rating: 4.8,
-      reviews: 167,
-      languages: ["Français", "Espagnol"],
-      availability: "Lun-Sam, 8h-20h"
-    },
-    features: [
-      "Plan détaillé jour par jour",
-      "Tisanes dépuratives",
-      "Conseils alimentaires",
-      "Support quotidien"
-    ],
-    included: ["Consultation initiale", "Guide 21 jours", "Tisanes préparées", "Groupe de support", "Suivi hebdomadaire"],
-    popular: true,
-    tags: ["Détox", "Programme", "Long terme"]
-  }
-];
-
-// Statistiques globales
-const globalStats = {
-  totalServices: 9,
-  expertsCount: 15,
-  satisfactionRate: 96,
-  naturalApproaches: 8,
-  traditionalTherapies: 5
-};
+import api from '@/lib/api';
+import ReservationBienEtreModal from "@/components/ReservationBienEtreModal";
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -153,11 +59,11 @@ const SlideIn = ({ children, direction = "left", delay = 0 }) => {
   );
 };
 
-// Composant Statistique
+// Composant Statistique amélioré
 const StatCard = ({ icon: Icon, value, label, description, color = "logo" }) => (
   <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border hover:shadow-xl transition-all duration-300">
     <div className="flex items-start gap-4">
-      <div className={`p-3 rounded-xl bg-${color}/10 flex-shrink-0`}>
+      <div className={`p-3 rounded-xl bg-logo/10 flex-shrink-0`}>
         <Icon className={`w-8 h-8 text-${color}`} />
       </div>
       <div className="flex-1">
@@ -169,281 +75,6 @@ const StatCard = ({ icon: Icon, value, label, description, color = "logo" }) => 
   </div>
 );
 
-// Composant formulaire de rendez-vous
-const AppointmentForm = ({ isOpen, onClose, service }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    date: "",
-    time: "",
-    message: "",
-    healthGoals: []
-  });
-
-  const [isLoading, setIsLoading] = useState(false);
-  const { trackBienEtreServiceBook } = useBienEtreTracking();
-
-  const healthGoalsList = [
-    "Gestion du stress",
-    "Problèmes digestifs",
-    "Troubles du sommeil",
-    "Douleurs chroniques",
-    "Allergies",
-    "Fatigue persistante"
-  ];
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    
-    if (type === 'checkbox') {
-      setFormData(prev => ({
-        ...prev,
-        healthGoals: checked 
-          ? [...prev.healthGoals, value]
-          : prev.healthGoals.filter(goal => goal !== value)
-      }));
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      trackBienEtreServiceBook(service.id, service.libelle, service.category?.name || 'general');
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      alert("✅ Consultation confirmée ! Vous recevrez un email avec toutes les informations.");
-      onClose();
-      
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        date: "",
-        time: "",
-        message: "",
-        healthGoals: []
-      });
-
-    } catch (error) {
-      console.error("Erreur création rendez-vous:", error);
-      alert("❌ Une erreur est survenue. Veuillez réessayer.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
-        <div className="p-8">
-          <div className="flex justify-between items-start mb-8">
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold text-gray-900">
-                Réserver une consultation
-              </h2>
-              <p className="text-gray-600 mt-2 text-lg">
-                {service?.libelle}
-              </p>
-              {service?.specialist && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-logo/10 rounded-full flex items-center justify-center">
-                      <Award className="w-5 h-5 text-logo" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-800">{service.specialist.name}</p>
-                      <p className="text-sm text-gray-600">{service.specialist.specialty}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            <button
-              onClick={onClose}
-              className="h-12 w-12 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-200 flex items-center justify-center flex-shrink-0 ml-4"
-              disabled={isLoading}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                    Nom complet *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                    placeholder="Votre nom complet"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                    Téléphone *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                    placeholder="06 12 34 56 78"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={isLoading}
-                  className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                  placeholder="votre@email.com"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                    Date souhaitée *
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    min={new Date().toISOString().split('T')[0]}
-                    max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                    Créneau horaire *
-                  </label>
-                  <select
-                    name="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
-                  >
-                    <option value="">Sélectionnez un créneau</option>
-                    <option value="09:00">09:00 - 10:00</option>
-                    <option value="10:30">10:30 - 11:30</option>
-                    <option value="14:00">14:00 - 15:00</option>
-                    <option value="15:30">15:30 - 16:30</option>
-                    <option value="17:00">17:00 - 18:00</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                  Vos objectifs de santé *
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {healthGoalsList.map((goal) => (
-                    <label key={goal} className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="healthGoals"
-                        value={goal}
-                        checked={formData.healthGoals.includes(goal)}
-                        onChange={handleChange}
-                        disabled={isLoading}
-                        className="h-5 w-5 rounded border-gray-300 text-logo focus:ring-logo"
-                      />
-                      <span className="text-gray-700">{goal}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
-                  Message complémentaire
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows={4}
-                  disabled={isLoading}
-                  className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200 resize-none"
-                  placeholder="Autres informations, questions spécifiques..."
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-4 pt-6">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-logo hover:bg-primary-dark text-white rounded-xl py-5 text-lg font-semibold border-2 border-logo hover:border-primary-dark transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                    Réservation...
-                  </>
-                ) : (
-                  <>
-                    <Calendar className="w-6 h-6 mr-3" />
-                    Confirmer la consultation
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isLoading}
-                className="flex-1 rounded-xl py-5 text-lg font-semibold border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-800 transition-all duration-300 disabled:opacity-50"
-              >
-                Annuler
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // Composant de carte de service
 const MedecineCard = ({ service, index, onOpenModal }) => {
   const { trackBienEtreServiceClick } = useBienEtreTracking();
@@ -453,23 +84,37 @@ const MedecineCard = ({ service, index, onOpenModal }) => {
     onOpenModal(service);
   };
 
+  // Formater la durée
+  const formatDuration = (service) => {
+    if (service.durationFormatted) return service.durationFormatted;
+    if (!service.duration) return "Sur mesure";
+    if (service.duration < 60) return `${service.duration}min`;
+    const hours = Math.floor(service.duration / 60);
+    const mins = service.duration % 60;
+    return mins > 0 ? `${hours}h${mins}` : `${hours}h`;
+  };
+
   return (
     <div className="group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-200 dark:border-border hover:border-primary-dark transform hover:-translate-y-1">
 
       <div className="relative h-56 overflow-hidden">
         <img
-          src={service.images[0]}
+          src={service.images?.[0] || "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
           alt={service.libelle}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
         <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
           <div className="bg-logo text-white px-4 py-2 rounded-full shadow-lg font-bold text-lg">
-            {service.price ? `${service.price}€` : "N/A"}
+            {service.price ? `${service.price}€` : "Sur devis"}
           </div>
           {service.popular && (
-            <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+            <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
               Populaire
             </div>
           )}
@@ -478,21 +123,33 @@ const MedecineCard = ({ service, index, onOpenModal }) => {
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           <div className="bg-primary-dark text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            {service.duration}
+            {formatDuration(service)}
           </div>
           {service.specialist?.rating && (
             <div className="bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm flex items-center gap-1">
               <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              {service.specialist.rating}
+              {service.specialist.rating.toFixed(1)}
             </div>
           )}
         </div>
       </div>
 
       <div className="p-6 space-y-4">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-foreground group-hover:text-logo transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
-          {service.libelle}
-        </h3>
+        <div className="flex justify-between items-start">
+          <h3 className="text-xl font-bold text-gray-800 dark:text-foreground group-hover:text-logo transition-colors duration-300 line-clamp-2 flex-1 min-h-[3.5rem]">
+            {service.libelle}
+          </h3>
+          {service.category && (
+            <span className={`text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0 ${
+              service.category.name === 'Atelier' ? 'bg-blue-100 text-blue-800' :
+              service.category.name === 'Programme' ? 'bg-purple-100 text-purple-800' :
+              service.category.name === 'Thérapie' ? 'bg-green-100 text-green-800' :
+              'bg-logo/10 text-logo'
+            }`}>
+              {service.category.name}
+            </span>
+          )}
+        </div>
 
         {service.specialist && (
           <div className="flex items-center gap-3">
@@ -501,7 +158,14 @@ const MedecineCard = ({ service, index, onOpenModal }) => {
             </div>
             <div>
               <div className="font-medium text-gray-800 dark:text-foreground">{service.specialist.name}</div>
-              <div className="text-sm text-gray-500 dark:text-muted-foreground">{service.specialist.specialty}</div>
+              <div className="text-sm text-gray-500 dark:text-muted-foreground">
+                {service.specialist.specialty}
+              </div>
+              {service.specialist.experience && (
+                <div className="text-xs text-gray-400 mt-1">
+                  {service.specialist.experience}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -510,24 +174,24 @@ const MedecineCard = ({ service, index, onOpenModal }) => {
           {service.description}
         </p>
 
-        {service.tags && (
-          <div className="flex flex-wrap gap-2">
-            {service.tags.map((tag, idx) => (
-              <span key={idx} className="text-xs bg-logo/10 text-logo px-2 py-1 rounded-full">
+        {service.tags && service.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {service.tags.slice(0, 3).map((tag, idx) => (
+              <span key={idx} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
                 {tag}
               </span>
             ))}
           </div>
         )}
 
-        {service.features && (
+        {service.features && service.features.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Comprend :</p>
             <div className="space-y-1">
               {service.features.slice(0, 2).map((feature, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <CheckCircle className="w-4 h-4 text-logo flex-shrink-0" />
-                  <span>{feature}</span>
+                  <Zap className="w-4 h-4 text-logo flex-shrink-0" />
+                  <span className="line-clamp-2">{feature}</span>
                 </div>
               ))}
             </div>
@@ -553,9 +217,24 @@ const MedecinesNaturelles = () => {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('Consultation');
+  const [activeTab, setActiveTab] = useState('Tous');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [stats, setStats] = useState({
+    totalServices: 0,
+    expertsCount: 15,
+    satisfactionRate: 96,
+    naturalApproaches: 8,
+    traditionalTherapies: 5,
+    yearsOfExperience: 12
+  });
+
+  // États pour les filtres avancés
+  const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+  const [sortBy, setSortBy] = useState('pertinence');
+  const [durationFilter, setDurationFilter] = useState('all');
 
   const { trackBienEtreTabChange, trackBienEtreSearch } = useBienEtreTracking();
 
@@ -565,42 +244,126 @@ const MedecinesNaturelles = () => {
     }
   }, [activeTab]);
 
+  // Récupérer les services depuis l'API
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
+      console.log('📡 [MedecinesNaturelles] Début récupération services');
       
-      const filteredServices = simulatedMedecinesNaturelles.filter(service => 
-        activeTab === 'Consultation' 
-          ? service.category.name === 'Consultation' || service.category.name === 'Thérapie'
-          : service.category.name === activeTab
-      );
+      // Test d'abord la route simple
+      try {
+        console.log('🧪 Test route /test');
+        const testResponse = await api.get('/medecines-bienetre/test');
+        console.log('✅ Route test OK:', testResponse.data);
+      } catch (testError) {
+        console.warn('⚠️ Route test échouée, continuons...', testError.message);
+      }
+
+      // Ensuite la route principale avec filtres
+      const params = {
+        search: searchTerm,
+        category: activeTab !== 'Tous' ? activeTab : undefined,
+        minPrice: priceRange.min || undefined,
+        maxPrice: priceRange.max || undefined,
+        sortBy: sortBy,
+        limit: 20
+      };
+
+      console.log('📡 Envoi requête avec params:', params);
       
-      setServices(filteredServices);
+      const response = await api.get('/medecines-bienetre', { params });
+      
+      console.log('✅ Réponse reçue:', {
+        success: response.data.success,
+        count: response.data.services?.length,
+        hasServices: response.data.services && response.data.services.length > 0
+      });
+      
+      if (response.data.success) {
+        setServices(response.data.services);
+        if (response.data.stats) {
+          setStats(response.data.stats);
+        }
+        console.log(`✅ ${response.data.services.length} services chargés`);
+      } else {
+        console.error('❌ Erreur API:', response.data.message);
+        // Fallback aux données simulées
+        setServices(getSimulatedServices().filter(service => 
+          activeTab === 'Tous' || 
+          (service.category && service.category.name === activeTab)
+        ));
+      }
       
     } catch (error) {
-      console.error('Erreur simulation:', error);
-      const filteredServices = simulatedMedecinesNaturelles.filter(service => 
-        activeTab === 'Consultation' 
-          ? service.category.name === 'Consultation' || service.category.name === 'Thérapie'
-          : service.category.name === activeTab
-      );
-      setServices(filteredServices);
+      console.error('❌ Erreur récupération services médecines:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url
+      });
+      
+      // Fallback aux données simulées
+      setServices(getSimulatedServices().filter(service => 
+        activeTab === 'Tous' || 
+        (service.category && service.category.name === activeTab)
+      ));
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Récupérer les catégories
+  const fetchCategories = async () => {
+    try {
+      console.log('📡 Récupération catégories médecines...');
+      const response = await api.get('/medecines-bienetre/categories');
+      if (response.data.success) {
+        setCategories(response.data.categories);
+        console.log('✅ Catégories médecines chargées:', response.data.categories);
+      } else {
+        console.warn('⚠️ Erreur chargement catégories, utilisation par défaut');
+        setCategories(['Tous', 'Consultation', 'Atelier', 'Programme', 'Thérapie']);
+      }
+    } catch (error) {
+      console.error('❌ Erreur récupération catégories médecines:', error.message);
+      setCategories(['Tous', 'Consultation', 'Atelier', 'Programme', 'Thérapie']);
+    }
+  };
+
+  // Récupérer les statistiques
+  const fetchStats = async () => {
+    try {
+      console.log('📡 Récupération statistiques médecines...');
+      const response = await api.get('/medecines-bienetre/stats');
+      if (response.data.success) {
+        setStats(response.data.stats);
+        console.log('✅ Statistiques médecines mises à jour');
+      }
+    } catch (error) {
+      console.error('❌ Erreur récupération statistiques médecines:', error.message);
+    }
+  };
+
   useEffect(() => {
+    console.log('🔄 MedecinesNaturelles component mounted, chargement initial...');
     fetchServices();
-  }, [activeTab]);
+    fetchCategories();
+    fetchStats();
+  }, []);
+
+  useEffect(() => {
+    console.log('🔄 Déclenchement rechargement services:', { activeTab, searchTerm, priceRange, sortBy });
+    fetchServices();
+  }, [activeTab, searchTerm, priceRange, sortBy]);
 
   const handleOpenModal = (service) => {
+    console.log('📋 Ouverture modal pour service:', service.libelle);
     setSelectedService(service);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    console.log('❌ Fermeture modal');
     setIsModalOpen(false);
     setSelectedService(null);
   };
@@ -611,85 +374,143 @@ const MedecinesNaturelles = () => {
     trackBienEtreSearch(value);
   };
 
-  const filteredServices = services.filter(service =>
-    service.libelle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.specialist?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const handleClearFilters = () => {
+    console.log('🗑️ Réinitialisation des filtres');
+    setSearchTerm('');
+    setPriceRange({ min: '', max: '' });
+    setSortBy('pertinence');
+    setDurationFilter('all');
+    setActiveTab('Tous');
+  };
 
-  const tabs = [
-    {
-      id: 'Consultation',
-      label: 'Consultations',
-      icon: <Sprout className="w-5 h-5" />,
-      description: 'Bilans et suivis personnalisés'
-    },
-    {
-      id: 'Thérapie',
-      label: 'Thérapies',
-      icon: <Leaf className="w-5 h-5" />,
-      description: 'Soins naturels spécialisés'
-    },
-    {
-      id: 'Atelier',
-      label: 'Ateliers',
-      icon: <Flower className="w-5 h-5" />,
-      description: 'Apprentissage pratique'
+  const filteredServices = services.filter(service => {
+    // Filtre par durée si spécifié
+    if (durationFilter !== 'all') {
+      if (durationFilter === 'short' && (service.duration && service.duration > 60)) {
+        return false;
+      }
+      if (durationFilter === 'medium' && (!service.duration || service.duration < 60 || service.duration > 120)) {
+        return false;
+      }
+      if (durationFilter === 'long' && (service.duration && service.duration < 120)) {
+        return false;
+      }
     }
-  ];
 
-  const stats = [
+    return (
+      service.libelle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (service.specialist?.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (service.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) ||
+      (service.category?.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  });
+
+  // Trier les services selon le critère sélectionné
+  const sortedServices = [...filteredServices].sort((a, b) => {
+    switch(sortBy) {
+      case 'price-asc':
+        return (a.price || 0) - (b.price || 0);
+      case 'price-desc':
+        return (b.price || 0) - (a.price || 0);
+      case 'name-az':
+        return a.libelle.localeCompare(b.libelle);
+      case 'duration':
+        return (a.duration || 0) - (b.duration || 0);
+      case 'popular':
+        return (b.popular ? 1 : 0) - (a.popular ? 1 : 0);
+      case 'rating':
+        return (b.specialist?.rating || 0) - (a.specialist?.rating || 0);
+      default:
+        return 0; // pertinence
+    }
+  });
+
+  // Statistiques cards
+  const statCards = [
     {
       icon: Sprout,
-      value: globalStats.totalServices,
-      label: "Approches naturelles",
-      description: "Méthodes différentes",
+      value: stats.totalServices || 0,
+      label: "Services disponibles",
+      description: "Approches naturelles",
       color: "logo"
     },
     {
       icon: Users,
-      value: globalStats.expertsCount,
+      value: stats.expertsCount || 15,
       label: "Experts certifiés",
       description: "À votre service",
       color: "primary-dark"
     },
     {
       icon: Heart,
-      value: globalStats.satisfactionRate + "%",
+      value: stats.satisfactionRate ? `${stats.satisfactionRate}%` : "96%",
       label: "Satisfaction clients",
       description: "Résultats garantis",
       color: "logo"
     },
     {
       icon: Shield,
-      value: globalStats.traditionalTherapies,
-      label: "Thérapies traditionnelles",
-      description: "Sagesse ancestrale",
+      value: stats.yearsOfExperience || 12,
+      label: "Années d'expérience",
+      description: "Sagesse traditionnelle",
       color: "primary-dark"
     }
   ];
 
+  // Tabs dynamiques basées sur les catégories
+  const tabs = categories.map(category => ({
+    id: category,
+    label: category === 'Tous' ? 'Toutes les approches' : category,
+    icon: category === 'Tous' ? <Sprout className="w-5 h-5" /> : 
+           category === 'Consultation' ? <Brain className="w-5 h-5" /> :
+           category === 'Atelier' ? <Flower className="w-5 h-5" /> :
+           category === 'Programme' ? <Leaf className="w-5 h-5" /> :
+           category === 'Thérapie' ? <Thermometer className="w-5 h-5" /> :
+           <Award className="w-5 h-5" />,
+    description: category === 'Tous' ? 'Toutes nos approches' : 
+                 `Services de ${category.toLowerCase()}`
+  }));
+
+  // Options de tri
+  const sortOptions = [
+    { value: 'pertinence', label: 'Pertinence' },
+    { value: 'price-asc', label: 'Prix croissant' },
+    { value: 'price-desc', label: 'Prix décroissant' },
+    { value: 'name-az', label: 'Nom A-Z' },
+    { value: 'duration', label: 'Durée' },
+    { value: 'popular', label: 'Populaire' },
+    { value: 'rating', label: 'Meilleures notes' }
+  ];
+
+  // Options de durée
+  const durationOptions = [
+    { value: 'all', label: 'Toutes durées' },
+    { value: 'short', label: '≤ 1h' },
+    { value: 'medium', label: '1h-2h' },
+    { value: 'long', label: '≥ 2h' }
+  ];
+
   return (
     <div className="font-sans text-foreground">
-      {/* STATISTIQUES
+      {/* STATISTIQUES */}
       <SlideIn direction="up">
         <div className="mb-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
+            {statCards.map((stat, index) => (
               <div key={index} className="transform hover:-translate-y-2 transition-transform duration-300">
                 <StatCard {...stat} />
               </div>
             ))}
           </div>
         </div>
-      </SlideIn> */}
+      </SlideIn>
 
-      {/* TABULATION INTERNE */}
+      {/* BARRE DE RECHERCHE ET FILTRES AMÉLIORÉE */}
       <SlideIn direction="down">
         <LayoutGroup>
           <div className="bg-white dark:bg-card rounded-3xl shadow-lg px-4 py-6 mb-8 w-full mx-auto border border-gray-200 dark:border-gray-700/40">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4 mb-4">
               <div className="lg:w-1/3">
                 <div className="relative">
                   <input
@@ -700,45 +521,143 @@ const MedecinesNaturelles = () => {
                     className="w-full px-6 py-4 pl-12 border border-gray-200 rounded-2xl bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-logo focus:border-logo transition-colors duration-200"
                   />
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
               </div>
               
-              <div className="lg:w-2/3">
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`group relative flex flex-col items-center px-4 py-3 rounded-2xl font-semibold transition-all duration-300 overflow-hidden min-w-[120px] ${activeTab === tab.id
-                          ? 'bg-logo text-white shadow-md'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60'
-                        }`}
-                    >
-                      <motion.span
-                        animate={{
-                          scale: activeTab === tab.id ? 1.1 : 1,
-                        }}
-                        transition={{ duration: 0.3 }}
-                        className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}
-                      >
-                        {tab.icon}
-                      </motion.span>
+              <div className="lg:w-2/3 flex flex-col gap-4">
+                {/* Boutons de filtre et tri */}
+                <div className="flex flex-wrap gap-2 justify-between items-center">
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <Filter className="w-4 h-4" />
+                    Filtres avancés
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                  </button>
 
-                      <motion.span
-                        animate={{
-                          y: activeTab === tab.id ? 2 : 0,
-                        }}
-                        transition={{ duration: 0.3 }}
-                        className="text-sm font-bold relative z-10 mt-1"
-                      >
-                        {tab.label}
-                      </motion.span>
-                      
-                      <span className="text-xs opacity-75 mt-1">{tab.description}</span>
-                    </button>
-                  ))}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Trier par:</span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-logo focus:border-logo"
+                    >
+                      {sortOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
+
+                {/* Filtres avancés */}
+                {showFilters && (
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Prix (€)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            placeholder="Min"
+                            value={priceRange.min}
+                            onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                          />
+                          <span className="text-gray-500">-</span>
+                          <input
+                            type="number"
+                            placeholder="Max"
+                            value={priceRange.max}
+                            onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Durée
+                        </label>
+                        <select
+                          value={durationFilter}
+                          onChange={(e) => setDurationFilter(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                        >
+                          {durationOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex items-end gap-2">
+                        <button
+                          onClick={handleClearFilters}
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          Réinitialiser
+                        </button>
+                        <button
+                          onClick={() => setShowFilters(false)}
+                          className="px-4 py-2 bg-logo text-white rounded-lg hover:bg-primary-dark transition-colors"
+                        >
+                          Appliquer
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
+            </div>
+
+            {/* Onglets de catégories */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`group relative flex flex-col items-center px-4 py-3 rounded-2xl font-semibold transition-all duration-300 overflow-hidden min-w-[120px] ${activeTab === tab.id
+                      ? 'bg-logo text-white shadow-md'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60'
+                    }`}
+                >
+                  <motion.span
+                    animate={{
+                      scale: activeTab === tab.id ? 1.1 : 1,
+                    }}
+                    transition={{ duration: 0.3 }}
+                    className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}
+                  >
+                    {tab.icon}
+                  </motion.span>
+
+                  <motion.span
+                    animate={{
+                      y: activeTab === tab.id ? 2 : 0,
+                    }}
+                    transition={{ duration: 0.3 }}
+                    className="text-sm font-bold relative z-10 mt-1"
+                  >
+                    {tab.label}
+                  </motion.span>
+                  
+                  <span className="text-xs opacity-75 mt-1">{tab.description}</span>
+                </button>
+              ))}
             </div>
           </div>
         </LayoutGroup>
@@ -758,26 +677,80 @@ const MedecinesNaturelles = () => {
             <div className="flex flex-col items-center justify-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-logo mb-4"></div>
               <div className="text-gray-600 dark:text-muted-foreground">Chargement des services...</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                {services.length === 0 ? 'Aucun service trouvé' : `${services.length} services disponibles`}
+              </div>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {filteredServices.length > 0 ? (
-                  filteredServices.map((service, index) => (
-                    <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                      <MedecineCard
-                        service={service}
-                        index={index}
-                        onOpenModal={handleOpenModal}
-                      />
-                    </SlideIn>
-                  ))
+              {/* En-tête avec compteur */}
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h3 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
+                    {activeTab === 'Tous' ? 'Médecines Naturelles' : activeTab}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">
+                    {sortedServices.length} service{sortedServices.length !== 1 ? 's' : ''} disponible{sortedServices.length !== 1 ? 's' : ''}
+                    {searchTerm && ` pour "${searchTerm}"`}
+                  </p>
+                </div>
+                
+                {(searchTerm || priceRange.min || priceRange.max || durationFilter !== 'all' || sortBy !== 'pertinence') && (
+                  <button
+                    onClick={handleClearFilters}
+                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-1"
+                  >
+                    <X className="w-4 h-4" />
+                    Effacer les filtres
+                  </button>
+                )}
+              </div>
+
+              {/* Liste des services */}
+              <div className="mb-12">
+                {sortedServices.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    {sortedServices.map((service, index) => (
+                      <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                        <MedecineCard
+                          service={service}
+                          index={index}
+                          onOpenModal={handleOpenModal}
+                        />
+                      </SlideIn>
+                    ))}
+                  </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                    {searchTerm ? 'Aucun service correspondant à votre recherche' : 'Aucun service disponible pour cette catégorie'}
+                  <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/30 rounded-2xl">
+                    <Sprout className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      {searchTerm ? 'Aucun service ne correspond à votre recherche' : 'Aucun service disponible'}
+                    </h4>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      {searchTerm 
+                        ? "Essayez de modifier vos critères de recherche ou vos filtres." 
+                        : "Les services seront bientôt disponibles."}
+                    </p>
+                    {searchTerm && (
+                      <button
+                        onClick={handleClearFilters}
+                        className="mt-4 bg-logo hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition-colors"
+                      >
+                        Voir tous les services
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* Pagination (si nécessaire) */}
+              {sortedServices.length > 0 && sortedServices.length >= 20 && (
+                <div className="flex justify-center mt-8">
+                  <button className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    Charger plus de services
+                  </button>
+                </div>
+              )}
             </>
           )}
         </motion.div>
@@ -798,14 +771,14 @@ const MedecinesNaturelles = () => {
             <div className="p-3 bg-logo/10 rounded-xl w-fit mb-4">
               <Shield className="w-8 h-8 text-logo" />
             </div>
-            <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Prévention</h4>
+            <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Prévention naturelle</h4>
             <p className="text-gray-600 dark:text-muted-foreground text-sm">Renforce les défenses naturelles</p>
           </div>
           <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border">
             <div className="p-3 bg-logo/10 rounded-xl w-fit mb-4">
               <Brain className="w-8 h-8 text-logo" />
             </div>
-            <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Autonomie</h4>
+            <h4 className="font-bold text-gray-800 dark:text-foreground mb-2">Autonomie santé</h4>
             <p className="text-gray-600 dark:text-muted-foreground text-sm">Apprend à prendre soin de soi</p>
           </div>
           <div className="bg-white dark:bg-card rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-border">
@@ -877,7 +850,7 @@ const MedecinesNaturelles = () => {
       </div>
 
       {/* MODAL */}
-      <AppointmentForm
+      <ReservationBienEtreModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         service={selectedService}
@@ -885,5 +858,41 @@ const MedecinesNaturelles = () => {
     </div>
   );
 };
+
+// Fonction de fallback pour les données simulées
+function getSimulatedServices() {
+  console.log('🔄 Chargement des données simulées');
+  return [
+    {
+      id: 1,
+      libelle: "Consultation Phytothérapie Complète",
+      description: "Bilan personnalisé et conseils en plantes médicinales pour traiter vos troubles de santé naturellement.",
+      price: 75,
+      duration: 60,
+      durationFormatted: "1h",
+      images: ["https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
+      category: { name: "Consultation" },
+      benefits: "Solutions naturelles, approche holistique, résultats durables",
+      specialist: {
+        name: "Dr. Sophie Laurent",
+        specialty: "Phytothérapeute",
+        experience: "12 ans d'expérience",
+        rating: 4.9,
+        reviews: 198,
+        languages: ["Français", "Anglais"],
+        availability: "Lun-Ven, 9h-18h"
+      },
+      features: [
+        "Bilan de santé complet",
+        "Prescription de plantes adaptées",
+        "Préparation de tisanes personnalisées",
+        "Suivi mensuel"
+      ],
+      tags: ["plantes", "personnalisé", "complet"],
+      popular: true,
+      type: "Consultation"
+    }
+  ];
+}
 
 export default MedecinesNaturelles;
