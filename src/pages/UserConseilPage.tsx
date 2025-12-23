@@ -1127,7 +1127,7 @@ const UserConseilPage = () => {
 
             {/* Dernières activités pour conseils */}
             <div>
-              <Card className="sticky top-6 border-[#D3D3D3] bg-[#FFFFFF]">
+              <Card className="border-[#D3D3D3] bg-[#FFFFFF]">
                 <div className="p-4 border-b border-[#D3D3D3]">
                   <h3 className="font-semibold flex items-center gap-2 text-[#8B4513]">
                     <MessageSquare className="h-4 w-4 text-[#556B2F]" />

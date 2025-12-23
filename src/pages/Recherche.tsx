@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback,useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home, MapPin, Users, Loader, TreePalm, X, Mail, Phone, DollarSign, Ruler, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -67,8 +67,8 @@ const PositionIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 const Recherche = ({ onClick }: { onClick?: () => void }) => {
   const location = useLocation();
   const navigate = useNavigate();
-// en haut du composant Recherche (juste après les useState)
-const defaultCenter = useMemo(() => [-21.1351, 55.2471] as [number, number], []);
+  // en haut du composant Recherche (juste après les useState)
+  const defaultCenter = useMemo(() => [-21.1351, 55.2471] as [number, number], []);
 
   // Fonction de fermeture simplifiée qui redirige toujours vers la page d'accueil
   const handleClose = () => {
@@ -132,19 +132,19 @@ const defaultCenter = useMemo(() => [-21.1351, 55.2471] as [number, number], [])
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Récupération auto toutes les 7 minutes quand la carte est ouverte
-useEffect(() => {
-  if (!showMapModal || hasPositionBeenFetched) return;
+  useEffect(() => {
+    if (!showMapModal || hasPositionBeenFetched) return;
 
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      setUserLocation([position.coords.latitude, position.coords.longitude]);
-      setHasPositionBeenFetched(true);
-    },
-    () => {
-      console.warn("Position non récupérée.");
-    }
-  );
-}, [showMapModal]);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation([position.coords.latitude, position.coords.longitude]);
+        setHasPositionBeenFetched(true);
+      },
+      () => {
+        console.warn("Position non récupérée.");
+      }
+    );
+  }, [showMapModal]);
 
 
   // Vérifier l'authentification au chargement
@@ -193,7 +193,7 @@ useEffect(() => {
     try {
       setMapLoading(true);
       const allPoints = await MapService.getAllMapPoints();
-      
+
       // DEBUG: Vérifier les données
       // console.log("📊 Données carte chargées:", {
       //   total: allPoints.length,
@@ -207,7 +207,7 @@ useEffect(() => {
       //     lng: p.longitude
       //   }))
       // });
-      
+
       setMapPoints(allPoints);
       setFilteredMapPoints(allPoints);
       setMapError(null);
@@ -227,7 +227,7 @@ useEffect(() => {
     const R = 6371; // Rayon de la Terre en km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
+    const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -283,10 +283,10 @@ useEffect(() => {
   };
 
   // Fonction pour gérer le clic sur un point de la carte
-const handleMapPointClick = useCallback((point: MapPoint) => {
-  // console.log("Point carte cliqué:", point);
-  setSelectedMapPoint(point);
-}, []);
+  const handleMapPointClick = useCallback((point: MapPoint) => {
+    // console.log("Point carte cliqué:", point);
+    setSelectedMapPoint(point);
+  }, []);
 
 
   // Fonction pour fermer le modal de détail
@@ -310,7 +310,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
   const handleGetUserLocation = () => {
     // Empêcher les appels multiples si déjà en cours
     if (geoLoading) return;
-    
+
     if (!navigator.geolocation) {
       setMapError("La géolocalisation n'est pas supportée par votre navigateur.");
       setUserLocation([-21.1351, 55.2471]);
@@ -327,15 +327,15 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
         setUserLocation([latitude, longitude]);
         setHasPositionBeenFetched(true);
         setGeoLoading(false);
-        
+
         // Centrer la carte sur la position utilisateur
         setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('centerMap', { 
-            detail: { 
+          window.dispatchEvent(new CustomEvent('centerMap', {
+            detail: {
               location: [latitude, longitude],
               zoom: 14,
               smooth: true
-            } 
+            }
           }));
         }, 300);
       },
@@ -360,7 +360,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
     setUserLocation(null);
     setHasPositionBeenFetched(false);
     setGeoLoading(false);
-    
+
     // Forcer une nouvelle récupération immédiate
     handleGetUserLocation();
   };
@@ -368,10 +368,10 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
   // Fonction pour ouvrir le modal de la carte SANS récupérer la position automatiquement
   const handleShowMapModal = () => {
     setShowMapModal(true);
-    
+
     // IMPORTANT: NE PAS récupérer la position automatiquement
     // La position sera récupérée par l'interval de 7 minutes seulement
-    
+
     // Optionnel : centrer sur la Réunion par défaut
     setTimeout(() => {
       handleCenterToReunion();
@@ -693,10 +693,10 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
       setResults([]);
       setFilteredResults([]);
       setStage("results");
-      
+
       // 🔥 Réafficher TOUTES les données sur la carte
       setFilteredMapPoints(mapPoints);
-      
+
       navigate('/recherche', { replace: true });
       return;
     }
@@ -750,13 +750,13 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
         setResults(normalizedResults);
         const filtered = filterResults(normalizedResults);
         setFilteredResults(filtered);
-        
+
         // 🔥 Synchroniser la carte avec les résultats API (filtrés)
         const idsFromResults = filtered.map(r => r.id);
 
         // Si la table source est "Property", on filtre par id
-        const mappedPoints = mapPoints.filter(mp => 
-          filtered.some(r => 
+        const mappedPoints = mapPoints.filter(mp =>
+          filtered.some(r =>
             r.id === mp.id && r.source_table === "Property"
           )
         );
@@ -1053,7 +1053,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
                 <ServoLogo />
               </div>
 
-              <div className="relative bg-white rounded-lg flex-1">
+              <div className="relative bg-white rounded-lg flex-1" onClick={() => setShowMapModal(false)}>
                 <Search className="absolute lg:block hidden left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
 
                 <AutoSuggestInput
@@ -1103,7 +1103,10 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
               </div>
 
               <Button
-                onClick={() => setHistoryOpen(true)}
+                onClick={() => {
+                  setHistoryOpen(true);
+                  setShowMapModal(false);
+                }}
                 variant="ghost"
                 size="icon"
                 className="shrink-0 bg-white border-black/60 border"
@@ -1345,7 +1348,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
                 )}
               </div>
             </div>
-            
+
             {/* Badges mobiles */}
             <div className="flex md:hidden gap-2">
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -1357,7 +1360,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
                 </span>
               )}
             </div>
-            
+
             <div className="flex items-center gap-1 md:gap-2">
               {/* Bouton pour obtenir la position (une seule fois) */}
               {!hasPositionBeenFetched ? (
@@ -1383,7 +1386,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
                   <RefreshCw className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
                 </button>
               )}
-              
+
               <button
                 onClick={handleCenterToReunion}
                 className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1428,17 +1431,17 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
             ) : (
               <>
                 {/* Log de debug */}
-                
-                
-               <GenericMap
-                points={filteredMapPoints}
-                userLocation={userLocation}
-                center={defaultCenter}
-                zoom={10}
-                onPointClick={handleMapPointClick}
-              />
 
-                
+
+                <GenericMap
+                  points={filteredMapPoints}
+                  userLocation={userLocation}
+                  center={defaultCenter}
+                  zoom={10}
+                  onPointClick={handleMapPointClick}
+                />
+
+
                 {/* Overlay de debug */}
                 <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-black/70 text-white text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5 rounded pointer-events-none">
                   {filteredMapPoints.length} points
@@ -1456,7 +1459,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
                   {mapPoints.filter(p => p.type === "user").length} partenaires
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-1.5 md:gap-2">
                 <Home className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
                 <span className="text-xs md:text-sm text-gray-700">
@@ -1464,7 +1467,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
                 </span>
               </div>
             </div>
-            
+
             <button
               onClick={() => navigate('/carte')}
               className="text-xs md:text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors self-end sm:self-auto"
