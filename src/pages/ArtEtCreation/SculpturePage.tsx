@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useState, useEffect, useCallback } from 'react'; 
 import { 
   Hammer, 
   Star, 
@@ -10,22 +10,52 @@ import {
   PencilRuler,
   Users,
   MapPin,
-  Calendar,
   Award,
   Phone,
-  Mail,
-  GraduationCap,
-  BookOpen,
-  X,
-  Image as ImageIcon,
-  ChevronRight,
-  Heart,
-  Share2,
-  ExternalLink,
-  Info,
-  MapPin as MapPinIcon,
-  Tag
+  Tag,
+  Briefcase,
+  Eye,
+  Search,
+  AlertCircle,
+  RefreshCw,
+  ChevronLeft,
+  Filter
 } from 'lucide-react';
+import api from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
+
+interface Professional {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  specialty: string;
+  city: string;
+  rating: number;
+  reviewCount: number;
+  avatar?: string;
+  verified: boolean;
+  bio?: string;
+  services: Array<{
+    id: string;
+    title: string;
+    description: string;
+    price?: number;
+    image?: string;
+  }>;
+  metiers: Array<{
+    id: number;
+    name: string;
+  }>;
+  createdAt: string;
+  isAvailable?: boolean;
+  companyName?: string;
+  commercialName?: string;
+  address?: string;
+  zipCode?: string;
+  email?: string;
+  phone?: string;
+}
 
 interface SculpturePageProps {
   searchQuery?: string;
@@ -33,128 +63,243 @@ interface SculpturePageProps {
 }
 
 const SculpturePage: React.FC<SculpturePageProps> = ({ searchQuery, onContactClick }) => {
-  const [showArtworks, setShowArtworks] = useState(false);
-  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [sculptors, setSculptors] = useState<Professional[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showAllSculptors, setShowAllSculptors] = useState(false);
+  
+  const navigate = useNavigate();
 
-  // Fonction pour afficher les œuvres
-  const handleViewArtworks = (artist) => {
-    setSelectedArtist(artist);
-    setShowArtworks(true);
-  };
-
+  // Types de sculpture avec keywords pour le filtrage
   const sculptureTypes = [
-    { name: 'Sculpture sur bois', icon: <Trees size={24} />, count: 28 },
-    { name: 'Sculpture sur pierre', icon: <Mountain size={24} />, count: 19 },
-    { name: 'Sculpture métal', icon: <Drill size={24} />, count: 15 },
-    { name: 'Sculpture terre cuite', icon: <EggFried size={24} />, count: 12 },
-    { name: 'Sculpture contemporaine', icon: <Palette size={24} />, count: 24 },
-    { name: 'Commandes sur mesure', icon: <PencilRuler size={24} />, count: 31 },
+    { 
+      name: 'Sculpture sur bois', 
+      icon: <Trees size={24} />, 
+      slug: 'bois',
+      keywords: ['bois', 'wood', 'chêne', 'noyer', 'ébène', 'bois']
+    },
+    { 
+      name: 'Sculpture sur pierre', 
+      icon: <Mountain size={24} />, 
+      slug: 'pierre',
+      keywords: ['pierre', 'stone', 'marbre', 'granit', 'calcaire', 'pierre']
+    },
+    { 
+      name: 'Sculpture métal', 
+      icon: <Drill size={24} />, 
+      slug: 'metal',
+      keywords: ['métal', 'metal', 'fer', 'acier', 'bronze', 'cuivre']
+    },
+    { 
+      name: 'Sculpture terre cuite', 
+      icon: <EggFried size={24} />, 
+      slug: 'terre-cuite',
+      keywords: ['terre', 'argile', 'céramique', 'poterie', 'terre-cuite', 'terre']
+    },
+    { 
+      name: 'Sculpture contemporaine', 
+      icon: <Palette size={24} />, 
+      slug: 'contemporain',
+      keywords: ['contemporain', 'moderne', 'abstrait', 'contemporary', 'actuel']
+    },
+    { 
+      name: 'Commandes sur mesure', 
+      icon: <PencilRuler size={24} />, 
+      slug: 'sur-mesure',
+      keywords: ['sur-mesure', 'commande', 'personnalisé', 'custom', 'personnalisée']
+    },
   ];
 
-  const featuredArtists = [
-    {
-      id: 1,
-      name: 'Jean-Luc Bernard',
-      material: 'Bois & Pierre',
-      location: 'Bretagne',
-      experience: '25 ans',
-      description: 'Spécialiste des sculptures monumentales',
-      image: 'https://picsum.photos/id/342/300/200',
-      artworks: [
-        {
-          id: 1,
-          title: 'L\'Esprit de la Forêt',
-          description: 'Sculpture monumentale en chêne, 3m de hauteur',
-          price: '4 500€',
-          image: 'https://picsum.photos/id/345/400/300',
-          category: 'Sculpture sur bois',
-          year: 2023
-        },
-        {
-          id: 2,
-          title: 'Harmonie Minérale',
-          description: 'Pierre et métal fusionnés, 1.5m de hauteur',
-          price: '2 800€',
-          image: 'https://picsum.photos/id/346/400/300',
-          category: 'Pierre & Métal',
-          year: 2022
-        }
-      ],
-      bio: 'Artiste sculpteur spécialisé dans les œuvres monumentales. Formé aux Beaux-Arts de Paris, il expose ses œuvres dans toute l\'Europe.',
-      rating: 4.8,
-      reviews: 42,
-      specialties: ['Sculpture monumentale', 'Art sacré', 'Commandes publiques']
-    },
-    {
-      id: 2,
-      name: 'Élise Moreau',
-      material: 'Bronze & Métal',
-      location: 'Normandie',
-      experience: '15 ans',
-      description: 'Artiste contemporaine primée',
-      image: 'https://picsum.photos/id/343/300/200',
-      artworks: [
-        {
-          id: 1,
-          title: 'Équilibre Urbain',
-          description: 'Bronze poli, formes géométriques',
-          price: '3 200€',
-          image: 'https://picsum.photos/id/347/400/300',
-          category: 'Bronze',
-          year: 2024
-        },
-        {
-          id: 2,
-          title: 'Métamorphose',
-          description: 'Acier corten patiné, mouvement fluide',
-          price: '2 900€',
-          image: 'https://picsum.photos/id/348/400/300',
-          category: 'Métal',
-          year: 2023
-        }
-      ],
-      bio: 'Sculptrice contemporaine reconnue pour ses œuvres abstraites en métal. Lauréate du Prix National de Sculpture 2021.',
-      rating: 4.9,
-      reviews: 38,
-      specialties: ['Art abstrait', 'Installations', 'Sculpture contemporaine']
-    },
-    {
-      id: 3,
-      name: 'Pierre Dubois',
-      material: 'Terre cuite',
-      location: 'Provence',
-      experience: '30 ans',
-      description: 'Maître artisan traditionnel',
-      image: 'https://picsum.photos/id/344/300/200',
-      artworks: [
-        {
-          id: 1,
-          title: 'Les Vendangeurs',
-          description: 'Terre cuite émaillée, scène traditionnelle',
-          price: '1 800€',
-          image: 'https://picsum.photos/id/349/400/300',
-          category: 'Terre cuite',
-          year: 2023
-        },
-        {
-          id: 2,
-          title: 'Sagesse Provençale',
-          description: 'Bas-relief en terre cuite patinée',
-          price: '2 100€',
-          image: 'https://picsum.photos/id/350/400/300',
-          category: 'Terre cuite',
-          year: 2022
-        }
-      ],
-      bio: 'Maître artisan céramiste perpétuant les techniques ancestrales. Formé auprès des derniers maîtres potiers de Vallauris.',
-      rating: 4.7,
-      reviews: 56,
-      specialties: ['Céramique traditionnelle', 'Terre cuite', 'Art figuratif']
-    },
-  ];
+  // Fonction pour récupérer les sculpteurs depuis l'API
+  const fetchSculptors = useCallback(async () => {
+    console.log('📡 Fetching sculptors...');
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const params: any = {
+        limit: 50,
+        page: 1
+      };
+      
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+      
+      if (cityFilter) {
+        params.location = cityFilter;
+      }
+      
+      console.log('🌐 API params:', params);
+      const response = await api.get('/art-creation/sculpture/products', { params });
+      
+      console.log('📦 API response:', {
+        success: response.data.success,
+        count: response.data.count,
+        dataLength: response.data.data?.length || 0
+      });
+      
+      if (response.data.success) {
+        setSculptors(response.data.data || []);
+      } else {
+        setError(response.data.message || 'Erreur lors du chargement des sculpteurs');
+      }
+    } catch (err: any) {
+      console.error('❌ Error fetching sculptors:', err);
+      setError('Erreur de connexion au serveur');
+      setSculptors([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm, cityFilter]);
+
+  // Fonction pour filtrer les sculpteurs par catégorie
+  const filterSculptorsByCategory = useCallback((categorySlug: string): Professional[] => {
+    if (categorySlug === 'all') return sculptors;
+    
+    const category = sculptureTypes.find(cat => cat.slug === categorySlug);
+    if (!category) return sculptors;
+    
+    return sculptors.filter(sculptor => {
+      // Vérifier dans les métiers
+      const hasMatchingMetier = sculptor.metiers?.some(metier => 
+        category.keywords.some(keyword => 
+          metier.name.toLowerCase().includes(keyword.toLowerCase())
+        )
+      );
+      
+      // Vérifier dans la spécialité
+      const hasMatchingSpecialty = sculptor.specialty && 
+        category.keywords.some(keyword => 
+          sculptor.specialty.toLowerCase().includes(keyword.toLowerCase())
+        );
+      
+      // Vérifier dans le nom
+      const hasMatchingName = sculptor.name && 
+        category.keywords.some(keyword => 
+          sculptor.name.toLowerCase().includes(keyword.toLowerCase())
+        );
+      
+      return hasMatchingMetier || hasMatchingSpecialty || hasMatchingName;
+    });
+  }, [sculptors]);
+
+  // Fonction pour compter les sculpteurs par catégorie
+  const countSculptorsByCategory = useCallback((categorySlug: string): number => {
+    if (categorySlug === 'all') return sculptors.length;
+    
+    const category = sculptureTypes.find(cat => cat.slug === categorySlug);
+    if (!category) return 0;
+    
+    return sculptors.filter(sculptor => {
+      const hasMatchingMetier = sculptor.metiers?.some(metier => 
+        category.keywords.some(keyword => 
+          metier.name.toLowerCase().includes(keyword.toLowerCase())
+        )
+      );
+      
+      const hasMatchingSpecialty = sculptor.specialty && 
+        category.keywords.some(keyword => 
+          sculptor.specialty.toLowerCase().includes(keyword.toLowerCase())
+        );
+      
+      return hasMatchingMetier || hasMatchingSpecialty;
+    }).length;
+  }, [sculptors]);
+
+  // Fonction pour recharger les données
+  const handleRetry = useCallback(() => {
+    console.log('🔄 Retry loading data');
+    setError(null);
+    fetchSculptors();
+  }, [fetchSculptors]);
+
+  // Gestion du clic sur une catégorie
+  const handleCategoryClick = useCallback((categorySlug: string) => {
+    console.log('🎯 Category clicked:', categorySlug);
+    setSelectedCategory(categorySlug);
+    setShowAllSculptors(true);
+    
+    // Scroll vers la section des sculpteurs
+    setTimeout(() => {
+      document.getElementById('sculptors-section')?.scrollIntoView({ 
+        behavior: 'smooth' 
+      });
+    }, 100);
+  }, []);
+
+  // Retour aux catégories
+  const handleBackToCategories = useCallback(() => {
+    setSelectedCategory(null);
+    setShowAllSculptors(false);
+  }, []);
+
+  // Voir tous les sculpteurs
+  const handleViewAllSculptors = useCallback(() => {
+    setSelectedCategory('all');
+    setShowAllSculptors(true);
+    
+    setTimeout(() => {
+      document.getElementById('sculptors-section')?.scrollIntoView({ 
+        behavior: 'smooth' 
+      });
+    }, 100);
+  }, []);
+
+  // Appel initial
+  useEffect(() => {
+    console.log('🚀 Initializing SculpturePage');
+    fetchSculptors();
+  }, [fetchSculptors]);
+
+  // Effet pour la recherche
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchSculptors();
+    }, 500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, cityFilter, fetchSculptors]);
+
+  // Fonction pour voir le profil
+  const handleViewProfile = useCallback((id: string) => {
+    navigate(`/professional/${id}`);
+  }, [navigate]);
+
+  // Déterminer quelle liste de sculpteurs afficher
+  const sculptorsToDisplay = selectedCategory 
+    ? filterSculptorsByCategory(selectedCategory)
+    : sculptors.slice(0, 6); // Affiche seulement 6 sculpteurs initialement
+
+  // Déterminer le titre
+  const displayTitle = selectedCategory 
+    ? selectedCategory === 'all'
+      ? 'Tous les sculpteurs'
+      : `Sculpteurs - ${sculptureTypes.find(c => c.slug === selectedCategory)?.name}`
+    : ' Nos Sculpteurs';
 
   return (
     <div>
+      {/* Erreur */}
+      {error && (
+        <div className="mb-6 p-4 rounded-md border border-red-300 bg-red-50">
+          <div className="flex items-center">
+            <AlertCircle className="mr-2 text-red-600" />
+            <p className="text-red-600 flex-1">{error}</p>
+            <button 
+              onClick={handleRetry}
+              className="ml-4 flex items-center px-3 py-2 rounded-md text-sm bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors"
+            >
+              <RefreshCw size={14} className="mr-1" />
+              Réessayer
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Sculpture Types */}
       <div className="mb-12">
         <div className="flex items-center mb-6">
@@ -179,19 +324,18 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ searchQuery, onContactCli
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{type.name}</h3>
-                  <div className="flex items-center mt-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} className="fill-current" style={{ color: '#8B4513' }} />
-                    ))}
-                  </div>
+                  
                 </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">
-                  {type.count} artistes disponibles
+                  {countSculptorsByCategory(type.slug)} artistes disponibles
                 </span>
-                <button className="px-3 py-1 rounded-full text-sm font-medium flex items-center"
-                        style={{ backgroundColor: '#6B8E23', color: 'white' }}>
+                <button 
+                  className="px-3 py-1 rounded-full text-sm font-medium flex items-center"
+                  style={{ backgroundColor: '#6B8E23', color: 'white' }}
+                  onClick={() => handleCategoryClick(type.slug)}
+                >
                   <Hammer size={12} className="mr-1" />
                   Explorer
                 </button>
@@ -201,231 +345,228 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ searchQuery, onContactCli
         </div>
       </div>
 
-      {/* Featured Artists */}
-      <div className="mb-12">
+      {/* Recherche et filtres */}
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Rechercher un sculpteur..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F]"
+              />
+            </div>
+          </div>
+          <div className="md:w-64">
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Ville, code postal..."
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F]"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Featured Artists - AFFICHAGE DES SCULPTEURS RÉELS */}
+      <div className="mb-12" id="sculptors-section">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center">
             <Award size={24} className="mr-2" style={{ color: '#8B4513' }} />
             <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-              Sculpteurs d'exception
-            </h2>
-          </div>
-          <button className="flex items-center px-4 py-2 rounded-md border font-medium"
-                  style={{ borderColor: '#556B2F', color: '#556B2F' }}>
-            <Users size={18} className="mr-2" />
-            Voir tous les sculpteurs
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredArtists.map((artist) => (
-            <div
-              key={artist.id}
-              className="rounded-lg overflow-hidden border hover:shadow-xl transition-shadow group"
-              style={{ borderColor: '#D3D3D3' }}
-            >
-              <div className="h-56 overflow-hidden">
-                <img
-                  src={artist.image}
-                  alt={artist.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="font-bold text-xl mb-3">{artist.name}</h3>
-                
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center">
-                    <Hammer size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                    <div>
-                      <span className="font-medium">Matière:</span>
-                      <span className="ml-2" style={{ color: '#556B2F' }}>{artist.material}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                    <div>
-                      <span className="font-medium">Localisation:</span>
-                      <span className="ml-2">{artist.location}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                    <div>
-                      <span className="font-medium">Expérience:</span>
-                      <span className="ml-2">{artist.experience}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-gray-600 mb-6">{artist.description}</p>
-                
-                <div className="flex space-x-2">
-                  <button 
-                    onClick={() => handleViewArtworks(artist)} 
-                    className="flex-1 py-2 rounded-md border text-center font-medium flex items-center justify-center hover:bg-[#556B2F] hover:text-white transition-colors duration-300"
-                    style={{ borderColor: '#556B2F', color: '#556B2F' }}
-                  >
-                    <Palette size={18} className="mr-2" />
-                    Voir les œuvres
-                  </button>
-                  <button 
-                    className="flex-1 py-2 rounded-md text-white font-medium flex items-center justify-center hover:bg-[#485826] transition-colors duration-200"
-                    style={{ backgroundColor: '#556B2F' }}
-                    onClick={() => onContactClick("Demande d'information sculpteur", artist.name)}
-                  >
-                    <Phone size={18} className="mr-2" />
-                    Contacter
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Workshop Section */}
-
-      
-      {/* Modal des œuvres */}
-      {showArtworks && selectedArtist && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-            {/* Header du modal */}
-            <div className="p-6 border-b flex justify-between items-center"
-              style={{ borderColor: '#D3D3D3', backgroundColor: '#556B2F' }}>
-              <div className="flex items-center">
-                <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
-                  <img 
-                    src={selectedArtist.image} 
-                    alt={selectedArtist.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">
-                    {selectedArtist.name}
-                  </h2>
-                  <p className="text-white/80 text-sm mt-1">
-                    {selectedArtist.description}
-                  </p>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  setShowArtworks(false);
-                  setSelectedArtist(null);
-                }} 
-                className="p-2 rounded-full hover:bg-white/20 transition-colors"
-              >
-                <X size={24} className="text-white" />
-              </button>
-            </div>
-            
-            {/* Contenu du modal */}
-            <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-              {/* Section Bio */}
-              <div className="p-6 border-b" style={{ borderColor: '#D3D3D3' }}>
-                <div className="flex items-center mb-4">
-                  <Info size={20} className="mr-2" style={{ color: '#8B4513' }} />
-                  <h3 className="text-lg font-bold" style={{ color: '#8B4513' }}>À propos de l'artiste</h3>
-                </div>
-                <p className="text-gray-700 mb-4">{selectedArtist.bio}</p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  <div className="flex items-center p-3 rounded-lg" style={{ backgroundColor: '#F5F5DC' }}>
-                    <Star size={18} className="mr-2" style={{ color: '#8B4513' }} />
-                    <div>
-                      <p className="font-medium" style={{ color: '#556B2F' }}>Note</p>
-                      <p className="text-lg font-bold">{selectedArtist.rating}/5</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center p-3 rounded-lg" style={{ backgroundColor: '#F5F5DC' }}>
-                    <MapPinIcon size={18} className="mr-2" style={{ color: '#8B4513' }} />
-                    <div>
-                      <p className="font-medium" style={{ color: '#556B2F' }}>Localisation</p>
-                      <p className="text-lg font-bold">{selectedArtist.location}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center p-3 rounded-lg" style={{ backgroundColor: '#F5F5DC' }}>
-                    <Calendar size={18} className="mr-2" style={{ color: '#8B4513' }} />
-                    <div>
-                      <p className="font-medium" style={{ color: '#556B2F' }}>Expérience</p>
-                      <p className="text-lg font-bold">{selectedArtist.experience}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Spécialités */}
-                <div className="mt-4">
-                  <h4 className="font-medium mb-2" style={{ color: '#8B4513' }}>Spécialités :</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedArtist.specialties?.map((specialty, index) => (
-                      <span 
-                        key={index}
-                        className="px-3 py-1 rounded-full text-sm"
-                        style={{ 
-                          backgroundColor: '#F0EAD6',
-                          color: '#556B2F',
-                          border: '1px solid #D3D3D3'
-                        }}
-                      >
-                        {specialty}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {displayTitle}
               
-              {/* Section Œuvres */}
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center">
-                    <Palette size={20} className="mr-2" style={{ color: '#8B4513' }} />
-                    <h3 className="text-lg font-bold" style={{ color: '#8B4513' }}>Œuvres de l'artiste</h3>
-                  </div>
-                  <span className="text-sm text-gray-500">{selectedArtist.artworks?.length} œuvres</span>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {selectedArtist.artworks?.map((artwork) => (
-                    <div 
-                      key={artwork.id}
-                      className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                      style={{ borderColor: '#D3D3D3' }}
-                    >
-                      <div className="h-48 overflow-hidden">
-                        <img 
-                          src={artwork.image} 
-                          alt={artwork.title}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-lg" style={{ color: '#556B2F' }}>{artwork.title}</h4>
-                          <span className="font-bold" style={{ color: '#8B4513' }}>{artwork.price}</span>
-                        </div>
-                        <p className="text-gray-600 text-sm mb-3">{artwork.description}</p>
-                        <div className="flex justify-between items-center">
-                          <span className="px-2 py-1 text-xs rounded"
-                            style={{ 
-                              backgroundColor: '#F0EAD6',
-                              color: '#556B2F'
-                            }}>
-                            {artwork.category}
-                          </span>
-                          <span className="text-sm text-gray-500">{artwork.year}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
+            </h2>
+            {loading && (
+              <div className="ml-4 flex items-center text-gray-500">
+                <RefreshCw size={16} className="animate-spin mr-2" />
+                <span className="text-sm">Chargement...</span>
               </div>
-            </div>
+            )}
+          </div>
+          
+          <div className="flex gap-2">
+            <button 
+              className="flex items-center px-4 py-2 rounded-md border font-medium"
+              style={{ borderColor: '#556B2F', color: '#556B2F' }}
+              onClick={handleViewAllSculptors}
+            >
+              <Users size={18} className="mr-2" />
+              Voir tous les sculpteurs
+            </button>
           </div>
         </div>
-      )}
+
+        
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="h-56 bg-gray-200 rounded-t-lg mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded mb-3 w-1/2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+              </div>
+            ))}
+          </div>
+        ) : sculptorsToDisplay.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {sculptorsToDisplay.map((sculptor) => (
+              <div
+                key={sculptor.id}
+                className="rounded-lg overflow-hidden border hover:shadow-xl transition-shadow group bg-white"
+                style={{ borderColor: '#D3D3D3' }}
+              >
+                {/* Avatar/Image */}
+                <div className="h-56 relative overflow-hidden bg-gray-100">
+                  {sculptor.avatar ? (
+                    <img 
+                      src={sculptor.avatar} 
+                      alt={sculptor.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        const parent = (e.target as HTMLImageElement).parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center">
+                              <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                              </svg>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-24 h-24 rounded-full bg-[#8B4513] bg-opacity-10 flex items-center justify-center mx-auto mb-4">
+                          <Hammer size={48} className="text-[#8B4513]" />
+                        </div>
+                        <span className="text-gray-600 text-sm">Aucune photo</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-bold text-xl">{sculptor.name}</h3>
+                    {sculptor.verified && (
+                      <span className="px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                        ✓ Vérifié
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center">
+                      <Hammer size={16} className="mr-2" style={{ color: '#8B4513' }} />
+                      <div>
+                        <span className="font-medium">Spécialité:</span>
+                        <span className="ml-2" style={{ color: '#556B2F' }}>
+                          {sculptor.specialty || 'Sculpteur'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <MapPin size={16} className="mr-2" style={{ color: '#8B4513' }} />
+                      <div>
+                        <span className="font-medium">Localisation:</span>
+                        <span className="ml-2">
+                          {sculptor.city || 'Non spécifié'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {sculptor.metiers && sculptor.metiers.length > 0 && (
+                      <div className="flex items-start">
+                        <Briefcase size={16} className="mr-2 mt-1" style={{ color: '#8B4513' }} />
+                        <div className="flex flex-wrap gap-1">
+                          {sculptor.metiers.slice(0, 2).map((metier) => (
+                            <span
+                              key={metier.id}
+                              className="inline-block px-2 py-1 rounded text-xs bg-gray-100 text-gray-700"
+                            >
+                              {metier.name}
+                            </span>
+                          ))}
+                          {sculptor.metiers.length > 2 && (
+                            <span className="text-gray-500 text-xs mt-1">
+                              +{sculptor.metiers.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handleViewProfile(sculptor.id)} 
+                      className="flex-1 py-2 rounded-md border text-center font-medium flex items-center justify-center hover:bg-[#556B2F] hover:text-white transition-colors duration-300"
+                      style={{ borderColor: '#556B2F', color: '#556B2F' }}
+                    >
+                      <Eye size={18} className="mr-2" />
+                      Profil
+                    </button>
+                    <button 
+                      className="flex-1 py-2 rounded-md text-white font-medium flex items-center justify-center hover:bg-[#485826] transition-colors duration-200"
+                      style={{ backgroundColor: '#556B2F' }}
+                      onClick={() => onContactClick("Demande d'information sculpteur", sculptor.name)}
+                    >
+                      <Phone size={18} className="mr-2" />
+                      Contacter
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 border border-[#D3D3D3] rounded-lg">
+            <Hammer size={48} className="mx-auto mb-4 text-gray-400" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {selectedCategory 
+                ? `Aucun sculpteur trouvé dans la catégorie "${sculptureTypes.find(c => c.slug === selectedCategory)?.name}"`
+                : 'Aucun sculpteur trouvé'
+              }
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {selectedCategory 
+                ? 'Essayez de modifier vos critères de recherche ou consultez tous les sculpteurs.'
+                : 'Aucun sculpteur ne correspond à vos critères de recherche.'
+              }
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2 rounded-md border border-[#556B2F] text-[#556B2F] font-medium hover:bg-gray-50 transition-colors"
+              >
+                Réessayer
+              </button>
+              {selectedCategory && (
+                <button
+                  onClick={handleBackToCategories}
+                  className="px-4 py-2 rounded-md bg-[#556B2F] text-white font-medium hover:bg-[#485826] transition-colors"
+                >
+                  Retour aux catégories
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

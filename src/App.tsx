@@ -909,6 +909,7 @@ const App = () => {
                     path="/marketplace-createurs"
                     element={<MarketplaceCreateurs />}
                   /> */}
+                  <Route path="/art-et-creation/photographie/:categorySlug" element={<ArtETCreation />} />
                 </Routes>
 
                 {/* Pop-up publicité globale */}
