@@ -1041,7 +1041,7 @@ const Header = () => {
             "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
         },
         {
-          title: "Location de voitures",
+          title: "Transports",
           description: "Voitures, utilitaires, 4x4",
           href: "/location-voiture",
           image:
