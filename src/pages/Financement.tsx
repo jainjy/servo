@@ -1516,6 +1516,10 @@ export default function Financement() {
 
       {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
+
+        <div className="absolute top-12 left-4 right-4 z-50">
+          <AdvertisementPopup />
+        </div>
         {/* Image de fond avec overlay */}
         <div className="absolute inset-0">
           <div
@@ -1654,7 +1658,6 @@ export default function Financement() {
           </div>
         </div>
       </section>
-     <AdvertisementPopup />
       {/* Section Partenaires Financement */}
       <section className="lg:py-20 bg-white" id="partenaires">
         <div className="container mx-auto px-4">

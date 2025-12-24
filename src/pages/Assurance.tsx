@@ -476,6 +476,9 @@ export default function Assurance() {
       {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
         {/* Image de fond avec overlay */}
+        <div className="absolute top-12 left-4 right-4 z-50">
+          <AdvertisementPopup />
+        </div>
         <div className="absolute inset-0">
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -587,7 +590,6 @@ export default function Assurance() {
           <ModalAssurance isOpen={isModalOpen} onClose={handleCloseModal} data={selectedCategorie} />
         </div>
       </section>
-      <AdvertisementPopup />
       {/* Section Services d'Assurance */}
       <section className="py-8 lg:py-4 bg-white" id="services-assurance">
         <div className="container mx-auto px-4">

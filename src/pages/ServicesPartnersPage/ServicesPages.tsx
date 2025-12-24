@@ -453,7 +453,7 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
 
   return (
     <>
-      <AdvancedSearchBar />
+      {AdvancedSearchBar && <AdvancedSearchBar />}
       {/* Section principale des services */}
       {!showStatuses && <ServicesSection />}
 

@@ -392,6 +392,9 @@ const LogementsSHLMR = () => {
     return (
         <div className="min-h-screen" style={{ backgroundColor: COLORS["light-bg"] }}>
             {/* Hero Section avec image */}
+            <div className="absolute top-12 left-4 right-4 z-50">
+                <AdvertisementPopup />
+            </div>
             <motion.section
                 ref={heroRef}
                 initial={{ opacity: 0 }}
@@ -565,7 +568,7 @@ const LogementsSHLMR = () => {
                                 </div>
                             </motion.div>
                         </div>
-                       <AdvertisementPopup />
+                        <AdvertisementPopup />
                     </motion.section>
                 )}
             </AnimatePresence>
@@ -748,12 +751,12 @@ const LogementsSHLMR = () => {
                                                         <div className="absolute bottom-3 left-3">
                                                             <span
                                                                 className={`px-2 py-1 rounded text-xs font-semibold ${logement.energyClass === "A"
-                                                                        ? "bg-green-500 text-white"
-                                                                        : logement.energyClass === "B"
-                                                                            ? "bg-lime-500 text-white"
-                                                                            : logement.energyClass === "C"
-                                                                                ? "bg-yellow-500 text-white"
-                                                                                : "bg-gray-500 text-white"
+                                                                    ? "bg-green-500 text-white"
+                                                                    : logement.energyClass === "B"
+                                                                        ? "bg-lime-500 text-white"
+                                                                        : logement.energyClass === "C"
+                                                                            ? "bg-yellow-500 text-white"
+                                                                            : "bg-gray-500 text-white"
                                                                     }`}
                                                             >
                                                                 Classe {logement.energyClass}
@@ -769,8 +772,8 @@ const LogementsSHLMR = () => {
                                                             toggleFavori(logement.id);
                                                         }}
                                                         className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
-                                                                ? 'bg-red-500 text-white'
-                                                                : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
+                                                            ? 'bg-red-500 text-white'
+                                                            : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
                                                             }`}
                                                     >
                                                         <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
@@ -825,12 +828,12 @@ const LogementsSHLMR = () => {
                                                     {/* Badge Achat/Location */}
                                                     {logement.type && (
                                                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${logement.type === "location"
-                                                                ? "bg-green-50 text-green-700"
-                                                                : "bg-blue-50 text-blue-700"
+                                                            ? "bg-green-50 text-green-700"
+                                                            : "bg-blue-50 text-blue-700"
                                                             }`}>
                                                             <div className={`w-1 h-1 rounded-full ${logement.type === "location"
-                                                                    ? "bg-green-600"
-                                                                    : "bg-blue-600"
+                                                                ? "bg-green-600"
+                                                                : "bg-blue-600"
                                                                 }`} />
                                                             {logement.type === "location" ? "Location" : "À vendre"}
                                                         </span>
@@ -889,13 +892,13 @@ const LogementsSHLMR = () => {
                                                     </motion.button>
                                                 </div>
                                             </div>
-                                            
+
                                         </motion.div>
                                     );
                                 })}
                             </div>
 
-                           <AdvertisementPopup />
+                            <AdvertisementPopup />
 
                             {/* Message si aucun résultat */}
                             {logements.length === 0 && (

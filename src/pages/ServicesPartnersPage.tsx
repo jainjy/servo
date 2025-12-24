@@ -16,10 +16,15 @@ import {
   Heart,
   Eye,
   Share2,
+  Loader2,
 } from "lucide-react";
 import PartnersPage from "./ServicesPartnersPage/PartnersPage";
 import ServicesPage from "./ServicesPartnersPage/ServicesPages";
 import ResultatSearch from "../pages/ResultatSearch";
+import AdvancedSearchBar from "../components/AdvancedSearchBar";
+import Lottie from "lottie-react";
+import search from "@/assets/search.json";
+
 // Types pour TypeScript
 interface Service {
   id: string;
@@ -94,9 +99,9 @@ const ServicesPartnersPage = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const section = params.get("section");
-const [searchLoading, setSearchLoading] = useState(false);
-const [searchResults, setSearchResults] = useState<Service[] | null>(null);
-const inputRef = useRef<HTMLInputElement>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<Service[] | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [view, setView] = useState("default");
   const [services, setServices] = useState<Service[]>([]);
@@ -228,55 +233,55 @@ const inputRef = useRef<HTMLInputElement>(null);
     return [...services, ...properties, ...products, ...aliments];
   }, [services, properties, products, aliments, searchResults]);
 
-    const handleSearch = async () => {
-      const query = searchQuery.trim();
-      
-      if (!query) {
-        // Si la recherche est vide, réinitialiser aux données d'origine
-        setSearchResults(null);
-        // Optionnel : vider aussi l'input
-        // setSearchQuery('');
-        return;
+  const handleSearch = async (queryParam?: string) => {
+    const query = (queryParam ?? searchQuery).trim();
+
+    if (!query) {
+      // Si la recherche est vide, réinitialiser aux données d'origine
+      setSearchResults(null);
+      // Optionnel : vider aussi l'input
+      // setSearchQuery('');
+      return;
+    }
+
+    try {
+      setSearchLoading(true);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+
+      const response = await fetch(`${API_BASE_URL}/searchservice`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ query }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data.services.map((s: any) => ({
+          ...s,
+          type: "service",
+          name: s.libelle || s.name || "",
+          images: s.images || [],
+          price: s.price || 0,
+          metiers: s.metiers ? (typeof s.metiers === 'string' ? s.metiers.split(", ").map((m: string) => ({ libelle: m })) : s.metiers) : []
+        })));
       }
+    } catch (error) {
+      console.error("Erreur recherche:", error);
+      setError("Erreur lors de la recherche");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
 
-      try {
-        setSearchLoading(true);
-        const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
-        
-        const response = await fetch(`${API_BASE_URL}/searchservice`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ query }),
-        });
+  // Optionnel : Ajouter une recherche automatique avec debounce
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setSearchResults(null);
+      return;
+    }
 
-        if (response.ok) {
-          const data = await response.json();
-          setSearchResults(data.services.map((s: any) => ({ 
-            ...s, 
-            type: "service",
-            name: s.libelle || s.name || "",
-            images: s.images || [], 
-            price: s.price || 0,
-            metiers: s.metiers ? (typeof s.metiers === 'string' ? s.metiers.split(", ").map((m: string) => ({ libelle: m })) : s.metiers) : []
-          })));
-        }
-      } catch (error) {
-        console.error("Erreur recherche:", error);
-        setError("Erreur lors de la recherche");
-      } finally {
-        setSearchLoading(false);
-      }
-    };
-
-// Optionnel : Ajouter une recherche automatique avec debounce
-useEffect(() => {
-  if (searchQuery.trim() === '') {
-    setSearchResults(null);
-    return;
-  }
-
-}, [searchQuery]);
+  }, [searchQuery]);
 
 
   // Appliquer les filtres et la recherche
@@ -398,109 +403,30 @@ useEffect(() => {
     return configs[type as keyof typeof configs] || configs.service;
   };
 
-  // Composant de barre de recherche avancée simplifié
-    const AdvancedSearchBar = () => {
-  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
-  
-  // Gérer la saisie et déclencher la recherche automatiquement
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocalSearchQuery(value);
-    setSearchQuery(value); // Mettre à jour l'état principal
-    
-    // Si la recherche est vide, réinitialiser
-    if (!value.trim()) {
-      setSearchResults(null);
-      return;
-    }
-  };
+  // NOTE: Search bar handled by shared component `AdvancedSearchBar` (imported)
+  // We keep search state `searchQuery`, `searchResults`, `searchLoading` here and pass handlers as needed.
+  // No local function component to avoid remounting the input and losing focus.
 
-  // Gérer la touche Entrée
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
-    }
-  };
+  // Generate categories and metiers lists for AdvancedSearchBar props
+  const categoriesList = useMemo(() => {
+    const setC = new Set<string>();
+    services.forEach((s) => s.category && setC.add(s.category));
+    products.forEach((p) => p.category && setC.add(p.category));
+    aliments.forEach((a) => a.category && setC.add(a.category));
+    properties.forEach((p) => p.propertyType && setC.add(p.propertyType));
+    return Array.from(setC);
+  }, [services, products, aliments, properties]);
 
-  // Recherche automatique avec debounce (optionnel)
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (localSearchQuery.trim()) {
-        handleSearch();
-      }
-    }, 500); // Augmenter le délai à 500ms pour éviter les recherches trop fréquentes
-
-    return () => clearTimeout(handler);
-  }, [localSearchQuery]);
-
-  return (
-    <div className="mb-8">
-      <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* INPUT SEARCH */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-            <input
-              ref={inputRef}
-              type="search"
-              placeholder="Rechercher des services, biens, produits..."
-              value={localSearchQuery}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-              className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              disabled={searchLoading}
-            />
-            {searchLoading && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600"></div>
-              </div>
-            )}
-          </div>
-          
-          <button 
-            onClick={handleSearch}
-            disabled={searchLoading || !searchQuery.trim()}
-            className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[120px] transition-colors"
-          >
-            {searchLoading ? (
-              <span className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                Recherche...
-              </span>
-            ) : (
-              <>
-                <Search className="w-5 h-5" /> 
-               Rechercher
-              </>
-            )}
-          </button>
-        </div>
-        
-        {/* Affichage du statut de recherche */}
-        {searchResults !== null && (
-          <div className="mt-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-            <div className="flex justify-between items-center">
-              <span className="text-emerald-800 font-medium">
-                {searchResults.length} résultat(s) trouvé(s) pour "{searchQuery}"
-              </span>
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setLocalSearchQuery("");
-                  setSearchResults(null);
-                }}
-                className="text-sm text-emerald-600 hover:text-emerald-800"
-              >
-                Effacer la recherche
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+  const metiersList = useMemo(() => {
+    const setM = new Set<string>();
+    services.forEach((s) =>
+      s.metiers?.forEach((m) => {
+        if (m.libelle) setM.add(m.libelle);
+        else if (m.name) setM.add(m.name);
+      })
+    );
+    return Array.from(setM);
+  }, [services]);
 
 
   // Composant de carte d'item
@@ -541,9 +467,8 @@ useEffect(() => {
           className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
         >
           <Heart
-            className={`w-5 h-5 ${
-              isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
-            }`}
+            className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
+              }`}
           />
         </button>
 
@@ -692,26 +617,26 @@ useEffect(() => {
         </div>
 
         <div className="relative z-10">
-          <div className="max-w-6xl mx-auto px-4 py-20">
+          <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
             {/* Titres */}
             <div className="text-center mb-12">
-              <h1 className="text-5xl font-bold text-white mb-4 leading-tight">
+              <h1 className="text-xl lg:text-3xl font-bold text-white mb-4 leading-tight">
                 {view === "default"
                   ? "Découvrez Notre Univers"
                   : view === "partenaires"
-                  ? "Nos Partenaires d'Excellence"
-                  : view === "services"
-                  ? "Tous nos Services"
-                  : "Centre d'Aide"}
+                    ? "Nos Partenaires d'Excellence"
+                    : view === "services"
+                      ? "Tous nos Services"
+                      : "Centre d'Aide"}
               </h1>
-              <p className="text-xl text-emerald-100 max-w-2xl mx-auto">
+              <p className="text-sm text-emerald-100 max-w-2xl mx-auto">
                 {view === "default"
                   ? "L'excellence à portée de clic : services, biens, produits et plus encore"
                   : view === "partenaires"
-                  ? "Des experts sélectionnés pour votre réussite"
-                  : view === "services"
-                  ? "Des prestations de qualité pour tous vos besoins"
-                  : "Nous sommes là pour vous accompagner"}
+                    ? "Des experts sélectionnés pour votre réussite"
+                    : view === "services"
+                      ? "Des prestations de qualité pour tous vos besoins"
+                      : "Nous sommes là pour vous accompagner"}
               </p>
             </div>
 
@@ -721,11 +646,10 @@ useEffect(() => {
                 onClick={() =>
                   navigate("/services-partners?section=prestations")
                 }
-                className={`group px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${
-                  view === "services"
-                    ? "bg-white text-emerald-700 shadow-2xl transform scale-105"
-                    : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
-                }`}
+                className={`group px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${view === "services"
+                  ? "bg-white text-emerald-700 shadow-2xl transform scale-105"
+                  : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+                  }`}
               >
                 <Wrench className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 Tous nos services
@@ -736,11 +660,10 @@ useEffect(() => {
                 onClick={() =>
                   navigate("/services-partners?section=partenaires")
                 }
-                className={`group px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${
-                  view === "partenaires"
-                    ? "bg-white text-violet-700 shadow-2xl transform scale-105"
-                    : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
-                }`}
+                className={`group px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${view === "partenaires"
+                  ? "bg-white text-violet-700 shadow-2xl transform scale-105"
+                  : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+                  }`}
               >
                 <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 Partenaires
@@ -749,70 +672,61 @@ useEffect(() => {
             </div>
           </div>
         </div>
-
-        {/* Vague décorative */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg
-            viewBox="0 0 1200 120"
-            preserveAspectRatio="none"
-            className="w-full h-12"
-          >
-            <path
-              d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
-              opacity=".25"
-              fill="currentColor"
-              className="text-white"
-            ></path>
-            <path
-              d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39 116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z"
-              opacity=".5"
-              fill="currentColor"
-              className="text-white"
-            ></path>
-            <path
-              d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
-              fill="currentColor"
-              className="text-white"
-            ></path>
-          </svg>
-        </div>
       </header>
 
-     <main className="max-w-6xl mx-auto px-4 py-8">
-    {searchResults !== null ? (
-      <ResultatSearch
-        searchQuery={searchQuery}
-        searchResults={searchResults}
-        favorites={favorites}
-        setFavorites={setFavorites}
-      />
-    ) : (
-    <>
-      {view === "partenaires" && (
-        <PartnersPage
-          filters={filters}
-          setFilters={setFilters}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          AdvancedSearchBar={AdvancedSearchBar}
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* Barre de recherche toujours montée : évite le démontage lors de l'affichage des résultats */}
+
+        <AdvancedSearchBar
+          onSearch={(filters: any) => {
+            const q = (filters && (filters.query || "")) || "";
+            setSearchQuery(q);
+            // return the promise from handleSearch so AdvancedSearchBar can await it
+            return handleSearch(q);
+          }}
+          categories={categoriesList}
+          metiers={metiersList}
         />
-      )}
-      {view === "services" && (
-        <ServicesPage
-          filters={filters}
-          setFilters={setFilters}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          AdvancedSearchBar={AdvancedSearchBar}
-        />
-      )}
-    </>
-  )}
-    </main>
+        <div className="bg-white mt-5 rounded-lg shadow-lg py-5">
+          {searchLoading ? (
+            <div className="py-20 flex flex-col items-center justify-center w-full">
+              <Lottie animationData={search} loop autoplay className="w-32 lg:w-52" />
+              <p className="mt-4 text-gray-600">Recherche en cours...</p>
+            </div>
+          ) : searchResults !== null ? (
+            <ResultatSearch
+              searchQuery={searchQuery}
+              searchResults={searchResults}
+              favorites={favorites}
+              setFavorites={setFavorites}
+            />
+
+          ) : (
+            <>
+              {view === "partenaires" && (
+                <PartnersPage
+                  filters={filters}
+                  setFilters={setFilters}
+                  showFilters={showFilters}
+                  setShowFilters={setShowFilters}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                />
+              )}
+              {view === "services" && (
+                <ServicesPage
+                  filters={filters}
+                  setFilters={setFilters}
+                  showFilters={showFilters}
+                  setShowFilters={setShowFilters}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 };

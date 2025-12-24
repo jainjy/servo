@@ -412,7 +412,7 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
         )}
 
         {/* Barre de recherche avancée */}
-        <AdvancedSearchBar />
+        {AdvancedSearchBar && <AdvancedSearchBar />}
 
         {/* Affichage conditionnel */}
         {!showExperts && !loading && <MetiersGrid />}
