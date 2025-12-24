@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   MapPin, 
   Clock, 
@@ -16,24 +16,54 @@ import {
   Tag,
   Phone,
   Eye,
-  Heart,
   BookOpen,
   Target,
-  DollarSign,
   X,
   Info,
   Share2,
   Mail,
-  ShoppingCart,
   ChevronRight,
-  Check,
   ExternalLink,
-  Download,
   Printer,
   Filter,
   Search,
-  Bookmark
+  AlertCircle,
+  RefreshCw,
+  Palette,
+  Star as StarIcon,
+  User as UserIcon
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '@/lib/api';
+
+interface Professional {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  specialty: string;
+  city: string;
+  rating: number;
+  reviewCount: number;
+  works: number;
+  avatar?: string;
+  verified: boolean;
+  bio?: string;
+  metiers: Array<{
+    id: number;
+    name: string;
+  }>;
+  createdAt: string;
+  isAvailable?: boolean;
+  companyName?: string;
+  commercialName?: string;
+  address?: string;
+  zipCode?: string;
+  email?: string;
+  phone?: string;
+  yearsExperience?: number;
+  deliveryTime?: string;
+}
 
 interface ArtisanatPageProps {
   searchQuery?: string;
@@ -42,26 +72,179 @@ interface ArtisanatPageProps {
 
 const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactClick }) => {
   const [showArtisanDetail, setShowArtisanDetail] = useState(false);
-  const [selectedArtisan, setSelectedArtisan] = useState(null);
+  const [selectedArtisan, setSelectedArtisan] = useState<Professional | null>(null);
   const [showAllArtisans, setShowAllArtisans] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [likedItems, setLikedItems] = useState([]);
-  const [showWorkshopDetail, setShowWorkshopDetail] = useState(false);
-  const [selectedWorkshop, setSelectedWorkshop] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState<{id: number, name: string, slug: string} | null>(null);
+  const [likedItems, setLikedItems] = useState<string[]>([]);
+  
+  // États pour l'API
+  const [loading, setLoading] = useState(true);
+  const [artisans, setArtisans] = useState<Professional[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  
+  const navigate = useNavigate();
 
-  // Fonctions handlers
-  const handleViewArtisanDetail = (artisan) => {
-    setSelectedArtisan(artisan);
-    setShowArtisanDetail(true);
-  };
+  // Catégories d'artisanat basées sur votre seed
+  const craftCategories = [
+    { 
+      id: 1, 
+      name: 'Céramique & Poterie', 
+      icon: <EggFried size={28} />, 
+      description: 'Pièces uniques en terre cuite, grès et porcelaine',
+      slug: 'ceramique',
+      keywords: ['céramiste', 'poterie', 'céramique', 'terre cuite', 'grès', 'porcelaine']
+    },
+    { 
+      id: 2, 
+      name: 'Tissage & Textile', 
+      icon: <Scissors size={28} />, 
+      description: 'Tissages traditionnels et créations textiles',
+      slug: 'tissage',
+      keywords: ['tisserand', 'tissage', 'textile', 'tissu']
+    },
+    { 
+      id: 3, 
+      name: 'Travail du cuir', 
+      icon: <Briefcase size={28} />, 
+      description: 'Maroquinerie fine et accessoires en cuir',
+      slug: 'cuir',
+      keywords: ['maroquinier', 'cuir', 'maroquinerie', 'maroquinier d\'art']
+    },
+    { 
+      id: 4, 
+      name: 'Bijoux artisanaux', 
+      icon: <Gem size={28} />, 
+      description: 'Créations uniques en métal, pierres et perles',
+      slug: 'bijoux',
+      keywords: ['bijoutier', 'bijoux', 'joaillier']
+    },
+    { 
+      id: 5, 
+      name: 'Menuiserie fine', 
+      icon: <Target size={28} />, 
+      description: 'Meubles et objets en bois massif',
+      slug: 'menuiserie',
+      keywords: ['ébéniste', 'menuiserie', 'bois', 'ébénisterie']
+    },
+    { 
+      id: 6, 
+      name: 'Verre soufflé', 
+      icon: <Wine size={28} />, 
+      description: 'Verre artistique soufflé à la bouche',
+      slug: 'verre',
+      keywords: ['verrier', 'verre', 'verre soufflé']
+    },
+    { 
+      id: 7, 
+      name: 'Vannerie', 
+      icon: <ShoppingBasket size={28} />, 
+      description: 'Paniers et objets en osier et rotin',
+      slug: 'vannerie',
+      keywords: ['vannier', 'vannerie', 'osier', 'rotin']
+    },
+    { 
+      id: 8, 
+      name: 'Créations diverses', 
+      icon: <BaggageClaim size={28} />, 
+      description: 'Créateurs textile, mobilier et créations uniques',
+      slug: 'creations',
+      keywords: ['créateur textile', 'créateur céramique', 'créateur mobilier', 'créateur verre soufflé']
+    },
+  ];
 
-  const handleViewCategory = (category) => {
+  // Fonction pour récupérer les artisans depuis l'API
+  const fetchArtisans = useCallback(async () => {
+    console.log('📡 Fetching artisans...');
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const params: any = {
+        limit: 50,
+        page: 1
+      };
+      
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+      
+      if (cityFilter) {
+        params.location = cityFilter;
+      }
+      
+      if (selectedCategory) {
+        params.category = selectedCategory.slug;
+      }
+      
+      console.log('🌐 API params:', params);
+      // Appel à la nouvelle route artisanat
+      const response = await api.get('/art-creation/artisanat/products', { params });
+      
+      console.log('📦 API response:', {
+        success: response.data.success,
+        count: response.data.count,
+        dataLength: response.data.data?.length || 0
+      });
+      
+      if (response.data.success) {
+        setArtisans(response.data.data || []);
+      } else {
+        setError(response.data.message || 'Erreur lors du chargement des artisans');
+      }
+    } catch (err: any) {
+      console.error('❌ Error fetching artisans:', err);
+      setError('Erreur de connexion au serveur');
+      setArtisans([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm, cityFilter, selectedCategory]);
+
+  // Fonction pour compter les artisans par catégorie
+  const countArtisansByCategory = useCallback((categorySlug: string): number => {
+    if (categorySlug === 'all') return artisans.length;
+    
+    const category = craftCategories.find(cat => cat.slug === categorySlug);
+    if (!category) return 0;
+    
+    return artisans.filter(artisan => {
+      return artisan.metiers?.some(metier => 
+        category.keywords.some(keyword => 
+          metier.name.toLowerCase().includes(keyword.toLowerCase())
+        )
+      );
+    }).length;
+  }, [artisans, craftCategories]);
+
+  // Fonction pour explorer une catégorie
+  const handleViewCategory = useCallback((category: any) => {
     setSelectedCategory(category);
-    // Ici vous pouvez ajouter la logique pour filtrer les artisans par catégorie
-  };
+    
+    // Scroll vers la section des artisans
+    setTimeout(() => {
+      document.getElementById('artisans-section')?.scrollIntoView({ 
+        behavior: 'smooth' 
+      });
+    }, 100);
+  }, []);
 
-  const handleLikeItem = (itemId) => {
+  // Fonction pour recharger les données
+  const handleRetry = useCallback(() => {
+    console.log('🔄 Retry loading data');
+    setError(null);
+    fetchArtisans();
+  }, [fetchArtisans]);
+
+  // Fonction pour voir le profil
+  const handleViewProfile = useCallback((id: string) => {
+    navigate(`/professional/${id}`);
+  }, [navigate]);
+
+  // Fonction pour liker un artisan
+  const handleLikeItem = (itemId: string) => {
     if (likedItems.includes(itemId)) {
       setLikedItems(likedItems.filter(id => id !== itemId));
     } else {
@@ -69,16 +252,12 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactCli
     }
   };
 
-  const handleViewWorkshopDetail = (workshop) => {
-    setSelectedWorkshop(workshop);
-    setShowWorkshopDetail(true);
-  };
-
-  const handleShareArtisan = (artisan) => {
+  // Fonction pour partager un artisan
+  const handleShareArtisan = (artisan: Professional) => {
     if (navigator.share) {
       navigator.share({
         title: artisan.name,
-        text: artisan.description,
+        text: artisan.specialty || `Découvrez ${artisan.name}, artisan spécialisé`,
         url: window.location.href,
       });
     } else {
@@ -87,225 +266,78 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactCli
     }
   };
 
-  const craftCategories = [
-    { 
-      id: 1, 
-      name: 'Céramique & Poterie', 
-      icon: <EggFried size={28} />, 
-      items: 156,
-      description: 'Pièces uniques en terre cuite, grès et porcelaine'
-    },
-    { 
-      id: 2, 
-      name: 'Tissage & Textile', 
-      icon: <Scissors size={28} />, 
-      items: 89,
-      description: 'Tissages traditionnels et créations textiles'
-    },
-    { 
-      id: 3, 
-      name: 'Travail du cuir', 
-      icon: <Briefcase size={28} />, 
-      items: 72,
-      description: 'Maroquinerie fine et accessoires en cuir'
-    },
-    { 
-      id: 4, 
-      name: 'Bijoux artisanaux', 
-      icon: <Gem size={28} />, 
-      items: 203,
-      description: 'Créations uniques en métal, pierres et perles'
-    },
-    { 
-      id: 5, 
-      name: 'Menuiserie fine', 
-      icon: <Target size={28} />, 
-      items: 64,
-      description: 'Meubles et objets en bois massif'
-    },
-    { 
-      id: 6, 
-      name: 'Verre soufflé', 
-      icon: <Wine size={28} />, 
-      items: 42,
-      description: 'Verre artistique soufflé à la bouche'
-    },
-    { 
-      id: 7, 
-      name: 'Vannerie', 
-      icon: <ShoppingBasket size={28} />, 
-      items: 38,
-      description: 'Paniers et objets en osier et rotin'
-    },
-    { 
-      id: 8, 
-      name: 'Maroquinerie', 
-      icon: <BaggageClaim size={28} />, 
-      items: 57,
-      description: 'Sacs et accessoires en cuir de qualité'
-    },
-  ];
 
-  const featuredArtisans = [
-    {
-      id: 1,
-      name: 'Atelier Terre et Feu',
-      craft: 'Céramique',
-      location: 'Vallauris',
-      rating: 4.9,
-      description: 'Pièces uniques en grès émaillé',
-      delivery: 'Sous 7 jours',
-      image: 'https://picsum.photos/id/225/300/200',
-      bio: 'Atelier familial spécialisé dans la céramique traditionnelle depuis 3 générations. Techniques de tournage, modelage et émaillage.',
-      years: 25,
-      products: [
-        { name: 'Vase cylindrique', price: '85€', image: 'https://picsum.photos/id/228/200/200' },
-        { name: 'Service à thé', price: '120€', image: 'https://picsum.photos/id/229/200/200' },
-        { name: 'Pots à épices', price: '45€', image: 'https://picsum.photos/id/230/200/200' }
-      ],
-      techniques: ['Tournage', 'Émaillage', 'Cuisson au bois'],
-      certifications: ['Maître Artisan', 'EPV'],
-      contact: {
-        email: 'contact@terre-feu.fr',
-        phone: '04 93 64 12 34',
-        website: 'www.terre-feu.fr'
-      }
-    },
-    {
-      id: 2,
-      name: 'Les Mains d\'Or',
-      craft: 'Maroquinerie',
-      location: 'Grasse',
-      rating: 5.0,
-      description: 'Sacs et accessoires en cuir végétal',
-      delivery: 'Sous 10 jours',
-      image: 'https://picsum.photos/id/226/300/200',
-      bio: 'Artisan maroquinier spécialisé dans le cuir végétal tanné. Créations sur mesure et pièces uniques.',
-      years: 12,
-      products: [
-        { name: 'Sac besace', price: '280€', image: 'https://picsum.photos/id/231/200/200' },
-        { name: 'Portefeuille', price: '95€', image: 'https://picsum.photos/id/232/200/200' },
-        { name: 'Ceinture', price: '120€', image: 'https://picsum.photos/id/233/200/200' }
-      ],
-      techniques: ['Découpe main', 'Couture sellier', 'Patine naturelle'],
-      certifications: ['Artisan d\'Art'],
-      contact: {
-        email: 'info@mainsdor.fr',
-        phone: '04 97 05 43 21',
-        website: 'www.mainsdor.fr'
-      }
-    },
-    {
-      id: 3,
-      name: 'L\'Atelier du Bois',
-      craft: 'Menuiserie',
-      location: 'Jura',
-      rating: 4.8,
-      description: 'Meubles sur mesure en bois massif',
-      delivery: 'Sur devis',
-      image: 'https://picsum.photos/id/227/300/200',
-      bio: 'Ébéniste spécialisé dans le mobilier contemporain en bois locaux. Restauration et création.',
-      years: 18,
-      products: [
-        { name: 'Table basse chêne', price: '450€', image: 'https://picsum.photos/id/234/200/200' },
-        { name: 'Chaise design', price: '320€', image: 'https://picsum.photos/id/235/200/200' },
-        { name: 'Étagère murale', price: '280€', image: 'https://picsum.photos/id/236/200/200' }
-      ],
-      techniques: ['Ébénisterie', 'Marqueterie', 'Finitions naturelles'],
-      certifications: ['Maître Artisan', 'Entreprise du Patrimoine Vivant'],
-      contact: {
-        email: 'atelier@bois-massif.fr',
-        phone: '03 84 24 56 78',
-        website: 'www.bois-massif.fr'
-      }
-    },
-  ];
 
-  const allArtisans = [
-    ...featuredArtisans,
-    {
-      id: 4,
-      name: 'Verre & Lumière',
-      craft: 'Verre soufflé',
-      location: 'Bièvre',
-      rating: 4.7,
-      description: 'Créations en verre soufflé artisanal',
-      delivery: 'Sous 15 jours',
-      image: 'https://picsum.photos/id/237/300/200',
-    },
-    {
-      id: 5,
-      name: 'Fibres & Couleurs',
-      craft: 'Tissage',
-      location: 'Aubusson',
-      rating: 4.9,
-      description: 'Tapisseries et tissages traditionnels',
-      delivery: 'Sur mesure',
-      image: 'https://picsum.photos/id/238/300/200',
-    },
-    {
-      id: 6,
-      name: 'Bijoux d\'Exception',
-      craft: 'Bijouterie',
-      location: 'Paris',
-      rating: 4.6,
-      description: 'Créations joaillières uniques',
-      delivery: 'Sous 5 jours',
-      image: 'https://picsum.photos/id/239/300/200',
-    },
-  ];
+  // Appel initial
+  useEffect(() => {
+    console.log('🚀 Initializing ArtisanatPage');
+    fetchArtisans();
+  }, [fetchArtisans]);
 
-  const workshops = [
-    { 
-      id: 1,
-      title: 'Initiation à la poterie', 
-      duration: '3h', 
-      price: '65€', 
-      slots: 4,
-      icon: <EggFried size={20} />,
-      description: 'Découverte du tournage et modelage de l\'argile',
-      instructor: 'Jean Dupont',
-      location: 'Atelier Terre et Feu',
-      date: '15 Avril 2024',
-      materials: 'Tout inclus',
-      level: 'Débutant'
-    },
-    { 
-      id: 2,
-      title: 'Création de bijoux', 
-      duration: '2h30', 
-      price: '45€', 
-      slots: 6,
-      icon: <Gem size={20} />,
-      description: 'Fabrication de bijoux en argent et pierres naturelles',
-      instructor: 'Marie Laurent',
-      location: 'Bijoux d\'Exception',
-      date: '22 Avril 2024',
-      materials: 'Matériel fourni',
-      level: 'Tous niveaux'
-    },
-    { 
-      id: 3,
-      title: 'Atelier cuir débutant', 
-      duration: '4h', 
-      price: '85€', 
-      slots: 3,
-      icon: <Briefcase size={20} />,
-      description: 'Réalisation d\'un porte-cartes en cuir végétal',
-      instructor: 'Pierre Martin',
-      location: 'Les Mains d\'Or',
-      date: '29 Avril 2024',
-      materials: 'Cuir et outils fournis',
-      level: 'Débutant'
-    },
-  ];
+  // Effet pour la recherche
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchArtisans();
+    }, 500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, cityFilter, selectedCategory, fetchArtisans]);
 
-  const displayedArtisans = showAllArtisans ? allArtisans : featuredArtisans;
+  // Déterminer quels artisans afficher
+  const displayedArtisans = showAllArtisans ? artisans : artisans.slice(0, 3);
   const displayedCategories = showAllCategories ? craftCategories : craftCategories.slice(0, 8);
+
+  // Fonction pour obtenir l'icône de catégorie
+  const getCategoryIcon = (metiers: Array<{id: number, name: string}>) => {
+    const metierName = metiers?.[0]?.name?.toLowerCase() || '';
+    
+    if (metierName.includes('céram') || metierName.includes('poterie')) {
+      return <EggFried size={28} />;
+    }
+    if (metierName.includes('tiss') || metierName.includes('textile')) {
+      return <Scissors size={28} />;
+    }
+    if (metierName.includes('cuir') || metierName.includes('maroquin')) {
+      return <Briefcase size={28} />;
+    }
+    if (metierName.includes('bijou') || metierName.includes('joaill')) {
+      return <Gem size={28} />;
+    }
+    if (metierName.includes('bois') || metierName.includes('ébén')) {
+      return <Target size={28} />;
+    }
+    if (metierName.includes('verre')) {
+      return <Wine size={28} />;
+    }
+    if (metierName.includes('vannier')) {
+      return <ShoppingBasket size={28} />;
+    }
+    
+    return <BaggageClaim size={28} />;
+  };
 
   return (
     <div>
-      {/* Craft Categories - TOUS LES BOUTONS FONCTIONNELS */}
+      
+
+      {/* Erreur */}
+      {error && (
+        <div className="mb-6 p-4 rounded-md border border-red-300 bg-red-50">
+          <div className="flex items-center">
+            <AlertCircle className="mr-2 text-red-600" />
+            <p className="text-red-600 flex-1">{error}</p>
+            <button 
+              onClick={handleRetry}
+              className="ml-4 flex items-center px-3 py-2 rounded-md text-sm bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors"
+            >
+              <RefreshCw size={14} className="mr-1" />
+              Réessayer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Catégories d'artisanat */}
       <div className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
@@ -341,7 +373,7 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactCli
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 flex items-center">
                   <BookOpen size={14} className="mr-1" />
-                  {category.items} créations
+                  {countArtisansByCategory(category.slug)} artisans
                 </span>
                 <button 
                   onClick={(e) => {
@@ -359,15 +391,50 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactCli
           ))}
         </div>
       </div>
+      {/* Barre de recherche */}
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Rechercher un artisan..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F]"
+              />
+            </div>
+          </div>
+          <div className="md:w-64">
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Ville, code postal..."
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F]"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Featured Artisans - TOUS LES BOUTONS FONCTIONNELS */}
-      <div className="mb-12">
+      {/* Section des artisans */}
+      <div className="mb-12" id="artisans-section">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center">
             <Award size={24} className="mr-2" style={{ color: '#8B4513' }} />
             <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-              Artisans sélectionnés
+              {selectedCategory ? `Artisans - ${selectedCategory.name}` : 'Nos artisans'}
             </h2>
+            {loading && (
+              <div className="ml-4 flex items-center text-gray-500">
+                <RefreshCw size={16} className="animate-spin mr-2" />
+                <span className="text-sm">Chargement...</span>
+              </div>
+            )}
           </div>
           <button 
             onClick={() => setShowAllArtisans(!showAllArtisans)}
@@ -375,142 +442,154 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactCli
             style={{ borderColor: '#556B2F', color: '#556B2F' }}
           >
             <Users size={18} className="mr-2" />
-            {showAllArtisans ? 'Voir moins' : 'Voir tous les artisans'}
+            {showAllArtisans ? '' : 'Voir tous les artisans'}
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {displayedArtisans.map((artisan) => (
-            <div
-              key={artisan.id}
-              className="rounded-lg overflow-hidden border hover:shadow-xl transition-shadow group"
-              style={{ borderColor: '#D3D3D3' }}
-            >
-              <div className="h-48 overflow-hidden relative">
-                <img
-                  src={artisan.image}
-                  alt={artisan.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleLikeItem(`artisan-${artisan.id}`);
-                  }}
-                  className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
-                >
-                  <Heart 
-                    size={18} 
-                    className={likedItems.includes(`artisan-${artisan.id}`) ? 'fill-red-500 text-red-500' : 'text-gray-600'}
-                  />
-                </button>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded mb-3 w-1/2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
               </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-bold text-xl mb-1">{artisan.name}</h3>
-                    <div className="flex items-center text-gray-600 mb-2">
-                      <MapPin size={16} className="mr-1" />
-                      {artisan.location}
+            ))}
+          </div>
+        ) : displayedArtisans.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {displayedArtisans.map((artisan) => (
+              <div
+                key={artisan.id}
+                className="rounded-lg overflow-hidden border hover:shadow-xl transition-shadow group"
+                style={{ borderColor: '#D3D3D3' }}
+              >
+                <div className="h-48 overflow-hidden relative">
+                  {artisan.avatar ? (
+                    <img
+                      src={artisan.avatar}
+                      alt={artisan.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://picsum.photos/id/225/300/200';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#F5F5DC] to-[#D3D3D3] flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="mb-2" style={{ color: '#8B4513' }}>
+                          {getCategoryIcon(artisan.metiers || [])}
+                        </div>
+                        <span className="font-bold" style={{ color: '#556B2F' }}>
+                          {artisan.name}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="font-bold text-xl mb-1">{artisan.name}</h3>
+                      <div className="flex items-center text-gray-600 mb-2">
+                        <MapPin size={16} className="mr-1" />
+                        {artisan.city || 'Non spécifié'}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center" style={{ color: '#8B4513' }}>
-                    <Star size={16} className="fill-current mr-1" />
-                    <span className="font-bold">{artisan.rating}</span>
+                  
+                  <div className="mb-4">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-2 hover:bg-[#556B2F] hover:text-white transition-colors cursor-pointer"
+                          style={{ backgroundColor: '#F0F0F0', color: '#556B2F' }}>
+                      <Tag size={14} className="mr-1" />
+                      {artisan.specialty || 'Artisan'}
+                    </span>
+                    <p className="text-gray-600">
+                      {artisan.metiers?.map(m => m.name).join(', ') || 'Artisan spécialisé'}
+                    </p>
                   </div>
-                </div>
-                
-                <div className="mb-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-2 hover:bg-[#556B2F] hover:text-white transition-colors cursor-pointer"
-                        style={{ backgroundColor: '#F0F0F0', color: '#556B2F' }}
-                        onClick={() => handleViewCategory({ name: artisan.craft })}>
-                    <Tag size={14} className="mr-1" />
-                    {artisan.craft}
-                  </span>
-                  <p className="text-gray-600">{artisan.description}</p>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
-                  <div className="flex items-center">
-                    <Clock size={14} className="mr-1" />
-                    Livraison: {artisan.delivery}
+                  
+                  
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handleViewProfile(artisan.id)}
+                      className="flex-1 py-2 rounded-md border text-center font-medium flex items-center justify-center hover:bg-[#556B2F] hover:text-white transition-colors duration-300"
+                      style={{ borderColor: '#556B2F', color: '#556B2F' }}
+                    >
+                      <Eye size={18} className="mr-2" />
+                      voir le profil
+                    </button>
+                    <button 
+                      onClick={() => onContactClick && onContactClick(`Contact: ${artisan.name}`, artisan.name)}
+                      className="flex-1 py-2 rounded-md text-white font-medium flex items-center justify-center hover:bg-[#485826] transition-colors duration-200"
+                      style={{ backgroundColor: '#556B2F' }}
+                    >
+                      <Phone size={18} className="mr-2" />
+                      Contacter
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => handleShareArtisan(artisan)}
-                    className="p-1 hover:text-[#556B2F] transition-colors"
-                    title="Partager"
-                  >
-                    <Share2 size={16} />
-                  </button>
-                </div>
-                
-                <div className="flex space-x-2">
-                  <button 
-                    onClick={() => handleViewArtisanDetail(artisan)}
-                    className="flex-1 py-2 rounded-md border text-center font-medium flex items-center justify-center hover:bg-[#556B2F] hover:text-white transition-colors duration-300"
-                    style={{ borderColor: '#556B2F', color: '#556B2F' }}
-                  >
-                    <Eye size={18} className="mr-2" />
-                    Voir les créations
-                  </button>
-                  <button 
-                    onClick={() => onContactClick && onContactClick(`Contact: ${artisan.name}`, artisan.name)}
-                    className="flex-1 py-2 rounded-md text-white font-medium flex items-center justify-center hover:bg-[#485826] transition-colors duration-200"
-                    style={{ backgroundColor: '#556B2F' }}
-                  >
-                    <Phone size={18} className="mr-2" />
-                    Contacter
-                  </button>
                 </div>
               </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 border border-[#D3D3D3] rounded-lg">
+            <Target size={48} className="mx-auto mb-4 text-gray-400" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Aucun artisan trouvé
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {selectedCategory 
+                ? `Aucun artisan spécialisé en "${selectedCategory.name}" n'a été trouvé.`
+                : 'Aucun artisan ne correspond à vos critères de recherche.'
+              }
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2 rounded-md border border-[#556B2F] text-[#556B2F] font-medium hover:bg-gray-50 transition-colors"
+              >
+                Réessayer
+              </button>
+              {selectedCategory && (
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className="px-4 py-2 rounded-md bg-[#556B2F] text-white font-medium hover:bg-[#485826] transition-colors"
+                >
+                  Voir tous les artisans
+                </button>
+              )}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
 
-      
-
-
-
-      {/* Modal Détail Artisan - COMPLET ET FONCTIONNEL */}
+      {/* Modal Détail Artisan */}
       {showArtisanDetail && selectedArtisan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-            {/* Header */}
+            {/* Header du modal */}
             <div className="p-6 border-b flex justify-between items-center"
               style={{ borderColor: '#D3D3D3', backgroundColor: '#556B2F' }}>
               <div className="flex items-center">
-                <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-white">
-                  <img 
-                    src={selectedArtisan.image} 
-                    alt={selectedArtisan.name}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-white bg-white flex items-center justify-center">
+                  {selectedArtisan.avatar ? (
+                    <img 
+                      src={selectedArtisan.avatar} 
+                      alt={selectedArtisan.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Target size={32} style={{ color: '#8B4513' }} />
+                  )}
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">{selectedArtisan.name}</h2>
-                  <div className="flex items-center text-white/80 text-sm mt-1">
-                    <MapPin size={14} className="mr-1" />
-                    {selectedArtisan.location} • 
-                    <Star size={14} className="ml-2 mr-1 fill-current" />
-                    {selectedArtisan.rating}
-                  </div>
+                  
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <button 
-                  onClick={() => handleShareArtisan(selectedArtisan)}
-                  className="p-2 rounded-full hover:bg-white/20 transition-colors"
-                  title="Partager"
-                >
-                  <Share2 size={20} className="text-white" />
-                </button>
-                <button 
-                  onClick={() => window.print()}
-                  className="p-2 rounded-full hover:bg-white/20 transition-colors"
-                  title="Imprimer"
-                >
-                  <Printer size={20} className="text-white" />
-                </button>
                 <button 
                   onClick={() => setShowArtisanDetail(false)}
                   className="p-2 rounded-full hover:bg-white/20 transition-colors"
@@ -520,244 +599,85 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactCli
               </div>
             </div>
 
-            {/* Contenu */}
-            <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
-              <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Colonne gauche - Informations */}
-                  <div className="lg:col-span-2">
-                    {/* À propos */}
-                    <div className="mb-8">
-                      <h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: '#8B4513' }}>
-                        <Info size={20} className="mr-2" />
-                        À propos de l'artisan
-                      </h3>
-                      <p className="text-gray-700 mb-4">{selectedArtisan.bio}</p>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 rounded-lg" style={{ backgroundColor: '#F5F5DC' }}>
-                          <p className="font-medium" style={{ color: '#556B2F' }}>Expérience</p>
-                          <p className="text-lg font-bold">{selectedArtisan.years} ans</p>
-                        </div>
-                        <div className="p-3 rounded-lg" style={{ backgroundColor: '#F5F5DC' }}>
-                          <p className="font-medium" style={{ color: '#556B2F' }}>Livraison</p>
-                          <p className="text-lg font-bold">{selectedArtisan.delivery}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Techniques */}
-                    {selectedArtisan.techniques && (
-                      <div className="mb-8">
-                        <h3 className="text-lg font-bold mb-4" style={{ color: '#8B4513' }}>Techniques maîtrisées</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedArtisan.techniques.map((tech, index) => (
-                            <span 
-                              key={index}
-                              className="px-3 py-1 rounded-full text-sm"
-                              style={{ 
-                                backgroundColor: '#F0EAD6',
-                                color: '#556B2F',
-                                border: '1px solid #D3D3D3'
-                              }}
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Produits */}
-                    {selectedArtisan.products && (
-                      <div className="mb-8">
-                        <h3 className="text-lg font-bold mb-4" style={{ color: '#8B4513' }}>Produits phares</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {selectedArtisan.products.map((product, index) => (
-                            <div key={index} className="border rounded-lg overflow-hidden" style={{ borderColor: '#D3D3D3' }}>
-                              <div className="h-32 overflow-hidden">
-                                <img 
-                                  src={product.image} 
-                                  alt={product.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="p-3">
-                                <h4 className="font-medium text-sm mb-1">{product.name}</h4>
-                                <p className="font-bold" style={{ color: '#8B4513' }}>{product.price}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+            {/* Contenu du modal */}
+            <div className="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Colonne gauche */}
+                <div className="lg:col-span-2">
+                  {/* À propos */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: '#8B4513' }}>
+                      <Info size={20} className="mr-2" />
+                      À propos de l'artisan
+                    </h3>
+                    <p className="text-gray-700 mb-4">
+                      {selectedArtisan.bio || `${selectedArtisan.name} est un artisan spécialisé dans ${selectedArtisan.specialty || "l'artisanat"}.`}
+                    </p>
                   </div>
 
-                  {/* Colonne droite - Contact et actions */}
-                  <div>
-                    {/* Certifications */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-bold mb-3" style={{ color: '#8B4513' }}>Certifications</h3>
-                      <div className="space-y-2">
-                        {selectedArtisan.certifications?.map((cert, index) => (
-                          <div key={index} className="flex items-center p-3 rounded-lg" style={{ backgroundColor: '#F5F5DC' }}>
-                            <Shield size={18} className="mr-2" style={{ color: '#556B2F' }} />
-                            <span className="font-medium">{cert}</span>
-                          </div>
+                  {/* Métiers */}
+                  {selectedArtisan.metiers && selectedArtisan.metiers.length > 0 && (
+                    <div className="mb-8">
+                      <h3 className="text-lg font-bold mb-4" style={{ color: '#8B4513' }}>Spécialités</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedArtisan.metiers.map((metier) => (
+                          <span 
+                            key={metier.id}
+                            className="px-3 py-2 rounded-lg text-sm font-medium"
+                            style={{ 
+                              backgroundColor: '#F0EAD6',
+                              color: '#556B2F',
+                              border: '1px solid #D3D3D3'
+                            }}
+                          >
+                            {metier.name}
+                          </span>
                         ))}
                       </div>
                     </div>
+                  )}
+                </div>
 
-                    {/* Contact */}
-                    {selectedArtisan.contact && (
-                      <div className="mb-6 p-4 rounded-lg border" style={{ borderColor: '#D3D3D3' }}>
-                        <h3 className="font-bold mb-3" style={{ color: '#8B4513' }}>Contact</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Mail size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                            <span className="text-sm">{selectedArtisan.contact.email}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Phone size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                            <span className="text-sm">{selectedArtisan.contact.phone}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <ExternalLink size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                            <a href={`https://${selectedArtisan.contact.website}`} className="text-sm hover:underline" style={{ color: '#556B2F' }}>
-                              {selectedArtisan.contact.website}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Actions */}
+                {/* Colonne droite - Contact et actions */}
+                <div>
+                  {/* Contact */}
+                  <div className="mb-6 p-4 rounded-lg border" style={{ borderColor: '#D3D3D3' }}>
+                    <h3 className="font-bold mb-3" style={{ color: '#8B4513' }}>Contact</h3>
                     <div className="space-y-3">
-                      
-                      <button 
-                        onClick={() => onContactClick && onContactClick(`Devis: ${selectedArtisan.name}`, selectedArtisan.name)}
-                        className="w-full py-3 rounded-lg border font-medium hover:bg-gray-50 transition-colors"
-                        style={{ borderColor: '#556B2F', color: '#556B2F' }}
-                      >
-                        Demander un devis sur mesure
-                      </button>
-                      <button 
-                        onClick={() => handleLikeItem(`artisan-${selectedArtisan.id}`)}
-                        className={`w-full py-3 rounded-lg border font-medium flex items-center justify-center ${
-                          likedItems.includes(`artisan-${selectedArtisan.id}`) 
-                            ? 'bg-[#8B4513] text-white border-[#8B4513]' 
-                            : 'hover:bg-[#556B2F] hover:text-white'
-                        }`}
-                        style={{ borderColor: '#556B2F', color: likedItems.includes(`artisan-${selectedArtisan.id}`) ? 'white' : '#556B2F' }}
-                      >
-                        <Heart 
-                          size={20} 
-                          className="mr-2" 
-                          fill={likedItems.includes(`artisan-${selectedArtisan.id}`) ? 'white' : 'none'}
-                        />
-                        {likedItems.includes(`artisan-${selectedArtisan.id}`) ? 'Favori' : 'Ajouter aux favoris'}
-                      </button>
+                      {selectedArtisan.email && (
+                        <div className="flex items-center">
+                          <Mail size={16} className="mr-2" style={{ color: '#8B4513' }} />
+                          <span className="text-sm">{selectedArtisan.email}</span>
+                        </div>
+                      )}
+                      {selectedArtisan.phone && (
+                        <div className="flex items-center">
+                          <Phone size={16} className="mr-2" style={{ color: '#8B4513' }} />
+                          <span className="text-sm">{selectedArtisan.phone}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Modal Atelier - COMPLET ET FONCTIONNEL */}
-      {showWorkshopDetail && selectedWorkshop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-            <div className="p-6 border-b flex justify-between items-center"
-              style={{ borderColor: '#D3D3D3', backgroundColor: '#556B2F' }}>
-              <div>
-                <h2 className="text-xl font-bold text-white">{selectedWorkshop.title}</h2>
-                <p className="text-white/80 text-sm mt-1">{selectedWorkshop.description}</p>
-              </div>
-              <button 
-                onClick={() => setShowWorkshopDetail(false)}
-                className="p-2 rounded-full hover:bg-white/20 transition-colors"
-              >
-                <X size={24} className="text-white" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4 mb-6">
-                <div className="flex items-center">
-                  <Clock size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                  <div className="flex-1">
-                    <p className="font-medium">Durée</p>
-                    <p className="text-gray-700">{selectedWorkshop.duration}</p>
+                  {/* Actions */}
+                  <div className="space-y-3">
+                    <button 
+                      onClick={() => handleViewProfile(selectedArtisan.id)}
+                      className="w-full py-3 rounded-lg text-white font-medium flex items-center justify-center hover:bg-[#7a3b0f] transition-colors"
+                      style={{ backgroundColor: '#8B4513' }}
+                    >
+                      <Eye size={20} className="mr-2" />
+                      Voir le profil complet
+                    </button>
+                    <button 
+                      onClick={() => onContactClick && onContactClick(`Devis: ${selectedArtisan.name}`, selectedArtisan.name)}
+                      className="w-full py-3 rounded-lg border font-medium hover:bg-gray-50 transition-colors"
+                      style={{ borderColor: '#556B2F', color: '#556B2F' }}
+                    >
+                      Demander un devis sur mesure
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <Calendar size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                  <div className="flex-1">
-                    <p className="font-medium">Date</p>
-                    <p className="text-gray-700">{selectedWorkshop.date}</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <MapPin size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                  <div className="flex-1">
-                    <p className="font-medium">Lieu</p>
-                    <p className="text-gray-700">{selectedWorkshop.location}</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <User size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                  <div className="flex-1">
-                    <p className="font-medium">Animateur</p>
-                    <p className="text-gray-700">{selectedWorkshop.instructor}</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <Tag size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                  <div className="flex-1">
-                    <p className="font-medium">Niveau</p>
-                    <p className="text-gray-700">{selectedWorkshop.level}</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <Briefcase size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                  <div className="flex-1">
-                    <p className="font-medium">Matériel</p>
-                    <p className="text-gray-700">{selectedWorkshop.materials}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-4 rounded-lg mb-6" style={{ backgroundColor: '#F5F5DC' }}>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium" style={{ color: '#8B4513' }}>Prix</p>
-                    <p className="text-2xl font-bold" style={{ color: '#556B2F' }}>{selectedWorkshop.price}</p>
-                    <p className="text-sm text-gray-600">par personne</p>
-                  </div>
-                  <div>
-                    <p className="font-medium" style={{ color: '#8B4513' }}>Places restantes</p>
-                    <p className={`text-2xl font-bold ${selectedWorkshop.slots < 5 ? 'text-red-600' : 'text-green-600'}`}>
-                      {selectedWorkshop.slots}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex space-x-3">
-                <button 
-                  onClick={() => setShowWorkshopDetail(false)}
-                  className="flex-1 py-3 rounded-lg border font-medium hover:bg-gray-50 transition-colors"
-                  style={{ borderColor: '#556B2F', color: '#556B2F' }}
-                >
-                  Retour
-                </button>
-                <button 
-                  onClick={() => onContactClick && onContactClick(`Inscription: ${selectedWorkshop.title}`, selectedWorkshop.instructor)}
-                  className="flex-1 py-3 rounded-lg text-white font-medium hover:bg-[#485826] transition-colors"
-                  style={{ backgroundColor: '#556B2F' }}
-                >
-                  <Calendar size={20} className="inline mr-2" />
-                  Réserver maintenant
-                </button>
               </div>
             </div>
           </div>
@@ -767,43 +687,6 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ searchQuery, onContactCli
   );
 };
 
-// Composant Star pour la notation
-const Star = ({ size, className, fill = 'none' }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    className={className}
-    fill={fill}
-    viewBox="0 0 24 24" 
-    stroke="currentColor"
-  >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      strokeWidth={2} 
-      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" 
-    />
-  </svg>
-);
 
-// Composant User (manquant dans lucide-react)
-const User = ({ size, className, style }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    className={className}
-    style={style}
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor"
-  >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      strokeWidth={2} 
-      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
-    />
-  </svg>
-);
 
 export default ArtisanatPage;
