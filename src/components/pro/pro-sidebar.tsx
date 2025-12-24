@@ -118,6 +118,11 @@ const navigation = [
     href: "/pro/demandes-devis",
     icon: FileText,
   },
+  {
+    name: "Demandes de conseil et accompagnement",
+    href: "/pro/conseil",
+    icon: Briefcase,
+  },
 
   // === GESTION FINANCIÈRE ===
   { name: "Mon abonnements", href: "/pro/subscription", icon: WalletCards },

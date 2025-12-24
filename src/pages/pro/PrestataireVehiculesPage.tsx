@@ -89,7 +89,15 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { Progress } from "@/components/ui/progress";
-import { pdf, Document, Page, Text, View, StyleSheet, Image as PdfImage } from "@react-pdf/renderer";
+import {
+  pdf,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image as PdfImage,
+} from "@react-pdf/renderer";
 
 // Styles pour le PDF
 const styles = StyleSheet.create({
@@ -168,28 +176,65 @@ const ContractDocument = ({ reservation }) => (
         <View>
           <Text style={styles.title}>CONTRAT DE LOCATION</Text>
           <Text style={styles.subtitle}>Réf: {reservation.id}</Text>
-          <Text style={styles.subtitle}>Date: {format(new Date(), "dd/MM/yyyy")}</Text>
+          <Text style={styles.subtitle}>
+            Date: {format(new Date(), "dd/MM/yyyy")}
+          </Text>
         </View>
         <View>
-          <Text style={{ fontSize: 16, fontWeight: "bold", color: "#556B2F" }}>OLIPLUS</Text>
+          <Text style={{ fontSize: 16, fontWeight: "bold", color: "#556B2F" }}>
+            OLIPLUS
+          </Text>
         </View>
       </View>
 
       {/* Informations Prestataire & Client */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
-        <View style={{ width: "48%", borderWidth: 1, borderColor: "#ddd", padding: 10 }}>
-          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>LOUEUR (Prestataire)</Text>
-          <Text style={styles.value}>{reservation.prestataire?.companyName || "Société Partenaire"}</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginBottom: 20,
+        }}
+      >
+        <View
+          style={{
+            width: "48%",
+            borderWidth: 1,
+            borderColor: "#ddd",
+            padding: 10,
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>
+            LOUEUR (Prestataire)
+          </Text>
+          <Text style={styles.value}>
+            {reservation.prestataire?.companyName || "Société Partenaire"}
+          </Text>
           <Text style={styles.value}>{reservation.prestataire?.email}</Text>
           <Text style={styles.value}>{reservation.prestataire?.phone}</Text>
-          <Text style={styles.value}>{reservation.prestataire?.address || "Adresse non renseignée"}</Text>
+          <Text style={styles.value}>
+            {reservation.prestataire?.address || "Adresse non renseignée"}
+          </Text>
         </View>
-        <View style={{ width: "48%", borderWidth: 1, borderColor: "#ddd", padding: 10 }}>
-          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>LOCATAIRE (Client)</Text>
-          <Text style={styles.value}>{reservation.nomClient || `${reservation.client?.firstName} ${reservation.client?.lastName}`}</Text>
+        <View
+          style={{
+            width: "48%",
+            borderWidth: 1,
+            borderColor: "#ddd",
+            padding: 10,
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>
+            LOCATAIRE (Client)
+          </Text>
+          <Text style={styles.value}>
+            {reservation.nomClient ||
+              `${reservation.client?.firstName} ${reservation.client?.lastName}`}
+          </Text>
           <Text style={styles.value}>{reservation.emailClient}</Text>
           <Text style={styles.value}>{reservation.telephoneClient}</Text>
-          <Text style={styles.value}>Permis: {reservation.numeroPermis || "Non renseigné"}</Text>
+          <Text style={styles.value}>
+            Permis: {reservation.numeroPermis || "Non renseigné"}
+          </Text>
         </View>
       </View>
 
@@ -198,11 +243,15 @@ const ContractDocument = ({ reservation }) => (
         <Text style={styles.sectionTitle}>VÉHICULE LOUÉ</Text>
         <View style={styles.row}>
           <Text style={styles.label}>Marque / Modèle :</Text>
-          <Text style={styles.value}>{reservation.vehicule.marque} {reservation.vehicule.modele}</Text>
+          <Text style={styles.value}>
+            {reservation.vehicule.marque} {reservation.vehicule.modele}
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Immatriculation :</Text>
-          <Text style={styles.value}>{reservation.vehicule.immatriculation || "Non assignée"}</Text>
+          <Text style={styles.value}>
+            {reservation.vehicule.immatriculation || "Non assignée"}
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Catégorie :</Text>
@@ -220,18 +269,22 @@ const ContractDocument = ({ reservation }) => (
         <View style={styles.row}>
           <Text style={styles.label}>Départ :</Text>
           <Text style={styles.value}>
-            {format(new Date(reservation.datePrise), "dd/MM/yyyy HH:mm")} à {reservation.lieuPrise}
+            {format(new Date(reservation.datePrise), "dd/MM/yyyy HH:mm")} à{" "}
+            {reservation.lieuPrise}
           </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Retour :</Text>
           <Text style={styles.value}>
-            {format(new Date(reservation.dateRetour), "dd/MM/yyyy HH:mm")} à {reservation.lieuRetour}
+            {format(new Date(reservation.dateRetour), "dd/MM/yyyy HH:mm")} à{" "}
+            {reservation.lieuRetour}
           </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Kilométrage :</Text>
-          <Text style={styles.value}>{reservation.kilometrageOption || "Standard"}</Text>
+          <Text style={styles.value}>
+            {reservation.kilometrageOption || "Standard"}
+          </Text>
         </View>
       </View>
 
@@ -240,11 +293,15 @@ const ContractDocument = ({ reservation }) => (
         <Text style={styles.sectionTitle}>INFORMATIONS FINANCIÈRES</Text>
         <View style={styles.row}>
           <Text style={styles.label}>Montant Total :</Text>
-          <Text style={{ ...styles.value, fontWeight: "bold" }}>{reservation.totalTTC?.toFixed(2)} €</Text>
+          <Text style={{ ...styles.value, fontWeight: "bold" }}>
+            {reservation.totalTTC?.toFixed(2)} €
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Caution (bloquée) :</Text>
-          <Text style={styles.value}>{reservation.cautionBloquee || reservation.vehicule.caution || 0} €</Text>
+          <Text style={styles.value}>
+            {reservation.cautionBloquee || reservation.vehicule.caution || 0} €
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Statut Paiement :</Text>
@@ -253,19 +310,48 @@ const ContractDocument = ({ reservation }) => (
       </View>
 
       {/* Signatures */}
-      <View style={{ marginTop: 30, flexDirection: "row", justifyContent: "space-between" }}>
+      <View
+        style={{
+          marginTop: 30,
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
         <View style={{ width: "40%", borderTopWidth: 1, paddingTop: 5 }}>
-          <Text style={{ fontSize: 10, textAlign: "center" }}>Signature du Loueur</Text>
-          <Text style={{ fontSize: 8, textAlign: "center", color: "#999", marginTop: 30 }}>(Cachet et signature)</Text>
+          <Text style={{ fontSize: 10, textAlign: "center" }}>
+            Signature du Loueur
+          </Text>
+          <Text
+            style={{
+              fontSize: 8,
+              textAlign: "center",
+              color: "#999",
+              marginTop: 30,
+            }}
+          >
+            (Cachet et signature)
+          </Text>
         </View>
         <View style={{ width: "40%", borderTopWidth: 1, paddingTop: 5 }}>
-          <Text style={{ fontSize: 10, textAlign: "center" }}>Signature du Locataire</Text>
-          <Text style={{ fontSize: 8, textAlign: "center", color: "#999", marginTop: 30 }}>("Lu et approuvé")</Text>
+          <Text style={{ fontSize: 10, textAlign: "center" }}>
+            Signature du Locataire
+          </Text>
+          <Text
+            style={{
+              fontSize: 8,
+              textAlign: "center",
+              color: "#999",
+              marginTop: 30,
+            }}
+          >
+            ("Lu et approuvé")
+          </Text>
         </View>
       </View>
 
       <Text style={styles.footer}>
-        Ce document est généré automatiquement par la plateforme OLIPLUS. Conditions générales de location applicables.
+        Ce document est généré automatiquement par la plateforme OLIPLUS.
+        Conditions générales de location applicables.
       </Text>
     </Page>
   </Document>
@@ -282,13 +368,23 @@ const PrestataireVehiculesPage = () => {
   const [showEditVehicule, setShowEditVehicule] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showReservationDetails, setShowReservationDetails] = useState(false);
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false); // NOUVEAU
   const [selectedVehicule, setSelectedVehicule] = useState(null);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("tous");
-  const [newImages, setNewImages] = useState([]); // Nouvelles images à uploader
-  const [existingImages, setExistingImages] = useState([]); // Images existantes déjà uploadées
+  const [newImages, setNewImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
   const { user } = useAuth();
+
+  // NOUVEAU: Formulaire de confirmation de paiement
+  const [paymentForm, setPaymentForm] = useState({
+    montant: 0,
+    methode: "virement",
+    dateReceived: new Date().toISOString().split("T")[0],
+    reference: "",
+    notes: "",
+  });
 
   const [vehiculeForm, setVehiculeForm] = useState({
     marque: "",
@@ -676,17 +772,19 @@ const PrestataireVehiculesPage = () => {
     const toastId = toast.loading("Génération du contrat PDF...");
     try {
       // Générer le blob PDF
-      const blob = await pdf(<ContractDocument reservation={reservation} />).toBlob();
-      
+      const blob = await pdf(
+        <ContractDocument reservation={reservation} />
+      ).toBlob();
+
       // Créer une URL et déclencher le téléchargement
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `Contrat_Location_${reservation.id.slice(0, 8)}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       toast.success("Contrat téléchargé avec succès", { id: toastId });
     } catch (error) {
       console.error("Erreur génération PDF:", error);
@@ -885,6 +983,67 @@ const PrestataireVehiculesPage = () => {
     );
   };
 
+  const handleConfirmPayment = async () => {
+    try {
+      if (!selectedReservation) return;
+
+      // Validation
+      if (!paymentForm.montant || paymentForm.montant <= 0) {
+        toast.error("Veuillez entrer un montant valide");
+        return;
+      }
+
+      if (!paymentForm.reference) {
+        toast.error("Veuillez entrer une référence de paiement");
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      await vehiculesApi.confirmPayment(selectedReservation.id, {
+        montant: parseFloat(paymentForm.montant),
+        methode: paymentForm.methode,
+        dateReceived: new Date(paymentForm.dateReceived),
+        reference: paymentForm.reference,
+        notes: paymentForm.notes,
+      });
+
+      toast.success("Paiement confirmé avec succès");
+      setShowPaymentConfirmation(false);
+      resetPaymentForm();
+      fetchData();
+    } catch (error) {
+      console.error("Erreur confirmation paiement:", error);
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la confirmation"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetPaymentForm = () => {
+    setPaymentForm({
+      montant: selectedReservation?.totalTTC || 0,
+      methode: "virement",
+      dateReceived: new Date().toISOString().split("T")[0],
+      reference: "",
+      notes: "",
+    });
+  };
+
+  const openPaymentConfirmation = (reservation) => {
+    setSelectedReservation(reservation);
+    setPaymentForm({
+      montant: reservation.totalTTC || 0,
+      methode: "virement",
+      dateReceived: new Date().toISOString().split("T")[0],
+      reference: "",
+      notes: "",
+    });
+    setShowPaymentConfirmation(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -1039,7 +1198,6 @@ const PrestataireVehiculesPage = () => {
               <Calendar className="h-4 w-4 mr-2" />
               Réservations ({reservations.length})
             </TabsTrigger>
-
           </TabsList>
 
           {/* Onglet Véhicules */}
@@ -1455,6 +1613,20 @@ const PrestataireVehiculesPage = () => {
                             <FileText className="h-4 w-4 mr-2" />
                             Contrat
                           </Button>
+                          {/* NOUVEAU BOUTON: Confirmation de paiement */}
+                          {reservation.statutPaiement !== "paye" && (
+                            <Button
+                              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                              size="sm"
+                              onClick={() =>
+                                openPaymentConfirmation(reservation)
+                              }
+                              title="Confirmer manuellement que le paiement a été reçu"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Confirmer paiement
+                            </Button>
+                          )}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm">
@@ -1464,11 +1636,9 @@ const PrestataireVehiculesPage = () => {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                              {[
-                                "en_attente",
-                                "confirmee",
-                                "en_cours",
-                              ].includes(reservation.statut) && (
+                              {["en_attente", "confirmee", "en_cours"].includes(
+                                reservation.statut
+                              ) && (
                                 <>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuLabel>
@@ -1561,7 +1731,6 @@ const PrestataireVehiculesPage = () => {
               </Card>
             )}
           </TabsContent>
-
         </Tabs>
       </div>
 
@@ -2747,7 +2916,10 @@ const PrestataireVehiculesPage = () => {
       </Dialog>
 
       {/* Modal Détails Réservation */}
-      <Dialog open={showReservationDetails} onOpenChange={setShowReservationDetails}>
+      <Dialog
+        open={showReservationDetails}
+        onOpenChange={setShowReservationDetails}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Détails de la réservation</DialogTitle>
@@ -2766,7 +2938,9 @@ const PrestataireVehiculesPage = () => {
                     {statusConfig[selectedReservation.statut]?.label}
                   </p>
                 </div>
-                <Badge className={statusConfig[selectedReservation.statut]?.color}>
+                <Badge
+                  className={statusConfig[selectedReservation.statut]?.color}
+                >
                   {statusConfig[selectedReservation.statut]?.label}
                 </Badge>
               </div>
@@ -2810,10 +2984,10 @@ const PrestataireVehiculesPage = () => {
                     {selectedReservation.client?.firstName}{" "}
                     {selectedReservation.client?.lastName}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-500">
                     Email: {selectedReservation.client?.email}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-500">
                     Téléphone: {selectedReservation.client?.phone || "N/A"}
                   </p>
                 </div>
@@ -2846,7 +3020,8 @@ const PrestataireVehiculesPage = () => {
                 </div>
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm font-medium text-blue-900">
-                    Durée: {Math.ceil(
+                    Durée:{" "}
+                    {Math.ceil(
                       (new Date(selectedReservation.dateRetour) -
                         new Date(selectedReservation.datePrise)) /
                         (1000 * 60 * 60 * 24)
@@ -2888,7 +3063,8 @@ const PrestataireVehiculesPage = () => {
                       {(
                         selectedReservation.totalTTC -
                         selectedReservation.totalHT
-                      ).toFixed(2)}€
+                      ).toFixed(2)}
+                      €
                     </span>
                   </div>
                   <Separator />
@@ -2936,6 +3112,240 @@ const PrestataireVehiculesPage = () => {
               onClick={() => setShowReservationDetails(false)}
             >
               Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* NOUVEAU MODAL: Confirmation de paiement */}
+      <Dialog
+        open={showPaymentConfirmation}
+        onOpenChange={setShowPaymentConfirmation}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Confirmer le paiement</DialogTitle>
+            <DialogDescription>
+              Réservation #{selectedReservation?.id.slice(0, 8)}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedReservation && (
+            <div className="space-y-6">
+              {/* Résumé de la réservation */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="pt-6">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Véhicule:</span>
+                      <span className="font-semibold">
+                        {selectedReservation.vehicule?.marque}{" "}
+                        {selectedReservation.vehicule?.modele}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Client:</span>
+                      <span className="font-semibold">
+                        {selectedReservation.client?.firstName}{" "}
+                        {selectedReservation.client?.lastName}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center border-t pt-3">
+                      <span className="text-gray-600 font-medium">
+                        Total à payer:
+                      </span>
+                      <span className="text-2xl font-bold text-[#8B4513]">
+                        {selectedReservation.totalTTC?.toFixed(2)}€
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Formulaire de confirmation */}
+              <div className="space-y-4">
+                {/* Montant */}
+                <div>
+                  <Label htmlFor="montant" className="required">
+                    Montant reçu (€) *
+                  </Label>
+                  <Input
+                    id="montant"
+                    type="number"
+                    value={paymentForm.montant}
+                    onChange={(e) =>
+                      setPaymentForm({
+                        ...paymentForm,
+                        montant: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    step="0.01"
+                    min="0"
+                    className="mt-1"
+                    placeholder="0.00"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Montant total de la réservation:{" "}
+                    {selectedReservation.totalTTC?.toFixed(2)}€
+                  </p>
+                </div>
+
+                {/* Méthode de paiement */}
+                <div>
+                  <Label htmlFor="methode">Méthode de paiement *</Label>
+                  <Select
+                    value={paymentForm.methode}
+                    onValueChange={(value) =>
+                      setPaymentForm({ ...paymentForm, methode: value })
+                    }
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="virement">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Virement bancaire
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="cheque">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Chèque
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="especes">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Espèces
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="carte">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          Carte bancaire
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="paypal">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          PayPal
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="autre">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Autre
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Date de réception */}
+                <div>
+                  <Label htmlFor="dateReceived" className="required">
+                    Date de réception du paiement *
+                  </Label>
+                  <Input
+                    id="dateReceived"
+                    type="date"
+                    value={paymentForm.dateReceived}
+                    onChange={(e) =>
+                      setPaymentForm({
+                        ...paymentForm,
+                        dateReceived: e.target.value,
+                      })
+                    }
+                    className="mt-1"
+                  />
+                </div>
+
+                {/* Référence de paiement */}
+                <div>
+                  <Label htmlFor="reference" className="required">
+                    Référence de paiement *
+                  </Label>
+                  <Input
+                    id="reference"
+                    value={paymentForm.reference}
+                    onChange={(e) =>
+                      setPaymentForm({
+                        ...paymentForm,
+                        reference: e.target.value,
+                      })
+                    }
+                    placeholder="Ex: Ref.12345, N°de chèque, IBAN..."
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Numéro de transaction, IBAN, numéro de chèque, etc.
+                  </p>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <Label htmlFor="notes">Notes additionnelles</Label>
+                  <Textarea
+                    id="notes"
+                    value={paymentForm.notes}
+                    onChange={(e) =>
+                      setPaymentForm({
+                        ...paymentForm,
+                        notes: e.target.value,
+                      })
+                    }
+                    placeholder="Notes internes sur ce paiement..."
+                    rows={3}
+                    className="mt-1"
+                  />
+                </div>
+
+                {/* Avertissement */}
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">
+                        Confirmation de paiement
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        Assurez-vous que le paiement a bien été reçu avant de
+                        confirmer. Cette action marque le paiement comme
+                        complété.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="pt-6 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setShowPaymentConfirmation(false)}
+              disabled={isSubmitting}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handleConfirmPayment}
+              disabled={isSubmitting}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Confirmation en cours...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Confirmer le paiement
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

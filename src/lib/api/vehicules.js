@@ -85,4 +85,8 @@ export const vehiculesApi = {
 
   getReservationItinerary: (reservationId) =>
     api.get(`/reservations-vehicules/${reservationId}/itinerary`),
+
+  // Confirmer manuellement un paiement
+  confirmPayment: (reservationId, data) =>
+    api.put(`/reservations-vehicules/${reservationId}/confirmer-paiement`, data),
 };
