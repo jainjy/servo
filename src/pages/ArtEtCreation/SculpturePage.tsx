@@ -458,16 +458,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ searchQuery, onContactCli
                   )}
                 </div>
                 
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-bold text-xl">{sculptor.name}</h3>
-                    {sculptor.verified && (
-                      <span className="px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                        ✓ Vérifié
-                      </span>
-                    )}
-                  </div>
-                  
+                <div className="p-6">                
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center">
                       <Hammer size={16} className="mr-2" style={{ color: '#8B4513' }} />
