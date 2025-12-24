@@ -1005,13 +1005,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
               {item.type}
             </span>
           </div>
-          {item.similarity && (
-            <div className="absolute top-2 left-2">
-              <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-                {Math.round(item.similarity)}%
-              </span>
-            </div>
-          )}
+         
         </div>
       );
     }
