@@ -348,7 +348,10 @@ const GestionImmobilier = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
 
       {/* Hero Section avec animation */}
       <motion.section
@@ -456,9 +459,6 @@ const GestionImmobilier = () => {
           </motion.div>
         </div>
       </section>
-
-      <AdvertisementPopup />
-
       {/* Services Section */}
       <section id="services" className="py-12 bg-gray-50" ref={servicesRef}>
         <div className="container mx-auto px-4">

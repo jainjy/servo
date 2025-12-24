@@ -1132,8 +1132,11 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   return (
     <div className="min-h-screen">
       <Suspense fallback={<LoadingFallback />}>
-        <Header />
 
+        {/* Advertisement Popup - Absolute Position */}
+        <div className="absolute top-12 left-4 right-4 z-50">
+          <AdvertisementPopup />
+        </div>
         {/* Hero Section avec margin-top */}
         <div className="mt-20 relative">
           <div className="fixed -z-10 overflow-hidden bg-black w-full h-96 top-0">

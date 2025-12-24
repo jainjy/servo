@@ -1,6 +1,6 @@
 // components/AdvancedSearchBar.tsx
 import React, { useState } from "react";
-import { Search, Filter, MapPin, Calendar, ChevronDown, X } from "lucide-react";
+import { Search, Filter, MapPin, Calendar, ChevronDown, X, Loader2 } from "lucide-react";
 
 interface SearchFilters {
   query: string;
@@ -17,7 +17,7 @@ interface SearchFilters {
 }
 
 interface AdvancedSearchBarProps {
-  onSearch: (filters: SearchFilters) => void;
+  onSearch: (filters: SearchFilters) => Promise<any> | void;
   categories: string[];
   metiers: string[];
   defaultFilters?: Partial<SearchFilters>;
@@ -82,9 +82,18 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch({ ...filters, metiers: selectedMetiers });
+    try {
+      setIsSearching(true);
+      await onSearch({ ...filters, metiers: selectedMetiers });
+    } catch (err) {
+      console.error("AdvancedSearchBar onSearch error:", err);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const resetFilters = () => {
@@ -120,31 +129,29 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                 value={filters.query}
                 onChange={handleInputChange}
                 placeholder="Que recherchez-vous ? (plombier, électricien, jardinier...)"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent"
+                disabled={isSearching}
+                className={"w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent " + (isSearching ? "opacity-70 cursor-wait" : "")}
+                aria-busy={isSearching}
               />
             </div>
           </div>
 
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Filter className="w-5 h-5" />
-              <span>Filtres</span>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  isExpanded ? "rotate-180" : ""
-                }`}
-              />
-            </button>
 
             <button
               type="submit"
-              className="px-6 py-3 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] transition-colors font-semibold"
+              disabled={isSearching}
+              className={"px-6 py-3 rounded-lg transition-colors font-semibold " + (isSearching ? "bg-[#6B8E23] text-white opacity-70 cursor-wait" : "bg-[#556B2F] text-white hover:bg-[#6B8E23]")}
+              aria-busy={isSearching}
             >
-              Rechercher
+              {isSearching ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Recherche...
+                </span>
+              ) : (
+                "Rechercher"
+              )}
             </button>
           </div>
         </div>
