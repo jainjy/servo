@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Navigation,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -376,6 +377,39 @@ const MesReservationsVehiculePage = () => {
     } catch (error) {
       console.error("Erreur génération PDF:", error);
       toast.error("Erreur lors de la génération du contrat", { id: toastId });
+    }
+  };
+
+  // Ajouter une fonction de suppression
+  const handleDeleteReservation = async (reservationId) => {
+    if (
+      !window.confirm(
+        "Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      toast.loading("Suppression en cours...", {
+        id: "delete-reservation",
+      });
+
+      await vehiculesApi.deleteReservation(reservationId);
+
+      toast.success("Réservation supprimée avec succès", {
+        id: "delete-reservation",
+      });
+
+      fetchReservations();
+    } catch (error) {
+      console.error("Erreur suppression:", error);
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la suppression",
+        {
+          id: "delete-reservation",
+        }
+      );
     }
   };
 
@@ -790,6 +824,23 @@ const MesReservationsVehiculePage = () => {
                               >
                                 <XCircle className="h-4 w-4 mr-2" />
                                 Annuler
+                              </Button>
+                            )}
+
+                            {/* NOUVEAU: Bouton Supprimer */}
+                            {["terminee", "annulee"].includes(
+                              reservation.statut
+                            ) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                                onClick={() =>
+                                  handleDeleteReservation(reservation.id)
+                                }
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
                               </Button>
                             )}
 

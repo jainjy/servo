@@ -33,6 +33,7 @@ import {
   Image as ImageIcon,
   Loader2,
   AlertTriangle,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -88,6 +89,187 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { Progress } from "@/components/ui/progress";
+import { pdf, Document, Page, Text, View, StyleSheet, Image as PdfImage } from "@react-pdf/renderer";
+
+// Styles pour le PDF
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: "column",
+    backgroundColor: "#FFFFFF",
+    padding: 30,
+    fontFamily: "Helvetica",
+  },
+  header: {
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#8B4513",
+    paddingBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#8B4513",
+  },
+  subtitle: {
+    fontSize: 10,
+    color: "#666",
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+    flexGrow: 1,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#333",
+    backgroundColor: "#f0f0f0",
+    padding: 5,
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 5,
+  },
+  label: {
+    width: 120,
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#555",
+  },
+  value: {
+    flex: 1,
+    fontSize: 10,
+    color: "#000",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 30,
+    left: 30,
+    right: 30,
+    textAlign: "center",
+    fontSize: 8,
+    color: "#999",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    paddingTop: 10,
+  },
+});
+
+// Composant Document PDF
+const ContractDocument = ({ reservation }) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      {/* En-tête */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>CONTRAT DE LOCATION</Text>
+          <Text style={styles.subtitle}>Réf: {reservation.id}</Text>
+          <Text style={styles.subtitle}>Date: {format(new Date(), "dd/MM/yyyy")}</Text>
+        </View>
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "bold", color: "#556B2F" }}>OLIPLUS</Text>
+        </View>
+      </View>
+
+      {/* Informations Prestataire & Client */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
+        <View style={{ width: "48%", borderWidth: 1, borderColor: "#ddd", padding: 10 }}>
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>LOUEUR (Prestataire)</Text>
+          <Text style={styles.value}>{reservation.prestataire?.companyName || "Société Partenaire"}</Text>
+          <Text style={styles.value}>{reservation.prestataire?.email}</Text>
+          <Text style={styles.value}>{reservation.prestataire?.phone}</Text>
+          <Text style={styles.value}>{reservation.prestataire?.address || "Adresse non renseignée"}</Text>
+        </View>
+        <View style={{ width: "48%", borderWidth: 1, borderColor: "#ddd", padding: 10 }}>
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>LOCATAIRE (Client)</Text>
+          <Text style={styles.value}>{reservation.nomClient || `${reservation.client?.firstName} ${reservation.client?.lastName}`}</Text>
+          <Text style={styles.value}>{reservation.emailClient}</Text>
+          <Text style={styles.value}>{reservation.telephoneClient}</Text>
+          <Text style={styles.value}>Permis: {reservation.numeroPermis || "Non renseigné"}</Text>
+        </View>
+      </View>
+
+      {/* Véhicule */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>VÉHICULE LOUÉ</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Marque / Modèle :</Text>
+          <Text style={styles.value}>{reservation.vehicule.marque} {reservation.vehicule.modele}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Immatriculation :</Text>
+          <Text style={styles.value}>{reservation.vehicule.immatriculation || "Non assignée"}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Catégorie :</Text>
+          <Text style={styles.value}>{reservation.vehicule.typeVehicule}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Carburant :</Text>
+          <Text style={styles.value}>{reservation.vehicule.carburant}</Text>
+        </View>
+      </View>
+
+      {/* Détails Location */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>DÉTAILS DE LA LOCATION</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Départ :</Text>
+          <Text style={styles.value}>
+            {format(new Date(reservation.datePrise), "dd/MM/yyyy HH:mm")} à {reservation.lieuPrise}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Retour :</Text>
+          <Text style={styles.value}>
+            {format(new Date(reservation.dateRetour), "dd/MM/yyyy HH:mm")} à {reservation.lieuRetour}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Kilométrage :</Text>
+          <Text style={styles.value}>{reservation.kilometrageOption || "Standard"}</Text>
+        </View>
+      </View>
+
+      {/* Financier */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>INFORMATIONS FINANCIÈRES</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Montant Total :</Text>
+          <Text style={{ ...styles.value, fontWeight: "bold" }}>{reservation.totalTTC?.toFixed(2)} €</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Caution (bloquée) :</Text>
+          <Text style={styles.value}>{reservation.cautionBloquee || reservation.vehicule.caution || 0} €</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Statut Paiement :</Text>
+          <Text style={styles.value}>{reservation.statutPaiement}</Text>
+        </View>
+      </View>
+
+      {/* Signatures */}
+      <View style={{ marginTop: 30, flexDirection: "row", justifyContent: "space-between" }}>
+        <View style={{ width: "40%", borderTopWidth: 1, paddingTop: 5 }}>
+          <Text style={{ fontSize: 10, textAlign: "center" }}>Signature du Loueur</Text>
+          <Text style={{ fontSize: 8, textAlign: "center", color: "#999", marginTop: 30 }}>(Cachet et signature)</Text>
+        </View>
+        <View style={{ width: "40%", borderTopWidth: 1, paddingTop: 5 }}>
+          <Text style={{ fontSize: 10, textAlign: "center" }}>Signature du Locataire</Text>
+          <Text style={{ fontSize: 8, textAlign: "center", color: "#999", marginTop: 30 }}>("Lu et approuvé")</Text>
+        </View>
+      </View>
+
+      <Text style={styles.footer}>
+        Ce document est généré automatiquement par la plateforme OLIPLUS. Conditions générales de location applicables.
+      </Text>
+    </Page>
+  </Document>
+);
 
 const PrestataireVehiculesPage = () => {
   const [vehicules, setVehicules] = useState([]);
@@ -455,6 +637,60 @@ const PrestataireVehiculesPage = () => {
           id: "delete-vehicule",
         }
       );
+    }
+  };
+
+  const handleDeleteReservation = async (reservationId) => {
+    if (
+      !window.confirm(
+        "Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      toast.loading("Suppression en cours...", {
+        id: "delete-reservation",
+      });
+
+      await vehiculesApi.deleteReservation(reservationId);
+
+      toast.success("Réservation supprimée avec succès", {
+        id: "delete-reservation",
+      });
+
+      fetchData();
+    } catch (error) {
+      console.error("Erreur suppression:", error);
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la suppression",
+        {
+          id: "delete-reservation",
+        }
+      );
+    }
+  };
+
+  const handleDownloadContract = async (reservation) => {
+    const toastId = toast.loading("Génération du contrat PDF...");
+    try {
+      // Générer le blob PDF
+      const blob = await pdf(<ContractDocument reservation={reservation} />).toBlob();
+      
+      // Créer une URL et déclencher le téléchargement
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Contrat_Location_${reservation.id.slice(0, 8)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("Contrat téléchargé avec succès", { id: toastId });
+    } catch (error) {
+      console.error("Erreur génération PDF:", error);
+      toast.error("Erreur lors de la génération du contrat", { id: toastId });
     }
   };
 
@@ -1196,92 +1432,114 @@ const PrestataireVehiculesPage = () => {
                         </div>
                       </CardContent>
 
-                      <CardFooter className="border-t pt-4 flex gap-2">
-                        <Button
-                          className="flex-1"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedReservation(reservation);
-                            setShowReservationDetails(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Détails
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <CardFooter className="border-t pt-4 flex gap-2 flex-col">
+                        <div className="flex gap-2">
+                          <Button
+                            className="flex-1"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedReservation(reservation);
+                              setShowReservationDetails(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Détails
+                          </Button>
+                          <Button
+                            className="flex-1"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadContract(reservation)}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Contrat
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                            {[
-                              "en_attente",
-                              "confirmee",
-                              "en_cours",
-                            ].includes(reservation.statut) && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuLabel>
-                                  Changer statut
-                                </DropdownMenuLabel>
-                                {reservation.statut === "en_attente" && (
+                              {[
+                                "en_attente",
+                                "confirmee",
+                                "en_cours",
+                              ].includes(reservation.statut) && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuLabel>
+                                    Changer statut
+                                  </DropdownMenuLabel>
+                                  {reservation.statut === "en_attente" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleUpdateReservationStatus(
+                                          reservation.id,
+                                          "confirmee"
+                                        )
+                                      }
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                                      Confirmer
+                                    </DropdownMenuItem>
+                                  )}
+                                  {reservation.statut === "confirmee" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleUpdateReservationStatus(
+                                          reservation.id,
+                                          "en_cours"
+                                        )
+                                      }
+                                    >
+                                      <Car className="h-4 w-4 mr-2 text-purple-600" />
+                                      Débuter location
+                                    </DropdownMenuItem>
+                                  )}
+                                  {reservation.statut === "en_cours" && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleUpdateReservationStatus(
+                                          reservation.id,
+                                          "terminee"
+                                        )
+                                      }
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                                      Terminer location
+                                    </DropdownMenuItem>
+                                  )}
                                   <DropdownMenuItem
                                     onClick={() =>
                                       handleUpdateReservationStatus(
                                         reservation.id,
-                                        "confirmee"
+                                        "annulee"
                                       )
                                     }
                                   >
-                                    <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                                    Confirmer
+                                    <XCircle className="h-4 w-4 mr-2 text-red-600" />
+                                    Annuler
                                   </DropdownMenuItem>
-                                )}
-                                {reservation.statut === "confirmee" && (
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleUpdateReservationStatus(
-                                        reservation.id,
-                                        "en_cours"
-                                      )
-                                    }
-                                  >
-                                    <Car className="h-4 w-4 mr-2 text-purple-600" />
-                                    Débuter location
-                                  </DropdownMenuItem>
-                                )}
-                                {reservation.statut === "en_cours" && (
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleUpdateReservationStatus(
-                                        reservation.id,
-                                        "terminee"
-                                      )
-                                    }
-                                  >
-                                    <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                                    Terminer location
-                                  </DropdownMenuItem>
-                                )}
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleUpdateReservationStatus(
-                                      reservation.id,
-                                      "annulee"
-                                    )
-                                  }
-                                >
-                                  <XCircle className="h-4 w-4 mr-2 text-red-600" />
-                                  Annuler
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                                </>
+                              )}
+
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDeleteReservation(reservation.id)
+                                }
+                                className="text-red-600 focus:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </CardFooter>
                     </Card>
                   );

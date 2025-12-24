@@ -25,6 +25,9 @@ export const vehiculesApi = {
   updateReservationStatus: (id, data) =>
     api.put(`/reservations-vehicules/${id}/statut`, data),
 
+  // Supprimer une réservation
+  deleteReservation: (id) => api.delete(`/reservations-vehicules/${id}`),
+
   // Vérifier la disponibilité
   checkDisponibilite: (vehiculeId, dateDebut, dateFin) =>
     api.get(`/reservations-vehicules/vehicule/${vehiculeId}/disponibilite`, {
