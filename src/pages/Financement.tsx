@@ -1729,14 +1729,14 @@ export default function Financement() {
                       className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-[#556B2F] hover:border-[#6B8E23]"
                       onClick={() => handlePartenaireClick(partenaire)}
                     >
-                      <Handshake className="h-5 w-5 mr-3" />
+                      <Handshake className="h-5 w-5 " />
                       Contacter
                     </Button>
                     <Button
                       className="flex-1 bg-slate-100 hover:bg-slate-200 text-[#8B4513] rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-[#D3D3D3] hover:border-slate-300"
                       onClick={() => navigate(`/financement/${partenaire.id}`)}
                     >
-                      <ArrowRight className="h-5 w-5 mr-3" />
+                      <ArrowRight className="h-5 w-5 " />
                       Détails
                     </Button>
                   </div>
