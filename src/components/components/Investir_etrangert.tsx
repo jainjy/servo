@@ -267,7 +267,7 @@ const InvestirEtranger = () => {
         </div>
         <div className="container mx-auto px-4 mt-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl lg:text-5xl font-semibold mb-4 tracking-[0.2em] text-gray-100 dark:text-white">
+            <h1 className="text-4xl lg:text-5xl font-semibold mb-4  text-gray-100 dark:text-white">
               INVESTISSEMENT
             </h1>
             <p className="text-sm lg:text-md opacity-90 mb-8 max-w-2xl mx-auto">

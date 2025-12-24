@@ -637,7 +637,7 @@ const GestionImmobilier = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section 
       <motion.section
         ref={ctaRef}
         className="py-16 bg-[#556B2F] rounded-lg mx-4 md:mx-8 lg:mx-16 mb-16"
@@ -679,6 +679,7 @@ const GestionImmobilier = () => {
           </div>
         </div>
       </motion.section>
+      */}
 
       {/* Modal Devis */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

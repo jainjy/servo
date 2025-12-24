@@ -601,11 +601,11 @@ const ReservationBienEtreModal: React.FC<ReservationBienEtreModalProps> = ({
               </div>
 
               {/* Boutons d'action */}
-              <div className="flex gap-4 pt-6">
+              <div className="flex-row md:flex-col gap-y-4 pt-6">
                 <button
                   type="submit"
                   disabled={isLoading || isFetchingUserData}
-                  className="flex-1 bg-logo hover:bg-primary-dark text-white rounded-xl py-5 text-lg font-semibold border-2 border-logo hover:border-primary-dark transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 bg-logo hover:bg-primary-dark  text-white rounded-xl p-4 text-lg font-semibold border-2 border-logo hover:border-primary-dark transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   {isLoading ? (
                     <>
@@ -623,7 +623,7 @@ const ReservationBienEtreModal: React.FC<ReservationBienEtreModalProps> = ({
                   type="button"
                   onClick={onClose}
                   disabled={isLoading || isFetchingUserData}
-                  className="flex-1 rounded-xl py-5 text-lg font-semibold border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-800 transition-all duration-300 disabled:opacity-50"
+                  className="flex-1 rounded-xl w-full mt-3 py-5 text-lg font-semibold border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-800 transition-all duration-300 disabled:opacity-50"
                 >
                   Annuler
                 </button>

@@ -517,7 +517,7 @@ const Therapeute = () => {
 
   return (
     <div className="font-sans text-foreground">
-      {/* STATISTIQUES */}
+      {/* STATISTIQUES
       <SlideIn direction="up">
         <div className="mb-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -528,7 +528,7 @@ const Therapeute = () => {
             ))}
           </div>
         </div>
-      </SlideIn>
+      </SlideIn> */}
 
       {/* BARRE DE RECHERCHE ET FILTRES AMÉLIORÉE */}
       <SlideIn direction="down">
@@ -666,7 +666,7 @@ const Therapeute = () => {
             </div>
 
             {/* Onglets de catégories */}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className=" md:flex flex-wrap gap-2 hidden  justify-center">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}

@@ -493,7 +493,7 @@ const MedecinesNaturelles = () => {
 
   return (
     <div className="font-sans text-foreground">
-      {/* STATISTIQUES */}
+      {/* STATISTIQUES 
       <SlideIn direction="up">
         <div className="mb-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -504,7 +504,7 @@ const MedecinesNaturelles = () => {
             ))}
           </div>
         </div>
-      </SlideIn>
+      </SlideIn>*/}
 
       {/* BARRE DE RECHERCHE ET FILTRES AMÉLIORÉE */}
       <SlideIn direction="down">
@@ -625,7 +625,7 @@ const MedecinesNaturelles = () => {
             </div>
 
             {/* Onglets de catégories */}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="md:flex hidden flex-wrap gap-2 justify-center">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}

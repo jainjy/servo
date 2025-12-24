@@ -590,9 +590,9 @@ const HuilesEssentielles = () => {
   }
 
   return (
-    <div className="min-h-screen pt-10 bg-[#F6F8FA]">
+    <div className="min-h-screen  bg-[#F6F8FA]">
       <div className="container mx-auto px-4 py-8">
-        {/* En-tête */}
+        {/* En-tête 
         <SlideIn direction="down" delay={100}>
           <div className="mb-8">
             <div className="bg-white rounded-3xl p-6 border-b border-gray-100 shadow-sm">
@@ -621,13 +621,13 @@ const HuilesEssentielles = () => {
                   </div>
                 </div>
 
-                {/* Compteur de produits */}
+                {/* Compteur de produits 
                 <div className="flex items-center gap-4">
                   <Badge variant="secondary" className="text-sm px-4 py-2">
                     {filteredHuiles.length} produit{filteredHuiles.length > 1 ? 's' : ''}
                   </Badge>
-                  
-                  {/* Badges d'information */}
+
+                  {/* Badges d'information 
                   <div className="hidden md:flex gap-2">
                     <Badge
                       variant="outline"
@@ -649,6 +649,7 @@ const HuilesEssentielles = () => {
             </div>
           </div>
         </SlideIn>
+        */}
 
         {/* Barre de recherche et filtres */}
         <SlideIn direction="up" delay={200}>
@@ -715,13 +716,6 @@ const HuilesEssentielles = () => {
                     />
                   </SlideIn>
                 ))}
-              </div>
-              
-              {/* Message de résultats */}
-              <div className="mt-6 text-center text-sm text-gray-600">
-                Affichage de {filteredHuiles.length} huile{filteredHuiles.length > 1 ? 's' : ''} essentielle{filteredHuiles.length > 1 ? 's' : ''}
-                {searchTerm && ` pour "${searchTerm}"`}
-                {activeCategory !== 'all' && ` dans la catégorie "${categories.find(c => c.id === activeCategory)?.name}"`}
               </div>
             </>
           ) : (

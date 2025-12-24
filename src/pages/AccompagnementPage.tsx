@@ -1326,7 +1326,7 @@ const AccompagnementPage: React.FC = () => {
 
             <motion.div>
               <Button
-                className="rounded-xl px-10 py-5 text-lg font-semibold border-2 transition-all duration-300"
+                className="rounded-xl text-lg font-semibold border-2 transition-all duration-300"
                 style={{
                   backgroundColor: colors.primaryDark,
                   color: colors.lightBg,
@@ -1342,7 +1342,7 @@ const AccompagnementPage: React.FC = () => {
                 }}
                 onClick={handleOpenContactModal}
               >
-                <Calendar className="h-5 w-5 mr-3" />
+                <Calendar className="h-5 w-5 " />
                 Demander un accompagnement
               </Button>
             </motion.div>

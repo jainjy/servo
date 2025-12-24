@@ -1157,11 +1157,11 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
             </div>
 
             {/* Boutons de sélection du type de location */}
-            <div className="flex justify-center gap-4 mb-6">
+            <div className="flex-row md:flex-col  justify-center gap-4 mb-6">
               <Button
                 onClick={() => setRentType("longue_duree")}
                 variant={rentType === "longue_duree" ? "default" : "outline"}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold ${rentType === "longue_duree"
+                className={`flex items-center gap-3 px-6  py-3 rounded-xl font-semibold ${rentType === "longue_duree"
                   ? "bg-[#556B2F] text-white hover:bg-[#6B8E23]"
                   : "border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
                   }`}
@@ -1173,7 +1173,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
               <Button
                 onClick={() => setRentType("saisonniere")}
                 variant={rentType === "saisonniere" ? "default" : "outline"}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold ${rentType === "saisonniere"
+                className={`flex items-center gap-3 px-6 py-3 mt-2 rounded-xl font-semibold ${rentType === "saisonniere"
                   ? "bg-[#556B2F] text-white hover:bg-[#6B8E23]"
                   : "border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
                   }`}
