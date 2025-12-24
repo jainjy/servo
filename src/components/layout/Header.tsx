@@ -1006,7 +1006,7 @@ const Header = () => {
             "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
         },
         {
-          title: "Explorer la Réunion",
+          title: "Hebergements touristiques",
           description: "Réservations d'hébergements",
           href: "/tourisme",
           image:
