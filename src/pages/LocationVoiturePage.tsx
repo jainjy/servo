@@ -27,6 +27,7 @@ import {
   DollarSign,
   Eye,
   X,
+  Loader2,
 } from "lucide-react";
 import { vehiculesApi } from "@/lib/api/vehicules";
 import { LocationPickerModal } from "@/components/location-picker-modal";
@@ -91,6 +92,7 @@ const LocationVoiturePage = () => {
   const [selectedVehicule, setSelectedVehicule] = useState(null);
   const [showReservation, setShowReservation] = useState(false);
   const [showLocationPickerPickup, setShowLocationPickerPickup] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLocationPickerReturn, setShowLocationPickerReturn] = useState(false);
   const [pickupLocation, setPickupLocation] = useState({
     latitude: null,
@@ -384,6 +386,7 @@ const LocationVoiturePage = () => {
   // Soumission de réservation
   const handleSubmitReservation = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     if (
       !reservationForm.nom ||
@@ -391,11 +394,13 @@ const LocationVoiturePage = () => {
       !reservationForm.telephone
     ) {
       toast.error("Veuillez remplir les informations obligatoires");
+      setIsSubmitting(false);
       return;
     }
 
     if (!pickupDate || !returnDate) {
       toast.error("Veuillez sélectionner les dates de location");
+      setIsSubmitting(false);
       return;
     }
 
@@ -433,11 +438,14 @@ const LocationVoiturePage = () => {
         extras: [],
       });
       setShowReservation(false);
+      setSelectedVehicule(null);
     } catch (error) {
       console.error("Erreur création réservation:", error);
       toast.error(
         error.response?.data?.error || "Erreur lors de la réservation"
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -471,15 +479,7 @@ const LocationVoiturePage = () => {
     return days > 0 ? days : 1;
   };
 
-  // Contacter l'agence
-  const handleContactAgency = (vehicule) => {
-    toast.info(
-      `Ouverture de la conversation avec ${
-        vehicule.agence || vehicule.prestataire?.companyName
-      }`
-    );
-    navigate("/mon-compte/messages");
-  };
+
 
   // Formater le prix
   const formatPrice = (price) => {
@@ -1238,18 +1238,7 @@ const LocationVoiturePage = () => {
                                                       </span>
                                                     </div>
                                                   </div>
-                                                  <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                      handleContactAgency(
-                                                        selectedVehicule
-                                                      )
-                                                    }
-                                                  >
-                                                    <Phone className="h-4 w-4 mr-2" />
-                                                    Contacter
-                                                  </Button>
+                       
                                                 </div>
                                               </div>
                                             </div>
@@ -1268,378 +1257,15 @@ const LocationVoiturePage = () => {
                                     </SheetContent>
                                   </Sheet>
 
-                                  <Dialog>
-                                    <DialogTrigger asChild>
-                                      <Button
-                                        className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
-                                        onClick={() =>
-                                          setSelectedVehicule(vehicule)
-                                        }
-                                      >
-                                        Réserver
-                                      </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col p-4 sm:p-6">
-                                      {selectedVehicule && (
-                                        <>
-                                          <DialogHeader className="sticky top-0 bg-white z-10">
-                                            <DialogTitle>
-                                              Réserver :{" "}
-                                              {selectedVehicule.marque}{" "}
-                                              {selectedVehicule.modele}
-                                            </DialogTitle>
-                                            <div className="text-sm text-gray-600">
-                                              {duration} jour
-                                              {duration > 1 ? "s" : ""} • Total
-                                              : {formatPrice(totalPrice)}
-                                            </div>
-                                          </DialogHeader>
-
-                                          <form
-                                            onSubmit={handleSubmitReservation}
-                                            className="flex flex-col flex-1"
-                                          >
-                                            <div className="space-y-4 flex-1 py-4">
-                                              {/* Dates */}
-                                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                <div>
-                                                  <Label className="text-sm">
-                                                    Date de prise en charge
-                                                  </Label>
-                                                  <Input
-                                                    type="date"
-                                                    value={pickupDate}
-                                                    onChange={(e) =>
-                                                      setPickupDate(
-                                                        e.target.value
-                                                      )
-                                                    }
-                                                    required
-                                                    className="text-sm"
-                                                  />
-                                                </div>
-                                                <div>
-                                                  <Label className="text-sm">Date de retour</Label>
-                                                  <Input
-                                                    type="date"
-                                                    value={returnDate}
-                                                    onChange={(e) =>
-                                                      setReturnDate(
-                                                        e.target.value
-                                                      )
-                                                    }
-                                                    min={pickupDate}
-                                                    required
-                                                    className="text-sm"
-                                                  />
-                                                </div>
-                                              </div>
-
-                                              {/* Lieux de prise en charge et retour */}
-                                              <div className="space-y-2">
-                                                <h4 className="font-semibold text-[#8B4513] text-sm">
-                                                  Lieux de location
-                                                </h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                  <div>
-                                                    <Label className="text-sm">
-                                                      Prise en charge
-                                                    </Label>
-                                                    <Button
-                                                      type="button"
-                                                      variant="outline"
-                                                      className="w-full justify-start text-left font-normal mt-1 text-sm h-9"
-                                                      onClick={() =>
-                                                        setShowLocationPickerPickup(
-                                                          true
-                                                        )
-                                                      }
-                                                    >
-                                                      <MapPin className="h-3 w-3 mr-2 flex-shrink-0" />
-                                                      <span className="truncate">
-                                                        {pickupLocation.address ||
-                                                          "Sélectionner"}
-                                                      </span>
-                                                    </Button>
-                                                  </div>
-                                                  <div>
-                                                    <Label className="text-sm">
-                                                      Retour
-                                                    </Label>
-                                                    <Button
-                                                      type="button"
-                                                      variant="outline"
-                                                      className="w-full justify-start text-left font-normal mt-1 text-sm h-9"
-                                                      onClick={() =>
-                                                        setShowLocationPickerReturn(
-                                                          true
-                                                        )
-                                                      }
-                                                    >
-                                                      <MapPin className="h-3 w-3 mr-2 flex-shrink-0" />
-                                                      <span className="truncate">
-                                                        {returnLocation.address ||
-                                                          "Sélectionner"}
-                                                      </span>
-                                                    </Button>
-                                                  </div>
-                                                </div>
-                                              </div>
-
-                                              {/* Informations personnelles */}
-                                              <div className="space-y-2">
-                                                <h4 className="font-semibold text-[#8B4513] text-sm">
-                                                  Informations personnelles
-                                                </h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                  <div>
-                                                    <Label className="text-sm">Nom complet *</Label>
-                                                    <Input
-                                                      value={
-                                                        reservationForm.nom
-                                                      }
-                                                      onChange={(e) =>
-                                                        setReservationForm({
-                                                          ...reservationForm,
-                                                          nom: e.target.value,
-                                                        })
-                                                      }
-                                                      required
-                                                      className="text-sm"
-                                                    />
-                                                  </div>
-                                                  <div>
-                                                    <Label className="text-sm">Email *</Label>
-                                                    <Input
-                                                      type="email"
-                                                      value={
-                                                        reservationForm.email
-                                                      }
-                                                      onChange={(e) =>
-                                                        setReservationForm({
-                                                          ...reservationForm,
-                                                          email: e.target.value,
-                                                        })
-                                                      }
-                                                      required
-                                                      className="text-sm"
-                                                    />
-                                                  </div>
-                                                </div>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                  <div>
-                                                    <Label className="text-sm">Téléphone *</Label>
-                                                    <Input
-                                                      type="tel"
-                                                      value={
-                                                        reservationForm.telephone
-                                                      }
-                                                      onChange={(e) =>
-                                                        setReservationForm({
-                                                          ...reservationForm,
-                                                          telephone:
-                                                            e.target.value,
-                                                        })
-                                                      }
-                                                      required
-                                                      className="text-sm"
-                                                    />
-                                                  </div>
-                                                  <div>
-                                                    <Label className="text-sm">
-                                                      N° permis
-                                                    </Label>
-                                                    <Input
-                                                      value={
-                                                        reservationForm.permis
-                                                      }
-                                                      onChange={(e) =>
-                                                        setReservationForm({
-                                                          ...reservationForm,
-                                                          permis:
-                                                            e.target.value,
-                                                        })
-                                                      }
-                                                      className="text-sm"
-                                                    />
-                                                  </div>
-                                                </div>
-                                              </div>
-
-                                              {/* Options supplémentaires */}
-                                              <div className="space-y-2">
-                                                <h4 className="font-semibold text-[#8B4513] text-sm">
-                                                  Options supplémentaires
-                                                </h4>
-                                                <div className="space-y-1 max-h-32 overflow-y-auto">
-                                                  {extras.map((extra) => {
-                                                    const ExtraIcon =
-                                                      extra.icon;
-                                                    const isSelected =
-                                                      reservationForm.extras.includes(
-                                                        extra.id
-                                                      );
-                                                    const extraTotal =
-                                                      extra.price * duration;
-
-                                                    return (
-                                                      <div
-                                                        key={extra.id}
-                                                        className={`flex items-center justify-between p-2 border rounded text-sm cursor-pointer ${
-                                                          isSelected
-                                                            ? "border-[#556B2F] bg-[#556B2F]/5"
-                                                            : "border-gray-200"
-                                                        }`}
-                                                        onClick={() => {
-                                                          if (isSelected) {
-                                                            setReservationForm({
-                                                              ...reservationForm,
-                                                              extras:
-                                                                reservationForm.extras.filter(
-                                                                  (id) =>
-                                                                    id !==
-                                                                    extra.id
-                                                                ),
-                                                            });
-                                                          } else {
-                                                            setReservationForm({
-                                                              ...reservationForm,
-                                                              extras: [
-                                                                ...reservationForm.extras,
-                                                                extra.id,
-                                                              ],
-                                                            });
-                                                          }
-                                                        }}
-                                                      >
-                                                        <div className="flex items-center gap-2">
-                                                          <div
-                                                            className={`p-1 rounded ${
-                                                              isSelected
-                                                                ? "bg-[#556B2F] text-white"
-                                                                : "bg-gray-100"
-                                                            }`}
-                                                          >
-                                                            <ExtraIcon className="h-3 w-3" />
-                                                          </div>
-                                                          <div>
-                                                            <p className="font-medium">
-                                                              {extra.label}
-                                                            </p>
-                                                          </div>
-                                                        </div>
-                                                        <div className="text-right text-xs">
-                                                          <p className="font-semibold">
-                                                            {formatPrice(
-                                                              extraTotal
-                                                            )}
-                                                          </p>
-                                                        </div>
-                                                      </div>
-                                                    );
-                                                  })}
-                                                </div>
-                                              </div>
-
-                                              {/* Récapitulatif */}
-                                              <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                                                <h4 className="font-semibold text-[#8B4513] mb-2">
-                                                  Récapitulatif
-                                                </h4>
-                                                <div className="space-y-1 text-sm">
-                                                  <div className="flex justify-between">
-                                                    <span>
-                                                      Location ({duration}{" "}
-                                                      jours)
-                                                    </span>
-                                                    <span className="font-semibold">
-                                                      {formatPrice(totalPrice)}
-                                                    </span>
-                                                  </div>
-                                                  {reservationForm.extras.map(
-                                                    (extraId) => {
-                                                      const extra = extras.find(
-                                                        (e) => e.id === extraId
-                                                      );
-                                                      const extraTotal = extra
-                                                        ? extra.price * duration
-                                                        : 0;
-                                                      return (
-                                                        <div
-                                                          key={extraId}
-                                                          className="flex justify-between"
-                                                        >
-                                                          <span className="truncate">
-                                                            {extra?.label}
-                                                          </span>
-                                                          <span className="flex-shrink-0 ml-2">
-                                                            +
-                                                            {formatPrice(
-                                                              extraTotal
-                                                            )}
-                                                          </span>
-                                                        </div>
-                                                      );
-                                                    }
-                                                  )}
-                                                  <Separator className="my-1" />
-                                                  <div className="flex justify-between font-bold">
-                                                    <span>Total</span>
-                                                    <span className="text-[#8B4513]">
-                                                      {formatPrice(
-                                                        totalPrice +
-                                                          reservationForm.extras.reduce(
-                                                            (
-                                                              total,
-                                                              extraId
-                                                            ) => {
-                                                              const extra =
-                                                                extras.find(
-                                                                  (e) =>
-                                                                    e.id ===
-                                                                    extraId
-                                                                );
-                                                              return (
-                                                                total +
-                                                                (extra
-                                                                  ? extra.price *
-                                                                    duration
-                                                                  : 0)
-                                                              );
-                                                            },
-                                                            0
-                                                          )
-                                                      )}
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
-
-                                            <DialogFooter className="sticky bottom-0 bg-white pt-4 gap-2 flex flex-col sm:flex-row">
-                                              <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() =>
-                                                  setShowReservation(false)
-                                                }
-                                                className="text-sm"
-                                              >
-                                                Annuler
-                                              </Button>
-                                              <Button
-                                                type="submit"
-                                                className="bg-[#556B2F] hover:bg-[#6B8E23] text-sm"
-                                              >
-                                                <CreditCard className="h-4 w-4 mr-2" />
-                                                Confirmer
-                                              </Button>
-                                            </DialogFooter>
-                                          </form>
-                                        </>
-                                      )}
-                                    </DialogContent>
-                                  </Dialog>
+                                  <Button
+                                    className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
+                                    onClick={() => {
+                                      setSelectedVehicule(vehicule);
+                                      setShowReservation(true);
+                                    }}
+                                  >
+                                    Réserver
+                                  </Button>
                                 </div>
                               </div>
                             </div>
@@ -1687,6 +1313,305 @@ const LocationVoiturePage = () => {
           toast.success("Lieu de prise en charge défini");
         }}
       />
+
+      <Dialog open={showReservation} onOpenChange={setShowReservation}>
+        <DialogContent className="max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col p-4 sm:p-6">
+          {selectedVehicule && (
+            <>
+              <DialogHeader className="sticky top-4 bg-white z-10 mb-2 rounded p-2">
+                <DialogTitle>
+                  Réserver : {selectedVehicule.marque} {selectedVehicule.modele}
+                </DialogTitle>
+                <div className="text-sm text-gray-600">
+                  {calculateDuration()} jour
+                  {calculateDuration() > 1 ? "s" : ""} • Total :{" "}
+                  {formatPrice(
+                    selectedVehicule.prixJour * calculateDuration()
+                  )}
+                </div>
+              </DialogHeader>
+
+              <form
+                onSubmit={handleSubmitReservation}
+                className="flex flex-col flex-1"
+              >
+                <div className="space-y-4 flex-1 py-4">
+                  {/* Dates */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm">Date de prise en charge</Label>
+                      <Input
+                        type="date"
+                        value={pickupDate}
+                        onChange={(e) => setPickupDate(e.target.value)}
+                        required
+                        min={new Date().toISOString().split("T")[0]}
+                        className="text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm">Date de retour</Label>
+                      <Input
+                        type="date"
+                        value={returnDate}
+                        onChange={(e) => setReturnDate(e.target.value)}
+                        min={pickupDate}
+                        required
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Lieux de prise en charge et retour */}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-[#8B4513] text-sm">
+                      Lieux de location
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-sm">Prise en charge</Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal mt-1 text-sm h-9"
+                          onClick={() => setShowLocationPickerPickup(true)}
+                        >
+                          <MapPin className="h-3 w-3 mr-2 flex-shrink-0" />
+                          <span className="truncate">
+                            {pickupLocation.address || "Sélectionner"}
+                          </span>
+                        </Button>
+                      </div>
+                      <div>
+                        <Label className="text-sm">Retour</Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal mt-1 text-sm h-9"
+                          onClick={() => setShowLocationPickerReturn(true)}
+                        >
+                          <MapPin className="h-3 w-3 mr-2 flex-shrink-0" />
+                          <span className="truncate">
+                            {returnLocation.address || "Sélectionner"}
+                          </span>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informations personnelles */}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-[#8B4513] text-sm">
+                      Informations personnelles
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-sm">Nom complet *</Label>
+                        <Input
+                          value={reservationForm.nom}
+                          onChange={(e) =>
+                            setReservationForm({
+                              ...reservationForm,
+                              nom: e.target.value,
+                            })
+                          }
+                          required
+                          className="text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm">Email *</Label>
+                        <Input
+                          type="email"
+                          value={reservationForm.email}
+                          onChange={(e) =>
+                            setReservationForm({
+                              ...reservationForm,
+                              email: e.target.value,
+                            })
+                          }
+                          required
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-sm">Téléphone *</Label>
+                        <Input
+                          type="tel"
+                          value={reservationForm.telephone}
+                          onChange={(e) =>
+                            setReservationForm({
+                              ...reservationForm,
+                              telephone: e.target.value,
+                            })
+                          }
+                          required
+                          className="text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm">N° permis</Label>
+                        <Input
+                          value={reservationForm.permis}
+                          onChange={(e) =>
+                            setReservationForm({
+                              ...reservationForm,
+                              permis: e.target.value,
+                            })
+                          }
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Options supplémentaires */}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-[#8B4513] text-sm">
+                      Options supplémentaires
+                    </h4>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {extras.map((extra) => {
+                        const ExtraIcon = extra.icon;
+                        const isSelected = reservationForm.extras.includes(
+                          extra.id
+                        );
+                        const extraTotal = extra.price * calculateDuration();
+
+                        return (
+                          <div
+                            key={extra.id}
+                            className={`flex items-center justify-between p-2 border rounded text-sm cursor-pointer ${
+                              isSelected
+                                ? "border-[#556B2F] bg-[#556B2F]/5"
+                                : "border-gray-200"
+                            }`}
+                            onClick={() => {
+                              if (isSelected) {
+                                setReservationForm({
+                                  ...reservationForm,
+                                  extras: reservationForm.extras.filter(
+                                    (id) => id !== extra.id
+                                  ),
+                                });
+                              } else {
+                                setReservationForm({
+                                  ...reservationForm,
+                                  extras: [...reservationForm.extras, extra.id],
+                                });
+                              }
+                            }}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`p-1 rounded ${
+                                  isSelected
+                                    ? "bg-[#556B2F] text-white"
+                                    : "bg-gray-100"
+                                }`}
+                              >
+                                <ExtraIcon className="h-3 w-3" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{extra.label}</p>
+                              </div>
+                            </div>
+                            <div className="text-right text-xs">
+                              <p className="font-semibold">
+                                {formatPrice(extraTotal)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Récapitulatif */}
+                  <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                    <h4 className="font-semibold text-[#8B4513] mb-2">
+                      Récapitulatif
+                    </h4>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Location ({calculateDuration()} jours)</span>
+                        <span className="font-semibold">
+                          {formatPrice(
+                            selectedVehicule.prixJour * calculateDuration()
+                          )}
+                        </span>
+                      </div>
+                      {reservationForm.extras.map((extraId) => {
+                        const extra = extras.find((e) => e.id === extraId);
+                        const extraTotal = extra
+                          ? extra.price * calculateDuration()
+                          : 0;
+                        return (
+                          <div key={extraId} className="flex justify-between">
+                            <span className="truncate">{extra?.label}</span>
+                            <span className="flex-shrink-0 ml-2">
+                              +{formatPrice(extraTotal)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      <Separator className="my-1" />
+                      <div className="flex justify-between font-bold">
+                        <span>Total</span>
+                        <span className="text-[#8B4513]">
+                          {formatPrice(
+                            selectedVehicule.prixJour * calculateDuration() +
+                              reservationForm.extras.reduce((total, extraId) => {
+                                const extra = extras.find(
+                                  (e) => e.id === extraId
+                                );
+                                return (
+                                  total +
+                                  (extra ? extra.price * calculateDuration() : 0)
+                                );
+                              }, 0)
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <DialogFooter className="sticky bottom-0 bg-white pt-4 gap-2 flex flex-col sm:flex-row">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowReservation(false)}
+                    className="text-sm"
+                    disabled={isSubmitting}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-[#556B2F] hover:bg-[#6B8E23] text-sm"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Traitement...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Confirmer
+                      </>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <LocationPickerModal
         open={showLocationPickerReturn}

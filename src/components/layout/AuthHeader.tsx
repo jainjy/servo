@@ -161,7 +161,7 @@ export function AuthHeader() {
 
   const handleLogout = () => {
     AuthService.logout();
-    navigate("/login");
+    navigate("/");
     setIsLogoutDialogOpen(false);
   };
 

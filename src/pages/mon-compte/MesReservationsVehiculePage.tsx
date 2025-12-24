@@ -24,6 +24,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { pdf, Document, Page, Text, View, StyleSheet, Image as PdfImage } from "@react-pdf/renderer";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -47,6 +48,186 @@ import { vehiculesApi } from "@/lib/api/vehicules";
 import { ItineraryModal } from "@/components/itinerary-modal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+
+// Styles pour le PDF
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: "column",
+    backgroundColor: "#FFFFFF",
+    padding: 30,
+    fontFamily: "Helvetica",
+  },
+  header: {
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#8B4513",
+    paddingBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#8B4513",
+  },
+  subtitle: {
+    fontSize: 10,
+    color: "#666",
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+    flexGrow: 1,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#333",
+    backgroundColor: "#f0f0f0",
+    padding: 5,
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 5,
+  },
+  label: {
+    width: 120,
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#555",
+  },
+  value: {
+    flex: 1,
+    fontSize: 10,
+    color: "#000",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 30,
+    left: 30,
+    right: 30,
+    textAlign: "center",
+    fontSize: 8,
+    color: "#999",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    paddingTop: 10,
+  },
+});
+
+// Composant Document PDF
+const ContractDocument = ({ reservation }) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      {/* En-tête */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>CONTRAT DE LOCATION</Text>
+          <Text style={styles.subtitle}>Réf: {reservation.id}</Text>
+          <Text style={styles.subtitle}>Date: {format(new Date(), "dd/MM/yyyy")}</Text>
+        </View>
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "bold", color: "#556B2F" }}>OLIPLUS</Text>
+        </View>
+      </View>
+
+      {/* Informations Prestataire & Client */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
+        <View style={{ width: "48%", borderWidth: 1, borderColor: "#ddd", padding: 10 }}>
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>LOUEUR (Prestataire)</Text>
+          <Text style={styles.value}>{reservation.prestataire?.companyName || "Société Partenaire"}</Text>
+          <Text style={styles.value}>{reservation.prestataire?.email}</Text>
+          <Text style={styles.value}>{reservation.prestataire?.phone}</Text>
+          <Text style={styles.value}>{reservation.prestataire?.address || "Adresse non renseignée"}</Text>
+        </View>
+        <View style={{ width: "48%", borderWidth: 1, borderColor: "#ddd", padding: 10 }}>
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>LOCATAIRE (Client)</Text>
+          <Text style={styles.value}>{reservation.nomClient || `${reservation.client?.firstName} ${reservation.client?.lastName}`}</Text>
+          <Text style={styles.value}>{reservation.emailClient}</Text>
+          <Text style={styles.value}>{reservation.telephoneClient}</Text>
+          <Text style={styles.value}>Permis: {reservation.numeroPermis || "Non renseigné"}</Text>
+        </View>
+      </View>
+
+      {/* Véhicule */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>VÉHICULE LOUÉ</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Marque / Modèle :</Text>
+          <Text style={styles.value}>{reservation.vehicule.marque} {reservation.vehicule.modele}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Immatriculation :</Text>
+          <Text style={styles.value}>{reservation.vehicule.immatriculation || "Non assignée"}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Catégorie :</Text>
+          <Text style={styles.value}>{reservation.vehicule.typeVehicule}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Carburant :</Text>
+          <Text style={styles.value}>{reservation.vehicule.carburant}</Text>
+        </View>
+      </View>
+
+      {/* Détails Location */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>DÉTAILS DE LA LOCATION</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Départ :</Text>
+          <Text style={styles.value}>
+            {format(new Date(reservation.datePrise), "dd/MM/yyyy HH:mm")} à {reservation.lieuPrise}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Retour :</Text>
+          <Text style={styles.value}>
+            {format(new Date(reservation.dateRetour), "dd/MM/yyyy HH:mm")} à {reservation.lieuRetour}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Kilométrage :</Text>
+          <Text style={styles.value}>{reservation.kilometrageOption || "Standard"}</Text>
+        </View>
+      </View>
+
+      {/* Financier */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>INFORMATIONS FINANCIÈRES</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Montant Total :</Text>
+          <Text style={{ ...styles.value, fontWeight: "bold" }}>{reservation.totalTTC?.toFixed(2)} €</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Caution (bloquée) :</Text>
+          <Text style={styles.value}>{reservation.cautionBloquee || reservation.vehicule.caution || 0} €</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Statut Paiement :</Text>
+          <Text style={styles.value}>{reservation.statutPaiement}</Text>
+        </View>
+      </View>
+
+      {/* Signatures */}
+      <View style={{ marginTop: 30, flexDirection: "row", justifyContent: "space-between" }}>
+        <View style={{ width: "40%", borderTopWidth: 1, paddingTop: 5 }}>
+          <Text style={{ fontSize: 10, textAlign: "center" }}>Signature du Loueur</Text>
+          <Text style={{ fontSize: 8, textAlign: "center", color: "#999", marginTop: 30 }}>(Cachet et signature)</Text>
+        </View>
+        <View style={{ width: "40%", borderTopWidth: 1, paddingTop: 5 }}>
+          <Text style={{ fontSize: 10, textAlign: "center" }}>Signature du Locataire</Text>
+          <Text style={{ fontSize: 8, textAlign: "center", color: "#999", marginTop: 30 }}>("Lu et approuvé")</Text>
+        </View>
+      </View>
+
+      <Text style={styles.footer}>
+        Ce document est généré automatiquement par la plateforme OLIPLUS. Conditions générales de location applicables.
+      </Text>
+    </Page>
+  </Document>
+);
 
 const MesReservationsVehiculePage = () => {
   const [reservations, setReservations] = useState([]);
@@ -176,20 +357,26 @@ const MesReservationsVehiculePage = () => {
     }
   };
 
-  const handleDownloadContract = (reservation) => {
-    toast.info("Téléchargement du contrat...");
-    // Générer et télécharger le contrat PDF
-    const contractData = {
-      reservationId: reservation.id,
-      client: `${reservation.client?.firstName} ${reservation.client?.lastName}`,
-      vehicule: `${reservation.vehicule.marque} ${reservation.vehicule.modele}`,
-      dates: `${format(
-        new Date(reservation.datePrise),
-        "dd/MM/yyyy"
-      )} - ${format(new Date(reservation.dateRetour), "dd/MM/yyyy")}`,
-      prixTotal: reservation.totalTTC,
-    };
-    console.log("Contrat généré:", contractData);
+  const handleDownloadContract = async (reservation) => {
+    const toastId = toast.loading("Génération du contrat PDF...");
+    try {
+      // Générer le blob PDF
+      const blob = await pdf(<ContractDocument reservation={reservation} />).toBlob();
+      
+      // Créer une URL et déclencher le téléchargement
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Contrat_Location_${reservation.id.slice(0, 8)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("Contrat téléchargé avec succès", { id: toastId });
+    } catch (error) {
+      console.error("Erreur génération PDF:", error);
+      toast.error("Erreur lors de la génération du contrat", { id: toastId });
+    }
   };
 
   const filteredReservations = reservations.filter((reservation) => {
