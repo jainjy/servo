@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import {
   Calendar,
   Car,
+  Truck,
+  Bike,
+
   Clock,
   CheckCircle,
   XCircle,
@@ -18,14 +21,25 @@ import {
   ChevronRight,
   Navigation,
   Trash2,
+  Zap,
+  Battery,
+  Gauge,
+  Weight,
+  Users,
+  Fuel,
+  Cog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { pdf, Document, Page, Text, View, StyleSheet, Image as PdfImage } from "@react-pdf/renderer";
+import {
+  pdf,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+} from "@react-pdf/renderer";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -41,6 +55,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -125,30 +140,67 @@ const ContractDocument = ({ reservation }) => (
       {/* En-tête */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>CONTRAT DE LOCATION</Text>
+          <Text style={styles.title}>CONTRAT DE LOCATION DE VÉHICULE</Text>
           <Text style={styles.subtitle}>Réf: {reservation.id}</Text>
-          <Text style={styles.subtitle}>Date: {format(new Date(), "dd/MM/yyyy")}</Text>
+          <Text style={styles.subtitle}>
+            Date: {format(new Date(), "dd/MM/yyyy")}
+          </Text>
         </View>
         <View>
-          <Text style={{ fontSize: 16, fontWeight: "bold", color: "#556B2F" }}>OLIPLUS</Text>
+          <Text style={{ fontSize: 16, fontWeight: "bold", color: "#556B2F" }}>
+            OLIPLUS
+          </Text>
         </View>
       </View>
 
       {/* Informations Prestataire & Client */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
-        <View style={{ width: "48%", borderWidth: 1, borderColor: "#ddd", padding: 10 }}>
-          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>LOUEUR (Prestataire)</Text>
-          <Text style={styles.value}>{reservation.prestataire?.companyName || "Société Partenaire"}</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginBottom: 20,
+        }}
+      >
+        <View
+          style={{
+            width: "48%",
+            borderWidth: 1,
+            borderColor: "#ddd",
+            padding: 10,
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>
+            LOUEUR (Prestataire)
+          </Text>
+          <Text style={styles.value}>
+            {reservation.prestataire?.companyName || "Société Partenaire"}
+          </Text>
           <Text style={styles.value}>{reservation.prestataire?.email}</Text>
           <Text style={styles.value}>{reservation.prestataire?.phone}</Text>
-          <Text style={styles.value}>{reservation.prestataire?.address || "Adresse non renseignée"}</Text>
+          <Text style={styles.value}>
+            {reservation.prestataire?.address || "Adresse non renseignée"}
+          </Text>
         </View>
-        <View style={{ width: "48%", borderWidth: 1, borderColor: "#ddd", padding: 10 }}>
-          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>LOCATAIRE (Client)</Text>
-          <Text style={styles.value}>{reservation.nomClient || `${reservation.client?.firstName} ${reservation.client?.lastName}`}</Text>
+        <View
+          style={{
+            width: "48%",
+            borderWidth: 1,
+            borderColor: "#ddd",
+            padding: 10,
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 5 }}>
+            LOCATAIRE (Client)
+          </Text>
+          <Text style={styles.value}>
+            {reservation.nomClient ||
+              `${reservation.client?.firstName} ${reservation.client?.lastName}`}
+          </Text>
           <Text style={styles.value}>{reservation.emailClient}</Text>
           <Text style={styles.value}>{reservation.telephoneClient}</Text>
-          <Text style={styles.value}>Permis: {reservation.numeroPermis || "Non renseigné"}</Text>
+          {reservation.numeroPermis && (
+            <Text style={styles.value}>Permis: {reservation.numeroPermis}</Text>
+          )}
         </View>
       </View>
 
@@ -156,21 +208,47 @@ const ContractDocument = ({ reservation }) => (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>VÉHICULE LOUÉ</Text>
         <View style={styles.row}>
+          <Text style={styles.label}>Catégorie :</Text>
+          <Text style={styles.value}>
+            {reservation.vehicule.categorie?.toUpperCase() || "VOITURE"}
+          </Text>
+        </View>
+        <View style={styles.row}>
           <Text style={styles.label}>Marque / Modèle :</Text>
-          <Text style={styles.value}>{reservation.vehicule.marque} {reservation.vehicule.modele}</Text>
+          <Text style={styles.value}>
+            {reservation.vehicule.marque} {reservation.vehicule.modele}
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Immatriculation :</Text>
-          <Text style={styles.value}>{reservation.vehicule.immatriculation || "Non assignée"}</Text>
+          <Text style={styles.value}>
+            {reservation.vehicule.immatriculation || "Non applicable"}
+          </Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>Catégorie :</Text>
+          <Text style={styles.label}>Type :</Text>
           <Text style={styles.value}>{reservation.vehicule.typeVehicule}</Text>
         </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Carburant :</Text>
-          <Text style={styles.value}>{reservation.vehicule.carburant}</Text>
-        </View>
+        {reservation.vehicule.cylindree && (
+          <View style={styles.row}>
+            <Text style={styles.label}>Cylindrée :</Text>
+            <Text style={styles.value}>{reservation.vehicule.cylindree}cc</Text>
+          </View>
+        )}
+        {reservation.vehicule.carburant && (
+          <View style={styles.row}>
+            <Text style={styles.label}>Carburant :</Text>
+            <Text style={styles.value}>{reservation.vehicule.carburant}</Text>
+          </View>
+        )}
+        {reservation.vehicule.transmission && (
+          <View style={styles.row}>
+            <Text style={styles.label}>Transmission :</Text>
+            <Text style={styles.value}>
+              {reservation.vehicule.transmission}
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Détails Location */}
@@ -179,18 +257,26 @@ const ContractDocument = ({ reservation }) => (
         <View style={styles.row}>
           <Text style={styles.label}>Départ :</Text>
           <Text style={styles.value}>
-            {format(new Date(reservation.datePrise), "dd/MM/yyyy HH:mm")} à {reservation.lieuPrise}
+            {format(new Date(reservation.datePrise), "dd/MM/yyyy HH:mm")} à{" "}
+            {reservation.lieuPrise}
           </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Retour :</Text>
           <Text style={styles.value}>
-            {format(new Date(reservation.dateRetour), "dd/MM/yyyy HH:mm")} à {reservation.lieuRetour}
+            {format(new Date(reservation.dateRetour), "dd/MM/yyyy HH:mm")} à{" "}
+            {reservation.lieuRetour}
           </Text>
         </View>
         <View style={styles.row}>
+          <Text style={styles.label}>Durée :</Text>
+          <Text style={styles.value}>{reservation.nombreJours} jour(s)</Text>
+        </View>
+        <View style={styles.row}>
           <Text style={styles.label}>Kilométrage :</Text>
-          <Text style={styles.value}>{reservation.kilometrageOption || "Standard"}</Text>
+          <Text style={styles.value}>
+            {reservation.kilometrageOption || "Standard"}
+          </Text>
         </View>
       </View>
 
@@ -198,12 +284,34 @@ const ContractDocument = ({ reservation }) => (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>INFORMATIONS FINANCIÈRES</Text>
         <View style={styles.row}>
-          <Text style={styles.label}>Montant Total :</Text>
-          <Text style={{ ...styles.value, fontWeight: "bold" }}>{reservation.totalTTC?.toFixed(2)} €</Text>
+          <Text style={styles.label}>Prix location :</Text>
+          <Text style={styles.value}>
+            {reservation.prixVehicule?.toFixed(2)} €
+          </Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>Caution (bloquée) :</Text>
-          <Text style={styles.value}>{reservation.cautionBloquee || reservation.vehicule.caution || 0} €</Text>
+          <Text style={styles.label}>Extras :</Text>
+          <Text style={styles.value}>
+            {reservation.prixExtras?.toFixed(2)} €
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Frais service :</Text>
+          <Text style={styles.value}>
+            {reservation.fraisService?.toFixed(2)} €
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Montant Total TTC :</Text>
+          <Text style={{ ...styles.value, fontWeight: "bold" }}>
+            {reservation.totalTTC?.toFixed(2)} €
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Caution :</Text>
+          <Text style={styles.value}>
+            {reservation.cautionBloquee || reservation.vehicule.caution || 0} €
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Statut Paiement :</Text>
@@ -212,19 +320,48 @@ const ContractDocument = ({ reservation }) => (
       </View>
 
       {/* Signatures */}
-      <View style={{ marginTop: 30, flexDirection: "row", justifyContent: "space-between" }}>
+      <View
+        style={{
+          marginTop: 30,
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
         <View style={{ width: "40%", borderTopWidth: 1, paddingTop: 5 }}>
-          <Text style={{ fontSize: 10, textAlign: "center" }}>Signature du Loueur</Text>
-          <Text style={{ fontSize: 8, textAlign: "center", color: "#999", marginTop: 30 }}>(Cachet et signature)</Text>
+          <Text style={{ fontSize: 10, textAlign: "center" }}>
+            Signature du Loueur
+          </Text>
+          <Text
+            style={{
+              fontSize: 8,
+              textAlign: "center",
+              color: "#999",
+              marginTop: 30,
+            }}
+          >
+            (Cachet et signature)
+          </Text>
         </View>
         <View style={{ width: "40%", borderTopWidth: 1, paddingTop: 5 }}>
-          <Text style={{ fontSize: 10, textAlign: "center" }}>Signature du Locataire</Text>
-          <Text style={{ fontSize: 8, textAlign: "center", color: "#999", marginTop: 30 }}>("Lu et approuvé")</Text>
+          <Text style={{ fontSize: 10, textAlign: "center" }}>
+            Signature du Locataire
+          </Text>
+          <Text
+            style={{
+              fontSize: 8,
+              textAlign: "center",
+              color: "#999",
+              marginTop: 30,
+            }}
+          >
+            ("Lu et approuvé")
+          </Text>
         </View>
       </View>
 
       <Text style={styles.footer}>
-        Ce document est généré automatiquement par la plateforme OLIPLUS. Conditions générales de location applicables.
+        Ce document est généré automatiquement par la plateforme OLIPLUS.
+        Conditions générales de location applicables.
       </Text>
     </Page>
   </Document>
@@ -235,10 +372,12 @@ const MesReservationsVehiculePage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("tous");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("tous");
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
-  const [selectedReservationForItinerary, setSelectedReservationForItinerary] = useState(null);
+  const [selectedReservationForItinerary, setSelectedReservationForItinerary] =
+    useState(null);
   const [reviewForm, setReviewForm] = useState({
     rating: 5,
     titre: "",
@@ -248,6 +387,7 @@ const MesReservationsVehiculePage = () => {
     recommandation: true,
   });
 
+  // Configuration des statuts
   const statusConfig = {
     en_attente: {
       label: "En attente",
@@ -276,6 +416,31 @@ const MesReservationsVehiculePage = () => {
     },
   };
 
+  // Catégories de véhicules
+  const categories = [
+    { id: "tous", label: "Toutes catégories", icon: Car },
+    { id: "voiture", label: "Voitures", icon: Car },
+    { id: "camion", label: "Camions", icon: Truck },
+    { id: "moto", label: "Motos", icon: Bike },
+    { id: "velo", label: "Vélos", icon: Bike },
+  ];
+
+  // Icônes par catégorie
+  const getCategoryIcon = (categorie) => {
+    switch (categorie) {
+      case "voiture":
+        return <Car className="h-4 w-4" />;
+      case "camion":
+        return <Truck className="h-4 w-4" />;
+      case "moto":
+        return <Bike className="h-4 w-4" />;
+      case "velo":
+        return <Bike className="h-4 w-4" />;
+      default:
+        return <Car className="h-4 w-4" />;
+    }
+  };
+
   const fetchReservations = async () => {
     setLoading(true);
     try {
@@ -284,7 +449,6 @@ const MesReservationsVehiculePage = () => {
       };
       const response = await vehiculesApi.getMesReservations(params);
       setReservations(response.data.data || []);
-      console.log("Réservations récupérées:", response);
     } catch (error) {
       console.error("Erreur récupération réservations:", error);
       toast.error("Erreur lors du chargement des réservations");
@@ -361,18 +525,19 @@ const MesReservationsVehiculePage = () => {
   const handleDownloadContract = async (reservation) => {
     const toastId = toast.loading("Génération du contrat PDF...");
     try {
-      // Générer le blob PDF
-      const blob = await pdf(<ContractDocument reservation={reservation} />).toBlob();
-      
-      // Créer une URL et déclencher le téléchargement
+      const blob = await pdf(
+        <ContractDocument reservation={reservation} />
+      ).toBlob();
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `Contrat_Location_${reservation.id.slice(0, 8)}.pdf`;
+      link.download = `Contrat_${
+        reservation.vehicule.categorie
+      }_${reservation.id.slice(0, 8)}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       toast.success("Contrat téléchargé avec succès", { id: toastId });
     } catch (error) {
       console.error("Erreur génération PDF:", error);
@@ -380,7 +545,6 @@ const MesReservationsVehiculePage = () => {
     }
   };
 
-  // Ajouter une fonction de suppression
   const handleDeleteReservation = async (reservationId) => {
     if (
       !window.confirm(
@@ -391,24 +555,17 @@ const MesReservationsVehiculePage = () => {
     }
 
     try {
-      toast.loading("Suppression en cours...", {
-        id: "delete-reservation",
-      });
-
+      toast.loading("Suppression en cours...", { id: "delete-reservation" });
       await vehiculesApi.deleteReservation(reservationId);
-
       toast.success("Réservation supprimée avec succès", {
         id: "delete-reservation",
       });
-
       fetchReservations();
     } catch (error) {
       console.error("Erreur suppression:", error);
       toast.error(
         error.response?.data?.error || "Erreur lors de la suppression",
-        {
-          id: "delete-reservation",
-        }
+        { id: "delete-reservation" }
       );
     }
   };
@@ -416,14 +573,18 @@ const MesReservationsVehiculePage = () => {
   const filteredReservations = reservations.filter((reservation) => {
     const matchesSearch =
       reservation.vehicule.marque
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       reservation.vehicule.modele
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       reservation.id.includes(searchTerm);
 
-    return matchesSearch;
+    const matchesCategory =
+      selectedCategory === "tous" ||
+      reservation.vehicule.categorie === selectedCategory;
+
+    return matchesSearch && matchesCategory;
   });
 
   const calculateDuration = (datePrise, dateRetour) => {
@@ -431,6 +592,47 @@ const MesReservationsVehiculePage = () => {
     const end = new Date(dateRetour);
     const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
     return days;
+  };
+
+  // Fonction pour rendre les caractéristiques spécifiques du véhicule
+  const renderVehicleSpecs = (vehicule) => {
+    const specs = [];
+
+    if (vehicule.annee) specs.push(`${vehicule.annee}`);
+    if (vehicule.places) specs.push(`${vehicule.places} places`);
+
+    if (vehicule.categorie === "moto" && vehicule.cylindree) {
+      specs.push(`${vehicule.cylindree}cc`);
+    }
+
+    if (vehicule.categorie === "velo") {
+      if (vehicule.typeVelo) specs.push(vehicule.typeVelo);
+      if (vehicule.assistanceElec) specs.push("Électrique");
+      if (vehicule.poids) specs.push(`${vehicule.poids}kg`);
+    }
+
+    if (vehicule.carburant) specs.push(vehicule.carburant);
+    if (vehicule.transmission) specs.push(vehicule.transmission);
+
+    return specs;
+  };
+
+  // Image par défaut par catégorie
+  const getVehicleImage = (vehicule) => {
+    if (vehicule.images && vehicule.images.length > 0) {
+      return vehicule.images[0];
+    }
+
+    const defaultImages = {
+      voiture:
+        "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&auto=format&fit=crop",
+      camion:
+        "https://images.unsplash.com/photo-1566474591191-8a583d6af81b?w=400&auto=format&fit=crop",
+      moto: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=400&auto=format&fit=crop",
+      velo: "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=400&auto=format&fit=crop",
+    };
+
+    return defaultImages[vehicule.categorie] || defaultImages.voiture;
   };
 
   // Calendrier
@@ -448,7 +650,11 @@ const MesReservationsVehiculePage = () => {
     return reservations.filter((reservation) => {
       const start = new Date(reservation.datePrise);
       const end = new Date(reservation.dateRetour);
-      const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const checkDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
       return checkDate >= start && checkDate <= end;
     });
   };
@@ -470,12 +676,10 @@ const MesReservationsVehiculePage = () => {
     const firstDay = getFirstDayOfMonth(currentDate);
     const days = [];
 
-    // Jours vides du mois précédent
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
 
-    // Jours du mois
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(currentDate.getFullYear(), currentDate.getMonth(), i));
     }
@@ -494,12 +698,12 @@ const MesReservationsVehiculePage = () => {
             Mes réservations de véhicules
           </h1>
           <p className="text-gray-600">
-            Gérez toutes vos locations de voitures et utilitaires
+            Gérez toutes vos locations de voitures, camions, motos et vélos
           </p>
         </div>
 
         {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -516,12 +720,16 @@ const MesReservationsVehiculePage = () => {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">En cours</p>
+                  <p className="text-sm text-gray-500">Voitures</p>
                   <p className="text-2xl font-bold">
-                    {reservations.filter((r) => r.statut === "en_cours").length}
+                    {
+                      reservations.filter(
+                        (r) => r.vehicule?.categorie === "voiture"
+                      ).length
+                    }
                   </p>
                 </div>
-                <Car className="h-8 w-8 text-purple-500" />
+                <Car className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -530,18 +738,34 @@ const MesReservationsVehiculePage = () => {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">À venir</p>
+                  <p className="text-sm text-gray-500">Utilitaires</p>
                   <p className="text-2xl font-bold">
                     {
                       reservations.filter(
-                        (r) =>
-                          ["en_attente", "confirmee"].includes(r.statut) &&
-                          new Date(r.datePrise) > new Date()
+                        (r) => r.vehicule?.categorie === "camion"
                       ).length
                     }
                   </p>
                 </div>
-                <Clock className="h-8 w-8 text-yellow-500" />
+                <Truck className="h-8 w-8 text-gray-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">2 roues</p>
+                  <p className="text-2xl font-bold">
+                    {
+                      reservations.filter((r) =>
+                        ["moto", "velo"].includes(r.vehicule?.categorie)
+                      ).length
+                    }
+                  </p>
+                </div>
+                <Bike className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
@@ -582,6 +806,28 @@ const MesReservationsVehiculePage = () => {
 
               <div className="flex gap-2">
                 <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Catégorie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => {
+                      const CategoryIcon = category.icon;
+                      return (
+                        <SelectItem key={category.id} value={category.id}>
+                          <div className="flex items-center gap-2">
+                            <CategoryIcon className="h-4 w-4" />
+                            {category.label}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+
+                <Select
                   value={selectedStatus}
                   onValueChange={setSelectedStatus}
                 >
@@ -619,7 +865,6 @@ const MesReservationsVehiculePage = () => {
 
           <TabsContent value="liste" className="space-y-4">
             {loading ? (
-              // Squelettes de chargement
               Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="animate-pulse">
                   <CardContent className="pt-6">
@@ -648,6 +893,7 @@ const MesReservationsVehiculePage = () => {
                 const canCancel =
                   ["en_attente", "confirmee"].includes(reservation.statut) &&
                   new Date(reservation.datePrise) > new Date();
+                const vehicleSpecs = renderVehicleSpecs(reservation.vehicule);
 
                 return (
                   <Card
@@ -657,15 +903,31 @@ const MesReservationsVehiculePage = () => {
                     <CardContent className="pt-6">
                       <div className="flex flex-col md:flex-row gap-6">
                         {/* Image véhicule */}
-                        <div className="w-full md:w-48 h-36">
+                        <div className="w-full md:w-48 h-36 relative">
                           <img
-                            src={
-                              reservation.vehicule.images?.[0] ||
-                              "https://images.unsplash.com/photo-1593941707882-a5bba5338fe2?w=400&auto=format&fit=crop"
-                            }
-                            alt={reservation.vehicule.marque}
+                            src={getVehicleImage(reservation.vehicule)}
+                            alt={`${reservation.vehicule.marque} ${reservation.vehicule.modele}`}
                             className="w-full h-full object-cover rounded-lg"
                           />
+                          <Badge className="absolute top-2 left-2 bg-[#556B2F] text-white">
+                            {getCategoryIcon(reservation.vehicule.categorie)}
+                            <span className="ml-1 capitalize">
+                              {reservation.vehicule.categorie}
+                            </span>
+                          </Badge>
+                          {reservation.vehicule.carburant === "electrique" && (
+                            <Badge className="absolute top-2 right-2 bg-green-500 text-white">
+                              <Zap className="h-3 w-3 mr-1" />
+                              Électrique
+                            </Badge>
+                          )}
+                          {reservation.vehicule.categorie === "velo" &&
+                            reservation.vehicule.assistanceElec && (
+                              <Badge className="absolute bottom-2 left-2 bg-blue-500 text-white">
+                                <Battery className="h-3 w-3 mr-1" />
+                                Assistance
+                              </Badge>
+                            )}
                         </div>
 
                         {/* Détails */}
@@ -674,10 +936,9 @@ const MesReservationsVehiculePage = () => {
                             <div>
                               <div className="flex items-center gap-2 mb-2">
                                 <Badge
-                                  className={
-                                    statusConfig[reservation.statut]?.color +
-                                    " text-white"
-                                  }
+                                  className={`${
+                                    statusConfig[reservation.statut]?.color
+                                  } text-white`}
                                 >
                                   <StatusIcon className="h-3 w-3 mr-1" />
                                   {statusConfig[reservation.statut]?.label}
@@ -685,6 +946,14 @@ const MesReservationsVehiculePage = () => {
                                 <Badge variant="outline">
                                   Réf: {reservation.id.slice(0, 8)}
                                 </Badge>
+                                {reservation.vehicule.typeVehicule && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-gray-100"
+                                  >
+                                    {reservation.vehicule.typeVehicule}
+                                  </Badge>
+                                )}
                               </div>
 
                               <h3 className="text-xl font-bold text-gray-900 mb-1">
@@ -716,6 +985,21 @@ const MesReservationsVehiculePage = () => {
                                   {reservation.lieuPrise}
                                 </span>
                               </div>
+
+                              {/* Caractéristiques du véhicule */}
+                              {vehicleSpecs.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {vehicleSpecs.map((spec, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {spec}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
                             </div>
 
                             <div className="text-right">
@@ -734,15 +1018,21 @@ const MesReservationsVehiculePage = () => {
                               <div>
                                 <p className="font-semibold">
                                   {reservation.prestataire?.companyName ||
-                                    reservation.prestataire?.commercialName}
+                                    reservation.prestataire?.commercialName ||
+                                    "Professionnel OLIPLUS"}
                                 </p>
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                   <span>{reservation.prestataire?.email}</span>
-                                  <span>•</span>
-                                  <span>{reservation.prestataire?.phone}</span>
+                                  {reservation.prestataire?.phone && (
+                                    <>
+                                      <span>•</span>
+                                      <span>
+                                        {reservation.prestataire.phone}
+                                      </span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
-
                             </div>
                           </div>
 
@@ -763,8 +1053,15 @@ const MesReservationsVehiculePage = () => {
                                   </DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-6">
-                                  {/* Contenu détaillé */}
                                   <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label className="text-gray-500 text-sm">
+                                        Catégorie
+                                      </Label>
+                                      <p className="font-semibold capitalize">
+                                        {reservation.vehicule.categorie}
+                                      </p>
+                                    </div>
                                     <div>
                                       <Label className="text-gray-500 text-sm">
                                         Véhicule
@@ -776,14 +1073,99 @@ const MesReservationsVehiculePage = () => {
                                     </div>
                                     <div>
                                       <Label className="text-gray-500 text-sm">
-                                        Catégorie
+                                        Type
                                       </Label>
                                       <p className="font-semibold">
                                         {reservation.vehicule.typeVehicule}
                                       </p>
                                     </div>
+                                    <div>
+                                      <Label className="text-gray-500 text-sm">
+                                        Année
+                                      </Label>
+                                      <p className="font-semibold">
+                                        {reservation.vehicule.annee}
+                                      </p>
+                                    </div>
+                                    {reservation.vehicule.carburant && (
+                                      <div>
+                                        <Label className="text-gray-500 text-sm">
+                                          Carburant
+                                        </Label>
+                                        <p className="font-semibold">
+                                          {reservation.vehicule.carburant}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {reservation.vehicule.transmission && (
+                                      <div>
+                                        <Label className="text-gray-500 text-sm">
+                                          Transmission
+                                        </Label>
+                                        <p className="font-semibold">
+                                          {reservation.vehicule.transmission}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {reservation.vehicule.cylindree && (
+                                      <div>
+                                        <Label className="text-gray-500 text-sm">
+                                          Cylindrée
+                                        </Label>
+                                        <p className="font-semibold">
+                                          {reservation.vehicule.cylindree}cc
+                                        </p>
+                                      </div>
+                                    )}
                                   </div>
-                                  {/* Ajouter plus de détails */}
+
+                                  <div className="bg-gray-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-[#8B4513] mb-3">
+                                      Informations de location
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <p className="text-sm text-gray-600">
+                                          Dates
+                                        </p>
+                                        <p className="font-semibold">
+                                          {format(
+                                            new Date(reservation.datePrise),
+                                            "dd/MM/yyyy HH:mm"
+                                          )}{" "}
+                                          -{" "}
+                                          {format(
+                                            new Date(reservation.dateRetour),
+                                            "dd/MM/yyyy HH:mm"
+                                          )}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-gray-600">
+                                          Durée
+                                        </p>
+                                        <p className="font-semibold">
+                                          {duration} jour(s)
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-gray-600">
+                                          Lieu de prise
+                                        </p>
+                                        <p className="font-semibold">
+                                          {reservation.lieuPrise}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-gray-600">
+                                          Lieu de retour
+                                        </p>
+                                        <p className="font-semibold">
+                                          {reservation.lieuRetour}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               </DialogContent>
                             </Dialog>
@@ -827,7 +1209,6 @@ const MesReservationsVehiculePage = () => {
                               </Button>
                             )}
 
-                            {/* NOUVEAU: Bouton Supprimer */}
                             {["terminee", "annulee"].includes(
                               reservation.statut
                             ) && (
@@ -844,17 +1225,21 @@ const MesReservationsVehiculePage = () => {
                               </Button>
                             )}
 
-                            <Button 
-                              size="sm" 
-                              className="ml-auto bg-blue-600 hover:bg-blue-700 text-white"
-                              onClick={() => {
-                                setSelectedReservationForItinerary(reservation);
-                                setShowItineraryModal(true);
-                              }}
-                            >
-                              <Navigation className="h-4 w-4 mr-2" />
-                              Voir l'itinéraire
-                            </Button>
+                            {reservation.vehicule.categorie !== "velo" && (
+                              <Button
+                                size="sm"
+                                className="ml-auto bg-blue-600 hover:bg-blue-700 text-white"
+                                onClick={() => {
+                                  setSelectedReservationForItinerary(
+                                    reservation
+                                  );
+                                  setShowItineraryModal(true);
+                                }}
+                              >
+                                <Navigation className="h-4 w-4 mr-2" />
+                                Itinéraire
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -870,8 +1255,8 @@ const MesReservationsVehiculePage = () => {
                     Aucune réservation trouvée
                   </h3>
                   <p className="text-gray-500 mb-4">
-                    {searchTerm
-                      ? "Aucune réservation ne correspond à votre recherche"
+                    {searchTerm || selectedCategory !== "tous"
+                      ? "Aucune réservation ne correspond à vos critères"
                       : "Vous n'avez pas encore de réservation de véhicule"}
                   </p>
                   <Button
@@ -908,11 +1293,7 @@ const MesReservationsVehiculePage = () => {
                       >
                         Aujourd'hui
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={nextMonth}
-                      >
+                      <Button variant="outline" size="sm" onClick={nextMonth}>
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
@@ -920,7 +1301,6 @@ const MesReservationsVehiculePage = () => {
 
                   {/* Grille du calendrier */}
                   <div className="grid grid-cols-7 gap-2">
-                    {/* En-têtes des jours */}
                     {weekDays.map((day) => (
                       <div
                         key={day}
@@ -930,14 +1310,12 @@ const MesReservationsVehiculePage = () => {
                       </div>
                     ))}
 
-                    {/* Jours du calendrier */}
                     {calendarDays.map((day, index) => {
                       const reservationsForDay = day
                         ? getReservationsForDate(day)
                         : [];
                       const isToday =
-                        day &&
-                        day.toDateString() === new Date().toDateString();
+                        day && day.toDateString() === new Date().toDateString();
                       const isCurrentMonth =
                         day && day.getMonth() === currentDate.getMonth();
 
@@ -968,7 +1346,6 @@ const MesReservationsVehiculePage = () => {
                                 {day.getDate()}
                               </div>
 
-                              {/* Réservations du jour */}
                               <div className="space-y-1">
                                 {reservationsForDay.slice(0, 2).map((res) => (
                                   <Dialog key={res.id}>
@@ -977,9 +1354,16 @@ const MesReservationsVehiculePage = () => {
                                         className={`text-xs p-1 rounded cursor-pointer truncate ${
                                           statusConfig[res.statut]?.color
                                         } text-white hover:opacity-80 transition-opacity`}
-                                        title={`${res.vehicule.marque} ${res.vehicule.modele}`}
+                                        title={`${res.vehicule.marque} ${res.vehicule.modele} (${res.vehicule.categorie})`}
                                       >
-                                        {res.vehicule.marque}
+                                        <div className="flex items-center gap-1">
+                                          {getCategoryIcon(
+                                            res.vehicule.categorie
+                                          )}
+                                          <span className="truncate">
+                                            {res.vehicule.marque}
+                                          </span>
+                                        </div>
                                       </div>
                                     </DialogTrigger>
                                     <DialogContent className="max-w-2xl">
@@ -990,6 +1374,14 @@ const MesReservationsVehiculePage = () => {
                                       </DialogHeader>
                                       <div className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <Label className="text-gray-500 text-sm">
+                                              Catégorie
+                                            </Label>
+                                            <p className="font-semibold capitalize">
+                                              {res.vehicule.categorie}
+                                            </p>
+                                          </div>
                                           <div>
                                             <Label className="text-gray-500 text-sm">
                                               Véhicule
@@ -1004,15 +1396,11 @@ const MesReservationsVehiculePage = () => {
                                               Statut
                                             </Label>
                                             <Badge
-                                              className={
-                                                statusConfig[res.statut]
-                                                  ?.color + " text-white"
-                                              }
+                                              className={`${
+                                                statusConfig[res.statut]?.color
+                                              } text-white`}
                                             >
-                                              {
-                                                statusConfig[res.statut]
-                                                  ?.label
-                                              }
+                                              {statusConfig[res.statut]?.label}
                                             </Badge>
                                           </div>
                                           <div>
@@ -1091,11 +1479,14 @@ const MesReservationsVehiculePage = () => {
               Laisser un avis pour {selectedReservation?.vehicule.marque}{" "}
               {selectedReservation?.vehicule.modele}
             </DialogTitle>
+            <DialogDescription>
+              Partager votre expérience avec ce{" "}
+              {selectedReservation?.vehicule.categorie}
+            </DialogDescription>
           </DialogHeader>
 
           {selectedReservation && (
             <div className="space-y-6">
-              {/* Note */}
               <div>
                 <Label className="block mb-2">Note générale</Label>
                 <div className="flex gap-1">
@@ -1106,7 +1497,7 @@ const MesReservationsVehiculePage = () => {
                       onClick={() =>
                         setReviewForm({ ...reviewForm, rating: star })
                       }
-                      className="text-2xl"
+                      className="text-2xl hover:scale-110 transition-transform"
                     >
                       {star <= reviewForm.rating ? "★" : "☆"}
                     </button>
@@ -1114,7 +1505,6 @@ const MesReservationsVehiculePage = () => {
                 </div>
               </div>
 
-              {/* Titre */}
               <div>
                 <Label>Titre de votre avis *</Label>
                 <Input
@@ -1122,11 +1512,10 @@ const MesReservationsVehiculePage = () => {
                   onChange={(e) =>
                     setReviewForm({ ...reviewForm, titre: e.target.value })
                   }
-                  placeholder="Ex: Excellent véhicule, agence sérieuse"
+                  placeholder={`Ex: Excellent ${selectedReservation.vehicule.categorie}, prestataire sérieux`}
                 />
               </div>
 
-              {/* Commentaire */}
               <div>
                 <Label>Commentaire détaillé *</Label>
                 <Textarea
@@ -1137,17 +1526,16 @@ const MesReservationsVehiculePage = () => {
                       commentaire: e.target.value,
                     })
                   }
-                  placeholder="Décrivez votre expérience avec ce véhicule et l'agence..."
+                  placeholder={`Décrivez votre expérience avec ce ${selectedReservation.vehicule.categorie}...`}
                   rows={4}
                 />
               </div>
 
-              {/* Points positifs/négatifs */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Points positifs (optionnel)</Label>
                   <Textarea
-                    placeholder="Ex: Véhicule propre, accueil chaleureux..."
+                    placeholder={`Ex: ${selectedReservation.vehicule.categorie} en bon état, accueil chaleureux...`}
                     rows={3}
                     value={reviewForm.avantages.join(", ")}
                     onChange={(e) =>
@@ -1176,7 +1564,6 @@ const MesReservationsVehiculePage = () => {
                 </div>
               </div>
 
-              {/* Recommandation */}
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -1188,10 +1575,11 @@ const MesReservationsVehiculePage = () => {
                       recommandation: e.target.checked,
                     })
                   }
-                  className="h-4 w-4"
+                  className="h-4 w-4 rounded border-gray-300 text-[#556B2F] focus:ring-[#556B2F]"
                 />
-                <Label htmlFor="recommandation">
-                  Je recommande ce véhicule et cette agence
+                <Label htmlFor="recommandation" className="text-sm">
+                  Je recommande ce {selectedReservation.vehicule.categorie} et
+                  ce prestataire
                 </Label>
               </div>
 
@@ -1202,7 +1590,12 @@ const MesReservationsVehiculePage = () => {
                 >
                   Annuler
                 </Button>
-                <Button onClick={handleSubmitReview}>Publier l'avis</Button>
+                <Button
+                  onClick={handleSubmitReview}
+                  className="bg-[#556B2F] hover:bg-[#6B8E23]"
+                >
+                  Publier l'avis
+                </Button>
               </div>
             </div>
           )}

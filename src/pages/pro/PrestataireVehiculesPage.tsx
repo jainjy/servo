@@ -34,6 +34,7 @@ import {
   Loader2,
   AlertTriangle,
   FileText,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -241,6 +242,39 @@ const ContractDocument = ({ reservation }) => (
       {/* Véhicule */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>VÉHICULE LOUÉ</Text>
+        {/* Catégorie */}
+        <View style={styles.row}>
+          <Text style={styles.label}>Catégorie :</Text>
+          <Text style={styles.value}>
+            {reservation.vehicule.categorie?.toUpperCase() || "VOITURE"}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Type :</Text>
+          <Text style={styles.value}>{reservation.vehicule.typeVehicule}</Text>
+        </View>
+
+        {/* Spécificités selon la catégorie */}
+        {reservation.vehicule.categorie === "moto" &&
+          reservation.vehicule.cylindree && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Cylindrée :</Text>
+              <Text style={styles.value}>
+                {reservation.vehicule.cylindree} cm³
+              </Text>
+            </View>
+          )}
+
+        {reservation.vehicule.categorie === "velo" && (
+          <View style={styles.row}>
+            <Text style={styles.label}>Type vélo :</Text>
+            <Text style={styles.value}>
+              {reservation.vehicule.typeVelo}
+              {reservation.vehicule.assistanceElec ? " (Électrique)" : ""}
+            </Text>
+          </View>
+        )}
+
         <View style={styles.row}>
           <Text style={styles.label}>Marque / Modèle :</Text>
           <Text style={styles.value}>
@@ -252,10 +286,6 @@ const ContractDocument = ({ reservation }) => (
           <Text style={styles.value}>
             {reservation.vehicule.immatriculation || "Non assignée"}
           </Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Catégorie :</Text>
-          <Text style={styles.value}>{reservation.vehicule.typeVehicule}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Carburant :</Text>
@@ -368,7 +398,7 @@ const PrestataireVehiculesPage = () => {
   const [showEditVehicule, setShowEditVehicule] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showReservationDetails, setShowReservationDetails] = useState(false);
-  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false); // NOUVEAU
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false);
   const [selectedVehicule, setSelectedVehicule] = useState(null);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -377,7 +407,7 @@ const PrestataireVehiculesPage = () => {
   const [existingImages, setExistingImages] = useState([]);
   const { user } = useAuth();
 
-  // NOUVEAU: Formulaire de confirmation de paiement
+  // Formulaire de confirmation de paiement
   const [paymentForm, setPaymentForm] = useState({
     montant: 0,
     methode: "virement",
@@ -386,14 +416,27 @@ const PrestataireVehiculesPage = () => {
     notes: "",
   });
 
+  // Formulaire véhicule avec les nouvelles catégories
   const [vehiculeForm, setVehiculeForm] = useState({
+    // Champs existants
     marque: "",
     modele: "",
     annee: new Date().getFullYear(),
     immatriculation: "",
     couleur: "",
     puissance: "",
+
+    // NOUVEAUX CHAMPS CATÉGORIE
+    categorie: "voiture", // Par défaut
     typeVehicule: "economique",
+
+    // Champs spécifiques moto/vélo
+    cylindree: "",
+    typeVelo: "vtt",
+    assistanceElec: false,
+    poids: "",
+
+    // Champs existants
     carburant: "essence",
     transmission: "manuelle",
     places: 5,
@@ -408,11 +451,10 @@ const PrestataireVehiculesPage = () => {
     prixMois: 1000,
     kilometrageInclus: "300 km/jour",
     caution: 500,
-    equipements: {},
-    caracteristiques: [],
     description: "",
-    agence: "",
+    agence: user?.companyName || user?.commercialName || "",
     conditionsLocation: "",
+    disponible: true,
   });
 
   const [stats, setStats] = useState({
@@ -424,18 +466,53 @@ const PrestataireVehiculesPage = () => {
     reservationsMois: 0,
     revenuMois: 0,
     clientsActifs: 0,
+    statsParCategorie: {},
   });
 
   // Types et options
-  const typesVehicules = [
-    { id: "economique", label: "Économique", icon: Car },
-    { id: "compacte", label: "Compacte", icon: Car },
-    { id: "berline", label: "Berline", icon: Car },
-    { id: "suv", label: "SUV & 4x4", icon: Car },
-    { id: "luxe", label: "Luxe & Premium", icon: Car },
-    { id: "utilitaire", label: "Utilitaire", icon: Package },
+  const categoriesVehicules = [
+    { id: "voiture", label: "Voiture", icon: Car },
     { id: "camion", label: "Camion", icon: Package },
-    { id: "minibus", label: "Minibus", icon: Users },
+    { id: "moto", label: "Moto", icon: Car },
+    { id: "velo", label: "Vélo", icon: Car },
+  ];
+
+  // Types de véhicules selon la catégorie
+  const typesVehicules = [
+    { id: "economique", label: "Économique", icon: Car, categorie: "voiture" },
+    { id: "compacte", label: "Compacte", icon: Car, categorie: "voiture" },
+    { id: "berline", label: "Berline", icon: Car, categorie: "voiture" },
+    { id: "suv", label: "SUV & 4x4", icon: Car, categorie: "voiture" },
+    { id: "luxe", label: "Luxe & Premium", icon: Car, categorie: "voiture" },
+    {
+      id: "utilitaire",
+      label: "Utilitaire",
+      icon: Package,
+      categorie: "voiture",
+    },
+    { id: "minibus", label: "Minibus", icon: Users, categorie: "voiture" },
+  ];
+
+  const typesCamion = [
+    { id: "camionnette", label: "Camionnette", icon: Package },
+    { id: "camion", label: "Camion", icon: Package },
+    { id: "poids_lourd", label: "Poids lourd", icon: Package },
+  ];
+
+  const typesMoto = [
+    { id: "sportive", label: "Sportive", icon: Car },
+    { id: "routiere", label: "Routière", icon: Car },
+    { id: "custom", label: "Custom", icon: Car },
+    { id: "trail", label: "Trail", icon: Car },
+    { id: "scooter", label: "Scooter", icon: Car },
+  ];
+
+  const typesVelo = [
+    { id: "vtt", label: "VTT", icon: Car },
+    { id: "vtc", label: "VTC", icon: Car },
+    { id: "route", label: "Route", icon: Car },
+    { id: "electrique", label: "Électrique", icon: Car },
+    { id: "ville", label: "Ville", icon: Car },
   ];
 
   const carburants = [
@@ -443,11 +520,13 @@ const PrestataireVehiculesPage = () => {
     { id: "diesel", label: "Diesel", icon: Fuel },
     { id: "electrique", label: "Électrique", icon: Fuel },
     { id: "hybride", label: "Hybride", icon: Fuel },
+    { id: "gpl", label: "GPL", icon: Fuel },
   ];
 
   const transmissions = [
     { id: "manuelle", label: "Manuelle", icon: Cog },
     { id: "automatique", label: "Automatique", icon: Cog },
+    { id: "semi_automatique", label: "Semi-automatique", icon: Cog },
   ];
 
   const villes = [
@@ -487,6 +566,22 @@ const PrestataireVehiculesPage = () => {
       color: "bg-red-100 text-red-800",
       icon: XCircle,
     },
+  };
+
+  // Fonction pour obtenir les types selon la catégorie
+  const getTypesByCategorie = (categorie) => {
+    switch (categorie) {
+      case "voiture":
+        return typesVehicules;
+      case "camion":
+        return typesCamion;
+      case "moto":
+        return typesMoto;
+      case "velo":
+        return typesVelo;
+      default:
+        return typesVehicules;
+    }
   };
 
   useEffect(() => {
@@ -554,6 +649,16 @@ const PrestataireVehiculesPage = () => {
           100
         : 0;
 
+    // Statistiques par catégorie
+    const statsParCategorie = vehiculesList.reduce((acc, vehicule) => {
+      const categorie = vehicule.categorie || "voiture";
+      if (!acc[categorie]) {
+        acc[categorie] = 0;
+      }
+      acc[categorie]++;
+      return acc;
+    }, {});
+
     setStats({
       totalVehicules,
       disponibles,
@@ -563,16 +668,16 @@ const PrestataireVehiculesPage = () => {
       reservationsMois,
       revenuMois,
       clientsActifs: clientsUniques,
+      statsParCategorie,
     });
   };
 
   const handleAddVehicule = async () => {
     try {
-      // Valider les champs requis
+      // Validation des champs obligatoires
       if (
         !vehiculeForm.marque ||
         !vehiculeForm.modele ||
-        !vehiculeForm.immatriculation ||
         !vehiculeForm.ville ||
         !vehiculeForm.prixJour
       ) {
@@ -580,7 +685,13 @@ const PrestataireVehiculesPage = () => {
         return;
       }
 
-      // Valider les images
+      // Validation de l'immatriculation (sauf pour les vélos)
+      if (vehiculeForm.categorie !== "velo" && !vehiculeForm.immatriculation) {
+        toast.error("Veuillez saisir l'immatriculation");
+        return;
+      }
+
+      // Validation des images
       if (newImages.length === 0) {
         toast.error("Veuillez ajouter au moins une image du véhicule");
         return;
@@ -594,16 +705,15 @@ const PrestataireVehiculesPage = () => {
 
       // Ajouter les champs texte
       Object.keys(vehiculeForm).forEach((key) => {
-        if (key !== "equipements" && key !== "caracteristiques") {
+        if (key !== "assistanceElec") {
           formData.append(key, vehiculeForm[key]);
         }
       });
 
-      // Ajouter les champs JSON
-      formData.append("equipements", JSON.stringify(vehiculeForm.equipements));
+      // Gérer le champ boolean séparément
       formData.append(
-        "caracteristiques",
-        JSON.stringify(vehiculeForm.caracteristiques)
+        "assistanceElec",
+        vehiculeForm.assistanceElec ? "true" : "false"
       );
 
       // Ajouter les images
@@ -646,26 +756,31 @@ const PrestataireVehiculesPage = () => {
       setIsSubmitting(true);
       setUploadingImages(true);
 
+      // Validation de l'immatriculation (sauf pour les vélos)
+      if (vehiculeForm.categorie !== "velo" && !vehiculeForm.immatriculation) {
+        toast.error("Veuillez saisir l'immatriculation");
+        return;
+      }
+
       // Créer FormData pour l'envoi des fichiers
       const formData = new FormData();
 
       // Ajouter les champs texte
       Object.keys(vehiculeForm).forEach((key) => {
-        if (key !== "equipements" && key !== "caracteristiques") {
+        if (key !== "assistanceElec") {
           formData.append(key, vehiculeForm[key]);
         }
       });
 
-      // Ajouter les champs JSON
-      formData.append("equipements", JSON.stringify(vehiculeForm.equipements));
+      // Gérer le champ boolean séparément
       formData.append(
-        "caracteristiques",
-        JSON.stringify(vehiculeForm.caracteristiques)
+        "assistanceElec",
+        vehiculeForm.assistanceElec ? "true" : "false"
       );
 
       // Ajouter les images existantes (URLs)
       if (existingImages && existingImages.length > 0) {
-        formData.append("images", JSON.stringify(existingImages));
+        formData.append("existingImages", JSON.stringify(existingImages));
       }
 
       // Ajouter les nouvelles images
@@ -823,7 +938,12 @@ const PrestataireVehiculesPage = () => {
       immatriculation: "",
       couleur: "",
       puissance: "",
+      categorie: "voiture",
       typeVehicule: "economique",
+      cylindree: "",
+      typeVelo: "vtt",
+      assistanceElec: false,
+      poids: "",
       carburant: "essence",
       transmission: "manuelle",
       places: 5,
@@ -838,11 +958,10 @@ const PrestataireVehiculesPage = () => {
       prixMois: 1000,
       kilometrageInclus: "300 km/jour",
       caution: 500,
-      equipements: {},
-      caracteristiques: [],
       description: "",
       agence: user?.companyName || user?.commercialName || "",
       conditionsLocation: "",
+      disponible: true,
     });
     setNewImages([]);
     setExistingImages([]);
@@ -856,12 +975,17 @@ const PrestataireVehiculesPage = () => {
       annee: vehicule.annee,
       immatriculation: vehicule.immatriculation,
       couleur: vehicule.couleur,
-      puissance: vehicule.puissance,
-      typeVehicule: vehicule.typeVehicule,
+      puissance: vehicule.puissance || "",
+      categorie: vehicule.categorie || "voiture",
+      typeVehicule: vehicule.typeVehicule || "economique",
+      cylindree: vehicule.cylindree || "",
+      typeVelo: vehicule.typeVelo || "vtt",
+      assistanceElec: vehicule.assistanceElec || false,
+      poids: vehicule.poids || "",
       carburant: vehicule.carburant,
       transmission: vehicule.transmission,
-      places: vehicule.places,
-      portes: vehicule.portes,
+      places: vehicule.places || 5,
+      portes: vehicule.portes || 5,
       volumeCoffre: vehicule.volumeCoffre || "",
       ville: vehicule.ville,
       adresse: vehicule.adresse || "",
@@ -870,20 +994,17 @@ const PrestataireVehiculesPage = () => {
       prixJour: vehicule.prixJour,
       prixSemaine: vehicule.prixSemaine || 300,
       prixMois: vehicule.prixMois || 1000,
-      kilometrageInclus: vehicule.kilometrageInclus,
+      kilometrageInclus: vehicule.kilometrageInclus || "300 km/jour",
       caution: vehicule.caution,
-      equipements: vehicule.equipements || {},
-      caracteristiques: vehicule.caracteristiques || [],
       description: vehicule.description || "",
       agence:
         vehicule.agence || user?.companyName || user?.commercialName || "",
       conditionsLocation: vehicule.conditionsLocation || "",
+      disponible: vehicule.disponible ?? true,
     });
 
-    // Conserver les images existantes (URLs)
     setExistingImages(vehicule.images || []);
     setNewImages([]);
-
     setShowEditVehicule(true);
   };
 
@@ -952,7 +1073,11 @@ const PrestataireVehiculesPage = () => {
     (vehicule) =>
       vehicule.marque.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicule.modele.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicule.immatriculation.toLowerCase().includes(searchTerm.toLowerCase())
+      vehicule.immatriculation
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      vehicule.categorie?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicule.typeVehicule?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const renderImagePreview = (image, index, isNew = false) => {
@@ -1209,7 +1334,7 @@ const PrestataireVehiculesPage = () => {
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
-                      placeholder="Rechercher un véhicule par marque, modèle ou immatriculation..."
+                      placeholder="Rechercher un véhicule par marque, modèle, catégorie ou type..."
                       className="pl-10 bg-gray-50 border-gray-200"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -1261,6 +1386,10 @@ const PrestataireVehiculesPage = () => {
                           </CardTitle>
                           <CardDescription className="flex items-center gap-2">
                             <span>{vehicule.annee}</span>
+                            <span className="text-gray-400">•</span>
+                            <span className="capitalize">
+                              {vehicule.categorie}
+                            </span>
                             <span className="text-gray-400">•</span>
                             <span className="capitalize">
                               {vehicule.carburant}
@@ -1342,27 +1471,55 @@ const PrestataireVehiculesPage = () => {
                           </div>
                         </div>
 
+                        {/* Spécificités selon la catégorie */}
+                        {vehicule.categorie === "moto" &&
+                          vehicule.cylindree && (
+                            <div className="flex items-center gap-2 text-gray-600 text-sm">
+                              <Cog className="h-4 w-4" />
+                              <span>Cylindrée: {vehicule.cylindree} cm³</span>
+                            </div>
+                          )}
+
+                        {vehicule.categorie === "velo" && (
+                          <div className="flex items-center gap-2 text-gray-600 text-sm">
+                            <span>Type: {vehicule.typeVelo}</span>
+                            {vehicule.assistanceElec && (
+                              <Badge variant="outline" className="text-xs">
+                                Électrique
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           <div className="flex items-center gap-2 text-gray-600">
                             <MapPin className="h-4 w-4" />
                             <span>{vehicule.ville}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Fuel className="h-4 w-4" />
-                            <span className="capitalize">
-                              {vehicule.carburant}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Cog className="h-4 w-4" />
-                            <span className="capitalize">
-                              {vehicule.transmission}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Users className="h-4 w-4" />
-                            <span>{vehicule.places} places</span>
-                          </div>
+                          {(vehicule.categorie === "voiture" ||
+                            vehicule.categorie === "camion") && (
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <Fuel className="h-4 w-4" />
+                              <span className="capitalize">
+                                {vehicule.carburant}
+                              </span>
+                            </div>
+                          )}
+                          {(vehicule.categorie === "voiture" ||
+                            vehicule.categorie === "camion") && (
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <Cog className="h-4 w-4" />
+                              <span className="capitalize">
+                                {vehicule.transmission}
+                              </span>
+                            </div>
+                          )}
+                          {vehicule.categorie === "voiture" && (
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <Users className="h-4 w-4" />
+                              <span>{vehicule.places} places</span>
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex items-center justify-between pt-2">
@@ -1376,7 +1533,7 @@ const PrestataireVehiculesPage = () => {
                             </span>
                           </div>
                           <div className="text-sm text-gray-500">
-                            {vehicule._count?.reservations || 0} location(s)
+                            {vehicule.nombreReservations || 0} location(s)
                           </div>
                         </div>
                       </div>
@@ -1534,6 +1691,10 @@ const PrestataireVehiculesPage = () => {
                               <div className="text-xs text-gray-500">
                                 {reservation.vehicule?.annee}
                               </div>
+                              <div className="text-xs text-gray-500">
+                                {reservation.vehicule?.categorie} •{" "}
+                                {reservation.vehicule?.typeVehicule}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1613,7 +1774,6 @@ const PrestataireVehiculesPage = () => {
                             <FileText className="h-4 w-4 mr-2" />
                             Contrat
                           </Button>
-                          {/* NOUVEAU BOUTON: Confirmation de paiement */}
                           {reservation.statutPaiement !== "paye" && (
                             <Button
                               className="flex-1 bg-green-600 hover:bg-green-700 text-white"
@@ -1748,15 +1908,197 @@ const PrestataireVehiculesPage = () => {
           </DialogHeader>
 
           <div className="space-y-6">
-            {/* Section Informations générales */}
+            {/* Section Catégorie */}
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-semibold text-blue-800 flex items-center gap-2 mb-2">
                 <Car className="h-5 w-5" />
-                Informations générales
+                Catégorie et type
               </h3>
               <p className="text-sm text-blue-600">
                 Champs marqués d'un * sont obligatoires
               </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Catégorie *</Label>
+                <Select
+                  value={vehiculeForm.categorie}
+                  onValueChange={(value) => {
+                    setVehiculeForm({
+                      ...vehiculeForm,
+                      categorie: value,
+                      typeVehicule:
+                        value === "voiture"
+                          ? "economique"
+                          : value === "moto"
+                          ? "sportive"
+                          : value === "velo"
+                          ? "vtt"
+                          : "camionnette",
+                    });
+                  }}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoriesVehicules.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Type *</Label>
+                <Select
+                  value={vehiculeForm.typeVehicule}
+                  onValueChange={(value) =>
+                    setVehiculeForm({ ...vehiculeForm, typeVehicule: value })
+                  }
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getTypesByCategorie(vehiculeForm.categorie).map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Champs spécifiques moto */}
+            {vehiculeForm.categorie === "moto" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="cylindree">Cylindrée (cm³)</Label>
+                  <Input
+                    id="cylindree"
+                    type="number"
+                    value={vehiculeForm.cylindree}
+                    onChange={(e) =>
+                      setVehiculeForm({
+                        ...vehiculeForm,
+                        cylindree: e.target.value,
+                      })
+                    }
+                    placeholder="Ex: 600, 1000..."
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Champs spécifiques vélo */}
+            {vehiculeForm.categorie === "velo" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="typeVelo">Type de vélo</Label>
+                  <Select
+                    value={vehiculeForm.typeVelo}
+                    onValueChange={(value) =>
+                      setVehiculeForm({ ...vehiculeForm, typeVelo: value })
+                    }
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typesVelo.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="poids">Poids (kg)</Label>
+                  <Input
+                    id="poids"
+                    type="number"
+                    step="0.1"
+                    value={vehiculeForm.poids}
+                    onChange={(e) =>
+                      setVehiculeForm({
+                        ...vehiculeForm,
+                        poids: e.target.value,
+                      })
+                    }
+                    placeholder="Ex: 12.5"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="assistanceElec"
+                    checked={vehiculeForm.assistanceElec}
+                    onCheckedChange={(checked) =>
+                      setVehiculeForm({
+                        ...vehiculeForm,
+                        assistanceElec: checked,
+                      })
+                    }
+                  />
+                  <Label htmlFor="assistanceElec">Assistance électrique</Label>
+                </div>
+              </div>
+            )}
+
+            {/* Champs pour voitures et camions */}
+            {(vehiculeForm.categorie === "voiture" ||
+              vehiculeForm.categorie === "camion") && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="places">Nombre de places</Label>
+                  <Input
+                    id="places"
+                    type="number"
+                    value={vehiculeForm.places}
+                    onChange={(e) =>
+                      setVehiculeForm({
+                        ...vehiculeForm,
+                        places: parseInt(e.target.value) || 5,
+                      })
+                    }
+                    min="1"
+                    className="mt-1"
+                  />
+                </div>
+                {vehiculeForm.categorie === "voiture" && (
+                  <div>
+                    <Label htmlFor="portes">Nombre de portes</Label>
+                    <Input
+                      id="portes"
+                      type="number"
+                      value={vehiculeForm.portes}
+                      onChange={(e) =>
+                        setVehiculeForm({
+                          ...vehiculeForm,
+                          portes: parseInt(e.target.value) || 5,
+                        })
+                      }
+                      min="1"
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Section Informations générales */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
+                <Car className="h-5 w-5" />
+                Informations générales
+              </h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1794,7 +2136,7 @@ const PrestataireVehiculesPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="immatriculation" className="required">
-                  Immatriculation *
+                  Immatriculation {vehiculeForm.categorie !== "velo" && "*"}
                 </Label>
                 <Input
                   id="immatriculation"
@@ -1808,7 +2150,15 @@ const PrestataireVehiculesPage = () => {
                   placeholder="Ex: AB-123-CD"
                   className="mt-1 uppercase"
                 />
-                <p className="text-xs text-gray-500 mt-1">Format: XX-123-XX</p>
+                {vehiculeForm.categorie !== "velo" ? (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Format: XX-123-XX
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Optionnel pour les vélos
+                  </p>
+                )}
               </div>
 
               <div>
@@ -1831,78 +2181,83 @@ const PrestataireVehiculesPage = () => {
               </div>
             </div>
 
-            {/* Section Caractéristiques techniques */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
-                <Cog className="h-5 w-5" />
-                Caractéristiques techniques
-              </h3>
-            </div>
+            {/* Caractéristiques techniques pour voitures et camions */}
+            {(vehiculeForm.categorie === "voiture" ||
+              vehiculeForm.categorie === "camion") && (
+              <>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
+                    <Cog className="h-5 w-5" />
+                    Caractéristiques techniques
+                  </h3>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label>Type de véhicule</Label>
-                <Select
-                  value={vehiculeForm.typeVehicule}
-                  onValueChange={(value) =>
-                    setVehiculeForm({ ...vehiculeForm, typeVehicule: value })
-                  }
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {typesVehicules.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Carburant</Label>
+                    <Select
+                      value={vehiculeForm.carburant}
+                      onValueChange={(value) =>
+                        setVehiculeForm({ ...vehiculeForm, carburant: value })
+                      }
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {carburants.map((carburant) => (
+                          <SelectItem key={carburant.id} value={carburant.id}>
+                            {carburant.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div>
-                <Label>Carburant</Label>
-                <Select
-                  value={vehiculeForm.carburant}
-                  onValueChange={(value) =>
-                    setVehiculeForm({ ...vehiculeForm, carburant: value })
-                  }
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {carburants.map((carburant) => (
-                      <SelectItem key={carburant.id} value={carburant.id}>
-                        {carburant.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  {vehiculeForm.categorie === "voiture" && (
+                    <div>
+                      <Label>Transmission</Label>
+                      <Select
+                        value={vehiculeForm.transmission}
+                        onValueChange={(value) =>
+                          setVehiculeForm({
+                            ...vehiculeForm,
+                            transmission: value,
+                          })
+                        }
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {transmissions.map((trans) => (
+                            <SelectItem key={trans.id} value={trans.id}>
+                              {trans.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
-              <div>
-                <Label>Transmission</Label>
-                <Select
-                  value={vehiculeForm.transmission}
-                  onValueChange={(value) =>
-                    setVehiculeForm({ ...vehiculeForm, transmission: value })
-                  }
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {transmissions.map((trans) => (
-                      <SelectItem key={trans.id} value={trans.id}>
-                        {trans.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                  <div>
+                    <Label htmlFor="volumeCoffre">Volume du coffre (L)</Label>
+                    <Input
+                      id="volumeCoffre"
+                      value={vehiculeForm.volumeCoffre}
+                      onChange={(e) =>
+                        setVehiculeForm({
+                          ...vehiculeForm,
+                          volumeCoffre: e.target.value,
+                        })
+                      }
+                      placeholder="Ex: 450"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Section Localisation et prix */}
             <div className="bg-green-50 p-4 rounded-lg">
@@ -1967,17 +2322,17 @@ const PrestataireVehiculesPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="kilometrageInclus">Kilométrage inclus</Label>
+                <Label htmlFor="adresse">Adresse</Label>
                 <Input
-                  id="kilometrageInclus"
-                  value={vehiculeForm.kilometrageInclus}
+                  id="adresse"
+                  value={vehiculeForm.adresse}
                   onChange={(e) =>
                     setVehiculeForm({
                       ...vehiculeForm,
-                      kilometrageInclus: e.target.value,
+                      adresse: e.target.value,
                     })
                   }
-                  placeholder="Ex: 300 km/jour"
+                  placeholder="Adresse complète"
                   className="mt-1"
                 />
               </div>
@@ -2142,7 +2497,7 @@ const PrestataireVehiculesPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Modification véhicule (similaire à l'ajout) */}
+      {/* Modal Modification véhicule */}
       <Dialog open={showEditVehicule} onOpenChange={setShowEditVehicule}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -2153,8 +2508,193 @@ const PrestataireVehiculesPage = () => {
           </DialogHeader>
 
           <div className="space-y-6">
+            {/* Section Catégorie */}
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-semibold text-blue-800 flex items-center gap-2 mb-2">
+                <Car className="h-5 w-5" />
+                Catégorie et type
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Catégorie *</Label>
+                <Select
+                  value={vehiculeForm.categorie}
+                  onValueChange={(value) => {
+                    setVehiculeForm({
+                      ...vehiculeForm,
+                      categorie: value,
+                      typeVehicule:
+                        value === "voiture"
+                          ? "economique"
+                          : value === "moto"
+                          ? "sportive"
+                          : value === "velo"
+                          ? "vtt"
+                          : "camionnette",
+                    });
+                  }}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoriesVehicules.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Type *</Label>
+                <Select
+                  value={vehiculeForm.typeVehicule}
+                  onValueChange={(value) =>
+                    setVehiculeForm({ ...vehiculeForm, typeVehicule: value })
+                  }
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getTypesByCategorie(vehiculeForm.categorie).map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Champs spécifiques moto */}
+            {vehiculeForm.categorie === "moto" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-cylindree">Cylindrée (cm³)</Label>
+                  <Input
+                    id="edit-cylindree"
+                    type="number"
+                    value={vehiculeForm.cylindree}
+                    onChange={(e) =>
+                      setVehiculeForm({
+                        ...vehiculeForm,
+                        cylindree: e.target.value,
+                      })
+                    }
+                    placeholder="Ex: 600, 1000..."
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Champs spécifiques vélo */}
+            {vehiculeForm.categorie === "velo" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-typeVelo">Type de vélo</Label>
+                  <Select
+                    value={vehiculeForm.typeVelo}
+                    onValueChange={(value) =>
+                      setVehiculeForm({ ...vehiculeForm, typeVelo: value })
+                    }
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typesVelo.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="edit-poids">Poids (kg)</Label>
+                  <Input
+                    id="edit-poids"
+                    type="number"
+                    step="0.1"
+                    value={vehiculeForm.poids}
+                    onChange={(e) =>
+                      setVehiculeForm({
+                        ...vehiculeForm,
+                        poids: e.target.value,
+                      })
+                    }
+                    placeholder="Ex: 12.5"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="edit-assistanceElec"
+                    checked={vehiculeForm.assistanceElec}
+                    onCheckedChange={(checked) =>
+                      setVehiculeForm({
+                        ...vehiculeForm,
+                        assistanceElec: checked,
+                      })
+                    }
+                  />
+                  <Label htmlFor="edit-assistanceElec">
+                    Assistance électrique
+                  </Label>
+                </div>
+              </div>
+            )}
+
+            {/* Champs pour voitures et camions */}
+            {(vehiculeForm.categorie === "voiture" ||
+              vehiculeForm.categorie === "camion") && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-places">Nombre de places</Label>
+                  <Input
+                    id="edit-places"
+                    type="number"
+                    value={vehiculeForm.places}
+                    onChange={(e) =>
+                      setVehiculeForm({
+                        ...vehiculeForm,
+                        places: parseInt(e.target.value) || 5,
+                      })
+                    }
+                    min="1"
+                    className="mt-1"
+                  />
+                </div>
+                {vehiculeForm.categorie === "voiture" && (
+                  <div>
+                    <Label htmlFor="edit-portes">Nombre de portes</Label>
+                    <Input
+                      id="edit-portes"
+                      type="number"
+                      value={vehiculeForm.portes}
+                      onChange={(e) =>
+                        setVehiculeForm({
+                          ...vehiculeForm,
+                          portes: parseInt(e.target.value) || 5,
+                        })
+                      }
+                      min="1"
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Section Informations générales */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
                 <Car className="h-5 w-5" />
                 Informations générales
               </h3>
@@ -2195,7 +2735,7 @@ const PrestataireVehiculesPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="edit-immatriculation" className="required">
-                  Immatriculation *
+                  Immatriculation {vehiculeForm.categorie !== "velo" && "*"}
                 </Label>
                 <Input
                   id="edit-immatriculation"
@@ -2209,7 +2749,15 @@ const PrestataireVehiculesPage = () => {
                   placeholder="Ex: AB-123-CD"
                   className="mt-1 uppercase"
                 />
-                <p className="text-xs text-gray-500 mt-1">Format: XX-123-XX</p>
+                {vehiculeForm.categorie !== "velo" ? (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Format: XX-123-XX
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Optionnel pour les vélos
+                  </p>
+                )}
               </div>
 
               <div>
@@ -2267,130 +2815,87 @@ const PrestataireVehiculesPage = () => {
               </div>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
-                <Cog className="h-5 w-5" />
-                Caractéristiques techniques
-              </h3>
-            </div>
+            {/* Caractéristiques techniques pour voitures et camions */}
+            {(vehiculeForm.categorie === "voiture" ||
+              vehiculeForm.categorie === "camion") && (
+              <>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
+                    <Cog className="h-5 w-5" />
+                    Caractéristiques techniques
+                  </h3>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label>Type de véhicule</Label>
-                <Select
-                  value={vehiculeForm.typeVehicule}
-                  onValueChange={(value) =>
-                    setVehiculeForm({ ...vehiculeForm, typeVehicule: value })
-                  }
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {typesVehicules.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Carburant</Label>
+                    <Select
+                      value={vehiculeForm.carburant}
+                      onValueChange={(value) =>
+                        setVehiculeForm({ ...vehiculeForm, carburant: value })
+                      }
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {carburants.map((carburant) => (
+                          <SelectItem key={carburant.id} value={carburant.id}>
+                            {carburant.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div>
-                <Label>Carburant</Label>
-                <Select
-                  value={vehiculeForm.carburant}
-                  onValueChange={(value) =>
-                    setVehiculeForm({ ...vehiculeForm, carburant: value })
-                  }
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {carburants.map((carburant) => (
-                      <SelectItem key={carburant.id} value={carburant.id}>
-                        {carburant.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  {vehiculeForm.categorie === "voiture" && (
+                    <div>
+                      <Label>Transmission</Label>
+                      <Select
+                        value={vehiculeForm.transmission}
+                        onValueChange={(value) =>
+                          setVehiculeForm({
+                            ...vehiculeForm,
+                            transmission: value,
+                          })
+                        }
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {transmissions.map((trans) => (
+                            <SelectItem key={trans.id} value={trans.id}>
+                              {trans.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
-              <div>
-                <Label>Transmission</Label>
-                <Select
-                  value={vehiculeForm.transmission}
-                  onValueChange={(value) =>
-                    setVehiculeForm({ ...vehiculeForm, transmission: value })
-                  }
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {transmissions.map((trans) => (
-                      <SelectItem key={trans.id} value={trans.id}>
-                        {trans.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                  <div>
+                    <Label htmlFor="edit-volumeCoffre">
+                      Volume du coffre (L)
+                    </Label>
+                    <Input
+                      id="edit-volumeCoffre"
+                      value={vehiculeForm.volumeCoffre}
+                      onChange={(e) =>
+                        setVehiculeForm({
+                          ...vehiculeForm,
+                          volumeCoffre: e.target.value,
+                        })
+                      }
+                      placeholder="Ex: 450"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-places">Places</Label>
-                <Input
-                  id="edit-places"
-                  type="number"
-                  value={vehiculeForm.places}
-                  onChange={(e) =>
-                    setVehiculeForm({
-                      ...vehiculeForm,
-                      places: parseInt(e.target.value) || 5,
-                    })
-                  }
-                  min="1"
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="edit-portes">Portes</Label>
-                <Input
-                  id="edit-portes"
-                  type="number"
-                  value={vehiculeForm.portes}
-                  onChange={(e) =>
-                    setVehiculeForm({
-                      ...vehiculeForm,
-                      portes: parseInt(e.target.value) || 5,
-                    })
-                  }
-                  min="1"
-                  className="mt-1"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="edit-volumeCoffre">Volume du coffre (L)</Label>
-              <Input
-                id="edit-volumeCoffre"
-                value={vehiculeForm.volumeCoffre}
-                onChange={(e) =>
-                  setVehiculeForm({
-                    ...vehiculeForm,
-                    volumeCoffre: e.target.value,
-                  })
-                }
-                placeholder="Ex: 450"
-                className="mt-1"
-              />
-            </div>
-
+            {/* Section Localisation et prix */}
             <div className="bg-green-50 p-4 rounded-lg">
               <h3 className="font-semibold text-green-800 flex items-center gap-2 mb-2">
                 <MapPin className="h-5 w-5" />
@@ -2623,6 +3128,21 @@ const PrestataireVehiculesPage = () => {
               />
             </div>
 
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="edit-disponible"
+                checked={vehiculeForm.disponible}
+                onCheckedChange={(checked) =>
+                  setVehiculeForm({
+                    ...vehiculeForm,
+                    disponible: checked,
+                  })
+                }
+              />
+              <Label htmlFor="edit-disponible">Véhicule disponible</Label>
+            </div>
+
+            {/* Section Images */}
             <div className="bg-purple-50 p-4 rounded-lg">
               <h3 className="font-semibold text-purple-800 flex items-center gap-2 mb-2">
                 <ImageIcon className="h-5 w-5" />
@@ -2730,7 +3250,7 @@ const PrestataireVehiculesPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Statistiques détaillées (identique à l'original) */}
+      {/* Modal Statistiques détaillées */}
       <Dialog open={showStats} onOpenChange={setShowStats}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
@@ -2789,37 +3309,43 @@ const PrestataireVehiculesPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Répartition par type</CardTitle>
+                  <CardTitle>Répartition par catégorie</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {typesVehicules.map((type) => {
-                      const count = vehicules.filter(
-                        (v) => v.typeVehicule === type.id
-                      ).length;
-                      const percentage =
-                        vehicules.length > 0
-                          ? (count / vehicules.length) * 100
-                          : 0;
+                    {Object.entries(stats.statsParCategorie).map(
+                      ([categorie, count]) => {
+                        const categorieInfo = categoriesVehicules.find(
+                          (c) => c.id === categorie
+                        ) || { label: categorie };
+                        const percentage =
+                          stats.totalVehicules > 0
+                            ? (count / stats.totalVehicules) * 100
+                            : 0;
 
-                      return (
-                        <div
-                          key={type.id}
-                          className="flex items-center justify-between"
-                        >
-                          <span className="text-sm">{type.label}</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-32 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-blue-500 h-2 rounded-full"
-                                style={{ width: `${percentage}%` }}
-                              ></div>
+                        return (
+                          <div
+                            key={categorie}
+                            className="flex items-center justify-between"
+                          >
+                            <span className="text-sm">
+                              {categorieInfo.label}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-32 bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-blue-500 h-2 rounded-full"
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-sm font-medium">
+                                {count}
+                              </span>
                             </div>
-                            <span className="text-sm font-medium">{count}</span>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      }
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -2966,12 +3492,28 @@ const PrestataireVehiculesPage = () => {
                     </p>
                     <p className="text-sm text-gray-600">
                       {selectedReservation.vehicule?.annee} •{" "}
-                      {selectedReservation.vehicule?.immatriculation}
+                      {selectedReservation.vehicule?.immatriculation ||
+                        "Non assignée"}
                     </p>
                     <p className="text-sm text-gray-600 mt-2">
-                      {selectedReservation.vehicule?.typeVehicule} •{" "}
-                      {selectedReservation.vehicule?.carburant}
+                      {selectedReservation.vehicule?.categorie?.toUpperCase()} •{" "}
+                      {selectedReservation.vehicule?.typeVehicule}
                     </p>
+                    {selectedReservation.vehicule?.categorie === "moto" &&
+                      selectedReservation.vehicule?.cylindree && (
+                        <p className="text-sm text-gray-600">
+                          Cylindrée: {selectedReservation.vehicule.cylindree}{" "}
+                          cm³
+                        </p>
+                      )}
+                    {selectedReservation.vehicule?.categorie === "velo" && (
+                      <p className="text-sm text-gray-600">
+                        Type: {selectedReservation.vehicule.typeVelo}
+                        {selectedReservation.vehicule.assistanceElec
+                          ? " (Électrique)"
+                          : ""}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -3117,7 +3659,7 @@ const PrestataireVehiculesPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* NOUVEAU MODAL: Confirmation de paiement */}
+      {/* Modal Confirmation de paiement */}
       <Dialog
         open={showPaymentConfirmation}
         onOpenChange={setShowPaymentConfirmation}

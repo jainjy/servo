@@ -1,8 +1,37 @@
 import api from "../api";
 
 export const vehiculesApi = {
-  // Récupérer tous les véhicules avec filtres
+  // Récupérer tous les véhicules avec filtres (MIS À JOUR)
   getVehicules: (params) => api.get("/vehicules", { params }),
+
+  // Récupérer les statistiques (MIS À JOUR)
+  getStats: () => api.get("/vehicules/stats/global"),
+
+  // Créer un véhicule avec les nouveaux champs
+  createVehicule: (data) => {
+    const formData = new FormData();
+
+    // Ajouter les champs du formulaire
+    Object.keys(data).forEach((key) => {
+      if (key === "images" && Array.isArray(data[key])) {
+        data[key].forEach((file, index) => {
+          if (file instanceof File) {
+            formData.append(`image_${index}`, file);
+          }
+        });
+      } else if (key === "equipements" || key === "caracteristiques") {
+        formData.append(key, JSON.stringify(data[key]));
+      } else if (data[key] !== null && data[key] !== undefined) {
+        formData.append(key, data[key]);
+      }
+    });
+
+    return api.post("/vehicules", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 
   // Récupérer un véhicule par ID
   getVehiculeById: (id) => api.get(`/vehicules/${id}`),
@@ -44,17 +73,6 @@ export const vehiculesApi = {
   // Supprimer un avis
   deleteAvis: (id) => api.delete(`/avis-vehicules/${id}`),
 
-  // Statistiques globales
-  getStats: () => api.get("/vehicules/stats/global"),
-
-  // Créer un véhicule (avec FormData pour les images)
-  createVehicule: (formData) =>
-    api.post("/vehicules", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
-
   // Mettre à jour un véhicule (avec FormData pour les images)
   updateVehicule: (id, formData) =>
     api.put(`/vehicules/${id}`, formData, {
@@ -88,5 +106,8 @@ export const vehiculesApi = {
 
   // Confirmer manuellement un paiement
   confirmPayment: (reservationId, data) =>
-    api.put(`/reservations-vehicules/${reservationId}/confirmer-paiement`, data),
+    api.put(
+      `/reservations-vehicules/${reservationId}/confirmer-paiement`,
+      data
+    ),
 };
