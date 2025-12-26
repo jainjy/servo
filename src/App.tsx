@@ -217,6 +217,7 @@ import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
 import MesReservationsVehiculePage from "./pages/mon-compte/MesReservationsVehiculePage";
 import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
+import ProjetsPage from "./pages/ProjetsPage";
          
 
 
@@ -699,6 +700,7 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
+                    <Route path="projet" element={<ProjetsPage />} />
                     <Route
                       path="vehicules"
                       element={<PrestataireVehiculesPage />}
