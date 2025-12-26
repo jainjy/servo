@@ -26,6 +26,7 @@ import {
   MessageSquare,
   Briefcase,
   Car,
+  ChevronRight,
 } from "lucide-react";
 // Import des icônes
 import {
@@ -33,6 +34,7 @@ import {
   LogOut,
   User as UserIcon,
   ChevronDown,
+  ChevronLeft,
   Calendar,
   CreditCard,
   CheckCheck,
@@ -78,6 +80,7 @@ const Header = () => {
   // États pour les notifications
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Array<any>>([]);
   const [notifLoading, setNotifLoading] = useState(false);
@@ -675,13 +678,6 @@ const Header = () => {
         //   image:
         //     "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         // },
-        {
-          title: "Conseil",
-          description: "Experts en audit & résolution de conflits",
-          href: "/conseil",
-          image:
-            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
-        },
         // {
         // title: "Aides & levées de fonds",
         // description: " Soutien financier pour entreprises",
@@ -696,13 +692,6 @@ const Header = () => {
         // image:
         // "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg",
         // },
-        {
-          title: "Accompagnement",
-          description: "Accompagnement juridique pour entreprises",
-          href: "/accompagnement",
-          image:
-            "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
-        }, // NOUVELLES CATÉGORIES AJOUTÉES
         {
           title: "Travaux & Matériaux",
           description: "Construction, rénovation et fournitures",
@@ -727,9 +716,26 @@ const Header = () => {
         {
           title: "Entreprise & Pro",
           description: "Services professionnels pour entreprises",
-          href: "/entreprise#services",
+         // href: "/entreprise#services",
           image:
             "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg", // Image d'illustration entreprise
+          submenu: [
+            {
+              title: "Services Partenaires",
+              description: "Trouvez un professionnel pour vos besoins",
+              href: "/entreprise#services",
+            },
+            {
+              title: "Conseil",
+              description: "Experts en audit & résolution de conflits",
+              href: "/conseil",
+            },
+            {
+              title: "Accompagnement",
+              description: "Accompagnement juridique pour entreprises",
+              href: "/accompagnement",
+            },
+          ],
         },
         {
           title: "Santé & Bien-être",
@@ -1733,16 +1739,52 @@ const Header = () => {
                       </Button>
                       <div className="absolute left-0 top-full w-[320px] p-2 rounded-lg border bg-[#FFFFFF] shadow-xl opacity-0 translate-y-1 scale-95 pointer-events-none transition ease-out duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto z-[1050]">
                         {section.items.map((item, itemIndex) => (
-                          <Link
+                          <div
                             key={itemIndex}
-                            to={item.href}
-                            className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
+                            className="relative group/item"
+                            onMouseEnter={() => item.submenu && setHoveredItem(item.title)}
+                            onMouseLeave={() => item.submenu && setHoveredItem(null)}
                           >
-                            <div className="font-semibold">{item.title}</div>
-                            <div className="text-xs text-gray-500">
-                              {item.description}
-                            </div>
-                          </Link>
+                            <Link
+                              to={item.href}
+                              className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-semibold">{item.title}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {item.description}
+                                  </div>
+                                </div>
+                                {item.submenu && (
+                                  <ChevronRight className="h-4 w-4 text-gray-600 transition-opacity" />
+                                )}
+                              </div>
+                            </Link>
+                            {/* Submenu for main menu items */}
+                            {item.submenu && hoveredItem === item.title && (
+                              <div 
+                                className="absolute left-full top-0 ml-0 w-56 bg-white rounded-lg border border-[#D3D3D3] shadow-lg overflow-hidden z-[1100]"
+                              >
+                                <div className="p-3">
+                                  <div className="space-y-1">
+                                    {item.submenu.map((subitem, subidx) => (
+                                      <Link
+                                        key={subidx}
+                                        to={subitem.href}
+                                        className="block p-2 rounded-lg hover:bg-gray-100 transition-colors text-xs text-gray-700 hover:text-gray-900"
+                                      >
+                                        <div className="font-medium">{subitem.title}</div>
+                                        {subitem.description && (
+                                          <div className="text-[11px] text-gray-500 mt-0.5">{subitem.description}</div>
+                                        )}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </>
@@ -1878,32 +1920,74 @@ const Header = () => {
                               <div className="relative">
                                 <div className="relative z-10 grid grid-cols-3 gap-6 p-6 mt-5">
                                   {current.items.map((item, idx) => (
-                                    <Link
+                                    <div
                                       key={idx}
-                                      to={item.href}
-                                      onClick={() => setIsPopoverOpen(false)}
-                                      className="group block rounded-lg overflow-hidden hover:ring-2 hover:ring-[#FFFFFF]/20 transition-all"
+                                      onMouseEnter={() => item.submenu && setHoveredItem(item.title)}
+                                      onMouseLeave={() => setHoveredItem(null)}
+                                      className="relative group"
                                     >
-                                      <div className="relative aspect-video">
-                                        {item.image && (
-                                          <img
-                                            src={item.image}
-                                            alt={item.title}
-                                            className="w-full h-full object-cover opacity-40"
-                                          />
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black to-[#556B2F]/20 p-4 flex flex-col justify-end">
-                                          <div className="text-[#FFFFFF] font-semibold group-hover:translate-x-2 transition-transform">
-                                            {item.title}
-                                          </div>
-                                          {item.description && (
-                                            <div className="text-sm text-[#D3D3D3] mt-1 group-hover:translate-x-2 transition-transform">
-                                              {item.description}
-                                            </div>
+                                      <Link
+                                        to={item.href}
+                                        onClick={() => setIsPopoverOpen(false)}
+                                        className="block rounded-lg overflow-hidden hover:ring-2 hover:ring-[#FFFFFF]/20 transition-all"
+                                      >
+                                        <div className="relative aspect-video">
+                                          {item.image && (
+                                            <img
+                                              src={item.image}
+                                              alt={item.title}
+                                              className="w-full h-full object-cover opacity-40"
+                                            />
                                           )}
+                                          <div className="absolute inset-0 bg-gradient-to-t from-black to-[#556B2F]/20 p-4 flex flex-col justify-end">
+                                            <div className="flex items-center justify-between">
+                                              <div>
+                                                <div className="text-[#FFFFFF] font-semibold group-hover:translate-x-2 transition-transform">
+                                                  {item.title}
+                                                </div>
+                                                {item.description && (
+                                                  <div className="text-sm text-[#D3D3D3] mt-1 group-hover:translate-x-2 transition-transform">
+                                                    {item.description}
+                                                  </div>
+                                                )}
+                                              </div>
+                                              {item.submenu && (
+                                                <ChevronLeft className="text-[#FFFFFF] h-5 w-5 transition-opacity" />
+                                              )}
+                                            </div>
+                                          </div>
                                         </div>
-                                      </div>
-                                    </Link>
+                                      </Link>
+                                      {/* Submenu */}
+                                      {item.submenu && hoveredItem === item.title && (
+                                        <div 
+                                          className="absolute left-full top-0 ml-2 w-64 bg-black rounded-lg border border-[#FFFFFF]/20 shadow-xl overflow-hidden z-[1100]"
+                                          onMouseLeave={() => setHoveredItem(null)}
+                                        >
+                                          <div className="p-4">
+                                            <h3 className="text-[#FFFFFF] font-semibold mb-3 flex items-center gap-2">
+                                              <ChevronLeft className="h-4 w-4" />
+                                              {item.title}
+                                            </h3>
+                                            <div className="space-y-2">
+                                              {item.submenu.map((subitem, subidx) => (
+                                                <Link
+                                                  key={subidx}
+                                                  to={subitem.href}
+                                                  onClick={() => setIsPopoverOpen(false)}
+                                                  className="block p-2 rounded-lg hover:bg-[#FFFFFF]/10 transition-colors text-sm text-[#D3D3D3] hover:text-[#FFFFFF]"
+                                                >
+                                                  <div className="font-medium">{subitem.title}</div>
+                                                  {subitem.description && (
+                                                    <div className="text-xs text-[#999999] mt-1">{subitem.description}</div>
+                                                  )}
+                                                </Link>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
                                   ))}
                                 </div>
                               </div>
