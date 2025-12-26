@@ -217,6 +217,7 @@ import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
 import MesReservationsVehiculePage from "./pages/mon-compte/MesReservationsVehiculePage";
 import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
+import LocationSaisonniere from "./pages/LocationSaisonniere";
          
 
 
@@ -351,6 +352,7 @@ const App = () => {
                   <Route path="/achat" element={<PropertyBuy />} />
                   <Route path="/location" element={<PropertyRent />} />
                   <Route path="/rachat" element={<RachatServiceCard />} />
+                  <Route path="/location-Saisonniere" element={<LocationSaisonniere />} />
                   <Route
                     path="/location-saisonniere"
                     element={<PropertyRent isSeasonal={true} />}

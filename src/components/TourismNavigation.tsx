@@ -15,6 +15,7 @@ const TourismNavigation: React.FC = () => {
     { id: 2, title: "Activités & Loisirs", path: "/activiteLoisirs" },
     { id: 3, title: "Lieux Touristiques", path: "/lieux_historique" },
     { id: 4, title: "Voyages Aériens", path: "/voyages" },
+    {id : 5, title: "Location Saisonnière", path: "/location-Saisonniere" },
   ];
 
   return (
