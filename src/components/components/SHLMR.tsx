@@ -21,7 +21,9 @@ import {
     Landmark,
     Loader,
     AlertTriangle,
-    ArrowRight
+    ArrowRight,
+    ChevronDown,
+    Building
 } from 'lucide-react';
 import api from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
@@ -72,6 +74,7 @@ interface Logement {
     address?: string;
     energyClass?: string;
     isPSLA?: boolean;
+    isSHLMR?: boolean;
     images?: string[];
     city?: string;
     bedrooms?: number;
@@ -79,9 +82,11 @@ interface Logement {
     surface?: number;
     price?: number;
     rooms?: number;
+    socialType?: string; // SHLMR, SODIAC, SIDR, SEDRE, SEMAC, PSLA
+    features?: string[];
 }
 
-const LogementsSHLMR = () => {
+const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
     const [activeTab, setActiveTab] = useState('logements');
     const [favoris, setFavoris] = useState<number[]>([]);
     const [sentRequests, setSentRequests] = useState<Record<string, boolean>>({});
@@ -90,6 +95,10 @@ const LogementsSHLMR = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [logements, setLogements] = useState<Logement[]>([]);
+    const [filteredLogements, setFilteredLogements] = useState<Logement[]>([]);
+    const [selectedSocialType, setSelectedSocialType] = useState<string>('all');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [socialTypesStats, setSocialTypesStats] = useState<any>(null);
 
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
@@ -100,6 +109,17 @@ const LogementsSHLMR = () => {
     const advantagesRef = React.useRef(null);
     const dispositifsRef = React.useRef(null);
     const propertiesRef = React.useRef([]);
+
+    // Types de logements sociaux disponibles
+    const socialTypes = [
+        { id: 'all', label: 'Tous les logements', icon: <Home className="w-4 h-4" /> },
+        { id: 'SHLMR', label: 'SHLMR', description: 'Sociétés d\'Habitation à Loyer Modéré de Réinsertion' },
+        { id: 'SODIAC', label: 'SODIAC', description: 'Sociétés de Développement Immobilier et d\'Aménagement Commercial' },
+        { id: 'SIDR', label: 'SIDR', description: 'Sociétés Immobilières de Développement Régional' },
+        { id: 'SEDRE', label: 'SEDRE', description: 'Sociétés d\'Équipement et de Développement Rural' },
+        { id: 'SEMAC', label: 'SEMAC', description: 'Sociétés d\'Économie Mixte d\'Aménagement Commercial' },
+        { id: 'PSLA', label: 'PSLA', description: 'Prêt Social Location Accession' }
+    ];
 
     const mapPropertyTypeToCategory = (type) => {
         const typeMap = {
@@ -182,15 +202,32 @@ const LogementsSHLMR = () => {
         return () => {
             ScrollTrigger.getAll().forEach(trigger => trigger.kill());
         };
-    }, [logements]);
+    }, [filteredLogements]);
 
-    const fetchSHLMRProperties = async () => {
+    // Filtrer les logements selon le type sélectionné
+    useEffect(() => {
+        if (selectedSocialType === 'all') {
+            setFilteredLogements(logements);
+        } else {
+            const filtered = logements.filter(logement => 
+                logement.socialType === selectedSocialType
+            );
+            setFilteredLogements(filtered);
+        }
+    }, [selectedSocialType, logements]);
+
+    const fetchSocialProperties = async (type = 'all') => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await api.get("/properties/shlmr");
-            // console.log("Réponse API SHLMR:", response.data);
+            let url = '/properties/social';
+            if (type !== 'all') {
+                url += `?socialType=${type}`;
+            }
+
+            const response = await api.get(url);
+            console.log("Réponse API Logements sociaux:", response.data);
 
             if (response.data.success) {
                 const transformedProperties = response.data.data.map((property) => ({
@@ -203,7 +240,7 @@ const LogementsSHLMR = () => {
                         : `${property.price?.toLocaleString("fr-FR")} €`,
                     titre: property.title,
                     lieu: `${property.city}${property.zipCode ? `, ${property.zipCode}` : ""}`,
-                    description: property.description || "Logement SHLMR disponible",
+                    description: property.description || "Logement social disponible",
                     caracteristiques: {
                         chambres: property.bedrooms || 0,
                         sdb: property.bathrooms || 0,
@@ -214,30 +251,102 @@ const LogementsSHLMR = () => {
                         balcon: true,
                         cave: false
                     },
-                    promoteur: property.owner ? `${property.owner.firstName} ${property.owner.lastName}` : "Propriétaire SHLMR",
+                    promoteur: property.owner ? `${property.owner.firstName} ${property.owner.lastName}` : "Propriétaire",
                     dateDispo: new Date().toISOString().split('T')[0],
                     vues: property.views || 0,
                     favori: false,
                     energyClass: property.energyClass,
                     address: property.address,
                     isSHLMR: property.isSHLMR,
+                    isPSLA: property.isPSLA,
                     images: property.images || [],
                     city: property.city,
                     bedrooms: property.bedrooms,
                     bathrooms: property.bathrooms,
                     surface: property.surface,
                     price: property.price,
-                    rooms: property.rooms
+                    rooms: property.rooms,
+                    socialType: property.socialType || 'SHLMR',
+                    features: property.features || []
                 }));
 
                 setLogements(transformedProperties);
+                setFilteredLogements(transformedProperties);
             }
         } catch (err) {
-            console.error("Error fetching SHLMR properties:", err);
-            setError("Erreur lors du chargement des propriétés SHLMR");
+            console.error("Error fetching social properties:", err);
+            setError("Erreur lors du chargement des propriétés sociales");
+            
+            // Données de démonstration pour tester
+            const demoProperties = generateDemoProperties();
+            setLogements(demoProperties);
+            setFilteredLogements(demoProperties);
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchSocialTypesStats = async () => {
+        try {
+            const response = await api.get('/properties/social/types');
+            if (response.data.success) {
+                setSocialTypesStats(response.data.data);
+            }
+        } catch (err) {
+            console.error("Error fetching social types stats:", err);
+        }
+    };
+
+    const generateDemoProperties = () => {
+        const types = ['SHLMR', 'SODIAC', 'SIDR', 'SEDRE', 'SEMAC', 'PSLA'];
+        const demoData = [];
+        
+        for (let i = 1; i <= 15; i++) {
+            const type = types[Math.floor(Math.random() * types.length)];
+            const isRent = Math.random() > 0.5;
+            
+            demoData.push({
+                id: i,
+                image: `https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&v=${i}`,
+                type: isRent ? "location" : "achat",
+                categorie: i % 3 === 0 ? "appartement" : "maison",
+                prix: isRent 
+                    ? `${(500 + Math.random() * 1000).toFixed(0)} €/mois`
+                    : `${(150000 + Math.random() * 200000).toFixed(0)} €`,
+                titre: `Logement social ${type} - ${i % 3 === 0 ? "Appartement" : "Maison"}`,
+                lieu: `Paris ${75000 + i}, France`,
+                description: `Beau logement social de type ${type} disponible dans un quartier calme.`,
+                caracteristiques: {
+                    chambres: 1 + (i % 4),
+                    sdb: 1 + (i % 2),
+                    surface: `${40 + (i % 6) * 10} m²`,
+                    parking: i % 3,
+                    annee: 2020 + (i % 4),
+                    etage: i % 5,
+                    balcon: i % 2 === 0,
+                    cave: i % 3 === 0
+                },
+                promoteur: `Promoteur ${type}`,
+                dateDispo: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+                vues: 100 + i * 10,
+                favori: false,
+                energyClass: ['A', 'B', 'C', 'D'][i % 4],
+                address: `${i} Rue de l'Exemple, Paris`,
+                isSHLMR: type === 'SHLMR',
+                isPSLA: type === 'PSLA',
+                images: [],
+                city: "Paris",
+                bedrooms: 1 + (i % 4),
+                bathrooms: 1 + (i % 2),
+                surface: 40 + (i % 6) * 10,
+                price: isRent ? 500 + (i % 10) * 100 : 150000 + (i % 10) * 20000,
+                rooms: 2 + (i % 4),
+                socialType: type,
+                features: [type, 'balcon', 'parking']
+            });
+        }
+        
+        return demoData;
     };
 
     const dispositifs = [
@@ -248,6 +357,46 @@ const LogementsSHLMR = () => {
             public: "Ménages en réinsertion et situations spécifiques",
             financement: "État + Collectivités locales",
             icon: <Home className="w-6 h-6" />
+        },
+        {
+            nom: "SODIAC",
+            description: "Sociétés de Développement Immobilier et d'Aménagement Commercial",
+            loyerMax: "Loyers adaptés au marché",
+            public: "Commerçants et entreprises",
+            financement: "Public/Privé",
+            icon: <Building className="w-6 h-6" />
+        },
+        {
+            nom: "SIDR",
+            description: "Sociétés Immobilières de Développement Régional",
+            loyerMax: "Loyers réglementés",
+            public: "Développement régional",
+            financement: "Régions + État",
+            icon: <Building className="w-6 h-6" />
+        },
+        {
+            nom: "SEDRE",
+            description: "Sociétés d'Équipement et de Développement Rural",
+            loyerMax: "Loyers modérés",
+            public: "Zones rurales",
+            financement: "Collectivités rurales",
+            icon: <Home className="w-6 h-6" />
+        },
+        {
+            nom: "SEMAC",
+            description: "Sociétés d'Économie Mixte d'Aménagement Commercial",
+            loyerMax: "Loyers commerciaux",
+            public: "Commerces et services",
+            financement: "Économie mixte",
+            icon: <Building className="w-6 h-6" />
+        },
+        {
+            nom: "PSLA",
+            description: "Prêt Social Location Accession",
+            loyerMax: "Loyers sociaux",
+            public: "Premier accès à la propriété",
+            financement: "Banques + Aides d'État",
+            icon: <Home className="w-6 h-6" />
         }
     ];
 
@@ -255,7 +404,7 @@ const LogementsSHLMR = () => {
         {
             icon: <Euro className="w-8 h-8" />,
             titre: "Loyers encadrés",
-            description: "Des loyers inférieurs de 20 à 50% au marché libre, spécifiques au SHLMR"
+            description: "Des loyers inférieurs de 20 à 50% au marché libre"
         },
         {
             icon: <Shield className="w-8 h-8" />,
@@ -307,17 +456,18 @@ const LogementsSHLMR = () => {
         {
             valeur: "90%",
             label: "Taux de satisfaction",
-            description: "Des locataires en logement SHLMR"
+            description: "Des locataires en logement social"
         },
         {
             valeur: "10K+",
-            label: "Logements SHLMR",
+            label: "Logements sociaux",
             description: "Disponibles en France"
         }
     ];
 
     useEffect(() => {
-        fetchSHLMRProperties();
+        fetchSocialProperties();
+        fetchSocialTypesStats();
     }, []);
 
     const toggleFavori = (id: number) => {
@@ -352,8 +502,8 @@ const LogementsSHLMR = () => {
             listingType: "rent",
             owner: {
                 firstName: logement.promoteur?.split(' ')[0] || "Propriétaire",
-                lastName: logement.promoteur?.split(' ')[1] || "SHLMR",
-                email: "contact@shlmr.fr",
+                lastName: logement.promoteur?.split(' ')[1] || "Social",
+                email: "contact@logementsocial.fr",
                 phone: "01 23 45 67 89"
             }
         };
@@ -374,7 +524,33 @@ const LogementsSHLMR = () => {
         }));
     };
 
-    if (loading) {
+    const handleSocialTypeSelect = (typeId: string) => {
+        setSelectedSocialType(typeId);
+        setDropdownOpen(false);
+        
+        // Recharger les données si le type change
+        if (typeId !== 'all') {
+            fetchSocialProperties(typeId);
+        } else {
+            fetchSocialProperties();
+        }
+        
+        if (activeTab !== 'logements') {
+            setActiveTab('logements');
+        }
+    };
+
+    const getSelectedTypeLabel = () => {
+        const type = socialTypes.find(t => t.id === selectedSocialType);
+        return type ? type.label : 'Tous les logements';
+    };
+
+    const getTypeDescription = (typeId: string) => {
+        const type = socialTypes.find(t => t.id === typeId);
+        return type ? type.description : '';
+    };
+
+    if (loading && logements.length === 0) {
         return (
             <div style={{ backgroundColor: COLORS["light-bg"] }} className="min-h-screen py-8 mt-16 flex items-center justify-center">
                 <motion.div
@@ -383,7 +559,7 @@ const LogementsSHLMR = () => {
                     className="text-center"
                 >
                     <Loader className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: COLORS.logo }} />
-                    <p className="text-gray-600">Chargement des logements SHLMR...</p>
+                    <p className="text-gray-600">Chargement des logements sociaux...</p>
                 </motion.div>
             </div>
         );
@@ -403,7 +579,7 @@ const LogementsSHLMR = () => {
                 <div className="absolute inset-0 z-0">
                     <img
                         src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-                        alt="Logements SHLMR"
+                        alt="Logements sociaux"
                         className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50"></div>
@@ -418,7 +594,7 @@ const LogementsSHLMR = () => {
                             transition={{ delay: 0.2, duration: 0.6 }}
                             className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6"
                         >
-                            Logements SHLMR
+                            Logements Sociaux
                         </motion.h1>
                         <motion.p
                             initial={{ opacity: 0 }}
@@ -426,7 +602,7 @@ const LogementsSHLMR = () => {
                             transition={{ delay: 0.4, duration: 0.6 }}
                             className="text-sm lg:text-md text-white mb-8 max-w-2xl mx-auto leading-relaxed"
                         >
-                            Découvrez les logements SHLMR (Sociétés d'Habitation à Loyer Modéré de Réinsertion)
+                            Découvrez les logements sociaux (SHLMR, SODIAC, SIDR, SEDRE, SEMAC, PSLA)
                             pour un parcours résidentiel sécurisé avec des loyers encadrés
                         </motion.p>
                         {error && (
@@ -448,8 +624,74 @@ const LogementsSHLMR = () => {
             <section className="py-8 -mt-10 relative z-20">
                 <div className="container mx-auto px-4">
                     <div className="flex flex-wrap justify-center gap-2">
+                        <div className="relative">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                    setActiveTab('logements');
+                                    if (activeTab === 'logements') {
+                                        setDropdownOpen(!dropdownOpen);
+                                    }
+                                }}
+                                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${activeTab === 'logements'
+                                        ? 'text-white shadow-lg'
+                                        : 'text-gray-700 hover:bg-opacity-10 bg-white/80 backdrop-blur-sm'
+                                    }`}
+                                style={activeTab === 'logements' ?
+                                    {
+                                        backgroundColor: COLORS.logo,
+                                        borderColor: COLORS.logo
+                                    } :
+                                    {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                        border: `1px solid ${COLORS.separator}`,
+                                        color: COLORS["secondary-text"]
+                                    }
+                                }
+                            >
+                                <Home className="w-4 h-4" />
+                                Logements
+                                <ChevronDown className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                            </motion.button>
+
+                            {/* Dropdown menu */}
+                            <AnimatePresence>
+                                {dropdownOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border z-50"
+                                        style={{ borderColor: COLORS.separator }}
+                                    >
+                                        {socialTypes.map((type) => (
+                                            <button
+                                                key={type.id}
+                                                onClick={() => handleSocialTypeSelect(type.id)}
+                                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3 ${selectedSocialType === type.id ? 'bg-gray-50' : ''
+                                                    }`}
+                                                style={{ color: COLORS["secondary-text"] }}
+                                            >
+                                                {type.icon}
+                                                <div className="flex-1">
+                                                    <div className="font-medium">{type.label}</div>
+                                                    {type.description && (
+                                                        <div className="text-xs text-gray-500 mt-1">{type.description}</div>
+                                                    )}
+                                                </div>
+                                                {selectedSocialType === type.id && (
+                                                    <CheckCircle2 className="w-4 h-4" style={{ color: COLORS.logo }} />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
                         {[
-                            { id: 'logements', label: 'Logements', icon: <Home className="w-4 h-4" /> },
                             { id: 'avantages', label: 'Avantages', icon: <BadgeCheck className="w-4 h-4" /> },
                             { id: 'dispositifs', label: 'Dispositifs', icon: <FileText className="w-4 h-4" /> }
                         ].map((tab) => (
@@ -459,8 +701,8 @@ const LogementsSHLMR = () => {
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${activeTab === tab.id
-                                    ? 'text-white shadow-lg'
-                                    : 'text-gray-700 hover:bg-opacity-10 bg-white/80 backdrop-blur-sm'
+                                        ? 'text-white shadow-lg'
+                                        : 'text-gray-700 hover:bg-opacity-10 bg-white/80 backdrop-blur-sm'
                                     }`}
                                 style={activeTab === tab.id ?
                                     {
@@ -479,6 +721,27 @@ const LogementsSHLMR = () => {
                             </motion.button>
                         ))}
                     </div>
+
+                    {/* Filtre actif */}
+                    {activeTab === 'logements' && selectedSocialType !== 'all' && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-4 text-center"
+                        >
+                            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm"
+                                style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
+                                <Building className="w-4 h-4" />
+                                Filtre actif : {getSelectedTypeLabel()}
+                                <button
+                                    onClick={() => handleSocialTypeSelect('all')}
+                                    className="ml-2 hover:opacity-70"
+                                >
+                                    ×
+                                </button>
+                            </span>
+                        </motion.div>
+                    )}
                 </div>
             </section>
 
@@ -497,7 +760,7 @@ const LogementsSHLMR = () => {
                         <div className="container mx-auto px-4">
                             <h2 className="lg:text-2xl text-lg font-bold text-center mb-16"
                                 style={{ color: COLORS["secondary-text"] }}>
-                                Les avantages du logement SHLMR
+                                Les avantages du logement social
                             </h2>
 
                             <div ref={advantagesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
@@ -541,7 +804,7 @@ const LogementsSHLMR = () => {
                                 }}
                             >
                                 <h3 className="text-3xl font-bold text-center mb-12">
-                                    Chiffres clés du logement SHLMR
+                                    Chiffres clés du logement social
                                 </h3>
                                 <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                                     {stats.map((stat, index) => (
@@ -565,7 +828,7 @@ const LogementsSHLMR = () => {
                                 </div>
                             </motion.div>
                         </div>
-                       <AdvertisementPopup />
+                        <AdvertisementPopup />
                     </motion.section>
                 )}
             </AnimatePresence>
@@ -585,15 +848,15 @@ const LogementsSHLMR = () => {
                         <div className="container mx-auto px-4">
                             <h2 className="text-4xl font-bold text-center mb-16"
                                 style={{ color: COLORS["secondary-text"] }}>
-                                Le dispositif SHLMR
+                                Les dispositifs de logement social
                             </h2>
 
-                            <div className="max-w-2xl mx-auto mb-16">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
                                 {dispositifs.map((dispositif, index) => (
                                     <motion.div
                                         key={index}
-                                        whileHover={{ scale: 1.02 }}
-                                        className="rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border"
+                                        whileHover={{ scale: 1.02, y: -5 }}
+                                        className="rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border"
                                         style={{
                                             backgroundColor: COLORS["light-bg"],
                                             borderColor: COLORS.separator
@@ -606,16 +869,18 @@ const LogementsSHLMR = () => {
                                                     style: { color: COLORS.logo }
                                                 })}
                                             </div>
-                                            <div>
-                                                <h3 className="text-2xl font-bold"
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold"
                                                     style={{ color: COLORS["secondary-text"] }}>
                                                     {dispositif.nom}
                                                 </h3>
-                                                <p style={{ color: COLORS["secondary-text"] }}>{dispositif.description}</p>
+                                                <p className="text-sm mt-1" style={{ color: COLORS["secondary-text"] }}>
+                                                    {dispositif.description}
+                                                </p>
                                             </div>
                                         </div>
 
-                                        <div ref={dispositifsRef} className="space-y-3 text-sm">
+                                        <div className="space-y-3 text-sm">
                                             <div className="flex justify-between">
                                                 <span className="font-semibold"
                                                     style={{ color: COLORS["secondary-text"] }}>Loyer max:</span>
@@ -695,6 +960,48 @@ const LogementsSHLMR = () => {
                         style={{ backgroundColor: COLORS["light-bg"] }}
                     >
                         <div className="container mx-auto px-4">
+                            <div className="flex justify-between items-center mb-8">
+                                <div>
+                                    <h2 className="text-2xl font-bold"
+                                        style={{ color: COLORS["secondary-text"] }}>
+                                        {selectedSocialType === 'all' 
+                                            ? 'Tous les logements sociaux' 
+                                            : `Logements ${getSelectedTypeLabel()}`}
+                                    </h2>
+                                    <p className="text-gray-600 mt-1">
+                                        {filteredLogements.length} logement{filteredLogements.length > 1 ? 's' : ''} disponible{filteredLogements.length > 1 ? 's' : ''}
+                                    </p>
+                                    {selectedSocialType !== 'all' && (
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            {getTypeDescription(selectedSocialType)}
+                                        </p>
+                                    )}
+                                </div>
+                                
+                                {/* Bouton de filtrage rapide */}
+                                <div className="flex gap-2 overflow-x-auto pb-2">
+                                    {socialTypes.slice(1).map((type) => (
+                                        <button
+                                            key={type.id}
+                                            onClick={() => handleSocialTypeSelect(type.id)}
+                                            className={`px-3 py-1 rounded-full text-sm whitespace-nowrap transition-colors ${selectedSocialType === type.id
+                                                    ? 'text-white'
+                                                    : 'hover:bg-gray-100'
+                                                }`}
+                                            style={selectedSocialType === type.id 
+                                                ? { backgroundColor: COLORS.logo }
+                                                : { 
+                                                    backgroundColor: `${COLORS.logo}15`, 
+                                                    color: COLORS.logo 
+                                                }
+                                            }
+                                        >
+                                            {type.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             {error && (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.9 }}
@@ -711,7 +1018,7 @@ const LogementsSHLMR = () => {
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {logements.map((logement, index) => {
+                                {filteredLogements.map((logement, index) => {
                                     const isDejaPostule = sentRequests?.[logement.id];
 
                                     return (
@@ -734,7 +1041,7 @@ const LogementsSHLMR = () => {
                                                     {/* Badges superposés */}
                                                     <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
                                                         style={{ color: COLORS.logo }}>
-                                                        SHLMR
+                                                        {logement.socialType || 'SOCIAL'}
                                                     </div>
 
                                                     {/* Badge prix */}
@@ -842,6 +1149,14 @@ const LogementsSHLMR = () => {
                                                             {logement.categorie}
                                                         </span>
                                                     )}
+                                                    {/* Badge social type */}
+                                                    {logement.socialType && (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                                                            style={{ backgroundColor: `${COLORS.logo}10`, color: COLORS.logo }}>
+                                                            <Building className="w-3 h-3" />
+                                                            {logement.socialType}
+                                                        </span>
+                                                    )}
                                                 </div>
 
                                                 {/* Informations supplémentaires */}
@@ -895,10 +1210,10 @@ const LogementsSHLMR = () => {
                                 })}
                             </div>
 
-                           <AdvertisementPopup />
+                            <AdvertisementPopup />
 
                             {/* Message si aucun résultat */}
-                            {logements.length === 0 && (
+                            {filteredLogements.length === 0 && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -907,11 +1222,18 @@ const LogementsSHLMR = () => {
                                     <Home className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
                                     <h3 className="text-xl font-semibold mb-2"
                                         style={{ color: COLORS["secondary-text"] }}>
-                                        Aucun logement SHLMR disponible
+                                        Aucun logement disponible
                                     </h3>
                                     <p style={{ color: COLORS["secondary-text"] }}>
-                                        Aucun logement SHLMR ne correspond à vos critères pour le moment.
+                                        Aucun logement {selectedSocialType !== 'all' ? 'de ce type ' : ''}ne correspond à vos critères pour le moment.
                                     </p>
+                                    <button
+                                        onClick={() => handleSocialTypeSelect('all')}
+                                        className="mt-4 px-4 py-2 rounded-lg font-semibold"
+                                        style={{ backgroundColor: COLORS.logo, color: 'white' }}
+                                    >
+                                        Voir tous les logements sociaux
+                                    </button>
                                 </motion.div>
                             )}
                         </div>
@@ -930,4 +1252,4 @@ const LogementsSHLMR = () => {
     );
 };
 
-export default LogementsSHLMR;
+export default LogementsSHLMR;  
