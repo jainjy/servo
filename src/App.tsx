@@ -219,7 +219,25 @@ import MesReservationsVehiculePage from "./pages/mon-compte/MesReservationsVehic
 import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
 import ProjetsPage from "./pages/ProjetsPage";
 import LocationSaisonniere from "./pages/LocationSaisonniere";
-         
+import ExplorerVivre from "./components/components/ExplorerVivre";
+import EventsDiscoveries from "./components/components/EvenementDecouverte";
+import NaturePatrimoine from "./components/components/NaturePatrimoine";
+import SejoursExperiences from "./components/components/SejoursExperience";
+import BienEtreAlimentation from "./components/components/BienEtreAlimentation";
+import MarketplaceCreateurs from "./pages/ArtEtCreation/MarketplaceCreateurs";
+import DepannageEntretien from "./components/components/DepannageEntretien";
+import PhotographiePage from "./pages/ArtEtCreation/PhotographiePage";
+import SculpturePage from "./pages/ArtEtCreation/SculpturePage";
+import PeinturePage from "./pages/ArtEtCreation/PeinturePage";
+import ArtistesCreateurs from "./components/components/ArtistesCreateurs";
+import GaleriesExpositions from "./components/components/GalerieExposition";
+import VideoCreationVisuelle from "./components/components/VideoCreationVisuel";
+import OeuvresCreationsLocales from "./components/components/OeuvreCreationLocales";
+import PodcastsComponent from "./components/components/PodcastsInspirer";
+import VideosComponent from "./components/components/VideosInspirer";
+import PortraitsLocaux from "./components/components/PortraitLocaux";
+import BonsPlansConseils from "./components/components/BonPlanConseils";
+
 
 
 const queryClient = new QueryClient();
@@ -253,7 +271,7 @@ const ScrollToHash = () => {
 
 const App = () => {
   const { user } = useAuth();
-  
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -353,6 +371,22 @@ const App = () => {
                   <Route path="/achat" element={<PropertyBuy />} />
                   <Route path="/location" element={<PropertyRent />} />
                   <Route path="/rachat" element={<RachatServiceCard />} />
+
+                  <Route path="/explorer-vivre" element={<ExplorerVivre />} />
+                  <Route path="/evenement-decouverte" element={<EventsDiscoveries />} />
+                  <Route path="/nature-patrimoine" element={<NaturePatrimoine />} />
+                  <Route path="/sejour-experience" element={<SejoursExperiences />} />
+                  <Route path="/bien-etre-alimentation" element={<BienEtreAlimentation />} />
+                  <Route path="/depannage-entretien" element={<DepannageEntretien />} />
+                  <Route path="/artistes-createurs" element={<ArtistesCreateurs />} />
+                  <Route path="/galerie-exposition" element={<GaleriesExpositions />} />
+                  <Route path="/video-creation-visuelle" element={<VideoCreationVisuelle />} />
+                  <Route path="/oeuvre-creation-locales" element={<OeuvresCreationsLocales />} />
+                  <Route path="/podcasts-inspirer-eveiller" element={<PodcastsComponent />} />
+                  <Route path="/videos-inspirer-eveiller" element={<VideosComponent />} />
+                  <Route path="/portraits-locaux" element={<PortraitsLocaux />} />
+                  <Route path="/bon-plan-conseil" element={<BonsPlansConseils />} />
+
                   <Route path="/location-Saisonniere" element={<LocationSaisonniere />} />
                   <Route
                     path="/location-saisonniere"
@@ -915,14 +949,14 @@ const App = () => {
                   {/* Onglets Arts et Creations */}
                   <Route path="/art-et-creation" element={<ArtETCreation />} />
 
-                  {/* <Route path="/photographie" element={<PhotographiePage />} />
-                  <Route path="/sculpture" element={<SculpturePage />} />
+                   <Route path="/photographie" element={<PhotographiePage />} />
+                  <Route path="/sculpture" element={<SculpturePage onContactClick={undefined} />} />
                   <Route path="/peinture" element={<PeinturePage />} />
-                  <Route path="/artisanat" element={<ArtisanatPage />} />
+                 {/* <Route path="/artisanat" element={<ArtisanatPage />} />*/}
                   <Route
                     path="/marketplace-createurs"
                     element={<MarketplaceCreateurs />}
-                  /> */}
+                  /> 
                   <Route
                     path="/art-et-creation/photographie/:categorySlug"
                     element={<ArtETCreation />}
