@@ -17,6 +17,10 @@ import {
   ChevronRight,
   CheckCircle,
   Briefcase,
+  Users,
+  DollarSign,
+  Eye,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +32,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useAlternance } from "@/hooks/useAlternance";// En haut du fichier, avec les autres imports
+import { useCandidatures } from '@/hooks/useCandidatures';
 
 const AlternanceSection = ({
   loading,
@@ -41,14 +47,31 @@ const AlternanceSection = ({
   researchProgress,
   setResearchProgress,
 }) => {
-  const [offres, setOffres] = useState([]);
+  // Utiliser le hook useAlternance pour récupérer les données
+  const { 
+    offres, 
+    isLoading, 
+    error, 
+    stats, 
+    fetchOffres, 
+    fetchStats,
+    checkAuthStatus 
+  } = useAlternance();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("tous");
   const [selectedNiveau, setSelectedNiveau] = useState("tous");
-  const [selectedDuree, setSelectedDuree] = useState("tous");
   const [activeTab, setActiveTab] = useState("alternance");
+  const [localOffres, setLocalOffres] = useState([]);
 
+  // Types d'offres
   const types = [
+    {
+      id: "tous",
+      label: "Tous",
+      icon: Briefcase,
+      description: "Tous les types d'offres",
+    },
     {
       id: "alternance",
       label: "Alternance",
@@ -60,135 +83,160 @@ const AlternanceSection = ({
       label: "Stage",
       icon: GraduationCap,
       description: "Stage conventionné",
-    },
-    {
-      id: "apprentissage",
-      label: "Apprentissage",
-      icon: BookOpen,
-      description: "Contrat d'apprentissage",
-    },
+    }
   ];
 
+  // Niveaux d'étude
   const niveaux = [
-    { id: "bac", label: "BAC", color: "bg-blue-100 text-blue-800" },
-    { id: "bac+2", label: "BAC+2", color: "bg-green-100 text-green-800" },
-    { id: "bac+3", label: "BAC+3/4", color: "bg-yellow-100 text-yellow-800" },
-    { id: "bac+5", label: "BAC+5", color: "bg-purple-100 text-purple-800" },
+    { id: "tous", label: "Tous", color: "bg-gray-100 text-gray-800" },
+    { id: "BAC", label: "BAC", color: "bg-blue-100 text-blue-800" },
+    { id: "BAC+2", label: "BAC+2", color: "bg-green-100 text-green-800" },
+    { id: "BAC+3", label: "BAC+3", color: "bg-yellow-100 text-yellow-800" },
+    { id: "BAC+4", label: "BAC+4", color: "bg-orange-100 text-orange-800" },
+    { id: "BAC+5 et plus", label: "BAC+5+", color: "bg-purple-100 text-purple-800" },
   ];
 
-  const offresList = [
-    {
-      id: 1,
-      title: "Développeur Web Alternance",
-      entreprise: "DigitalFuture SA",
-      type: "alternance",
-      niveau: "bac+3",
-      duree: "12+",
-      location: "Paris (75)",
-      date: "Début Septembre 2024",
-      remuneration: "70-85% SMIC",
-      description:
-        "Alternance en développement web full stack pour un BAC+3/4.",
-      missions: [
-        "Développement frontend React",
-        "API REST avec Node.js",
-        "Tests et déploiement",
-        "Participation aux réunions d'équipe",
-      ],
-      competences: [
-        "HTML/CSS",
-        "JavaScript",
-        "React",
-        "Git",
-        "TypeScript",
-        "Node.js",
-      ],
-      avantages: [
-        "Formation financée",
-        "Salaire + primes",
-        "Ticket resto",
-        "Télétravail partiel",
-      ],
-      icon: Code,
-      urgent: true,
-      remote: "hybride",
-    },
-    {
-      id: 2,
-      title: "Stage Marketing Digital",
-      entreprise: "BrandBoost Agency",
-      type: "stage",
-      niveau: "bac+5",
-      duree: "5-6",
-      location: "Lyon (69)",
-      date: "Mars à Août 2024",
-      remuneration: "Gratification légale",
-      description:
-        "Stage en marketing digital avec gestion de campagnes sociales.",
-      missions: [
-        "Gestion réseaux sociaux",
-        "Analyse de données",
-        "Création de contenus",
-        "Reporting mensuel",
-      ],
-      competences: [
-        "SEO",
-        "Google Analytics",
-        "Réseaux sociaux",
-        "Copywriting",
-        "Canva",
-        "Excel",
-      ],
-      avantages: [
-        "Indemnités",
-        "Formation interne",
-        "Possibilité CDI",
-        "Matériel fourni",
-      ],
-      icon: TrendingUp,
-      urgent: false,
-      remote: true,
-    },
-  ];
+  // Formater les offres pour l'affichage
+  const formatOffreForDisplay = (offre) => {
+    // Déterminer le type d'icône en fonction du type d'offre
+    let IconComponent = Code;
+    if (offre.type?.includes("Stage")) {
+      IconComponent = GraduationCap;
+    } else if (offre.type?.includes("Alternance")) {
+      IconComponent = TrendingUp;
+    }
 
+    // Déterminer la durée formatée
+    let dureeFormatted = offre.duree || "Non spécifié";
+    if (offre.type?.includes("Stage")) {
+      dureeFormatted = "4-6 mois";
+    } else if (offre.type?.includes("Alternance")) {
+      dureeFormatted = "12-24 mois";
+    }
+
+    return {
+      id: offre.id,
+      title: offre.title || "Sans titre",
+      entreprise: offre.ecolePartenaire || "Entreprise",
+      type: offre.type || "Non spécifié",
+      niveau: offre.niveauEtude || "Non spécifié",
+      duree: dureeFormatted,
+      location: offre.location || "Non spécifié",
+      date: offre.dateDebut ? new Date(offre.dateDebut).toLocaleDateString('fr-FR', { 
+        month: 'long', 
+        year: 'numeric' 
+      }) : "Date non spécifiée",
+      remuneration: offre.remuneration || "Non spécifié",
+      description: offre.description || "Aucune description",
+      missions: Array.isArray(offre.missions) ? offre.missions : [],
+      competences: Array.isArray(offre.competences) ? offre.competences : [],
+      avantages: Array.isArray(offre.avantages) ? offre.avantages : [],
+      icon: IconComponent,
+      urgent: offre.urgent || false,
+      remote: offre.location?.toLowerCase().includes('télétravail') ? "hybride" : "présentiel",
+      status: offre.status || "active",
+      vues: offre.vues || 0,
+      candidatures_count: offre.candidatures_count || 0,
+      ecolePartenaire: offre.ecolePartenaire || "",
+      rythmeAlternance: offre.rythmeAlternance || "",
+      pourcentageTemps: offre.pourcentageTemps || ""
+    };
+  };
+
+  // Charger les offres au montage
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setOffres(offresList);
-      setLoading(false);
-    }, 1000);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([
+          fetchOffres({ 
+            search: '', 
+            status: 'active', 
+            type: 'all',
+            niveau: 'all',
+            page: 1,
+            limit: 50
+          }),
+          fetchStats()
+        ]);
+      } catch (error) {
+        console.error("Erreur chargement données alternance:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
-  const filteredOffres = offres.filter((offre) => {
+  // Mettre à jour les offres locales quand les données changent
+  useEffect(() => {
+    if (offres && offres.length > 0) {
+      const formattedOffres = offres.map(formatOffreForDisplay);
+      setLocalOffres(formattedOffres);
+    } else {
+      setLocalOffres([]);
+    }
+  }, [offres]);
+
+  // Filtrer les offres
+  const filteredOffres = localOffres.filter((offre) => {
     const matchesSearch =
+      searchTerm === "" ||
       offre.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      offre.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === "tous" || offre.type === selectedType;
-    const matchesNiveau =
-      selectedNiveau === "tous" || offre.niveau === selectedNiveau;
+      offre.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      offre.entreprise.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesType = 
+      selectedType === "tous" || 
+      (selectedType === "alternance" && offre.type.includes("Alternance")) ||
+      (selectedType === "stage" && offre.type.includes("Stage"));
+
+    const matchesNiveau = 
+      selectedNiveau === "tous" || 
+      offre.niveau === selectedNiveau;
 
     const matchesTab =
-      (activeTab === "alternance" &&
-        (offre.type === "alternance" || offre.type === "apprentissage")) ||
-      (activeTab === "stage" && offre.type === "stage") ||
-      (activeTab === "sauvegardees" &&
-        savedItems.includes(`alternance-${offre.id}`));
+      (activeTab === "alternance" && offre.type.includes("Alternance")) ||
+      (activeTab === "stage" && offre.type.includes("Stage")) ||
+      (activeTab === "sauvegardees" && savedItems.includes(`alternance-${offre.id}`));
 
-    return matchesSearch && matchesType && matchesNiveau && matchesTab;
+    // Ne montrer que les offres actives
+    const isActive = offre.status === "active";
+
+    return matchesSearch && matchesType && matchesNiveau && matchesTab && isActive;
   });
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
       toast.info(`Recherche d'alternance/stage pour "${searchTerm}"`);
+      // Recharger les données avec le terme de recherche
+      fetchOffres({ 
+        search: searchTerm, 
+        status: 'active', 
+        type: selectedType === "tous" ? "all" : selectedType,
+        niveau: selectedNiveau === "tous" ? "all" : selectedNiveau,
+        page: 1,
+        limit: 50
+      });
     }
   };
 
   const handleResetFilters = () => {
     setSelectedType("tous");
     setSelectedNiveau("tous");
-    setSelectedDuree("tous");
     setSearchTerm("");
     setActiveTab("alternance");
+    
+    fetchOffres({ 
+      search: '', 
+      status: 'active', 
+      type: 'all',
+      niveau: 'all',
+      page: 1,
+      limit: 50
+    });
+    
     toast.success("Filtres réinitialisés");
   };
 
@@ -196,28 +244,110 @@ const AlternanceSection = ({
     toast.info("Ouverture du calendrier des événements...");
   };
 
+  // Statistiques dynamiques
   const statsData = [
-    { label: "Offres actives", value: "856", icon: Briefcase },
-    { label: "Alternances", value: "312", icon: GraduationCap },
-    { label: "Taux d'embauche", value: "78%", icon: Award },
-    { label: "Entreprises partenaires", value: "124", icon: Building },
+    { 
+      label: "Offres actives", 
+      value: stats?.total || "0", 
+      icon: Briefcase 
+    },
+    { 
+      label: "Alternances", 
+      value: stats?.alternance || "0", 
+      icon: GraduationCap 
+    },
+    { 
+      label: "Stages", 
+      value: stats?.stage || "0", 
+      icon: BookOpen 
+    },
+    { 
+      label: "Total candidatures", 
+      value: stats?.candidatures || "0", 
+      icon: Users 
+    },
   ];
+
+  // Gérer l'application à une offre
+  const { postuler } = useCandidatures();
+
+ const handleApplyToOffre = async (offreId, offreTitle) => {
+    try {
+      const result = await postuler(
+        offreId,
+        'alternance',
+        offreTitle,
+        {
+          messageMotivation: "Je suis intéressé par cette offre d'alternance",
+          nomCandidat: user?.name,
+          emailCandidat: user?.email
+        }
+      );
+
+      if (result.success) {
+        toast.success(`Vous avez postulé à "${offreTitle}"`);
+        handleApply(offreId, "alternance", offreTitle);
+      }
+      
+    } catch (error) {
+      console.error("Erreur lors de la postulation:", error);
+      toast.error(error.message || "Erreur lors de la postulation");
+    }
+  };
+
+  // Gérer le partage d'une offre
+  const handleShareOffre = (offre) => {
+    const shareText = `Découvrez cette offre: ${offre.title} - ${offre.entreprise} - ${offre.location}`;
+    const shareUrl = `${window.location.origin}/alternance/${offre.id}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: offre.title,
+        text: shareText,
+        url: shareUrl,
+      });
+    } else {
+      navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      toast.success("Lien copié dans le presse-papier");
+    }
+  };
+
+  // Rendu d'un badge pour le statut
+  const renderStatusBadge = (status) => {
+    const statusConfig = {
+      active: { label: "Active", color: "bg-green-100 text-green-800" },
+      draft: { label: "Brouillon", color: "bg-gray-100 text-gray-800" },
+      archived: { label: "Archivée", color: "bg-yellow-100 text-yellow-800" },
+      filled: { label: "Pourvue", color: "bg-blue-100 text-blue-800" }
+    };
+    
+    const config = statusConfig[status] || statusConfig.active;
+    return (
+      <Badge className={config.color}>
+        {config.label}
+      </Badge>
+    );
+  };
 
   return (
     <>
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
-        {statsData.map((stat, index) => (
-          <Card
-            key={index}
-            className="bg-white/40 border-white/60 text-[#556B2F]"
-          >
-            <CardContent className="pt-6 text-center">
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <div className="text-sm opacity-90">{stat.label}</div>
-            </CardContent>
-          </Card>
-        ))}
+        {statsData.map((stat, index) => {
+          const IconComponent = stat.icon;
+          return (
+            <Card
+              key={index}
+              className="bg-white/40 border-white/60 text-[#556B2F] hover:shadow-md transition-shadow"
+            >
+              <CardContent className="pt-6 text-center">
+                <IconComponent className="h-8 w-8 mx-auto mb-2 text-[#8B4513]" />
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="text-sm opacity-90">{stat.label}</div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Search Bar */}
@@ -452,7 +582,7 @@ const AlternanceSection = ({
             </TabsList>
 
             <TabsContent value={activeTab} className="space-y-4">
-              {loading ? (
+              {(isLoading || loading) ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <Card key={i} className="border-[#D3D3D3] animate-pulse">
                     <CardContent className="pt-6">
@@ -509,24 +639,18 @@ const AlternanceSection = ({
                                       Urgent
                                     </Badge>
                                   )}
+                                  {renderStatusBadge(offre.status)}
                                   <Badge className="bg-[#556B2F] text-white">
-                                    {
-                                      types.find((t) => t.id === offre.type)
-                                        ?.label
-                                    }
+                                    {offre.type}
                                   </Badge>
                                   <Badge
                                     className={
                                       niveaux.find(
                                         (n) => n.id === offre.niveau
-                                      )?.color
+                                      )?.color || "bg-gray-100 text-gray-800"
                                     }
                                   >
-                                    {
-                                      niveaux.find(
-                                        (n) => n.id === offre.niveau
-                                      )?.label
-                                    }
+                                    {offre.niveau}
                                   </Badge>
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-1">
@@ -539,15 +663,31 @@ const AlternanceSection = ({
                                   </span>
                                   <MapPin className="h-4 w-4 ml-2" />
                                   <span>{offre.location}</span>
+                                  <div className="flex items-center gap-1 ml-2 text-sm text-gray-500">
+                                    <Eye className="h-3 w-3" />
+                                    <span>{offre.vues} vues</span>
+                                  </div>
                                 </div>
                               </div>
                               <div className="text-right">
                                 <div className="text-2xl font-bold text-[#8B4513] mb-1">
                                   {offre.remuneration}
                                 </div>
+                                <div className="flex items-center gap-2 justify-end mb-1">
+                                  <Clock className="h-4 w-4 text-gray-500" />
+                                  <p className="text-sm text-gray-600">
+                                    {offre.duree}
+                                  </p>
+                                </div>
                                 <p className="text-sm text-gray-500">
                                   {offre.date}
                                 </p>
+                                <div className="flex items-center gap-1 justify-end mt-1">
+                                  <Users className="h-3 w-3 text-gray-500" />
+                                  <span className="text-xs text-gray-500">
+                                    {offre.candidatures_count} candidatures
+                                  </span>
+                                </div>
                               </div>
                             </div>
 
@@ -555,33 +695,47 @@ const AlternanceSection = ({
                               {offre.description}
                             </p>
 
-                            <div className="mb-4">
-                              <h4 className="font-semibold text-[#556B2F] mb-2">
-                                Missions :
-                              </h4>
-                              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                {offre.missions
-                                  .slice(0, 3)
-                                  .map((mission, idx) => (
-                                    <li key={idx}>{mission}</li>
-                                  ))}
-                              </ul>
-                            </div>
+                            {offre.missions.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="font-semibold text-[#556B2F] mb-2">
+                                  Missions :
+                                </h4>
+                                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                  {offre.missions
+                                    .slice(0, 3)
+                                    .map((mission, idx) => (
+                                      <li key={idx}>{mission}</li>
+                                    ))}
+                                  {offre.missions.length > 3 && (
+                                    <li className="text-gray-400">
+                                      ... et {offre.missions.length - 3} autres
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
 
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                              <div className="flex flex-wrap gap-2">
-                                {offre.competences
-                                  .slice(0, 4)
-                                  .map((comp, idx) => (
-                                    <Badge
-                                      key={idx}
-                                      variant="secondary"
-                                      className="bg-gray-100"
-                                    >
-                                      {comp}
+                              {offre.competences.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                  {offre.competences
+                                    .slice(0, 4)
+                                    .map((comp, idx) => (
+                                      <Badge
+                                        key={idx}
+                                        variant="secondary"
+                                        className="bg-gray-100"
+                                      >
+                                        {comp}
+                                      </Badge>
+                                    ))}
+                                  {offre.competences.length > 4 && (
+                                    <Badge variant="outline" className="text-gray-500">
+                                      +{offre.competences.length - 4}
                                     </Badge>
-                                  ))}
-                              </div>
+                                  )}
+                                </div>
+                              )}
                               <div className="flex gap-2">
                                 <Button
                                   size="sm"
@@ -606,9 +760,7 @@ const AlternanceSection = ({
                                   size="sm"
                                   variant="outline"
                                   className="border-gray-300"
-                                  onClick={() =>
-                                    handleShare(offre, "alternance")
-                                  }
+                                  onClick={() => handleShareOffre(offre)}
                                 >
                                   <Share2 className="h-4 w-4 mr-1" />
                                   Partager
@@ -620,15 +772,16 @@ const AlternanceSection = ({
                                       ? "bg-green-600 hover:bg-green-700"
                                       : "bg-[#8B4513] hover:bg-[#6B3410]"
                                   } text-white`}
-                                  onClick={() =>
-                                    handleApply(
-                                      offre.id,
-                                      "alternance",
-                                      offre.title
-                                    )
-                                  }
+                                  onClick={() => handleApplyToOffre(offre.id, offre.title)}
                                 >
-                                  {isApplied ? "✓ Postulé" : "Postuler"}
+                                  {isApplied ? (
+                                    <>
+                                      <Check className="h-4 w-4 mr-1" />
+                                      Postulé
+                                    </>
+                                  ) : (
+                                    "Postuler"
+                                  )}
                                 </Button>
                               </div>
                             </div>
@@ -646,7 +799,7 @@ const AlternanceSection = ({
                       Aucune offre ne correspond à vos critères
                     </h3>
                     <p className="text-gray-500 mb-4">
-                      Essayez de modifier vos critères de recherche
+                      Essayez de modifier vos critères de recherche ou vérifiez plus tard
                     </p>
                     <Button variant="outline" onClick={handleResetFilters}>
                       Voir toutes les offres
