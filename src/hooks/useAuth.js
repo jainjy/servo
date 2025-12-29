@@ -36,5 +36,6 @@ export const useAuth = () => {
     forgotPassword: AuthService.forgotPassword.bind(AuthService),
     resetPassword: AuthService.resetPassword.bind(AuthService),
     verifyResetToken: AuthService.verifyResetToken.bind(AuthService),
+    getAuthHeaders: AuthService.getAuthHeaders.bind(AuthService) // 🔥 IMPORTANT
   };
 };

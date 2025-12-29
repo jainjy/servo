@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";// En haut du fichier, avec les autres imports
+import { useCandidatures } from '@/hooks/useCandidatures';
 import {
   Search,
   Filter,
@@ -56,6 +57,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
+import { useEmploi } from "@/hooks/useEmploi";
 
 const EmploiSection = ({
   loading,
@@ -73,6 +75,14 @@ const EmploiSection = ({
   alertSettings,
   setAlertSettings,
 }) => {
+  const { 
+    emplois, 
+    isLoading, 
+    stats, 
+    fetchEmplois, 
+    fetchStats 
+  } = useEmploi();
+
   const [offres, setOffres] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSecteur, setSelectedSecteur] = useState("tous");
@@ -88,138 +98,144 @@ const EmploiSection = ({
 
   const secteurs = [
     {
-      id: "informatique",
+      id: "Informatique & Tech",
       label: "Informatique & Tech",
-      count: 156,
+      count: stats?.parSecteur?.["Informatique & Tech"] || 0,
       icon: Code,
     },
     {
-      id: "batiment",
+      id: "Bâtiment & Construction",
       label: "Bâtiment & Construction",
-      count: 89,
+      count: stats?.parSecteur?.["Bâtiment & Construction"] || 0,
       icon: Hammer,
     },
     {
-      id: "commerce",
+      id: "Commerce & Vente",
       label: "Commerce & Vente",
-      count: 142,
+      count: stats?.parSecteur?.["Commerce & Vente"] || 0,
       icon: TrendingUp,
     },
-    { id: "sante", label: "Santé & Social", count: 78, icon: Activity },
+    {
+      id: "Santé & Social",
+      label: "Santé & Social",
+      count: stats?.parSecteur?.["Santé & Social"] || 0,
+      icon: Activity,
+    },
   ];
 
   const typesContrat = [
-    { id: "cdi", label: "CDI", color: "bg-green-100 text-green-800" },
-    { id: "cdd", label: "CDD", color: "bg-blue-100 text-blue-800" },
-    {
-      id: "interim",
-      label: "Intérim",
-      color: "bg-purple-100 text-purple-800",
-    },
-    {
-      id: "freelance",
-      label: "Freelance",
-      color: "bg-orange-100 text-orange-800",
-    },
-  ];
-
-  const offresList = [
-    {
-      id: 1,
-      title: "Développeur Frontend React",
-      entreprise: "TechVision Solutions",
-      secteur: "informatique",
-      type: "cdi",
-      experience: "intermediaire",
-      location: "Paris (75)",
-      salaire: "45-55K€",
-      date: "Publiée il y a 2 jours",
-      urgent: true,
-      remote: true,
-      description:
-        "Nous recherchons un développeur Frontend expérimenté en React pour rejoindre notre équipe produit.",
-      missions: [
-        "Développer de nouvelles features en React/TypeScript",
-        "Optimiser les performances frontend",
-        "Collaborer avec les designers et product managers",
-      ],
-      competences: [
-        "React",
-        "TypeScript",
-        "Redux",
-        "CSS/SASS",
-        "Jest",
-        "Git",
-      ],
-      avantages: [
-        "Télétravail flexible",
-        "Mutuelle premium",
-        "Équipement fourni",
-        "Prime annuelle",
-      ],
-      icon: Code,
-    },
-    {
-      id: 2,
-      title: "Chef de Chantier BTP",
-      entreprise: "Bâtiments Modernes SA",
-      secteur: "batiment",
-      type: "cdi",
-      experience: "senior",
-      location: "Lyon (69)",
-      salaire: "50-65K€",
-      date: "Publiée il y a 5 jours",
-      urgent: true,
-      remote: false,
-      description:
-        "Gestion complète de chantiers de construction neuve de 50 à 200 logements.",
-      missions: [
-        "Planification et coordination des travaux",
-        "Gestion des équipes et sous-traitants",
-        "Contrôle qualité et respect des délais",
-      ],
-      competences: [
-        "Gestion de chantier",
-        "Normes BTP",
-        "Autocad",
-        "Management",
-        "Sécurité",
-      ],
-      avantages: [
-        "Véhicule de fonction",
-        "Prime résultat",
-        "Formation continue",
-        "Mutuelle famille",
-      ],
-      icon: Hammer,
-    },
+    { id: "CDI", label: "CDI", color: "bg-green-100 text-green-800" },
+    { id: "CDD", label: "CDD", color: "bg-blue-100 text-blue-800" },
+    { id: "Intérim", label: "Intérim", color: "bg-purple-100 text-purple-800" },
+    { id: "Freelance", label: "Freelance", color: "bg-orange-100 text-orange-800" },
+    { id: "Alternance", label: "Alternance", color: "bg-yellow-100 text-yellow-800" },
+    { id: "Stage", label: "Stage", color: "bg-pink-100 text-pink-800" },
   ];
 
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setOffres(offresList);
-      setLoading(false);
-    }, 1000);
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([
+          fetchEmplois({
+            search: "",
+            status: "active",
+            type: "all",
+            secteur: "all",
+            page: 1
+          }),
+          fetchStats()
+        ]);
+      } catch (error) {
+        toast.error("Erreur lors du chargement des offres");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
+
+  useEffect(() => {
+    if (emplois && Array.isArray(emplois)) {
+      const formattedOffres = emplois
+        .filter(emploi => emploi.status === 'active')
+        .map(emploi => ({
+          id: emploi.id,
+          title: emploi.title,
+          entreprise: emploi.entreprise || "Entreprise non spécifiée",
+          secteur: emploi.secteur,
+          type: emploi.typeContrat,
+          experience: emploi.experience,
+          location: emploi.location,
+          salaire: emploi.salaire,
+          date: emploi.datePublication 
+            ? `Publiée il y a ${calculateDaysAgo(emploi.datePublication)}`
+            : "Date non spécifiée",
+          urgent: emploi.urgent || false,
+          remote: emploi.remotePossible || false,
+          description: emploi.description,
+          missions: Array.isArray(emploi.missions) ? emploi.missions : [],
+          competences: Array.isArray(emploi.competences) ? emploi.competences : [],
+          avantages: Array.isArray(emploi.avantages) ? emploi.avantages : [],
+          icon: getIconBySecteur(emploi.secteur),
+          candidatures_count: emploi.candidatures_count || 0,
+          vues: emploi.vues || 0,
+          dateLimite: emploi.dateLimite,
+          nombrePostes: emploi.nombrePostes || 1,
+        }));
+      setOffres(formattedOffres);
+    }
+  }, [emplois]);
+
+  const calculateDaysAgo = (dateString) => {
+    if (!dateString) return "quelques jours";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return "1 jour";
+    if (diffDays === 0) return "aujourd'hui";
+    return `${diffDays} jours`;
+  };
+
+  const getIconBySecteur = (secteur) => {
+    switch(secteur) {
+      case "Informatique & Tech":
+        return Code;
+      case "Bâtiment & Construction":
+        return Hammer;
+      case "Commerce & Vente":
+        return TrendingUp;
+      case "Santé & Social":
+        return Activity;
+      default:
+        return Briefcase;
+    }
+  };
 
   const filteredOffres = offres.filter((offre) => {
     const matchesSearch =
+      searchTerm === "" ||
       offre.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      offre.description.toLowerCase().includes(searchTerm.toLowerCase());
+      offre.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      offre.entreprise.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesSecteur =
       selectedSecteur === "tous" || offre.secteur === selectedSecteur;
-    const matchesType = selectedType === "tous" || offre.type === selectedType;
+    
+    const matchesType =
+      selectedType === "tous" || offre.type === selectedType;
+    
     const matchesUrgent = !onlyUrgent || offre.urgent;
+    
     const matchesRemote = !onlyRemote || offre.remote;
 
     const matchesTab =
       activeTab === "toutes" ||
       (activeTab === "urgentes" && offre.urgent) ||
       (activeTab === "remote" && offre.remote) ||
-      (activeTab === "recentes" && offre.date.includes("1 jour")) ||
-      (activeTab === "sauvegardees" &&
-        savedItems.includes(`emploi-${offre.id}`));
+      (activeTab === "sauvegardees" && savedItems.includes(`emploi-${offre.id}`));
 
     return (
       matchesSearch &&
@@ -231,9 +247,23 @@ const EmploiSection = ({
     );
   });
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (searchTerm.trim()) {
-      toast.info(`Recherche d'emploi pour "${searchTerm}"`);
+      setLoading(true);
+      try {
+        await fetchEmplois({
+          search: searchTerm,
+          status: "active",
+          type: selectedType !== "tous" ? selectedType : "all",
+          secteur: selectedSecteur !== "tous" ? selectedSecteur : "all",
+          page: 1
+        });
+        toast.info(`Recherche d'emploi pour "${searchTerm}"`);
+      } catch (error) {
+        toast.error("Erreur lors de la recherche");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -247,22 +277,55 @@ const EmploiSection = ({
     setSearchTerm("");
     setSortBy("pertinence");
     setActiveTab("toutes");
+    
+    setLoading(true);
+    fetchEmplois({
+      search: "",
+      status: "active",
+      type: "all",
+      secteur: "all",
+      page: 1
+    }).finally(() => setLoading(false));
+    
     toast.success("Filtres réinitialisés");
   };
 
-  const handleSubmitApplication = (e) => {
+  const { postuler } = useCandidatures();
+
+ const handleSubmitApplication = async (e, offre) => {
     e.preventDefault();
+    
     if (!cvFile && !motivationLetter.trim()) {
-      toast.error(
-        "Veuillez ajouter au moins un CV ou un message de motivation"
-      );
+      toast.error("Veuillez ajouter au moins un CV ou un message de motivation");
       return;
     }
 
-    toast.success("Candidature envoyée avec succès !");
-    setMotivationLetter("");
-    setCvFile(null);
-    setIsApplicationDialogOpen(false);
+    try {
+      const result = await postuler(
+        offre.id,
+        'emploi',
+        offre.title,
+        {
+          messageMotivation: motivationLetter,
+          cvUrl: cvFile?.url,
+          nomCandidat: user?.name,
+          emailCandidat: user?.email,
+          telephoneCandidat: user?.phone
+        }
+      );
+
+      if (result.success) {
+        toast.success("Candidature envoyée avec succès !");
+        setMotivationLetter("");
+        setCvFile(null);
+        setIsApplicationDialogOpen(false);
+        
+        // Mettre à jour la liste
+        handleApply(offre.id, "emploi", offre.title);
+      }
+    } catch (error) {
+      toast.error(error.message || "Erreur lors de l'envoi de la candidature");
+    }
   };
 
   const toggleJobAlerts = () => {
@@ -276,10 +339,26 @@ const EmploiSection = ({
   };
 
   const statsData = [
-    { label: "Offres actives", value: "2,345", icon: Briefcase },
-    { label: "Nouvelles offres (7j)", value: "+156", icon: Clock },
-    { label: "Télétravail possible", value: "867", icon: Users2 },
-    { label: "Recrutement rapide", value: "423", icon: Zap },
+    { 
+      label: "Offres actives", 
+      value: stats?.active || "0", 
+      icon: Briefcase 
+    },
+    { 
+      label: "Nouvelles offres (7j)", 
+      value: "+" + (stats?.nouvellesSemaine || "0"), 
+      icon: Clock 
+    },
+    { 
+      label: "Télétravail possible", 
+      value: stats?.remotePossible || "0", 
+      icon: Users2 
+    },
+    { 
+      label: "Urgentes", 
+      value: stats?.urgent || "0", 
+      icon: Zap 
+    },
   ];
 
   return (
@@ -309,8 +388,9 @@ const EmploiSection = ({
             <Button
               className="bg-[#8B4513] hover:bg-[#6B3410] text-white px-8"
               onClick={handleSearch}
+              disabled={isLoading}
             >
-              Rechercher
+              {isLoading ? "Recherche..." : "Rechercher"}
             </Button>
           </div>
         </div>
@@ -410,6 +490,7 @@ const EmploiSection = ({
                 variant="outline"
                 className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white transition-colors"
                 onClick={handleResetFilters}
+                disabled={isLoading}
               >
                 Réinitialiser les filtres
               </Button>
@@ -546,7 +627,6 @@ const EmploiSection = ({
               <TabsTrigger value="toutes">Toutes</TabsTrigger>
               <TabsTrigger value="urgentes">Urgentes</TabsTrigger>
               <TabsTrigger value="remote">Télétravail</TabsTrigger>
-              <TabsTrigger value="recentes">Récentes</TabsTrigger>
               <TabsTrigger value="sauvegardees">
                 <Heart
                   className={`h-4 w-4 mr-2 ${
@@ -561,7 +641,7 @@ const EmploiSection = ({
             </TabsList>
 
             <TabsContent value={activeTab} className="space-y-4">
-              {loading ? (
+              {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <Card key={i} className="border-[#D3D3D3] animate-pulse">
                     <CardContent className="pt-6">
@@ -620,14 +700,10 @@ const EmploiSection = ({
                                     className={
                                       typesContrat.find(
                                         (t) => t.id === offre.type
-                                      )?.color
+                                      )?.color || "bg-gray-100 text-gray-800"
                                     }
                                   >
-                                    {
-                                      typesContrat.find(
-                                        (t) => t.id === offre.type
-                                      )?.label
-                                    }
+                                    {offre.type}
                                   </Badge>
                                   {offre.remote && (
                                     <Badge
@@ -664,46 +740,46 @@ const EmploiSection = ({
                               {offre.description}
                             </p>
 
-                            <div className="mb-4">
-                              <h4 className="font-semibold text-[#556B2F] mb-2">
-                                Compétences recherchées :
-                              </h4>
-                              <div className="flex flex-wrap gap-2">
-                                {offre.competences
-                                  .slice(0, 4)
-                                  .map((comp, idx) => (
+                            {offre.competences && offre.competences.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="font-semibold text-[#556B2F] mb-2">
+                                  Compétences recherchées :
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {offre.competences
+                                    .slice(0, 4)
+                                    .map((comp, idx) => (
+                                      <Badge
+                                        key={idx}
+                                        variant="secondary"
+                                        className="bg-gray-100"
+                                      >
+                                        {comp}
+                                      </Badge>
+                                    ))}
+                                  {offre.competences.length > 4 && (
                                     <Badge
-                                      key={idx}
-                                      variant="secondary"
-                                      className="bg-gray-100"
+                                      variant="outline"
+                                      className="text-gray-500"
                                     >
-                                      {comp}
+                                      +{offre.competences.length - 4}
                                     </Badge>
-                                  ))}
-                                {offre.competences.length > 4 && (
-                                  <Badge
-                                    variant="outline"
-                                    className="text-gray-500"
-                                  >
-                                    +{offre.competences.length - 4}
-                                  </Badge>
-                                )}
+                                  )}
+                                </div>
                               </div>
-                            </div>
+                            )}
 
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                               <div className="flex flex-wrap gap-2">
-                                {offre.avantages
-                                  .slice(0, 3)
-                                  .map((avantage, idx) => (
-                                    <Badge
-                                      key={idx}
-                                      variant="outline"
-                                      className="border-green-200 text-green-700 bg-green-50"
-                                    >
-                                      {avantage}
-                                    </Badge>
-                                  ))}
+                                {offre.avantages && offre.avantages.slice(0, 3).map((avantage, idx) => (
+                                  <Badge
+                                    key={idx}
+                                    variant="outline"
+                                    className="border-green-200 text-green-700 bg-green-50"
+                                  >
+                                    {avantage}
+                                  </Badge>
+                                ))}
                               </div>
                               <div className="flex gap-2">
                                 <Button
@@ -767,17 +843,45 @@ const EmploiSection = ({
                                               {selectedJob.description}
                                             </p>
                                           </div>
-                                          <div>
-                                            <h4 className="font-semibold text-[#8B4513] mb-2">
-                                              Missions principales
-                                            </h4>
-                                            <ul className="list-disc list-inside space-y-1 text-gray-700">
-                                              {selectedJob.missions.map(
-                                                (mission, idx) => (
-                                                  <li key={idx}>{mission}</li>
-                                                )
-                                              )}
-                                            </ul>
+                                          {selectedJob.missions && selectedJob.missions.length > 0 && (
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Missions principales
+                                              </h4>
+                                              <ul className="list-disc list-inside space-y-1 text-gray-700">
+                                                {selectedJob.missions.map(
+                                                  (mission, idx) => (
+                                                    <li key={idx}>{mission}</li>
+                                                  )
+                                                )}
+                                              </ul>
+                                            </div>
+                                          )}
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Salaire
+                                              </h4>
+                                              <p className="text-lg font-bold">{selectedJob.salaire}</p>
+                                            </div>
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Type de contrat
+                                              </h4>
+                                              <p>{selectedJob.type}</p>
+                                            </div>
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Expérience
+                                              </h4>
+                                              <p>{selectedJob.experience}</p>
+                                            </div>
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Date limite
+                                              </h4>
+                                              <p>{selectedJob.dateLimite ? new Date(selectedJob.dateLimite).toLocaleDateString() : "Non spécifiée"}</p>
+                                            </div>
                                           </div>
                                           <Button
                                             className="w-full bg-[#8B4513] hover:bg-[#6B3410]"

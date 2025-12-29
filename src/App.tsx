@@ -105,8 +105,9 @@ import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
 import ReservationTable from "./pages/pro/ReservationBien-etre";
 import GestionFormationsPage from "./components/pro/Gestion-Emploi-Formations/GestionFormationsPage";
-import GestionEmploisPage from "./components/pro/Gestion-Emploi-Formations/GestionEmploisPage";
 import GestionAlternancePage from "./components/pro/Gestion-Emploi-Formations/GestionAlternancePage";
+import GestionEmploisPage from "./components/pro/Gestion-Emploi-Formations/GestionEmploisPage";
+
 import FinancementDemandesPro from "./pages/pro/FinancementDemandesPro";
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
 import PodcastsBatiment from "./components/PodcastsBatiment";
@@ -217,6 +218,11 @@ import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
 import MesReservationsVehiculePage from "./pages/mon-compte/MesReservationsVehiculePage";
 import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
+
+// Ajoutez cette ligne avec les autres imports
+import MesCandidatures from "@/pages/EmploiFormationsPage/MesCandidatures";
+         
+
 import ProjetsPage from "./pages/ProjetsPage";
 import LocationSaisonniere from "./pages/LocationSaisonniere";
 import ExplorerVivre from "./components/components/ExplorerVivre";
@@ -862,9 +868,12 @@ const App = () => {
                       element={<GestionFormationsPage />}
                     />
                     <Route
-                      path="gestion-emplois"
-                      element={<GestionEmploisPage />}
-                    />
+  path="gestion-formations"
+  element={<GestionFormationsPage />}
+  
+/>
+
+<Route path="gestion-emplois" element={<GestionEmploisPage />} />
                     <Route
                       path="gestion-alternance"
                       element={<GestionAlternancePage />}
@@ -895,6 +904,9 @@ const App = () => {
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
                     <Route path="conseil" element={<UserConseilPage />} />
+ {/* AJOUTEZ CETTE ROUTE */}
+  <Route path="candidatures" element={<MesCandidatures />} />
+
                     <Route
                       path="locationSaisonniere"
                       element={<GestionLocationSaisonniere />}

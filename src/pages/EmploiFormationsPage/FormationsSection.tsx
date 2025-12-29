@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";// En haut du fichier, avec les autres imports
+import { useCandidatures } from '@/hooks/useCandidatures';
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -8,22 +9,15 @@ import {
   Award,
   BookOpen,
   MapPin,
-  ChevronRight,
   Star,
   Calendar,
-  Zap,
-  RotateCw,
   GraduationCap,
   Download,
   Mail,
-  Heart,
-  Share2,
-  Eye,
-  FileText,
-  X,
+  ChevronRight,
   CheckCircle,
-  ExternalLink,
-  Upload,
+  DollarSign,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,7 +48,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -67,7 +60,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth"; // Importez useAuth
+import { useAuth } from "@/hooks/useAuth";
+import { usePublicFormations } from "@/hooks/usePublicFormations";
 
 const FormationsSection = ({
   loading,
@@ -83,14 +77,12 @@ const FormationsSection = ({
   setLoading,
 }) => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth(); // Utilisez le hook useAuth
-  
-  const [formations, setFormations] = useState([]);
+  const { isAuthenticated, user } = useAuth();
+  const { formations, isLoading: apiLoading, fetchFormations, applyToFormation } = usePublicFormations();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("tous");
   const [selectedFormat, setSelectedFormat] = useState("tous");
   const [priceRange, setPriceRange] = useState([0, 5000]);
-  const [selectedOrganismes, setSelectedOrganismes] = useState([]);
   const [sortBy, setSortBy] = useState("pertinence");
   const [activeTab, setActiveTab] = useState("toutes");
   const [selectedFormation, setSelectedFormation] = useState(null);
@@ -114,153 +106,56 @@ const FormationsSection = ({
   ];
 
   const formats = [
-    { id: "presentiel", label: "Présentiel", icon: Users },
-    { id: "distanciel", label: "100% en ligne", icon: BookOpen },
-    { id: "hybride", label: "Hybride", icon: RotateCw },
+    { id: "présentiel", label: "Présentiel", icon: Users },
+    { id: "100% en ligne", label: "100% en ligne", icon: BookOpen },
+    { id: "hybride", label: "Hybride", icon: ChevronRight },
     { id: "alternance", label: "Alternance", icon: GraduationCap },
   ];
 
-  const formationsList = [
-    {
-      id: 1,
-      title: "Développeur Web Full Stack",
-      organisme: "OpenClassrooms",
-      category: "informatique",
-      format: "distanciel",
-      duration: "6 mois",
-      participants: "25 places",
-      price: 2990,
-      rating: 4.8,
-      reviews: 124,
-      location: "100% en ligne",
-      certification: "RNCP niveau 6",
-      description:
-        "Formation complète pour devenir développeur full stack avec projets concrets",
-      features: [
-        "Projets tutorés",
-        "Certification reconnue",
-        "Suivi personnalisé",
-      ],
-      startDate: "15/01/2024",
-      financed: true,
-      certified: true,
-      details: {
-        prerequisites: "Bonne maîtrise de l'ordinateur, logique algorithmique",
-        program: [
-          "HTML/CSS avancé",
-          "JavaScript moderne",
-          "React & Node.js",
-          "Bases de données",
-          "DevOps & déploiement",
-        ],
-        methodology: "Projets pratiques, mentorat individuel, communauté active",
-        financingOptions: ["CPF", "Pôle Emploi", "Entreprise", "Personnel"],
-      },
-    },
-    {
-      id: 2,
-      title: "Gestion de Projet Agile",
-      organisme: "CNAM",
-      category: "management",
-      format: "hybride",
-      duration: "3 mois",
-      participants: "18 places",
-      price: 1850,
-      rating: 4.6,
-      reviews: 89,
-      location: "Paris + Distanciel",
-      certification: "Certificat CNAM",
-      description: "Maîtrisez les méthodologies Agile et Scrum",
-      features: [
-        "Cas réels d'entreprise",
-        "Certification PMI",
-        "Ateliers pratiques",
-      ],
-      startDate: "20/02/2024",
-      financed: true,
-      certified: true,
-    },
-    {
-      id: 3,
-      title: "CAP Électricien",
-      organisme: "AFPA",
-      category: "batiment",
-      format: "presentiel",
-      duration: "12 mois",
-      participants: "15 places",
-      price: 4500,
-      rating: 4.9,
-      reviews: 156,
-      location: "Lyon",
-      certification: "Diplôme d'État",
-      description: "Formation complète avec stages en entreprise",
-      features: ["Matériel fourni", "Stages garantis", "Aide à l'emploi"],
-      startDate: "10/01/2024",
-      financed: true,
-      certified: true,
-    },
-    {
-      id: 4,
-      title: "Marketing Digital Avancé",
-      organisme: "Coursera",
-      category: "commerce",
-      format: "distanciel",
-      duration: "4 mois",
-      participants: "Illimité",
-      price: 790,
-      rating: 4.7,
-      reviews: 234,
-      location: "100% en ligne",
-      certification: "Google Certificat",
-      description: "Spécialisation en marketing digital et analytics",
-      features: [
-        "Certification Google",
-        "Accès à vie",
-        "Réseau professionnel",
-      ],
-      startDate: "Démarrage immédiat",
-      financed: false,
-      certified: true,
-    },
-  ];
-
-  useEffect(() => {
+  // Charger les formations depuis l'API
+useEffect(() => {
+  const loadFormations = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setFormations(formationsList);
+    try {
+      // Récupérer uniquement les formations actives
+      await fetchFormations({ 
+        status: "active",
+        page: 1,
+        limit: 50
+      });
+    } catch (error) {
+      // L'erreur est déjà gérée dans le hook
+      console.log("Erreur capturée dans FormationsSection:", error);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
 
-  // Vérifier si on doit ouvrir un dialogue après le retour du login
+  loadFormations();
+}, [fetchFormations]); // Ajoutez fetchFormations comme dépendance
+
+  // Vérifier les actions en attente après connexion
   useEffect(() => {
     const checkForPendingAction = () => {
-      // Vérifier si l'utilisateur vient de se connecter et a une action en attente
       const pendingAction = sessionStorage.getItem('pendingFormationAction');
       const formationId = sessionStorage.getItem('selectedFormationId');
       
       if (pendingAction === 'inscription' && formationId && isAuthenticated) {
-        // Trouver la formation correspondante
-        const formationToOpen = formationsList.find(f => f.id.toString() === formationId);
+        const formationToOpen = formations?.find(f => f.id.toString() === formationId);
         if (formationToOpen) {
-          // Ouvrir le dialogue
           setSelectedFormation(formationToOpen);
           setIsContactDialogOpen(true);
-          
-          // Afficher un message de bienvenue
           toast.success("Bienvenue ! Vous pouvez maintenant vous inscrire à la formation.");
         }
         
-        // Nettoyer le sessionStorage
         sessionStorage.removeItem('pendingFormationAction');
         sessionStorage.removeItem('selectedFormationId');
+        sessionStorage.removeItem('formationTitle');
       }
     };
 
-    // Vérifier immédiatement au chargement
     checkForPendingAction();
 
-    // Écouter les changements de sessionStorage (pour gérer les onglets multiples)
     const handleStorageChange = (e) => {
       if (e.key === 'pendingFormationAction' || e.key === 'selectedFormationId') {
         checkForPendingAction();
@@ -272,23 +167,27 @@ const FormationsSection = ({
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [isAuthenticated]); // Dépendre de isAuthenticated
+  }, [isAuthenticated, formations]);
 
-  const filteredFormations = formations.filter((formation) => {
+  const filteredFormations = formations?.filter((formation) => {
     const matchesSearch =
-      formation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      formation.description.toLowerCase().includes(searchTerm.toLowerCase());
+      formation.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      formation.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      formation.organisme?.toLowerCase().includes(searchTerm.toLowerCase());
+    
     const matchesCategory =
       selectedCategory === "tous" || formation.category === selectedCategory;
+    
     const matchesFormat =
       selectedFormat === "tous" || formation.format === selectedFormat;
+    
     const matchesPrice =
       formation.price >= priceRange[0] && formation.price <= priceRange[1];
 
     const matchesTab =
       activeTab === "toutes" ||
-      (activeTab === "certifiantes" && formation.certified) ||
-      (activeTab === "financees" && formation.financed) ||
+      (activeTab === "certifiantes" && formation.isCertified) ||
+      (activeTab === "financees" && formation.isFinanced) ||
       (activeTab === "alternance" && formation.format === "alternance");
 
     return (
@@ -296,9 +195,10 @@ const FormationsSection = ({
       matchesCategory &&
       matchesFormat &&
       matchesPrice &&
-      matchesTab
+      matchesTab &&
+      formation.status === "active" // Ne montrer que les formations actives
     );
-  });
+  }) || [];
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
@@ -309,7 +209,6 @@ const FormationsSection = ({
   const handleResetFilters = () => {
     setSelectedCategory("tous");
     setSelectedFormat("tous");
-    setSelectedOrganismes([]);
     setPriceRange([0, 5000]);
     setSearchTerm("");
     setSortBy("pertinence");
@@ -317,57 +216,104 @@ const FormationsSection = ({
     toast.success("Filtres réinitialisés");
   };
 
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) {
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
-    toast.success(
-      "Votre demande a été envoyée ! Un conseiller vous contactera sous 24h."
-    );
-    setContactForm({ name: "", email: "", phone: "", message: "" });
-    setIsContactDialogOpen(false);
+    try {
+      // Ici, vous pouvez appeler une API pour envoyer la demande de contact
+      // await sendContactRequest({ ...contactForm, formationId: selectedFormation?.id });
+      
+      toast.success(
+        "Votre demande a été envoyée ! Un conseiller vous contactera sous 24h."
+      );
+      setContactForm({ name: "", email: "", phone: "", message: "" });
+      setIsContactDialogOpen(false);
+    } catch (error) {
+      toast.error("Erreur lors de l'envoi de la demande");
+    }
   };
 
-  const handleDownloadCatalog = () => {
-    toast.info("Téléchargement du catalogue en cours...");
-    setTimeout(() => {
-      toast.success("Catalogue téléchargé avec succès !");
-    }, 1500);
-  };
-
-  const handleInscription = (formation) => {
-    // Vérifier si l'utilisateur est connecté en utilisant useAuth
-    console.log("Auth status:", { isAuthenticated, user }); // Debug
-    
+  const handleInscription = async (formation) => {
     if (!isAuthenticated) {
-      // Stocker les informations dans sessionStorage pour récupération après login
       sessionStorage.setItem('pendingFormationAction', 'inscription');
       sessionStorage.setItem('selectedFormationId', formation.id.toString());
       sessionStorage.setItem('formationTitle', formation.title);
-      
-      // Stocker aussi l'URL actuelle pour le retour
       sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
       
-      // Rediriger vers login
       navigate("/login");
       return;
     }
 
-    // Si connecté, ouvrir directement le formulaire
-    console.log("User is authenticated, opening dialog for formation:", formation.title);
+    // Si l'utilisateur est connecté, ouvrir le formulaire d'inscription
     setSelectedFormation(formation);
     setIsContactDialogOpen(true);
   };
 
+ const { postuler } = useCandidatures();
+
+const handleApplyToFormation = async () => {
+  if (!selectedFormation || !user) return;
+
+  try {
+    const result = await postuler(
+      selectedFormation.id,
+      'formation',
+      selectedFormation.title,
+      {
+        messageMotivation: contactForm.message,
+        cvUrl: cvFile?.url,
+        nomCandidat: contactForm.name || user.name,
+        emailCandidat: contactForm.email || user.email,
+        telephoneCandidat: contactForm.phone || user.phone
+      }
+    );
+
+    if (result.success) {
+      toast.success("Votre candidature a été envoyée avec succès !");
+      setIsContactDialogOpen(false);
+      setContactForm({ name: "", email: "", phone: "", message: "" });
+      
+      // Mettre à jour la liste des formations appliquées
+      if (handleApply) {
+        handleApply(`formations-${selectedFormation.id}`);
+      }
+      
+      // Recharger les formations pour mettre à jour le compteur
+      await fetchFormations({ status: "active" });
+    }
+  } catch (error) {
+    if (error.message.includes("Non autorisé") || error.message.includes("déjà postulé")) {
+      toast.error(error.message);
+    } else {
+      toast.error("Erreur lors de l'inscription");
+    }
+  }
+};
+
   const statsData = [
-    { label: "Formations disponibles", value: "527", icon: BookOpen },
+    { label: "Formations disponibles", value: formations?.length || "0", icon: BookOpen },
     { label: "Organismes partenaires", value: "86", icon: Users },
     { label: "Certifications reconnues", value: "312", icon: Award },
     { label: "Taux de réussite", value: "94%", icon: Star },
   ];
+
+  const getCategoryIcon = (category) => {
+    const icons = {
+      'Informatique & Numérique': '💻',
+      'Management & Leadership': '👔',
+      'Commerce & Marketing': '📈',
+      'Bâtiment & Construction': '🏗️',
+      'Santé & Bien-être': '🏥',
+      'Comptabilité & Finance': '💰',
+      'Langues étrangères': '🌐',
+      'Artisanat & Métiers': '🛠️',
+    };
+    return icons[category] || '📚';
+  };
 
   return (
     <>
@@ -496,7 +442,7 @@ const FormationsSection = ({
                 <Button
                   variant="outline"
                   className="w-full justify-start border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white"
-                  onClick={handleDownloadCatalog}
+                  onClick={() => toast.info("Fonctionnalité à venir")}
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Télécharger le catalogue
@@ -577,21 +523,21 @@ const FormationsSection = ({
               <TabsContent value={activeTab} className="space-y-6">
                 {/* Formations List */}
                 <div className="space-y-4">
-                  {loading ? (
+                  {apiLoading || loading ? (
                     Array.from({ length: 3 }).map((_, i) => (
-                      <Card key={i} className="border-[#D3D3D3]">
-                        <CardContent className="pt-6">
-                          <div className="flex flex-col md:flex-row gap-4">
-                            <Skeleton className="h-48 w-full md:w-48 rounded-lg" />
-                            <div className="flex-1 space-y-2">
-                              <Skeleton className="h-6 w-3/4" />
-                              <Skeleton className="h-4 w-1/2" />
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-2/3" />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        <Card key={`skeleton-${i}`} className="border-[#D3D3D3]">
+      <CardContent className="pt-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <Skeleton className="h-48 w-full md:w-48 rounded-lg" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
                     ))
                   ) : filteredFormations.length > 0 ? (
                     filteredFormations.map((formation) => (
@@ -603,7 +549,9 @@ const FormationsSection = ({
                           <div className="flex flex-col md:flex-row gap-6">
                             {/* Formation Image/Logo */}
                             <div className="relative w-full md:w-48 h-48 bg-gradient-to-br from-[#556B2F] to-[#6B8E23] rounded-lg flex items-center justify-center">
-                              <BookOpen className="h-16 w-16 text-white" />
+                              <div className="text-4xl">
+                                {getCategoryIcon(formation.category)}
+                              </div>
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -630,24 +578,24 @@ const FormationsSection = ({
                                 <div>
                                   <div className="flex items-center gap-2 mb-2">
                                     <Badge className="bg-[#556B2F] hover:bg-[#6B8E23] text-white">
-                                      {formation.category
-                                        .charAt(0)
-                                        .toUpperCase() +
-                                        formation.category.slice(1)}
+                                      {formation.category}
                                     </Badge>
                                     <Badge
                                       variant="outline"
                                       className="border-[#8B4513] text-[#8B4513]"
                                     >
-                                      {
-                                        formats.find(
-                                          (f) => f.id === formation.format
-                                        )?.label
-                                      }
+                                      {formation.format}
                                     </Badge>
-                                    {formation.certified && (
+                                    {formation.isCertified && (
                                       <Badge className="bg-green-100 text-green-800 border-green-200">
+                                        <CheckCircle className="h-3 w-3 mr-1" />
                                         Certifiée
+                                      </Badge>
+                                    )}
+                                    {formation.isFinanced && (
+                                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                                        <DollarSign className="h-3 w-3 mr-1" />
+                                        Financée
                                       </Badge>
                                     )}
                                   </div>
@@ -655,7 +603,7 @@ const FormationsSection = ({
                                     {formation.title}
                                   </h3>
                                   <p className="text-gray-600 mb-3">
-                                    {formation.organisme}
+                                    {formation.organisme || "Organisme"}
                                   </p>
                                 </div>
                                 <div className="text-right">
@@ -667,10 +615,10 @@ const FormationsSection = ({
                                   <div className="flex items-center justify-end gap-1">
                                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                                     <span className="font-semibold">
-                                      {formation.rating}
+                                      {formation.rating || "4.5"}
                                     </span>
                                     <span className="text-gray-500 text-sm">
-                                      ({formation.reviews} avis)
+                                      ({formation.reviews || 0} avis)
                                     </span>
                                   </div>
                                 </div>
@@ -696,34 +644,41 @@ const FormationsSection = ({
                                 <div className="flex items-center gap-2">
                                   <Users className="h-4 w-4 text-[#556B2F]" />
                                   <span className="text-sm">
-                                    {formation.participants}
+                                    {formation.currentParticipants || 0}/{formation.maxParticipants || 10} places
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Calendar className="h-4 w-4 text-[#556B2F]" />
                                   <span className="text-sm">
-                                    Début : {formation.startDate}
+                                    Début : {formation.startDate ? new Date(formation.startDate).toLocaleDateString('fr-FR') : "À définir"}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                {formation.features.map((feature, idx) => (
-                                  <Badge
-                                    key={idx}
-                                    variant="secondary"
-                                    className="bg-gray-100"
-                                  >
-                                    {feature}
-                                  </Badge>
-                                ))}
-                              </div>
+                              {formation.program && formation.program.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                  {formation.program.slice(0, 3).map((feature, idx) => (
+                                    <Badge
+                                      key={idx}
+                                      variant="secondary"
+                                      className="bg-gray-100"
+                                    >
+                                      {feature}
+                                    </Badge>
+                                  ))}
+                                  {formation.program.length > 3 && (
+                                    <Badge variant="outline" className="text-gray-500">
+                                      +{formation.program.length - 3} autres
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
 
                               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div className="flex items-center gap-2">
                                   <Award className="h-4 w-4 text-[#6B8E23]" />
                                   <span className="text-sm font-medium">
-                                    {formation.certification}
+                                    {formation.certification || "Certification incluse"}
                                   </span>
                                 </div>
                                 <div className="flex gap-3">
@@ -745,7 +700,7 @@ const FormationsSection = ({
                                           {formation.title}
                                         </SheetTitle>
                                         <SheetDescription>
-                                          {formation.organisme} •{" "}
+                                          {formation.organisme || "Organisme"} •{" "}
                                           {formation.location}
                                         </SheetDescription>
                                       </SheetHeader>
@@ -758,48 +713,71 @@ const FormationsSection = ({
                                             {formation.description}
                                           </p>
                                         </div>
-                                        {formation.details && (
-                                          <>
-                                            <div>
-                                              <h4 className="font-semibold text-[#8B4513] mb-2">
-                                                Programme
-                                              </h4>
-                                              <ul className="list-disc list-inside space-y-1 text-gray-700">
-                                                {formation.details.program?.map(
-                                                  (item, idx) => (
-                                                    <li key={idx}>{item}</li>
-                                                  )
-                                                )}
-                                              </ul>
-                                            </div>
-                                            <div>
-                                              <h4 className="font-semibold text-[#8B4513] mb-2">
-                                                Financements
-                                              </h4>
-                                              <div className="flex flex-wrap gap-2">
-                                                {formation.details.financingOptions?.map(
-                                                  (option, idx) => (
-                                                    <Badge
-                                                      key={idx}
-                                                      variant="outline"
-                                                      className="bg-gray-50"
-                                                    >
-                                                      {option}
-                                                    </Badge>
-                                                  )
-                                                )}
-                                              </div>
-                                            </div>
-                                          </>
+                                        {formation.requirements && (
+                                          <div>
+                                            <h4 className="font-semibold text-[#8B4513] mb-2">
+                                              Pré-requis
+                                            </h4>
+                                            <p className="text-gray-700">
+                                              {formation.requirements}
+                                            </p>
+                                          </div>
                                         )}
+                                        {formation.program && formation.program.length > 0 && (
+                                          <div>
+                                            <h4 className="font-semibold text-[#8B4513] mb-2">
+                                              Programme
+                                            </h4>
+                                            <ul className="list-disc list-inside space-y-1 text-gray-700">
+                                              {formation.program.map(
+                                                (item, idx) => (
+                                                  <li key={idx}>{item}</li>
+                                                )
+                                              )}
+                                            </ul>
+                                          </div>
+                                        )}
+                                        <div>
+                                          <h4 className="font-semibold text-[#8B4513] mb-2">
+                                            Informations pratiques
+                                          </h4>
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <p className="text-sm text-gray-600">Durée</p>
+                                              <p className="font-medium">{formation.duration}</p>
+                                            </div>
+                                            <div>
+                                              <p className="text-sm text-gray-600">Format</p>
+                                              <p className="font-medium">{formation.format}</p>
+                                            </div>
+                                            <div>
+                                              <p className="text-sm text-gray-600">Prix</p>
+                                              <p className="font-medium">{formation.price}€</p>
+                                            </div>
+                                            <div>
+                                              <p className="text-sm text-gray-600">Statut</p>
+                                              <Badge className={
+                                                formation.status === 'active' ? 'bg-green-100 text-green-800' :
+                                                formation.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                                                'bg-yellow-100 text-yellow-800'
+                                              }>
+                                                {formation.status === 'active' ? 'Active' : 
+                                                 formation.status === 'draft' ? 'Brouillon' : 'Archivée'}
+                                              </Badge>
+                                            </div>
+                                          </div>
+                                        </div>
                                       </div>
                                     </SheetContent>
                                   </Sheet>
                                   <Button
                                     className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
                                     onClick={() => handleInscription(formation)}
+                                    disabled={appliedItems.includes(`formations-${formation.id}`)}
                                   >
-                                    S'inscrire
+                                    {appliedItems.includes(`formations-${formation.id}`) 
+                                      ? "Déjà inscrit" 
+                                      : "S'inscrire"}
                                   </Button>
                                 </div>
                               </div>
@@ -831,66 +809,73 @@ const FormationsSection = ({
         </div>
       </div>
 
-      {/* Dialog de contact */}
+      {/* Dialog d'inscription */}
       <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {selectedFormation
-                ? `Demande d'information : ${selectedFormation.title}`
-                : "Demande d'information sur les formations"}
+                ? `Inscription : ${selectedFormation.title}`
+                : "Demande d'information"}
             </DialogTitle>
             <DialogDescription>
-              Un conseiller vous recontactera sous 24h pour répondre à vos
-              questions.
+              {selectedFormation
+                ? "Postulez à cette formation en remplissant le formulaire ci-dessous."
+                : "Un conseiller vous recontactera sous 24h pour répondre à vos questions."}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleContactSubmit}>
+          <form onSubmit={selectedFormation ? handleApplyToFormation : handleContactSubmit}>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nom complet *</Label>
-                  <Input
-                    id="name"
-                    value={contactForm.name}
-                    onChange={(e) =>
-                      setContactForm({ ...contactForm, name: e.target.value })
-                    }
-                    placeholder="Votre nom"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={contactForm.email}
-                    onChange={(e) =>
-                      setContactForm({
-                        ...contactForm,
-                        email: e.target.value,
-                      })
-                    }
-                    placeholder="votre@email.com"
-                    required
-                  />
-                </div>
-              </div>
+              {!selectedFormation && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nom complet *</Label>
+                      <Input
+                        id="name"
+                        value={contactForm.name}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, name: e.target.value })
+                        }
+                        placeholder="Votre nom"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={contactForm.email}
+                        onChange={(e) =>
+                          setContactForm({
+                            ...contactForm,
+                            email: e.target.value,
+                          })
+                        }
+                        placeholder="votre@email.com"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Téléphone</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={contactForm.phone}
+                      onChange={(e) =>
+                        setContactForm({ ...contactForm, phone: e.target.value })
+                      }
+                      placeholder="06 12 34 56 78"
+                    />
+                  </div>
+                </>
+              )}
               <div className="space-y-2">
-                <Label htmlFor="phone">Téléphone</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={contactForm.phone}
-                  onChange={(e) =>
-                    setContactForm({ ...contactForm, phone: e.target.value })
-                  }
-                  placeholder="06 12 34 56 78"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message">Message *</Label>
+                <Label htmlFor="message">
+                  {selectedFormation ? "Lettre de motivation *" : "Message *"}
+                </Label>
                 <Textarea
                   id="message"
                   value={contactForm.message}
@@ -900,11 +885,30 @@ const FormationsSection = ({
                       message: e.target.value,
                     })
                   }
-                  placeholder="Décrivez votre projet de formation..."
+                  placeholder={
+                    selectedFormation
+                      ? "Pourquoi souhaitez-vous suivre cette formation ?..."
+                      : "Décrivez votre projet de formation..."
+                  }
                   className="min-h-[100px]"
                   required
                 />
               </div>
+              {selectedFormation && (
+                <div className="space-y-2">
+                  <Label htmlFor="cv">CV (optionnel)</Label>
+                  <Input
+                    id="cv"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleFileUpload}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Formats acceptés : PDF, DOC, DOCX (max 5MB)
+                  </p>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button
@@ -918,7 +922,7 @@ const FormationsSection = ({
                 type="submit"
                 className="bg-[#556B2F] hover:bg-[#6B8E23]"
               >
-                Envoyer la demande
+                {selectedFormation ? "Postuler" : "Envoyer la demande"}
               </Button>
             </DialogFooter>
           </form>
