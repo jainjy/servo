@@ -237,6 +237,7 @@ import PodcastsComponent from "./components/components/PodcastsInspirer";
 import VideosComponent from "./components/components/VideosInspirer";
 import PortraitsLocaux from "./components/components/PortraitLocaux";
 import BonsPlansConseils from "./components/components/BonPlanConseils";
+import PortraitsAdmin from "./pages/admin/PortraitsAdmin";
 
 
 
@@ -373,21 +374,63 @@ const App = () => {
                   <Route path="/rachat" element={<RachatServiceCard />} />
 
                   <Route path="/explorer-vivre" element={<ExplorerVivre />} />
-                  <Route path="/evenement-decouverte" element={<EventsDiscoveries />} />
-                  <Route path="/nature-patrimoine" element={<NaturePatrimoine />} />
-                  <Route path="/sejour-experience" element={<SejoursExperiences />} />
-                  <Route path="/bien-etre-alimentation" element={<BienEtreAlimentation />} />
-                  <Route path="/depannage-entretien" element={<DepannageEntretien />} />
-                  <Route path="/artistes-createurs" element={<ArtistesCreateurs />} />
-                  <Route path="/galerie-exposition" element={<GaleriesExpositions />} />
-                  <Route path="/video-creation-visuelle" element={<VideoCreationVisuelle />} />
-                  <Route path="/oeuvre-creation-locales" element={<OeuvresCreationsLocales />} />
-                  <Route path="/podcasts-inspirer-eveiller" element={<PodcastsComponent />} />
-                  <Route path="/videos-inspirer-eveiller" element={<VideosComponent />} />
-                  <Route path="/portraits-locaux" element={<PortraitsLocaux />} />
-                  <Route path="/bon-plan-conseil" element={<BonsPlansConseils />} />
+                  <Route
+                    path="/evenement-decouverte"
+                    element={<EventsDiscoveries />}
+                  />
+                  <Route
+                    path="/nature-patrimoine"
+                    element={<NaturePatrimoine />}
+                  />
+                  <Route
+                    path="/sejour-experience"
+                    element={<SejoursExperiences />}
+                  />
+                  <Route
+                    path="/bien-etre-alimentation"
+                    element={<BienEtreAlimentation />}
+                  />
+                  <Route
+                    path="/depannage-entretien"
+                    element={<DepannageEntretien />}
+                  />
+                  <Route
+                    path="/artistes-createurs"
+                    element={<ArtistesCreateurs />}
+                  />
+                  <Route
+                    path="/galerie-exposition"
+                    element={<GaleriesExpositions />}
+                  />
+                  <Route
+                    path="/video-creation-visuelle"
+                    element={<VideoCreationVisuelle />}
+                  />
+                  <Route
+                    path="/oeuvre-creation-locales"
+                    element={<OeuvresCreationsLocales />}
+                  />
+                  <Route
+                    path="/podcasts-inspirer-eveiller"
+                    element={<PodcastsComponent />}
+                  />
+                  <Route
+                    path="/videos-inspirer-eveiller"
+                    element={<VideosComponent />}
+                  />
+                  <Route
+                    path="/portraits-locaux"
+                    element={<PortraitsLocaux />}
+                  />
+                  <Route
+                    path="/bon-plan-conseil"
+                    element={<BonsPlansConseils />}
+                  />
 
-                  <Route path="/location-Saisonniere" element={<LocationSaisonniere />} />
+                  <Route
+                    path="/location-Saisonniere"
+                    element={<LocationSaisonniere />}
+                  />
                   <Route
                     path="/location-saisonniere"
                     element={<PropertyRent isSeasonal={true} />}
@@ -879,6 +922,7 @@ const App = () => {
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="blog" element={<Blog />} />
+                    <Route path="portraits" element={<PortraitsAdmin />} />
                     <Route path="bookings" element={<Bookings />} />
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
@@ -949,14 +993,17 @@ const App = () => {
                   {/* Onglets Arts et Creations */}
                   <Route path="/art-et-creation" element={<ArtETCreation />} />
 
-                   <Route path="/photographie" element={<PhotographiePage />} />
-                  <Route path="/sculpture" element={<SculpturePage onContactClick={undefined} />} />
+                  <Route path="/photographie" element={<PhotographiePage />} />
+                  <Route
+                    path="/sculpture"
+                    element={<SculpturePage onContactClick={undefined} />}
+                  />
                   <Route path="/peinture" element={<PeinturePage />} />
-                 {/* <Route path="/artisanat" element={<ArtisanatPage />} />*/}
+                  {/* <Route path="/artisanat" element={<ArtisanatPage />} />*/}
                   <Route
                     path="/marketplace-createurs"
                     element={<MarketplaceCreateurs />}
-                  /> 
+                  />
                   <Route
                     path="/art-et-creation/photographie/:categorySlug"
                     element={<ArtETCreation />}
