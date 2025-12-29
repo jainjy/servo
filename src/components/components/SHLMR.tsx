@@ -1064,7 +1064,7 @@ const LogementsSHLMR = () => {
 
                                                                     {/* Badge prix */}
                                                                     <div className="absolute top-3 right-3 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
-                                                                        style={{ backgroundColor: `${COLORS.logo}20`, color: COLORS.logo }}>
+                                                                        style={{ backgroundColor: `${COLORS.logo}20`, color: COLORS.logo }}>git 
                                                                         {logement.prix}
                                                                     </div>
 
