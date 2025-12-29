@@ -1,3 +1,4 @@
+// frontend/src/pages/ListingsPage.jsx
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,15 @@ import AuthService from "@/services/authService";
 import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
 import { ListingModal } from "@/components/admin/listings/listing-modal";
+
+// Import des constantes des types sociaux
+import {
+  SOCIAL_TYPES,
+  SOCIAL_TYPE_LABELS,
+  SOCIAL_TYPE_COLORS,
+  getSocialTypeColor,
+  getSocialTypeLabel
+} from "@/constants/socialTypes";
 
 // Nouvelle palette de couleurs
 const COLORS = {
@@ -177,6 +187,12 @@ const ModalStatistiques = ({ isOpen, onClose, annonce }) => {
               <Badge className={STATUT_ANNONCE[annonce.status]?.color}>
                 {STATUT_ANNONCE[annonce.status]?.label}
               </Badge>
+            </div>
+            <div className="flex justify-between">
+              <span style={{ color: COLORS.SECONDARY_TEXT }}>Type social:</span>
+              <span style={{ color: COLORS.PRIMARY_DARK }}>
+                {annonce.socialTypeLabel || annonce.socialType || "Aucun"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span style={{ color: COLORS.SECONDARY_TEXT }}>Créée le:</span>
@@ -549,6 +565,9 @@ const ModalGalerieImages = ({ isOpen, onClose, annonce }) => {
           <p><strong>Propriété:</strong> {annonce.title}</p>
           <p><strong>Localisation:</strong> {annonce.address}, {annonce.city}</p>
           <p><strong>Nombre d'images:</strong> {images.length}</p>
+          {annonce.socialType && (
+            <p><strong>Type social:</strong> {annonce.socialTypeLabel || annonce.socialType}</p>
+          )}
         </div>
       </div>
     </Modal>
@@ -598,6 +617,9 @@ const ListingsPage = () => {
     try {
       setLoading(true);
       const response = await api.get(`/properties/user/${userId}?status=all`);
+      
+      // Le backend renvoie maintenant socialType et socialTypeLabel
+      // grâce à la fonction determineSocialType()
       setAnnonces(response.data);
     } catch (error) {
       console.error("Error fetching properties:", error);
@@ -620,8 +642,6 @@ const ListingsPage = () => {
   // Fonction pour créer une réservation automatique
   const creerReservationAutomatique = async (annonce, clientId) => {
     try {
-      // console.log(`🔄 Création réservation automatique pour annonce: ${annonce.id}, client: ${clientId}`);
-      
       // Calculer les dates (7 jours après aujourd'hui, durée 7 nuits)
       const dateDebut = new Date();
       dateDebut.setDate(dateDebut.getDate() + 7);
@@ -657,8 +677,6 @@ const ListingsPage = () => {
         }
       }));
       
-      // console.log("✅ Réservation créée avec succès:", response.data);
-      
       return { 
         success: true, 
         message: "Réservation créée avec succès",
@@ -670,13 +688,9 @@ const ListingsPage = () => {
       
       // Essayer avec l'endpoint spécial
       try {
-        // console.log("🔄 Tentative via endpoint spécial auto-from-property...");
-        
         const responseAlt = await api.post(`/locations-saisonnieres/auto-from-property/${annonce.id}`, {
           clientId: clientId
         });
-        
-        // console.log("✅ Réservation créée via endpoint spécial:", responseAlt.data);
         
         return { 
           success: true, 
@@ -833,6 +847,25 @@ const ListingsPage = () => {
     if (annonce.listingType === "both") return { vente: true, location: true };
     if (annonce.listingType === "rent") return { vente: false, location: true };
     return { vente: true, location: false };
+  };
+
+  // Fonction pour obtenir le badge du type social
+  const renderSocialTypeBadge = (socialType) => {
+    if (!socialType) return null;
+    
+    return (
+      <Badge
+        variant="secondary"
+        className="text-xs font-semibold px-2.5 py-1"
+        style={{ 
+          backgroundColor: getSocialTypeColor(socialType),
+          color: COLORS.LIGHT_BG 
+        }}
+        title={getSocialTypeLabel(socialType)}
+      >
+        {socialType}
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -1071,30 +1104,9 @@ const ListingsPage = () => {
                         Saisonnière
                       </Badge>
                     )}
-                    {annonce.isPSLA && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs font-semibold px-2.5 py-1"
-                        style={{ 
-                          backgroundColor: "#EA580C",
-                          color: COLORS.LIGHT_BG 
-                        }}
-                      >
-                        PSLA
-                      </Badge>
-                    )}
-                    {annonce.isSHLMR && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs font-semibold px-2.5 py-1"
-                        style={{ 
-                          backgroundColor: "#4F46E5",
-                          color: COLORS.LIGHT_BG 
-                        }}
-                      >
-                        SHLMR
-                      </Badge>
-                    )}
+                    
+                    {/* Badge du type social */}
+                    {annonce.socialType && renderSocialTypeBadge(annonce.socialType)}
                   </div>
                 </div>
 
@@ -1143,6 +1155,18 @@ const ListingsPage = () => {
                       <span>{annonce.bedrooms} ch.</span>
                     </div>
                   </div>
+
+                  {/* Type social */}
+                  {annonce.socialTypeLabel && (
+                    <div className="mb-4 text-xs sm:text-sm">
+                      <span className="font-medium" style={{ color: COLORS.SECONDARY_TEXT }}>
+                        Type social: 
+                      </span>
+                      <span className="ml-2" style={{ color: getSocialTypeColor(annonce.socialType) }}>
+                        {annonce.socialTypeLabel}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Statistiques rapides */}
                   <div className="flex justify-between mb-4 p-2 sm:p-3 rounded-lg gap-2"

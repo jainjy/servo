@@ -82,11 +82,212 @@ interface Logement {
     surface?: number;
     price?: number;
     rooms?: number;
-    socialType?: string;
+    socialType?: string; // SHLMR, SODIAC, SIDR, SEDRE, SEMAC, PSLA
     features?: string[];
 }
 
-const LogementsSHLMR = () => {
+// Composant de carte individuelle avec animations framer-motion
+const PropertyCard = ({ 
+    logement, 
+    index, 
+    favoris, 
+    toggleFavori, 
+    handlePostuler, 
+    sentRequests, 
+    handleVoirDetails 
+}) => {
+    const isDejaPostule = sentRequests?.[logement.id];
+    
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.5, delay: index * 0.05 }}
+            whileHover={{ y: -8, transition: { duration: 0.2 } }}
+            className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
+            style={{ borderColor: COLORS.separator }}
+        >
+            {/* Image avec badges */}
+            <div className="relative">
+                <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
+                    <img
+                        src={logement.image}
+                        alt={logement.titre}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+
+                    {/* Badges superposés */}
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
+                        style={{ color: COLORS.logo }}>
+                        {logement.socialType || 'SOCIAL'}
+                    </div>
+
+                    {/* Badge prix */}
+                    <div className="absolute top-3 right-3 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
+                        style={{ backgroundColor: `${COLORS.logo}20`, color: COLORS.logo }}>
+                        {logement.prix}
+                    </div>
+
+                    {/* Badge classe énergie */}
+                    {logement.energyClass && (
+                        <div className="absolute bottom-3 left-3">
+                            <span
+                                className={`px-2 py-1 rounded text-xs font-semibold ${logement.energyClass === "A"
+                                    ? "bg-green-500 text-white"
+                                    : logement.energyClass === "B"
+                                        ? "bg-lime-500 text-white"
+                                        : logement.energyClass === "C"
+                                            ? "bg-yellow-500 text-white"
+                                            : "bg-gray-500 text-white"
+                                    }`}
+                            >
+                                Classe {logement.energyClass}
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Bouton favori */}
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavori(logement.id);
+                        }}
+                        className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
+                            ? 'bg-red-500 text-white'
+                            : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
+                            }`}
+                    >
+                        <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
+                    </motion.button>
+                </div>
+            </div>
+
+            {/* Contenu de la carte */}
+            <div className="p-4">
+                <h3 className="font-semibold text-sm line-clamp-2 leading-tight mb-2"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    {logement.titre}
+                </h3>
+
+                {/* Localisation */}
+                <div className="flex items-center text-xs mb-3"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {logement.lieu}
+                </div>
+
+                <p className="text-sm mb-4 line-clamp-2"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    {logement.description}
+                </p>
+
+                {/* Caractéristiques */}
+                <div className="flex items-center gap-4 text-xs mb-3"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    {logement.surface && (
+                        <div className="flex items-center gap-2">
+                            <Ruler className="h-3 w-3" style={{ color: COLORS.logo }} />
+                            <span className="font-medium">{logement.surface} m²</span>
+                        </div>
+                    )}
+                    {logement.bedrooms && (
+                        <div className="flex items-center gap-2">
+                            <Bed className="h-3 w-3" style={{ color: COLORS.logo }} />
+                            <span className="font-medium">{logement.bedrooms} ch.</span>
+                        </div>
+                    )}
+                    {logement.bathrooms && (
+                        <div className="flex items-center gap-2">
+                            <Bath className="h-3 w-3" style={{ color: COLORS.logo }} />
+                            <span className="font-medium">{logement.bathrooms} sdb</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Features */}
+                <div className="flex flex-wrap gap-1 mb-3">
+                    {/* Badge Achat/Location */}
+                    {logement.type && (
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${logement.type === "location"
+                            ? "bg-green-50 text-green-700"
+                            : "bg-blue-50 text-blue-700"
+                            }`}>
+                            <div className={`w-1 h-1 rounded-full ${logement.type === "location"
+                                ? "bg-green-600"
+                                : "bg-blue-600"
+                                }`} />
+                            {logement.type === "location" ? "Location" : "À vendre"}
+                        </span>
+                    )}
+                    {logement.categorie && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                            style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
+                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: COLORS.logo }} />
+                            {logement.categorie}
+                        </span>
+                    )}
+                    {/* Badge social type */}
+                    {logement.socialType && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                            style={{ backgroundColor: `${COLORS.logo}10`, color: COLORS.logo }}>
+                            <Building className="w-3 h-3" />
+                            {logement.socialType}
+                        </span>
+                    )}
+                </div>
+
+                {/* Informations supplémentaires */}
+                <div className="flex justify-between items-center pt-4 text-sm"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" style={{ color: COLORS.logo }} />
+                        <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Eye className="w-4 h-4" style={{ color: COLORS.logo }} />
+                        <span>{logement.vues} vues</span>
+                    </div>
+                </div>
+
+                {/* Boutons d'action */}
+                <div className="flex gap-2 mt-4">
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handlePostuler(logement);
+                        }}
+                        disabled={isDejaPostule}
+                        className="flex-1 text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60"
+                        style={{
+                            backgroundColor: isDejaPostule ? `${COLORS.logo}60` : COLORS.logo,
+                            borderColor: COLORS.logo
+                        }}
+                    >
+                        {isDejaPostule ? "Visite déjà demandée" : "Demander une visite"}
+                    </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => handleVoirDetails(logement, e)}
+                        className="p-2 rounded-md transition"
+                        style={{
+                            border: `1px solid ${COLORS.separator}`,
+                            color: COLORS.logo
+                        }}
+                    >
+                        <Eye className="w-4 h-4" />
+                    </motion.button>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
+const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
     const [activeTab, setActiveTab] = useState('logements');
     const [favoris, setFavoris] = useState<number[]>([]);
     const [sentRequests, setSentRequests] = useState<Record<string, boolean>>({});
@@ -103,7 +304,7 @@ const LogementsSHLMR = () => {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-    // Refs pour animations
+    // Refs pour animations GSAP (gardées pour les autres sections)
     const heroRef = React.useRef(null);
     const statsRef = React.useRef(null);
     const advantagesRef = React.useRef(null);
@@ -130,7 +331,7 @@ const LogementsSHLMR = () => {
         return typeMap[type] || "maison";
     };
 
-    // Initialisation des animations GSAP
+    // Initialisation des animations GSAP (seulement pour les sections non-cartes)
     useEffect(() => {
         // Animation des statistiques
         if (statsRef.current) {
@@ -183,7 +384,19 @@ const LogementsSHLMR = () => {
         return () => {
             ScrollTrigger.getAll().forEach(trigger => trigger.kill());
         };
-    }, [filteredLogements]);
+    }, []);
+
+    // Filtrer les logements selon le type sélectionné
+    useEffect(() => {
+        if (selectedSocialType === 'all') {
+            setFilteredLogements(logements);
+        } else {
+            const filtered = logements.filter(logement => 
+                logement.socialType === selectedSocialType
+            );
+            setFilteredLogements(filtered);
+        }
+    }, [selectedSocialType, logements]);
 
     const fetchSocialProperties = async (type = 'all') => {
         try {
@@ -195,88 +408,55 @@ const LogementsSHLMR = () => {
                 url += `?socialType=${type}`;
             }
 
-            console.log("🔍 URL appelée:", url);
-            
             const response = await api.get(url);
-            
-            if (response.data && response.data.success) {
-                const propertiesData = response.data.data || [];
-                console.log("✅ Données reçues:", propertiesData.length, "propriétés");
-                
-                // Afficher chaque propriété pour débogage
-                propertiesData.forEach((prop, index) => {
-                    console.log(`📊 Propriété ${index + 1}:`, {
-                        id: prop.id,
-                        title: prop.title,
-                        socialType: prop.socialType,
-                        image: prop.images?.[0] ? "OUI" : "NON",
-                        isPSLA: prop.isPSLA,
-                        isSHLMR: prop.isSHLMR
-                    });
-                });
+            console.log("Réponse API Logements sociaux:", response.data);
 
-                const transformedProperties = propertiesData.map((property, index) => {
-                    // CRITIQUE: S'assurer que l'ID est unique
-                    const uniqueId = property.id || Date.now() + Math.random();
-                    
-                    return {
-                        id: uniqueId,
-                        image: property.images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400",
-                        type: property.listingType === "rent" ? "location" : "achat",
-                        categorie: mapPropertyTypeToCategory(property.type),
-                        prix: property.listingType === "rent"
-                            ? `${property.price?.toLocaleString("fr-FR") || '0'} €/mois`
-                            : `${property.price?.toLocaleString("fr-FR") || '0'} €`,
-                        titre: property.title || "Logement social",
-                        lieu: `${property.city || ''}${property.zipCode ? `, ${property.zipCode}` : ""}`,
-                        description: property.description || "Logement social disponible",
-                        caracteristiques: {
-                            chambres: property.bedrooms || 0,
-                            sdb: property.bathrooms || 0,
-                            surface: `${property.surface || 0} m²`,
-                            parking: 0,
-                            annee: new Date().getFullYear(),
-                            etage: 0,
-                            balcon: true,
-                            cave: false
-                        },
-                        promoteur: property.owner ? `${property.owner.firstName || ''} ${property.owner.lastName || ''}`.trim() || "Propriétaire" : "Propriétaire",
-                        dateDispo: new Date().toISOString().split('T')[0],
-                        vues: property.views || 0,
-                        favori: false,
-                        energyClass: property.energyClass,
-                        address: property.address,
-                        isSHLMR: property.isSHLMR,
-                        isPSLA: property.isPSLA,
-                        images: property.images || [],
-                        city: property.city,
-                        bedrooms: property.bedrooms,
-                        bathrooms: property.bathrooms,
-                        surface: property.surface,
-                        price: property.price,
-                        rooms: property.rooms,
-                        socialType: property.socialType || (property.isSHLMR ? 'SHLMR' : property.isPSLA ? 'PSLA' : 'SOCIAL'),
-                        features: property.features || []
-                    };
-                });
+            if (response.data.success) {
+                const transformedProperties = response.data.data.map((property) => ({
+                    id: property.id,
+                    image: property.images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400",
+                    type: property.listingType === "rent" ? "location" : "achat",
+                    categorie: mapPropertyTypeToCategory(property.type),
+                    prix: property.listingType === "rent"
+                        ? `${property.price?.toLocaleString("fr-FR")} €/mois`
+                        : `${property.price?.toLocaleString("fr-FR")} €`,
+                    titre: property.title,
+                    lieu: `${property.city}${property.zipCode ? `, ${property.zipCode}` : ""}`,
+                    description: property.description || "Logement social disponible",
+                    caracteristiques: {
+                        chambres: property.bedrooms || 0,
+                        sdb: property.bathrooms || 0,
+                        surface: `${property.surface || 0} m²`,
+                        parking: 0,
+                        annee: new Date().getFullYear(),
+                        etage: 0,
+                        balcon: true,
+                        cave: false
+                    },
+                    promoteur: property.owner ? `${property.owner.firstName} ${property.owner.lastName}` : "Propriétaire",
+                    dateDispo: new Date().toISOString().split('T')[0],
+                    vues: property.views || 0,
+                    favori: false,
+                    energyClass: property.energyClass,
+                    address: property.address,
+                    isSHLMR: property.isSHLMR,
+                    isPSLA: property.isPSLA,
+                    images: property.images || [],
+                    city: property.city,
+                    bedrooms: property.bedrooms,
+                    bathrooms: property.bathrooms,
+                    surface: property.surface,
+                    price: property.price,
+                    rooms: property.rooms,
+                    socialType: property.socialType || 'SHLMR',
+                    features: property.features || []
+                }));
 
-                console.log("✅ Propriétés transformées:", transformedProperties.length);
-                console.log("📋 Liste des IDs:", transformedProperties.map(p => p.id));
-                
-                // CORRECTION CRITIQUE: Mettre à jour les deux états avec les données transformées
                 setLogements(transformedProperties);
                 setFilteredLogements(transformedProperties);
-            } else {
-                console.error("❌ Réponse API invalide:", response.data);
-                setError("Erreur dans la structure des données reçues");
-                
-                // Données de démonstration pour tester
-                const demoProperties = generateDemoProperties();
-                setLogements(demoProperties);
-                setFilteredLogements(demoProperties);
             }
         } catch (err) {
-            console.error("❌ Erreur lors du chargement des propriétés sociales:", err);
+            console.error("Error fetching social properties:", err);
             setError("Erreur lors du chargement des propriétés sociales");
             
             // Données de démonstration pour tester
@@ -291,7 +471,7 @@ const LogementsSHLMR = () => {
     const fetchSocialTypesStats = async () => {
         try {
             const response = await api.get('/properties/social/types');
-            if (response.data && response.data.success) {
+            if (response.data.success) {
                 setSocialTypesStats(response.data.data);
             }
         } catch (err) {
@@ -527,12 +707,15 @@ const LogementsSHLMR = () => {
     };
 
     const handleSocialTypeSelect = (typeId: string) => {
-        console.log("Filtre sélectionné:", typeId);
         setSelectedSocialType(typeId);
         setDropdownOpen(false);
         
-        // Recharger les données avec le bon filtre API
-        fetchSocialProperties(typeId);
+        // Recharger les données si le type change
+        if (typeId !== 'all') {
+            fetchSocialProperties(typeId);
+        } else {
+            fetchSocialProperties();
+        }
         
         if (activeTab !== 'logements') {
             setActiveTab('logements');
@@ -547,11 +730,6 @@ const LogementsSHLMR = () => {
     const getTypeDescription = (typeId: string) => {
         const type = socialTypes.find(t => t.id === typeId);
         return type ? type.description : '';
-    };
-
-    const resetFilters = () => {
-        setSelectedSocialType('all');
-        fetchSocialProperties();
     };
 
     if (loading && logements.length === 0) {
@@ -593,7 +771,7 @@ const LogementsSHLMR = () => {
                 </div>
 
                 {/* Contenu */}
-                <div className="container mx-auto px-4 relative z-10">
+                <div className="container mx-auto px-4 relative z-10 py-20 ">
                     <div className="max-w-4xl mx-auto text-center">
                         <motion.h1
                             initial={{ opacity: 0, y: -20 }}
@@ -670,7 +848,7 @@ const LogementsSHLMR = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border z-50"
+                                        className="absolute top-full left-0 mt-2 w-64  rounded-lg shadow-xl border z-50"
                                         style={{ borderColor: COLORS.separator }}
                                     >
                                         {socialTypes.map((type) => (
@@ -741,7 +919,7 @@ const LogementsSHLMR = () => {
                                 <Building className="w-4 h-4" />
                                 Filtre actif : {getSelectedTypeLabel()}
                                 <button
-                                    onClick={resetFilters}
+                                    onClick={() => handleSocialTypeSelect('all')}
                                     className="ml-2 hover:opacity-70"
                                 >
                                     ×
@@ -774,6 +952,10 @@ const LogementsSHLMR = () => {
                                 {avantages.map((avantage, index) => (
                                     <motion.div
                                         key={index}
+                                        initial={{ opacity: 0, y: 40 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.15, duration: 0.7 }}
                                         whileHover={{ y: -8, transition: { duration: 0.2 } }}
                                         className="p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border"
                                         style={{
@@ -817,6 +999,10 @@ const LogementsSHLMR = () => {
                                     {stats.map((stat, index) => (
                                         <motion.div
                                             key={index}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: index * 0.1, duration: 0.5 }}
                                             whileHover={{ scale: 1.05 }}
                                             className="text-center"
                                         >
@@ -862,6 +1048,10 @@ const LogementsSHLMR = () => {
                                 {dispositifs.map((dispositif, index) => (
                                     <motion.div
                                         key={index}
+                                        initial={{ opacity: 0, y: 40 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1, duration: 0.6 }}
                                         whileHover={{ scale: 1.02, y: -5 }}
                                         className="rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border"
                                         style={{
@@ -954,7 +1144,7 @@ const LogementsSHLMR = () => {
                 )}
             </AnimatePresence>
 
-            {/* Section Logements - CORRIGÉ POUR RÉSOUDRE LE MASQUAGE */}
+            {/* Section Logements */}
             <AnimatePresence mode="wait">
                 {activeTab === 'logements' && (
                     <motion.section
@@ -976,8 +1166,13 @@ const LogementsSHLMR = () => {
                                             : `Logements ${getSelectedTypeLabel()}`}
                                     </h2>
                                     <p className="text-gray-600 mt-1">
-                                        {filteredLogements.length} logement{filteredLogements.length !== 1 ? 's' : ''} disponible{filteredLogements.length !== 1 ? 's' : ''}
+                                        {filteredLogements.length} logement{filteredLogements.length > 1 ? 's' : ''} disponible{filteredLogements.length > 1 ? 's' : ''}
                                     </p>
+                                    {selectedSocialType !== 'all' && (
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            {getTypeDescription(selectedSocialType)}
+                                        </p>
+                                    )}
                                 </div>
                                 
                                 {/* Bouton de filtrage rapide */}
@@ -1019,247 +1214,46 @@ const LogementsSHLMR = () => {
                                 </motion.div>
                             )}
 
-                            {loading ? (
-                                <div className="text-center py-8">
-                                    <Loader className="w-8 h-8 animate-spin mx-auto mb-2" style={{ color: COLORS.logo }} />
-                                    <p className="text-gray-600">Chargement des logements...</p>
-                                </div>
-                            ) : (
-                                <>
-                                    {/* Container principal corrigé */}
-                                    <div className="relative">
-                                        {/* GRID CORRIGÉ - IMPORTANT */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                            {filteredLogements.map((logement, index) => {
-                                                const isDejaPostule = sentRequests?.[logement.id];
-
-                                                return (
-                                                    <motion.div
-                                                        key={`${logement.id}-${index}`}
-                                                        initial={{ opacity: 0, y: 20 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        transition={{ delay: index * 0.1 }}
-                                                        whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                                                        className="h-full"
-                                                    >
-                                                        <div className="h-full overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer border shadow-md flex flex-col"
-                                                            style={{ 
-                                                                borderColor: COLORS.separator,
-                                                            }}
-                                                        >
-                                                            {/* Image avec badges */}
-                                                            <div className="relative flex-shrink-0">
-                                                                <div className="relative h-48 w-full overflow-hidden">
-                                                                    <img
-                                                                        src={logement.image}
-                                                                        alt={logement.titre}
-                                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                                        onError={(e) => {
-                                                                            e.target.src = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400";
-                                                                        }}
-                                                                    />
-
-                                                                    {/* Badges superposés */}
-                                                                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
-                                                                        style={{ color: COLORS.logo }}>
-                                                                        {logement.socialType || 'SOCIAL'}
-                                                                    </div>
-
-                                                                    {/* Badge prix */}
-                                                                    <div className="absolute top-3 right-3 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
-                                                                        style={{ backgroundColor: `${COLORS.logo}20`, color: COLORS.logo }}>git 
-                                                                        {logement.prix}
-                                                                    </div>
-
-                                                    {/* Badge classe énergie */}
-                                                    {logement.energyClass && (
-                                                        <div className="absolute bottom-3 left-3">
-                                                            <span
-                                                                className={`px-2 py-1 rounded text-xs font-semibold ${logement.energyClass === "A"
-                                                                    ? "bg-green-500 text-white"
-                                                                    : logement.energyClass === "B"
-                                                                        ? "bg-lime-500 text-white"
-                                                                        : logement.energyClass === "C"
-                                                                            ? "bg-yellow-500 text-white"
-                                                                            : "bg-gray-500 text-white"
-                                                                    }`}
-                                                            >
-                                                                Classe {logement.energyClass}
-                                                            </span>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Bouton favori */}
-                                                    <motion.button
-                                                        whileTap={{ scale: 0.9 }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            toggleFavori(logement.id);
-                                                        }}
-                                                        className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
-                                                            ? 'bg-red-500 text-white'
-                                                            : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
-                                                            }`}
-                                                    >
-                                                        <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
-                                                    </motion.button>
-                                                </div>
-                                            </div>
-
-                                                            {/* Contenu de la carte */}
-                                                            <div className="p-4 flex-grow flex flex-col">
-                                                                <h3 className="font-semibold text-sm line-clamp-2 leading-tight mb-2"
-                                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                                    {logement.titre}
-                                                                </h3>
-
-                                                                {/* Localisation */}
-                                                                <div className="flex items-center text-xs mb-3"
-                                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                                    <MapPin className="h-3 w-3 mr-1" />
-                                                                    {logement.lieu}
-                                                                </div>
-
-                                                                <p className="text-sm mb-4 line-clamp-2 flex-grow"
-                                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                                    {logement.description}
-                                                                </p>
-
-                                                                {/* Caractéristiques */}
-                                                                <div className="flex items-center gap-4 text-xs mb-3"
-                                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                                    {logement.surface && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            <Ruler className="h-3 w-3" style={{ color: COLORS.logo }} />
-                                                                            <span className="font-medium">{logement.surface} m²</span>
-                                                                        </div>
-                                                                    )}
-                                                                    {logement.bedrooms && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            <Bed className="h-3 w-3" style={{ color: COLORS.logo }} />
-                                                                            <span className="font-medium">{logement.bedrooms} ch.</span>
-                                                                        </div>
-                                                                    )}
-                                                                    {logement.bathrooms && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            <Bath className="h-3 w-3" style={{ color: COLORS.logo }} />
-                                                                            <span className="font-medium">{logement.bathrooms} sdb</span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-
-                                                {/* Features */}
-                                                <div className="flex flex-wrap gap-1 mb-3">
-                                                    {/* Badge Achat/Location */}
-                                                    {logement.type && (
-                                                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${logement.type === "location"
-                                                            ? "bg-green-50 text-green-700"
-                                                            : "bg-blue-50 text-blue-700"
-                                                            }`}>
-                                                            <div className={`w-1 h-1 rounded-full ${logement.type === "location"
-                                                                ? "bg-green-600"
-                                                                : "bg-blue-600"
-                                                                }`} />
-                                                            {logement.type === "location" ? "Location" : "À vendre"}
-                                                        </span>
-                                                    )}
-                                                    {logement.categorie && (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                                                            style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
-                                                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: COLORS.logo }} />
-                                                            {logement.categorie}
-                                                        </span>
-                                                    )}
-                                                    {/* Badge social type */}
-                                                    {logement.socialType && (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                                                            style={{ backgroundColor: `${COLORS.logo}10`, color: COLORS.logo }}>
-                                                            <Building className="w-3 h-3" />
-                                                            {logement.socialType}
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                                {/* Informations supplémentaires */}
-                                                                <div className="flex justify-between items-center pt-4 text-sm"
-                                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                                    <div className="flex items-center gap-1">
-                                                                        <Calendar className="w-4 h-4" style={{ color: COLORS.logo }} />
-                                                                        <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-1">
-                                                                        <Eye className="w-4 h-4" style={{ color: COLORS.logo }} />
-                                                                        <span>{logement.vues} vues</span>
-                                                                    </div>
-                                                                </div>
-
-                                                {/* Boutons d'action */}
-                                                <div className="flex gap-2 mt-4">
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handlePostuler(logement);
-                                                        }}
-                                                        disabled={isDejaPostule}
-                                                        className="flex-1 text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60"
-                                                        style={{
-                                                            backgroundColor: isDejaPostule ? `${COLORS.logo}60` : COLORS.logo,
-                                                            borderColor: COLORS.logo
-                                                        }}
-                                                    >
-                                                        {isDejaPostule ? "Visite déjà demandée" : "Demander une visite"}
-                                                    </motion.button>
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        onClick={(e) => handleVoirDetails(logement, e)}
-                                                        className="p-2 rounded-md transition"
-                                                        style={{
-                                                            border: `1px solid ${COLORS.separator}`,
-                                                            color: COLORS.logo
-                                                        }}
-                                                    >
-                                                        <Eye className="w-4 h-4" />
-                                                    </motion.button>
-                                                </div>
-                                            </div>
-
-                                        </motion.div>
-                                    );
-                                })}
+                            <div className="grid grid-cols-1 md:grid-cols-2 bg-white lg:grid-cols-3 gap-8">
+                                {filteredLogements.map((logement, index) => (
+                                    <PropertyCard
+                                        key={logement.id}
+                                        logement={logement}
+                                        index={index}
+                                        favoris={favoris}
+                                        toggleFavori={toggleFavori}
+                                        handlePostuler={handlePostuler}
+                                        sentRequests={sentRequests}
+                                        handleVoirDetails={handleVoirDetails}
+                                    />
+                                ))}
                             </div>
 
-                                    <AdvertisementPopup />
+                            <AdvertisementPopup />
 
-                                    {/* Message si aucun résultat */}
-                                    {filteredLogements.length === 0 && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="text-center py-12"
-                                        >
-                                            <Home className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
-                                            <h3 className="text-xl font-semibold mb-2"
-                                                style={{ color: COLORS["secondary-text"] }}>
-                                                Aucun logement disponible
-                                            </h3>
-                                            <p style={{ color: COLORS["secondary-text"] }}>
-                                                Aucun logement {selectedSocialType !== 'all' ? 'de type ' + getSelectedTypeLabel() + ' ' : ''}ne correspond à vos critères pour le moment.
-                                            </p>
-                                            {selectedSocialType !== 'all' && (
-                                                <button
-                                                    onClick={resetFilters}
-                                                    className="mt-4 px-4 py-2 rounded-lg font-semibold"
-                                                    style={{ backgroundColor: COLORS.logo, color: 'white' }}
-                                                >
-                                                    Voir tous les logements sociaux
-                                                </button>
-                                            )}
-                                        </motion.div>
-                                    )}
-                                </>
+                            {/* Message si aucun résultat */}
+                            {filteredLogements.length === 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="text-center py-12"
+                                >
+                                    <Home className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
+                                    <h3 className="text-xl font-semibold mb-2"
+                                        style={{ color: COLORS["secondary-text"] }}>
+                                        Aucun logement disponible
+                                    </h3>
+                                    <p style={{ color: COLORS["secondary-text"] }}>
+                                        Aucun logement {selectedSocialType !== 'all' ? 'de ce type ' : ''}ne correspond à vos critères pour le moment.
+                                    </p>
+                                    <button
+                                        onClick={() => handleSocialTypeSelect('all')}
+                                        className="mt-4 px-4 py-2 rounded-lg font-semibold"
+                                        style={{ backgroundColor: COLORS.logo, color: 'white' }}
+                                    >
+                                        Voir tous les logements sociaux
+                                    </button>
+                                </motion.div>
                             )}
                         </div>
                     </motion.section>
