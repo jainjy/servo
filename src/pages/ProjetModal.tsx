@@ -9,7 +9,8 @@ import {
   Loader2,
   Calendar,
   Tag,
-  AlertTriangle
+  AlertTriangle,
+  Edit3
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import api from '../lib/api';
@@ -22,10 +23,24 @@ interface ProjetFormData {
   status: 'active' | 'inactive';
 }
 
+interface Projet {
+  id: number;
+  titre: string;
+  details: string;
+  duree: string;
+  media: string | null;
+  status: 'active' | 'inactive';
+  categorie: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ProjetModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  projet?: Projet | null; // <-- Nouveau prop pour le projet à éditer
+  isEditMode?: boolean;  // <-- Nouveau prop pour savoir si on est en mode édition
 }
 
 const categories = [
@@ -39,7 +54,13 @@ const categories = [
   { value: 'other', label: 'Autre' },
 ];
 
-const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const ProjetModal: React.FC<ProjetModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSuccess,
+  projet = null,
+  isEditMode = false 
+}) => {
   const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState<ProjetFormData>({
     titre: '',
@@ -55,6 +76,7 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [existingMedia, setExistingMedia] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Couleurs personnalisées
@@ -75,6 +97,39 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
     };
   }, [previewUrl]);
 
+  // IMPORTANT : Initialiser le formulaire avec les données du projet en mode édition
+  useEffect(() => {
+    if (isEditMode && projet) {
+      console.log('Initialisation mode édition:', projet);
+      
+      // Formater la date pour l'input type="date"
+      const dureeDate = new Date(projet.duree);
+      const formattedDate = dureeDate.toISOString().split('T')[0];
+      
+      setFormData({
+        titre: projet.titre || '',
+        details: projet.details || '',
+        duree: formattedDate,
+        categorie: projet.categorie || '',
+        status: projet.status || 'active',
+      });
+
+      // Stocker l'URL du média existant
+      if (projet.media) {
+        setExistingMedia(projet.media);
+        
+        // Déterminer le type de média existant
+        const isVideo = projet.media.includes('.mp4') || 
+                       projet.media.includes('.mov') || 
+                       projet.media.includes('.avi');
+        setMediaType(isVideo ? 'video' : 'image');
+      }
+    } else {
+      // Réinitialiser pour création
+      resetForm();
+    }
+  }, [projet, isEditMode, isOpen]); // <-- Ajouter isOpen
+
   // Réinitialiser le formulaire
   const resetForm = () => {
     setFormData({
@@ -87,9 +142,14 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
     setMediaFile(null);
     setMediaType('image');
     setPreviewUrl(null);
+    setExistingMedia(null);
     setError(null);
     setSuccess(false);
     setDragActive(false);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -135,6 +195,7 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     setMediaFile(file);
+    setExistingMedia(null); // Effacer le média existant si nouveau fichier sélectionné
     setError(null);
   };
 
@@ -143,7 +204,7 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
     
     // Validation
     if (!isAuthenticated || !user) {
-      setError('Veuillez vous connecter pour créer un projet');
+      setError('Veuillez vous connecter');
       return;
     }
 
@@ -163,35 +224,45 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
         if (value) formDataToSend.append(key, value);
       });
 
-      // Ajouter le fichier média
+      // Ajouter le fichier média si présent
       if (mediaFile) {
         const fieldName = mediaType === 'video' ? 'video' : 'image';
         formDataToSend.append(fieldName, mediaFile);
       }
 
-      // Envoyer la requête
-      const response = await api.post('/projets', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      let response;
+      
+      if (isEditMode && projet) {
+        // MODE ÉDITION : PUT
+        response = await api.put(`/projets/${projet.id}`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      } else {
+        // MODE CRÉATION : POST
+        response = await api.post('/projets', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      }
 
       if (response.data.success) {
         setSuccess(true);
-        resetForm();
         
-        // Fermer la modal après 2 secondes
+        // Fermer la modal après 1.5 secondes
         setTimeout(() => {
           onClose();
           if (onSuccess) onSuccess();
-        }, 2000);
+        }, 1500);
       }
     } catch (err: any) {
-      console.error('Erreur création projet:', err);
+      console.error(`Erreur ${isEditMode ? 'modification' : 'création'} projet:`, err);
       setError(
         err.response?.data?.message || 
         err.response?.data?.error || 
-        'Erreur lors de la création du projet. Veuillez réessayer.'
+        `Erreur lors de la ${isEditMode ? 'modification' : 'création'} du projet. Veuillez réessayer.`
       );
     } finally {
       setIsSubmitting(false);
@@ -256,8 +327,17 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
             style={{ backgroundColor: colors.logo, color: 'white' }}
           >
             <h3 className="text-xl font-semibold flex items-center gap-2">
-              <FileImage size={24} />
-              Ajouter un Nouveau Projet
+              {isEditMode ? (
+                <>
+                  <Edit3 size={24} />
+                  Modifier le Projet
+                </>
+              ) : (
+                <>
+                  <FileImage size={24} />
+                  Ajouter un Nouveau Projet
+                </>
+              )}
             </h3>
             <button
               onClick={onClose}
@@ -279,9 +359,14 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
                   <Check size={32} style={{ color: colors.primaryDark }} />
                 </div>
                 <h4 className="text-xl font-semibold mb-2" style={{ color: colors.secondaryText }}>
-                  Projet Créé avec Succès!
+                  {isEditMode ? 'Projet Modifié avec Succès!' : 'Projet Créé avec Succès!'}
                 </h4>
-                <p className="text-gray-600">Votre projet a été enregistré et sera visible dans votre portfolio.</p>
+                <p className="text-gray-600">
+                  {isEditMode 
+                    ? 'Votre projet a été mis à jour avec succès.' 
+                    : 'Votre projet a été enregistré et sera visible dans votre portfolio.'
+                  }
+                </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
@@ -366,7 +451,7 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
                 <div className="mb-6">
                   <label className="block mb-2 font-medium" style={{ color: colors.secondaryText }}>
                     Média (Image ou Vidéo)
-                    <span className="text-gray-500 text-sm font-normal ml-1">- Optionnel</span>
+                    <span className="text-gray-500 text-sm font-normal ml-1">- {isEditMode ? 'Optionnel' : 'Optionnel'}</span>
                   </label>
                   <div
                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
@@ -389,18 +474,18 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
                       className="hidden"
                     />
                     
-                    {previewUrl ? (
+                    {previewUrl || existingMedia ? (
                       <div className="space-y-4">
                         <div className="relative">
                           {mediaType === 'image' ? (
                             <img
-                              src={previewUrl}
+                              src={previewUrl || existingMedia || ''}
                               alt="Prévisualisation"
                               className="max-h-48 mx-auto rounded-lg object-cover"
                             />
                           ) : (
                             <video
-                              src={previewUrl}
+                              src={previewUrl || existingMedia || ''}
                               className="max-h-48 mx-auto rounded-lg"
                               controls
                             />
@@ -421,9 +506,19 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
                             <FileVideo size={16} style={{ color: colors.secondaryText }} />
                           )}
                           <p className="text-sm truncate max-w-xs" style={{ color: colors.secondaryText }}>
-                            {mediaFile?.name}
+                            {mediaFile?.name || (existingMedia ? 'Média existant' : 'Aucun fichier')}
                           </p>
+                          {existingMedia && !mediaFile && (
+                            <span className="text-xs px-2 py-1 rounded bg-gray-100">
+                              Existant
+                            </span>
+                          )}
                         </div>
+                        {isEditMode && existingMedia && !mediaFile && (
+                          <p className="text-xs text-gray-500">
+                            Si vous sélectionnez un nouveau fichier, l'ancien média sera remplacé.
+                          </p>
+                        )}
                       </div>
                     ) : (
                       <>
@@ -587,12 +682,12 @@ const ProjetModal: React.FC<ProjetModalProps> = ({ isOpen, onClose, onSuccess })
                     {isSubmitting ? (
                       <>
                         <Loader2 size={20} className="animate-spin" />
-                        Création...
+                        {isEditMode ? 'Modification...' : 'Création...'}
                       </>
                     ) : (
                       <>
                         <Check size={20} />
-                        Créer le Projet
+                        {isEditMode ? 'Modifier le Projet' : 'Créer le Projet'}
                       </>
                     )}
                   </button>
