@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import TourismNavigation from '../TourismNavigation';
 
 const PortraitsLocaux = () => {
   const [activeGeneration, setActiveGeneration] = useState('tous');
@@ -608,14 +609,11 @@ const PortraitsLocaux = () => {
     <div className="min-h-screen overflow-hidden">
       {/* Header avec effet de texture */}
       <div className="relative pt-20 pb-16 px-4 overflow-hidden">
-        <div
-          className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
-          <div
-            className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70'
-          />
+        <div className="absolute inset-0 h-64 -z-10 w-full overflow-hidden">
+          <div className="absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70" />
           <img
             src="https://i.pinimg.com/1200x/d5/99/51/d59951aaef774bfb6c704069ce42a3bc.jpg"
-            className='h-full object-cover w-full'
+            className="h-full object-cover w-full"
             alt="Background"
           />
         </div>
@@ -627,13 +625,10 @@ const PortraitsLocaux = () => {
             Portraits locaux
           </h1>
           <p className="text-sm text-gray-200 max-w-3xl mx-auto leading-relaxed">
-            Découvrez les visages et histoires des habitants locaux.
-            Des rencontres authentiques qui tissent la mémoire vivante de notre île.
+            Découvrez les visages et histoires des habitants locaux. Des
+            rencontres authentiques qui tissent la mémoire vivante de notre île.
           </p>
-          <div className="inline-flex items-center mb-6 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm text-gray-100">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-            Histoires vraies, mémoires vivantes
-          </div>
+          <TourismNavigation page="inspirer" />
         </div>
       </div>
 
@@ -645,10 +640,11 @@ const PortraitsLocaux = () => {
               <button
                 key={generation.id}
                 onClick={() => setActiveGeneration(generation.id)}
-                className={`px-6 py-3 text-xs rounded-full font-medium transition-all duration-300 border ${activeGeneration === generation.id
-                  ? 'bg-secondary-text text-white  transform scale-105'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-400 hover:text-emerald-700'
-                  }`}
+                className={`px-6 py-3 text-xs rounded-full font-medium transition-all duration-300 border ${
+                  activeGeneration === generation.id
+                    ? "bg-secondary-text text-white  transform scale-105"
+                    : "bg-white text-gray-700 border-gray-300 hover:border-emerald-400 hover:text-emerald-700"
+                }`}
               >
                 {generation.label}
               </button>
@@ -675,16 +671,30 @@ const PortraitsLocaux = () => {
                       <h2 className="text-3xl font-bold text-gray-900 mb-2">
                         {selectedPortraitData.name}
                       </h2>
-                      <div className={`text-xl font-semibold text-${selectedPortraitData.color}-600`}>
-                        {selectedPortraitData.age} ans • {selectedPortraitData.profession} • {selectedPortraitData.location}
+                      <div
+                        className={`text-xl font-semibold text-${selectedPortraitData.color}-600`}
+                      >
+                        {selectedPortraitData.age} ans •{" "}
+                        {selectedPortraitData.profession} •{" "}
+                        {selectedPortraitData.location}
                       </div>
                     </div>
                     <button
                       onClick={() => setSelectedPortrait(null)}
                       className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"
                     >
-                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-5 h-5 text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -692,10 +702,15 @@ const PortraitsLocaux = () => {
                   {/* Galerie de photos */}
                   <div className="grid grid-cols-3 gap-4 mb-8">
                     {selectedPortraitData.images.map((img, index) => (
-                      <div key={index} className="relative overflow-hidden rounded-xl aspect-square">
+                      <div
+                        key={index}
+                        className="relative overflow-hidden rounded-xl aspect-square"
+                      >
                         <img
                           src={`${img}?auto=format&fit=crop&w=400&h=400&q=80`}
-                          alt={`${selectedPortraitData.name} - Photo ${index + 1}`}
+                          alt={`${selectedPortraitData.name} - Photo ${
+                            index + 1
+                          }`}
                           className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                         />
                       </div>
@@ -704,7 +719,9 @@ const PortraitsLocaux = () => {
 
                   {/* Histoire complète */}
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Son histoire</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                      Son histoire
+                    </h3>
                     <p className="text-gray-700 leading-relaxed">
                       {selectedPortraitData.story}
                     </p>
@@ -713,38 +730,60 @@ const PortraitsLocaux = () => {
                   {/* Interview */}
                   <div className="bg-gray-50 rounded-2xl p-6 mb-8">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-bold text-gray-900">Interview audio</h4>
-                      <div className="text-gray-600">{selectedPortraitData.interview.duration}</div>
+                      <h4 className="font-bold text-gray-900">
+                        Interview audio
+                      </h4>
+                      <div className="text-gray-600">
+                        {selectedPortraitData.interview.duration}
+                      </div>
                     </div>
 
                     <div className="flex items-center space-x-4">
                       <button
                         onClick={() => handleStoryPlay(selectedPortraitData.id)}
-                        className={`w-16 h-16 rounded-full flex items-center justify-center ${playingStory === selectedPortraitData.id && isListening
-                          ? `bg-${selectedPortraitData.color}-100 text-${selectedPortraitData.color}-600`
-                          : `bg-${selectedPortraitData.color}-600 text-white hover:bg-${selectedPortraitData.color}-700`
-                          }`}
+                        className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                          playingStory === selectedPortraitData.id &&
+                          isListening
+                            ? `bg-${selectedPortraitData.color}-100 text-${selectedPortraitData.color}-600`
+                            : `bg-${selectedPortraitData.color}-600 text-white hover:bg-${selectedPortraitData.color}-700`
+                        }`}
                       >
-                        {playingStory === selectedPortraitData.id && isListening ? (
+                        {playingStory === selectedPortraitData.id &&
+                        isListening ? (
                           <div className="flex space-x-1">
                             <div className="w-2 h-5 bg-current"></div>
                             <div className="w-2 h-5 bg-current"></div>
                           </div>
                         ) : (
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                          <svg
+                            className="w-6 h-6"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                         )}
                       </button>
 
                       <div className="flex-1">
-                        <div className="text-sm text-gray-500 mb-2">Sujets abordés</div>
+                        <div className="text-sm text-gray-500 mb-2">
+                          Sujets abordés
+                        </div>
                         <div className="flex flex-wrap gap-2">
-                          {selectedPortraitData.interview.topics.map((topic, index) => (
-                            <span key={index} className={`px-3 py-1 bg-${selectedPortraitData.color}-100 text-${selectedPortraitData.color}-800 rounded-full text-sm`}>
-                              {topic}
-                            </span>
-                          ))}
+                          {selectedPortraitData.interview.topics.map(
+                            (topic, index) => (
+                              <span
+                                key={index}
+                                className={`px-3 py-1 bg-${selectedPortraitData.color}-100 text-${selectedPortraitData.color}-800 rounded-full text-sm`}
+                              >
+                                {topic}
+                              </span>
+                            )
+                          )}
                         </div>
                       </div>
                     </div>
@@ -764,10 +803,15 @@ const PortraitsLocaux = () => {
 
                   {/* Sagesse */}
                   <div>
-                    <h4 className="font-bold text-gray-900 mb-4">Sagesse transmise</h4>
+                    <h4 className="font-bold text-gray-900 mb-4">
+                      Sagesse transmise
+                    </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {selectedPortraitData.wisdom.map((wisdom, index) => (
-                        <div key={index} className={`bg-${selectedPortraitData.color}-50 rounded-xl p-4 border border-${selectedPortraitData.color}-200`}>
+                        <div
+                          key={index}
+                          className={`bg-${selectedPortraitData.color}-50 rounded-xl p-4 border border-${selectedPortraitData.color}-200`}
+                        >
                           <div className="text-lg mb-2">"</div>
                           <p className="text-gray-700 italic">{wisdom}</p>
                         </div>
@@ -794,37 +838,62 @@ const PortraitsLocaux = () => {
             {[
               {
                 generation: "Anciens",
-                count: portraits.filter(p => p.generation === 'anciens').length,
-                description: "Porteurs de la mémoire et des traditions ancestrales",
+                count: portraits.filter((p) => p.generation === "anciens")
+                  .length,
+                description:
+                  "Porteurs de la mémoire et des traditions ancestrales",
                 color: "amber",
-                icon: "M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"
+                icon: "M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222",
               },
               {
                 generation: "Actuels",
-                count: portraits.filter(p => p.generation === 'actuels').length,
+                count: portraits.filter((p) => p.generation === "actuels")
+                  .length,
                 description: "Acteurs du présent, bâtisseurs du futur",
                 color: "emerald",
-                icon: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6 M9 17l2 2 4-4"
+                icon: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6 M9 17l2 2 4-4",
               },
               {
                 generation: "Jeunes",
-                count: portraits.filter(p => p.generation === 'jeunes').length,
-                description: "Visionnaires qui réinventent l'identité réunionnaise",
+                count: portraits.filter((p) => p.generation === "jeunes")
+                  .length,
+                description:
+                  "Visionnaires qui réinventent l'identité réunionnaise",
                 color: "purple",
-                icon: "M12 14l9-5-9-5-9 5 9 5z M12 14v6 M5 13.999v5 M19 13.999v5"
-              }
+                icon: "M12 14l9-5-9-5-9 5 9 5z M12 14v6 M5 13.999v5 M19 13.999v5",
+              },
             ].map((gen, index) => (
-              <div key={index} className="bg-white rounded-2xl p-8 text-center border border-gray-200 hover:shadow-lg transition-shadow">
-                <div className='flex items-start justify-between'>
-                  <div className={` w-10 h-10 bg-${gen.color}-100 rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-                    <svg className={`w-5 h-5 text-${gen.color}-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={gen.icon} />
+              <div
+                key={index}
+                className="bg-white rounded-2xl p-8 text-center border border-gray-200 hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-start justify-between">
+                  <div
+                    className={` w-10 h-10 bg-${gen.color}-100 rounded-2xl flex items-center justify-center mx-auto mb-6`}
+                  >
+                    <svg
+                      className={`w-5 h-5 text-${gen.color}-600`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d={gen.icon}
+                      />
                     </svg>
-
                   </div>
-                  <div className='flex-1 flex gap-4 items-start ml-4'>
-                    <div className="text-xl font-bold text-gray-900 mb-2">{gen.count}</div>
-                    <div className={`text-xl font-bold text-${gen.color}-600 mb-3`}>{gen.generation}</div>
+                  <div className="flex-1 flex gap-4 items-start ml-4">
+                    <div className="text-xl font-bold text-gray-900 mb-2">
+                      {gen.count}
+                    </div>
+                    <div
+                      className={`text-xl font-bold text-${gen.color}-600 mb-3`}
+                    >
+                      {gen.generation}
+                    </div>
                   </div>
                 </div>
                 <p className="text-gray-600 text-sm">{gen.description}</p>
@@ -838,13 +907,19 @@ const PortraitsLocaux = () => {
           <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-3xl p-12 text-white text-center">
             <div
               className="text-5xl mb-6"
-              style={{ transform: `rotate(${quoteRotation}deg)`, transition: 'transform 1s ease-in-out' }}
-            >"</div>
+              style={{
+                transform: `rotate(${quoteRotation}deg)`,
+                transition: "transform 1s ease-in-out",
+              }}
+            >
+              "
+            </div>
             <div className="text-2xl italic mb-8 max-w-3xl mx-auto">
               {portraits[dailyQuoteIndex].quote}
             </div>
             <div className="text-emerald-200">
-              — {portraits[dailyQuoteIndex].name}, {portraits[dailyQuoteIndex].age} ans
+              — {portraits[dailyQuoteIndex].name},{" "}
+              {portraits[dailyQuoteIndex].age} ans
             </div>
           </div>
         </div>
@@ -857,8 +932,9 @@ const PortraitsLocaux = () => {
               Votre histoire mérite d'être racontée
             </h2>
             <p className="text-gray-300 max-w-2xl mx-auto mb-8">
-              Vous connaissez une personne dont l'histoire mérite d'être partagée ?
-              Proposez-nous un portrait ou partagez votre propre récit.
+              Vous connaissez une personne dont l'histoire mérite d'être
+              partagée ? Proposez-nous un portrait ou partagez votre propre
+              récit.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <button className="bg-white text-gray-900 font-bold px-10 py-4 rounded-xl hover:bg-gray-100 transition-colors">
@@ -873,9 +949,9 @@ const PortraitsLocaux = () => {
       </div>
 
       {/* Élément audio caché */}
-      <audio ref={audioRef} style={{ display: 'none' }} />
+      <audio ref={audioRef} style={{ display: "none" }} />
 
-      <style >{`
+      <style>{`
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;

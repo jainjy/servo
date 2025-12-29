@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { MediaService } from "../lib/api";
 import LoadingSpinner from "./Loading/LoadingSpinner";
+import TourismNavigation from "./TourismNavigation";
 
 interface VideoEpisode {
   id: string;
@@ -355,62 +356,7 @@ const PodcastsReunion: React.FC = () => {
               Explorez l'île intense à travers nos vidéos : paysages, culture,
               gastronomie et aventures
             </p>
-
-            {/* Statistiques */}
-            <div className="flex flex-wrap justify-center items-center gap-4 lg:gap-8">
-              {/* Vue totales */}
-              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/20 bg-gradient-to-br from-[#556B2F]/30 to-[#6B8E23]/20 hover:from-[#556B2F]/40 hover:to-[#6B8E23]/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 lg:p-3 rounded-xl bg-gradient-to-br from-[#6B8E23]/30 to-[#7BA05B]/30 border border-[#6B8E23]/30 group-hover:from-[#6B8E23]/40 group-hover:to-[#7BA05B]/40 transition-colors duration-300">
-                    <Headphones className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
-                      {videoEpisodes
-                        .reduce((total, ep) => total + ep.views, 0)
-                        .toLocaleString()}
-                    </span>
-                    <span className="text-xs lg:text-sm text-gray-200 opacity-90">
-                      explorations
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vidéos disponibles */}
-              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/20 bg-gradient-to-br from-[#8B4513]/30 to-[#D2691E]/20 hover:from-[#8B4513]/40 hover:to-[#D2691E]/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 lg:p-3 rounded-xl bg-gradient-to-br from-[#8B4513]/30 to-[#A0522D]/30 border border-[#8B4513]/30 group-hover:from-[#8B4513]/40 group-hover:to-[#A0522D]/40 transition-colors duration-300">
-                    <Map className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
-                      {videoEpisodes.length}
-                    </span>
-                    <span className="text-xs lg:text-sm text-gray-200 opacity-90">
-                      découvertes
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vidéos premium */}
-              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/20 bg-gradient-to-br from-[#556B2F]/30 to-[#8FBC8F]/20 hover:from-[#556B2F]/40 hover:to-[#8FBC8F]/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 lg:p-3 rounded-xl bg-gradient-to-br from-[#556B2F]/30 to-[#8FBC8F]/30 border border-[#556B2F]/30 group-hover:from-[#556B2F]/40 group-hover:to-[#8FBC8F]/40 transition-colors duration-300">
-                    <TreePalm className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
-                      {videoEpisodes.filter((ep) => ep.featured).length}
-                    </span>
-                    <span className="text-xs lg:text-sm text-gray-200 opacity-90">
-                      pépites
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TourismNavigation page="inspirer" />
           </div>
         </div>
       </div>
