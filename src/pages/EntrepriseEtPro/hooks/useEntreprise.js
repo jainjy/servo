@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 import { toast } from "sonner";
+import { serviceCategories } from "../data/servicesData";
+import { partenaires } from "../data/partnersData"; // Ajouté
 
 export const useEntreprise = () => {
   const { trackBusinessInteraction } = useInteractionTracking();
@@ -144,6 +146,8 @@ export const useEntreprise = () => {
     searchTerm,
     formData,
     hoveredCard,
+    serviceCategories,
+    partenaires, // Ajouté
     setShowMessageModal,
     setShowMapModal,
     setSelectedPartenaire,

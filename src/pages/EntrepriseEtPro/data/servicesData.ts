@@ -67,7 +67,7 @@ export const servicesEntreprisePro: Service[] = [
   },
   {
     id: 3,
-    nom: "Cession & Liquidation",
+    nom: "Cession",
     description:
       "Conseil et accompagnement pour la cession ou la liquidation de votre entreprise",
     icon: Scale,
