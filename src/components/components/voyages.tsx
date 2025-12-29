@@ -192,7 +192,7 @@ const VoyagesAeriens: React.FC = () => {
         }
       } catch (error) {
         console.error("Erreur chargement vols:", error);
-        setError("Impossible de charger les vols. Veuillez réessayer.");
+        setError("Impossible de charger les vols. Veuillez se connecter à internet !!!.");
         setVols([]);
         setVolsOriginaux([]);
       } finally {
@@ -416,8 +416,7 @@ const VoyagesAeriens: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
-          <div className="text-red-500 text-4xl mb-4">Erreur</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Erreur</h2>
+          <div className="text-red-500 text-4xl mb-4">Pas de connexion !</div>
           <div className="text-gray-600 mb-6">{error}</div>
           <button
             onClick={() => window.location.reload()}

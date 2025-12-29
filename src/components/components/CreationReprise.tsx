@@ -495,9 +495,7 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
     >
       <div className="container mx-auto px-4 max-w-7xl">
         <div 
-          className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'
-         
-        >
+          className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
           <div 
             className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70'
           />

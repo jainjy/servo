@@ -1,9 +1,50 @@
 import api from "@/lib/api";
+
 // Rôles d'utilisateur
 export const UserRole = {
   USER: "user",
   ADMIN: "admin",
   PROFESSIONAL: "professional",
+};
+
+// Validation des mots de passe - Constantes de sécurité
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_VALIDATION_ERRORS = {
+  EMPTY: "Le mot de passe ne peut pas être vide",
+  TOO_SHORT: `Le mot de passe doit contenir au moins ${PASSWORD_MIN_LENGTH} caractères`,
+  WHITESPACE_ONLY: "Le mot de passe ne peut pas contenir uniquement des espaces",
+};
+
+// Fonction de validation des mots de passe
+const validatePassword = (password) => {
+  // Vérifier null/undefined
+  if (password === null || password === undefined) {
+    return {
+      valid: false,
+      error: PASSWORD_VALIDATION_ERRORS.EMPTY,
+    };
+  }
+
+  // Vérifier les espaces uniquement
+  if (typeof password === "string" && password.trim().length === 0) {
+    return {
+      valid: false,
+      error: PASSWORD_VALIDATION_ERRORS.EMPTY,
+    };
+  }
+
+  // Vérifier la longueur minimale
+  if (password.length < PASSWORD_MIN_LENGTH) {
+    return {
+      valid: false,
+      error: PASSWORD_VALIDATION_ERRORS.TOO_SHORT,
+    };
+  }
+
+  return {
+    valid: true,
+    error: null,
+  };
 };
 // Stockage sécurisé avec gestion d'erreurs
 class SecureStorage {
@@ -52,6 +93,12 @@ class AuthService {
   // register
   static async register(userData) {
     try {
+      // Valider le mot de passe avant d'envoyer
+      const passwordValidation = validatePassword(userData.password);
+      if (!passwordValidation.valid) {
+        throw new Error(passwordValidation.error);
+      }
+
       const registerData = {
         firstName: userData.firstName,
         lastName: userData.lastName,
@@ -84,6 +131,12 @@ class AuthService {
   // Inscription Pro sans paiement (avec plan sélectionné gratuit 2 mois)
   static async signupPro(userData, planId) {
     try {
+      // Valider le mot de passe avant d'envoyer
+      const passwordValidation = validatePassword(userData.password);
+      if (!passwordValidation.valid) {
+        throw new Error(passwordValidation.error);
+      }
+
       const response = await api.post("/auth/signup-pro", {
         utilisateur: {
           ...userData,
@@ -254,6 +307,12 @@ class AuthService {
   // Réinitialisation du mot de passe
   static async resetPassword(token, newPassword) {
     try {
+      // Valider le nouveau mot de passe avant d'envoyer
+      const passwordValidation = validatePassword(newPassword);
+      if (!passwordValidation.valid) {
+        throw new Error(passwordValidation.error);
+      }
+
       const response = await api.post("/auth/reset-password", {
         token,
         newPassword,
@@ -358,6 +417,12 @@ class AuthService {
   // Changer le mot de passe
   static async changePassword(currentPassword, newPassword) {
     try {
+      // Valider le nouveau mot de passe avant d'envoyer
+      const passwordValidation = validatePassword(newPassword);
+      if (!passwordValidation.valid) {
+        throw new Error(passwordValidation.error);
+      }
+
       const response = await api.put("/users/update/change-password", {
         currentPassword,
         newPassword,

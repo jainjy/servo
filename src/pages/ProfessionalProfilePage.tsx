@@ -28,6 +28,8 @@ import {
   Lightbulb,
   BarChart3,
   Map,
+  Image as ImageIcon,
+  Play,
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -48,6 +50,7 @@ import { professionalProfileService } from "@/services/professionalProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { DemandeDevisModal } from "@/components/DemandeDevisModal";
 import { ContactModal } from "@/components/ContactModal";
+import ProjectsTab from "@/components/components/ProjetProfessionnal";
 
 interface ProfessionalProfile {
   id: string;
@@ -515,10 +518,11 @@ const ProfessionalProfilePage = () => {
                   onValueChange={setActiveTab}
                   className="w-full"
                 >
-                  <TabsList className="grid grid-cols-5 bg-[#6B8E23]/5 p-1">
+                  <TabsList className="grid grid-cols-6 bg-[#6B8E23]/5 p-1">
                     {[
                       { id: "overview", label: "Aperçu", icon: Building },
                       { id: "services", label: "Services", icon: Briefcase },
+                      { id: "projects", label: "Nos projets", icon: ImageIcon },
                       { id: "reviews", label: "Avis", icon: Star },
                       { id: "schedule", label: "Horaires", icon: CalendarDays },
                       { id: "location", label: "Localisation", icon: MapPin },
@@ -546,6 +550,9 @@ const ProfessionalProfilePage = () => {
                         services={profile.services}
                         onServiceClick={handleServiceClick}
                       />
+                    </TabsContent>
+                    <TabsContent value="projects">
+                      <ProjectsTab professional={profile} />
                     </TabsContent>
                     <TabsContent value="reviews">
                       <ReviewsTab reviews={profile.Review} />

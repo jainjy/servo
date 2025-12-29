@@ -4,6 +4,8 @@ import {
   Filter,
   Car,
   Truck,
+  Bike,
+  Bus,
   MapPin,
   Calendar,
   Users,
@@ -28,9 +30,14 @@ import {
   Eye,
   X,
   Loader2,
+  Battery,
+  Weight,
+  Gauge,
+  Monitor,
 } from "lucide-react";
 import { vehiculesApi } from "@/lib/api/vehicules";
 import { LocationPickerModal } from "@/components/location-picker-modal";
+import { BusRoutesView } from "@/components/BusRoutesView";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -79,21 +86,24 @@ const LocationVoiturePage = () => {
   const [vehicules, setVehicules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("tous");
   const [selectedType, setSelectedType] = useState("tous");
   const [selectedTransmission, setSelectedTransmission] = useState("tous");
   const [selectedFuel, setSelectedFuel] = useState("tous");
-  const [priceRange, setPriceRange] = useState([30, 150]);
+  const [priceRange, setPriceRange] = useState([10, 200]);
   const [selectedCity, setSelectedCity] = useState("tous");
   const [savedVehicules, setSavedVehicules] = useState([]);
-  const [activeTab, setActiveTab] = useState("voitures");
+  const [activeTab, setActiveTab] = useState("tous");
   const [sortBy, setSortBy] = useState("pertinence");
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [selectedVehicule, setSelectedVehicule] = useState(null);
   const [showReservation, setShowReservation] = useState(false);
-  const [showLocationPickerPickup, setShowLocationPickerPickup] = useState(false);
+  const [showLocationPickerPickup, setShowLocationPickerPickup] =
+    useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showLocationPickerReturn, setShowLocationPickerReturn] = useState(false);
+  const [showLocationPickerReturn, setShowLocationPickerReturn] =
+    useState(false);
   const [pickupLocation, setPickupLocation] = useState({
     latitude: null,
     longitude: null,
@@ -122,68 +132,82 @@ const LocationVoiturePage = () => {
     prixMoyen: 0,
   });
 
-  // Types de véhicules basés sur votre modèle
-  const typesVehicules = [
+  // Catégories basées sur votre modèle
+  const categories = [
     {
-      id: "economique",
-      label: "Économique",
+      id: "tous",
+      label: "Tous les véhicules",
       icon: Car,
-      description: "Petites voitures éco",
+      description: "Toutes catégories",
     },
     {
-      id: "compacte",
-      label: "Compacte",
+      id: "voiture",
+      label: "Voitures",
       icon: Car,
-      description: "Voitures citadines",
-    },
-    {
-      id: "berline",
-      label: "Berline",
-      icon: Car,
-      description: "Confort et espace",
-    },
-    {
-      id: "suv",
-      label: "SUV & 4x4",
-      icon: Car,
-      description: "Aventures et famille",
-    },
-    {
-      id: "luxe",
-      label: "Luxe & Premium",
-      icon: Car,
-      description: "Haut de gamme",
-    },
-    {
-      id: "utilitaire",
-      label: "Utilitaire",
-      icon: Truck,
-      description: "Petits utilitaires",
+      description: "Tous types de voitures",
     },
     {
       id: "camion",
-      label: "Camion",
+      label: "Camions & Utilitaires",
       icon: Truck,
-      description: "Grands volumes",
+      description: "Transport de marchandises",
     },
     {
-      id: "minibus",
-      label: "Minibus",
-      icon: Users,
-      description: "Groupes et familles",
+      id: "moto",
+      label: "Motos",
+      icon: Monitor,
+      description: "Roadsters, trails, sportives",
+    },
+    {
+      id: "velo",
+      label: "Vélos",
+      icon: Bike,
+      description: "VTT, VTC, électriques",
     },
   ];
+
+  // Types de véhicules par catégorie
+  const typesParCategorie = {
+    voiture: [
+      { id: "economique", label: "Économique" },
+      { id: "compacte", label: "Compacte" },
+      { id: "berline", label: "Berline" },
+      { id: "suv", label: "SUV & 4x4" },
+      { id: "luxe", label: "Luxe & Premium" },
+    ],
+    camion: [
+      { id: "utilitaire", label: "Utilitaire" },
+      { id: "pick-up", label: "Pick-up" },
+      { id: "camionnette", label: "Camionnette" },
+    ],
+    moto: [
+      { id: "roadster", label: "Roadster" },
+      { id: "trail", label: "Trail" },
+      { id: "sportive", label: "Sportive" },
+      { id: "custom", label: "Custom" },
+      { id: "scooter", label: "Scooter" },
+    ],
+    velo: [
+      { id: "VTT", label: "VTT" },
+      { id: "VTC", label: "VTC" },
+      { id: "route", label: "Route" },
+      { id: "electrique", label: "Électrique" },
+      { id: "ville", label: "Ville" },
+    ],
+  };
 
   const transmissions = [
     { id: "manuelle", label: "Manuelle", icon: Cog },
     { id: "automatique", label: "Automatique", icon: Cog },
+    { id: "semi_automatique", label: "Semi-automatique", icon: Cog },
   ];
 
   const carburants = [
     { id: "essence", label: "Essence", icon: Fuel },
     { id: "diesel", label: "Diesel", icon: Fuel },
     { id: "electrique", label: "Électrique", icon: Zap },
-    { id: "hybride", label: "Hybride", icon: Fuel },
+    { id: "hybride", label: "Hybride", icon: Battery },
+    { id: "gpl", label: "GPL", icon: Fuel },
   ];
 
   const extras = [
@@ -191,6 +215,8 @@ const LocationVoiturePage = () => {
     { id: "siège-bébé", label: "Siège bébé", price: 8, icon: Users },
     { id: "wifi", label: "WiFi mobile", price: 10, icon: Wifi },
     { id: "climatisation", label: "Climatisation", price: 0, icon: Snowflake },
+    { id: "casque", label: "Casque", price: 5, icon: Shield },
+    { id: "antivol", label: "Antivol", price: 3, icon: ShieldCheck },
     {
       id: "assurance-tous-risques",
       label: "Tous risques",
@@ -205,6 +231,74 @@ const LocationVoiturePage = () => {
     },
   ];
 
+  // Icônes par catégorie
+  const getCategoryIcon = (categorie) => {
+    switch (categorie) {
+      case "voiture":
+        return <Car className="h-4 w-4" />;
+      case "camion":
+        return <Truck className="h-4 w-4" />;
+      case "moto":
+        return <Bike className="h-4 w-4" />;
+      case "velo":
+        return <Bike className="h-4 w-4" />;
+      default:
+        return <Car className="h-4 w-4" />;
+    }
+  };
+
+  // Image par défaut par catégorie
+  const getDefaultImage = (categorie, typeVehicule) => {
+    const defaultImages = {
+      voiture: {
+        suv: "https://images.unsplash.com/photo-1563720223486-7a472e5c7b52?w=800&auto=format&fit=crop",
+        economique:
+          "https://images.unsplash.com/photo-1593941707882-a5bba5338fe2?w=800&auto=format&fit=crop",
+        compacte:
+          "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&auto=format&fit=crop",
+        berline:
+          "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&auto=format&fit=crop",
+        luxe: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&auto=format&fit=crop",
+        default:
+          "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+      },
+      camion: {
+        utilitaire:
+          "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800&auto=format&fit=crop",
+        "pick-up":
+          "https://images.unsplash.com/photo-1566474591191-8a583d6af81b?w=800&auto=format&fit=crop",
+        default:
+          "https://images.unsplash.com/photo-1566474591191-8a583d6af81b?w=800&auto=format&fit=crop",
+      },
+      moto: {
+        roadster:
+          "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&auto=format&fit=crop",
+        trail:
+          "https://images.unsplash.com/photo-1527847263472-aa5338d178b8?w=800&auto=format&fit=crop",
+        sportive:
+          "https://images.unsplash.com/photo-1620748690536-eba2d67a10e6?w=800&auto=format&fit=crop",
+        default:
+          "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&auto=format&fit=crop",
+      },
+      velo: {
+        VTT: "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=800&auto=format&fit=crop",
+        VTC: "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=800&auto=format&fit=crop",
+        route:
+          "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=800&auto=format&fit=crop",
+        electrique:
+          "https://images.unsplash.com/photo-1598335624134-5bceb5de202d?w=800&auto=format&fit=crop",
+        default:
+          "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=800&auto=format&fit=crop",
+      },
+    };
+
+    return (
+      defaultImages[categorie]?.[typeVehicule] ||
+      defaultImages[categorie]?.default ||
+      "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop"
+    );
+  };
+
   useEffect(() => {
     fetchVehicules();
     fetchStats();
@@ -214,6 +308,7 @@ const LocationVoiturePage = () => {
   useEffect(() => {
     fetchVehicules();
   }, [
+    selectedCategory,
     selectedType,
     selectedTransmission,
     selectedFuel,
@@ -227,7 +322,8 @@ const LocationVoiturePage = () => {
     setLoading(true);
     try {
       const params = {
-        type: selectedType !== "tous" ? selectedType : undefined,
+        categorie: selectedCategory !== "tous" ? selectedCategory : undefined,
+        typeVehicule: selectedType !== "tous" ? selectedType : undefined,
         transmission:
           selectedTransmission !== "tous" ? selectedTransmission : undefined,
         carburant: selectedFuel !== "tous" ? selectedFuel : undefined,
@@ -258,11 +354,9 @@ const LocationVoiturePage = () => {
 
   const fetchVilles = async () => {
     try {
-      // Récupérer les villes uniques depuis les véhicules
       const response = await vehiculesApi.getVehicules({ limit: 100 });
       const vehiculesData = response.data.data || [];
 
-      // Compter les véhicules par ville
       const villeCounts = {};
       vehiculesData.forEach((vehicule) => {
         if (vehicule.ville) {
@@ -270,7 +364,6 @@ const LocationVoiturePage = () => {
         }
       });
 
-      // Transformer en format pour le select
       const villesList = Object.entries(villeCounts).map(([ville, count]) => ({
         id: ville.toLowerCase().replace(/\s+/g, "-"),
         label: ville,
@@ -280,17 +373,17 @@ const LocationVoiturePage = () => {
       setVilles(villesList);
     } catch (error) {
       console.error("Erreur chargement villes:", error);
-      // Villes par défaut en cas d'erreur
       setVilles([
         { id: "saint-denis", label: "Saint-Denis", count: 0 },
         { id: "saint-pierre", label: "Saint-Pierre", count: 0 },
         { id: "saint-paul", label: "Saint-Paul", count: 0 },
         { id: "le-tampon", label: "Le Tampon", count: 0 },
+        { id: "saint-leu", label: "Saint-Leu", count: 0 },
+        { id: "cilaos", label: "Cilaos", count: 0 },
       ]);
     }
   };
 
-  // Gestion du tri
   const sortVehicules = (vehiculesList, sortMethod) => {
     const sorted = [...vehiculesList];
     switch (sortMethod) {
@@ -307,42 +400,39 @@ const LocationVoiturePage = () => {
     }
   };
 
-  // Filtrage des véhicules
   const filteredVehicules = sortVehicules(
     vehicules.filter((vehicule) => {
       const matchesSearch =
-        vehicule.marque.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicule.modele.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (vehicule.description &&
-          vehicule.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()));
+        vehicule.marque?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicule.modele?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicule.description
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        vehicule.typeVehicule?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === "tous" || vehicule.categorie === selectedCategory;
 
       const matchesType =
-        selectedType === "tous" ||
-        (activeTab === "voitures" &&
-          ["economique", "compacte", "berline", "suv", "luxe"].includes(
-            vehicule.typeVehicule
-          )) ||
-        (activeTab === "utilitaires" &&
-          ["utilitaire", "camion", "minibus"].includes(
-            vehicule.typeVehicule
-          )) ||
-        vehicule.typeVehicule === selectedType;
+        selectedType === "tous" || vehicule.typeVehicule === selectedType;
 
       const matchesTransmission =
         selectedTransmission === "tous" ||
         vehicule.transmission === selectedTransmission;
+
       const matchesFuel =
         selectedFuel === "tous" || vehicule.carburant === selectedFuel;
+
       const matchesCity =
         selectedCity === "tous" || vehicule.ville === selectedCity;
+
       const matchesPrice =
         vehicule.prixJour >= priceRange[0] &&
         vehicule.prixJour <= priceRange[1];
 
       return (
         matchesSearch &&
+        matchesCategory &&
         matchesType &&
         matchesTransmission &&
         matchesFuel &&
@@ -355,8 +445,6 @@ const LocationVoiturePage = () => {
     sortBy
   );
 
-
-  // Réserver un véhicule
   const handleReserve = async (vehicule) => {
     setSelectedVehicule(vehicule);
 
@@ -383,7 +471,6 @@ const LocationVoiturePage = () => {
     }
   };
 
-  // Soumission de réservation
   const handleSubmitReservation = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -427,7 +514,6 @@ const LocationVoiturePage = () => {
         `Réservation confirmée ! Un email de confirmation vous a été envoyé.`
       );
 
-      // Réinitialisation
       setReservationForm({
         nom: "",
         email: "",
@@ -449,7 +535,6 @@ const LocationVoiturePage = () => {
     }
   };
 
-  // Recherche avec entrée
   const handleSearch = (e) => {
     if (e.key === "Enter" || e.type === "click") {
       fetchVehicules();
@@ -457,20 +542,19 @@ const LocationVoiturePage = () => {
     }
   };
 
-
-  // Réinitialiser les filtres
   const handleResetFilters = () => {
+    setSelectedCategory("tous");
     setSelectedType("tous");
     setSelectedTransmission("tous");
     setSelectedFuel("tous");
     setSelectedCity("tous");
-    setPriceRange([30, 150]);
+    setPriceRange([10, 200]);
     setSearchTerm("");
+    setActiveTab("tous");
     fetchVehicules();
     toast.success("Filtres réinitialisés");
   };
 
-  // Calculer la durée de location
   const calculateDuration = () => {
     if (!pickupDate || !returnDate) return 1;
     const start = new Date(pickupDate);
@@ -479,9 +563,6 @@ const LocationVoiturePage = () => {
     return days > 0 ? days : 1;
   };
 
-
-
-  // Formater le prix
   const formatPrice = (price) => {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
@@ -490,36 +571,36 @@ const LocationVoiturePage = () => {
     }).format(price);
   };
 
-  // Récupérer l'image du véhicule
   const getVehicleImage = (vehicule) => {
     if (vehicule.images && vehicule.images.length > 0) {
       return vehicule.images[0];
     }
+    return getDefaultImage(vehicule.categorie, vehicule.typeVehicule);
+  };
 
-    // Image par défaut basée sur le type
-    const defaultImages = {
-      suv: "https://images.unsplash.com/photo-1563720223486-7a472e5c7b52?w=800&auto=format&fit=crop",
-      economique:
-        "https://images.unsplash.com/photo-1593941707882-a5bba5338fe2?w=800&auto=format&fit=crop",
-      compacte:
-        "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&auto=format&fit=crop",
-      berline:
-        "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&auto=format&fit=crop",
-      luxe: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&auto=format&fit=crop",
-      utilitaire:
-        "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800&auto=format&fit=crop",
-      camion:
-        "https://images.unsplash.com/photo-1566474591191-8a583d6af81b?w=800&auto=format&fit=crop",
-      electrique:
-        "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&auto=format&fit=crop",
-      minibus:
-        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop",
-    };
+  const renderVehicleSpecifics = (vehicule) => {
+    const specifics = [];
 
-    return (
-      defaultImages[vehicule.typeVehicule] ||
-      "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop"
-    );
+    // Caractéristiques communes
+    if (vehicule.annee) specifics.push(`${vehicule.annee}`);
+    if (vehicule.places) specifics.push(`${vehicule.places} places`);
+    if (vehicule.portes) specifics.push(`${vehicule.portes} portes`);
+
+    // Spécifiques par catégorie
+    if (vehicule.categorie === "moto" && vehicule.cylindree) {
+      specifics.push(`${vehicule.cylindree}cc`);
+    }
+
+    if (vehicule.categorie === "velo") {
+      if (vehicule.typeVelo) specifics.push(vehicule.typeVelo);
+      if (vehicule.assistanceElec) specifics.push("Assistance électrique");
+      if (vehicule.poids) specifics.push(`${vehicule.poids}kg`);
+    }
+
+    if (vehicule.carburant) specifics.push(vehicule.carburant);
+    if (vehicule.transmission) specifics.push(vehicule.transmission);
+
+    return specifics;
   };
 
   return (
@@ -531,78 +612,16 @@ const LocationVoiturePage = () => {
           backgroundImage: `url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1920&auto=format&fit=crop')`,
         }}
       >
-        {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] opacity-50"></div>
 
-        {/* Content */}
         <div className="relative max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Location de Voitures & Utilitaires à La Réunion
+              Location de Véhicules à La Réunion
             </h1>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Livraison partout sur l'île • Meilleur prix garanti
+              Voitures • Camions • Motos • Vélos • Livraison sur toute l'île
             </p>
-          </div>
-
-          {/* Search Form */}
-          <div className="max-w-6xl mx-auto bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label className="text-white text-sm mb-2 block">
-                  Lieu de prise en charge
-                </Label>
-                <Select value={selectedCity} onValueChange={setSelectedCity}>
-                  <SelectTrigger className="bg-white/50">
-                    <SelectValue placeholder="Choisir une ville" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tous">Toutes les villes</SelectItem>
-                    {villes.map((ville) => (
-                      <SelectItem key={ville.id} value={ville.label}>
-                        {ville.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-white text-sm mb-2 block">
-                  Date de prise en charge
-                </Label>
-                <Input
-                  type="date"
-                  value={pickupDate}
-                  onChange={(e) => setPickupDate(e.target.value)}
-                  className="bg-white/50"
-                  min={new Date().toISOString().split("T")[0]}
-                />
-              </div>
-
-              <div>
-                <Label className="text-white text-sm mb-2 block">
-                  Date de retour
-                </Label>
-                <Input
-                  type="date"
-                  value={returnDate}
-                  onChange={(e) => setReturnDate(e.target.value)}
-                  className="bg-white/50"
-                  min={pickupDate}
-                />
-              </div>
-
-              <div className="flex items-end">
-                <Button
-                  className="w-full bg-[#8B4513] hover:bg-[#6B3410] text-white py-6 text-lg"
-                  onClick={handleSearch}
-                >
-                  <Search className="h-5 w-5 mr-2" />
-                  Rechercher
-                </Button>
-              </div>
-            </div>
           </div>
 
 
@@ -610,9 +629,24 @@ const LocationVoiturePage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar Filters */}
-          <div className="lg:col-span-1">
+        <Tabs defaultValue="location" className="w-full">
+          <div className="flex justify-center mb-8">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="location" className="flex items-center gap-2">
+                <Car className="h-4 w-4" />
+                Location de Véhicules
+              </TabsTrigger>
+              <TabsTrigger value="bus" className="flex items-center gap-2">
+                <Bus className="h-4 w-4" />
+                Réseaux de Bus
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="location" className="mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Sidebar Filters */}
+              <div className="lg:col-span-1">
             <Card className="sticky top-24 border-[#D3D3D3]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -621,28 +655,30 @@ const LocationVoiturePage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Type de véhicule */}
+                {/* Catégorie de véhicule */}
                 <div>
                   <h3 className="font-semibold mb-3 text-[#8B4513]">
-                    Type de véhicule
+                    Catégorie
                   </h3>
                   <div className="space-y-2">
-                    {typesVehicules.map((type) => {
-                      const TypeIcon = type.icon;
+                    {categories.map((category) => {
+                      const CategoryIcon = category.icon;
                       return (
                         <div
-                          key={type.id}
+                          key={category.id}
                           className="flex items-center justify-between hover:bg-gray-50 p-2 rounded cursor-pointer"
-                          onClick={() => setSelectedType(type.id)}
+                          onClick={() => setSelectedCategory(category.id)}
                         >
                           <div className="flex items-center gap-2">
                             <Checkbox
-                              checked={selectedType === type.id}
-                              onCheckedChange={() => setSelectedType(type.id)}
+                              checked={selectedCategory === category.id}
+                              onCheckedChange={() =>
+                                setSelectedCategory(category.id)
+                              }
                             />
                             <span className="flex items-center gap-2 text-sm">
-                              <TypeIcon className="h-4 w-4" />
-                              {type.label}
+                              <CategoryIcon className="h-4 w-4" />
+                              {category.label}
                             </span>
                           </div>
                         </div>
@@ -651,62 +687,107 @@ const LocationVoiturePage = () => {
                   </div>
                 </div>
 
+                {/* Type de véhicule (dynamique selon la catégorie) */}
+                {selectedCategory !== "tous" &&
+                  typesParCategorie[selectedCategory] && (
+                    <>
+                      <Separator className="bg-[#D3D3D3]" />
+                      <div>
+                        <h3 className="font-semibold mb-3 text-[#8B4513]">
+                          Type
+                        </h3>
+                        <div className="space-y-2">
+                          <div
+                            className="flex items-center gap-2 hover:bg-gray-50 p-2 rounded cursor-pointer"
+                            onClick={() => setSelectedType("tous")}
+                          >
+                            <Checkbox
+                              checked={selectedType === "tous"}
+                              onCheckedChange={() => setSelectedType("tous")}
+                            />
+                            <span className="text-sm">Tous les types</span>
+                          </div>
+                          {typesParCategorie[selectedCategory].map((type) => (
+                            <div
+                              key={type.id}
+                              className="flex items-center gap-2 hover:bg-gray-50 p-2 rounded cursor-pointer"
+                              onClick={() => setSelectedType(type.id)}
+                            >
+                              <Checkbox
+                                checked={selectedType === type.id}
+                                onCheckedChange={() => setSelectedType(type.id)}
+                              />
+                              <span className="text-sm">{type.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
                 <Separator className="bg-[#D3D3D3]" />
 
-                {/* Transmission */}
-                <div>
-                  <h3 className="font-semibold mb-3 text-[#8B4513]">
-                    Transmission
-                  </h3>
-                  <Select
-                    value={selectedTransmission}
-                    onValueChange={setSelectedTransmission}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tous types" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tous">Tous types</SelectItem>
-                      {transmissions.map((trans) => {
-                        const TransIcon = trans.icon;
-                        return (
-                          <SelectItem key={trans.id} value={trans.id}>
-                            <span className="flex items-center gap-2">
-                              <TransIcon className="h-4 w-4" />
-                              {trans.label}
-                            </span>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Transmission (uniquement pour voitures et camions) */}
+                {["voiture", "camion", "moto"].includes(selectedCategory) && (
+                  <div>
+                    <h3 className="font-semibold mb-3 text-[#8B4513]">
+                      Transmission
+                    </h3>
+                    <Select
+                      value={selectedTransmission}
+                      onValueChange={setSelectedTransmission}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tous types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tous">Tous types</SelectItem>
+                        {transmissions.map((trans) => {
+                          const TransIcon = trans.icon;
+                          return (
+                            <SelectItem key={trans.id} value={trans.id}>
+                              <span className="flex items-center gap-2">
+                                <TransIcon className="h-4 w-4" />
+                                {trans.label}
+                              </span>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
-                {/* Carburant */}
-                <div>
-                  <h3 className="font-semibold mb-3 text-[#8B4513]">
-                    Type de carburant
-                  </h3>
-                  <Select value={selectedFuel} onValueChange={setSelectedFuel}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tous types" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tous">Tous types</SelectItem>
-                      {carburants.map((fuel) => {
-                        const FuelIcon = fuel.icon;
-                        return (
-                          <SelectItem key={fuel.id} value={fuel.id}>
-                            <span className="flex items-center gap-2">
-                              <FuelIcon className="h-4 w-4" />
-                              {fuel.label}
-                            </span>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Carburant (uniquement pour véhicules motorisés) */}
+                {selectedCategory !== "velo" && (
+                  <div>
+                    <h3 className="font-semibold mb-3 text-[#8B4513]">
+                      Type de carburant
+                    </h3>
+                    <Select
+                      value={selectedFuel}
+                      onValueChange={setSelectedFuel}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tous types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tous">Tous types</SelectItem>
+                        {carburants.map((fuel) => {
+                          const FuelIcon = fuel.icon;
+                          return (
+                            <SelectItem key={fuel.id} value={fuel.id}>
+                              <span className="flex items-center gap-2">
+                                <FuelIcon className="h-4 w-4" />
+                                {fuel.label}
+                              </span>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* Prix par jour */}
                 <div>
@@ -715,14 +796,14 @@ const LocationVoiturePage = () => {
                   </h3>
                   <div className="space-y-2 px-2">
                     <div className="flex justify-between text-sm text-gray-600">
-                      <span>30€</span>
-                      <span>90€</span>
-                      <span>150€</span>
+                      <span>10€</span>
+                      <span>100€</span>
+                      <span>200€</span>
                     </div>
                     <input
                       type="range"
-                      min="30"
-                      max="150"
+                      min="10"
+                      max="200"
                       step="5"
                       value={priceRange[0]}
                       onChange={(e) =>
@@ -732,8 +813,8 @@ const LocationVoiturePage = () => {
                     />
                     <input
                       type="range"
-                      min="30"
-                      max="150"
+                      min="10"
+                      max="200"
                       step="5"
                       value={priceRange[1]}
                       onChange={(e) =>
@@ -786,7 +867,7 @@ const LocationVoiturePage = () => {
                     <div>
                       <h4 className="font-medium text-sm">Assurance incluse</h4>
                       <p className="text-xs text-gray-600">
-                        Tous risques disponibles
+                        Protection complète
                       </p>
                     </div>
                   </div>
@@ -794,20 +875,9 @@ const LocationVoiturePage = () => {
                     <Clock className="h-5 w-5 text-[#6B8E23] mt-0.5" />
                     <div>
                       <h4 className="font-medium text-sm">
-                        Flexibilité horaire
+                        Livraison gratuite
                       </h4>
-                      <p className="text-xs text-gray-600">
-                        Prise en charge 24/7
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <DollarSign className="h-5 w-5 text-[#8B4513] mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-sm">
-                        Pas de frais cachés
-                      </h4>
-                      <p className="text-xs text-gray-600">Prix transparents</p>
+                      <p className="text-xs text-gray-600">Dans toute l'île</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
@@ -817,7 +887,7 @@ const LocationVoiturePage = () => {
                         Véhicules vérifiés
                       </h4>
                       <p className="text-xs text-gray-600">
-                        Contrôle qualité rigoureux
+                        Entretien régulier
                       </p>
                     </div>
                   </div>
@@ -857,284 +927,243 @@ const LocationVoiturePage = () => {
                     <SelectItem value="marque">Marque (A-Z)</SelectItem>
                   </SelectContent>
                 </Select>
-
-                <Button
-                  variant="outline"
-                  className="border-[#556B2F] text-[#556B2F]"
-                  onClick={() => toast.info("Comparateur bientôt disponible")}
-                >
-                  <Filter className="h-4 w-4 mr-2" />
-                  Comparer
-                </Button>
               </div>
             </div>
 
-            {/* Tabs */}
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="mb-6"
-            >
-              <TabsList className="grid grid-cols-4 mb-6">
-                <TabsTrigger value="voitures">
-                  <Car className="h-4 w-4 mr-2" />
-                  Voitures
-                </TabsTrigger>
-                <TabsTrigger value="utilitaires">
-                  <Truck className="h-4 w-4 mr-2" />
-                  Utilitaires
-                </TabsTrigger>
-                <TabsTrigger value="luxe">
-                  <Star className="h-4 w-4 mr-2" />
-                  Premium
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value={activeTab} className="space-y-4">
-                {loading ? (
-                  // Squelette de chargement
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <Card key={i} className="border-[#D3D3D3] animate-pulse">
-                      <CardContent className="pt-6">
-                        <div className="flex gap-4">
-                          <div className="h-48 w-64 bg-gray-200 rounded-lg"></div>
-                          <div className="flex-1 space-y-3">
-                            <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                            <div className="h-4 bg-gray-200 rounded w-full"></div>
-                          </div>
+            {/* Véhicules */}
+            <div className="space-y-4">
+              {loading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i} className="border-[#D3D3D3] animate-pulse">
+                    <CardContent className="pt-6">
+                      <div className="flex gap-4">
+                        <div className="h-48 w-64 bg-gray-200 rounded-lg"></div>
+                        <div className="flex-1 space-y-3">
+                          <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-full"></div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : filteredVehicules.length > 0 ? (
-                  filteredVehicules.map((vehicule) => {
-                    const duration = calculateDuration();
-                    const totalPrice = vehicule.prixJour * duration;
-                    const weeklyPrice =
-                      vehicule.prixSemaine || vehicule.prixJour * 7 * 0.85; // 15% de réduction pour la semaine
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : filteredVehicules.length > 0 ? (
+                filteredVehicules.map((vehicule) => {
+                  const duration = calculateDuration();
+                  const totalPrice = vehicule.prixJour * duration;
 
-                    return (
-                      <Card
-                        key={vehicule.id}
-                        className="border-[#D3D3D3] hover:shadow-lg transition-shadow duration-300"
-                      >
-                        <CardContent className="pt-6">
-                          <div className="flex flex-col md:flex-row gap-6">
-                            {/* Image véhicule */}
-                            <div className="w-full md:w-64 h-48 relative">
-                              <img
-                                src={getVehicleImage(vehicule)}
-                                alt={`${vehicule.marque} ${vehicule.modele}`}
-                                className="w-full h-full object-cover rounded-lg"
-                              />
-
-                              {vehicule.carburant === "electrique" && (
-                                <Badge className="absolute top-2 left-2 bg-green-500 text-white">
-                                  <Zap className="h-3 w-3 mr-1" />
-                                  Électrique
+                  return (
+                    <Card
+                      key={vehicule.id}
+                      className="border-[#D3D3D3] hover:shadow-lg transition-shadow duration-300"
+                    >
+                      <CardContent className="pt-6">
+                        <div className="flex flex-col md:flex-row gap-6">
+                          {/* Image véhicule */}
+                          <div className="w-full md:w-64 h-48 relative">
+                            <img
+                              src={getVehicleImage(vehicule)}
+                              alt={`${vehicule.marque} ${vehicule.modele}`}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                            <Badge className="absolute top-2 left-2 bg-[#556B2F] text-white">
+                              {getCategoryIcon(vehicule.categorie)}
+                              <span className="ml-1 capitalize">
+                                {vehicule.categorie}
+                              </span>
+                            </Badge>
+                            {vehicule.carburant === "electrique" && (
+                              <Badge className="absolute top-2 right-2 bg-green-500 text-white">
+                                <Zap className="h-3 w-3 mr-1" />
+                                Électrique
+                              </Badge>
+                            )}
+                            {vehicule.categorie === "velo" &&
+                              vehicule.assistanceElec && (
+                                <Badge className="absolute bottom-2 left-2 bg-blue-500 text-white">
+                                  <Battery className="h-3 w-3 mr-1" />
+                                  Assistance
                                 </Badge>
+                              )}
+                          </div>
+
+                          {/* Détails véhicule */}
+                          <div className="flex-1">
+                            <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
+                              <div>
+                                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                  <Badge
+                                    variant="outline"
+                                    className="border-[#8B4513] text-[#8B4513]"
+                                  >
+                                    {vehicule.typeVehicule}
+                                  </Badge>
+                                  {vehicule.transmission && (
+                                    <Badge variant="outline">
+                                      {vehicule.transmission}
+                                    </Badge>
+                                  )}
+                                  {vehicule.carburant &&
+                                    vehicule.carburant !== "electrique" && (
+                                      <Badge variant="outline">
+                                        {vehicule.carburant}
+                                      </Badge>
+                                    )}
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-1">
+                                  {vehicule.marque} {vehicule.modele}
+                                </h3>
+                                <div className="flex items-center gap-2 text-gray-600 mb-2">
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{vehicule.ville}</span>
+                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                  <span className="font-semibold">
+                                    {vehicule.rating?.toFixed(1) || "0.0"}
+                                  </span>
+                                  <span className="text-gray-500 text-sm">
+                                    ({vehicule.nombreAvis || 0} avis)
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-[#8B4513] mb-1">
+                                  {formatPrice(vehicule.prixJour)}
+                                  <span className="text-sm font-normal text-gray-500">
+                                    /jour
+                                  </span>
+                                </div>
+                                {vehicule.prixSemaine && (
+                                  <p className="text-sm text-gray-500">
+                                    {formatPrice(vehicule.prixSemaine)} la
+                                    semaine
+                                  </p>
+                                )}
+                                <p className="text-lg font-bold text-green-600">
+                                  Total : {formatPrice(totalPrice)}
+                                </p>
+                              </div>
+                            </div>
+
+                            <p className="text-gray-700 mb-4 line-clamp-2">
+                              {vehicule.description ||
+                                "Véhicule de qualité disponible à la location."}
+                            </p>
+
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                              {renderVehicleSpecifics(vehicule).map(
+                                (spec, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
+                                      <span className="text-xs text-gray-600">
+                                        ✓
+                                      </span>
+                                    </div>
+                                    <span className="text-sm">{spec}</span>
+                                  </div>
+                                )
                               )}
                             </div>
 
-                            {/* Détails véhicule */}
-                            <div className="flex-1">
-                              <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
-                                <div>
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Badge className="bg-[#556B2F] text-white">
-                                      {typesVehicules.find(
-                                        (t) => t.id === vehicule.typeVehicule
-                                      )?.label || vehicule.typeVehicule}
-                                    </Badge>
-                                    <Badge
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-green-600" />
+                                <span className="text-sm font-medium">
+                                  {vehicule.prestataire?.companyName ||
+                                    "Professionnel OLIPLUS"}{" "}
+                                  •{vehicule.prestataire?.rating || 4.5}★
+                                </span>
+                              </div>
+                              <div className="flex gap-2">
+                                <Sheet>
+                                  <SheetTrigger asChild>
+                                    <Button
                                       variant="outline"
-                                      className="border-[#8B4513] text-[#8B4513]"
+                                      className="border-[#556B2F] text-[#556B2F]"
+                                      onClick={() =>
+                                        setSelectedVehicule(vehicule)
+                                      }
                                     >
-                                      {vehicule.transmission === "automatique"
-                                        ? "Auto"
-                                        : "Manuelle"}
-                                    </Badge>
-                                    <Badge variant="outline">
-                                      {vehicule.carburant}
-                                    </Badge>
-                                  </div>
-                                  <h3 className="text-xl font-bold text-gray-900 mb-1">
-                                    {vehicule.marque} {vehicule.modele}
-                                  </h3>
-                                  <div className="flex items-center gap-2 text-gray-600 mb-2">
-                                    <MapPin className="h-4 w-4" />
-                                    <span>{vehicule.ville}</span>
-                                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                    <span className="font-semibold">
-                                      {vehicule.rating.toFixed(1)}
-                                    </span>
-                                    <span className="text-gray-500 text-sm">
-                                      ({vehicule.nombreAvis || 0} avis)
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-2xl font-bold text-[#8B4513] mb-1">
-                                    {formatPrice(vehicule.prixJour)}
-                                    <span className="text-sm font-normal text-gray-500">
-                                      /jour
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-gray-500">
-                                    {formatPrice(weeklyPrice)} la semaine
-                                  </p>
-                                  <p className="text-lg font-bold text-green-600">
-                                    Total : {formatPrice(totalPrice)}
-                                  </p>
-                                </div>
-                              </div>
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      Détails
+                                    </Button>
+                                  </SheetTrigger>
+                                  <SheetContent className="sm:max-w-xl overflow-y-auto">
+                                    {selectedVehicule && (
+                                      <>
+                                        <SheetHeader>
+                                          <SheetTitle>
+                                            {selectedVehicule.marque}{" "}
+                                            {selectedVehicule.modele}
+                                          </SheetTitle>
+                                          <SheetDescription>
+                                            {selectedVehicule.annee} •{" "}
+                                            {selectedVehicule.categorie}
+                                            {selectedVehicule.carburant &&
+                                              ` • ${selectedVehicule.carburant}`}
+                                          </SheetDescription>
+                                        </SheetHeader>
+                                        <div className="mt-6 space-y-6">
+                                          <img
+                                            src={getVehicleImage(
+                                              selectedVehicule
+                                            )}
+                                            alt={`${selectedVehicule.marque} ${selectedVehicule.modele}`}
+                                            className="w-full h-64 object-cover rounded-lg"
+                                          />
 
-                              <p className="text-gray-700 mb-4 line-clamp-2">
-                                {vehicule.description ||
-                                  "Véhicule de qualité disponible à la location."}
-                              </p>
+                                          <div>
+                                            <h4 className="font-semibold text-[#8B4513] mb-2">
+                                              Description
+                                            </h4>
+                                            <p className="text-gray-700">
+                                              {selectedVehicule.description ||
+                                                "Véhicule de qualité disponible à la location."}
+                                            </p>
+                                          </div>
 
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4 text-[#556B2F]" />
-                                  <span className="text-sm">
-                                    {vehicule.annee}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Fuel className="h-4 w-4 text-[#556B2F]" />
-                                  <span className="text-sm">
-                                    {vehicule.carburant}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Cog className="h-4 w-4 text-[#556B2F]" />
-                                  <span className="text-sm">
-                                    {vehicule.puissance}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Users className="h-4 w-4 text-[#556B2F]" />
-                                  <span className="text-sm">
-                                    {vehicule.places} places
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Clock className="h-4 w-4 text-[#556B2F]" />
-                                  <span className="text-sm">
-                                    {vehicule.kilometrageInclus}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                {vehicule.caracteristiques &&
-                                vehicule.caracteristiques.length > 0 ? (
-                                  vehicule.caracteristiques
-                                    .slice(0, 4)
-                                    .map((caract, idx) => (
-                                      <Badge
-                                        key={idx}
-                                        variant="secondary"
-                                        className="bg-gray-100"
-                                      >
-                                        {caract}
-                                      </Badge>
-                                    ))
-                                ) : (
-                                  <>
-                                    <Badge
-                                      variant="secondary"
-                                      className="bg-gray-100"
-                                    >
-                                      {vehicule.places} places
-                                    </Badge>
-                                    <Badge
-                                      variant="secondary"
-                                      className="bg-gray-100"
-                                    >
-                                      {vehicule.portes} portes
-                                    </Badge>
-                                    <Badge
-                                      variant="secondary"
-                                      className="bg-gray-100"
-                                    >
-                                      {vehicule.transmission}
-                                    </Badge>
-                                  </>
-                                )}
-                              </div>
-
-                              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                  <Shield className="h-4 w-4 text-green-600" />
-                                  <span className="text-sm font-medium">
-                                    {vehicule.agence ||
-                                      vehicule.prestataire?.companyName}{" "}
-                                    • {vehicule.prestataire?.rating || 4.5}★
-                                  </span>
-                                </div>
-                                <div className="flex gap-2">
-                                  <Sheet>
-                                    <SheetTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        className="border-[#556B2F] text-[#556B2F]"
-                                        onClick={() =>
-                                          setSelectedVehicule(vehicule)
-                                        }
-                                      >
-                                        <Eye className="h-4 w-4 mr-1" />
-                                        Détails
-                                      </Button>
-                                    </SheetTrigger>
-                                    <SheetContent className="sm:max-w-xl overflow-y-auto">
-                                      {selectedVehicule && (
-                                        <>
-                                          <SheetHeader>
-                                            <SheetTitle>
-                                              {selectedVehicule.marque}{" "}
-                                              {selectedVehicule.modele}
-                                            </SheetTitle>
-                                            <SheetDescription>
-                                              {selectedVehicule.annee} •{" "}
-                                              {selectedVehicule.carburant} •{" "}
-                                              {selectedVehicule.puissance}
-                                            </SheetDescription>
-                                          </SheetHeader>
-                                          <div className="mt-6 space-y-6">
-                                            <img
-                                              src={getVehicleImage(
-                                                selectedVehicule
-                                              )}
-                                              alt={`${selectedVehicule.marque} ${selectedVehicule.modele}`}
-                                              className="w-full h-64 object-cover rounded-lg"
-                                            />
-
-                                            <div>
-                                              <h4 className="font-semibold text-[#8B4513] mb-2">
-                                                Description
-                                              </h4>
-                                              <p className="text-gray-700">
-                                                {selectedVehicule.description ||
-                                                  "Véhicule de qualité disponible à la location."}
-                                              </p>
-                                            </div>
-
-                                            <div>
-                                              <h4 className="font-semibold text-[#8B4513] mb-2">
-                                                Caractéristiques techniques
-                                              </h4>
-                                              <div className="grid grid-cols-2 gap-3">
-                                                <div className="bg-gray-50 p-3 rounded">
-                                                  <p className="text-sm text-gray-600">
-                                                    Année
-                                                  </p>
-                                                  <p className="font-semibold">
-                                                    {selectedVehicule.annee}
-                                                  </p>
-                                                </div>
+                                          <div>
+                                            <h4 className="font-semibold text-[#8B4513] mb-2">
+                                              Caractéristiques
+                                            </h4>
+                                            <div className="grid grid-cols-2 gap-3">
+                                              <div className="bg-gray-50 p-3 rounded">
+                                                <p className="text-sm text-gray-600">
+                                                  Catégorie
+                                                </p>
+                                                <p className="font-semibold capitalize">
+                                                  {selectedVehicule.categorie}
+                                                </p>
+                                              </div>
+                                              <div className="bg-gray-50 p-3 rounded">
+                                                <p className="text-sm text-gray-600">
+                                                  Type
+                                                </p>
+                                                <p className="font-semibold">
+                                                  {
+                                                    selectedVehicule.typeVehicule
+                                                  }
+                                                </p>
+                                              </div>
+                                              <div className="bg-gray-50 p-3 rounded">
+                                                <p className="text-sm text-gray-600">
+                                                  Année
+                                                </p>
+                                                <p className="font-semibold">
+                                                  {selectedVehicule.annee}
+                                                </p>
+                                              </div>
+                                              <div className="bg-gray-50 p-3 rounded">
+                                                <p className="text-sm text-gray-600">
+                                                  Marque
+                                                </p>
+                                                <p className="font-semibold">
+                                                  {selectedVehicule.marque}
+                                                </p>
+                                              </div>
+                                              {selectedVehicule.carburant && (
                                                 <div className="bg-gray-50 p-3 rounded">
                                                   <p className="text-sm text-gray-600">
                                                     Carburant
@@ -1143,30 +1172,8 @@ const LocationVoiturePage = () => {
                                                     {selectedVehicule.carburant}
                                                   </p>
                                                 </div>
-                                                <div className="bg-gray-50 p-3 rounded">
-                                                  <p className="text-sm text-gray-600">
-                                                    Puissance
-                                                  </p>
-                                                  <p className="font-semibold">
-                                                    {selectedVehicule.puissance}
-                                                  </p>
-                                                </div>
-                                                <div className="bg-gray-50 p-3 rounded">
-                                                  <p className="text-sm text-gray-600">
-                                                    Couleur
-                                                  </p>
-                                                  <p className="font-semibold">
-                                                    {selectedVehicule.couleur}
-                                                  </p>
-                                                </div>
-                                                <div className="bg-gray-50 p-3 rounded">
-                                                  <p className="text-sm text-gray-600">
-                                                    Places
-                                                  </p>
-                                                  <p className="font-semibold">
-                                                    {selectedVehicule.places}
-                                                  </p>
-                                                </div>
+                                              )}
+                                              {selectedVehicule.transmission && (
                                                 <div className="bg-gray-50 p-3 rounded">
                                                   <p className="text-sm text-gray-600">
                                                     Transmission
@@ -1177,124 +1184,114 @@ const LocationVoiturePage = () => {
                                                     }
                                                   </p>
                                                 </div>
-                                              </div>
-                                            </div>
-
-                                            <div>
-                                              <h4 className="font-semibold text-[#8B4513] mb-2">
-                                                Conditions de location
-                                              </h4>
-                                              <div className="bg-yellow-50 p-4 rounded-lg">
-                                                <div className="space-y-2">
-                                                  <div className="flex justify-between">
-                                                    <span>
-                                                      Kilométrage inclus:
-                                                    </span>
-                                                    <span className="font-semibold">
-                                                      {
-                                                        selectedVehicule.kilometrageInclus
-                                                      }
-                                                    </span>
-                                                  </div>
-                                                  <div className="flex justify-between">
-                                                    <span>Caution:</span>
-                                                    <span className="font-semibold">
-                                                      {formatPrice(
-                                                        selectedVehicule.caution
-                                                      )}
-                                                    </span>
-                                                  </div>
-                                                  {selectedVehicule.conditionsLocation && (
-                                                    <p className="text-sm text-gray-600 mt-2">
-                                                      {
-                                                        selectedVehicule.conditionsLocation
-                                                      }
-                                                    </p>
-                                                  )}
+                                              )}
+                                              {selectedVehicule.cylindree && (
+                                                <div className="bg-gray-50 p-3 rounded">
+                                                  <p className="text-sm text-gray-600">
+                                                    Cylindrée
+                                                  </p>
+                                                  <p className="font-semibold">
+                                                    {selectedVehicule.cylindree}
+                                                    cc
+                                                  </p>
                                                 </div>
-                                              </div>
-                                            </div>
-
-                                            <div>
-                                              <h4 className="font-semibold text-[#8B4513] mb-2">
-                                                À propos de l'agence
-                                              </h4>
-                                              <div className="bg-blue-50 p-4 rounded-lg">
-                                                <div className="flex items-center justify-between">
-                                                  <div>
-                                                    <p className="font-semibold">
-                                                      {selectedVehicule.agence ||
-                                                        selectedVehicule
-                                                          .prestataire
-                                                          ?.companyName ||
-                                                        "Professionnel OLIPLUS"}
-                                                    </p>
-                                                    <div className="flex items-center gap-1">
-                                                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                                      <span>
-                                                        {selectedVehicule.prestataire?.rating?.toFixed(
-                                                          1
-                                                        ) || 4.5}
-                                                      </span>
-                                                    </div>
-                                                  </div>
-                       
+                                              )}
+                                              {selectedVehicule.poids && (
+                                                <div className="bg-gray-50 p-3 rounded">
+                                                  <p className="text-sm text-gray-600">
+                                                    Poids
+                                                  </p>
+                                                  <p className="font-semibold">
+                                                    {selectedVehicule.poids}kg
+                                                  </p>
                                                 </div>
-                                              </div>
+                                              )}
                                             </div>
-
-                                            <Button
-                                              className="w-full bg-[#8B4513] hover:bg-[#6B3410]"
-                                              onClick={() =>
-                                                handleReserve(selectedVehicule)
-                                              }
-                                            >
-                                              Réserver maintenant
-                                            </Button>
                                           </div>
-                                        </>
-                                      )}
-                                    </SheetContent>
-                                  </Sheet>
 
-                                  <Button
-                                    className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
-                                    onClick={() => {
-                                      setSelectedVehicule(vehicule);
-                                      setShowReservation(true);
-                                    }}
-                                  >
-                                    Réserver
-                                  </Button>
-                                </div>
+                                          <div>
+                                            <h4 className="font-semibold text-[#8B4513] mb-2">
+                                              Conditions de location
+                                            </h4>
+                                            <div className="bg-yellow-50 p-4 rounded-lg">
+                                              <div className="space-y-2">
+                                                <div className="flex justify-between">
+                                                  <span>Caution:</span>
+                                                  <span className="font-semibold">
+                                                    {formatPrice(
+                                                      selectedVehicule.caution ||
+                                                        0
+                                                    )}
+                                                  </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                  <span>Disponible:</span>
+                                                  <span className="font-semibold">
+                                                    {selectedVehicule.disponible
+                                                      ? "Oui"
+                                                      : "Non"}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <Button
+                                            className="w-full bg-[#8B4513] hover:bg-[#6B3410]"
+                                            onClick={() =>
+                                              handleReserve(selectedVehicule)
+                                            }
+                                          >
+                                            Réserver maintenant
+                                          </Button>
+                                        </div>
+                                      </>
+                                    )}
+                                  </SheetContent>
+                                </Sheet>
+
+                                <Button
+                                  className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
+                                  onClick={() => {
+                                    setSelectedVehicule(vehicule);
+                                    setShowReservation(true);
+                                  }}
+                                >
+                                  Réserver
+                                </Button>
                               </div>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })
-                ) : (
-                  <Card className="border-[#D3D3D3]">
-                    <CardContent className="pt-12 pb-12 text-center">
-                      <Car className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                        Aucun véhicule ne correspond à vos critères
-                      </h3>
-                      <p className="text-gray-500 mb-4">
-                        Essayez de modifier vos filtres ou vos dates de
-                        recherche
-                      </p>
-                      <Button variant="outline" onClick={handleResetFilters}>
-                        Voir tous les véhicules
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-            </Tabs>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <Card className="border-[#D3D3D3]">
+                  <CardContent className="pt-12 pb-12 text-center">
+                    <Car className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                      Aucun véhicule ne correspond à vos critères
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      Essayez de modifier vos filtres ou vos dates de recherche
+                    </p>
+                    <Button variant="outline" onClick={handleResetFilters}>
+                      Voir tous les véhicules
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         </div>
+          </TabsContent>
+
+          <TabsContent value="bus" className="mt-0">
+            <BusRoutesView />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Location Picker Modals */}
@@ -1314,6 +1311,7 @@ const LocationVoiturePage = () => {
         }}
       />
 
+      {/* Reservation Dialog */}
       <Dialog open={showReservation} onOpenChange={setShowReservation}>
         <DialogContent className="max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col p-4 sm:p-6">
           {selectedVehicule && (
@@ -1325,9 +1323,7 @@ const LocationVoiturePage = () => {
                 <div className="text-sm text-gray-600">
                   {calculateDuration()} jour
                   {calculateDuration() > 1 ? "s" : ""} • Total :{" "}
-                  {formatPrice(
-                    selectedVehicule.prixJour * calculateDuration()
-                  )}
+                  {formatPrice(selectedVehicule.prixJour * calculateDuration())}
                 </div>
               </DialogHeader>
 
@@ -1362,7 +1358,7 @@ const LocationVoiturePage = () => {
                     </div>
                   </div>
 
-                  {/* Lieux de prise en charge et retour */}
+                  {/* Lieux */}
                   <div className="space-y-2">
                     <h4 className="font-semibold text-[#8B4513] text-sm">
                       Lieux de location
@@ -1480,6 +1476,17 @@ const LocationVoiturePage = () => {
                         );
                         const extraTotal = extra.price * calculateDuration();
 
+                        // Filtrer les extras par catégorie
+                        const isForThisVehicle =
+                          (selectedVehicule.categorie === "velo" &&
+                            ["casque", "antivol"].includes(extra.id)) ||
+                          (selectedVehicule.categorie !== "velo" &&
+                            !["casque", "antivol"].includes(extra.id)) ||
+                          extra.id === "assurance-tous-risques" ||
+                          extra.id === "conduite-additionnelle";
+
+                        if (!isForThisVehicle) return null;
+
                         return (
                           <div
                             key={extra.id}
@@ -1563,15 +1570,20 @@ const LocationVoiturePage = () => {
                         <span className="text-[#8B4513]">
                           {formatPrice(
                             selectedVehicule.prixJour * calculateDuration() +
-                              reservationForm.extras.reduce((total, extraId) => {
-                                const extra = extras.find(
-                                  (e) => e.id === extraId
-                                );
-                                return (
-                                  total +
-                                  (extra ? extra.price * calculateDuration() : 0)
-                                );
-                              }, 0)
+                              reservationForm.extras.reduce(
+                                (total, extraId) => {
+                                  const extra = extras.find(
+                                    (e) => e.id === extraId
+                                  );
+                                  return (
+                                    total +
+                                    (extra
+                                      ? extra.price * calculateDuration()
+                                      : 0)
+                                  );
+                                },
+                                0
+                              )
                           )}
                         </span>
                       </div>
