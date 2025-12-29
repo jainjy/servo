@@ -86,6 +86,207 @@ interface Logement {
     features?: string[];
 }
 
+// Composant de carte individuelle avec animations framer-motion
+const PropertyCard = ({ 
+    logement, 
+    index, 
+    favoris, 
+    toggleFavori, 
+    handlePostuler, 
+    sentRequests, 
+    handleVoirDetails 
+}) => {
+    const isDejaPostule = sentRequests?.[logement.id];
+    
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.5, delay: index * 0.05 }}
+            whileHover={{ y: -8, transition: { duration: 0.2 } }}
+            className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
+            style={{ borderColor: COLORS.separator }}
+        >
+            {/* Image avec badges */}
+            <div className="relative">
+                <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
+                    <img
+                        src={logement.image}
+                        alt={logement.titre}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+
+                    {/* Badges superposés */}
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
+                        style={{ color: COLORS.logo }}>
+                        {logement.socialType || 'SOCIAL'}
+                    </div>
+
+                    {/* Badge prix */}
+                    <div className="absolute top-3 right-3 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
+                        style={{ backgroundColor: `${COLORS.logo}20`, color: COLORS.logo }}>
+                        {logement.prix}
+                    </div>
+
+                    {/* Badge classe énergie */}
+                    {logement.energyClass && (
+                        <div className="absolute bottom-3 left-3">
+                            <span
+                                className={`px-2 py-1 rounded text-xs font-semibold ${logement.energyClass === "A"
+                                    ? "bg-green-500 text-white"
+                                    : logement.energyClass === "B"
+                                        ? "bg-lime-500 text-white"
+                                        : logement.energyClass === "C"
+                                            ? "bg-yellow-500 text-white"
+                                            : "bg-gray-500 text-white"
+                                    }`}
+                            >
+                                Classe {logement.energyClass}
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Bouton favori */}
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavori(logement.id);
+                        }}
+                        className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
+                            ? 'bg-red-500 text-white'
+                            : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
+                            }`}
+                    >
+                        <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
+                    </motion.button>
+                </div>
+            </div>
+
+            {/* Contenu de la carte */}
+            <div className="p-4">
+                <h3 className="font-semibold text-sm line-clamp-2 leading-tight mb-2"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    {logement.titre}
+                </h3>
+
+                {/* Localisation */}
+                <div className="flex items-center text-xs mb-3"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {logement.lieu}
+                </div>
+
+                <p className="text-sm mb-4 line-clamp-2"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    {logement.description}
+                </p>
+
+                {/* Caractéristiques */}
+                <div className="flex items-center gap-4 text-xs mb-3"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    {logement.surface && (
+                        <div className="flex items-center gap-2">
+                            <Ruler className="h-3 w-3" style={{ color: COLORS.logo }} />
+                            <span className="font-medium">{logement.surface} m²</span>
+                        </div>
+                    )}
+                    {logement.bedrooms && (
+                        <div className="flex items-center gap-2">
+                            <Bed className="h-3 w-3" style={{ color: COLORS.logo }} />
+                            <span className="font-medium">{logement.bedrooms} ch.</span>
+                        </div>
+                    )}
+                    {logement.bathrooms && (
+                        <div className="flex items-center gap-2">
+                            <Bath className="h-3 w-3" style={{ color: COLORS.logo }} />
+                            <span className="font-medium">{logement.bathrooms} sdb</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Features */}
+                <div className="flex flex-wrap gap-1 mb-3">
+                    {/* Badge Achat/Location */}
+                    {logement.type && (
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${logement.type === "location"
+                            ? "bg-green-50 text-green-700"
+                            : "bg-blue-50 text-blue-700"
+                            }`}>
+                            <div className={`w-1 h-1 rounded-full ${logement.type === "location"
+                                ? "bg-green-600"
+                                : "bg-blue-600"
+                                }`} />
+                            {logement.type === "location" ? "Location" : "À vendre"}
+                        </span>
+                    )}
+                    {logement.categorie && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                            style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
+                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: COLORS.logo }} />
+                            {logement.categorie}
+                        </span>
+                    )}
+                    {/* Badge social type */}
+                    {logement.socialType && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                            style={{ backgroundColor: `${COLORS.logo}10`, color: COLORS.logo }}>
+                            <Building className="w-3 h-3" />
+                            {logement.socialType}
+                        </span>
+                    )}
+                </div>
+
+                {/* Informations supplémentaires */}
+                <div className="flex justify-between items-center pt-4 text-sm"
+                    style={{ color: COLORS["secondary-text"] }}>
+                    <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" style={{ color: COLORS.logo }} />
+                        <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Eye className="w-4 h-4" style={{ color: COLORS.logo }} />
+                        <span>{logement.vues} vues</span>
+                    </div>
+                </div>
+
+                {/* Boutons d'action */}
+                <div className="flex gap-2 mt-4">
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handlePostuler(logement);
+                        }}
+                        disabled={isDejaPostule}
+                        className="flex-1 text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60"
+                        style={{
+                            backgroundColor: isDejaPostule ? `${COLORS.logo}60` : COLORS.logo,
+                            borderColor: COLORS.logo
+                        }}
+                    >
+                        {isDejaPostule ? "Visite déjà demandée" : "Demander une visite"}
+                    </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => handleVoirDetails(logement, e)}
+                        className="p-2 rounded-md transition"
+                        style={{
+                            border: `1px solid ${COLORS.separator}`,
+                            color: COLORS.logo
+                        }}
+                    >
+                        <Eye className="w-4 h-4" />
+                    </motion.button>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
 const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
     const [activeTab, setActiveTab] = useState('logements');
     const [favoris, setFavoris] = useState<number[]>([]);
@@ -103,12 +304,11 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-    // Refs pour animations
+    // Refs pour animations GSAP (gardées pour les autres sections)
     const heroRef = React.useRef(null);
     const statsRef = React.useRef(null);
     const advantagesRef = React.useRef(null);
     const dispositifsRef = React.useRef(null);
-    const propertiesRef = React.useRef([]);
 
     // Types de logements sociaux disponibles
     const socialTypes = [
@@ -131,7 +331,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
         return typeMap[type] || "maison";
     };
 
-    // Initialisation des animations GSAP
+    // Initialisation des animations GSAP (seulement pour les sections non-cartes)
     useEffect(() => {
         // Animation des statistiques
         if (statsRef.current) {
@@ -181,28 +381,10 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
             });
         }
 
-        // Animation des propriétés
-        propertiesRef.current.forEach((card, index) => {
-            if (card) {
-                gsap.from(card, {
-                    scrollTrigger: {
-                        trigger: card,
-                        start: "top 85%",
-                        toggleActions: "play none none reverse",
-                    },
-                    y: 50,
-                    opacity: 0,
-                    duration: 0.8,
-                    delay: index * 0.1,
-                    ease: "power2.out",
-                });
-            }
-        });
-
         return () => {
             ScrollTrigger.getAll().forEach(trigger => trigger.kill());
         };
-    }, [filteredLogements]);
+    }, []);
 
     // Filtrer les logements selon le type sélectionné
     useEffect(() => {
@@ -589,7 +771,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                 </div>
 
                 {/* Contenu */}
-                <div className="container mx-auto px-4 relative z-10">
+                <div className="container mx-auto px-4 relative z-10 py-20 ">
                     <div className="max-w-4xl mx-auto text-center">
                         <motion.h1
                             initial={{ opacity: 0, y: -20 }}
@@ -666,7 +848,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border z-50"
+                                        className="absolute top-full left-0 mt-2 w-64  rounded-lg shadow-xl border z-50"
                                         style={{ borderColor: COLORS.separator }}
                                     >
                                         {socialTypes.map((type) => (
@@ -770,6 +952,10 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                 {avantages.map((avantage, index) => (
                                     <motion.div
                                         key={index}
+                                        initial={{ opacity: 0, y: 40 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.15, duration: 0.7 }}
                                         whileHover={{ y: -8, transition: { duration: 0.2 } }}
                                         className="p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border"
                                         style={{
@@ -813,6 +999,10 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                     {stats.map((stat, index) => (
                                         <motion.div
                                             key={index}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: index * 0.1, duration: 0.5 }}
                                             whileHover={{ scale: 1.05 }}
                                             className="text-center"
                                         >
@@ -858,6 +1048,10 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                 {dispositifs.map((dispositif, index) => (
                                     <motion.div
                                         key={index}
+                                        initial={{ opacity: 0, y: 40 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1, duration: 0.6 }}
                                         whileHover={{ scale: 1.02, y: -5 }}
                                         className="rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border"
                                         style={{
@@ -1020,197 +1214,19 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                 </motion.div>
                             )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {filteredLogements.map((logement, index) => {
-                                    const isDejaPostule = sentRequests?.[logement.id];
-
-                                    return (
-                                        <motion.div
-                                            key={logement.id}
-                                            ref={el => propertiesRef.current[index] = el}
-                                            whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                                            className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
-                                            style={{ borderColor: COLORS.separator }}
-                                        >
-                                            {/* Image avec badges */}
-                                            <div className="relative">
-                                                <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
-                                                    <img
-                                                        src={logement.image}
-                                                        alt={logement.titre}
-                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                    />
-
-                                                    {/* Badges superposés */}
-                                                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
-                                                        style={{ color: COLORS.logo }}>
-                                                        {logement.socialType || 'SOCIAL'}
-                                                    </div>
-
-                                                    {/* Badge prix */}
-                                                    <div className="absolute top-3 right-3 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
-                                                        style={{ backgroundColor: `${COLORS.logo}20`, color: COLORS.logo }}>
-                                                        {logement.prix}
-                                                    </div>
-
-                                                    {/* Badge classe énergie */}
-                                                    {logement.energyClass && (
-                                                        <div className="absolute bottom-3 left-3">
-                                                            <span
-                                                                className={`px-2 py-1 rounded text-xs font-semibold ${logement.energyClass === "A"
-                                                                    ? "bg-green-500 text-white"
-                                                                    : logement.energyClass === "B"
-                                                                        ? "bg-lime-500 text-white"
-                                                                        : logement.energyClass === "C"
-                                                                            ? "bg-yellow-500 text-white"
-                                                                            : "bg-gray-500 text-white"
-                                                                    }`}
-                                                            >
-                                                                Classe {logement.energyClass}
-                                                            </span>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Bouton favori */}
-                                                    <motion.button
-                                                        whileTap={{ scale: 0.9 }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            toggleFavori(logement.id);
-                                                        }}
-                                                        className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
-                                                            ? 'bg-red-500 text-white'
-                                                            : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
-                                                            }`}
-                                                    >
-                                                        <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
-                                                    </motion.button>
-                                                </div>
-                                            </div>
-
-                                            {/* Contenu de la carte */}
-                                            <div className="p-4">
-                                                <h3 className="font-semibold text-sm line-clamp-2 leading-tight mb-2"
-                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                    {logement.titre}
-                                                </h3>
-
-                                                {/* Localisation */}
-                                                <div className="flex items-center text-xs mb-3"
-                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                    <MapPin className="h-3 w-3 mr-1" />
-                                                    {logement.lieu}
-                                                </div>
-
-                                                <p className="text-sm mb-4 line-clamp-2"
-                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                    {logement.description}
-                                                </p>
-
-                                                {/* Caractéristiques */}
-                                                <div className="flex items-center gap-4 text-xs mb-3"
-                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                    {logement.surface && (
-                                                        <div className="flex items-center gap-2">
-                                                            <Ruler className="h-3 w-3" style={{ color: COLORS.logo }} />
-                                                            <span className="font-medium">{logement.surface} m²</span>
-                                                        </div>
-                                                    )}
-                                                    {logement.bedrooms && (
-                                                        <div className="flex items-center gap-2">
-                                                            <Bed className="h-3 w-3" style={{ color: COLORS.logo }} />
-                                                            <span className="font-medium">{logement.bedrooms} ch.</span>
-                                                        </div>
-                                                    )}
-                                                    {logement.bathrooms && (
-                                                        <div className="flex items-center gap-2">
-                                                            <Bath className="h-3 w-3" style={{ color: COLORS.logo }} />
-                                                            <span className="font-medium">{logement.bathrooms} sdb</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Features */}
-                                                <div className="flex flex-wrap gap-1 mb-3">
-                                                    {/* Badge Achat/Location */}
-                                                    {logement.type && (
-                                                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${logement.type === "location"
-                                                            ? "bg-green-50 text-green-700"
-                                                            : "bg-blue-50 text-blue-700"
-                                                            }`}>
-                                                            <div className={`w-1 h-1 rounded-full ${logement.type === "location"
-                                                                ? "bg-green-600"
-                                                                : "bg-blue-600"
-                                                                }`} />
-                                                            {logement.type === "location" ? "Location" : "À vendre"}
-                                                        </span>
-                                                    )}
-                                                    {logement.categorie && (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                                                            style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
-                                                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: COLORS.logo }} />
-                                                            {logement.categorie}
-                                                        </span>
-                                                    )}
-                                                    {/* Badge social type */}
-                                                    {logement.socialType && (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                                                            style={{ backgroundColor: `${COLORS.logo}10`, color: COLORS.logo }}>
-                                                            <Building className="w-3 h-3" />
-                                                            {logement.socialType}
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                {/* Informations supplémentaires */}
-                                                <div className="flex justify-between items-center pt-4 text-sm"
-                                                    style={{ color: COLORS["secondary-text"] }}>
-                                                    <div className="flex items-center gap-1">
-                                                        <Calendar className="w-4 h-4" style={{ color: COLORS.logo }} />
-                                                        <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <Eye className="w-4 h-4" style={{ color: COLORS.logo }} />
-                                                        <span>{logement.vues} vues</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Boutons d'action */}
-                                                <div className="flex gap-2 mt-4">
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handlePostuler(logement);
-                                                        }}
-                                                        disabled={isDejaPostule}
-                                                        className="flex-1 text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60"
-                                                        style={{
-                                                            backgroundColor: isDejaPostule ? `${COLORS.logo}60` : COLORS.logo,
-                                                            borderColor: COLORS.logo
-                                                        }}
-                                                    >
-                                                        {isDejaPostule ? "Visite déjà demandée" : "Demander une visite"}
-                                                    </motion.button>
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        onClick={(e) => handleVoirDetails(logement, e)}
-                                                        className="p-2 rounded-md transition"
-                                                        style={{
-                                                            border: `1px solid ${COLORS.separator}`,
-                                                            color: COLORS.logo
-                                                        }}
-                                                    >
-                                                        <Eye className="w-4 h-4" />
-                                                    </motion.button>
-                                                </div>
-                                            </div>
-
-                                        </motion.div>
-                                    );
-                                })}
+                            <div className="grid grid-cols-1 md:grid-cols-2 bg-white lg:grid-cols-3 gap-8">
+                                {filteredLogements.map((logement, index) => (
+                                    <PropertyCard
+                                        key={logement.id}
+                                        logement={logement}
+                                        index={index}
+                                        favoris={favoris}
+                                        toggleFavori={toggleFavori}
+                                        handlePostuler={handlePostuler}
+                                        sentRequests={sentRequests}
+                                        handleVoirDetails={handleVoirDetails}
+                                    />
+                                ))}
                             </div>
 
                             <AdvertisementPopup />
@@ -1255,4 +1271,4 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
     );
 };
 
-export default LogementsSHLMR;  
+export default LogementsSHLMR;
