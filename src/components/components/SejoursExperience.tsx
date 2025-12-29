@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import TourismNavigation from "@/components/TourismNavigation";
 const SejoursExperiences = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeFilter, setActiveFilter] = useState('tous');
@@ -270,22 +270,19 @@ const SejoursExperiences = () => {
 
   return (
     <div className="min-h-screen overflow-hidden">
-
-      <div className="pt-20 pb-10 backdrop-blur-sm z-50 border-b overflow-hidden border-gray-100">
-        {/* Header fixe */}
-        <div
-          className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'
+      <div className="relative pt-20 pb-10 border-b border-gray-100">
+        {/* Header background */}
+        <div 
+          className="absolute inset-0 -z-20 w-full overflow-hidden bg-cover bg-center"
+          style={{
+            backgroundImage: `url('https://i.pinimg.com/736x/4f/fc/36/4ffc3610fc77d1ad9e92faf74bdf0c4b.jpg')`
+          }}
         >
-          <div
-            className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70'
-          />
-          <img
-            src="https://i.pinimg.com/736x/4f/fc/36/4ffc3610fc77d1ad9e92faf74bdf0c4b.jpg"
-            className='h-full object-cover w-full'
-            alt="Background"
-          />
+          <div className="absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70" />
         </div>
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        
+        {/* Header content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
           <div className="text-center">
             <h1 className="text-xl md:text-4xl font-bold text-gray-100 mb-4">
               Séjours & expériences
@@ -294,6 +291,11 @@ const SejoursExperiences = () => {
               Vivez des expériences inoubliables durant votre séjour.
             </p>
           </div>
+        </div>
+
+        {/* Navigation - Outside header background */}
+        <div className="relative z-20">
+          <TourismNavigation page="sejour" />
         </div>
       </div>
 
@@ -310,10 +312,11 @@ const SejoursExperiences = () => {
                     setActiveFilter(filter.id);
                     setActiveSlide(0);
                   }}
-                  className={`flex-shrink-0 px-6 py-3 rounded-full border transition-all duration-300 ${activeFilter === filter.id
-                    ? 'bg-logo text-white'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-gray-700 hover:text-gray-900'
-                    }`}
+                  className={`flex-shrink-0 px-6 py-3 rounded-full border transition-all duration-300 ${
+                    activeFilter === filter.id
+                      ? "bg-logo text-white"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-gray-700 hover:text-gray-900"
+                  }`}
                 >
                   {filter.label}
                 </button>
@@ -324,11 +327,7 @@ const SejoursExperiences = () => {
           {/* Slider principal */}
           <div className="relative h-[700px] rounded-3xl overflow-hidden shadow-xl mb-16">
             {filteredExperiences.map((exp, index) => (
-              <ExperienceSlide
-                key={exp.id}
-                experience={exp}
-                index={index}
-              />
+              <ExperienceSlide key={exp.id} experience={exp} index={index} />
             ))}
 
             {/* Contrôles de navigation */}
@@ -338,10 +337,11 @@ const SejoursExperiences = () => {
                   <button
                     key={index}
                     onClick={() => setActiveSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${activeSlide === index
-                      ? 'w-10 bg-gray-900'
-                      : 'bg-gray-400 hover:bg-gray-600'
-                      }`}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      activeSlide === index
+                        ? "w-10 bg-gray-900"
+                        : "bg-gray-400 hover:bg-gray-600"
+                    }`}
                   />
                 ))}
               </div>
@@ -349,20 +349,48 @@ const SejoursExperiences = () => {
 
             {/* Flèches de navigation */}
             <button
-              onClick={() => setActiveSlide(prev => prev > 0 ? prev - 1 : filteredExperiences.length - 1)}
+              onClick={() =>
+                setActiveSlide((prev) =>
+                  prev > 0 ? prev - 1 : filteredExperiences.length - 1
+                )
+              }
               className="absolute left-6 top-1/2 transform -translate-y-1/2 z-30 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
             >
-              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-6 h-6 text-gray-900"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
 
             <button
-              onClick={() => setActiveSlide(prev => (prev + 1) % filteredExperiences.length)}
+              onClick={() =>
+                setActiveSlide(
+                  (prev) => (prev + 1) % filteredExperiences.length
+                )
+              }
               className="absolute right-6 top-1/2 transform -translate-y-1/2 z-30 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
             >
-              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-6 h-6 text-gray-900"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
 
@@ -401,32 +429,50 @@ const SejoursExperiences = () => {
               {[
                 {
                   title: "Guides experts",
-                  description: "Nos guides sont passionnés et certifiés dans leur domaine.",
-                  icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  description:
+                    "Nos guides sont passionnés et certifiés dans leur domaine.",
+                  icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
                 },
                 {
                   title: "Petits groupes",
-                  description: "Limités pour préserver l'authenticité et la qualité.",
-                  icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  description:
+                    "Limités pour préserver l'authenticité et la qualité.",
+                  icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
                 },
                 {
                   title: "Impact positif",
-                  description: "Nous reversons 5% de chaque réservation à des projets locaux.",
-                  icon: "M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
+                  description:
+                    "Nous reversons 5% de chaque réservation à des projets locaux.",
+                  icon: "M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3",
                 },
                 {
                   title: "Flexibilité",
                   description: "Annulation gratuite jusqu'à 30 jours avant.",
-                  icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                }
+                  icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+                },
               ].map((item, index) => (
-                <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow">
+                <div
+                  key={index}
+                  className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow"
+                >
                   <div className="w-12 h-12 bg-gray-900 text-white rounded-xl flex items-center justify-center mb-4">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d={item.icon}
+                      />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {item.title}
+                  </h3>
                   <p className="text-gray-600 text-sm">{item.description}</p>
                 </div>
               ))}
@@ -440,7 +486,8 @@ const SejoursExperiences = () => {
                 Prêt à vivre l'extraordinaire ?
               </h2>
               <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-                Contactez nos experts pour créer le séjour parfaitement adapté à vos envies.
+                Contactez nos experts pour créer le séjour parfaitement adapté à
+                vos envies.
               </p>
               <button className="bg-white text-gray-900 font-semibold px-8 py-4 rounded-xl hover:bg-gray-100 transition-colors duration-300">
                 Parler à un expert

@@ -1,5 +1,6 @@
 import { features } from 'process';
 import React, { useState } from 'react';
+import TourismNavigation from '../TourismNavigation';
 
 const EventsDiscoveries = () => {
   const [activeTab, setActiveTab] = useState('events');
@@ -165,6 +166,7 @@ const EventsDiscoveries = () => {
             Vivez des événements uniques et faites de nouvelles découvertes dans votre région.
             Des expériences mémorables vous attendent.
           </p>
+          <TourismNavigation />
         </div>
 
         {/* Statistiques */}

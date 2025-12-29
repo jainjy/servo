@@ -1004,6 +1004,14 @@ const Header = () => {
     {
       title: "EXPLORER ET VIVRE",
       items: [
+        {
+          title: "Découvrir & Sortir",
+          description:
+            "Partez à la rencontre des expériences qui animent votre région : sorties, culture, nature et moments à partager.",
+          href: "/activiteLoisirs",
+          image:
+            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+        },
         // {
         //   title: "Hebergements touristiques",
         //   description: "Réservations d'hébergements",
@@ -1011,21 +1019,7 @@ const Header = () => {
         //   image:
         //     "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
         // },
-        {
-          title: "Manger & Consommer",
-          description:
-            "Savourez, consommez local et prenez soin de votre alimentation au quotidien.",
-          href: "/alimentation",
-          image:
-            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
-        },
-        // {
-        //   title: "Activités & loisirs",
-        //   description: "Découvertes & aventures",
-        //   href: "/activiteLoisirs",
-        //   image:
-        //     "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
-        // },
+
         {
           title: "Séjourner & Voyager",
           description:
@@ -1034,6 +1028,15 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
         },
+        {
+          title: "Manger & Consommer",
+          description:
+            "Savourez, consommez local et prenez soin de votre alimentation au quotidien.",
+          href: "/alimentation",
+          image:
+            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+        },
+
         // {
         //   title: "Lieux historiques & culturels",
         //   description: "Explorez le patrimoine local",
@@ -2442,7 +2445,7 @@ const Header = () => {
       {/* Logout Confirmation Dialog */}
       {isLogoutDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
+          {/* Backdrop */} 
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={handleCancelLogout}
