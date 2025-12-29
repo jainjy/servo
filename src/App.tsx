@@ -238,8 +238,7 @@ import VideosComponent from "./components/components/VideosInspirer";
 import PortraitsLocaux from "./components/components/PortraitLocaux";
 import BonsPlansConseils from "./components/components/BonPlanConseils";
 import PortraitsAdmin from "./pages/admin/PortraitsAdmin";
-
-
+import EventsDiscoveriesPro from "./components/pro/Evenement&Decouverte/EventsDiscoveriesPro";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -874,6 +873,10 @@ const App = () => {
                       path="delete-account"
                       element={<DeleteAccountPage />}
                     />
+                    <Route
+                    path="events-discoveries"
+                    element={<EventsDiscoveriesPro />}
+                  />
                   </Route>
                   {/* Section Mon Compte Routes */}
                   <Route
