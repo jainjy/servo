@@ -1023,27 +1023,6 @@ const VideosComponent = () => {
           </div>
         </div>
 
-        {/* CTA final */}
-        <div className="relative rounded-3xl overflow-hidden">
-          <div className="absolute inset-0 bg-logo"></div>
-          <div className="relative z-10 p-12 text-center">
-            <h2 className="text-3xl font-bold mb-6">
-              Votre histoire mérite d'être racontée
-            </h2>
-            <p className="text-gray-300 max-w-2xl mx-auto mb-8">
-              Vous avez un projet vidéo ? Notre équipe de professionnels
-              est à votre disposition pour donner vie à vos idées les plus ambitieuses.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button className="bg-white text-slate-900 font-bold px-10 py-4 rounded-xl hover:opacity-90 transition-opacity">
-                Discuter de mon projet
-              </button>
-              <button className="bg-white/10 backdrop-blur-sm text-white font-semibold px-10 py-4 rounded-xl border border-white/20 hover:bg-white/20 transition-colors">
-                Voir notre showreel
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Player plein écran */}

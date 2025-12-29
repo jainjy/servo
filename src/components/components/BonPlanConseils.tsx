@@ -929,27 +929,7 @@ const BonsPlansConseils = () => {
           </div>
         )}
 
-        {/* CTA final */}
-        <div className="relative rounded-3xl overflow-hidden shadow-2xl mb-5">
-          <div className="absolute inset-0 bg-secondary-text"></div>
-          <div className="relative z-10 p-12 text-white text-center">
-            <h2 className="text-3xl font-bold mb-6">
-              Vous avez une astuce à partager ?
-            </h2>
-            <p className="text-emerald-100 max-w-2xl mx-auto mb-8">
-              Partagez vos bons plans et conseils avec la communauté.
-              Votre expérience peut aider des milliers de personnes.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button className="bg-white text-secondary-text font-bold px-10 py-4 rounded-xl hover:bg-gray-100 transition-colors">
-                Proposer un conseil
-              </button>
-              <button className="bg-transparent border-2 border-white text-white font-semibold px-10 py-4 rounded-xl hover:bg-white/10 transition-colors">
-                Devenir expert
-              </button>
-            </div>
-          </div>
-        </div>
+
       </div>
 
       {/* Quiz */}
