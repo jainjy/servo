@@ -650,6 +650,13 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
+        {
+          title: "Conseils & accompagnement",
+          description: "Support stratégique pour entrepreneurs",
+          href: "/conseil",
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
+        },
         // {
         // title: "Création & reprise",
         // description: "Accompagnement pour entrepreneurs",
@@ -706,37 +713,30 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg", // Image d'illustration entretien
         },
-        {
-          title: "Art & Créations",
-          description: "Œuvres d'art, artisanat et créateurs",
-          href: "/art-et-creation",
-          image:
-            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg", // Image d'illustration art
-        },
-        {
-          title: "Entreprise & Pro",
-          description: "Services professionnels pour entreprises",
-          // href: "/entreprise#services",
-          image:
-            "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg", // Image d'illustration entreprise
-          submenu: [
-            {
-              title: "Services Partenaires",
-              description: "Trouvez un professionnel pour vos besoins",
-              href: "/entreprise#services",
-            },
-            {
-              title: "Conseil",
-              description: "Experts en audit & résolution de conflits",
-              href: "/conseil",
-            },
-            {
-              title: "Accompagnement",
-              description: "Accompagnement juridique pour entreprises",
-              href: "/accompagnement",
-            },
-          ],
-        },
+        // {
+        //   title: "Entreprise & Pro",
+        //   description: "Services professionnels pour entreprises",
+        //   // href: "/entreprise#services",
+        //   image:
+        //     "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg", // Image d'illustration entreprise
+        //   submenu: [
+        //     {
+        //       title: "Services Partenaires",
+        //       description: "Trouvez un professionnel pour vos besoins",
+        //       href: "/entreprise#services",
+        //     },
+        //     {
+        //       title: "Conseil",
+        //       description: "Experts en audit & résolution de conflits",
+        //       href: "/conseil",
+        //     },
+        //     {
+        //       title: "Accompagnement",
+        //       description: "Accompagnement juridique pour entreprises",
+        //       href: "/accompagnement",
+        //     },
+        //   ],
+        // },
         {
           title: "Santé & Bien-être",
           description: "Soins, nutrition et médecines naturelles",
@@ -1002,60 +1002,72 @@ const Header = () => {
     // ],
     // },
     {
-      title: "VIVRE À LA RÉUNION",
+      title: "EXPLORER ET VIVRE",
       items: [
+        // {
+        //   title: "Hebergements touristiques",
+        //   description: "Réservations d'hébergements",
+        //   href: "/tourisme",
+        //   image:
+        //     "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
+        // },
         {
-          title: "Produits et accessoires",
-          description: "Tout pour votre domicile",
+          title: "Manger & Consommer",
+          description:
+            "Savourez, consommez local et prenez soin de votre alimentation au quotidien.",
+          href: "/alimentation",
+          image:
+            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+        },
+        // {
+        //   title: "Activités & loisirs",
+        //   description: "Découvertes & aventures",
+        //   href: "/activiteLoisirs",
+        //   image:
+        //     "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+        // },
+        {
+          title: "Séjourner & Voyager",
+          description:
+            "Organisez vos déplacements et vos séjours facilement, qu’ils soient courts, longs ou insolites.",
+          href: "/voyages",
+          image:
+            "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
+        },
+        // {
+        //   title: "Lieux historiques & culturels",
+        //   description: "Explorez le patrimoine local",
+        //   href: "/lieux_historique",
+        //   image:
+        //     "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
+        // },
+        // {
+        //   title: "Transports",
+        //   description: "Voitures, utilitaires, 4x4",
+        //   href: "/location-voiture",
+        //   image:
+        //     "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
+        // },
+        {
+          title: "Maison & Quotidien",
+          description:
+            "Tout ce qu’il faut pour améliorer, entretenir et faciliter la vie à la maison.",
           href: "/produits#equipement",
           image:
             "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
         },
         {
-          title: "Hebergements touristiques",
-          description: "Réservations d'hébergements",
-          href: "/tourisme",
+          title: "Art & Créations",
+          description:
+            "Mettez en lumière la créativité locale et les talents artistiques.",
+          href: "/art-et-creation",
           image:
-            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
+            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg", // Image d'illustration art
         },
         {
-          title: "Manger à la Réunion",
-          description: "Restaurants & courses & bien être",
-          href: "/alimentation",
-          image:
-            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
-        },
-        {
-          title: "Activités & loisirs",
-          description: "Découvertes & aventures",
-          href: "/activiteLoisirs",
-          image:
-            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
-        },
-        {
-          title: "Voyages",
-          description: "Cours & ateliers locaux",
-          href: "/voyages",
-          image:
-            "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
-        },
-        {
-          title: "Lieux historiques & culturels",
-          description: "Explorez le patrimoine local",
-          href: "/lieux_historique",
-          image:
-            "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
-        },
-        {
-          title: "Transports",
-          description: "Voitures, utilitaires, 4x4",
-          href: "/location-voiture",
-          image:
-            "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&auto=format&fit=crop",
-        },
-        {
-          title: "Podcasts",
-          description: "Ressources sur vivre à la Réunion",
+          title: "Inspirer  & Éveiller ",
+          description:
+            "Un espace pour apprendre, s’inspirer et découvrir autrement.",
           href: "/podcasts/reunion",
           image:
             "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
