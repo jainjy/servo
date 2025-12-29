@@ -706,7 +706,10 @@ const PrestataireVehiculesPage = () => {
       // Ajouter les champs texte
       Object.keys(vehiculeForm).forEach((key) => {
         if (key !== "assistanceElec") {
-          formData.append(key, vehiculeForm[key]);
+          const value = vehiculeForm[key];
+          if (value !== null && value !== undefined && value !== "") {
+            formData.append(key, value);
+          }
         }
       });
 
@@ -716,10 +719,16 @@ const PrestataireVehiculesPage = () => {
         vehiculeForm.assistanceElec ? "true" : "false"
       );
 
-      // Ajouter les images
-      newImages.forEach((file, index) => {
+      // Ajouter les images avec la clé "images" (comme attendu par Multer)
+      newImages.forEach((file) => {
         formData.append("images", file);
       });
+
+      // Log pour déboguer
+      console.log("FormData envoyé:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ":", pair[1]);
+      }
 
       // Afficher la progression
       toast.loading("Ajout du véhicule en cours...", {
@@ -768,7 +777,10 @@ const PrestataireVehiculesPage = () => {
       // Ajouter les champs texte
       Object.keys(vehiculeForm).forEach((key) => {
         if (key !== "assistanceElec") {
-          formData.append(key, vehiculeForm[key]);
+          const value = vehiculeForm[key];
+          if (value !== null && value !== undefined && value !== "") {
+            formData.append(key, value);
+          }
         }
       });
 
@@ -780,13 +792,21 @@ const PrestataireVehiculesPage = () => {
 
       // Ajouter les images existantes (URLs)
       if (existingImages && existingImages.length > 0) {
-        formData.append("existingImages", JSON.stringify(existingImages));
+        existingImages.forEach((imgUrl) => {
+          formData.append("existingImages", imgUrl);
+        });
       }
 
-      // Ajouter les nouvelles images
-      newImages.forEach((file, index) => {
+      // Ajouter les nouvelles images avec la clé "images"
+      newImages.forEach((file) => {
         formData.append("images", file);
       });
+
+      // Log pour déboguer
+      console.log("FormData mise à jour:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ":", pair[1]);
+      }
 
       toast.loading("Mise à jour du véhicule en cours...", {
         id: "update-vehicule",
@@ -2181,6 +2201,41 @@ const PrestataireVehiculesPage = () => {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="couleur">Couleur</Label>
+                <Input
+                  id="couleur"
+                  value={vehiculeForm.couleur}
+                  onChange={(e) =>
+                    setVehiculeForm({
+                      ...vehiculeForm,
+                      couleur: e.target.value,
+                    })
+                  }
+                  placeholder="Ex: Noir, Blanc, Bleu..."
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="puissance">Puissance (ch)</Label>
+                <Input
+                  id="puissance"
+                  type="number"
+                  value={vehiculeForm.puissance}
+                  onChange={(e) =>
+                    setVehiculeForm({
+                      ...vehiculeForm,
+                      puissance: e.target.value,
+                    })
+                  }
+                  placeholder="Ex: 110"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
             {/* Caractéristiques techniques pour voitures et camions */}
             {(vehiculeForm.categorie === "voiture" ||
               vehiculeForm.categorie === "camion") && (
@@ -3490,24 +3545,24 @@ const PrestataireVehiculesPage = () => {
                       {selectedReservation.vehicule?.marque}{" "}
                       {selectedReservation.vehicule?.modele}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-500">
                       {selectedReservation.vehicule?.annee} •{" "}
                       {selectedReservation.vehicule?.immatriculation ||
                         "Non assignée"}
                     </p>
-                    <p className="text-sm text-gray-600 mt-2">
+                    <p className="text-sm text-gray-500 mt-2">
                       {selectedReservation.vehicule?.categorie?.toUpperCase()} •{" "}
                       {selectedReservation.vehicule?.typeVehicule}
                     </p>
                     {selectedReservation.vehicule?.categorie === "moto" &&
                       selectedReservation.vehicule?.cylindree && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-500">
                           Cylindrée: {selectedReservation.vehicule.cylindree}{" "}
                           cm³
                         </p>
                       )}
                     {selectedReservation.vehicule?.categorie === "velo" && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-500">
                         Type: {selectedReservation.vehicule.typeVelo}
                         {selectedReservation.vehicule.assistanceElec
                           ? " (Électrique)"
