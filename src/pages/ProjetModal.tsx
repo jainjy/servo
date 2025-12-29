@@ -213,6 +213,14 @@ const ProjetModal: React.FC<ProjetModalProps> = ({
       return;
     }
 
+     const selectedDate = new Date(formData.duree);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Réinitialiser l'heure pour comparaison
+  
+  if (selectedDate > today) {
+    setError('La date de fin ne peut pas être dans le futur');
+    return;
+  }
     setIsSubmitting(true);
     setError(null);
 
@@ -543,40 +551,41 @@ const ProjetModal: React.FC<ProjetModalProps> = ({
                 {/* Informations complémentaires */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {/* Date de fin */}
-                  <div>
-                    <label htmlFor="duree" className="block mb-2 font-medium" style={{ color: colors.secondaryText }}>
-                      Date de Fin *
-                    </label>
-                    <div className="relative">
-                      <Calendar 
-                        size={20} 
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                        style={{ color: colors.secondaryText }}
-                      />
-                      <input
-                        type="date"
-                        id="duree"
-                        name="duree"
-                        value={formData.duree}
-                        onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border focus:outline-none transition-all"
-                        style={{ 
-                          borderColor: colors.separator,
-                          backgroundColor: colors.lightBg,
-                          boxShadow: '0 0 0 1px transparent'
-                        }}
-                        required
-                        onFocus={(e) => {
-                          e.target.style.boxShadow = `0 0 0 2px ${colors.primaryDark}`;
-                          e.target.style.borderColor = colors.primaryDark;
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.boxShadow = '0 0 0 1px transparent';
-                          e.target.style.borderColor = colors.separator;
-                        }}
-                      />
-                    </div>
+                <div>
+                  <label htmlFor="duree" className="block mb-2 font-medium" style={{ color: colors.secondaryText }}>
+                    Date de Fin *
+                  </label>
+                  <div className="relative">
+                    <Calendar 
+                      size={20} 
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                      style={{ color: colors.secondaryText }}
+                    />
+                    <input
+                      type="date"
+                      id="duree"
+                      name="duree"
+                      value={formData.duree}
+                      onChange={handleInputChange}
+                      max={new Date().toISOString().split('T')[0]} // Ajout de cette ligne pour bloquer les dates futures
+                      className="w-full pl-10 pr-4 py-2.5 rounded-lg border focus:outline-none transition-all"
+                      style={{ 
+                        borderColor: colors.separator,
+                        backgroundColor: colors.lightBg,
+                        boxShadow: '0 0 0 1px transparent'
+                      }}
+                      required
+                      onFocus={(e) => {
+                        e.target.style.boxShadow = `0 0 0 2px ${colors.primaryDark}`;
+                        e.target.style.borderColor = colors.primaryDark;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.boxShadow = '0 0 0 1px transparent';
+                        e.target.style.borderColor = colors.separator;
+                      }}
+                    />
                   </div>
+                </div>
 
                   {/* Catégorie */}
                   <div>
@@ -650,8 +659,8 @@ const ProjetModal: React.FC<ProjetModalProps> = ({
                         e.target.style.borderColor = colors.separator;
                       }}
                     >
-                      <option value="active">Actif</option>
-                      <option value="inactive">Inactif</option>
+                      <option value="active">En cours</option>
+                      <option value="inactive">Terminé</option>
                     </select>
                   </div>
                 </div>
