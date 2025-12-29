@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, Home, TrendingUp, Package, User2Icon, ArrowUpRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-house.jpg";
 import "../styles/font.css";
 import gsap from "gsap";
@@ -25,89 +27,37 @@ const colors = {
 const sketchImageUrl = "/2em.png";
 
 const Hero = () => {
-  const [heroQuery, setHeroQuery] = useState("");
   const navigate = useNavigate();
-
-  const [isRevealing, setIsRevealing] = useState(false);
-  const [mouseInactive, setMouseInactive] = useState(false);
-  const mouseInactiveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
   const heroRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [waveOffset, setWaveOffset] = useState(0);
-  const [revealRadius, setRevealRadius] = useState(0);
-  const animationRef = useRef<number | null>(null);
-  const [mouseTrail, setMouseTrail] = useState<Array<{
-    id: number;
-    x: number;
-    y: number;
-    size: number;
-    life: number;
-    timestamp: number;
-    offsetX: number;
-    offsetY: number;
-  }>>([]);
-  const [randomReveals, setRandomReveals] = useState<Array<{
-    id: number;
-    x: number;
-    y: number;
-    size: number;
-    life: number;
-    createdAt: number;
-  }>>([]);
-  
-  const trailIdRef = useRef(0);
-  const randomIdRef = useRef(0);
-  const lastMouseMoveTime = useRef(Date.now());
-  const [alwaysRevealing, setAlwaysRevealing] = useState(false);
-
+  const [heroQuery, setHeroQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [revealRadius, setRevealRadius] = useState(0);
+  const [isRevealing, setIsRevealing] = useState(false);
+  const [alwaysRevealing, setAlwaysRevealing] = useState(false);
+  const [waveOffset, setWaveOffset] = useState(0);
+  const animationRef = useRef<number | null>(null);
+  const mouseInactiveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Animation de l'onde, des traces et du rayon de révélation
+  // Animation de l'onde et du rayon de révélation
   useEffect(() => {
     const animate = () => {
       setWaveOffset(prev => prev + 0.02);
-      
-      // Animer le rayon de révélation seulement si revealing
+
       if (isRevealing || alwaysRevealing) {
         setRevealRadius(prev => {
-          if (prev < 100) { // Réduit à 150px (au lieu de 220px)
-            return prev + (100 - prev) * 0.07; // Accélération douce
+          if (prev < 100) {
+            return prev + (100 - prev) * 0.07;
           }
           return prev;
         });
       } else if (revealRadius > 0) {
-        setRevealRadius(prev => prev * 0.92); // Décroissance douce
+        setRevealRadius(prev => prev * 0.92);
       }
-      
-      // Mettre à jour les traces
-      setMouseTrail(prev => 
-        prev
-          .map(trail => ({
-            ...trail,
-            life: trail.life - 0.018, // Ralenti la disparition
-            size: trail.size * 0.985, // Ralenti la réduction
-            // Déplacement aléatoire pour effet réaliste
-            x: trail.x + Math.sin(waveOffset + trail.id) * 0.5,
-            y: trail.y + Math.cos(waveOffset + trail.id) * 0.3,
-          }))
-          .filter(trail => trail.life > 0)
-      );
-      
-      // Mettre à jour les révélations aléatoires
-      setRandomReveals(prev => 
-        prev
-          .map(reveal => ({
-            ...reveal,
-            life: reveal.life - 0.009, // Ralenti la disparition
-            size: reveal.size * 1.008, // Légère expansion
-          }))
-          .filter(reveal => reveal.life > 0)
-      );
 
       animationRef.current = requestAnimationFrame(animate);
     };
@@ -119,74 +69,18 @@ const Hero = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isRevealing, mouseTrail.length, randomReveals.length, revealRadius, alwaysRevealing, waveOffset]);
+  }, [isRevealing, revealRadius, alwaysRevealing, waveOffset]);
 
-  // Ajouter une trace au déplacement de la souris avec décalage aléatoire
-  const addTrailPoint = useCallback((x: number, y: number) => {
-    const now = Date.now();
-    if (now - lastMouseMoveTime.current < 50) return; // Réduit à 50ms
-    
-    lastMouseMoveTime.current = now;
-    
-    trailIdRef.current += 1;
-    setMouseTrail(prev => {
-      // Décalage aléatoire pour que les traces sortent du cercle
-      const offsetX = (Math.random() - 0.5) * 60;
-      const offsetY = (Math.random() - 0.5) * 60;
-      
-      const newTrail = {
-        id: trailIdRef.current,
-        x: x + offsetX,
-        y: y + offsetY,
-        size: 90 + Math.random() * 70, // Augmenté la taille: 90-160px
-        life: 1,
-        timestamp: now,
-        offsetX,
-        offsetY
-      };
-      
-      // Garder seulement les 15 dernières traces
-      return [...prev.slice(-14), newTrail];
-    });
-  }, []);
-
-  // Créer une révélation aléatoire
-  const createRandomReveal = useCallback(() => {
-    randomIdRef.current += 1;
-    setRandomReveals(prev => {
-      const newReveal = {
-        id: randomIdRef.current,
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        size: 70 + Math.random() * 100, // Augmenté la taille: 70-170px
-        life: 1,
-        createdAt: Date.now()
-      };
-      
-      // Garder seulement les 8 dernières révélations
-      return [...prev.slice(-7), newReveal];
-    });
-  }, []);
-
-  // Générer des révélations aléatoires TOUJOURS (même sans bouger)
+  // Générer des révélations aléatoires
   useEffect(() => {
-    // Mode "toujours actif" après 3 secondes d'inactivité
     const alwaysActiveTimeout = setTimeout(() => {
       setAlwaysRevealing(true);
     }, 3000);
 
-    const interval = setInterval(() => {
-      // Révélations aléatoires continues
-      if (Math.random() > 0.4) { // 60% de chance
-        createRandomReveal();
-      }
-    }, 800); // Intervalle réduit
-
     return () => {
       clearTimeout(alwaysActiveTimeout);
-      clearInterval(interval);
     };
-  }, [createRandomReveal]);
+  }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const x = e.clientX;
@@ -194,33 +88,25 @@ const Hero = () => {
     setMousePosition({ x, y });
 
     setIsRevealing(true);
-    setMouseInactive(false);
-    setAlwaysRevealing(false); // Désactive le mode toujours actif quand on bouge
-
-    // Ajouter une trace
-    addTrailPoint(x, y);
+    setAlwaysRevealing(false);
 
     if (mouseInactiveTimeoutRef.current) {
       clearTimeout(mouseInactiveTimeoutRef.current);
     }
 
     mouseInactiveTimeoutRef.current = setTimeout(() => {
-      setMouseInactive(true);
       setIsRevealing(false);
-      // Après 2 secondes d'inactivité, on active le mode toujours actif
       setTimeout(() => {
         setAlwaysRevealing(true);
       }, 2000);
-    }, 1000); // Réduit à 1 seconde
-  }, [addTrailPoint]);
+    }, 1000);
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
     setIsRevealing(false);
-    setMouseInactive(false);
     if (mouseInactiveTimeoutRef.current) {
       clearTimeout(mouseInactiveTimeoutRef.current);
     }
-    // Active le mode toujours actif quand on quitte
     setTimeout(() => {
       setAlwaysRevealing(true);
     }, 500);
@@ -239,254 +125,295 @@ const Hero = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Calcul de l'onde
-  const getWaveDistortion = (x: number, y: number, time: number) => {
-    const amplitude = (isRevealing || alwaysRevealing) ? 12 : 0; // Augmenté l'amplitude
-    const frequency = 0.007;
-    return Math.sin(x * frequency + y * frequency + time) * amplitude;
-  };
-
   return (
     <>
       <style>{`
-        @keyframes wave-pulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.7;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 0.9;
-          }
-        }
-
-        @keyframes trail-fade {
-          0% {
-            opacity: 0.95;
-            transform: scale(1) rotate(0deg);
-          }
-          100% {
+        @keyframes slideInLeft {
+          from {
             opacity: 0;
-            transform: scale(1.25) rotate(5deg);
+            transform: translateX(-60px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
           }
         }
 
-        @keyframes random-reveal {
-          0% {
+        @keyframes slideInRight {
+          from {
             opacity: 0;
-            transform: scale(0.4) rotate(0deg);
+            transform: translateX(60px);
           }
-          15% {
-            opacity: 0.9;
-            transform: scale(1) rotate(180deg);
+          to {
+            opacity: 1;
+            transform: translateX(0);
           }
-          85% {
-            opacity: 0.9;
-            transform: scale(1) rotate(180deg);
-          }
-          100% {
+        }
+
+        @keyframes fadeInUp {
+          from {
             opacity: 0;
-            transform: scale(1.4) rotate(360deg);
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
           }
         }
 
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-5px) rotate(1deg);
-          }
+        .hero-title {
+          animation: slideInLeft 0.8s ease-out;
         }
 
-        .wave-distortion {
-          filter: url(#wave-filter);
-          transition: filter 0.3s ease-out;
+        .hero-subtitle {
+          animation: slideInLeft 0.8s ease-out 0.2s both;
         }
 
-        .trail-point {
-          position: absolute;
-          border-radius: 50%;
-          pointer-events: none;
-          animation: trail-fade linear forwards, float 3s ease-in-out infinite;
-          mix-blend-mode: multiply;
-          background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.95) 0%,
-            rgba(255, 255, 255, 0.75) 20%,
-            rgba(255, 255, 255, 0.5) 50%,
-            transparent 80%
-          );
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
-          overflow: hidden;
-          box-shadow: 
-            0 0 25px rgba(255, 255, 255, 0.5),
-            0 0 50px rgba(255, 255, 255, 0.3),
-            inset 0 0 30px rgba(255, 255, 255, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.3);
+        .hero-description {
+          animation: fadeInUp 0.8s ease-out 0.4s both;
         }
 
-        .trail-image {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          filter: grayscale(100%) brightness(1.7) contrast(1.4);
-          opacity: 1; // OPAQUE À 100%
-          mix-blend-mode: multiply;
+        .hero-cta {
+          animation: fadeInUp 0.8s ease-out 0.6s both;
         }
 
-        .random-reveal {
-          position: absolute;
-          border-radius: 50%;
-          pointer-events: none;
-          animation: random-reveal linear forwards, float 4s ease-in-out infinite;
-          mix-blend-mode: multiply;
-          overflow: hidden;
-          background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.9) 0%,
-            rgba(255, 255, 255, 0.6) 40%,
-            transparent 80%
-          );
-          box-shadow: 
-            0 0 30px rgba(255, 255, 255, 0.6),
-            0 0 60px rgba(255, 255, 255, 0.4);
-          border: 1.5px solid rgba(255, 255, 255, 0.4);
+        .hero-card {
+          animation: slideInRight 0.8s ease-out 0.3s both;
         }
 
-        .reveal-content {
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          filter: grayscale(100%) brightness(1.7) contrast(1.4);
-          opacity: 1; // OPAQUE À 100%
-          mix-blend-mode: multiply;
-        }
-
-        .reveal-mask {
-          clip-path: circle(var(--reveal-radius, 0px) at var(--mouse-x, 50%) var(--mouse-y, 50%));
-          transition: clip-path 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .reveal-overlay {
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(
-            circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-            rgba(255, 255, 255, 0.4) 0%,
-            rgba(255, 255, 255, 0.2) 40%,
-            transparent 80%
-          );
-          mix-blend-mode: overlay;
-          opacity: var(--reveal-opacity, 0);
-          transition: opacity 0.3s ease-out;
+        .grayscale-image {
+          filter: grayscale(100%) brightness(0.9) contrast(1.1);
         }
       `}</style>
 
       <section
         id="hero"
         ref={heroRef}
-        className="relative h-[500px] lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
+        className="relative min-h-screen h-96 w-full overflow-hidden bg-gradient-to-b from-gray-900 via-gray-800 to-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Filtre SVG pour l'effet d'onde */}
-        <svg style={{ display: 'none' }}>
-          <defs>
-            <filter id="wave-filter" x="-20%" y="-20%" width="140%" height="140%">
-              <feTurbulence 
-                type="fractalNoise" 
-                baseFrequency="0.007 0.007" 
-                numOctaves="3" 
-                seed={Math.floor(waveOffset * 10)}
-                result="noise"
-              />
-              <feDisplacementMap 
-                in="SourceGraphic" 
-                in2="noise" 
-                scale={(isRevealing || alwaysRevealing) ? 7 : 0}
-                xChannelSelector="R" 
-                yChannelSelector="G"
-              />
-              <feGaussianBlur stdDeviation="0.5" />
-            </filter>
-          </defs>
-        </svg>
-        {/* Conteneur principal */}
-        <div
-          className="absolute inset-0 w-full h-full overflow-hidden"
-          style={{
-            transform: `translateY(${scrollProgress * 20}px)`,
-            transition: 'transform 0.2s ease-out',
-          }}
-        >
-          {/* Image principale (photo) */}
-          <motion.img
+        {/* Background Image with Grayscale Effect */}
+        <div className="absolute inset-0 w-full h-full">
+          <img
             src={heroImage}
             alt="Background"
-            className="absolute top-0 left-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             style={{
-              filter: 'brightness(0.8) contrast(1.1) saturate(1.1)',
-            }}
-            animate={{
-              x: (mousePosition.x - window.innerWidth / 2) * 0.003,
-              y: (mousePosition.y - window.innerHeight / 2) * 0.003,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 250,
-              damping: 40
+              transform: `translateY(${scrollProgress * 30}px)`,
             }}
           />
-
-          {/* Image de dessin avec effet principal et masque progressif */}
-          <div 
-            className="absolute top-0 left-0 w-full h-full wave-distortion reveal-mask"
-            style={{
-              opacity: (isRevealing || alwaysRevealing) ? 1 : 0, // OPAQUE À 100%
-              pointerEvents: 'none',
-              transition: 'opacity 0.4s ease-out',
-              "--mouse-x": `${mousePosition.x}px`,
-              "--mouse-y": `${mousePosition.y}px`,
-              "--reveal-radius": `${revealRadius}px`,
-            } as React.CSSProperties}
-          >
-            <img
-              src={sketchImageUrl}
-              alt="Dessin architectural"
-              className="absolute top-0 left-0 w-full h-full object-cover"
-              style={{
-                // filter: 'grayscale(100%) brightness(1.7) contrast(1.4)',
-                mixBlendMode: 'multiply',
-                opacity: 1,
-                transform: `
-                  translateX(${getWaveDistortion(mousePosition.x, mousePosition.y, waveOffset)}px)
-                  translateY(${getWaveDistortion(mousePosition.y, mousePosition.x, waveOffset + 1)}px)
-                `,
-                transition: 'transform 0.1s linear',
-              }}
-            />
-            
-            {/* Overlay de lumière sur la zone révélée */}
-            <div 
-              className="reveal-overlay"
-              style={{
-                "--mouse-x": `${mousePosition.x}px`,
-                "--mouse-y": `${mousePosition.y}px`,
-                "--reveal-opacity": (isRevealing || alwaysRevealing) ? 1 : 0,
-              } as React.CSSProperties}
-            />
-          </div>
-          
-          {/* Overlay gradient réduit */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/8 to-black/35" />
+          {/* Dark Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
         </div>
 
-        {/* Effet de lumière interactive */}
+        {/* Content Container */}
+        <div className="relative z-20 h-full min-h-screen flex items-start pt-32 lg:items-center lg:pt-0">
+          <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
+              {/* Left Content */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-4  lg:space-y-6"
+              >
+
+                {/* Main Title */}
+                <div className="space-y-4">
+                  <motion.h1
+                    initial={{ opacity: 0, x: -40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.1 }}
+                    className="hero-title space text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white leading-tight"
+                  >
+                    Votre plateforme
+                    <br />
+                    <span className="text-gray-500">
+                      du quotidien
+                    </span>
+                  </motion.h1>
+                </div>
+
+                {/* Search Input Overlay */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                  className="mx-auto max-w-2xl w-full px-4 pointer-events-auto mt-4"
+                  onClick={openModal}
+                >
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-lg rounded-full p-2 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-300">
+                    <div className="flex-1 flex items-center">
+                      <Search className="ml-4 h-5 w-5 text-white/70 flex-shrink-0" />
+                      <Input
+                        value={heroQuery}
+                        onChange={(e) => setHeroQuery(e.target.value)}
+                        placeholder="Recherche avancée..."
+                        className="pl-3 pr-4 h-12 bg-transparent border-0 text-white placeholder:text-white/60 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                      />
+                    </div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Button
+                        className="h-12 px-6 rounded-full font-medium flex items-center gap-2 hover:shadow-lg transition-all duration-300"
+                        style={{
+                          backgroundColor: colors.sruvol,
+                          color: 'white',
+                          boxShadow: '0 4px 15px rgba(104, 142, 35, 0.4)'
+                        }}
+                      >
+                        <span>Rechercher</span>
+                        <ArrowUpRight className="h-5 w-5 transform rotate-30" />
+                      </Button>
+                    </motion.div>
+                  </div>
+                </motion.div>
+
+              </motion.div>
+
+              {/* Right Card - Service Cards */}
+              <motion.div
+                initial={{ opacity: 0, x: 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="hero-card hidden lg:block w-3/4 py-5"
+              >
+                <div className="grid grid-cols-2 grid-rows-4 mt-5">
+                  {[
+                    {
+                      icon: Home,
+                      title: "Annonces Immobilières",
+                      description: "Trouver votre futur logement",
+                      href: "/immobilier"
+                    },
+                    {
+                      icon: TrendingUp,
+                      title: "Services professionnels",
+                      description: "Trouver un professionnel",
+                      href: "/service"
+                    },
+                    {
+                      icon: Package,
+                      title: "Décoration & Mobilier",
+                      description: "Tous les produits pour la maison",
+                      href: "/produits"
+                    },
+                    {
+                      icon: User2Icon,
+                      title: "Vivre à la réunion",
+                      description: "Une douceur de vie tropicale",
+                      href: "/tourisme"
+                    },
+                  ].map((service, index) => {
+                    const colStart = index % 2 === 0 ? 'col-start-1' : 'col-start-2';
+                    const rowStart = index === 0 ? 'row-start-1' : index === 1 ? 'row-start-2' : index === 2 ? 'row-start-3' : 'row-start-4';
+                    
+                    return (
+                      <Link to={service.href} key={service.title} className={`no-underline ${colStart} ${rowStart}`}>
+                        <Card
+                          className="
+                            p-2 lg:p-3
+                            text-center flex flex-col items-center justify-center
+                            hover:shadow-2xl shadow-lg transition-all duration-500
+                            cursor-pointer
+                            bg-transparent hover:bg-white/10
+                            group relative overflow-hidden border-b-0 border-r-0
+                            h-full min-h-[110px]
+                          "
+                        >
+                          {/* Effet de fond animé */}
+                          <div className="absolute inset-0 backdrop-blur-xl bg-gradient-to-tr from-black via-transparent to-white"></div>
+
+                          {/* Icône */}
+                          <div className="relative mb-2 z-10">
+                            <div className="
+                              rounded-2xl bg-gradient-to-br from-white/20 to-white/10
+                              flex items-center justify-center
+                              transition-all duration-500 group-hover:from-white/30 group-hover:to-white/15
+                              group-hover:scale-110 group-hover:rotate-3
+                              w-12 h-12
+                              border border-white/30
+                            ">
+                              <service.icon className="
+                                transition-transform duration-500
+                                h-6 w-6
+                                text-white
+                                group-hover:scale-110
+                              " />
+                            </div>
+                          </div>
+
+                          {/* Contenu */}
+                          <div className="relative z-10 flex-1 w-full">
+                            <h3 className="
+                              font-bold text-white text-center group-hover:text-white
+                              transition-colors duration-300
+                              text-xs lg:text-sm
+                              mb-1
+                              line-clamp-2
+                            ">
+                              {service.title}
+                            </h3>
+
+                            <p className="
+                              text-white/70 leading-tight text-center
+                              text-xs
+                              line-clamp-2
+                              opacity-80 group-hover:opacity-100
+                              transition-opacity duration-300
+                            ">
+                              {service.description}
+                            </p>
+                          </div>
+
+                          {/* Indicateur hover */}
+                          <div className="
+                            absolute bottom-0 left-1/2 transform -translate-x-1/2
+                            w-0 h-0.5 bg-white
+                            group-hover:w-4/5 transition-all duration-500
+                          "></div>
+                        </Card>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        {/* Reveal Bulb with Image - Behind all content */}
         <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none transition-all duration-300 z-10"
+          className="absolute top-0 left-0 w-full h-full pointer-events-none z-0"
+          style={{
+            clipPath: `circle(${revealRadius}px at ${mousePosition.x}px ${mousePosition.y}px)`,
+            opacity: (isRevealing || alwaysRevealing) ? 1 : 0,
+            transition: 'opacity 0.4s ease-out',
+          }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          <img
+            src={sketchImageUrl}
+            alt="Dessin architectural"
+            className="absolute top-0 left-0 w-full h-full object-cover"
+            style={{
+              filter: 'grayscale(70%)',
+              mixBlendMode: 'multiply',
+              opacity: 1,
+            }}
+          />
+        </div>
+
+        {/* Reveal Bulb Effect Layer */}
+        <div
+          className="absolute top-0 left-0 w-full h-full pointer-events-none z-1"
           style={{
             background: `
               radial-gradient(
@@ -499,81 +426,6 @@ const Hero = () => {
             opacity: (isRevealing || alwaysRevealing) ? 1 : 0,
           }}
         />
-
-        {/* Points lumineux autour du curseur */}
-        {(isRevealing || alwaysRevealing) && (
-          <div className="absolute inset-0 pointer-events-none z-15">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-2.5 h-2.5 rounded-full bg-white/40"
-                style={{
-                  left: mousePosition.x + Math.sin(waveOffset + i * 1) * (revealRadius * 0.9),
-                  top: mousePosition.y + Math.cos(waveOffset + i * 1) * (revealRadius * 0.9),
-                  opacity: 0.6 + Math.sin(waveOffset + i * 2) * 0.3,
-                  transform: `scale(${0.7 + Math.sin(waveOffset + i * 1.5) * 0.7})`,
-                  filter: 'blur(2px)',
-                  boxShadow: '0 0 15px rgba(255, 255, 255, 0.9)',
-                  animation: `float ${3 + i}s ease-in-out infinite`,
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Contenu principal */}
-        <div className="container relative z-25 mx-auto px-1 lg:px-4 py-5 lg:py-20 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="mb-2 lg:mb-6 text-2xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white"
-          >
-            <span className="block">La super-application</span>
-            <span 
-              className="block mt-1 lg:mt-4"
-              style={{ 
-                color: colors.sruvol,
-                textShadow: '0 2px 10px rgba(0,0,0,0.3)'
-              }}
-            >
-              du quotidien
-            </span>
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="mx-auto max-w-3xl"
-            onClick={openModal}
-          >
-            <div
-              className="flex flex-col md:flex-row gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-2xl cursor-text hover:bg-white/15 transition-all duration-300"
-              style={{ backdropFilter: 'blur(10px)' }}
-            >
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70" />
-                <Input
-                  value={heroQuery}
-                  onChange={(e) => setHeroQuery(e.target.value)}
-                  placeholder="Cliquez pour lancer une recherche avancée"
-                  className="pl-12 h-14 lg:h-16 bg-transparent border-0 text-white placeholder:text-white/60 text-lg focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-lg"
-                />
-              </div>
-              <Button
-                size="lg"
-                className="md:w-auto h-14 lg:h-16 px-8 text-lg font-medium rounded-xl hover:scale-105 transition-transform duration-200"
-                style={{
-                  backgroundColor: colors.sruvol,
-                  color: 'white',
-                  boxShadow: '0 4px 20px rgba(104, 142, 35, 0.3)'
-                }}
-              >
-                Rechercher
-              </Button>
-            </div>
-          </motion.div>
-        </div>
 
       </section>
 
