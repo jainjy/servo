@@ -33,6 +33,10 @@ import {
   ShoppingCart,
   Wine,
   Utensils,
+  Store,
+  ShoppingBag,
+  Beef,
+  GlassWater,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -236,8 +240,6 @@ const Alimentation = () => {
 
   // CORRIGÉ: Fonction pour naviguer vers la catégorie
   const handleCategoryClick = (category) => {
-    // console.log("🟢 Catégorie cliquée:", category);
-
     const categoryData = {
       name: category.name,
       description: category.description,
@@ -245,13 +247,6 @@ const Alimentation = () => {
       foodCategory: category.foodCategory,
       iconName: category.iconName,
     };
-
-    // DEBUG: Vérifier les données avant navigation
-    // console.log("📋 Données de navigation:", categoryData);
-    // console.log(
-    //   "🔗 URL de navigation:",
-    //   `/alimentation/food-category/${encodeURIComponent(category.foodCategory)}`
-    // );
 
     // Utiliser foodCategory pour la navigation
     navigate(
@@ -274,176 +269,161 @@ const Alimentation = () => {
     return categoryCounts[categoryName] || 0;
   };
 
-  // Données pour les 4 nouvelles sections basées sur foodCategory
+  // Données pour les 4 nouvelles sections basées sur les nouvelles sections demandées
   const sections = [
     {
-      id: "cours-epicerie",
-      title: "Cours & Epicerie",
-      icon: ShoppingCart,
-      description: "Produits frais et essentiels du quotidien",
-    },
-    {
-      id: "boulangerie-charcuterie",
-      title: "Boulangerie & Charcuterie",
-      icon: ChefHat,
-      description: "Pains, charcuteries et fromages artisanaux",
-    },
-    {
-      id: "cave-vins",
-      title: "Cave & Vins",
-      icon: Wine,
-      description: "Vins, spiritueux et champagnes sélectionnés",
-    },
-    {
-      id: "restaurant",
-      title: "Restaurant",
+      id: "restaurants-snacks",
+      title: "Restaurants & Snacks",
       icon: Utensils,
-      description: "Plats préparés et spécialités maison",
+      description: "Découvrez les meilleurs restaurants et snacks de l'île",
+      color: "#556B2F",
+      subcategories: [
+        {
+          name: "Restaurants Traditionnels",
+          foodCategory: "restaurants-traditionnels",
+          iconName: "ChefHat",
+          description: "Cuisine locale et spécialités créoles",
+          image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Snacks Rapides",
+          foodCategory: "snacks-rapides",
+          iconName: "Coffee",
+          description: "Pause déjeuner et casse-croûte",
+          image: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Food Trucks",
+          foodCategory: "food-trucks",
+          iconName: "Truck",
+          description: "Cuisine de rue et spécialités locales",
+          image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Brasseries & Cafés",
+          foodCategory: "brasseries-cafes",
+          iconName: "GlassWater",
+          description: "Terrasses et moments de détente",
+          image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+      ]
+    },
+    {
+      id: "produits-locaux",
+      title: "Produits Locaux",
+      icon: ShoppingBag,
+      description: "Produits frais et authentiques de La Réunion",
+      color: "#8B4513",
+      subcategories: [
+        {
+          name: "Fruits Tropicaux",
+          foodCategory: "fruits-tropicaux",
+          iconName: "Apple",
+          description: "Letchis, mangues, ananas et fruits de la passion",
+          image: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Épices & Saveurs",
+          foodCategory: "epices-saveurs",
+          iconName: "Sparkles",
+          description: "Curcuma, vanille, safran et combavas",
+          image: "https://images.unsplash.com/photo-1596040033221-a1f4f8a7c526?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Miels & Confitures",
+          foodCategory: "miels-confitures",
+          iconName: "Heart",
+          description: "Produits de la ruche et confitures artisanales",
+          image: "https://images.unsplash.com/photo-1587049352851-8d4e89133924?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Rhum Arrangé",
+          foodCategory: "rhum-arrange",
+          iconName: "Wine",
+          description: "Rhum traditionnel et préparations maison",
+          image: "https://images.unsplash.com/photo-1516456712011-4b6b2c6c40d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+      ]
+    },
+    {
+      id: "marches-artisans",
+      title: "Marchés & Artisans",
+      icon: Store,
+      description: "Marchés locaux et produits d'artisans réunionnais",
+      color: "#D2691E",
+      subcategories: [
+        {
+          name: "Marchés Forains",
+          foodCategory: "marches-forains",
+          iconName: "ShoppingCart",
+          description: "Marchés hebdomadaires et produits frais",
+          image: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Artisans Alimentaires",
+          foodCategory: "artisans-alimentaires",
+          iconName: "ChefHat",
+          description: "Produits transformés par nos artisans",
+          image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Boutiques de Producteurs",
+          foodCategory: "boutiques-producteurs",
+          iconName: "Store",
+          description: "Vente directe à la ferme",
+          image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Épiceries Créoles",
+          foodCategory: "epiceries-creoles",
+          iconName: "ShoppingBag",
+          description: "Produits traditionnels et ingrédients locaux",
+          image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+      ]
+    },
+    {
+      id: "bien-etre-alimentation",
+      title: "Bien-être & Alimentation",
+      icon: Heart,
+      description: "Alimentation saine et produits bien-être",
+      color: "#2E8B57",
+      subcategories: [
+        {
+          name: "Produits Bio & Naturels",
+          foodCategory: "produits-bio",
+          iconName: "Leaf",
+          description: "Agriculture biologique et naturelle",
+          image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Super-aliments Tropicaux",
+          foodCategory: "super-aliments",
+          iconName: "Zap",
+          description: "Baies, graines et plantes locales",
+          image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Infusions & Tisanes",
+          foodCategory: "infusions-tisanes",
+          iconName: "Coffee",
+          description: "Plantes médicinales de l'île",
+          image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Compléments Alimentaires",
+          foodCategory: "complements-alimentaires",
+          iconName: "Shield",
+          description: "Produits naturels pour votre santé",
+          image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        },
+      ]
     },
   ];
 
   // Fonction pour obtenir les catégories par section
   const getCategoriesForSection = (section) => {
-    const categoryMapping = {
-      "cours-epicerie": [
-        {
-          name: "Fruits Frais",
-          foodCategory: "fruits",
-          iconName: "Apple",
-          description: "Fruits de saison bio et locaux",
-          image:
-            "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Légumes Frais",
-          foodCategory: "legumes",
-          iconName: "Carrot",
-          description: "Légumes de saison bio et locaux",
-          image:
-            "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Épicerie Bio",
-          foodCategory: "epicerie",
-          iconName: "Wheat",
-          description: "Pâtes, riz, céréales bio",
-          image:
-            "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Produits Laitiers",
-          foodCategory: "produits-laitiers",
-          iconName: "Milk",
-          description: "Lait, fromages, yaourts bio",
-          image:
-            "https://images.unsplash.com/photo-1566772940196-0e2e789813d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-      ],
-      "boulangerie-charcuterie": [
-        {
-          name: "Boulangerie",
-          foodCategory: "boulangerie",
-          iconName: "Wheat",
-          description: "Pains artisanaux et viennoiseries",
-          image:
-            "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Pâtisserie",
-          foodCategory: "patisseries",
-          iconName: "Sparkles",
-          description: "Gâteaux et desserts artisanaux",
-          image:
-            "https://images.unsplash.com/photo-1555507036-ab794f27d2e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Charcuterie",
-          foodCategory: "charcuterie",
-          iconName: "ChefHat",
-          description: "Saucissons, jambons, pâtés",
-          image:
-            "https://images.unsplash.com/photo-1604503468506-a8da13d82791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Fromagerie",
-          foodCategory: "fromages",
-          iconName: "Milk",
-          description: "Fromages affinés et frais",
-          image:
-            "https://images.unsplash.com/photo-1486297678162-eb2a1b331e84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-      ],
-      "cave-vins": [
-        {
-          name: "Vins Rouges",
-          foodCategory: "vins-rouges",
-          iconName: "Heart",
-          description: "Cépages français et internationaux",
-          image:
-            "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Vins Blancs",
-          foodCategory: "vins-blancs",
-          iconName: "Sparkles",
-          description: "Vins frais et fruités",
-          image:
-            "https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Champagnes",
-          foodCategory: "champagnes",
-          iconName: "Zap",
-          description: "Champagnes et vins effervescents",
-          image:
-            "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Spiritueux",
-          foodCategory: "spiritueux",
-          iconName: "Flame",
-          description: "Whisky, vodka, gin et rhum",
-          image:
-            "https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-      ],
-      restaurant: [
-        {
-          name: "Plats Préparés",
-          foodCategory: "plats-prepares",
-          iconName: "ChefHat",
-          description: "Plats frais préparés par nos chefs",
-          image:
-            "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Sandwichs & Salades",
-          foodCategory: "sandwichs",
-          iconName: "Leaf",
-          description: "Préparations fraîches du jour",
-          image:
-            "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Pâtisseries Maison",
-          foodCategory: "patisseries",
-          iconName: "Heart",
-          description: "Desserts et pâtisseries fraîches",
-          image:
-            "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-        {
-          name: "Boissons Chaudes",
-          foodCategory: "boissons-chaudes",
-          iconName: "Coffee",
-          description: "Cafés, thés et chocolats chauds",
-          image:
-            "https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
-      ],
-    };
-
-    return categoryMapping[section.id] || [];
+    return section.subcategories || [];
   };
 
   // Fonction pour obtenir l'icône par nom
@@ -462,6 +442,14 @@ const Alimentation = () => {
       Sparkles,
       Zap,
       Flame,
+      Truck,
+      Store,
+      ShoppingBag,
+      ShoppingCart,
+      Wine,
+      Utensils,
+      Shield,
+      GlassWater,
     };
     return icons[iconName] || Apple;
   };
@@ -503,11 +491,10 @@ const Alimentation = () => {
           <div className="bg-white/90 py-5 rounded-lg backdrop-blur-sm">
             <div className="text-center mb-5 animate-fade-in">
               <h1 className="tracking-widest h-full text-xl lg:text-5xl md:text-4xl font-bold mb-4 text-logo">
-                Manger a la reunion
+                Manger & Consommer
               </h1>
               <p className="text-sm px-2 lg:text-sm text-[#8B4513] max-w-2xl mx-auto leading-relaxed">
-                Découvrez nos produits frais, bio et locaux pour une
-                alimentation saine et savoureuse
+                Découvrez les saveurs authentiques de La Réunion : restaurants locaux, produits frais, marchés artisanaux et bien-être
               </p>
             </div>
 
@@ -518,19 +505,19 @@ const Alimentation = () => {
             >
               <Badge className="bg-[#556B2F] text-white hover:bg-[#6B8E23] border-0 px-4 py-2">
                 <Leaf className="h-3 w-3 mr-1" />
-                Produits Bio
+                Produits Locaux
               </Badge>
-              <Badge className="bg-[#556B2F] text-white hover:bg-[#6B8E23] border-0 px-4 py-2">
+              <Badge className="bg-[#8B4513] text-white hover:bg-[#A0522D] border-0 px-4 py-2">
                 <Truck className="h-3 w-3 mr-1" />
-                Livraison 24h
+                Fraîcheur Garantie
               </Badge>
-              <Badge className="bg-[#556B2F] text-white hover:bg-[#6B8E23] border-0 px-4 py-2">
+              <Badge className="bg-[#D2691E] text-white hover:bg-[#CD853F] border-0 px-4 py-2">
                 <ShieldCheck className="h-3 w-3 mr-1" />
-                Qualité Garantie
+                Artisans Réunionnais
               </Badge>
-              <Badge className="bg-[#556B2F] text-white hover:bg-[#6B8E23] border-0 px-4 py-2">
+              <Badge className="bg-[#2E8B57] text-white hover:bg-[#3CB371] border-0 px-4 py-2">
                 <Star className="h-3 w-3 mr-1" />
-                Producteurs Locaux
+                Bien-être Naturel
               </Badge>
             </div>
           </div>
@@ -565,68 +552,161 @@ const Alimentation = () => {
             </>
           ) : (
             filteredSections.map((section, sectionIndex) => {
-            const IconComponent = section.icon;
-            const animationDelays = {
-              container: `${0.2 + sectionIndex * 0.2}s`,
-              cards: `${0.3 + sectionIndex * 0.2}s`,
-            };
+              const IconComponent = section.icon;
+              const animationDelays = {
+                container: `${0.2 + sectionIndex * 0.2}s`,
+                cards: `${0.3 + sectionIndex * 0.2}s`,
+              };
 
-            return (
-              <div
-                key={section.id}
-                className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
-                id={section.id}
-              >
+              return (
                 <div
-                  className="flex items-center justify-between gap-4 mb-8 animate-slide-from-left"
-                  style={{ animationDelay: animationDelays.container }}
+                  key={section.id}
+                  className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
+                  id={section.id}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-[#556B2F] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                      <IconComponent className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl lg:text-2xl font-bold text-black/70">
-                        {section.title}
-                      </h2>
-                      <p className="text-xs text-[#8B4513] mt-2">
-                        {section.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Barre de recherche à droite */}
-                  <div className="hidden md:flex items-center ml-auto">
-                    <form onSubmit={handleSectionSearch} className="relative">
-                      <div className="relative flex items-center">
-                        <Input
-                          type="text"
-                          placeholder={`Chercher dans ${section.title}...`}
-                          value={sectionSearchQueries[section.id] || ""}
-                          onChange={(e) => {
-                            setSectionSearchQueries({
-                              ...sectionSearchQueries,
-                              [section.id]: e.target.value,
-                            });
-                          }}
-                          className="pl-10 pr-2 py-2 h-16 rounded-xl border-2 border-[#D3D3D3] focus:border-[#556B2F] focus:outline-none transition-all duration-300 w-32 lg:w-96 placeholder-[#8B4513]"
-                        />
-                        <button
-                          type="submit"
-                          className="absolute left-3 text-[#556B2F] hover:text-[#6B8E23] transition-colors"
-                        >
-                          <Search className="h-5 w-5" />
-                        </button>
+                  <div
+                    className="flex items-center justify-between gap-4 mb-8 animate-slide-from-left"
+                    style={{ animationDelay: animationDelays.container }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div 
+                        className="p-3 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-110"
+                        style={{ backgroundColor: section.color }}
+                      >
+                        <IconComponent className="h-8 w-8 text-white" />
                       </div>
-                    </form>
-                  </div>
-                </div>
+                      <div>
+                        <h2 className="text-xl lg:text-2xl font-bold text-black/70">
+                          {section.title}
+                        </h2>
+                        <p className="text-xs text-[#8B4513] mt-2">
+                          {section.description}
+                        </p>
+                        
+                        {/* Sous-liens de navigation */}
+                        <div className="flex flex-wrap gap-3 mt-3">
+                          {section.subcategories && section.subcategories.map((subcat) => (
+                            <a
+                              key={subcat.foodCategory}
+                              href={`#${subcat.foodCategory}`}
+                              className="text-xs text-[#556B2F] hover:text-[#6B8E23] transition-colors"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                navigate(
+                                  `/alimentation/food-category/${encodeURIComponent(subcat.foodCategory)}`,
+                                  {
+                                    state: {
+                                      name: subcat.name,
+                                      description: subcat.description,
+                                      image: subcat.image,
+                                      foodCategory: subcat.foodCategory,
+                                      iconName: subcat.iconName,
+                                    },
+                                  }
+                                );
+                              }}
+                            >
+                              {subcat.name} →
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {section.categories
-                    .filter((category) => {
-                      const searchQuery =
-                        sectionSearchQueries[section.id] || "";
+                    {/* Barre de recherche à droite */}
+                    <div className="hidden md:flex items-center ml-auto">
+                      <form onSubmit={handleSectionSearch} className="relative">
+                        <div className="relative flex items-center">
+                          <Input
+                            type="text"
+                            placeholder={`Chercher dans ${section.title}...`}
+                            value={sectionSearchQueries[section.id] || ""}
+                            onChange={(e) => {
+                              setSectionSearchQueries({
+                                ...sectionSearchQueries,
+                                [section.id]: e.target.value,
+                              });
+                            }}
+                            className="pl-10 pr-2 py-2 h-16 rounded-xl border-2 border-[#D3D3D3] focus:border-[#556B2F] focus:outline-none transition-all duration-300 w-32 lg:w-96 placeholder-[#8B4513]"
+                          />
+                          <button
+                            type="submit"
+                            className="absolute left-3 text-[#556B2F] hover:text-[#6B8E23] transition-colors"
+                          >
+                            <Search className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {section.categories
+                      .filter((category) => {
+                        const searchQuery =
+                          sectionSearchQueries[section.id] || "";
+                        return (
+                          category.name
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                          category.description
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
+                        );
+                      })
+                      .map((category, index) => {
+                        const CategoryIcon = getIconByName(category.iconName);
+                        const productCount = getProductCount(category.name);
+
+                        return (
+                          <Card
+                            key={category.name}
+                            className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
+                            style={{
+                              animationDelay: `${
+                                parseFloat(animationDelays.cards) + index * 0.1
+                              }s`,
+                            }}
+                          >
+                            <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                              <img
+                                src={category.image}
+                                alt={category.name}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                              />
+                              <div className="flex justify-end absolute rounded-full text-white bottom-2 right-2">
+                                <Badge 
+                                  className="text-white"
+                                  style={{ backgroundColor: section.color }}
+                                >
+                                  {productCount} produit
+                                  {productCount !== 1 ? "s" : ""}
+                                </Badge>
+                              </div>
+                            </div>
+                            <h3 className="text-xl font-semibold mb-2 text-[#556B2F] group-hover:text-[#6B8E23] transition-colors duration-300">
+                              {category.name}
+                            </h3>
+                            <p className="text-[#8B4513] text-sm mb-2 leading-relaxed">
+                              {category.description}
+                            </p>
+                            <Button
+                              className="w-full text-white border-0 transition-all duration-300"
+                              style={{ 
+                                backgroundColor: section.color,
+                                hover: { backgroundColor: `${section.color}CC` }
+                              }}
+                              onClick={() => handleCategoryClick(category)}
+                            >
+                              Explorer
+                              <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                            </Button>
+                          </Card>
+                        );
+                      })}
+
+                    {section.categories.filter((category) => {
+                      const searchQuery = sectionSearchQueries[section.id] || "";
                       return (
                         category.name
                           .toLowerCase()
@@ -635,75 +715,22 @@ const Alimentation = () => {
                           .toLowerCase()
                           .includes(searchQuery.toLowerCase())
                       );
-                    })
-                    .map((category, index) => {
-                      const CategoryIcon = getIconByName(category.iconName);
-                      const productCount = getProductCount(category.name);
-
-                      return (
-                        <Card
-                          key={category.name}
-                          className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
-                          style={{
-                            animationDelay: `${
-                              parseFloat(animationDelays.cards) + index * 0.1
-                            }s`,
-                          }}
-                        >
-                          <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                            <img
-                              src={category.image}
-                              alt={category.name}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                            <div className="flex justify-end absolute rounded-full text-white bottom-2 right-2">
-                              <Badge className="bg-black text-white">
-                                {productCount} produit
-                                {productCount !== 1 ? "s" : ""}
-                              </Badge>
-                            </div>
-                          </div>
-                          <h3 className="text-xl font-semibold mb-2 text-[#556B2F] group-hover:text-[#6B8E23] transition-colors duration-300">
-                            {category.name}
-                          </h3>
-                          <p className="text-[#8B4513] text-sm mb-2 leading-relaxed">
-                            {category.description}
+                    }).length === 0 &&
+                      sectionSearchQueries[section.id] && (
+                        <div className="col-span-full text-center py-8">
+                          <p className="text-gray-500 text-lg">
+                            Aucune catégorie ne correspond à "
+                            {sectionSearchQueries[section.id]}"
                           </p>
-                          <Button
-                            className="w-full bg-[#556B2F] hover:bg-[#6B8E23] hover:text-white text-white border-0 transition-all duration-300"
-                            onClick={() => handleCategoryClick(category)}
-                          >
-                            Explorer
-                            <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                          </Button>
-                        </Card>
-                      );
-                    })}
-
-                  {section.categories.filter((category) => {
-                    const searchQuery = sectionSearchQueries[section.id] || "";
-                    return (
-                      category.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      category.description
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())
-                    );
-                  }).length === 0 &&
-                    sectionSearchQueries[section.id] && (
-                      <div className="col-span-full text-center py-8">
-                        <p className="text-gray-500 text-lg">
-                          Aucune catégorie ne correspond à "
-                          {sectionSearchQueries[section.id]}"
-                        </p>
-                      </div>
-                    )}
+                        </div>
+                      )}
+                  </div>
                 </div>
-              </div>
-            );
+              );
             })
           )}
+
+          {/* Section médecine par les plantes
           <div className="text-center mt-12">
             <Card className="bg-white/80 backdrop-blur-md rounded-3xl p-8 border-0">
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
@@ -722,38 +749,7 @@ const Alimentation = () => {
                 Explorer la médecine des plantes
               </Button>
             </Card>
-          </div>
-          {/* Section CTA 
-          <div
-            className="text-center animate-bounce-in "
-            style={{ animationDelay: "0.8s" }}
-          >
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-4 lg:p-12 border border-white/20 shadow-2xl">
-              <h3 className="text-xl lg:text-2xl font-bold text-gray-700 mb-4">
-                Livraison de produits frais à domicile
-              </h3>
-              <p className="text-sm lg:text-md text-[#8B4513] mb-8 max-w-2xl mx-auto">
-                Commandez vos produits alimentaires frais et recevez-les sous
-                24h. Qualité garantie, producteurs locaux et service
-                personnalisé.
-              </p>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <Button
-                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl animate-pulse-cta"
-                  onClick={() => handleContactClick("contact")}
-                >
-                  Commander maintenant
-                </Button>
-                <Button
-                  className="bg-white hover:bg-gray-50 text-[#556B2F] border-2 border-[#556B2F] px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                  onClick={() => handleContactClick("rdv")}
-                >
-                  <Users className="h-5 w-5 mr-2" />
-                  Conseil Nutrition
-                </Button>
-              </div>
-            </div>
-          </div>*/}
+          </div> */}
         </section>
       </div>
 
