@@ -8,24 +8,8 @@ export const vehiculesApi = {
   getStats: () => api.get("/vehicules/stats/global"),
 
   // Créer un véhicule avec les nouveaux champs
-  createVehicule: (data) => {
-    const formData = new FormData();
-
-    // Ajouter les champs du formulaire
-    Object.keys(data).forEach((key) => {
-      if (key === "images" && Array.isArray(data[key])) {
-        data[key].forEach((file, index) => {
-          if (file instanceof File) {
-            formData.append(`image_${index}`, file);
-          }
-        });
-      } else if (key === "equipements" || key === "caracteristiques") {
-        formData.append(key, JSON.stringify(data[key]));
-      } else if (data[key] !== null && data[key] !== undefined) {
-        formData.append(key, data[key]);
-      }
-    });
-
+  createVehicule: (formData) => {
+    // formData est déjà un objet FormData avec les images ajoutées
     return api.post("/vehicules", formData, {
       headers: {
         "Content-Type": "multipart/form-data",

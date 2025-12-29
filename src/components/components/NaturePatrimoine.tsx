@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import TourismNavigation from '../TourismNavigation';
 
 const NaturePatrimoine = () => {
   const [activeCategory, setActiveCategory] = useState('tous');
@@ -219,16 +220,14 @@ const NaturePatrimoine = () => {
   return (
     <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-7xl mx-auto pt-10">
+        {/* En-tête avec image de fond */}
         <div
-          className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
-          <div
-            className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70'
-          />
-          <img
-            src="https://i.pinimg.com/736x/02/59/69/0259699a168aea21ba838cd4873a1fdc.jpg"
-            className='h-full object-cover w-full'
-            alt="Background"
-          />
+          className="absolute inset-0 h-[300px] -z-20 w-full overflow-hidden bg-cover bg-center"
+          style={{
+            backgroundImage: `url('https://i.pinimg.com/736x/02/59/69/0259699a168aea21ba838cd4873a1fdc.jpg')`,
+          }}
+        >
+          <div className="absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70" />
         </div>
         {/* En-tête minimaliste */}
         <div className="text-center mb-20">
@@ -236,9 +235,11 @@ const NaturePatrimoine = () => {
             Nature & patrimoine
           </h1>
           <p className="text-sm text-gray-200 max-w-3xl mx-auto font-light leading-relaxed">
-            Explorez une nature préservée et un patrimoine authentique.
-            Des lieux exceptionnels qui racontent notre histoire et protègent notre avenir.
+            Explorez une nature préservée et un patrimoine authentique. Des
+            lieux exceptionnels qui racontent notre histoire et protègent notre
+            avenir.
           </p>
+          <TourismNavigation />
         </div>
 
         {/* Bandeau défilant infini */}
@@ -263,17 +264,14 @@ const NaturePatrimoine = () => {
             {/* Premier set d'images */}
             <div className="flex w-max gap-4 pr-4 animate-[move_25s_linear_infinite] animation-pausable">
               {[
-                '1506905925346-21bda4d32df4',
-                '1518837695005-2083093ee35b',
-                '1448375240586-882707db888b',
-                '1506929562872-bb421503ef21',
-                '1544551763-46a013bb70d5',
-                '1513584684374-8bab748fbf90'
+                "1506905925346-21bda4d32df4",
+                "1518837695005-2083093ee35b",
+                "1448375240586-882707db888b",
+                "1506929562872-bb421503ef21",
+                "1544551763-46a013bb70d5",
+                "1513584684374-8bab748fbf90",
               ].map((photoId, index) => (
-                <div
-                  key={index}
-                  className="flex-none h-48 w-64 flex-shrink-0"
-                >
+                <div key={index} className="flex-none h-48 w-64 flex-shrink-0">
                   <img
                     src={`https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=400&h=200&q=80`}
                     alt={`Nature ${index + 1}`}
@@ -284,14 +282,17 @@ const NaturePatrimoine = () => {
             </div>
 
             {/* Second set d'images (pour l'effet infini) */}
-            <div aria-hidden className="flex w-max gap-4 pr-4 animate-[move_25s_linear_infinite] animation-pausable">
+            <div
+              aria-hidden
+              className="flex w-max gap-4 pr-4 animate-[move_25s_linear_infinite] animation-pausable"
+            >
               {[
-                '1506905925346-21bda4d32df4',
-                '1518837695005-2083093ee35b',
-                '1448375240586-882707db888b',
-                '1506929562872-bb421503ef21',
-                '1544551763-46a013bb70d5',
-                '1513584684374-8bab748fbf90'
+                "1506905925346-21bda4d32df4",
+                "1518837695005-2083093ee35b",
+                "1448375240586-882707db888b",
+                "1506929562872-bb421503ef21",
+                "1544551763-46a013bb70d5",
+                "1513584684374-8bab748fbf90",
               ].map((photoId, index) => (
                 <div
                   key={`duplicate-${index}`}
@@ -329,10 +330,11 @@ const NaturePatrimoine = () => {
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`px-6 py-2.5 rounded-full font-medium transition-all duration-300 border ${activeCategory === category.id
-                    ? 'bg-secondary-text text-white'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-gray-900 hover:text-gray-900'
-                  }`}
+                className={`px-6 py-2.5 rounded-full font-medium transition-all duration-300 border ${
+                  activeCategory === category.id
+                    ? "bg-secondary-text text-white"
+                    : "bg-white text-gray-700 border-gray-300 hover:border-gray-900 hover:text-gray-900"
+                }`}
               >
                 {category.label}
               </button>
@@ -356,11 +358,15 @@ const NaturePatrimoine = () => {
             </div>
             <div className="text-center">
               <div className="text-5xl font-light text-gray-900 mb-3">1270</div>
-              <div className="text-gray-600 font-medium">Espèces endémiques</div>
+              <div className="text-gray-600 font-medium">
+                Espèces endémiques
+              </div>
             </div>
             <div className="text-center">
               <div className="text-5xl font-light text-gray-900 mb-3">92%</div>
-              <div className="text-gray-600 font-medium">Territoire préservé</div>
+              <div className="text-gray-600 font-medium">
+                Territoire préservé
+              </div>
             </div>
             <div className="text-center">
               <div className="text-5xl font-light text-gray-900 mb-3">150+</div>
@@ -375,35 +381,84 @@ const NaturePatrimoine = () => {
             Exploration géographique
           </h3>
           <p className=" text-gray-600 text-center mb-4">
-            Découvrez nos {places.length} sites naturels et patrimoniaux répartis à travers les territoires ultramarins
+            Découvrez nos {places.length} sites naturels et patrimoniaux
+            répartis à travers les territoires ultramarins
           </p>
           <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl bg-white border border-gray-200">
             {/* Conteneur SVG pour la carte */}
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 600">
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox="0 0 1000 600"
+            >
               {/* Dégradé de fond */}
               <defs>
-                <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: '#f0fdf4', stopOpacity: 1 }} />
-                  <stop offset="100%" style={{ stopColor: '#fffbeb', stopOpacity: 1 }} />
+                <linearGradient
+                  id="mapGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop
+                    offset="0%"
+                    style={{ stopColor: "#f0fdf4", stopOpacity: 1 }}
+                  />
+                  <stop
+                    offset="100%"
+                    style={{ stopColor: "#fffbeb", stopOpacity: 1 }}
+                  />
                 </linearGradient>
               </defs>
               <rect width="1000" height="600" fill="url(#mapGradient)" />
 
               {/* Formes géométriques de continents/îles */}
-              <circle cx="200" cy="250" r="80" fill="#d1fae5" opacity="0.6" stroke="#10b981" strokeWidth="2" />
-              <circle cx="600" cy="180" r="70" fill="#d1fae5" opacity="0.5" stroke="#10b981" strokeWidth="2" />
-              <ellipse cx="350" cy="400" rx="60" ry="50" fill="#d1fae5" opacity="0.5" stroke="#10b981" strokeWidth="2" />
-              <circle cx="100" cy="100" r="40" fill="#d1fae5" opacity="0.6" stroke="#10b981" strokeWidth="2" />
+              <circle
+                cx="200"
+                cy="250"
+                r="80"
+                fill="#d1fae5"
+                opacity="0.6"
+                stroke="#10b981"
+                strokeWidth="2"
+              />
+              <circle
+                cx="600"
+                cy="180"
+                r="70"
+                fill="#d1fae5"
+                opacity="0.5"
+                stroke="#10b981"
+                strokeWidth="2"
+              />
+              <ellipse
+                cx="350"
+                cy="400"
+                rx="60"
+                ry="50"
+                fill="#d1fae5"
+                opacity="0.5"
+                stroke="#10b981"
+                strokeWidth="2"
+              />
+              <circle
+                cx="100"
+                cy="100"
+                r="40"
+                fill="#d1fae5"
+                opacity="0.6"
+                stroke="#10b981"
+                strokeWidth="2"
+              />
             </svg>
 
             {/* Points interactifs sur la carte */}
             <div className="absolute inset-0">
               {places.map((place) => {
                 const positions = {
-                  'Réunion': { top: '42%', left: '25%' },
-                  'Guadeloupe': { top: '35%', left: '15%' },
-                  'Mayotte': { top: '58%', left: '37%' },
-                  'France': { top: '15%', left: '8%' }
+                  Réunion: { top: "42%", left: "25%" },
+                  Guadeloupe: { top: "35%", left: "15%" },
+                  Mayotte: { top: "58%", left: "37%" },
+                  France: { top: "15%", left: "8%" },
                 };
                 const pos = positions[place.location];
 
@@ -411,7 +466,11 @@ const NaturePatrimoine = () => {
                   <div
                     key={place.id}
                     className="absolute group"
-                    style={{ top: pos?.top || '50%', left: pos?.left || '50%', transform: 'translate(-50%, -50%)' }}
+                    style={{
+                      top: pos?.top || "50%",
+                      left: pos?.left || "50%",
+                      transform: "translate(-50%, -50%)",
+                    }}
                   >
                     {/* Cercle pulsant */}
                     <div className="relative w-8 h-8">
@@ -424,8 +483,12 @@ const NaturePatrimoine = () => {
                     {/* Popup au survol */}
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto z-10">
                       <div className="bg-gray-900 text-white px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap shadow-2xl">
-                        <div className="font-bold text-emerald-400">{place.location}</div>
-                        <div className="text-gray-300 text-xs mt-1">{place.title}</div>
+                        <div className="font-bold text-emerald-400">
+                          {place.location}
+                        </div>
+                        <div className="text-gray-300 text-xs mt-1">
+                          {place.title}
+                        </div>
                       </div>
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                     </div>
@@ -441,20 +504,29 @@ const NaturePatrimoine = () => {
                   <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
                   <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping opacity-50 absolute"></div>
                 </div>
-                <span className="text-sm text-gray-700 font-medium">Sites disponibles</span>
+                <span className="text-sm text-gray-700 font-medium">
+                  Sites disponibles
+                </span>
               </div>
-              <div className="text-xs text-gray-500">Survolez pour plus de détails</div>
+              <div className="text-xs text-gray-500">
+                Survolez pour plus de détails
+              </div>
             </div>
 
             {/* Compteur de sites par région */}
             <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200">
-              <div className="text-xs font-semibold text-gray-600 mb-3">Sites par région</div>
+              <div className="text-xs font-semibold text-gray-600 mb-3">
+                Sites par région
+              </div>
               <div className="space-y-2">
-                {['Réunion', 'Guadeloupe', 'Mayotte'].map((location) => (
-                  <div key={location} className="flex justify-between items-center">
+                {["Réunion", "Guadeloupe", "Mayotte"].map((location) => (
+                  <div
+                    key={location}
+                    className="flex justify-between items-center"
+                  >
                     <span className="text-sm text-gray-700">{location}</span>
                     <span className="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 rounded-full w-6 h-6 text-xs font-bold">
-                      {places.filter(p => p.location === location).length}
+                      {places.filter((p) => p.location === location).length}
                     </span>
                   </div>
                 ))}
@@ -469,8 +541,8 @@ const NaturePatrimoine = () => {
             Contribuez à la préservation
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto mb-10">
-            Partagez vos découvertes, signalez des sites à protéger, ou participez
-            à nos programmes de conservation du patrimoine.
+            Partagez vos découvertes, signalez des sites à protéger, ou
+            participez à nos programmes de conservation du patrimoine.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button className="px-8 py-4 bg-gray-100 text-slate-900 font-medium rounded-xl  transition-colors duration-300">

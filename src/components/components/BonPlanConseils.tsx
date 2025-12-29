@@ -4,6 +4,7 @@ import perfectAnim from '../../assets/perfect.json';
 import confetiAnim from '../../assets/Confeti.json';
 import coolAnim from '../../assets/Cool.json';
 import cryAnim from '../../assets/Cry.json';
+import TourismNavigation from '../TourismNavigation';
 
 const BonsPlansConseils = () => {
   const [activeCategory, setActiveCategory] = useState('tous');
@@ -664,10 +665,7 @@ const BonsPlansConseils = () => {
               Découvrez des astuces et conseils utiles pour vos activités.
               Des solutions pratiques testées et approuvées par nos experts locaux.
             </p>
-            <div className="inline-flex items-center mt-2 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-              CONSEILS PRATIQUES 100% LOCAUX
-            </div>
+            <TourismNavigation page='inspirer' />
           </div>
 
           {/* Barre de recherche */}

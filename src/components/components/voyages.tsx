@@ -445,12 +445,13 @@ const VoyagesAeriens: React.FC = () => {
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-center text-white">
-            
-            <h1 className="text-xl lg:text-4xl font-bold mb-4">Explorer le Monde</h1>
+            <h1 className="text-xl lg:text-4xl font-bold mb-4">
+              Explorer le Monde
+            </h1>
             <p className="text-sm mb-5 max-w-2xl mx-auto">
               Découvrez des destinations incroyables avec nos vols exclusifs
             </p>
-            <TourismNavigation />
+            <TourismNavigation page="sejour" />
           </div>
         </div>
       </div>
