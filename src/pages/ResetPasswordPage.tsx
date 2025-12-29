@@ -12,24 +12,15 @@ import {
 import { toast } from "sonner";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import {
+  validatePassword,
+  validatePasswordStrong,
+  PASSWORD_ERRORS,
+  getPasswordStrengthLabel,
+  passwordsMatch,
+} from "@/utils/passwordValidator";
 
-// Fonction de validation des mots de passe
-const validatePassword = (password: string) => {
-  return {
-    minLength: password.length >= 8,
-    maxLength: password.length <= 12,
-    hasUpperCase: /[A-Z]/.test(password),
-    hasLowerCase: /[a-z]/.test(password),
-    hasNumber: /\d/.test(password),
-    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\;/]/.test(password),
-  };
-};
-
-const isPasswordValid = (password: string) => {
-  const validation = validatePassword(password);
-  return Object.values(validation).every((v) => v === true);
-};
-
+// Composant pour afficher les exigences du mot de passe
 const PasswordRequirement = ({
   met,
   text,
@@ -71,7 +62,7 @@ export default function ResetPasswordPage() {
     hasNumber: false,
     hasSpecialChar: false,
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -124,7 +115,15 @@ export default function ResetPasswordPage() {
     
     // Mettre à jour la validation du mot de passe en temps réel
     if (name === "newPassword") {
-      setPasswordValidation(validatePassword(value));
+      const validation = validatePasswordStrong(value);
+      setPasswordValidation({
+        minLength: validation.minLength,
+        maxLength: validation.maxLength,
+        hasUpperCase: validation.hasUpperCase,
+        hasLowerCase: validation.hasLowerCase,
+        hasNumber: validation.hasNumber,
+        hasSpecialChar: validation.hasSpecialChar,
+      });
     }
     
     // Effacer l'erreur quand l'utilisateur tape
@@ -137,17 +136,22 @@ export default function ResetPasswordPage() {
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     
+    // Valider le nouveau mot de passe
     if (!formData.newPassword) {
-      newErrors.newPassword = 'Nouveau mot de passe requis';
-    } else if (!isPasswordValid(formData.newPassword)) {
-      newErrors.newPassword = 'Le mot de passe ne respecte pas les conditions requises (8-12 caractères, majuscule, minuscule, chiffre et caractère spécial)';
+      newErrors.newPassword = PASSWORD_ERRORS.EMPTY;
+    } else {
+      const validation = validatePassword(formData.newPassword);
+      if (!validation.valid) {
+        newErrors.newPassword = validation.error;
+      }
     }
     
+    // Valider la confirmation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Confirmation du mot de passe requise';
-    } else if (formData.newPassword !== formData.confirmPassword) {
+    } else if (!passwordsMatch(formData.newPassword, formData.confirmPassword)) {
       newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
     }
     

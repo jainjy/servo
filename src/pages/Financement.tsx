@@ -1516,6 +1516,10 @@ export default function Financement() {
 
       {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
+
+        <div className="absolute top-12 left-4 right-4 z-50">
+          <AdvertisementPopup />
+        </div>
         {/* Image de fond avec overlay */}
         <div className="absolute inset-0">
           <div
@@ -1654,7 +1658,6 @@ export default function Financement() {
           </div>
         </div>
       </section>
-     <AdvertisementPopup />
       {/* Section Partenaires Financement */}
       <section className="lg:py-20 bg-white" id="partenaires">
         <div className="container mx-auto px-4">
@@ -1729,14 +1732,14 @@ export default function Financement() {
                       className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-[#556B2F] hover:border-[#6B8E23]"
                       onClick={() => handlePartenaireClick(partenaire)}
                     >
-                      <Handshake className="h-5 w-5 mr-3" />
+                      <Handshake className="h-5 w-5 " />
                       Contacter
                     </Button>
                     <Button
                       className="flex-1 bg-slate-100 hover:bg-slate-200 text-[#8B4513] rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-[#D3D3D3] hover:border-slate-300"
                       onClick={() => navigate(`/financement/${partenaire.id}`)}
                     >
-                      <ArrowRight className="h-5 w-5 mr-3" />
+                      <ArrowRight className="h-5 w-5 " />
                       Détails
                     </Button>
                   </div>

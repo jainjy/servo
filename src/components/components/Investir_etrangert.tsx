@@ -259,6 +259,9 @@ const InvestirEtranger = () => {
 
   return (
     <div className="min-h-screen  text-[#2a2a2a]">
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       {/* Hero Section */}
       <section className="text-white py-16">
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
@@ -267,7 +270,7 @@ const InvestirEtranger = () => {
         </div>
         <div className="container mx-auto px-4 mt-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl lg:text-5xl font-semibold mb-4 tracking-[0.2em] text-gray-100 dark:text-white">
+            <h1 className="text-4xl lg:text-5xl font-semibold mb-4  text-gray-100 dark:text-white">
               INVESTISSEMENT
             </h1>
             <p className="text-sm lg:text-md opacity-90 mb-8 max-w-2xl mx-auto">
@@ -521,8 +524,6 @@ const InvestirEtranger = () => {
           </div>
         </div>
       </section>
-
-      <AdvertisementPopup />
 
       {/* Section Vente/Location/Gestion */}
       <section className="py-8 bg-[#FAFAFA] border-t border-[#D3D3D3]">

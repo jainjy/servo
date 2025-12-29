@@ -1,8 +1,21 @@
 import api from "../api";
 
 export const vehiculesApi = {
-  // Récupérer tous les véhicules avec filtres
+  // Récupérer tous les véhicules avec filtres (MIS À JOUR)
   getVehicules: (params) => api.get("/vehicules", { params }),
+
+  // Récupérer les statistiques (MIS À JOUR)
+  getStats: () => api.get("/vehicules/stats/global"),
+
+  // Créer un véhicule avec les nouveaux champs
+  createVehicule: (formData) => {
+    // formData est déjà un objet FormData avec les images ajoutées
+    return api.post("/vehicules", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 
   // Récupérer un véhicule par ID
   getVehiculeById: (id) => api.get(`/vehicules/${id}`),
@@ -25,6 +38,9 @@ export const vehiculesApi = {
   updateReservationStatus: (id, data) =>
     api.put(`/reservations-vehicules/${id}/statut`, data),
 
+  // Supprimer une réservation
+  deleteReservation: (id) => api.delete(`/reservations-vehicules/${id}`),
+
   // Vérifier la disponibilité
   checkDisponibilite: (vehiculeId, dateDebut, dateFin) =>
     api.get(`/reservations-vehicules/vehicule/${vehiculeId}/disponibilite`, {
@@ -40,17 +56,6 @@ export const vehiculesApi = {
 
   // Supprimer un avis
   deleteAvis: (id) => api.delete(`/avis-vehicules/${id}`),
-
-  // Statistiques globales
-  getStats: () => api.get("/vehicules/stats/global"),
-
-  // Créer un véhicule (avec FormData pour les images)
-  createVehicule: (formData) =>
-    api.post("/vehicules", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
 
   // Mettre à jour un véhicule (avec FormData pour les images)
   updateVehicule: (id, formData) =>
@@ -82,4 +87,11 @@ export const vehiculesApi = {
 
   getReservationItinerary: (reservationId) =>
     api.get(`/reservations-vehicules/${reservationId}/itinerary`),
+
+  // Confirmer manuellement un paiement
+  confirmPayment: (reservationId, data) =>
+    api.put(
+      `/reservations-vehicules/${reservationId}/confirmer-paiement`,
+      data
+    ),
 };

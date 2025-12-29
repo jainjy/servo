@@ -26,7 +26,7 @@ import {
   HeartHandshake,
   Rocket,
   Target,
-  Zap
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Partenaire } from "../data/partnersData";
@@ -70,18 +70,21 @@ interface Advantage {
   icon: LucideIcon;
   color: string;
 }
-
 const PartnersSection: React.FC<PartnersSectionProps> = ({
   handleContact,
   handleOpenMap,
   handlePartnerLocation,
   trackBusinessInteraction,
-  colors
+  colors,
 }) => {
   const [partenaires, setPartenaires] = useState<Partenaire[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSecteur, setSelectedSecteur] = useState<string>("tous");
+
+  // --- PAGINATION : uniquement Suivant / Précédent ---
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 8; // nombre de cartes par page
 
   const filters: FilterOption[] = [
     { label: "Présentation partenaires", value: "presentation" },
@@ -91,79 +94,111 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
 
   // Icônes pour différents secteurs
   const secteurIcons: Record<string, LucideIcon> = {
-    "Construction": Building,
-    "Services": Briefcase,
-    "Artisanat": Wrench,
-    "Technique": Cpu,
-    "Général": Users,
-    "Design": Palette,
-    "Santé": HeartHandshake,
-    "Technologie": Cpu,
-    "Finance": Coins,
-    "Marketing": Rocket,
-    "Consulting": Target,
-    "Énergie": Zap
+    Construction: Building,
+    Services: Briefcase,
+    Artisanat: Wrench,
+    Technique: Cpu,
+    Général: Users,
+    Design: Palette,
+    Santé: HeartHandshake,
+    Technologie: Cpu,
+    Finance: Coins,
+    Marketing: Rocket,
+    Consulting: Target,
+    Énergie: Zap,
   };
 
   // Fonction pour transformer les données de l'API en Partenaire
   const transformMetierToPartenaire = (metier: MetierFromAPI): Partenaire => {
-    // Catégories basées sur le libellé du métier
     const getSecteurFromLibelle = (libelle: string): string => {
       const libelleLower = libelle.toLowerCase();
-      if (libelleLower.includes('plombier') || libelleLower.includes('électricien') || 
-          libelleLower.includes('maçon') || libelleLower.includes('construction')) {
+      if (
+        libelleLower.includes("plombier") ||
+        libelleLower.includes("électricien") ||
+        libelleLower.includes("maçon") ||
+        libelleLower.includes("construction")
+      ) {
         return "Construction";
-      } else if (libelleLower.includes('consultant') || libelleLower.includes('conseil') || 
-                 libelleLower.includes('formation') || libelleLower.includes('expert')) {
+      } else if (
+        libelleLower.includes("consultant") ||
+        libelleLower.includes("conseil") ||
+        libelleLower.includes("formation") ||
+        libelleLower.includes("expert")
+      ) {
         return "Services";
-      } else if (libelleLower.includes('artisan') || libelleLower.includes('menuiserie') || 
-                 libelleLower.includes('ébéniste') || libelleLower.includes('design')) {
+      } else if (
+        libelleLower.includes("artisan") ||
+        libelleLower.includes("menuiserie") ||
+        libelleLower.includes("ébéniste") ||
+        libelleLower.includes("design")
+      ) {
         return "Artisanat";
-      } else if (libelleLower.includes('technicien') || libelleLower.includes('ingénieur') || 
-                 libelleLower.includes('informatique') || libelleLower.includes('développeur')) {
+      } else if (
+        libelleLower.includes("technicien") ||
+        libelleLower.includes("ingénieur") ||
+        libelleLower.includes("informatique") ||
+        libelleLower.includes("développeur")
+      ) {
         return "Technique";
-      } else if (libelleLower.includes('médecin') || libelleLower.includes('infirmier') || 
-                 libelleLower.includes('thérapeute')) {
+      } else if (
+        libelleLower.includes("médecin") ||
+        libelleLower.includes("infirmier") ||
+        libelleLower.includes("thérapeute")
+      ) {
         return "Santé";
-      } else if (libelleLower.includes('comptable') || libelleLower.includes('financier') || 
-                 libelleLower.includes('banquier')) {
+      } else if (
+        libelleLower.includes("comptable") ||
+        libelleLower.includes("financier") ||
+        libelleLower.includes("banquier")
+      ) {
         return "Finance";
-      } else if (libelleLower.includes('marketing') || libelleLower.includes('communication') || 
-                 libelleLower.includes('publicité')) {
+      } else if (
+        libelleLower.includes("marketing") ||
+        libelleLower.includes("communication") ||
+        libelleLower.includes("publicité")
+      ) {
         return "Marketing";
       }
       return "Général";
     };
 
-    // Obtenir l'icône du secteur
     const secteur = getSecteurFromLibelle(metier.libelle);
     const secteurIcon = secteurIcons[secteur] || Briefcase;
 
-    // Générer des données réalistes basées sur le métier
     const nombreProjets = (metier._count?.services || 0) * 5 + 10;
-    const rating = 3.5 + Math.random() * 1.5; // Note entre 3.5 et 5
-    const badgeLevel = nombreProjets > 50 ? "Expert" : nombreProjets > 20 ? "Confirmé" : "Débutant";
+    const rating = 3.5 + Math.random() * 1.5;
+    const badgeLevel =
+      nombreProjets > 50
+        ? "Expert"
+        : nombreProjets > 20
+        ? "Confirmé"
+        : "Débutant";
+
     const badgeColors = {
-      "Expert": "#10B981", // Vert
-      "Confirmé": "#3B82F6", // Bleu
-      "Débutant": "#F59E0B" // Orange
-    };
+      Expert: "#10B981",
+      Confirmé: "#3B82F6",
+      Débutant: "#F59E0B",
+    } as const;
 
     return {
       id: metier.id.toString(),
       nom: metier.libelle,
-      description: `Spécialiste en ${metier.libelle.toLowerCase()}. ${metier._count?.services || 0} services proposés.`,
+      description: `Spécialiste en ${metier.libelle.toLowerCase()}. ${
+        metier._count?.services || 0
+      } services proposés.`,
       secteur: secteur,
-      secteurIcon: secteurIcon, // Ajout de l'icône
+      secteurIcon: secteurIcon,
       rating: parseFloat(rating.toFixed(1)),
       projets: nombreProjets,
       badge: badgeLevel,
-      badgeColor: badgeColors[badgeLevel as keyof typeof badgeColors] || colors.primaryDark,
+      badgeColor:
+        badgeColors[badgeLevel as keyof typeof badgeColors] ||
+        colors.primaryDark,
       location: {
         address: "Paris, France",
         lat: 48.8566 + (Math.random() * 0.1 - 0.05),
-        lng: 2.3522 + (Math.random() * 0.1 - 0.05)
-      }
+        lng: 2.3522 + (Math.random() * 0.1 - 0.05),
+      },
     };
   };
 
@@ -172,18 +207,15 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
     const fetchMetiers = async () => {
       try {
         setLoading(true);
-        // Utiliser le nouveau service utilisateur
         const response = await UserMetierService.getAllMetiers();
-        
-        // Transformer les données API en partenaires
-        const partenairesFromAPI: Partenaire[] = response.map((metier: MetierFromAPI) => 
-          transformMetierToPartenaire(metier)
+
+        const partenairesFromAPI: Partenaire[] = response.map(
+          (metier: MetierFromAPI) => transformMetierToPartenaire(metier)
         );
-        
+
         setPartenaires(partenairesFromAPI);
         setError(null);
-        
-        // Track successful data loading
+
         trackBusinessInteraction(
           "metiers_loaded",
           "Métiers chargés",
@@ -193,8 +225,7 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
       } catch (err: any) {
         console.error("Erreur lors du chargement des métiers:", err);
         setError("Impossible de charger les métiers. Veuillez réessayer.");
-        
-        // Track error
+
         trackBusinessInteraction(
           "metiers_error",
           "Erreur chargement métiers",
@@ -212,17 +243,13 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
   const handleFilterChange = (filter: FilterOption, value: string) => {
     if (filter.value === "presentation") {
       setSelectedSecteur(value);
+      setCurrentPage(1); // reset page quand on change de filtre
     }
-    
-    trackBusinessInteraction(
-      "partner_filter",
-      filter.label,
-      "filter_select",
-      {
-        filter: filter.value,
-        value: value,
-      }
-    );
+
+    trackBusinessInteraction("partner_filter", filter.label, "filter_select", {
+      filter: filter.value,
+      value: value,
+    });
     toast.info(`Filtre ${filter.label} sélectionné: ${value}`);
   };
 
@@ -235,11 +262,33 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
   };
 
   // Filtrer les partenaires par secteur
-  const filteredPartenaires = selectedSecteur === "tous" 
-    ? partenaires 
-    : partenaires.filter(p => 
-        p.secteur.toLowerCase().includes(selectedSecteur.toLowerCase())
-      );
+  const filteredPartenaires =
+    selectedSecteur === "tous"
+      ? partenaires
+      : partenaires.filter((p) =>
+          p.secteur.toLowerCase().includes(selectedSecteur.toLowerCase())
+        );
+
+  // --- LOGIQUE DE PAGINATION (client-side) ---
+  const totalPages = Math.ceil(filteredPartenaires.length / itemsPerPage) || 1;
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const indexOfLast = safeCurrentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentPartenaires = filteredPartenaires.slice(
+    indexOfFirst,
+    indexOfLast
+  );
+
+  const handlePageChange = (page: number) => {
+  if (page < 1 || page > totalPages) return;
+  setCurrentPage(page);
+
+  // Défilement fluide vers le haut de la section "partenaire"
+  const section = document.getElementById("partenaire");
+  if (section) {
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
 
   return (
     <motion.section
@@ -284,7 +333,7 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
             className="text-sm lg:text-sm max-w-2xl mx-auto mb-4 lg:mb-8"
             style={{ color: colors.textSecondary }}
           >
-            Rejoignez notre réseau d'experts et développez votre activité
+            Rejoignez notre réseau d&apos;experts et développez votre activité
           </p>
         </motion.div>
 
@@ -307,7 +356,9 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
             {filters.map((filter, index) => (
               <motion.div key={index}>
                 <Select
-                  onValueChange={(value: string) => handleFilterChange(filter, value)}
+                  onValueChange={(value: string) =>
+                    handleFilterChange(filter, value)
+                  }
                 >
                   <SelectTrigger className="w-[240px] border-2 rounded-xl bg-white">
                     <SelectValue placeholder={filter.label} />
@@ -354,8 +405,10 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
         {/* État de chargement */}
         {loading && (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" 
-                 style={{ borderColor: colors.primaryDark }}></div>
+            <div
+              className="inline-block animate-spin rounded-full h-8 w-8 border-b-2"
+              style={{ borderColor: colors.primaryDark }}
+            ></div>
             <p className="mt-4" style={{ color: colors.textSecondary }}>
               Chargement des métiers...
             </p>
@@ -375,16 +428,25 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
           </div>
         )}
 
-        {/* Grille des partenaires */}
+        {/* Grille + pagination */}
         {!loading && !error && (
           <>
             {filteredPartenaires.length > 0 ? (
-              <PartnersGrid 
-                partenaires={filteredPartenaires}
-                handleContact={handleContact}
-                handlePartnerLocation={handlePartnerLocation}
-                colors={colors}
-              />
+              <>
+                <PartnersGrid
+                  partenaires={currentPartenaires}
+                  handleContact={handleContact}
+                  handlePartnerLocation={handlePartnerLocation}
+                  colors={colors}
+                />
+
+                <SimplePagination
+                  currentPage={safeCurrentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  colors={colors}
+                />
+              </>
             ) : (
               <div className="text-center py-12">
                 <p style={{ color: colors.textSecondary }}>
@@ -399,10 +461,7 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
         <AdvantagesSection colors={colors} />
 
         {/* CTA devenir partenaire */}
-        <CTAButton 
-          onCTAClick={handleCTAClick}
-          colors={colors}
-        />
+        <CTAButton onCTAClick={handleCTAClick} colors={colors} />
       </div>
     </motion.section>
   );
@@ -415,14 +474,14 @@ interface PartnersGridProps {
   colors: Colors;
 }
 
-const PartnersGrid: React.FC<PartnersGridProps> = ({ 
-  partenaires, 
-  handleContact, 
-  handlePartnerLocation, 
-  colors 
+const PartnersGrid: React.FC<PartnersGridProps> = ({
+  partenaires,
+  handleContact,
+  handlePartnerLocation,
+  colors,
 }) => (
   <motion.div
-    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16"
+    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"
     variants={{
       hidden: { opacity: 0 },
       visible: {
@@ -435,7 +494,7 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
   >
     {partenaires.map((partenaire) => {
       const SecteurIcon = partenaire.secteurIcon;
-      
+
       return (
         <motion.div
           key={partenaire.id}
@@ -455,7 +514,7 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
           className="h-full"
         >
           <Card
-            className="p-6 h-full rounded-2xl overflow-hidden relative hover:shadow-2xl transition-all duration-500 group"
+            className="p-6 h-full rounded-2xl overflow-hidden relative hover:shadow-2xl transition-all duration-500 group flex flex-col"
             style={{
               borderColor: colors.separator,
               backgroundColor: colors.cardBg,
@@ -474,7 +533,7 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
               {partenaire.badge}
             </motion.div>
 
-            {/* Icône du secteur au lieu de l'image */}
+            {/* Icône + contenu en colonne */}
             <motion.div
               className="w-16 h-16 mb-6 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 mx-auto"
               style={{
@@ -489,7 +548,8 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
               />
             </motion.div>
 
-            <div className="text-center">
+            {/* Contenu + bouton en flex-col pour pousser le bouton en bas */}
+            <div className="text-center flex flex-col h-full">
               <h3
                 className="text-xl font-bold mb-2"
                 style={{ color: colors.textPrimary }}
@@ -502,7 +562,7 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
                 style={{
                   backgroundColor: `${colors.primaryDark}10`,
                   color: colors.primaryDark,
-                  border: `1px solid ${colors.primaryDark}20`
+                  border: `1px solid ${colors.primaryDark}20`,
                 }}
               >
                 {partenaire.secteur}
@@ -515,7 +575,6 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
                 {partenaire.description}
               </p>
 
-              {/* Localisation */}
               <motion.div
                 className="flex items-center justify-center gap-2 cursor-pointer group mb-4"
                 onClick={() => handlePartnerLocation(partenaire)}
@@ -532,13 +591,9 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
                 </span>
               </motion.div>
 
-              {/* Stats */}
               <div className="flex items-center justify-center gap-6 text-sm mb-6">
                 <div className="flex items-center gap-1">
-                  <Star
-                    className="h-4 w-4"
-                    style={{ color: colors.warning }}
-                  />
+                  <Star className="h-4 w-4" style={{ color: colors.warning }} />
                   <span
                     className="font-semibold"
                     style={{ color: colors.textPrimary }}
@@ -557,8 +612,8 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
                 </div>
               </div>
 
-              {/* BOUTON DE CONTACT */}
-              <motion.div>
+              {/* BOUTON DE CONTACT toujours en bas */}
+              <motion.div className="mt-auto">
                 <Button
                   className="w-full font-semibold rounded-xl gap-2 border-2 transition-all duration-300 py-3"
                   style={{
@@ -567,16 +622,12 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
                     borderColor: colors.primaryDark,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor =
-                      colors.primaryLight;
-                    e.currentTarget.style.borderColor =
-                      colors.primaryLight;
+                    e.currentTarget.style.backgroundColor = colors.primaryLight;
+                    e.currentTarget.style.borderColor = colors.primaryLight;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor =
-                      colors.primaryDark;
-                    e.currentTarget.style.borderColor =
-                      colors.primaryDark;
+                    e.currentTarget.style.backgroundColor = colors.primaryDark;
+                    e.currentTarget.style.borderColor = colors.primaryDark;
                   }}
                   onClick={() => handleContact(partenaire)}
                 >
@@ -600,19 +651,22 @@ const AdvantagesSection: React.FC<AdvantagesSectionProps> = ({ colors }) => {
   const advantages: Advantage[] = [
     {
       title: "Visibilité accrue",
-      description: "Bénéficiez d'une exposition privilégiée auprès de notre communauté",
+      description:
+        "Bénéficiez d'une exposition privilégiée auprès de notre communauté",
       icon: TrendingUp,
       color: colors.primaryDark,
     },
     {
       title: "Opportunités business",
-      description: "Accédez à de nouveaux marchés et développez votre chiffre d'affaires",
+      description:
+        "Accédez à de nouveaux marchés et développez votre chiffre d'affaires",
       icon: Coins,
       color: colors.secondaryText,
     },
     {
       title: "Support dédié",
-      description: "Un accompagnement personnalisé pour maximiser votre réussite",
+      description:
+        "Un accompagnement personnalisé pour maximiser votre réussite",
       icon: Shield,
       color: colors.logo,
     },
@@ -635,7 +689,7 @@ const AdvantagesSection: React.FC<AdvantagesSectionProps> = ({ colors }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {advantages.map((advantage, index) => {
           const AdvantageIcon = advantage.icon;
-          
+
           return (
             <motion.div
               key={index}
@@ -707,6 +761,60 @@ const CTAButton: React.FC<CTAButtonProps> = ({ onCTAClick, colors }) => (
         Devenir Partenaire
       </Button>
     </motion.div>
+  </motion.div>
+);
+
+// --- COMPOSANT PAGINATION SIMPLE (Précédent / Suivant uniquement) ---
+interface SimplePaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  colors: Colors;
+}
+
+const SimplePagination: React.FC<SimplePaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  colors,
+}) => (
+  <motion.div
+    className="flex justify-center items-center gap-4 mb-16"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4 }}
+  >
+    <Button
+      variant="outline"
+      disabled={currentPage === 1}
+      onClick={() => onPageChange(currentPage - 1)}
+      className="px-4 py-2 rounded-xl border-2 text-sm"
+      style={{
+        borderColor: colors.primaryDark,
+        color: colors.primaryDark,
+        opacity: currentPage === 1 ? 0.5 : 1,
+      }}
+    >
+      Précédent
+    </Button>
+
+    <span style={{ color: colors.textPrimary }}>
+      Page {currentPage} / {totalPages}
+    </span>
+
+    <Button
+      variant="outline"
+      disabled={currentPage === totalPages}
+      onClick={() => onPageChange(currentPage + 1)}
+      className="px-4 py-2 rounded-xl border-2 text-sm"
+      style={{
+        borderColor: colors.primaryDark,
+        color: colors.primaryDark,
+        opacity: currentPage === totalPages ? 0.5 : 1,
+      }}
+    >
+      Suivant
+    </Button>
   </motion.div>
 );
 

@@ -138,11 +138,11 @@ const BienEtre = () => {
       </section>
 
       {/* MENU DE TABULATION - Toujours visible */}
-      <div className="sticky top-0 z-40 bg-white dark:bg-card shadow-lg">
+      <div className="sticky top-0 z-40 bg-white  dark:bg-card shadow-lg">
         <SlideIn direction="down">
           <LayoutGroup>
-            <div className="container mx-auto px-4">
-              <div className="flex overflow-x-auto py-4 gap-2 scrollbar-hide">
+            <div className=" mx-auto px-4">
+              <div className=" py-4 gap-2 grid grid-cols-2 md:grid-cols-5">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}

@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 
 // Composants
@@ -14,56 +13,10 @@ import MapModal from "./EntrepriseEtPro/components/MapModal";
 
 // Données
 import { colors } from "./EntrepriseEtPro/data/colors";
-import {
-  servicesEntreprisePro,
-  serviceCategories,
-} from "./EntrepriseEtPro/data/servicesData";
-import { partenaires } from "./EntrepriseEtPro/data/partnersData";
+import { partenaires } from "./EntrepriseEtPro/data/partnersData"; // IMPORT AJOUTÉ ICI
 
 // Hook personnalisé
 import { useEntreprise } from "./EntrepriseEtPro/hooks/useEntreprise";
-
-// Types
-interface Service {
-  id: number;
-  nom: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  category: string;
-  details?: string;
-  color: string;
-  features: string[];
-}
-
-interface Partenaire {
-  id: number;
-  nom: string;
-  description: string;
-  rating: number;
-  projets: number;
-  badge: string;
-  badgeColor: string;
-  location: {
-    lat: number;
-    lng: number;
-    address: string;
-  };
-}
-
-interface FormData {
-  nom: string;
-  email: string;
-  telephone: string;
-  message: string;
-  service: string;
-  typeAvis: string;
-}
-
-interface Location {
-  lat: number;
-  lng: number;
-  address: string;
-}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -101,6 +54,7 @@ const Entreprise: React.FC = () => {
     searchTerm,
     formData,
     hoveredCard,
+    serviceCategories,
     setShowMessageModal,
     setShowMapModal,
     setSelectedPartenaire,
@@ -116,27 +70,17 @@ const Entreprise: React.FC = () => {
     handlePartnerLocation,
     handleSubmitMessage,
     handleInputChange,
+    filteredServices,
   } = useEntreprise();
 
   // Track l'affichage des services
   useEffect(() => {
-    servicesEntreprisePro.forEach((service: Service) => {
-      trackBusinessInteraction(service.id.toString(), service.nom, "view");
-    });
-  }, [trackBusinessInteraction]);
-
-  // Filtrage des services
-  const filteredServices = servicesEntreprisePro.filter((service: Service) => {
-    const matchesCategory =
-      activeServiceCategory === "tous" ||
-      service.category === activeServiceCategory;
-    const matchesSearch =
-      service.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (service.details &&
-        service.details.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
+    if (filteredServices) {
+      filteredServices.forEach((service) => {
+        trackBusinessInteraction(service.id.toString(), service.nom, "view");
+      });
+    }
+  }, [filteredServices, trackBusinessInteraction]);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
@@ -200,7 +144,7 @@ const Entreprise: React.FC = () => {
           colors={colors}
         />
 
-        {filteredServices.length === 0 && (
+        {filteredServices && filteredServices.length === 0 && (
           <motion.div
             className="text-center py-12"
             initial={{ opacity: 0 }}
@@ -221,14 +165,14 @@ const Entreprise: React.FC = () => {
         handlePartnerLocation={handlePartnerLocation}
         trackBusinessInteraction={trackBusinessInteraction}
         colors={colors}
-        partenaires={partenaires}
+        partenaires={partenaires} // PASSEZ ICI AUSSI SI BESOIN
       />
 
       {/* Modals */}
       {showMapModal && (
         <MapModal
           selectedLocation={selectedLocation}
-          partenaires={partenaires}
+          partenaires={partenaires} // AJOUTÉ ICI - C'EST CE QUI MANQUAIT
           handlePartnerLocation={handlePartnerLocation}
           onClose={() => {
             setShowMapModal(false);

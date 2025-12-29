@@ -30,6 +30,7 @@ import {
   GraduationCap,
   Book,
   Users,
+  Hammer,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -40,6 +41,7 @@ const navigation = [
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
+   { name: "Mes projets", href: "/pro/projet", icon: Hammer },
   // {
   //   name: "Art et commerce Services",
   //   href: "/pro/Art-commerce-services",
@@ -118,6 +120,11 @@ const navigation = [
     href: "/pro/demandes-devis",
     icon: FileText,
   },
+  {
+    name: "Demandes de conseil et accompagnement",
+    href: "/pro/conseil",
+    icon: Briefcase,
+  },
 
   // === GESTION FINANCIÈRE ===
   { name: "Mon abonnements", href: "/pro/subscription", icon: WalletCards },
@@ -173,6 +180,7 @@ const categoryConfig = {
           "Mes Services",
           "Art et Creation",
           "Mes services Bien-etre",
+          "Mes projets"
         ].includes(item.name),
     },
     emploiFormations: {

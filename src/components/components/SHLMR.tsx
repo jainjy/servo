@@ -572,6 +572,9 @@ const LogementsSHLMR = () => {
     return (
         <div className="min-h-screen" style={{ backgroundColor: COLORS["light-bg"] }}>
             {/* Hero Section avec image */}
+            <div className="absolute top-12 left-4 right-4 z-50">
+                <AdvertisementPopup />
+            </div>
             <motion.section
                 ref={heroRef}
                 initial={{ opacity: 0 }}
@@ -1068,40 +1071,40 @@ const LogementsSHLMR = () => {
                                                                         {logement.prix}
                                                                     </div>
 
-                                                                    {/* Badge classe énergie */}
-                                                                    {logement.energyClass && (
-                                                                        <div className="absolute bottom-3 left-3">
-                                                                            <span
-                                                                                className={`px-2 py-1 rounded text-xs font-semibold ${logement.energyClass === "A"
-                                                                                        ? "bg-green-500 text-white"
-                                                                                        : logement.energyClass === "B"
-                                                                                            ? "bg-lime-500 text-white"
-                                                                                            : logement.energyClass === "C"
-                                                                                                ? "bg-yellow-500 text-white"
-                                                                                                : "bg-gray-500 text-white"
-                                                                                    }`}
-                                                                            >
-                                                                                Classe {logement.energyClass}
-                                                                            </span>
-                                                                        </div>
-                                                                    )}
+                                                    {/* Badge classe énergie */}
+                                                    {logement.energyClass && (
+                                                        <div className="absolute bottom-3 left-3">
+                                                            <span
+                                                                className={`px-2 py-1 rounded text-xs font-semibold ${logement.energyClass === "A"
+                                                                    ? "bg-green-500 text-white"
+                                                                    : logement.energyClass === "B"
+                                                                        ? "bg-lime-500 text-white"
+                                                                        : logement.energyClass === "C"
+                                                                            ? "bg-yellow-500 text-white"
+                                                                            : "bg-gray-500 text-white"
+                                                                    }`}
+                                                            >
+                                                                Classe {logement.energyClass}
+                                                            </span>
+                                                        </div>
+                                                    )}
 
-                                                                    {/* Bouton favori */}
-                                                                    <motion.button
-                                                                        whileTap={{ scale: 0.9 }}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            toggleFavori(logement.id);
-                                                                        }}
-                                                                        className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
-                                                                                ? 'bg-red-500 text-white'
-                                                                                : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
-                                                                            }`}
-                                                                    >
-                                                                        <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
-                                                                    </motion.button>
-                                                                </div>
-                                                            </div>
+                                                    {/* Bouton favori */}
+                                                    <motion.button
+                                                        whileTap={{ scale: 0.9 }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleFavori(logement.id);
+                                                        }}
+                                                        className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
+                                                            ? 'bg-red-500 text-white'
+                                                            : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
+                                                            }`}
+                                                    >
+                                                        <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
+                                                    </motion.button>
+                                                </div>
+                                            </div>
 
                                                             {/* Contenu de la carte */}
                                                             <div className="p-4 flex-grow flex flex-col">
@@ -1145,37 +1148,37 @@ const LogementsSHLMR = () => {
                                                                     )}
                                                                 </div>
 
-                                                                {/* Features */}
-                                                                <div className="flex flex-wrap gap-1 mb-3">
-                                                                    {/* Badge Achat/Location */}
-                                                                    {logement.type && (
-                                                                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${logement.type === "location"
-                                                                                ? "bg-green-50 text-green-700"
-                                                                                : "bg-blue-50 text-blue-700"
-                                                                            }`}>
-                                                                            <div className={`w-1 h-1 rounded-full ${logement.type === "location"
-                                                                                    ? "bg-green-600"
-                                                                                    : "bg-blue-600"
-                                                                                }`} />
-                                                                            {logement.type === "location" ? "Location" : "À vendre"}
-                                                                        </span>
-                                                                    )}
-                                                                    {logement.categorie && (
-                                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                                                                            style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
-                                                                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: COLORS.logo }} />
-                                                                            {logement.categorie}
-                                                                        </span>
-                                                                    )}
-                                                                    {/* Badge social type */}
-                                                                    {logement.socialType && (
-                                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                                                                            style={{ backgroundColor: `${COLORS.logo}10`, color: COLORS.logo }}>
-                                                                            <Building className="w-3 h-3" />
-                                                                            {logement.socialType}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
+                                                {/* Features */}
+                                                <div className="flex flex-wrap gap-1 mb-3">
+                                                    {/* Badge Achat/Location */}
+                                                    {logement.type && (
+                                                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${logement.type === "location"
+                                                            ? "bg-green-50 text-green-700"
+                                                            : "bg-blue-50 text-blue-700"
+                                                            }`}>
+                                                            <div className={`w-1 h-1 rounded-full ${logement.type === "location"
+                                                                ? "bg-green-600"
+                                                                : "bg-blue-600"
+                                                                }`} />
+                                                            {logement.type === "location" ? "Location" : "À vendre"}
+                                                        </span>
+                                                    )}
+                                                    {logement.categorie && (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                                                            style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
+                                                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: COLORS.logo }} />
+                                                            {logement.categorie}
+                                                        </span>
+                                                    )}
+                                                    {/* Badge social type */}
+                                                    {logement.socialType && (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                                                            style={{ backgroundColor: `${COLORS.logo}10`, color: COLORS.logo }}>
+                                                            <Building className="w-3 h-3" />
+                                                            {logement.socialType}
+                                                        </span>
+                                                    )}
+                                                </div>
 
                                                                 {/* Informations supplémentaires */}
                                                                 <div className="flex justify-between items-center pt-4 text-sm"
@@ -1190,44 +1193,43 @@ const LogementsSHLMR = () => {
                                                                     </div>
                                                                 </div>
 
-                                                                {/* Boutons d'action */}
-                                                                <div className="flex gap-2 mt-4 pt-4 border-t" style={{ borderColor: COLORS.separator }}>
-                                                                    <motion.button
-                                                                        whileHover={{ scale: 1.02 }}
-                                                                        whileTap={{ scale: 0.98 }}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            handlePostuler(logement);
-                                                                        }}
-                                                                        disabled={isDejaPostule}
-                                                                        className="flex-1 text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60"
-                                                                        style={{
-                                                                            backgroundColor: isDejaPostule ? `${COLORS.logo}60` : COLORS.logo,
-                                                                            borderColor: COLORS.logo
-                                                                        }}
-                                                                    >
-                                                                        {isDejaPostule ? "Visite déjà demandée" : "Demander une visite"}
-                                                                    </motion.button>
-                                                                    <motion.button
-                                                                        whileHover={{ scale: 1.1 }}
-                                                                        whileTap={{ scale: 0.9 }}
-                                                                        onClick={(e) => handleVoirDetails(logement, e)}
-                                                                        className="p-2 rounded-md transition"
-                                                                        style={{
-                                                                            border: `1px solid ${COLORS.separator}`,
-                                                                            color: COLORS.logo
-                                                                        }}
-                                                                    >
-                                                                        <Eye className="w-4 h-4" />
-                                                                    </motion.button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </motion.div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
+                                                {/* Boutons d'action */}
+                                                <div className="flex gap-2 mt-4">
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.02 }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handlePostuler(logement);
+                                                        }}
+                                                        disabled={isDejaPostule}
+                                                        className="flex-1 text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60"
+                                                        style={{
+                                                            backgroundColor: isDejaPostule ? `${COLORS.logo}60` : COLORS.logo,
+                                                            borderColor: COLORS.logo
+                                                        }}
+                                                    >
+                                                        {isDejaPostule ? "Visite déjà demandée" : "Demander une visite"}
+                                                    </motion.button>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        onClick={(e) => handleVoirDetails(logement, e)}
+                                                        className="p-2 rounded-md transition"
+                                                        style={{
+                                                            border: `1px solid ${COLORS.separator}`,
+                                                            color: COLORS.logo
+                                                        }}
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                    </motion.button>
+                                                </div>
+                                            </div>
+
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
 
                                     <AdvertisementPopup />
 

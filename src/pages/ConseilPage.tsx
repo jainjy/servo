@@ -1595,17 +1595,17 @@ const ConseilPage = () => {
               situation et vous proposer des solutions sur mesure qui génèrent des résultats concrets.
             </p>
 
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 m-2 justify-center">
               <motion.div whileHover={{ scale: 1.05 }}>
                 <Button
-                  className="rounded-xl px-10 py-5 text-lg font-semibold"
+                  className="rounded-xl  text-lg font-semibold"
                   style={{
                     backgroundColor: colors.primaryDark,
                     color: colors.lightBg
                   }}
                   onClick={handleOpenContactModal}
                 >
-                  <Calendar className="h-5 w-5 mr-3" />
+                  <Calendar className="h-5 w-5 " />
                   Demander un conseil personnalisé
                 </Button>
               </motion.div>
@@ -1620,7 +1620,7 @@ const ConseilPage = () => {
                   }}
                   onClick={() => document.getElementById('types-conseil')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  <Lightbulb className="h-5 w-5 mr-3" />
+                  <Lightbulb className="h-5 w-5" />
                   Explorer tous nos conseils
                 </Button>
               </motion.div>

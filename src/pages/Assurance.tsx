@@ -476,6 +476,9 @@ export default function Assurance() {
       {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
         {/* Image de fond avec overlay */}
+        <div className="absolute top-12 left-4 right-4 z-50">
+          <AdvertisementPopup />
+        </div>
         <div className="absolute inset-0">
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -587,7 +590,6 @@ export default function Assurance() {
           <ModalAssurance isOpen={isModalOpen} onClose={handleCloseModal} data={selectedCategorie} />
         </div>
       </section>
-      <AdvertisementPopup />
       {/* Section Services d'Assurance */}
       <section className="py-8 lg:py-4 bg-white" id="services-assurance">
         <div className="container mx-auto px-4">
@@ -714,7 +716,7 @@ export default function Assurance() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-10 py-2 lg:py-4" id="devis-assurance">
+      <section className="py-2 lg:py-4 m-4" id="devis-assurance">
         <div className="container mx-auto py-10 rounded-lg  bg-white shadow-xl px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -729,10 +731,10 @@ export default function Assurance() {
             </p>
             <motion.div>
               <Button
-                className="bg-[#556B2F] text-white hover:bg-[#6B8E23] rounded-xl px-10 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
+                className="bg-[#556B2F] text-white hover:bg-[#6B8E23] rounded-xl text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
                 onClick={() => openModal('contact')}
               >
-                <Phone className="h-5 w-5 mr-3" />
+                <Phone className="h-5 w-5" />
                 Demander un devis gratuit
               </Button>
             </motion.div>

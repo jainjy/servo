@@ -29,7 +29,30 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       "Services",
       "navigate"
     );
+    
+    // Déclencher le callback parent
     onServicesClick();
+    
+    // Scroll vers la section services
+    const servicesSection = document.getElementById("services");
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ 
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  };
+
+  const handlePartnersClick = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    trackBusinessInteraction(
+      "partners_map",
+      "Carte partenaires",
+      "open_from_hero"
+    );
+    
+    // Déclencher le callback parent pour ouvrir la modal
+    onMapClick();
   };
 
   const handleMouseEnter = (e: MouseEvent<HTMLButtonElement>) => {
@@ -82,17 +105,17 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 onClick={handleServicesClick}
               >
                 <Briefcase className="h-5 w-5 mr-3" />
-                <a href="#services">Découvrir nos services</a>
+                Découvrir nos services
               </Button>
             </motion.div>
 
             <motion.div>
               <Button
                 className="bg-logo hover:bg-logo/80 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-logo hover:border-logo/80 transition-all duration-300"
-                onClick={onMapClick}
+                onClick={handlePartnersClick} // Utilise la nouvelle fonction
               >
                 <MapPin className="h-5 w-5 mr-3" />
-                <a href="#partenaire">Voir nos partenaires</a>
+                Voir nos partenaires
               </Button>
             </motion.div>
           </div>

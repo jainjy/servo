@@ -12,6 +12,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { MediaService } from "../lib/api";
+import AdvertisementPopup from "./AdvertisementPopup";
 
 interface VideoEpisode {
   id: string;
@@ -366,9 +367,8 @@ const PodcastsImmobilier: React.FC = () => {
     // console.log('🎬 Rendu de VideoCard pour:', episode.title);
     return (
       <div
-        className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border group cursor-pointer ${
-          episode.featured ? "border-2 border-[#8B4513]" : "border-[#D3D3D3]"
-        }`}
+        className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border group cursor-pointer ${episode.featured ? "border-2 border-[#8B4513]" : "border-[#D3D3D3]"
+          }`}
       >
         {episode.featured && (
           <div className="bg-gradient-to-r from-[#8B4513] to-[#D2691E] text-white px-3 py-1 text-xs font-medium rounded-t-xl flex items-center justify-center">
@@ -485,6 +485,9 @@ const PodcastsImmobilier: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section avec Image de Background */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <div
         className="relative mt-16 py-6 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}
@@ -503,7 +506,7 @@ const PodcastsImmobilier: React.FC = () => {
             </h1>
 
             {/* Sous-titre */}
-            <p className="text-md md:text-lg text-gray-100 max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
+            <p className="text-sm text-gray-100 max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
               Découvrez nos visites virtuelles, conseils d'experts et analyses
               de marché en vidéo
             </p>
@@ -578,11 +581,10 @@ const PodcastsImmobilier: React.FC = () => {
           <div className="flex gap-4 mb-8 border-b border-[#D3D3D3]">
             <button
               onClick={() => setActiveTab("all")}
-              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
-                activeTab === "all"
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === "all"
                   ? "border-[#6B8E23] text-[#6B8E23]"
                   : "border-transparent text-gray-600 hover:text-[#556B2F]"
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-2">
                 <Video className="w-5 h-5" />
@@ -593,11 +595,10 @@ const PodcastsImmobilier: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab("favorites")}
-              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
-                activeTab === "favorites"
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === "favorites"
                   ? "border-[#8B4513] text-[#8B4513]"
                   : "border-transparent text-gray-600 hover:text-[#8B4513]"
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-2">
                 <Heart className="w-5 h-5" />
@@ -795,18 +796,16 @@ const PodcastsImmobilier: React.FC = () => {
                         onClick={() =>
                           selectedEpisode && toggleFavorite(selectedEpisode.id)
                         }
-                        className={`p-1.5 lg:p-2 rounded-full transition-all duration-200 shadow-md ${
-                          selectedEpisode && isFavorite(selectedEpisode.id)
+                        className={`p-1.5 lg:p-2 rounded-full transition-all duration-200 shadow-md ${selectedEpisode && isFavorite(selectedEpisode.id)
                             ? "bg-gradient-to-r from-[#8B4513] to-[#D2691E] text-white hover:from-[#A0522D] hover:to-[#D2691E]"
                             : "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] text-white hover:from-[#556B2F] hover:to-[#6B8E23]"
-                        }`}
+                          }`}
                       >
                         <Heart
-                          className={`w-4 h-4 lg:w-5 lg:h-5 ${
-                            selectedEpisode && isFavorite(selectedEpisode.id)
+                          className={`w-4 h-4 lg:w-5 lg:h-5 ${selectedEpisode && isFavorite(selectedEpisode.id)
                               ? "fill-current"
                               : ""
-                          }`}
+                            }`}
                         />
                       </button>
 
@@ -991,18 +990,16 @@ const PodcastsImmobilier: React.FC = () => {
                       onClick={() =>
                         selectedEpisode && toggleFavorite(selectedEpisode.id)
                       }
-                      className={`flex items-center justify-center space-x-2 py-2 rounded-lg font-medium transition-all duration-200 border text-xs lg:text-sm shadow-md ${
-                        selectedEpisode && isFavorite(selectedEpisode.id)
+                      className={`flex items-center justify-center space-x-2 py-2 rounded-lg font-medium transition-all duration-200 border text-xs lg:text-sm shadow-md ${selectedEpisode && isFavorite(selectedEpisode.id)
                           ? "bg-gradient-to-r from-[#8B4513] to-[#D2691E] border-[#8B4513]/50 text-white hover:from-[#A0522D] hover:to-[#D2691E]"
                           : "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] border-[#6B8E23]/50 text-white hover:from-[#556B2F] hover:to-[#6B8E23]"
-                      }`}
+                        }`}
                     >
                       <Heart
-                        className={`w-3 h-3 lg:w-4 lg:h-4 ${
-                          selectedEpisode && isFavorite(selectedEpisode.id)
+                        className={`w-3 h-3 lg:w-4 lg:h-4 ${selectedEpisode && isFavorite(selectedEpisode.id)
                             ? "fill-current"
                             : ""
-                        }`}
+                          }`}
                       />
                       <span>
                         {selectedEpisode && isFavorite(selectedEpisode.id)
@@ -1017,6 +1014,7 @@ const PodcastsImmobilier: React.FC = () => {
           </div>
         </div>
       )}
+      <AdvertisementPopup />
     </div>
   );
 };
