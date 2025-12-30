@@ -15,7 +15,8 @@ import {
   RefreshCw,
   Briefcase,
   Eye,
-  Search
+  Search,
+  ImageIcon
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '@/lib/api';
@@ -309,6 +310,17 @@ const PhotographiePage: React.FC = () => {
     ? `Photographes ${categories.find(c => c.slug === selectedCategory)?.name.toLowerCase()}`
     : ' Nos Photographes';
 
+    
+  const handleViewArtworks = useCallback(
+  (professional: Professional) => {
+    navigate(`/oeuvres/${professional.id}`, {
+      state: {
+        professionalName: professional.name,
+      },
+    });
+  },
+  [navigate]
+);
   return (
     <div className="min-h-screen bg-[#FFFFFF0]">
       {/* Section principale */}
@@ -540,11 +552,11 @@ const PhotographiePage: React.FC = () => {
                         Profil
                       </button>
                       <button
-                        onClick={() => handleContact(professional)}
+                        onClick={() => handleViewArtworks(professional)}
                         className="flex-1 py-2 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center"
                       >
-                        <Phone size={16} className="mr-2" />
-                        Contacter
+                        <ImageIcon size={16} className="mr-2" />
+                        voir les Œuvres
                       </button>
                     </div>
                   </div>

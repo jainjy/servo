@@ -237,6 +237,7 @@ import PodcastsComponent from "./components/components/PodcastsInspirer";
 import VideosComponent from "./components/components/VideosInspirer";
 import PortraitsLocaux from "./components/components/PortraitLocaux";
 import BonsPlansConseils from "./components/components/BonPlanConseils";
+import OeuvrePages from "./pages/ArtEtCreation/OeuvrePages";
 
 
 
@@ -952,6 +953,11 @@ const App = () => {
                    <Route path="/photographie" element={<PhotographiePage />} />
                   <Route path="/sculpture" element={<SculpturePage onContactClick={undefined} />} />
                   <Route path="/peinture" element={<PeinturePage />} />
+
+                  <Route
+                    path="/oeuvres/:professionalId"
+                    element={<OeuvrePages />}
+                  />
                  {/* <Route path="/artisanat" element={<ArtisanatPage />} />*/}
                   <Route
                     path="/marketplace-createurs"
