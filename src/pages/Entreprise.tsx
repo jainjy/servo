@@ -5,15 +5,15 @@ import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 
 // Composants
 import HeroSection from "./EntrepriseEtPro/components/HeroSection";
-import ServicesGrid from "./EntrepriseEtPro/components/ServicesGrid";
-import ServiceFilters from "./EntrepriseEtPro/components/ServiceFilters";
+import ServicesGrid from "./EntrepriseEtPro/components/ServicesGrid"; // Maintenant avec filtres intégrés
 import PartnersSection from "./EntrepriseEtPro/components/PartnersSection";
 import ContactModal from "./EntrepriseEtPro/components/ContactModal";
 import MapModal from "./EntrepriseEtPro/components/MapModal";
 
 // Données
 import { colors } from "./EntrepriseEtPro/data/colors";
-import { partenaires } from "./EntrepriseEtPro/data/partnersData"; // IMPORT AJOUTÉ ICI
+import { partenaires } from "./EntrepriseEtPro/data/partnersData";
+import { serviceCategories } from "./EntrepriseEtPro/data/servicesData"; // IMPORT AJOUTÉ
 
 // Hook personnalisé
 import { useEntreprise } from "./EntrepriseEtPro/hooks/useEntreprise";
@@ -54,7 +54,6 @@ const Entreprise: React.FC = () => {
     searchTerm,
     formData,
     hoveredCard,
-    serviceCategories,
     setShowMessageModal,
     setShowMapModal,
     setSelectedPartenaire,
@@ -82,13 +81,26 @@ const Entreprise: React.FC = () => {
     }
   }, [filteredServices, trackBusinessInteraction]);
 
+  // Fonction pour suivre les interactions avec les filtres
+  const handleFilterInteraction = (
+    id: string,
+    name: string,
+    action: string,
+    metadata?: Record<string, any>
+  ) => {
+    trackBusinessInteraction(id, name, action, metadata);
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       <Header />
 
       {/* Hero Section */}
       <HeroSection
-        onServicesClick={() => setActiveServiceCategory("tous")}
+        onServicesClick={() => {
+          setActiveServiceCategory("all");
+          trackBusinessInteraction("hero_services", "Services", "click");
+        }}
         onMapClick={handleOpenMap}
         trackBusinessInteraction={trackBusinessInteraction}
         colors={colors}
@@ -124,38 +136,23 @@ const Entreprise: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Filtres et recherche */}
-        <ServiceFilters
-          activeServiceCategory={activeServiceCategory}
-          setActiveServiceCategory={setActiveServiceCategory}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          serviceCategories={serviceCategories}
-          trackBusinessInteraction={trackBusinessInteraction}
-          colors={colors}
-        />
-
-        {/* Grille des services */}
+        {/* Grille des services AVEC FILTRES INTÉGRÉS */}
         <ServicesGrid
-          filteredServices={filteredServices}
-          handleServiceClick={handleServiceClick}
-          hoveredCard={hoveredCard}
-          setHoveredCard={setHoveredCard}
+          handleServiceClick={(service) => {
+            handleServiceClick(service);
+            trackBusinessInteraction(
+              service.id.toString(),
+              service.nom,
+              "service_select"
+            );
+          }}
           colors={colors}
+          serviceCategories={serviceCategories} // Passer les catégories
+          trackBusinessInteraction={handleFilterInteraction} // Passer la fonction de tracking
+          initialCategory={activeServiceCategory} // Optionnel : catégorie initiale
         />
 
-        {filteredServices && filteredServices.length === 0 && (
-          <motion.div
-            className="text-center py-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <p style={{ color: colors.textSecondary }}>
-              Aucun service ne correspond à votre recherche. Essayez avec
-              d'autres termes.
-            </p>
-          </motion.div>
-        )}
+        {/* Message si aucun service (maintenant géré dans ServicesGrid) */}
       </motion.section>
 
       {/* Section Partenaires */}
@@ -165,14 +162,14 @@ const Entreprise: React.FC = () => {
         handlePartnerLocation={handlePartnerLocation}
         trackBusinessInteraction={trackBusinessInteraction}
         colors={colors}
-        partenaires={partenaires} // PASSEZ ICI AUSSI SI BESOIN
+        partenaires={partenaires}
       />
 
       {/* Modals */}
       {showMapModal && (
         <MapModal
           selectedLocation={selectedLocation}
-          partenaires={partenaires} // AJOUTÉ ICI - C'EST CE QUI MANQUAIT
+          partenaires={partenaires}
           handlePartnerLocation={handlePartnerLocation}
           onClose={() => {
             setShowMapModal(false);

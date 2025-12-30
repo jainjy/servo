@@ -2108,7 +2108,7 @@ const CalendarPage = () => {
         onSaveCreneaux={sauvegarderCreneaux}
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

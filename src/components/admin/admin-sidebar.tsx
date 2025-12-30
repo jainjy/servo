@@ -27,6 +27,7 @@ import {
   Scale,
   UserCog,
   Video,
+  Image,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from "../../assets/logo.png";
@@ -42,7 +43,6 @@ const navigation = [
   { name: "Paiements", href: "/admin/payments", icon: CreditCard },
 
   // === GESTION DES ANNONCES & SERVICES ===
-  // { name: "Prestataires", href: "/admin/vendors", icon: Building2 },
   { name: "Annonces", href: "/admin/listings", icon: Building2 },
   { name: "Services", href: "/admin/services", icon: Wrench },
   {
@@ -83,6 +83,7 @@ const navigation = [
   // === MARKETING & COMMUNICATION ===
   { name: "Publicité", href: "/admin/publicite", icon: MessageCircle },
   { name: "blog", href: "/admin/blog", icon: Newspaper },
+  { name: "Portraits", href: "/admin/portraits", icon: Image },
   { name: "Gestion des Médias", href: "/admin/media", icon: Video },
 ];
 
@@ -147,7 +148,7 @@ export function AdminSidebar() {
         sections.servicesFinanciers.push(item);
       }
       // Marketing & Communication
-      else if (["Publicité", "blog", "Gestion des Médias"].includes(item.name)) {
+      else if (["Publicité", "blog", "Portraits", "Gestion des Médias"].includes(item.name)) {
         sections.marketing.push(item);
       }
     });

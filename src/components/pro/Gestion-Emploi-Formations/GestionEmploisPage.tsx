@@ -150,6 +150,28 @@ export default function GestionEmploisPage() {
     { value: "closed", label: "Pourvue", color: "bg-blue-100 text-blue-800" },
   ];
 
+  // Ajoutez ce useEffect pour charger les données initiales
+useEffect(() => {
+  const loadInitialData = async () => {
+    try {
+      await Promise.all([
+        fetchEmplois({
+          search: '',
+          status: 'all',
+          type: 'all',
+          secteur: 'all',
+          page: 1
+        }),
+        fetchStats()
+      ]);
+    } catch (err) {
+      console.error('Erreur lors du chargement initial:', err);
+    }
+  };
+
+  loadInitialData();
+}, []);
+
   // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -198,28 +220,30 @@ export default function GestionEmploisPage() {
     setSecteurFilter("all");
   };
 
-  const handleEdit = (emploi) => {
-    setEditingEmploi(emploi);
-    setFormData({
-      title: emploi.title || "",
-      description: emploi.description || "",
-      typeContrat: emploi.typeContrat || "",
-      secteur: emploi.secteur || "",
-      experience: emploi.experience || "",
-      salaire: emploi.salaire || "",
-      location: emploi.location || "",
-      remotePossible: emploi.remotePossible || false,
-      urgent: emploi.urgent || false,
-      status: emploi.status || "draft",
-      missions: emploi.missions || [""],
-      competences: emploi.competences || [""],
-      avantages: emploi.avantages || [""],
-      datePublication: emploi.datePublication ? emploi.datePublication.split('T')[0] : "",
-      dateLimite: emploi.dateLimite ? emploi.dateLimite.split('T')[0] : "",
-      nombrePostes: emploi.nombrePostes || 1,
-    });
-    setIsDialogOpen(true);
-  };
+  // Corrigez la fonction handleEdit
+const handleEdit = (emploi) => {
+  setEditingEmploi(emploi);
+  setFormData({
+    title: emploi.title || "",
+    description: emploi.description || "",
+    typeContrat: emploi.typeContrat || "",
+    secteur: emploi.secteur || "",
+    experience: emploi.experience || "",
+    salaire: emploi.salaire || "",
+    location: emploi.location || "",
+    remotePossible: emploi.remotePossible || false,
+    urgent: emploi.urgent || false,
+    status: emploi.status || "draft",
+    missions: emploi.missions || [""],
+    competences: emploi.competences || [""],
+    avantages: emploi.avantages || [""],
+    datePublication: emploi.datePublication ? emploi.datePublication.split('T')[0] : "",
+    dateLimite: emploi.dateLimite ? emploi.dateLimite.split('T')[0] : "",
+    nombrePostes: emploi.nombrePostes || 1,
+  });
+  setIsDialogOpen(true);
+};
+
 
   const handleDelete = async (id) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette offre ?")) {
@@ -241,45 +265,54 @@ export default function GestionEmploisPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      // Préparer les données pour l'API
-      const apiData = {
-        title: formData.title,
-        description: formData.description,
-        typeContrat: formData.typeContrat,
-        secteur: formData.secteur,
-        experience: formData.experience,
-        salaire: formData.salaire,
-        location: formData.location,
-        remotePossible: formData.remotePossible,
-        urgent: formData.urgent,
-        status: formData.status,
-        missions: formData.missions.filter(m => m.trim() !== ''),
-        competences: formData.competences.filter(c => c.trim() !== ''),
-        avantages: formData.avantages.filter(a => a.trim() !== ''),
-        datePublication: formData.datePublication || null,
-        dateLimite: formData.dateLimite || null,
-        nombrePostes: parseInt(formData.nombrePostes),
-      };
+// Corrigez la fonction handleSubmit
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    // Convertir les chaînes en tableaux si besoin
+    const missionsArray = Array.isArray(formData.missions) ? formData.missions : 
+                         (formData.missions ? [formData.missions] : []);
+    const competencesArray = Array.isArray(formData.competences) ? formData.competences : 
+                           (formData.competences ? [formData.competences] : []);
+    const avantagesArray = Array.isArray(formData.avantages) ? formData.avantages : 
+                         (formData.avantages ? [formData.avantages] : []);
 
-      if (editingEmploi) {
-        await updateEmploi(editingEmploi.id, apiData);
-        toast.success("Offre mise à jour avec succès");
-      } else {
-        await createEmploi(apiData);
-        toast.success("Offre créée avec succès");
-      }
-      
-      setIsDialogOpen(false);
-      setEditingEmploi(null);
-      resetForm();
-      
-    } catch (error) {
-      toast.error(error.message || "Erreur lors de l'enregistrement");
+    const apiData = {
+      title: formData.title,
+      description: formData.description,
+      typeContrat: formData.typeContrat,
+      secteur: formData.secteur,
+      experience: formData.experience,
+      salaire: formData.salaire,
+      location: formData.location,
+      remotePossible: formData.remotePossible,
+      urgent: formData.urgent,
+      status: formData.status,
+      missions: missionsArray.filter(m => m && m.trim() !== ''),
+      competences: competencesArray.filter(c => c && c.trim() !== ''),
+      avantages: avantagesArray.filter(a => a && a.trim() !== ''),
+      datePublication: formData.datePublication || null,
+      dateLimite: formData.dateLimite || null,
+      nombrePostes: parseInt(formData.nombrePostes),
+    };
+
+    if (editingEmploi) {
+      await updateEmploi(editingEmploi.id, apiData);
+      toast.success("Offre mise à jour avec succès");
+    } else {
+      await createEmploi(apiData);
+      toast.success("Offre créée avec succès");
     }
-  };
+    
+    setIsDialogOpen(false);
+    setEditingEmploi(null);
+    resetForm();
+    
+  } catch (error) {
+    console.error('Erreur lors de l\'enregistrement:', error);
+    toast.error(error.message || "Erreur lors de l'enregistrement");
+  }
+};
 
   const resetForm = () => {
     setFormData({

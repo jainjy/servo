@@ -1,4 +1,4 @@
-// components/pro/ProSidebar.jsx
+// components/pro/ProSidebar.tsx
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
@@ -31,28 +31,51 @@ import {
   Book,
   Users,
   Hammer,
+  CalendarDays,
+  MapPin,
+  Globe,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
-const navigation = [
+// Interface pour les items de navigation
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+// Interface pour les catégories
+interface CategoryConfig {
+  title: string;
+  matcher: (item: NavigationItem) => boolean;
+}
+
+interface CategoryConfigMap {
+  [key: string]: CategoryConfig;
+}
+
+const navigation: NavigationItem[] = [
   // === TABLEAU DE BORD ===
   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
 
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
-   { name: "Mes projets", href: "/pro/projet", icon: Hammer },
-  // {
-  //   name: "Art et commerce Services",
-  //   href: "/pro/Art-commerce-services",
-  //   icon: Wrench,
-  // },
+  { name: "Mes projets", href: "/pro/projet", icon: Hammer },
+  
+  // === ÉVÉNEMENTS & DÉCOUVERTES === 🔥 NOUVELLE SECTION
+  { 
+    name: "Événements & Découvertes", 
+    href: "/pro/events-discoveries", 
+    icon: CalendarDays 
+  },
+  
+  // === ART ET CRÉATION ===
   {
     name: "Art et Creation",
     href: "/pro/art-et-creation-page",
     icon: Brush,
   },
-  // { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
 
   // === EMPLOI & FORMATIONS ===
   {
@@ -141,16 +164,9 @@ const navigation = [
     href: "/pro/contact-messages",
     icon: Contact2Icon,
   },
-  // { name: "Mes Clients", href: "/pro/clients", icon: Users },
 
   // === DOCUMENTS & MÉDIAS ===
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
-  // 🔥 NOUVEL ITEM : Gestion des Médias
-  // {
-  //   name: "Gestion des Médias",
-  //   href: "/pro/media",
-  //   icon: Video,
-  // },
 
   // === ÉDUCATION ===
   {
@@ -162,15 +178,28 @@ const navigation = [
   // === AVIS & PARAMÈTRES ===
   { name: "Avis", href: "/pro/reviews", icon: Star },
   { name: "Paramètres", href: "/pro/settings", icon: Settings },
+
 ];
 
-// Configuration des catégories pour un regroupement flexible
-const categoryConfig = {
-  // Définir les catégories et leurs règles d'appartenance
+// Configuration des catégories
+const categoryConfig: {
+  categories: CategoryConfigMap;
+  defaultCategory: CategoryConfig;
+} = {
   categories: {
     tableauDeBord: {
       title: "Tableau de bord",
       matcher: (item) => item.name === "Tableau de Bord",
+    },
+    // === NOUVELLE CATÉGORIE ===
+    evenementsDecouvertes: {
+      title: "Événements & Découvertes",
+      matcher: (item) => [
+        "Événements & Découvertes",
+        "Gestion des Événements", 
+        "Gestion des Découvertes",
+        "Admin Événements"
+      ].includes(item.name),
     },
     annoncesServices: {
       title: "Annonces & Services",
@@ -179,7 +208,6 @@ const categoryConfig = {
           "Mes Annonces",
           "Mes Services",
           "Art et Creation",
-          "Mes services Bien-etre",
           "Mes projets"
         ].includes(item.name),
     },
@@ -241,12 +269,16 @@ const categoryConfig = {
     },
   },
 
-  // Catégorie par défaut pour les éléments non classés
   defaultCategory: {
     title: "Autres",
     matcher: () => true,
   },
 };
+
+// Interface pour les sections
+interface NavigationSections {
+  [key: string]: NavigationItem[];
+}
 
 export function ProSidebar() {
   const location = useLocation();
@@ -263,11 +295,11 @@ export function ProSidebar() {
   const getNotificationCount = (itemName: string) => {
     switch (itemName) {
       case "Mes Commandes":
-        return notifications.pendingOrders;
+        return notifications.pendingOrders || 0;
       case "Messages":
-        return notifications.messages;
+        return notifications.messages || 0;
       case "Réservations":
-        return notifications.reservations;
+        return notifications.reservations || 0;
       default:
         return 0;
     }
@@ -291,9 +323,9 @@ export function ProSidebar() {
     }
   };
 
-  // Fonction améliorée pour grouper les éléments par catégorie
-  const getNavigationSections = () => {
-    const sections = {};
+  // Fonction pour grouper les éléments par catégorie
+  const getNavigationSections = (): NavigationSections => {
+    const sections: NavigationSections = {};
 
     // Initialiser toutes les sections
     Object.keys(categoryConfig.categories).forEach((categoryKey) => {
@@ -303,7 +335,7 @@ export function ProSidebar() {
 
     // Trier les éléments non classés
     const unassignedItems = [...navigation];
-    const assignedItems = new Set();
+    const assignedItems = new Set<string>();
 
     // Assigner chaque élément à sa catégorie
     Object.entries(categoryConfig.categories).forEach(
@@ -333,7 +365,14 @@ export function ProSidebar() {
 
   const sections = getNavigationSections();
 
-  const Section = ({ title, items, categoryKey }) => {
+  // Composant Section avec TypeScript
+  interface SectionProps {
+    title: string;
+    items: NavigationItem[];
+    categoryKey: string;
+  }
+
+  const Section: React.FC<SectionProps> = ({ title, items, categoryKey }) => {
     if (items.length === 0) return null;
 
     return (
@@ -347,6 +386,7 @@ export function ProSidebar() {
             const notificationCount = getNotificationCount(item.name);
             const showNotification = shouldShowNotification(item.name);
             const notificationColor = getNotificationColor(item.name);
+            const IconComponent = item.icon;
 
             return (
               <Link
@@ -360,7 +400,7 @@ export function ProSidebar() {
                     : "text-gray-900 hover:bg-[#6B8E23]/5 hover:text-[#556B2F]"
                 )}
               >
-                <item.icon
+                <IconComponent
                   className={cn(
                     "h-4 w-4 transition-transform group-hover:scale-110",
                     isActive ? "text-[#556B2F]" : "text-[#8B4513]"

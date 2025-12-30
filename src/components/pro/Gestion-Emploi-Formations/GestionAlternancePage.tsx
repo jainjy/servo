@@ -1,3 +1,4 @@
+// GestionAlternancePage.js - CORRECTIONS IMPORTANTES
 import { useState, useEffect, useCallback } from "react";
 import { useAlternance } from "@/hooks/useAlternance";
 import { Button } from "@/components/ui/button";
@@ -85,7 +86,11 @@ export default function GestionAlternancePage() {
     deleteOffre,
     updateStatus,
     exportCSV,
-    changePage
+    changePage,  
+    checkAuthStatus, // <-- AJOUTEZ CELUI-CI
+  isAuthenticated, // <-- AJOUTEZ CELUI-CI SI BESOIN
+  user, // <-- AJOUTEZ CELUI-CI SI BESOIN
+  authLoading // <-- AJOUTEZ CELUI-CI SI BESOIN
   } = useAlternance();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -95,7 +100,7 @@ export default function GestionAlternancePage() {
   const [editingOffre, setEditingOffre] = useState(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Form state
+  // Form state - CORRECTION: Ajouter le niveauFilter
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -138,6 +143,28 @@ export default function GestionAlternancePage() {
     { value: "filled", label: "Pourvu", color: "bg-blue-100 text-blue-800" },
   ];
 
+  // Initialiser les données au chargement
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([
+          fetchOffres({
+            search: '',
+            status: 'all',
+            type: 'all',
+            niveau: 'all',
+            page: 1
+          }),
+          fetchStats()
+        ]);
+      } catch (err) {
+        console.error('Erreur lors du chargement initial:', err);
+      }
+    };
+
+    loadInitialData();
+  }, []);
+
   // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -147,22 +174,22 @@ export default function GestionAlternancePage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Load data on mount and when filters change
+  // Load data when filters change
   useEffect(() => {
-    loadData();
+    if (debouncedSearch !== undefined) {
+      loadData();
+    }
   }, [debouncedSearch, typeFilter, statusFilter]);
 
   const loadData = async () => {
     try {
-      await Promise.all([
-        fetchOffres({
-          search: debouncedSearch,
-          type: typeFilter,
-          status: statusFilter,
-          page: 1
-        }),
-        fetchStats()
-      ]);
+      await fetchOffres({
+        search: debouncedSearch,
+        status: statusFilter,
+        type: typeFilter,
+        niveau: 'all', // Ajouter si vous avez un filtre niveau
+        page: 1
+      });
     } catch (err) {
       // Error is handled in the hook
     }
@@ -173,6 +200,7 @@ export default function GestionAlternancePage() {
       search: searchTerm,
       type: typeFilter,
       status: statusFilter,
+      niveau: 'all',
       page: 1
     });
   }, [searchTerm, typeFilter, statusFilter, fetchOffres]);
@@ -193,12 +221,12 @@ export default function GestionAlternancePage() {
       duree: offre.duree || "",
       remuneration: offre.remuneration || "",
       location: offre.location || "",
-      dateDebut: offre.dateDebut ? offre.dateDebut.split('T')[0] : "",
-      dateFin: offre.dateFin ? offre.dateFin.split('T')[0] : "",
+      dateDebut: offre.dateDebut ? new Date(offre.dateDebut).toISOString().split('T')[0] : "",
+      dateFin: offre.dateFin ? new Date(offre.dateFin).toISOString().split('T')[0] : "",
       status: offre.status || "draft",
-      missions: offre.missions || [""],
-      competences: offre.competences || [""],
-      avantages: offre.avantages || [""],
+      missions: Array.isArray(offre.missions) ? offre.missions : [""],
+      competences: Array.isArray(offre.competences) ? offre.competences : [""],
+      avantages: Array.isArray(offre.avantages) ? offre.avantages : [""],
       ecolePartenaire: offre.ecolePartenaire || "",
       rythmeAlternance: offre.rythmeAlternance || "",
       pourcentageTemps: offre.pourcentageTemps || "",
@@ -227,46 +255,107 @@ export default function GestionAlternancePage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      // Préparer les données pour l'API
-      const apiData = {
-        title: formData.title,
-        description: formData.description,
-        type: formData.type,
-        niveauEtude: formData.niveauEtude,
-        duree: formData.duree,
-        remuneration: formData.remuneration,
-        location: formData.location,
-        dateDebut: formData.dateDebut,
-        dateFin: formData.dateFin || null,
-        status: formData.status,
-        missions: formData.missions.filter(m => m.trim() !== ''),
-        competences: formData.competences.filter(c => c.trim() !== ''),
-        avantages: formData.avantages.filter(a => a.trim() !== ''),
-        ecolePartenaire: formData.ecolePartenaire,
-        rythmeAlternance: formData.rythmeAlternance,
-        pourcentageTemps: formData.pourcentageTemps,
-        urgent: formData.urgent,
-      };
+  // Ensuite, modifiez votre handleSubmit :
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Vérifier l'authentification avant de soumettre
+  console.log('🔐 Auth status before submit:', {
+    checkAuthStatus: checkAuthStatus ? 'Function exists' : 'Function missing',
+    isAuthenticated,
+    user: user?.id,
+    authLoading
+  });
 
-      if (editingOffre) {
-        await updateOffre(editingOffre.id, apiData);
-        toast.success("Offre mise à jour avec succès");
-      } else {
-        await createOffre(apiData);
-        toast.success("Offre créée avec succès");
-      }
-      
-      setIsDialogOpen(false);
-      setEditingOffre(null);
-      resetForm();
-      
-    } catch (error) {
+  // Utilisez checkAuthStatus si disponible, sinon vérifiez manuellement
+  const authStatus = checkAuthStatus ? checkAuthStatus() : {
+    isAuthenticated,
+    hasToken: !!user?.token, // ou votre logique de token
+    userId: user?.id,
+    authLoading,
+    isReady: isAuthenticated && !authLoading
+  };
+  
+  console.log('📋 Auth details:', authStatus);
+
+    // Vérifier l'authentification
+  
+  console.log('🔐 Auth status in handleSubmit:', authStatus);
+  
+  
+  if (!authStatus.isReady) {
+    if (authLoading) {
+      toast.error('Veuillez patienter, authentification en cours...');
+    } else if (!authStatus.isAuthenticated) {
+      toast.error('Veuillez vous connecter pour créer/modifier une offre');
+    } else if (!authStatus.hasToken) {
+      toast.error('Session expirée, veuillez vous reconnecter');
+    }
+    return;
+  }
+
+  try {
+    // Convertir les tableaux si nécessaire
+    const missionsArray = Array.isArray(formData.missions) ? formData.missions : 
+                         (formData.missions ? [formData.missions] : []);
+    const competencesArray = Array.isArray(formData.competences) ? formData.competences : 
+                           (formData.competences ? [formData.competences] : []);
+    const avantagesArray = Array.isArray(formData.avantages) ? formData.avantages : 
+                         (formData.avantages ? [formData.avantages] : []);
+
+    // Préparer les données pour l'API
+    const apiData = {
+      title: formData.title,
+      description: formData.description,
+      type: formData.type,
+      niveauEtude: formData.niveauEtude,
+      duree: formData.duree,
+      remuneration: formData.remuneration,
+      location: formData.location,
+      dateDebut: formData.dateDebut,
+      dateFin: formData.dateFin || null,
+      status: formData.status,
+      missions: missionsArray.filter(m => m && m.trim() !== ''),
+      competences: competencesArray.filter(c => c && c.trim() !== ''),
+      avantages: avantagesArray.filter(a => a && a.trim() !== ''),
+      ecolePartenaire: formData.ecolePartenaire || '',
+      rythmeAlternance: formData.rythmeAlternance || '',
+      pourcentageTemps: formData.pourcentageTemps || '',
+      urgent: formData.urgent || false,
+    };
+
+    console.log('📤 Submitting data with auth:', {
+      user: user?.id,
+      tokenPresent: !!user?.token,
+      data: apiData
+    });
+
+    if (editingOffre) {
+      await updateOffre(editingOffre.id, apiData);
+      toast.success("Offre mise à jour avec succès");
+    } else {
+      await createOffre(apiData);
+      toast.success("Offre créée avec succès");
+    }
+    
+    setIsDialogOpen(false);
+    setEditingOffre(null);
+    resetForm();
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'enregistrement:', error);
+    
+    // Afficher un message d'erreur plus utile
+    if (error.message.includes('Non authentifié')) {
+      toast.error('Session expirée. Veuillez vous reconnecter.');
+      // Vous pourriez vouloir rediriger vers la page de login ici
+    } else if (error.message.includes('401')) {
+      toast.error('Session expirée. Veuillez vous reconnecter.');
+    } else {
       toast.error(error.message || "Erreur lors de l'enregistrement");
     }
-  };
+  }
+};
 
   const resetForm = () => {
     setFormData({
@@ -290,15 +379,17 @@ export default function GestionAlternancePage() {
     });
   };
 
-  const handleExportCSV = async () => {
-    try {
-      toast.info("Export CSV en cours...");
-      await exportCSV();
-      toast.success("Export CSV terminé");
-    } catch (error) {
-      toast.error("Erreur lors de l'export CSV");
-    }
-  };
+ // GestionAlternancePage.js - CORRECTION des statistiques
+const handleExportCSV = async () => {
+  try {
+    toast.info("Export CSV en cours...");
+    await exportCSV();
+    toast.success("Export CSV terminé");
+  } catch (error) {
+    console.error('Export CSV error:', error);
+    toast.error(error.message || "Erreur lors de l'export CSV");
+  }
+};
 
   const renderPagination = () => {
     if (pagination.pages <= 1) return null;
@@ -367,14 +458,14 @@ export default function GestionAlternancePage() {
         </div>
       )}
 
-      {/* Stats Cards */}
+      {/* Stats Cards - CORRECTION: Utiliser stats.parType */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Offres total</p>
-                <p className="text-2xl font-bold text-[#556B2F]">{stats.total}</p>
+                <p className="text-2xl font-bold text-[#556B2F]">{stats.total || 0}</p>
               </div>
               <Target className="h-8 w-8 text-[#6B8E23]" />
             </div>
@@ -385,7 +476,7 @@ export default function GestionAlternancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Alternances</p>
-                <p className="text-2xl font-bold text-[#556B2F]">{stats.alternance}</p>
+                <p className="text-2xl font-bold text-[#556B2F]">{stats.alternance || 0}</p>
               </div>
               <GraduationCap className="h-8 w-8 text-blue-500" />
             </div>
@@ -396,7 +487,7 @@ export default function GestionAlternancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Stages</p>
-                <p className="text-2xl font-bold text-[#556B2F]">{stats.stage}</p>
+                <p className="text-2xl font-bold text-[#556B2F]">{stats.stage || 0}</p>
               </div>
               <BookOpen className="h-8 w-8 text-green-500" />
             </div>
@@ -407,7 +498,7 @@ export default function GestionAlternancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Candidatures</p>
-                <p className="text-2xl font-bold text-[#556B2F]">{stats.candidatures}</p>
+                <p className="text-2xl font-bold text-[#556B2F]">{stats.candidatures || 0}</p>
               </div>
               <FileText className="h-8 w-8 text-purple-500" />
             </div>
@@ -415,6 +506,7 @@ export default function GestionAlternancePage() {
         </Card>
       </div>
 
+      {/* Rest of the component remains the same as in your previous code */}
       {/* Search and Actions Bar */}
       <Card className="mb-6">
         <CardContent className="pt-6">
@@ -479,237 +571,267 @@ export default function GestionAlternancePage() {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingOffre ? 'Modifier l\'offre' : 'Nouvelle offre alternance/stage'}
-                    </DialogTitle>
-                    <DialogDescription>
-                      {editingOffre 
-                        ? 'Modifiez les informations de votre offre'
-                        : 'Créez une nouvelle offre d\'alternance ou de stage'
-                      }
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="title">Intitulé du poste *</Label>
-                          <Input
-                            id="title"
-                            value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="type">Type d'offre *</Label>
-                          <Select
-                            value={formData.type}
-                            onValueChange={(value) => setFormData({...formData, type: value})}
-                            required
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner un type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {types.map((type) => (
-                                <SelectItem key={type} value={type}>{type}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+  <DialogHeader>
+    <DialogTitle>
+      {editingOffre ? 'Modifier l\'offre' : 'Nouvelle offre alternance/stage'}
+    </DialogTitle>
+    <DialogDescription>
+      {editingOffre 
+        ? 'Modifiez les informations de votre offre'
+        : 'Créez une nouvelle offre d\'alternance ou de stage'
+      }
+    </DialogDescription>
+  </DialogHeader>
+  <form onSubmit={handleSubmit}>
+    <div className="grid gap-4 py-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Intitulé du poste *</Label>
+          <Input
+            id="title"
+            value={formData.title}
+            onChange={(e) => setFormData({...formData, title: e.target.value})}
+            required
+            placeholder="ex: Développeur Web en Alternance"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="type">Type d'offre *</Label>
+          <Select
+            value={formData.type}
+            onValueChange={(value) => setFormData({...formData, type: value})}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un type" />
+            </SelectTrigger>
+            <SelectContent>
+              {types.map((type) => (
+                <SelectItem key={type} value={type}>{type}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="niveauEtude">Niveau d'étude requis *</Label>
-                          <Select
-                            value={formData.niveauEtude}
-                            onValueChange={(value) => setFormData({...formData, niveauEtude: value})}
-                            required
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner un niveau" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {niveauxEtude.map((niveau) => (
-                                <SelectItem key={niveau} value={niveau}>{niveau}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="duree">Durée *</Label>
-                          <Input
-                            id="duree"
-                            value={formData.duree}
-                            onChange={(e) => setFormData({...formData, duree: e.target.value})}
-                            placeholder="ex: 12 mois"
-                            required
-                          />
-                        </div>
-                      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="niveauEtude">Niveau d'étude requis *</Label>
+          <Select
+            value={formData.niveauEtude}
+            onValueChange={(value) => setFormData({...formData, niveauEtude: value})}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un niveau" />
+            </SelectTrigger>
+            <SelectContent>
+              {niveauxEtude.map((niveau) => (
+                <SelectItem key={niveau} value={niveau}>{niveau}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="duree">Durée *</Label>
+          <Input
+            id="duree"
+            value={formData.duree}
+            onChange={(e) => setFormData({...formData, duree: e.target.value})}
+            placeholder="ex: 12 mois, 24 mois, 6 mois"
+            required
+          />
+        </div>
+      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="remuneration">Rémunération *</Label>
-                          <Input
-                            id="remuneration"
-                            value={formData.remuneration}
-                            onChange={(e) => setFormData({...formData, remuneration: e.target.value})}
-                            placeholder="ex: 70-85% SMIC"
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="location">Lieu de travail *</Label>
-                          <Input
-                            id="location"
-                            value={formData.location}
-                            onChange={(e) => setFormData({...formData, location: e.target.value})}
-                            placeholder="ex: Paris (75)"
-                            required
-                          />
-                        </div>
-                      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="remuneration">Rémunération *</Label>
+          <Input
+            id="remuneration"
+            value={formData.remuneration}
+            onChange={(e) => setFormData({...formData, remuneration: e.target.value})}
+            placeholder="ex: 70-85% SMIC, 1200€/mois"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="location">Lieu de travail *</Label>
+          <Input
+            id="location"
+            value={formData.location}
+            onChange={(e) => setFormData({...formData, location: e.target.value})}
+            placeholder="ex: Paris (75), Lyon (69), Télétravail"
+            required
+          />
+        </div>
+      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="dateDebut">Date de début *</Label>
-                          <Input
-                            id="dateDebut"
-                            type="date"
-                            value={formData.dateDebut}
-                            onChange={(e) => setFormData({...formData, dateDebut: e.target.value})}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="dateFin">Date de fin</Label>
-                          <Input
-                            id="dateFin"
-                            type="date"
-                            value={formData.dateFin}
-                            onChange={(e) => setFormData({...formData, dateFin: e.target.value})}
-                          />
-                        </div>
-                      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="dateDebut">Date de début *</Label>
+          <Input
+            id="dateDebut"
+            type="date"
+            value={formData.dateDebut}
+            onChange={(e) => setFormData({...formData, dateDebut: e.target.value})}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="dateFin">Date de fin (optionnel)</Label>
+          <Input
+            id="dateFin"
+            type="date"
+            value={formData.dateFin}
+            onChange={(e) => setFormData({...formData, dateFin: e.target.value})}
+          />
+        </div>
+      </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="description">Description du poste *</Label>
-                        <Textarea
-                          id="description"
-                          value={formData.description}
-                          onChange={(e) => setFormData({...formData, description: e.target.value})}
-                          rows={4}
-                          required
-                        />
-                      </div>
+      <div className="space-y-2">
+        <Label htmlFor="description">Description du poste *</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          rows={4}
+          placeholder="Décrivez les missions principales, le contexte de l'entreprise..."
+          required
+        />
+      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="ecolePartenaire">École/CFA partenaire</Label>
-                          <Input
-                            id="ecolePartenaire"
-                            value={formData.ecolePartenaire}
-                            onChange={(e) => setFormData({...formData, ecolePartenaire: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="rythmeAlternance">Rythme alternance</Label>
-                          <Input
-                            id="rythmeAlternance"
-                            value={formData.rythmeAlternance}
-                            onChange={(e) => setFormData({...formData, rythmeAlternance: e.target.value})}
-                            placeholder="ex: 3 semaines entreprise / 1 semaine école"
-                          />
-                        </div>
-                      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="ecolePartenaire">École/CFA partenaire (optionnel)</Label>
+          <Input
+            id="ecolePartenaire"
+            value={formData.ecolePartenaire}
+            onChange={(e) => setFormData({...formData, ecolePartenaire: e.target.value})}
+            placeholder="ex: École 42, Université Paris-Saclay"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="rythmeAlternance">Rythme alternance (optionnel)</Label>
+          <Input
+            id="rythmeAlternance"
+            value={formData.rythmeAlternance}
+            onChange={(e) => setFormData({...formData, rythmeAlternance: e.target.value})}
+            placeholder="ex: 3 semaines entreprise / 1 semaine école"
+          />
+        </div>
+      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="missions">Missions principales</Label>
-                          <Textarea
-                            id="missions"
-                            value={formData.missions.join('\n')}
-                            onChange={(e) => setFormData({...formData, missions: e.target.value.split('\n')})}
-                            rows={3}
-                            placeholder="Une mission par ligne"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="competences">Compétences recherchées</Label>
-                          <Textarea
-                            id="competences"
-                            value={formData.competences.join('\n')}
-                            onChange={(e) => setFormData({...formData, competences: e.target.value.split('\n')})}
-                            rows={3}
-                            placeholder="Une compétence par ligne"
-                          />
-                        </div>
-                      </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="pourcentageTemps">% Temps entreprise</Label>
+          <Select
+            value={formData.pourcentageTemps}
+            onValueChange={(value) => setFormData({...formData, pourcentageTemps: value})}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="60%">60%</SelectItem>
+              <SelectItem value="70%">70%</SelectItem>
+              <SelectItem value="80%">80%</SelectItem>
+              <SelectItem value="100%">100% (stage)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center space-x-2 pt-6">
+          <Switch
+            id="urgent"
+            checked={formData.urgent}
+            onCheckedChange={(checked) => setFormData({...formData, urgent: checked})}
+          />
+          <Label htmlFor="urgent" className="cursor-pointer">Offre urgente</Label>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="status">Statut</Label>
+          <Select
+            value={formData.status}
+            onValueChange={(value) => setFormData({...formData, status: value})}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              {statuses.map((status) => (
+                <SelectItem key={status.value} value={status.value}>
+                  {status.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="avantages">Avantages proposés</Label>
-                        <Textarea
-                          id="avantages"
-                          value={formData.avantages.join('\n')}
-                          onChange={(e) => setFormData({...formData, avantages: e.target.value.split('\n')})}
-                          rows={2}
-                          placeholder="Un avantage par ligne"
-                        />
-                      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="missions">Missions principales</Label>
+          <Textarea
+            id="missions"
+            value={formData.missions.join('\n')}
+            onChange={(e) => setFormData({...formData, missions: e.target.value.split('\n')})}
+            rows={3}
+            placeholder="Une mission par ligne
+• Développer des applications web
+• Participer aux réunions d'équipe
+• Rédiger de la documentation"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="competences">Compétences recherchées</Label>
+          <Textarea
+            id="competences"
+            value={formData.competences.join('\n')}
+            onChange={(e) => setFormData({...formData, competences: e.target.value.split('\n')})}
+            rows={3}
+            placeholder="Une compétence par ligne
+• React/Next.js
+• Node.js
+• Git
+• Base de données"
+          />
+        </div>
+      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="urgent"
-                            checked={formData.urgent}
-                            onCheckedChange={(checked) => setFormData({...formData, urgent: checked})}
-                          />
-                          <Label htmlFor="urgent">Offre urgente</Label>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="status">Statut</Label>
-                        <Select
-                          value={formData.status}
-                          onValueChange={(value) => setFormData({...formData, status: value})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {statuses.map((status) => (
-                              <SelectItem key={status.value} value={status.value}>
-                                {status.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setIsDialogOpen(false);
-                          setEditingOffre(null);
-                          resetForm();
-                        }}
-                      >
-                        Annuler
-                      </Button>
-                      <Button type="submit" className="bg-[#556B2F] hover:bg-[#6B8E23]" disabled={isLoading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {editingOffre ? 'Mettre à jour' : 'Publier'}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
+      <div className="space-y-2">
+        <Label htmlFor="avantages">Avantages proposés</Label>
+        <Textarea
+          id="avantages"
+          value={formData.avantages.join('\n')}
+          onChange={(e) => setFormData({...formData, avantages: e.target.value.split('\n')})}
+          rows={2}
+          placeholder="Un avantage par ligne
+• Tickets restaurant
+• Mutuelle
+• Télétravail possible
+• Équipement fourni"
+        />
+      </div>
+    </div>
+    <DialogFooter>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => {
+          setIsDialogOpen(false);
+          setEditingOffre(null);
+          resetForm();
+        }}
+      >
+        Annuler
+      </Button>
+      <Button type="submit" className="bg-[#556B2F] hover:bg-[#6B8E23]" disabled={isLoading}>
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {editingOffre ? 'Mettre à jour' : 'Publier'}
+      </Button>
+    </DialogFooter>
+  </form>
+</DialogContent>
               </Dialog>
             </div>
           </div>
@@ -822,7 +944,7 @@ export default function GestionAlternancePage() {
                         <TableCell>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {offre.dateDebut ? offre.dateDebut.split('T')[0] : '-'}
+                            {offre.dateDebut ? new Date(offre.dateDebut).toLocaleDateString() : '-'}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
@@ -837,10 +959,6 @@ export default function GestionAlternancePage() {
                               <DropdownMenuItem onClick={() => handleEdit(offre)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Modifier
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {/* View candidates */}}>
-                                <Users className="h-4 w-4 mr-2" />
-                                Voir candidatures ({offre.candidatures_count || 0})
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 

@@ -39,6 +39,7 @@ import { vehiculesApi } from "@/lib/api/vehicules";
 import { LocationPickerModal } from "@/components/location-picker-modal";
 import { BusRoutesView } from "@/components/BusRoutesView";
 import { Button } from "@/components/ui/button";
+import TourismNavigation from "@/components/TourismNavigation";
 import {
   Card,
   CardContent,
@@ -623,8 +624,7 @@ const LocationVoiturePage = () => {
               Voitures • Camions • Motos • Vélos • Livraison sur toute l'île
             </p>
           </div>
-
-
+          <TourismNavigation page="sejour" />
         </div>
       </div>
 
@@ -647,645 +647,682 @@ const LocationVoiturePage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Sidebar Filters */}
               <div className="lg:col-span-1">
-            <Card className="sticky top-24 border-[#D3D3D3]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Filter className="h-5 w-5" />
-                  Filtres avancés
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Catégorie de véhicule */}
-                <div>
-                  <h3 className="font-semibold mb-3 text-[#8B4513]">
-                    Catégorie
-                  </h3>
-                  <div className="space-y-2">
-                    {categories.map((category) => {
-                      const CategoryIcon = category.icon;
-                      return (
-                        <div
-                          key={category.id}
-                          className="flex items-center justify-between hover:bg-gray-50 p-2 rounded cursor-pointer"
-                          onClick={() => setSelectedCategory(category.id)}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              checked={selectedCategory === category.id}
-                              onCheckedChange={() =>
-                                setSelectedCategory(category.id)
-                              }
-                            />
-                            <span className="flex items-center gap-2 text-sm">
-                              <CategoryIcon className="h-4 w-4" />
-                              {category.label}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Type de véhicule (dynamique selon la catégorie) */}
-                {selectedCategory !== "tous" &&
-                  typesParCategorie[selectedCategory] && (
-                    <>
-                      <Separator className="bg-[#D3D3D3]" />
-                      <div>
-                        <h3 className="font-semibold mb-3 text-[#8B4513]">
-                          Type
-                        </h3>
-                        <div className="space-y-2">
-                          <div
-                            className="flex items-center gap-2 hover:bg-gray-50 p-2 rounded cursor-pointer"
-                            onClick={() => setSelectedType("tous")}
-                          >
-                            <Checkbox
-                              checked={selectedType === "tous"}
-                              onCheckedChange={() => setSelectedType("tous")}
-                            />
-                            <span className="text-sm">Tous les types</span>
-                          </div>
-                          {typesParCategorie[selectedCategory].map((type) => (
+                <Card className="sticky top-24 border-[#D3D3D3]">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Filter className="h-5 w-5" />
+                      Filtres avancés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Catégorie de véhicule */}
+                    <div>
+                      <h3 className="font-semibold mb-3 text-[#8B4513]">
+                        Catégorie
+                      </h3>
+                      <div className="space-y-2">
+                        {categories.map((category) => {
+                          const CategoryIcon = category.icon;
+                          return (
                             <div
-                              key={type.id}
-                              className="flex items-center gap-2 hover:bg-gray-50 p-2 rounded cursor-pointer"
-                              onClick={() => setSelectedType(type.id)}
+                              key={category.id}
+                              className="flex items-center justify-between hover:bg-gray-50 p-2 rounded cursor-pointer"
+                              onClick={() => setSelectedCategory(category.id)}
                             >
-                              <Checkbox
-                                checked={selectedType === type.id}
-                                onCheckedChange={() => setSelectedType(type.id)}
-                              />
-                              <span className="text-sm">{type.label}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                <Separator className="bg-[#D3D3D3]" />
-
-                {/* Transmission (uniquement pour voitures et camions) */}
-                {["voiture", "camion", "moto"].includes(selectedCategory) && (
-                  <div>
-                    <h3 className="font-semibold mb-3 text-[#8B4513]">
-                      Transmission
-                    </h3>
-                    <Select
-                      value={selectedTransmission}
-                      onValueChange={setSelectedTransmission}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Tous types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tous">Tous types</SelectItem>
-                        {transmissions.map((trans) => {
-                          const TransIcon = trans.icon;
-                          return (
-                            <SelectItem key={trans.id} value={trans.id}>
-                              <span className="flex items-center gap-2">
-                                <TransIcon className="h-4 w-4" />
-                                {trans.label}
-                              </span>
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Carburant (uniquement pour véhicules motorisés) */}
-                {selectedCategory !== "velo" && (
-                  <div>
-                    <h3 className="font-semibold mb-3 text-[#8B4513]">
-                      Type de carburant
-                    </h3>
-                    <Select
-                      value={selectedFuel}
-                      onValueChange={setSelectedFuel}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Tous types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tous">Tous types</SelectItem>
-                        {carburants.map((fuel) => {
-                          const FuelIcon = fuel.icon;
-                          return (
-                            <SelectItem key={fuel.id} value={fuel.id}>
-                              <span className="flex items-center gap-2">
-                                <FuelIcon className="h-4 w-4" />
-                                {fuel.label}
-                              </span>
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Prix par jour */}
-                <div>
-                  <h3 className="font-semibold mb-3 text-[#8B4513]">
-                    Prix par jour : {priceRange[0]}€ - {priceRange[1]}€
-                  </h3>
-                  <div className="space-y-2 px-2">
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>10€</span>
-                      <span>100€</span>
-                      <span>200€</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="10"
-                      max="200"
-                      step="5"
-                      value={priceRange[0]}
-                      onChange={(e) =>
-                        setPriceRange([parseInt(e.target.value), priceRange[1]])
-                      }
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#556B2F]"
-                    />
-                    <input
-                      type="range"
-                      min="10"
-                      max="200"
-                      step="5"
-                      value={priceRange[1]}
-                      onChange={(e) =>
-                        setPriceRange([priceRange[0], parseInt(e.target.value)])
-                      }
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#6B8E23]"
-                    />
-                  </div>
-                </div>
-
-                {/* Ville */}
-                <div>
-                  <h3 className="font-semibold mb-3 text-[#8B4513]">
-                    Ville de location
-                  </h3>
-                  <Select value={selectedCity} onValueChange={setSelectedCity}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Toutes villes" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tous">Toutes les villes</SelectItem>
-                      {villes.map((ville) => (
-                        <SelectItem key={ville.id} value={ville.label}>
-                          {ville.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white transition-colors"
-                  onClick={handleResetFilters}
-                >
-                  Réinitialiser les filtres
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Pourquoi nous choisir */}
-            <Card className="mt-4 border-[#556B2F]">
-              <CardContent className="pt-6">
-                <h3 className="font-semibold mb-4 text-[#8B4513]">
-                  Pourquoi choisir OLIPLUS ?
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <ShieldCheck className="h-5 w-5 text-[#556B2F] mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-sm">Assurance incluse</h4>
-                      <p className="text-xs text-gray-600">
-                        Protection complète
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Clock className="h-5 w-5 text-[#6B8E23] mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-sm">
-                        Livraison gratuite
-                      </h4>
-                      <p className="text-xs text-gray-600">Dans toute l'île</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-sm">
-                        Véhicules vérifiés
-                      </h4>
-                      <p className="text-xs text-gray-600">
-                        Entretien régulier
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Header avec tabs et tri */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {filteredVehicules.length} véhicule
-                  {filteredVehicules.length > 1 ? "s" : ""} disponible
-                  {filteredVehicules.length > 1 ? "s" : ""}
-                </h2>
-                <p className="text-gray-600">
-                  Durée sélectionnée : {calculateDuration()} jour
-                  {calculateDuration() > 1 ? "s" : ""}
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Trier par" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pertinence">Pertinence</SelectItem>
-                    <SelectItem value="prix-croissant">
-                      Prix croissant
-                    </SelectItem>
-                    <SelectItem value="prix-dec">Prix décroissant</SelectItem>
-                    <SelectItem value="note">Meilleures notes</SelectItem>
-                    <SelectItem value="marque">Marque (A-Z)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Véhicules */}
-            <div className="space-y-4">
-              {loading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="border-[#D3D3D3] animate-pulse">
-                    <CardContent className="pt-6">
-                      <div className="flex gap-4">
-                        <div className="h-48 w-64 bg-gray-200 rounded-lg"></div>
-                        <div className="flex-1 space-y-3">
-                          <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                          <div className="h-4 bg-gray-200 rounded w-full"></div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : filteredVehicules.length > 0 ? (
-                filteredVehicules.map((vehicule) => {
-                  const duration = calculateDuration();
-                  const totalPrice = vehicule.prixJour * duration;
-
-                  return (
-                    <Card
-                      key={vehicule.id}
-                      className="border-[#D3D3D3] hover:shadow-lg transition-shadow duration-300"
-                    >
-                      <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row gap-6">
-                          {/* Image véhicule */}
-                          <div className="w-full md:w-64 h-48 relative">
-                            <img
-                              src={getVehicleImage(vehicule)}
-                              alt={`${vehicule.marque} ${vehicule.modele}`}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                            <Badge className="absolute top-2 left-2 bg-[#556B2F] text-white">
-                              {getCategoryIcon(vehicule.categorie)}
-                              <span className="ml-1 capitalize">
-                                {vehicule.categorie}
-                              </span>
-                            </Badge>
-                            {vehicule.carburant === "electrique" && (
-                              <Badge className="absolute top-2 right-2 bg-green-500 text-white">
-                                <Zap className="h-3 w-3 mr-1" />
-                                Électrique
-                              </Badge>
-                            )}
-                            {vehicule.categorie === "velo" &&
-                              vehicule.assistanceElec && (
-                                <Badge className="absolute bottom-2 left-2 bg-blue-500 text-white">
-                                  <Battery className="h-3 w-3 mr-1" />
-                                  Assistance
-                                </Badge>
-                              )}
-                          </div>
-
-                          {/* Détails véhicule */}
-                          <div className="flex-1">
-                            <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
-                              <div>
-                                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                  <Badge
-                                    variant="outline"
-                                    className="border-[#8B4513] text-[#8B4513]"
-                                  >
-                                    {vehicule.typeVehicule}
-                                  </Badge>
-                                  {vehicule.transmission && (
-                                    <Badge variant="outline">
-                                      {vehicule.transmission}
-                                    </Badge>
-                                  )}
-                                  {vehicule.carburant &&
-                                    vehicule.carburant !== "electrique" && (
-                                      <Badge variant="outline">
-                                        {vehicule.carburant}
-                                      </Badge>
-                                    )}
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-1">
-                                  {vehicule.marque} {vehicule.modele}
-                                </h3>
-                                <div className="flex items-center gap-2 text-gray-600 mb-2">
-                                  <MapPin className="h-4 w-4" />
-                                  <span>{vehicule.ville}</span>
-                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="font-semibold">
-                                    {vehicule.rating?.toFixed(1) || "0.0"}
-                                  </span>
-                                  <span className="text-gray-500 text-sm">
-                                    ({vehicule.nombreAvis || 0} avis)
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-2xl font-bold text-[#8B4513] mb-1">
-                                  {formatPrice(vehicule.prixJour)}
-                                  <span className="text-sm font-normal text-gray-500">
-                                    /jour
-                                  </span>
-                                </div>
-                                {vehicule.prixSemaine && (
-                                  <p className="text-sm text-gray-500">
-                                    {formatPrice(vehicule.prixSemaine)} la
-                                    semaine
-                                  </p>
-                                )}
-                                <p className="text-lg font-bold text-green-600">
-                                  Total : {formatPrice(totalPrice)}
-                                </p>
+                              <div className="flex items-center gap-2">
+                                <Checkbox
+                                  checked={selectedCategory === category.id}
+                                  onCheckedChange={() =>
+                                    setSelectedCategory(category.id)
+                                  }
+                                />
+                                <span className="flex items-center gap-2 text-sm">
+                                  <CategoryIcon className="h-4 w-4" />
+                                  {category.label}
+                                </span>
                               </div>
                             </div>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                            <p className="text-gray-700 mb-4 line-clamp-2">
-                              {vehicule.description ||
-                                "Véhicule de qualité disponible à la location."}
-                            </p>
-
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-                              {renderVehicleSpecifics(vehicule).map(
-                                (spec, index) => (
+                    {/* Type de véhicule (dynamique selon la catégorie) */}
+                    {selectedCategory !== "tous" &&
+                      typesParCategorie[selectedCategory] && (
+                        <>
+                          <Separator className="bg-[#D3D3D3]" />
+                          <div>
+                            <h3 className="font-semibold mb-3 text-[#8B4513]">
+                              Type
+                            </h3>
+                            <div className="space-y-2">
+                              <div
+                                className="flex items-center gap-2 hover:bg-gray-50 p-2 rounded cursor-pointer"
+                                onClick={() => setSelectedType("tous")}
+                              >
+                                <Checkbox
+                                  checked={selectedType === "tous"}
+                                  onCheckedChange={() =>
+                                    setSelectedType("tous")
+                                  }
+                                />
+                                <span className="text-sm">Tous les types</span>
+                              </div>
+                              {typesParCategorie[selectedCategory].map(
+                                (type) => (
                                   <div
-                                    key={index}
-                                    className="flex items-center gap-2"
+                                    key={type.id}
+                                    className="flex items-center gap-2 hover:bg-gray-50 p-2 rounded cursor-pointer"
+                                    onClick={() => setSelectedType(type.id)}
                                   >
-                                    <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
-                                      <span className="text-xs text-gray-600">
-                                        ✓
-                                      </span>
-                                    </div>
-                                    <span className="text-sm">{spec}</span>
+                                    <Checkbox
+                                      checked={selectedType === type.id}
+                                      onCheckedChange={() =>
+                                        setSelectedType(type.id)
+                                      }
+                                    />
+                                    <span className="text-sm">
+                                      {type.label}
+                                    </span>
                                   </div>
                                 )
                               )}
                             </div>
-
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                              <div className="flex items-center gap-2">
-                                <Shield className="h-4 w-4 text-green-600" />
-                                <span className="text-sm font-medium">
-                                  {vehicule.prestataire?.companyName ||
-                                    "Professionnel OLIPLUS"}{" "}
-                                  •{vehicule.prestataire?.rating || 4.5}★
-                                </span>
-                              </div>
-                              <div className="flex gap-2">
-                                <Sheet>
-                                  <SheetTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      className="border-[#556B2F] text-[#556B2F]"
-                                      onClick={() =>
-                                        setSelectedVehicule(vehicule)
-                                      }
-                                    >
-                                      <Eye className="h-4 w-4 mr-1" />
-                                      Détails
-                                    </Button>
-                                  </SheetTrigger>
-                                  <SheetContent className="sm:max-w-xl overflow-y-auto">
-                                    {selectedVehicule && (
-                                      <>
-                                        <SheetHeader>
-                                          <SheetTitle>
-                                            {selectedVehicule.marque}{" "}
-                                            {selectedVehicule.modele}
-                                          </SheetTitle>
-                                          <SheetDescription>
-                                            {selectedVehicule.annee} •{" "}
-                                            {selectedVehicule.categorie}
-                                            {selectedVehicule.carburant &&
-                                              ` • ${selectedVehicule.carburant}`}
-                                          </SheetDescription>
-                                        </SheetHeader>
-                                        <div className="mt-6 space-y-6">
-                                          <img
-                                            src={getVehicleImage(
-                                              selectedVehicule
-                                            )}
-                                            alt={`${selectedVehicule.marque} ${selectedVehicule.modele}`}
-                                            className="w-full h-64 object-cover rounded-lg"
-                                          />
-
-                                          <div>
-                                            <h4 className="font-semibold text-[#8B4513] mb-2">
-                                              Description
-                                            </h4>
-                                            <p className="text-gray-700">
-                                              {selectedVehicule.description ||
-                                                "Véhicule de qualité disponible à la location."}
-                                            </p>
-                                          </div>
-
-                                          <div>
-                                            <h4 className="font-semibold text-[#8B4513] mb-2">
-                                              Caractéristiques
-                                            </h4>
-                                            <div className="grid grid-cols-2 gap-3">
-                                              <div className="bg-gray-50 p-3 rounded">
-                                                <p className="text-sm text-gray-600">
-                                                  Catégorie
-                                                </p>
-                                                <p className="font-semibold capitalize">
-                                                  {selectedVehicule.categorie}
-                                                </p>
-                                              </div>
-                                              <div className="bg-gray-50 p-3 rounded">
-                                                <p className="text-sm text-gray-600">
-                                                  Type
-                                                </p>
-                                                <p className="font-semibold">
-                                                  {
-                                                    selectedVehicule.typeVehicule
-                                                  }
-                                                </p>
-                                              </div>
-                                              <div className="bg-gray-50 p-3 rounded">
-                                                <p className="text-sm text-gray-600">
-                                                  Année
-                                                </p>
-                                                <p className="font-semibold">
-                                                  {selectedVehicule.annee}
-                                                </p>
-                                              </div>
-                                              <div className="bg-gray-50 p-3 rounded">
-                                                <p className="text-sm text-gray-600">
-                                                  Marque
-                                                </p>
-                                                <p className="font-semibold">
-                                                  {selectedVehicule.marque}
-                                                </p>
-                                              </div>
-                                              {selectedVehicule.carburant && (
-                                                <div className="bg-gray-50 p-3 rounded">
-                                                  <p className="text-sm text-gray-600">
-                                                    Carburant
-                                                  </p>
-                                                  <p className="font-semibold">
-                                                    {selectedVehicule.carburant}
-                                                  </p>
-                                                </div>
-                                              )}
-                                              {selectedVehicule.transmission && (
-                                                <div className="bg-gray-50 p-3 rounded">
-                                                  <p className="text-sm text-gray-600">
-                                                    Transmission
-                                                  </p>
-                                                  <p className="font-semibold">
-                                                    {
-                                                      selectedVehicule.transmission
-                                                    }
-                                                  </p>
-                                                </div>
-                                              )}
-                                              {selectedVehicule.cylindree && (
-                                                <div className="bg-gray-50 p-3 rounded">
-                                                  <p className="text-sm text-gray-600">
-                                                    Cylindrée
-                                                  </p>
-                                                  <p className="font-semibold">
-                                                    {selectedVehicule.cylindree}
-                                                    cc
-                                                  </p>
-                                                </div>
-                                              )}
-                                              {selectedVehicule.poids && (
-                                                <div className="bg-gray-50 p-3 rounded">
-                                                  <p className="text-sm text-gray-600">
-                                                    Poids
-                                                  </p>
-                                                  <p className="font-semibold">
-                                                    {selectedVehicule.poids}kg
-                                                  </p>
-                                                </div>
-                                              )}
-                                            </div>
-                                          </div>
-
-                                          <div>
-                                            <h4 className="font-semibold text-[#8B4513] mb-2">
-                                              Conditions de location
-                                            </h4>
-                                            <div className="bg-yellow-50 p-4 rounded-lg">
-                                              <div className="space-y-2">
-                                                <div className="flex justify-between">
-                                                  <span>Caution:</span>
-                                                  <span className="font-semibold">
-                                                    {formatPrice(
-                                                      selectedVehicule.caution ||
-                                                        0
-                                                    )}
-                                                  </span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                  <span>Disponible:</span>
-                                                  <span className="font-semibold">
-                                                    {selectedVehicule.disponible
-                                                      ? "Oui"
-                                                      : "Non"}
-                                                  </span>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          <Button
-                                            className="w-full bg-[#8B4513] hover:bg-[#6B3410]"
-                                            onClick={() =>
-                                              handleReserve(selectedVehicule)
-                                            }
-                                          >
-                                            Réserver maintenant
-                                          </Button>
-                                        </div>
-                                      </>
-                                    )}
-                                  </SheetContent>
-                                </Sheet>
-
-                                <Button
-                                  className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
-                                  onClick={() => {
-                                    setSelectedVehicule(vehicule);
-                                    setShowReservation(true);
-                                  }}
-                                >
-                                  Réserver
-                                </Button>
-                              </div>
-                            </div>
                           </div>
+                        </>
+                      )}
+
+                    <Separator className="bg-[#D3D3D3]" />
+
+                    {/* Transmission (uniquement pour voitures et camions) */}
+                    {["voiture", "camion", "moto"].includes(
+                      selectedCategory
+                    ) && (
+                      <div>
+                        <h3 className="font-semibold mb-3 text-[#8B4513]">
+                          Transmission
+                        </h3>
+                        <Select
+                          value={selectedTransmission}
+                          onValueChange={setSelectedTransmission}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Tous types" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tous">Tous types</SelectItem>
+                            {transmissions.map((trans) => {
+                              const TransIcon = trans.icon;
+                              return (
+                                <SelectItem key={trans.id} value={trans.id}>
+                                  <span className="flex items-center gap-2">
+                                    <TransIcon className="h-4 w-4" />
+                                    {trans.label}
+                                  </span>
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Carburant (uniquement pour véhicules motorisés) */}
+                    {selectedCategory !== "velo" && (
+                      <div>
+                        <h3 className="font-semibold mb-3 text-[#8B4513]">
+                          Type de carburant
+                        </h3>
+                        <Select
+                          value={selectedFuel}
+                          onValueChange={setSelectedFuel}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Tous types" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tous">Tous types</SelectItem>
+                            {carburants.map((fuel) => {
+                              const FuelIcon = fuel.icon;
+                              return (
+                                <SelectItem key={fuel.id} value={fuel.id}>
+                                  <span className="flex items-center gap-2">
+                                    <FuelIcon className="h-4 w-4" />
+                                    {fuel.label}
+                                  </span>
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Prix par jour */}
+                    <div>
+                      <h3 className="font-semibold mb-3 text-[#8B4513]">
+                        Prix par jour : {priceRange[0]}€ - {priceRange[1]}€
+                      </h3>
+                      <div className="space-y-2 px-2">
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>10€</span>
+                          <span>100€</span>
+                          <span>200€</span>
                         </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })
-              ) : (
-                <Card className="border-[#D3D3D3]">
-                  <CardContent className="pt-12 pb-12 text-center">
-                    <Car className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                      Aucun véhicule ne correspond à vos critères
-                    </h3>
-                    <p className="text-gray-500 mb-4">
-                      Essayez de modifier vos filtres ou vos dates de recherche
-                    </p>
-                    <Button variant="outline" onClick={handleResetFilters}>
-                      Voir tous les véhicules
+                        <input
+                          type="range"
+                          min="10"
+                          max="200"
+                          step="5"
+                          value={priceRange[0]}
+                          onChange={(e) =>
+                            setPriceRange([
+                              parseInt(e.target.value),
+                              priceRange[1],
+                            ])
+                          }
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#556B2F]"
+                        />
+                        <input
+                          type="range"
+                          min="10"
+                          max="200"
+                          step="5"
+                          value={priceRange[1]}
+                          onChange={(e) =>
+                            setPriceRange([
+                              priceRange[0],
+                              parseInt(e.target.value),
+                            ])
+                          }
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#6B8E23]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Ville */}
+                    <div>
+                      <h3 className="font-semibold mb-3 text-[#8B4513]">
+                        Ville de location
+                      </h3>
+                      <Select
+                        value={selectedCity}
+                        onValueChange={setSelectedCity}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Toutes villes" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tous">
+                            Toutes les villes
+                          </SelectItem>
+                          {villes.map((ville) => (
+                            <SelectItem key={ville.id} value={ville.label}>
+                              {ville.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white transition-colors"
+                      onClick={handleResetFilters}
+                    >
+                      Réinitialiser les filtres
                     </Button>
                   </CardContent>
                 </Card>
-              )}
+
+                {/* Pourquoi nous choisir */}
+                <Card className="mt-4 border-[#556B2F]">
+                  <CardContent className="pt-6">
+                    <h3 className="font-semibold mb-4 text-[#8B4513]">
+                      Pourquoi choisir OLIPLUS ?
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-2">
+                        <ShieldCheck className="h-5 w-5 text-[#556B2F] mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-sm">
+                            Assurance incluse
+                          </h4>
+                          <p className="text-xs text-gray-600">
+                            Protection complète
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Clock className="h-5 w-5 text-[#6B8E23] mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-sm">
+                            Livraison gratuite
+                          </h4>
+                          <p className="text-xs text-gray-600">
+                            Dans toute l'île
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-sm">
+                            Véhicules vérifiés
+                          </h4>
+                          <p className="text-xs text-gray-600">
+                            Entretien régulier
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Main Content */}
+              <div className="lg:col-span-3">
+                {/* Header avec tabs et tri */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {filteredVehicules.length} véhicule
+                      {filteredVehicules.length > 1 ? "s" : ""} disponible
+                      {filteredVehicules.length > 1 ? "s" : ""}
+                    </h2>
+                    <p className="text-gray-600">
+                      Durée sélectionnée : {calculateDuration()} jour
+                      {calculateDuration() > 1 ? "s" : ""}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Trier par" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pertinence">Pertinence</SelectItem>
+                        <SelectItem value="prix-croissant">
+                          Prix croissant
+                        </SelectItem>
+                        <SelectItem value="prix-dec">
+                          Prix décroissant
+                        </SelectItem>
+                        <SelectItem value="note">Meilleures notes</SelectItem>
+                        <SelectItem value="marque">Marque (A-Z)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Véhicules */}
+                <div className="space-y-4">
+                  {loading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <Card key={i} className="border-[#D3D3D3] animate-pulse">
+                        <CardContent className="pt-6">
+                          <div className="flex gap-4">
+                            <div className="h-48 w-64 bg-gray-200 rounded-lg"></div>
+                            <div className="flex-1 space-y-3">
+                              <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                              <div className="h-4 bg-gray-200 rounded w-full"></div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : filteredVehicules.length > 0 ? (
+                    filteredVehicules.map((vehicule) => {
+                      const duration = calculateDuration();
+                      const totalPrice = vehicule.prixJour * duration;
+
+                      return (
+                        <Card
+                          key={vehicule.id}
+                          className="border-[#D3D3D3] hover:shadow-lg transition-shadow duration-300"
+                        >
+                          <CardContent className="pt-6">
+                            <div className="flex flex-col md:flex-row gap-6">
+                              {/* Image véhicule */}
+                              <div className="w-full md:w-64 h-48 relative">
+                                <img
+                                  src={getVehicleImage(vehicule)}
+                                  alt={`${vehicule.marque} ${vehicule.modele}`}
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                                <Badge className="absolute top-2 left-2 bg-[#556B2F] text-white">
+                                  {getCategoryIcon(vehicule.categorie)}
+                                  <span className="ml-1 capitalize">
+                                    {vehicule.categorie}
+                                  </span>
+                                </Badge>
+                                {vehicule.carburant === "electrique" && (
+                                  <Badge className="absolute top-2 right-2 bg-green-500 text-white">
+                                    <Zap className="h-3 w-3 mr-1" />
+                                    Électrique
+                                  </Badge>
+                                )}
+                                {vehicule.categorie === "velo" &&
+                                  vehicule.assistanceElec && (
+                                    <Badge className="absolute bottom-2 left-2 bg-blue-500 text-white">
+                                      <Battery className="h-3 w-3 mr-1" />
+                                      Assistance
+                                    </Badge>
+                                  )}
+                              </div>
+
+                              {/* Détails véhicule */}
+                              <div className="flex-1">
+                                <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                      <Badge
+                                        variant="outline"
+                                        className="border-[#8B4513] text-[#8B4513]"
+                                      >
+                                        {vehicule.typeVehicule}
+                                      </Badge>
+                                      {vehicule.transmission && (
+                                        <Badge variant="outline">
+                                          {vehicule.transmission}
+                                        </Badge>
+                                      )}
+                                      {vehicule.carburant &&
+                                        vehicule.carburant !== "electrique" && (
+                                          <Badge variant="outline">
+                                            {vehicule.carburant}
+                                          </Badge>
+                                        )}
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-1">
+                                      {vehicule.marque} {vehicule.modele}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                                      <MapPin className="h-4 w-4" />
+                                      <span>{vehicule.ville}</span>
+                                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                      <span className="font-semibold">
+                                        {vehicule.rating?.toFixed(1) || "0.0"}
+                                      </span>
+                                      <span className="text-gray-500 text-sm">
+                                        ({vehicule.nombreAvis || 0} avis)
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-2xl font-bold text-[#8B4513] mb-1">
+                                      {formatPrice(vehicule.prixJour)}
+                                      <span className="text-sm font-normal text-gray-500">
+                                        /jour
+                                      </span>
+                                    </div>
+                                    {vehicule.prixSemaine && (
+                                      <p className="text-sm text-gray-500">
+                                        {formatPrice(vehicule.prixSemaine)} la
+                                        semaine
+                                      </p>
+                                    )}
+                                    <p className="text-lg font-bold text-green-600">
+                                      Total : {formatPrice(totalPrice)}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <p className="text-gray-700 mb-4 line-clamp-2">
+                                  {vehicule.description ||
+                                    "Véhicule de qualité disponible à la location."}
+                                </p>
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                                  {renderVehicleSpecifics(vehicule).map(
+                                    (spec, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
+                                          <span className="text-xs text-gray-600">
+                                            ✓
+                                          </span>
+                                        </div>
+                                        <span className="text-sm">{spec}</span>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                  <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-green-600" />
+                                    <span className="text-sm font-medium">
+                                      {vehicule.prestataire?.companyName ||
+                                        "Professionnel OLIPLUS"}{" "}
+                                      •{vehicule.prestataire?.rating || 4.5}★
+                                    </span>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Sheet>
+                                      <SheetTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          className="border-[#556B2F] text-[#556B2F]"
+                                          onClick={() =>
+                                            setSelectedVehicule(vehicule)
+                                          }
+                                        >
+                                          <Eye className="h-4 w-4 mr-1" />
+                                          Détails
+                                        </Button>
+                                      </SheetTrigger>
+                                      <SheetContent className="sm:max-w-xl overflow-y-auto">
+                                        {selectedVehicule && (
+                                          <>
+                                            <SheetHeader>
+                                              <SheetTitle>
+                                                {selectedVehicule.marque}{" "}
+                                                {selectedVehicule.modele}
+                                              </SheetTitle>
+                                              <SheetDescription>
+                                                {selectedVehicule.annee} •{" "}
+                                                {selectedVehicule.categorie}
+                                                {selectedVehicule.carburant &&
+                                                  ` • ${selectedVehicule.carburant}`}
+                                              </SheetDescription>
+                                            </SheetHeader>
+                                            <div className="mt-6 space-y-6">
+                                              <img
+                                                src={getVehicleImage(
+                                                  selectedVehicule
+                                                )}
+                                                alt={`${selectedVehicule.marque} ${selectedVehicule.modele}`}
+                                                className="w-full h-64 object-cover rounded-lg"
+                                              />
+
+                                              <div>
+                                                <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                  Description
+                                                </h4>
+                                                <p className="text-gray-700">
+                                                  {selectedVehicule.description ||
+                                                    "Véhicule de qualité disponible à la location."}
+                                                </p>
+                                              </div>
+
+                                              <div>
+                                                <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                  Caractéristiques
+                                                </h4>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                  <div className="bg-gray-50 p-3 rounded">
+                                                    <p className="text-sm text-gray-600">
+                                                      Catégorie
+                                                    </p>
+                                                    <p className="font-semibold capitalize">
+                                                      {
+                                                        selectedVehicule.categorie
+                                                      }
+                                                    </p>
+                                                  </div>
+                                                  <div className="bg-gray-50 p-3 rounded">
+                                                    <p className="text-sm text-gray-600">
+                                                      Type
+                                                    </p>
+                                                    <p className="font-semibold">
+                                                      {
+                                                        selectedVehicule.typeVehicule
+                                                      }
+                                                    </p>
+                                                  </div>
+                                                  <div className="bg-gray-50 p-3 rounded">
+                                                    <p className="text-sm text-gray-600">
+                                                      Année
+                                                    </p>
+                                                    <p className="font-semibold">
+                                                      {selectedVehicule.annee}
+                                                    </p>
+                                                  </div>
+                                                  <div className="bg-gray-50 p-3 rounded">
+                                                    <p className="text-sm text-gray-600">
+                                                      Marque
+                                                    </p>
+                                                    <p className="font-semibold">
+                                                      {selectedVehicule.marque}
+                                                    </p>
+                                                  </div>
+                                                  {selectedVehicule.carburant && (
+                                                    <div className="bg-gray-50 p-3 rounded">
+                                                      <p className="text-sm text-gray-600">
+                                                        Carburant
+                                                      </p>
+                                                      <p className="font-semibold">
+                                                        {
+                                                          selectedVehicule.carburant
+                                                        }
+                                                      </p>
+                                                    </div>
+                                                  )}
+                                                  {selectedVehicule.transmission && (
+                                                    <div className="bg-gray-50 p-3 rounded">
+                                                      <p className="text-sm text-gray-600">
+                                                        Transmission
+                                                      </p>
+                                                      <p className="font-semibold">
+                                                        {
+                                                          selectedVehicule.transmission
+                                                        }
+                                                      </p>
+                                                    </div>
+                                                  )}
+                                                  {selectedVehicule.cylindree && (
+                                                    <div className="bg-gray-50 p-3 rounded">
+                                                      <p className="text-sm text-gray-600">
+                                                        Cylindrée
+                                                      </p>
+                                                      <p className="font-semibold">
+                                                        {
+                                                          selectedVehicule.cylindree
+                                                        }
+                                                        cc
+                                                      </p>
+                                                    </div>
+                                                  )}
+                                                  {selectedVehicule.poids && (
+                                                    <div className="bg-gray-50 p-3 rounded">
+                                                      <p className="text-sm text-gray-600">
+                                                        Poids
+                                                      </p>
+                                                      <p className="font-semibold">
+                                                        {selectedVehicule.poids}
+                                                        kg
+                                                      </p>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+
+                                              <div>
+                                                <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                  Conditions de location
+                                                </h4>
+                                                <div className="bg-yellow-50 p-4 rounded-lg">
+                                                  <div className="space-y-2">
+                                                    <div className="flex justify-between">
+                                                      <span>Caution:</span>
+                                                      <span className="font-semibold">
+                                                        {formatPrice(
+                                                          selectedVehicule.caution ||
+                                                            0
+                                                        )}
+                                                      </span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                      <span>Disponible:</span>
+                                                      <span className="font-semibold">
+                                                        {selectedVehicule.disponible
+                                                          ? "Oui"
+                                                          : "Non"}
+                                                      </span>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+
+                                              <Button
+                                                className="w-full bg-[#8B4513] hover:bg-[#6B3410]"
+                                                onClick={() =>
+                                                  handleReserve(
+                                                    selectedVehicule
+                                                  )
+                                                }
+                                              >
+                                                Réserver maintenant
+                                              </Button>
+                                            </div>
+                                          </>
+                                        )}
+                                      </SheetContent>
+                                    </Sheet>
+
+                                    <Button
+                                      className="bg-[#8B4513] hover:bg-[#6B3410] text-white"
+                                      onClick={() => {
+                                        setSelectedVehicule(vehicule);
+                                        setShowReservation(true);
+                                      }}
+                                    >
+                                      Réserver
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })
+                  ) : (
+                    <Card className="border-[#D3D3D3]">
+                      <CardContent className="pt-12 pb-12 text-center">
+                        <Car className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                          Aucun véhicule ne correspond à vos critères
+                        </h3>
+                        <p className="text-gray-500 mb-4">
+                          Essayez de modifier vos filtres ou vos dates de
+                          recherche
+                        </p>
+                        <Button variant="outline" onClick={handleResetFilters}>
+                          Voir tous les véhicules
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
           </TabsContent>
 
           <TabsContent value="bus" className="mt-0">

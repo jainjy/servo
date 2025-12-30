@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 import { toast } from "sonner";
 import { serviceCategories } from "../data/servicesData";
-import { partenaires } from "../data/partnersData"; // Ajouté
+import { partenaires } from "../data/partnersData";
+import { EnterpriseService } from "@/services/enterpriseService";
 
 export const useEntreprise = () => {
   const { trackBusinessInteraction } = useInteractionTracking();
@@ -10,9 +11,9 @@ export const useEntreprise = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
-  const [selectedPartenaire, setSelectedPartenaire] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [selectedService, setSelectedService] = useState(null);
+  const [selectedPartenaire, setSelectedPartenaire] = useState<any>(null);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [selectedService, setSelectedService] = useState<EnterpriseService | null>(null);
   const [activeServiceCategory, setActiveServiceCategory] = useState("tous");
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
@@ -23,19 +24,97 @@ export const useEntreprise = () => {
     service: "",
     typeAvis: "positif",
   });
-  const [hoveredCard, setHoveredCard] = useState(null);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
-  const handleServiceClick = (service) => {
-    trackBusinessInteraction(service.id.toString(), service.nom, "click", {
-      category: service.category,
+  // Fonction pour générer des features à partir des tags
+  const generateFeaturesFromTags = (service: EnterpriseService): string[] => {
+    const featuresMap: { [key: string]: string[] } = {
+      'création': [
+        "Choix du statut juridique",
+        "Rédaction des statuts",
+        "Immatriculation",
+        "Domiciliation d'entreprise"
+      ],
+      'rachat': [
+        "Due diligence",
+        "Évaluation financière",
+        "Négociation",
+        "Transmission juridique"
+      ],
+      'cession': [
+        "Évaluation de l'entreprise",
+        "Recherche d'acquéreurs",
+        "Négociations",
+        "Procédures légales"
+      ],
+      'communication': [
+        "Stratégie digitale",
+        "Branding",
+        "Social Media",
+        "Campagnes publicitaires"
+      ],
+      'comptabilité': [
+        "Comptabilité générale",
+        "Déclarations fiscales",
+        "TVA",
+        "Bilans annuels"
+      ],
+      'juridique': [
+        "Droit des sociétés",
+        "Contrats commerciaux",
+        "Propriété intellectuelle",
+        "Résolution de litiges"
+      ],
+      'financement': [
+        "Analyse de faisabilité",
+        "Montage de dossier",
+        "Recherche de financeurs",
+        "Suivi administratif"
+      ],
+      'international': [
+        "Étude de marché",
+        "Stratégie d'export",
+        "Logistique internationale",
+        "Conformité réglementaire"
+      ]
+    };
+    
+    // Trouve des caractéristiques basées sur les tags
+    if (service.tags) {
+      for (const tag of service.tags) {
+        const lowerTag = tag.toLowerCase();
+        if (featuresMap[lowerTag]) {
+          return featuresMap[lowerTag];
+        }
+      }
+    }
+    
+    // Caractéristiques par défaut
+    return [
+      "Accompagnement personnalisé",
+      "Expertise professionnelle",
+      "Solutions sur mesure",
+      "Suivi continu"
+    ];
+  };
+
+  const handleServiceClick = (service: EnterpriseService) => {
+    trackBusinessInteraction(service.id.toString(), service.libelle, "click", {
+      category: service.category?.name,
+      tags: service.tags,
     });
+    
     setSelectedService(service);
+    
+    // Générer les features à partir des tags
+    const features = generateFeaturesFromTags(service);
+    
     setFormData((prev) => ({
       ...prev,
-      service: service.nom,
+      service: service.libelle,
       message: `Bonjour,\n\nJe suis intéressé par le service "${
-        service.nom
-      }".\n\nPouvez-vous me renseigner sur :\n${service.features
+        service.libelle
+      }".\n\nPouvez-vous me renseigner sur :\n${features
         .map((f) => `• ${f}`)
         .join(
           "\n"
@@ -44,7 +123,7 @@ export const useEntreprise = () => {
     setShowMessageModal(true);
   };
 
-  const handleContact = (partenaire) => {
+  const handleContact = (partenaire: any) => {
     trackBusinessInteraction(
       partenaire.id.toString(),
       partenaire.nom,
@@ -63,20 +142,20 @@ export const useEntreprise = () => {
     setShowMapModal(true);
   };
 
-  const handlePartnerLocation = (partenaire) => {
+  const handlePartnerLocation = (partenaire: any) => {
     trackBusinessInteraction(
       partenaire.id.toString(),
       partenaire.nom,
       "location_view",
       {
-        address: partenaire.location.address,
+        address: partenaire.location?.address,
       }
     );
     setSelectedLocation(partenaire.location);
     setShowMapModal(true);
   };
 
-  const handleSubmitMessage = (e) => {
+  const handleSubmitMessage = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -91,9 +170,10 @@ export const useEntreprise = () => {
       : selectedService
       ? {
           id: selectedService.id.toString(),
-          name: selectedService.nom,
+          name: selectedService.libelle,
           action: "service_request",
-          category: selectedService.category,
+          category: selectedService.category?.name,
+          tags: selectedService.tags,
         }
       : {
           id: "general_contact",
@@ -128,7 +208,7 @@ export const useEntreprise = () => {
     }, 2000);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -147,7 +227,7 @@ export const useEntreprise = () => {
     formData,
     hoveredCard,
     serviceCategories,
-    partenaires, // Ajouté
+    partenaires,
     setShowMessageModal,
     setShowMapModal,
     setSelectedPartenaire,

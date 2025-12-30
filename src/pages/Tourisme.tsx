@@ -788,7 +788,7 @@ export const TourismSection = () => {
             <p className="text-sm max-w-2xl mx-auto mb-5 leading-relaxed">
               Découvrez nos hébergements partenaires et réservez votre séjour en toute simplicité
             </p>
-            <TourismNavigation />
+            <TourismNavigation page="sejour" />
           </div>
           
         </div>
