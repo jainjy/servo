@@ -1,4 +1,3 @@
-// services/conseilService.js - VERSION COMPLÈTE ET CORRIGÉE
 import api from "../lib/api";
 
 export const conseilService = {
@@ -64,64 +63,11 @@ export const conseilService = {
     } catch (error) {
       console.error('Erreur récupération types conseil:', error);
       
-      // Données par défaut
+      // Retourner un tableau vide au lieu de données par défaut
       return {
-        success: true,
-        data: [
-          {
-            id: 1,
-            title: "Audit Stratégique",
-            description: "Analyse approfondie de votre situation et recommandations stratégiques",
-            icon: "BarChart",
-            color: "#6B8E23",
-            details: [
-              "Analyse SWOT complète",
-              "Benchmark concurrentiel",
-              "Diagnostic organisationnel",
-              "Recommandations stratégiques",
-              "Plan d'action détaillé"
-            ],
-            duration: "2-4 semaines",
-            price: "À partir de 2 500€",
-            category: 'audit',
-            isFeatured: true,
-            isPopular: true
-          },
-          {
-            id: 2,
-            title: "Médiation & Résolution",
-            description: "Résolution amiable des conflits internes et externes",
-            icon: "Handshake",
-            color: "#27AE60",
-            details: [
-              "Médiation commerciale",
-              "Résolution de conflits internes",
-              "Négociation stratégique",
-              "Accords de partenariat",
-              "Prévention des litiges"
-            ],
-            duration: "1-3 semaines",
-            price: "À partir de 1 800€",
-            category: 'mediation'
-          },
-          {
-            id: 3,
-            title: "Conseil en Stratégie",
-            description: "Développement et optimisation de votre stratégie d'entreprise",
-            icon: "Target",
-            color: "#8B4513",
-            details: [
-              "Définition de vision",
-              "Plan stratégique sur 3-5 ans",
-              "Allocation des ressources",
-              "Suivi des indicateurs",
-              "Ajustements stratégiques"
-            ],
-            duration: "3-6 semaines",
-            price: "À partir de 3 500€",
-            category: 'strategie'
-          }
-        ]
+        success: false,
+        data: [],
+        error: "Impossible de charger les types de conseil"
       };
     }
   },
@@ -134,35 +80,11 @@ export const conseilService = {
     } catch (error) {
       console.error('Erreur récupération experts:', error);
       
-      // Données par défaut
+      // Retourner un tableau vide au lieu de données par défaut
       return {
-        success: true,
-        data: [
-          {
-            id: 1,
-            name: "Dr. Sophie Laurent",
-            title: "Experte en Audit Stratégique",
-            specialty: "Stratégie d'entreprise & Organisation",
-            experience: "20 ans d'expérience",
-            rating: 4.9,
-            avatarColor: "#6B8E23",
-            disponibilite: 'disponible',
-            projets: 156,
-            certifications: ["MBA HEC", "Certified Management Consultant", "Six Sigma Black Belt"]
-          },
-          {
-            id: 2,
-            name: "Pierre Martin",
-            title: "Spécialiste en Médiation",
-            specialty: "Résolution de conflits & Négociation",
-            experience: "15 ans d'expérience",
-            rating: 4.8,
-            avatarColor: "#8B4513",
-            disponibilite: 'limitee',
-            projets: 89,
-            certifications: ["Médiateur certifié CNMA", "Expert en négociation Harvard", "Praticien PNL"]
-          }
-        ]
+        success: false,
+        data: [],
+        error: "Impossible de charger les experts"
       };
     }
   },
@@ -343,15 +265,11 @@ export const conseilService = {
     } catch (error) {
       console.error('Erreur récupération stats:', error);
       
-      // Données par défaut
+      // Retourner un tableau vide
       return {
-        success: true,
-        data: [
-          { value: "98%", label: "Satisfaction client", icon: "ThumbsUp", color: "#27AE60" },
-          { value: "500+", label: "Projets conseillés", icon: "Target", color: "#6B8E23" },
-          { value: "15", label: "Années d'expertise", icon: "Award", color: "#8B4513" },
-          { value: "24h", label: "Réponse garantie", icon: "Clock", color: "#D4AF37" }
-        ]
+        success: false,
+        data: [],
+        error: "Impossible de charger les statistiques"
       };
     }
   },
@@ -364,21 +282,11 @@ export const conseilService = {
     } catch (error) {
       console.error('Erreur récupération témoignages:', error);
       
-      // Données par défaut
+      // Retourner un tableau vide
       return {
-        success: true,
-        data: [
-          {
-            id: 1,
-            name: "Julie Moreau",
-            entreprise: "TechStart Solutions",
-            texte: "L'audit stratégique réalisé par l'équipe a été déterminant pour notre repositionnement sur le marché.",
-            rating: 5,
-            date: "15 Jan 2024",
-            avatarColor: "#6B8E23",
-            resultat: "+150% croissance en 12 mois"
-          }
-        ]
+        success: false,
+        data: [],
+        error: "Impossible de charger les témoignages"
       };
     }
   },
@@ -391,19 +299,11 @@ export const conseilService = {
     } catch (error) {
       console.error('Erreur récupération étapes:', error);
       
-      // Données par défaut
+      // Retourner un tableau vide
       return {
-        success: true,
-        data: [
-          {
-            step: 1,
-            title: "Diagnostic initial",
-            description: "Analyse approfondie de votre situation",
-            icon: "Search",
-            color: "#6B8E23",
-            details: "Entretien découverte, analyse documentaire, identification des enjeux"
-          }
-        ]
+        success: false,
+        data: [],
+        error: "Impossible de charger les étapes"
       };
     }
   },
@@ -416,17 +316,11 @@ export const conseilService = {
     } catch (error) {
       console.error('Erreur récupération avantages:', error);
       
-      // Données par défaut
+      // Retourner un tableau vide
       return {
-        success: true,
-        data: [
-          {
-            title: "Expertise certifiée",
-            description: "Nos conseillers sont certifiés et possèdent une expertise avérée",
-            icon: "Shield",
-            color: "#6B8E23"
-          }
-        ]
+        success: false,
+        data: [],
+        error: "Impossible de charger les avantages"
       };
     }
   },

@@ -37,26 +37,17 @@ import {
   ShoppingBag,
   Beef,
   GlassWater,
+  ChevronRight,
+  ArrowUp,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { useCart } from "@/hooks/useCart";
 import ProductCard from "@/components/ProductCard";
 import api from "@/lib/api";
 
-// Composant Skeleton Loading pour les catégories
-const CategoryCardSkeleton = () => (
-  <Card className="p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl">
-    <div className="w-full h-32 rounded-md mb-4 bg-gray-300 animate-pulse" />
-    <div className="h-6 bg-gray-300 rounded mb-2 animate-pulse" />
-    <div className="h-4 bg-gray-300 rounded mb-4 w-3/4 animate-pulse" />
-    <div className="h-10 bg-gray-300 rounded animate-pulse" />
-  </Card>
-);
-
+// Composant Skeleton Loading
 const SectionSkeleton = () => (
-  <div className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm">
+  <div className="bg-white/80 p-5 pb-14 my-10 rounded-lg backdrop-blur-sm">
     <div className="flex items-center justify-between gap-4 mb-8">
       <div className="flex items-center gap-4 w-full">
         <div className="p-3 rounded-2xl bg-gray-300 w-14 h-14 animate-pulse" />
@@ -68,208 +59,79 @@ const SectionSkeleton = () => (
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {[1, 2, 3, 4].map((i) => (
-        <CategoryCardSkeleton key={i} />
+        <div key={i} className="p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl">
+          <div className="w-full h-32 rounded-md mb-4 bg-gray-300 animate-pulse" />
+          <div className="h-6 bg-gray-300 rounded mb-2 animate-pulse" />
+          <div className="h-4 bg-gray-300 rounded mb-4 w-3/4 animate-pulse" />
+          <div className="h-10 bg-gray-300 rounded animate-pulse" />
+        </div>
       ))}
     </div>
   </div>
 );
 
-// Composant Contact Modal
-const ContactModal = ({ isOpen, onClose, type }) => {
-  if (!isOpen) return null;
-
+// Composant Navigation Rapide
+const QuickNavigation = ({ sections, activeSection, onSectionClick }) => {
+  if (!sections || sections.length === 0) return null;
+  
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl max-w-md w-full animate-scale-in">
-        <div className="p-6 border-b border-[#D3D3D3] flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-[#556B2F]">
-            {type === "contact" ? "Contactez-nous" : "Prendre rendez-vous"}
-          </h2>
-          <Button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-            variant="ghost"
+    <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-30 hidden lg:block">
+      <Card className="p-3 bg-white/90 backdrop-blur-md shadow-xl border-0 rounded-2xl">
+        <div className="flex flex-col items-center gap-2">
+          {sections.map((section) => {
+            const IconComponent = section.icon;
+            const isActive = activeSection === section.id;
+            
+            return (
+              <button
+                key={section.id}
+                onClick={() => onSectionClick(section.id)}
+                className={`relative p-2 rounded-xl transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-[#556B2F] text-white' 
+                    : 'hover:bg-[#556B2F]/10 text-[#556B2F]'
+                }`}
+                title={section.title}
+              >
+                <IconComponent className="h-5 w-5" />
+                {isActive && (
+                  <div className="absolute -right-1 -top-1 w-3 h-3 bg-[#6B8E23] rounded-full border-2 border-white"></div>
+                )}
+              </button>
+            );
+          })}
+          
+          <div className="h-px w-8 bg-[#D3D3D3] my-1"></div>
+          
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="p-2 rounded-xl hover:bg-[#556B2F]/10 text-[#556B2F] transition-colors duration-300"
+            title="Retour en haut"
           >
-            <X className="h-5 w-5" />
-          </Button>
+            <ArrowUp className="h-5 w-5" />
+          </button>
         </div>
-
-        <div className="p-6">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-[#6B8E23]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              {type === "contact" ? (
-                <Phone className="h-8 w-8 text-[#556B2F]" />
-              ) : (
-                <Calendar className="h-8 w-8 text-[#556B2F]" />
-              )}
-            </div>
-            <h3 className="text-xl font-semibold text-[#556B2F] mb-2">
-              {type === "contact" ? "Service Client" : "Consultation Nutrition"}
-            </h3>
-            <p className="text-[#8B4513]">
-              {type === "contact"
-                ? "Notre équipe est disponible pour répondre à toutes vos questions."
-                : "Planifiez une consultation avec nos nutritionnistes."}
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-[#FFFFFF]">
-              <Phone className="h-5 w-5 text-[#556B2F]" />
-              <div>
-                <p className="font-semibold text-[#556B2F]">
-                  +33 1 23 45 67 89
-                </p>
-                <p className="text-sm text-[#8B4513]">Lun-Sam 8h-20h</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-[#FFFFFF]">
-              <MapPin className="h-5 w-5 text-[#556B2F]" />
-              <div>
-                <p className="font-semibold text-[#556B2F]">
-                  Marché Bio Paris 15
-                </p>
-                <p className="text-sm text-[#8B4513]">75015 Paris</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-[#FFFFFF]">
-              <Clock className="h-5 w-5 text-[#556B2F]" />
-              <div>
-                <p className="font-semibold text-[#556B2F]">Livraison</p>
-                <p className="text-sm text-[#8B4513]">Sous 24h</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <Button
-              className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  window.open("tel:+33123456789");
-                }
-              }}
-            >
-              <Phone className="h-4 w-4 mr-2" />
-              Appeler maintenant
-            </Button>
-          </div>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 };
 
 const Alimentation = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [contactModalType, setContactModalType] = useState("contact");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [categoryCounts, setCategoryCounts] = useState({});
   const [sectionSearchQueries, setSectionSearchQueries] = useState({});
+  const [activeSection, setActiveSection] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const sectionRefs = useRef({});
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { addToCart } = useCart(user);
 
-  // Charger les produits et catégories au montage du composant
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, []);
-
-  const fetchProducts = async (category = null) => {
-    try {
-      setIsLoading(true);
-      const params = { status: "active" };
-      if (category) {
-        params.category = category;
-      }
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
-      const response = await api.get("/aliments", { params });
-      setProducts(response.data.products);
-    } catch (error) {
-      console.error(
-        "Erreur lors du chargement des produits alimentaires:",
-        error
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      setIsCategoriesLoading(true);
-      const response = await api.get("/aliments/categories");
-      setCategories(response.data);
-
-      // Créer un objet avec les comptes par catégorie pour un accès facile
-      const counts = {};
-      response.data.forEach((cat) => {
-        counts[cat.name] = cat.count;
-      });
-      setCategoryCounts(counts);
-    } catch (error) {
-      console.error(
-        "Erreur lors du chargement des catégories alimentaires:",
-        error
-      );
-    } finally {
-      setIsCategoriesLoading(false);
-    }
-  };
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    await fetchProducts();
-  };
-
-  const handleSectionSearch = (e) => {
-    e.preventDefault();
-    // La recherche est faite en temps réel via le filtrage dans le render
-  };
-
-  // CORRIGÉ: Fonction pour naviguer vers la catégorie
-  const handleCategoryClick = (category) => {
-    const categoryData = {
-      name: category.name,
-      description: category.description,
-      image: category.image,
-      foodCategory: category.foodCategory,
-      iconName: category.iconName,
-    };
-
-    // Utiliser foodCategory pour la navigation
-    navigate(
-      `/alimentation/food-category/${encodeURIComponent(
-        category.foodCategory
-      )}`,
-      {
-        state: categoryData,
-      }
-    );
-  };
-
-  const handleContactClick = (type) => {
-    setContactModalType(type);
-    setIsContactModalOpen(true);
-  };
-
-  // Fonction pour obtenir le nombre de produits pour une catégorie
-  const getProductCount = (categoryName) => {
-    return categoryCounts[categoryName] || 0;
-  };
-
-  // Données pour les 4 nouvelles sections basées sur les nouvelles sections demandées
+  // Données pour les 4 sections (statiques)
   const sections = [
     {
       id: "restaurants-snacks",
@@ -421,63 +283,229 @@ const Alimentation = () => {
     },
   ];
 
-  // Fonction pour obtenir les catégories par section
-  const getCategoriesForSection = (section) => {
-    return section.subcategories || [];
+  // Charger les données UNE SEULE FOIS au montage
+  useEffect(() => {
+    console.log("useEffect de chargement des données exécuté");
+    let isMounted = true;
+    
+    const loadData = async () => {
+      try {
+        console.log("Début du chargement des données...");
+        
+        // Charger les catégories
+        const categoriesResponse = await api.get("/aliments/categories");
+        console.log("Catégories chargées:", categoriesResponse.data);
+        
+        // Charger les produits
+        const productsResponse = await api.get("/aliments", { 
+          params: { status: "active" } 
+        });
+        console.log("Produits chargés:", productsResponse.data);
+        
+        if (isMounted) {
+          // Mettre à jour les états
+          setCategories(categoriesResponse.data || []);
+          
+          // Calculer les comptes par catégorie
+          const counts = {};
+          if (categoriesResponse.data) {
+            categoriesResponse.data.forEach((cat) => {
+              counts[cat.name] = cat.count || 0;
+            });
+          }
+          setCategoryCounts(counts);
+          
+          setProducts(productsResponse.data?.products || productsResponse.data || []);
+          setIsInitialized(true);
+          setIsCategoriesLoading(false);
+          console.log("Données initialisées avec succès");
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+        if (isMounted) {
+          setIsInitialized(true);
+          setIsCategoriesLoading(false);
+          console.log("Initialisation malgré l'erreur");
+        }
+      }
+    };
+
+    loadData();
+    
+    return () => {
+      console.log("Cleanup useEffect");
+      isMounted = false;
+    };
+  }, []); // Dépendance vide = exécuté une seule fois
+
+  // Configuration de l'intersection observer (uniquement après initialisation)
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    console.log("Configuration de l'intersection observer");
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '-20% 0px -70% 0px',
+        threshold: 0.1,
+      }
+    );
+
+    // Observer toutes les sections
+    Object.values(sectionRefs.current).forEach(ref => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      console.log("Cleanup observer");
+      observer.disconnect();
+    };
+  }, [isInitialized]);
+
+  // Fonction pour filtrer les sections
+  const getFilteredSections = useCallback(() => {
+    return sections
+      .map((section) => {
+        const categories = section.subcategories || [];
+        const filteredCategories = categories.filter(
+          (category) => (categoryCounts[category.name] || 0) > 0
+        );
+
+        return {
+          ...section,
+          categories: filteredCategories,
+        };
+      })
+      .filter((section) => section.categories.length > 0);
+  }, [categoryCounts]);
+
+  // Recherche en temps réel avec debounce
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.length > 2) {
+        performSearch(searchQuery);
+      } else if (searchQuery.length === 0) {
+        setSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, isInitialized]);
+
+  const performSearch = async (query) => {
+    console.log("Recherche pour:", query);
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    
+    try {
+      setIsSearching(true);
+      
+      const response = await api.get("/aliments", {
+        params: {
+          status: "active",
+          search: query,
+          limit: 50
+        }
+      });
+      
+      const data = response.data;
+      const results = data.products || data || [];
+      console.log("Résultats de recherche:", results.length);
+      setSearchResults(Array.isArray(results) ? results : []);
+      
+    } catch (error) {
+      console.error("Erreur lors de la recherche:", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  // Fonction pour obtenir l'icône par nom
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    await performSearch(searchQuery);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  const handleCategoryClick = (category) => {
+    const categoryData = {
+      name: category.name,
+      description: category.description,
+      image: category.image,
+      foodCategory: category.foodCategory,
+      iconName: category.iconName,
+    };
+
+    navigate(
+      `/alimentation/food-category/${encodeURIComponent(
+        category.foodCategory
+      )}`,
+      {
+        state: categoryData,
+      }
+    );
+  };
+
+  const handleSectionNavigation = (sectionId) => {
+    const element = sectionRefs.current[sectionId];
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
   const getIconByName = (iconName) => {
     const icons = {
-      Apple,
-      Carrot,
-      Wheat,
-      Coffee,
-      Fish,
-      Milk,
-      Egg,
-      ChefHat,
-      Heart,
-      Leaf,
-      Sparkles,
-      Zap,
-      Flame,
-      Truck,
-      Store,
-      ShoppingBag,
-      ShoppingCart,
-      Wine,
-      Utensils,
-      Shield,
-      GlassWater,
+      Apple, Carrot, Wheat, Coffee, Fish, Milk, Egg, ChefHat, Heart, Leaf,
+      Sparkles, Zap, Flame, Truck, Store, ShoppingBag, ShoppingCart, Wine,
+      Utensils, Shield, GlassWater,
     };
     return icons[iconName] || Apple;
   };
 
-  // Filtrer les sections basées sur les produits disponibles
-  const filteredSections = sections
-    .map((section) => {
-      const categories = getCategoriesForSection(section);
-      const filteredCategories = categories.filter(
-        (category) => getProductCount(category.name) > 0
-      );
+  const filteredSections = getFilteredSections();
 
-      return {
-        ...section,
-        categories: filteredCategories,
-      };
-    })
-    .filter((section) => section.categories.length > 0);
+  // Écran de chargement initial
+  if (!isInitialized) {
+    console.log("Affichage de l'écran de chargement");
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#556B2F] mx-auto"></div>
+          <p className="mt-4 text-[#556B2F]">Chargement en cours...</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
 
   return (
-    <div className="min-h-screen relative pt-16 overflow-hidden bg-[#FFFFFF]">
+    <div className="min-h-screen relative pt-16 bg-[#FFFFFF]">
       {/* Background Image avec overlay */}
       <div className="absolute inset-0">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url("https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
-            backgroundAttachment: "fixed",
           }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40" />
@@ -485,11 +513,20 @@ const Alimentation = () => {
 
       <div className="absolute inset-0 bg-gradient-to-br from-[#6B8E23]/20 to-[#FFFFFF]/30 z-1" />
 
+      {/* Navigation Rapide */}
+      {filteredSections.length > 0 && (
+        <QuickNavigation 
+          sections={filteredSections}
+          activeSection={activeSection}
+          onSectionClick={handleSectionNavigation}
+        />
+      )}
+
       <div className="relative z-10">
-        <section className="container mx-auto px-4 py-8">
-          {/* En-tête avec animation */}
-          <div className="bg-white/90 py-5 rounded-lg backdrop-blur-sm">
-            <div className="text-center mb-5 animate-fade-in">
+        <section className="container mx-auto px-4 pt-10 pb-20">
+          {/* En-tête */}
+          <div className="bg-white/90 py-5 rounded-b-lg backdrop-blur-sm">
+            <div className="text-center mb-5">
               <h1 className="tracking-widest h-full text-xl lg:text-5xl md:text-4xl font-bold mb-4 text-logo">
                 Manger & Consommer
               </h1>
@@ -497,55 +534,33 @@ const Alimentation = () => {
                 Découvrez les saveurs authentiques de La Réunion : restaurants locaux, produits frais, marchés artisanaux et bien-être
               </p>
             </div>
-
             {/* Badges d'avantages */}
-            <div
-              className="flex flex-wrap justify-center gap-4 mb-6 animate-fade-in"
-              style={{ animationDelay: "0.3s" }}
-            >
-              <Badge className="bg-[#556B2F] text-white hover:bg-[#6B8E23] border-0 px-4 py-2">
-                <Leaf className="h-3 w-3 mr-1" />
+            <div className="flex flex-wrap justify-center gap-4 mb-6 px-4">
+              <Badge className="bg-[#556B2F] text-white hover:bg-[#6B8E23] border-0 px-5 py-2.5 rounded-full shadow-md">
+                <Leaf className="h-4 w-4 mr-2" />
                 Produits Locaux
               </Badge>
-              <Badge className="bg-[#8B4513] text-white hover:bg-[#A0522D] border-0 px-4 py-2">
-                <Truck className="h-3 w-3 mr-1" />
+              <Badge className="bg-[#8B4513] text-white hover:bg-[#A0522D] border-0 px-5 py-2.5 rounded-full shadow-md">
+                <Truck className="h-4 w-4 mr-2" />
                 Fraîcheur Garantie
               </Badge>
-              <Badge className="bg-[#D2691E] text-white hover:bg-[#CD853F] border-0 px-4 py-2">
-                <ShieldCheck className="h-3 w-3 mr-1" />
+              <Badge className="bg-[#D2691E] text-white hover:bg-[#CD853F] border-0 px-5 py-2.5 rounded-full shadow-md">
+                <ShieldCheck className="h-4 w-4 mr-2" />
                 Artisans Réunionnais
               </Badge>
-              <Badge className="bg-[#2E8B57] text-white hover:bg-[#3CB371] border-0 px-4 py-2">
-                <Star className="h-3 w-3 mr-1" />
+              <Badge className="bg-[#2E8B57] text-white hover:bg-[#3CB371] border-0 px-5 py-2.5 rounded-full shadow-md">
+                <Star className="h-4 w-4 mr-2" />
                 Bien-être Naturel
               </Badge>
             </div>
           </div>
 
-          {/* Affichage des résultats de recherche */}
-          {searchQuery && products.length > 0 && (
-            <div className="mb-12 animate-fade-in">
-              <h2 className="text-3xl font-bold mb-6">
-                Résultats pour "{searchQuery}"
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products
-                  .filter((product) => product.id !== 0)
-                  .map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={addToCart}
-                      user={user}
-                    />
-                  ))}
-              </div>
-            </div>
-          )}
+          
 
-          {/* Sections dynamiques */}
+          {/* Sections */}
           {isCategoriesLoading ? (
             <>
+              <SectionSkeleton />
               <SectionSkeleton />
               <SectionSkeleton />
               <SectionSkeleton />
@@ -553,32 +568,40 @@ const Alimentation = () => {
           ) : (
             filteredSections.map((section, sectionIndex) => {
               const IconComponent = section.icon;
-              const animationDelays = {
-                container: `${0.2 + sectionIndex * 0.2}s`,
-                cards: `${0.3 + sectionIndex * 0.2}s`,
-              };
 
               return (
                 <div
                   key={section.id}
-                  className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
+                  ref={(el) => {
+                    if (el) sectionRefs.current[section.id] = el;
+                  }}
+                  className="bg-white/90 py-15 pb-14 px-4 mt-10 rounded-2xl backdrop-blur-sm shadow-sm border border-[#D3D3D3]/30"
                   id={section.id}
                 >
-                  <div
-                    className="flex items-center justify-between gap-4 mb-8 animate-slide-from-left"
-                    style={{ animationDelay: animationDelays.container }}
-                  >
+                  <div className="flex items-center justify-between gap-4 mb-8">
                     <div className="flex items-center gap-4">
                       <div 
-                        className="p-3 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-110"
+                        className="p-3 rounded-2xl shadow-lg"
                         style={{ backgroundColor: section.color }}
                       >
                         <IconComponent className="h-8 w-8 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-xl lg:text-2xl font-bold text-black/70">
-                          {section.title}
-                        </h2>
+                        <div className="flex items-center gap-3">
+                          <h2 className="text-xl lg:text-2xl font-bold text-black/70">
+                            {section.title}
+                          </h2>
+                          <Badge 
+                            variant="outline"
+                            className="text-xs"
+                            style={{ 
+                              color: section.color,
+                              borderColor: section.color
+                            }}
+                          >
+                            {section.categories.length} catégories
+                          </Badge>
+                        </div>
                         <p className="text-xs text-[#8B4513] mt-2">
                           {section.description}
                         </p>
@@ -586,97 +609,54 @@ const Alimentation = () => {
                         {/* Sous-liens de navigation */}
                         <div className="flex flex-wrap gap-3 mt-3">
                           {section.subcategories && section.subcategories.map((subcat) => (
-                            <a
+                            <button
                               key={subcat.foodCategory}
-                              href={`#${subcat.foodCategory}`}
-                              className="text-xs text-[#556B2F] hover:text-[#6B8E23] transition-colors"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                navigate(
-                                  `/alimentation/food-category/${encodeURIComponent(subcat.foodCategory)}`,
-                                  {
-                                    state: {
-                                      name: subcat.name,
-                                      description: subcat.description,
-                                      image: subcat.image,
-                                      foodCategory: subcat.foodCategory,
-                                      iconName: subcat.iconName,
-                                    },
-                                  }
-                                );
-                              }}
+                              onClick={() => navigate(
+                                `/alimentation/food-category/${encodeURIComponent(subcat.foodCategory)}`,
+                                {
+                                  state: {
+                                    name: subcat.name,
+                                    description: subcat.description,
+                                    image: subcat.image,
+                                    foodCategory: subcat.foodCategory,
+                                    iconName: subcat.iconName,
+                                  },
+                                }
+                              )}
+                              className="text-xs text-[#556B2F] hover:text-[#6B8E23] transition-colors bg-[#556B2F]/5 hover:bg-[#556B2F]/10 px-3 py-1 rounded-full"
                             >
                               {subcat.name} →
-                            </a>
+                            </button>
                           ))}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Barre de recherche à droite */}
-                    <div className="hidden md:flex items-center ml-auto">
-                      <form onSubmit={handleSectionSearch} className="relative">
-                        <div className="relative flex items-center">
-                          <Input
-                            type="text"
-                            placeholder={`Chercher dans ${section.title}...`}
-                            value={sectionSearchQueries[section.id] || ""}
-                            onChange={(e) => {
-                              setSectionSearchQueries({
-                                ...sectionSearchQueries,
-                                [section.id]: e.target.value,
-                              });
-                            }}
-                            className="pl-10 pr-2 py-2 h-16 rounded-xl border-2 border-[#D3D3D3] focus:border-[#556B2F] focus:outline-none transition-all duration-300 w-32 lg:w-96 placeholder-[#8B4513]"
-                          />
-                          <button
-                            type="submit"
-                            className="absolute left-3 text-[#556B2F] hover:text-[#6B8E23] transition-colors"
-                          >
-                            <Search className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </form>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {section.categories
-                      .filter((category) => {
-                        const searchQuery =
-                          sectionSearchQueries[section.id] || "";
-                        return (
-                          category.name
-                            .toLowerCase()
-                            .includes(searchQuery.toLowerCase()) ||
-                          category.description
-                            .toLowerCase()
-                            .includes(searchQuery.toLowerCase())
-                        );
-                      })
                       .map((category, index) => {
                         const CategoryIcon = getIconByName(category.iconName);
-                        const productCount = getProductCount(category.name);
+                        const productCount = categoryCounts[category.name] || 0;
 
                         return (
                           <Card
-                            key={category.name}
-                            className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
-                            style={{
-                              animationDelay: `${
-                                parseFloat(animationDelays.cards) + index * 0.1
-                              }s`,
-                            }}
+                            key={`${category.name}-${index}`}
+                            className="group p-5 flex flex-col border border-[#D3D3D3]/50 bg-white/95 backdrop-blur-sm shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer text-center rounded-xl"
                           >
-                            <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                            <div className="relative flex mx-auto overflow-hidden bg-black/10 w-full h-40 rounded-lg mb-4">
                               <img
                                 src={category.image}
                                 alt={category.name}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                onError={(e) => {
+                                  e.target.src = "https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
+                                }}
                               />
-                              <div className="flex justify-end absolute rounded-full text-white bottom-2 right-2">
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                              <div className="flex justify-end absolute rounded-full text-white bottom-3 right-3">
                                 <Badge 
-                                  className="text-white"
+                                  className="text-white shadow-md"
                                   style={{ backgroundColor: section.color }}
                                 >
                                   {productCount} produit
@@ -684,17 +664,27 @@ const Alimentation = () => {
                                 </Badge>
                               </div>
                             </div>
-                            <h3 className="text-xl font-semibold mb-2 text-[#556B2F] group-hover:text-[#6B8E23] transition-colors duration-300">
+                            <div className="flex items-center justify-center mb-3">
+                              <div 
+                                className="p-2 rounded-lg"
+                                style={{ backgroundColor: `${section.color}15` }}
+                              >
+                                <CategoryIcon 
+                                  className="h-5 w-5" 
+                                  style={{ color: section.color }}
+                                />
+                              </div>
+                            </div>
+                            <h3 className="text-lg font-semibold mb-2 text-[#556B2F] group-hover:text-[#6B8E23] transition-colors duration-300 px-2">
                               {category.name}
                             </h3>
-                            <p className="text-[#8B4513] text-sm mb-2 leading-relaxed">
+                            <p className="text-[#8B4513] text-sm mb-4 leading-relaxed px-2">
                               {category.description}
                             </p>
                             <Button
-                              className="w-full text-white border-0 transition-all duration-300"
+                              className="w-full text-white border-0 transition-all duration-300 shadow-md hover:shadow-lg mt-auto"
                               style={{ 
                                 backgroundColor: section.color,
-                                hover: { backgroundColor: `${section.color}CC` }
                               }}
                               onClick={() => handleCategoryClick(category)}
                             >
@@ -704,226 +694,13 @@ const Alimentation = () => {
                           </Card>
                         );
                       })}
-
-                    {section.categories.filter((category) => {
-                      const searchQuery = sectionSearchQueries[section.id] || "";
-                      return (
-                        category.name
-                          .toLowerCase()
-                          .includes(searchQuery.toLowerCase()) ||
-                        category.description
-                          .toLowerCase()
-                          .includes(searchQuery.toLowerCase())
-                      );
-                    }).length === 0 &&
-                      sectionSearchQueries[section.id] && (
-                        <div className="col-span-full text-center py-8">
-                          <p className="text-gray-500 text-lg">
-                            Aucune catégorie ne correspond à "
-                            {sectionSearchQueries[section.id]}"
-                          </p>
-                        </div>
-                      )}
                   </div>
                 </div>
               );
             })
           )}
-
-          {/* Section médecine par les plantes
-          <div className="text-center mt-12">
-            <Card className="bg-white/80 backdrop-blur-md rounded-3xl p-8 border-0">
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                Découvrez la médecine par les plantes
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Explorez notre section dédiée à la phytothérapie et apprenez à
-                utiliser les plantes pour prendre soin de votre santé
-                naturellement.
-              </p>
-              <Button
-                onClick={() => navigate("/medecine-plantes")}
-                className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
-              >
-                <Leaf className="h-5 w-5 mr-2" />
-                Explorer la médecine des plantes
-              </Button>
-            </Card>
-          </div> */}
         </section>
       </div>
-
-      {/* Modal de contact seulement */}
-      <ContactModal
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-        type={contactModalType}
-      />
-
-      {/* Styles CSS pour les animations */}
-      <style>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes slide-from-left {
-          from {
-            opacity: 0;
-            transform: translateX(-50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes slide-from-right {
-          from {
-            opacity: 0;
-            transform: translateX(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes slide-from-left-card {
-          from {
-            opacity: 0;
-            transform: translateX(-30px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-        @keyframes slide-from-right-card {
-          from {
-            opacity: 0;
-            transform: translateX(30px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-        @keyframes scale-up {
-          from {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes scale-up-card {
-          from {
-            opacity: 0;
-            transform: scale(0.9) translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-        @keyframes bounce-in {
-          0% {
-            opacity: 0;
-            transform: scale(0.3);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.05);
-          }
-          70% {
-            transform: scale(0.9);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes pulse-cta {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.02);
-          }
-        }
-        @keyframes scale-in {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        .animate-fade-in {
-          animation: fade-in 0.8s ease-out forwards;
-        }
-        .animate-slide-up {
-          animation: slide-up 0.6s ease-out forwards;
-        }
-        .animate-slide-from-left {
-          animation: slide-from-left 0.8s ease-out forwards;
-        }
-        .animate-slide-from-right {
-          animation: slide-from-right 0.8s ease-out forwards;
-        }
-        .animate-slide-from-left-card {
-          animation: slide-from-left-card 0.6s ease-out forwards;
-        }
-        .animate-slide-from-right-card {
-          animation: slide-from-right-card 0.6s ease-out forwards;
-        }
-        .animate-scale-up {
-          animation: scale-up 0.7s ease-out forwards;
-        }
-        .animate-scale-up-card {
-          animation: scale-up-card 0.6s ease-out forwards;
-        }
-        .animate-bounce-in {
-          animation: bounce-in 1s ease-out forwards;
-        }
-        .animate-pulse-cta {
-          animation: pulse-cta 3s ease-in-out infinite;
-        }
-        .animate-scale-in {
-          animation: scale-in 0.3s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

@@ -210,6 +210,7 @@ const ConseilPage = () => {
   );
   const [avantages, setAvantages] = useState<Avantage[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     nom: "",
@@ -259,6 +260,7 @@ const ConseilPage = () => {
   const fetchData = async () => {
     try {
       setIsDataLoading(true);
+      setDataError(null);
 
       console.log("🔍 Début du chargement des données pour la page Conseil...");
 
@@ -289,279 +291,245 @@ const ConseilPage = () => {
       });
 
       // Gestion des types de conseil
-      if (
-        typesResponse.status === "fulfilled" &&
-        typesResponse.value?.success
-      ) {
-        const typesData = typesResponse.value.data || [];
-        console.log(`📋 Types de conseil reçus: ${typesData.length}`);
-        setConseilTypes(
-          typesData.map((type: any) => ({
-            ...type,
-            id: type.id || Date.now(),
-            icon: type.icon || "BarChart",
-            details: Array.isArray(type.details) ? type.details : [],
-            category: type.category || "audit",
-          }))
-        );
+      if (typesResponse.status === "fulfilled") {
+        const typesData = typesResponse.value?.data || [];
+        if (typesResponse.value?.success && typesData.length > 0) {
+          console.log(`📋 Types de conseil reçus: ${typesData.length}`);
+          setConseilTypes(
+            typesData.map((type: any) => ({
+              ...type,
+              id: type.id || Date.now(),
+              icon: type.icon || "BarChart",
+              details: Array.isArray(type.details) ? type.details : [],
+              category: type.category || "audit",
+            }))
+          );
+        } else {
+          setConseilTypes([]);
+        }
       } else {
-        console.log("⚠️ Utilisation des types de conseil par défaut");
-        setConseilTypes(getDefaultConseilTypes());
+        setConseilTypes([]);
       }
 
-      // Gestion des experts - CORRECTION DÉTAILLÉE ICI
-      if (
-        expertsResponse.status === "fulfilled" &&
-        expertsResponse.value?.success
-      ) {
-        const expertsData = expertsResponse.value.data || [];
-        console.log(`👨‍💼 Experts reçus: ${expertsData.length}`, expertsData);
-
-        const formattedExperts = expertsData.map(
-          (expert: any, index: number) => {
-            console.log(`Expert ${index}:`, expert);
-
-            // DÉTERMINER LE NOM
-            let name = expert.name;
-            if (!name && (expert.firstName || expert.lastName)) {
-              name = `${expert.firstName || ""} ${
-                expert.lastName || ""
-              }`.trim();
-            }
-            if (!name) {
-              name =
-                expert.commercialName ||
-                expert.companyName ||
-                `Expert ${index + 1}`;
-            }
-
-            // DÉTERMINER LE TITRE
-            let title = expert.title;
-            if (!title) {
-              if (expert.role === "expert") title = "Expert Conseil";
-              else if (expert.userType === "professional")
-                title = "Professionnel";
-              else if (expert.commercialName) title = expert.commercialName;
-              else if (expert.metiers?.[0]?.metier?.libelle)
-                title = `Expert ${expert.metiers[0].metier.libelle}`;
-              else title = "Consultant";
-            }
-
-            // DÉTERMINER LA SPÉCIALITÉ
-            let specialty = expert.specialty;
-            if (!specialty) {
-              if (expert.metiers?.[0]?.metier?.libelle) {
-                specialty = expert.metiers[0].metier.libelle;
-              } else if (expert.services?.[0]?.service?.libelle) {
-                specialty = expert.services[0].service.libelle;
-              } else {
-                specialty = "Conseil stratégique";
+      // Gestion des experts
+      if (expertsResponse.status === "fulfilled") {
+        const expertsData = expertsResponse.value?.data || [];
+        if (expertsResponse.value?.success && expertsData.length > 0) {
+          console.log(`👨‍💼 Experts reçus: ${expertsData.length}`);
+          
+          const formattedExperts = expertsData.map(
+            (expert: any, index: number) => {
+              // DÉTERMINER LE NOM
+              let name = expert.name;
+              if (!name && (expert.firstName || expert.lastName)) {
+                name = `${expert.firstName || ""} ${
+                  expert.lastName || ""
+                }`.trim();
               }
-            }
-
-            // DÉTERMINER L'EXPÉRIENCE
-            let experience = expert.experience;
-            if (!experience) {
-              if (expert.createdAt) {
-                const now = new Date();
-                const joinDate = new Date(expert.createdAt);
-                const years = Math.floor(
-                  (now.getTime() - joinDate.getTime()) /
-                    (1000 * 60 * 60 * 24 * 365)
-                );
-                if (years > 10) experience = "Plus de 10 ans d'expérience";
-                else if (years > 5) experience = "5-10 ans d'expérience";
-                else if (years > 3) experience = "3-5 ans d'expérience";
-                else if (years > 1) experience = "1-3 ans d'expérience";
-                else experience = "Moins d'un an d'expérience";
-              } else {
-                experience = "Expérience variable";
-              }
-            }
-
-            // DÉTERMINER LE RATING
-            let rating = expert.rating;
-            if (!rating || typeof rating !== "number") {
-              // Calculer un rating basé sur l'expérience et le nombre de projets
-              rating = 4.0;
-              if (expert._count?.expertDemandesConseil > 50) rating += 1.0;
-              else if (expert._count?.expertDemandesConseil > 20) rating += 0.7;
-              else if (expert._count?.expertDemandesConseil > 10) rating += 0.5;
-              else if (expert._count?.expertDemandesConseil > 5) rating += 0.3;
-
-              if (expert.createdAt) {
-                const now = new Date();
-                const joinDate = new Date(expert.createdAt);
-                const years =
-                  (now.getTime() - joinDate.getTime()) /
-                  (1000 * 60 * 60 * 24 * 365);
-                if (years > 5) rating += 0.5;
-                else if (years > 3) rating += 0.3;
-                else if (years > 1) rating += 0.2;
+              if (!name) {
+                name =
+                  expert.commercialName ||
+                  expert.companyName ||
+                  `Expert ${index + 1}`;
               }
 
-              rating = Math.min(rating, 5);
+              // DÉTERMINER LE TITRE
+              let title = expert.title;
+              if (!title) {
+                if (expert.role === "expert") title = "Expert Conseil";
+                else if (expert.userType === "professional")
+                  title = "Professionnel";
+                else if (expert.commercialName) title = expert.commercialName;
+                else if (expert.metiers?.[0]?.metier?.libelle)
+                  title = `Expert ${expert.metiers[0].metier.libelle}`;
+                else title = "Consultant";
+              }
+
+              // DÉTERMINER LA SPÉCIALITÉ
+              let specialty = expert.specialty;
+              if (!specialty) {
+                if (expert.metiers?.[0]?.metier?.libelle) {
+                  specialty = expert.metiers[0].metier.libelle;
+                } else if (expert.services?.[0]?.service?.libelle) {
+                  specialty = expert.services[0].service.libelle;
+                } else {
+                  specialty = "Conseil stratégique";
+                }
+              }
+
+              // DÉTERMINER L'EXPÉRIENCE
+              let experience = expert.experience;
+              if (!experience) {
+                if (expert.createdAt) {
+                  const now = new Date();
+                  const joinDate = new Date(expert.createdAt);
+                  const years = Math.floor(
+                    (now.getTime() - joinDate.getTime()) /
+                      (1000 * 60 * 60 * 24 * 365)
+                  );
+                  if (years > 10) experience = "Plus de 10 ans d'expérience";
+                  else if (years > 5) experience = "5-10 ans d'expérience";
+                  else if (years > 3) experience = "3-5 ans d'expérience";
+                  else if (years > 1) experience = "1-3 ans d'expérience";
+                  else experience = "Moins d'un an d'expérience";
+                } else {
+                  experience = "Expérience variable";
+                }
+              }
+
+              // DÉTERMINER LE RATING
+              let rating = expert.rating;
+              if (!rating || typeof rating !== "number") {
+                // Calculer un rating basé sur l'expérience et le nombre de projets
+                rating = 4.0;
+                if (expert._count?.expertDemandesConseil > 50) rating += 1.0;
+                else if (expert._count?.expertDemandesConseil > 20) rating += 0.7;
+                else if (expert._count?.expertDemandesConseil > 10) rating += 0.5;
+                else if (expert._count?.expertDemandesConseil > 5) rating += 0.3;
+
+                if (expert.createdAt) {
+                  const now = new Date();
+                  const joinDate = new Date(expert.createdAt);
+                  const years =
+                    (now.getTime() - joinDate.getTime()) /
+                    (1000 * 60 * 60 * 24 * 365);
+                  if (years > 5) rating += 0.5;
+                  else if (years > 3) rating += 0.3;
+                  else if (years > 1) rating += 0.2;
+                }
+
+                rating = Math.min(rating, 5);
+              }
+
+              // DÉTERMINER LES PROJETS
+              let projets =
+                expert.projets ||
+                expert.projects ||
+                expert._count?.expertDemandesConseil ||
+                0;
+
+              // DÉTERMINER LA DISPONIBILITÉ
+              let disponibilite = expert.disponibilite;
+              if (!disponibilite) {
+                if (projets < 5) disponibilite = "disponible";
+                else if (projets < 15) disponibilite = "limitee";
+                else disponibilite = "complet";
+              }
+
+              // DÉTERMINER LA COULEUR DE L'AVATAR
+              let avatarColor = expert.avatarColor;
+              if (!avatarColor) {
+                const colors = [
+                  "#6B8E23",
+                  "#8B4513",
+                  "#556B2F",
+                  "#2C3E50",
+                  "#27AE60",
+                  "#D4AF37",
+                  "#8FBC8F",
+                  "#A0522D",
+                ];
+                const idStr = expert.id || index.toString();
+                const colorIndex =
+                  idStr
+                    .split("")
+                    .reduce(
+                      (acc: number, char: string) => acc + char.charCodeAt(0),
+                      0
+                    ) % colors.length;
+                avatarColor = colors[colorIndex];
+              }
+
+              // DÉTERMINER L'AVATAR
+              const avatar = expert.avatar || null;
+
+              // DÉTERMINER LES CERTIFICATIONS
+              const certifications = expert.certifications || [];
+
+              return {
+                id: expert.id || `expert-${Date.now()}-${index}`,
+                name,
+                title,
+                specialty,
+                experience,
+                rating: parseFloat(rating.toFixed(1)),
+                avatarColor,
+                disponibilite,
+                projets,
+                certifications,
+                avatar,
+                firstName: expert.firstName,
+                lastName: expert.lastName,
+                email: expert.email,
+                phone: expert.phone,
+                companyName: expert.companyName,
+                commercialName: expert.commercialName,
+                role: expert.role,
+                userType: expert.userType,
+                metiers: expert.metiers || [],
+                services: expert.services || [],
+              };
             }
+          );
 
-            // DÉTERMINER LES PROJETS
-            let projets =
-              expert.projets ||
-              expert.projects ||
-              expert._count?.expertDemandesConseil ||
-              0;
-
-            // DÉTERMINER LA DISPONIBILITÉ
-            let disponibilite = expert.disponibilite;
-            if (!disponibilite) {
-              if (projets < 5) disponibilite = "disponible";
-              else if (projets < 15) disponibilite = "limitee";
-              else disponibilite = "complet";
-            }
-
-            // DÉTERMINER LA COULEUR DE L'AVATAR
-            let avatarColor = expert.avatarColor;
-            if (!avatarColor) {
-              const colors = [
-                "#6B8E23",
-                "#8B4513",
-                "#556B2F",
-                "#2C3E50",
-                "#27AE60",
-                "#D4AF37",
-                "#8FBC8F",
-                "#A0522D",
-              ];
-              const idStr = expert.id || index.toString();
-              const colorIndex =
-                idStr
-                  .split("")
-                  .reduce(
-                    (acc: number, char: string) => acc + char.charCodeAt(0),
-                    0
-                  ) % colors.length;
-              avatarColor = colors[colorIndex];
-            }
-
-            // DÉTERMINER L'AVATAR
-            const avatar = expert.avatar || null;
-
-            // DÉTERMINER LES CERTIFICATIONS
-            const certifications = expert.certifications || [];
-
-            return {
-              id: expert.id || `expert-${Date.now()}-${index}`,
-              name,
-              title,
-              specialty,
-              experience,
-              rating: parseFloat(rating.toFixed(1)),
-              avatarColor,
-              disponibilite,
-              projets,
-              certifications,
-              avatar,
-              firstName: expert.firstName,
-              lastName: expert.lastName,
-              email: expert.email,
-              phone: expert.phone,
-              companyName: expert.companyName,
-              commercialName: expert.commercialName,
-              role: expert.role,
-              userType: expert.userType,
-              metiers: expert.metiers || [],
-              services: expert.services || [],
-            };
-          }
-        );
-
-        console.log("✅ Experts formatés:", formattedExperts);
-        setConseillers(formattedExperts);
+          console.log("✅ Experts formatés:", formattedExperts);
+          setConseillers(formattedExperts);
+        } else {
+          setConseillers([]);
+        }
       } else {
-        console.log("⚠️ Utilisation des experts par défaut");
-        setConseillers(getDefaultConseillers());
+        setConseillers([]);
       }
 
       // Gestion des témoignages
-      if (
-        temoignagesResponse.status === "fulfilled" &&
-        temoignagesResponse.value?.success
-      ) {
-        const temoignagesData = temoignagesResponse.value.data || [];
-        console.log(`💬 Témoignages reçus: ${temoignagesData.length}`);
-        const validatedTemoignages = temoignagesData.map((temoignage: any) => ({
-          id: temoignage.id || Date.now(),
-          name: temoignage.name || "Client",
-          entreprise: temoignage.entreprise || "Entreprise",
-          texte:
-            temoignage.texte ||
-            temoignage.message ||
-            "Aucun témoignage disponible",
-          rating: temoignage.rating || 5,
-          date: temoignage.date || new Date().toLocaleDateString(),
-          avatarColor: temoignage.avatarColor || colors.primaryDark,
-          resultat: temoignage.resultat || "Résultat positif",
-        }));
-        setTemoignages(validatedTemoignages);
+      if (temoignagesResponse.status === "fulfilled") {
+        const temoignagesData = temoignagesResponse.value?.data || [];
+        if (temoignagesResponse.value?.success && temoignagesData.length > 0) {
+          console.log(`💬 Témoignages reçus: ${temoignagesData.length}`);
+          setTemoignages(
+            temoignagesData.map((temoignage: any) => ({
+              id: temoignage.id || Date.now(),
+              name: temoignage.name || "Client",
+              entreprise: temoignage.entreprise || "Entreprise",
+              texte:
+                temoignage.texte ||
+                temoignage.message ||
+                "Aucun témoignage disponible",
+              rating: temoignage.rating || 5,
+              date: temoignage.date || new Date().toLocaleDateString(),
+              avatarColor: temoignage.avatarColor || colors.primaryDark,
+              resultat: temoignage.resultat || "Résultat positif",
+            }))
+          );
+        } else {
+          setTemoignages([]);
+        }
       } else {
-        console.log("⚠️ Utilisation des témoignages par défaut");
-        setTemoignages(getDefaultTemoignages());
+        setTemoignages([]);
       }
 
       // Gestion des statistiques
-      if (
-        statsResponse.status === "fulfilled" &&
-        statsResponse.value?.success
-      ) {
-        const statsData = statsResponse.value.data;
-        console.log(`📈 Statistiques reçues:`, statsData);
-        if (Array.isArray(statsData)) {
-          setStats(statsData);
-        } else if (statsData && typeof statsData === "object") {
-          // Si c'est un objet, le convertir en tableau
-          const statsObj = statsData;
-          const statsArray = [
-            {
-              value: statsObj.totalDemandes?.toString() || "500+",
-              label: "Projets conseillés",
-              icon: "Target",
-              color: colors.primaryDark,
-            },
-            {
-              value: (statsObj.tauxReussite?.toString() || "98") + "%",
-              label: "Satisfaction client",
-              icon: "ThumbsUp",
-              color: colors.success,
-            },
-            {
-              value: statsObj.experience || "15",
-              label: "Années d'expertise",
-              icon: "Award",
-              color: colors.secondaryText,
-            },
-            {
-              value: "24h",
-              label: "Réponse garantie",
-              icon: "Clock",
-              color: colors.accentGold,
-            },
-          ];
-          setStats(statsArray);
+      if (statsResponse.status === "fulfilled") {
+        const statsData = statsResponse.value?.data;
+        if (statsResponse.value?.success && statsData) {
+          console.log(`📈 Statistiques reçues:`, statsData);
+          if (Array.isArray(statsData) && statsData.length > 0) {
+            setStats(statsData);
+          } else {
+            setStats([]);
+          }
         } else {
-          setStats(getDefaultStats());
+          setStats([]);
         }
       } else {
-        console.log("⚠️ Utilisation des statistiques par défaut");
-        setStats(getDefaultStats());
+        setStats([]);
       }
 
       // Gestion des étapes
-      if (
-        etapesResponse.status === "fulfilled" &&
-        etapesResponse.value?.success
-      ) {
-        const etapesData = etapesResponse.value.data || [];
-        console.log(`🔢 Étapes reçues: ${etapesData.length}`);
-        if (Array.isArray(etapesData)) {
+      if (etapesResponse.status === "fulfilled") {
+        const etapesData = etapesResponse.value?.data || [];
+        if (etapesResponse.value?.success && etapesData.length > 0) {
+          console.log(`🔢 Étapes reçues: ${etapesData.length}`);
           setProcessusConseil(
             etapesData.map((etape: any) => ({
               ...etape,
@@ -575,271 +543,42 @@ const ConseilPage = () => {
             }))
           );
         } else {
-          setProcessusConseil(getDefaultProcessus());
+          setProcessusConseil([]);
         }
       } else {
-        console.log("⚠️ Utilisation du processus par défaut");
-        setProcessusConseil(getDefaultProcessus());
+        setProcessusConseil([]);
       }
 
       // Gestion des avantages
-      if (
-        avantagesResponse.status === "fulfilled" &&
-        avantagesResponse.value?.success
-      ) {
-        const avantagesData = avantagesResponse.value.data || [];
-        console.log(`🎯 Avantages reçus: ${avantagesData.length}`);
-        setAvantages(avantagesData);
+      if (avantagesResponse.status === "fulfilled") {
+        const avantagesData = avantagesResponse.value?.data || [];
+        if (avantagesResponse.value?.success && avantagesData.length > 0) {
+          console.log(`🎯 Avantages reçus: ${avantagesData.length}`);
+          setAvantages(avantagesData);
+        } else {
+          setAvantages([]);
+        }
       } else {
-        console.log("⚠️ Utilisation des avantages par défaut");
-        setAvantages(getDefaultAvantages());
+        setAvantages([]);
       }
+
     } catch (error) {
       console.error("❌ Erreur lors du chargement des données:", error);
+      setDataError("Impossible de charger les données. Veuillez réessayer.");
+      
+      // Initialiser tous les tableaux à vide
+      setConseilTypes([]);
+      setConseillers([]);
+      setTemoignages([]);
+      setStats([]);
+      setProcessusConseil([]);
+      setAvantages([]);
+      
       toast.error("Erreur lors du chargement des données");
-      setDefaultData();
     } finally {
       setIsDataLoading(false);
       console.log("✅ Chargement des données terminé");
     }
-  };
-
-  // Fonctions pour les données par défaut
-  const getDefaultConseilTypes = (): ConseilType[] => [
-    {
-      id: 1,
-      title: "Audit Stratégique",
-      description:
-        "Analyse approfondie de votre situation et recommandations stratégiques",
-      icon: "BarChart",
-      color: colors.primaryDark,
-      details: [
-        "Analyse SWOT complète",
-        "Benchmark concurrentiel",
-        "Diagnostic organisationnel",
-        "Recommandations stratégiques",
-        "Plan d'action détaillé",
-      ],
-      duration: "2-4 semaines",
-      price: "À partir de 2 500€",
-      category: "audit",
-      featured: true,
-      popular: true,
-    },
-    {
-      id: 2,
-      title: "Médiation & Résolution",
-      description: "Résolution amiable des conflits internes et externes",
-      icon: "Handshake",
-      color: colors.success,
-      details: [
-        "Médiation commerciale",
-        "Résolution de conflits internes",
-        "Négociation stratégique",
-        "Accords de partenariat",
-        "Prévention des litiges",
-      ],
-      duration: "1-3 semaines",
-      price: "À partir de 1 800€",
-      category: "mediation",
-    },
-    {
-      id: 3,
-      title: "Conseil en Stratégie",
-      description:
-        "Développement et optimisation de votre stratégie d'entreprise",
-      icon: "TargetIcon",
-      color: colors.secondaryText,
-      details: [
-        "Définition de vision",
-        "Plan stratégique sur 3-5 ans",
-        "Allocation des ressources",
-        "Suivi des indicateurs",
-        "Ajustements stratégiques",
-      ],
-      duration: "3-6 semaines",
-      price: "À partir de 3 500€",
-      category: "strategie",
-    },
-  ];
-
-  const getDefaultConseillers = (): Conseiller[] => [
-    {
-      id: "1",
-      name: "Dr. Sophie Laurent",
-      title: "Experte en Audit Stratégique",
-      specialty: "Stratégie d'entreprise & Organisation",
-      experience: "20 ans d'expérience",
-      rating: 4.9,
-      avatarColor: "#6B8E23",
-      disponibilite: "disponible",
-      projets: 156,
-      certifications: [
-        "MBA HEC",
-        "Certified Management Consultant",
-        "Six Sigma Black Belt",
-      ],
-      avatar:
-        "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop",
-    },
-    {
-      id: "2",
-      name: "Pierre Martin",
-      title: "Spécialiste en Médiation",
-      specialty: "Résolution de conflits & Négociation",
-      experience: "15 ans d'expérience",
-      rating: 4.8,
-      avatarColor: "#8B4513",
-      disponibilite: "limitee",
-      projets: 89,
-      certifications: [
-        "Médiateur certifié CNMA",
-        "Expert en négociation Harvard",
-        "Praticien PNL",
-      ],
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    },
-  ];
-
-  const getDefaultStats = (): Stat[] => [
-    {
-      value: "98%",
-      label: "Satisfaction client",
-      icon: "ThumbsUp",
-      color: colors.success,
-    },
-    {
-      value: "500+",
-      label: "Projets conseillés",
-      icon: "Target",
-      color: colors.primaryDark,
-    },
-    {
-      value: "15",
-      label: "Années d'expertise",
-      icon: "Award",
-      color: colors.secondaryText,
-    },
-    {
-      value: "24h",
-      label: "Réponse garantie",
-      icon: "Clock",
-      color: colors.accentGold,
-    },
-  ];
-
-  const getDefaultTemoignages = (): Temoignage[] => [
-    {
-      id: 1,
-      name: "Julie Moreau",
-      entreprise: "TechStart Solutions",
-      texte:
-        "L'audit stratégique réalisé par l'équipe a été déterminant pour notre repositionnement sur le marché. Les recommandations étaient précises et actionnables.",
-      rating: 5,
-      date: "15 Jan 2024",
-      avatarColor: "#6B8E23",
-      resultat: "+150% croissance en 12 mois",
-    },
-    {
-      id: 2,
-      name: "Marc Lefebvre",
-      entreprise: "Manufacturing Corp",
-      texte:
-        "La médiation a permis de résoudre un conflit interne qui durait depuis des mois. Professionnalisme et discrétion remarquables.",
-      rating: 5,
-      date: "22 Nov 2023",
-      avatarColor: "#8B4513",
-      resultat: "Conflit résolu en 3 semaines",
-    },
-  ];
-
-  const getDefaultProcessus = (): EtapeProcessus[] => [
-    {
-      step: 1,
-      title: "Diagnostic initial",
-      description: "Analyse approfondie de votre situation",
-      icon: "Search",
-      color: colors.primaryDark,
-      details: [
-        "Entretien découverte",
-        "Analyse documentaire",
-        "Identification des enjeux",
-      ],
-    },
-    {
-      step: 2,
-      title: "Proposition sur mesure",
-      description: "Élaboration d'une approche personnalisée",
-      icon: "Lightbulb",
-      color: colors.success,
-      details: [
-        "Recommandations spécifiques",
-        "Planning détaillé",
-        "Budget prévisionnel",
-      ],
-    },
-    {
-      step: 3,
-      title: "Mise en œuvre",
-      description: "Accompagnement dans la réalisation",
-      icon: "Rocket",
-      color: colors.secondaryText,
-      details: [
-        "Suivi régulier",
-        "Ajustements en temps réel",
-        "Coordination des équipes",
-      ],
-    },
-    {
-      step: 4,
-      title: "Suivi & Évaluation",
-      description: "Mesure des résultats et capitalisation",
-      icon: "BarChart",
-      color: colors.accentGold,
-      details: [
-        "Tableaux de bord",
-        "Reporting détaillé",
-        "Recommandations finales",
-      ],
-    },
-  ];
-
-  const getDefaultAvantages = (): Avantage[] => [
-    {
-      title: "Expertise certifiée",
-      description:
-        "Nos conseillers sont certifiés et possèdent une expertise avérée",
-      icon: "ShieldIcon",
-      color: colors.primaryDark,
-    },
-    {
-      title: "Approche sur mesure",
-      description: "Chaque mission est adaptée à vos besoins spécifiques",
-      icon: "TargetIcon",
-      color: colors.success,
-    },
-    {
-      title: "Confidentialité absolue",
-      description: "Discrétion garantie dans toutes nos interventions",
-      icon: "Shield",
-      color: colors.secondaryText,
-    },
-    {
-      title: "Résultats mesurables",
-      description: "Des objectifs clairs avec des indicateurs de performance",
-      icon: "TrendingUp",
-      color: colors.accentGold,
-    },
-  ];
-
-  const setDefaultData = () => {
-    setConseilTypes(getDefaultConseilTypes());
-    setConseillers(getDefaultConseillers());
-    setStats(getDefaultStats());
-    setTemoignages(getDefaultTemoignages());
-    setProcessusConseil(getDefaultProcessus());
-    setAvantages(getDefaultAvantages());
   };
 
   // Fonction helper pour obtenir l'icône
@@ -878,8 +617,8 @@ const ConseilPage = () => {
   const getDefaultAvatar = (expert: Conseiller) => {
     // Utiliser des images Unsplash par défaut basées sur le nom
     const nameHash = expert.name
-      .split("")
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      ? expert.name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      : 0;
     const avatars = [
       "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop",
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
@@ -1188,7 +927,7 @@ const ConseilPage = () => {
 
         <div className="relative z-10 container mx-auto px-4 max-w-4xl text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Conseil <span className="text-secondary-text">Expert</span>
+            Conseil <span style={{ color: colors.accentGold }}>Expert</span>
           </h1>
 
           <p className="text-slate-300 text-sm mb-10">
@@ -1196,9 +935,13 @@ const ConseilPage = () => {
             accompagner votre entreprise vers l'excellence.
           </p>
 
-          {/* AFFICHAGE CORRIGÉ DES STATISTIQUES */}
+          {/* AFFICHAGE DES STATISTIQUES */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            {Array.isArray(stats) && stats.length > 0 ? (
+            {dataError ? (
+              <div className="col-span-4 text-center py-4">
+                <p className="text-slate-300">Données temporairement indisponibles</p>
+              </div>
+            ) : stats.length > 0 ? (
               stats.map((s, i) => {
                 const IconComponent = getIconComponent(s.icon);
                 return (
@@ -1212,18 +955,10 @@ const ConseilPage = () => {
                 );
               })
             ) : (
-              // Fallback si stats n'est pas un tableau
-              <>
-                {getDefaultStats().map((s, i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/10"
-                  >
-                    <div className="text-xl font-bold">{s.value}</div>
-                    <div className="text-xs text-slate-300">{s.label}</div>
-                  </div>
-                ))}
-              </>
+              // Message quand il n'y a pas de données
+              <div className="col-span-4 text-center py-4">
+                <p className="text-slate-300">Chargement des statistiques...</p>
+              </div>
             )}
           </div>
 
@@ -1255,125 +990,127 @@ const ConseilPage = () => {
       </section>
 
       {/* Section Notre Processus */}
-      <motion.section
-        className="container mx-auto px-4 py-16"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2
-            className="text-3xl lg:text-4xl font-bold mb-4"
-            style={{ color: colors.primaryDark }}
-          >
-            Notre <span style={{ color: colors.secondaryText }}>Processus</span>
-          </h2>
-          <p
-            className="text-lg max-w-3xl mx-auto"
-            style={{ color: colors.textSecondary }}
-          >
-            Une méthodologie éprouvée pour des résultats concrets et mesurables
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedProcessus.map((etape) => {
-            const IconComponent = getIconComponent(etape.icon);
-            return (
-              <motion.div
-                key={etape.step}
-                variants={itemVariants}
-                whileHover={{ y: -5 }}
-                className="relative"
-              >
-                <Card
-                  className="p-6 h-full rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-                  style={{ backgroundColor: colors.cardBg }}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="relative">
-                      <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center"
-                        style={{
-                          backgroundColor: `${etape.color}15`,
-                          border: `2px solid ${etape.color}`,
-                        }}
-                      >
-                        <IconComponent
-                          className="h-6 w-6"
-                          style={{ color: etape.color }}
-                        />
-                      </div>
-                      <div
-                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                        style={{ backgroundColor: etape.color }}
-                      >
-                        {etape.step}
-                      </div>
-                    </div>
-
-                    <div className="flex-1">
-                      <h3
-                        className="text-lg font-bold mb-2"
-                        style={{ color: colors.textPrimary }}
-                      >
-                        {etape.title}
-                      </h3>
-                      <p
-                        className="text-sm mb-3"
-                        style={{ color: colors.textSecondary }}
-                      >
-                        {etape.description}
-                      </p>
-                      <ul className="space-y-1">
-                        {etape.details.map((detail, idx) => (
-                          <li
-                            key={idx}
-                            className="flex items-center text-xs"
-                            style={{ color: colors.textSecondary }}
-                          >
-                            <CheckCircle
-                              className="h-3 w-3 mr-2"
-                              style={{ color: etape.color }}
-                            />
-                            {detail}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {processusConseil.length > 4 && (
-          <motion.div className="text-center mt-8">
-            <Button
-              variant="outline"
-              className="rounded-xl px-6 py-3 font-medium"
-              style={{
-                borderColor: colors.primaryDark,
-                color: colors.primaryDark,
-              }}
-              onClick={() => setShowMoreProcess(!showMoreProcess)}
+      {processusConseil.length > 0 && (
+        <motion.section
+          className="container mx-auto px-4 py-16"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants} className="text-center mb-16">
+            <h2
+              className="text-3xl lg:text-4xl font-bold mb-4"
+              style={{ color: colors.primaryDark }}
             >
-              {showMoreProcess ? (
-                <>
-                  <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
-                  Voir moins
-                </>
-              ) : (
-                <>
-                  Voir les {processusConseil.length - 4} étapes supplémentaires
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </>
-              )}
-            </Button>
+              Notre <span style={{ color: colors.secondaryText }}>Processus</span>
+            </h2>
+            <p
+              className="text-lg max-w-3xl mx-auto"
+              style={{ color: colors.textSecondary }}
+            >
+              Une méthodologie éprouvée pour des résultats concrets et mesurables
+            </p>
           </motion.div>
-        )}
-      </motion.section>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayedProcessus.map((etape) => {
+              const IconComponent = getIconComponent(etape.icon);
+              return (
+                <motion.div
+                  key={etape.step}
+                  variants={itemVariants}
+                  whileHover={{ y: -5 }}
+                  className="relative"
+                >
+                  <Card
+                    className="p-6 h-full rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                    style={{ backgroundColor: colors.cardBg }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="relative">
+                        <div
+                          className="w-12 h-12 rounded-lg flex items-center justify-center"
+                          style={{
+                            backgroundColor: `${etape.color}15`,
+                            border: `2px solid ${etape.color}`,
+                          }}
+                        >
+                          <IconComponent
+                            className="h-6 w-6"
+                            style={{ color: etape.color }}
+                          />
+                        </div>
+                        <div
+                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                          style={{ backgroundColor: etape.color }}
+                        >
+                          {etape.step}
+                        </div>
+                      </div>
+
+                      <div className="flex-1">
+                        <h3
+                          className="text-lg font-bold mb-2"
+                          style={{ color: colors.textPrimary }}
+                        >
+                          {etape.title}
+                        </h3>
+                        <p
+                          className="text-sm mb-3"
+                          style={{ color: colors.textSecondary }}
+                        >
+                          {etape.description}
+                        </p>
+                        <ul className="space-y-1">
+                          {etape.details.map((detail, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-center text-xs"
+                              style={{ color: colors.textSecondary }}
+                            >
+                              <CheckCircle
+                                className="h-3 w-3 mr-2"
+                                style={{ color: etape.color }}
+                              />
+                              {detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {processusConseil.length > 4 && (
+            <motion.div className="text-center mt-8">
+              <Button
+                variant="outline"
+                className="rounded-xl px-6 py-3 font-medium"
+                style={{
+                  borderColor: colors.primaryDark,
+                  color: colors.primaryDark,
+                }}
+                onClick={() => setShowMoreProcess(!showMoreProcess)}
+              >
+                {showMoreProcess ? (
+                  <>
+                    <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
+                    Voir moins
+                  </>
+                ) : (
+                  <>
+                    Voir les {processusConseil.length - 4} étapes supplémentaires
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </motion.div>
+          )}
+        </motion.section>
+      )}
 
       {/* Section Types de Conseil */}
       <motion.section
@@ -1462,165 +1199,204 @@ const ConseilPage = () => {
           </div>
         </motion.div>
 
-        {filteredTypes.length > 0 ? (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8"
-            variants={containerVariants}
-          >
-            {filteredTypes.map((type) => {
-              const IconComponent = getIconComponent(type.icon);
-              return (
-                <motion.div
-                  key={type.id}
-                  variants={itemVariants}
-                  whileHover="hover"
-                  initial="initial"
-                  onClick={() => handleTypeSelect(type)}
-                  className="relative"
-                >
-                  {type.featured && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                      <div
-                        className="px-4 py-1 rounded-full text-xs font-bold text-white"
-                        style={{ backgroundColor: type.color }}
-                      >
-                        Recommandé
+        {conseilTypes.length > 0 ? (
+          filteredTypes.length > 0 ? (
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8"
+              variants={containerVariants}
+            >
+              {filteredTypes.map((type) => {
+                const IconComponent = getIconComponent(type.icon);
+                return (
+                  <motion.div
+                    key={type.id}
+                    variants={itemVariants}
+                    whileHover="hover"
+                    initial="initial"
+                    onClick={() => handleTypeSelect(type)}
+                    className="relative"
+                  >
+                    {type.featured && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                        <div
+                          className="px-4 py-1 rounded-full text-xs font-bold text-white"
+                          style={{ backgroundColor: type.color }}
+                        >
+                          Recommandé
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <motion.div variants={cardHoverVariants} className="h-full">
-                    <Card
-                      className={`p-6 h-full rounded-2xl cursor-pointer transition-all duration-500 ${
-                        selectedType === type.id ? "ring-2 ring-offset-2" : ""
-                      }`}
-                      style={{
-                        borderColor:
-                          selectedType === type.id
-                            ? type.color
-                            : colors.separator,
-                        backgroundColor: colors.cardBg,
-                        borderWidth: selectedType === type.id ? "2px" : "1px",
-                      }}
-                    >
-                      <div
-                        className={`w-14 h-14 mb-4 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                          selectedType === type.id ? "scale-110" : ""
+                    <motion.div variants={cardHoverVariants} className="h-full">
+                      <Card
+                        className={`p-6 h-full rounded-2xl cursor-pointer transition-all duration-500 ${
+                          selectedType === type.id ? "ring-2 ring-offset-2" : ""
                         }`}
                         style={{
-                          backgroundColor:
+                          borderColor:
                             selectedType === type.id
                               ? type.color
-                              : `${type.color}15`,
+                              : colors.separator,
+                          backgroundColor: colors.cardBg,
+                          borderWidth: selectedType === type.id ? "2px" : "1px",
                         }}
                       >
-                        <IconComponent
-                          className={`h-6 w-6 transition-all duration-300 ${
+                        <div
+                          className={`w-14 h-14 mb-4 rounded-xl flex items-center justify-center transition-all duration-300 ${
                             selectedType === type.id ? "scale-110" : ""
                           }`}
                           style={{
-                            color:
+                            backgroundColor:
                               selectedType === type.id
-                                ? colors.lightBg
-                                : type.color,
+                                ? type.color
+                                : `${type.color}15`,
                           }}
-                        />
-                      </div>
-
-                      <h3
-                        className="text-xl font-bold mb-3"
-                        style={{ color: colors.textPrimary }}
-                      >
-                        {type.title}
-                      </h3>
-
-                      <p
-                        className="leading-relaxed mb-4 text-sm"
-                        style={{ color: colors.textSecondary }}
-                      >
-                        {type.description}
-                      </p>
-
-                      <div className="mb-4">
-                        <ul className="space-y-2">
-                          {type.details.map((detail, index) => (
-                            <li key={index} className="flex items-start gap-2">
-                              <CheckCircle
-                                className="h-4 w-4 flex-shrink-0 mt-0.5"
-                                style={{ color: type.color }}
-                              />
-                              <span
-                                className="text-xs"
-                                style={{ color: colors.textSecondary }}
-                              >
-                                {detail}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <Clock
-                            className="h-3 w-3"
-                            style={{ color: colors.textSecondary }}
-                          />
-                          <span
-                            className="text-xs font-medium"
-                            style={{ color: colors.textPrimary }}
-                          >
-                            {type.duration}
-                          </span>
-                        </div>
-                        <div
-                          className="text-sm font-bold"
-                          style={{ color: type.color }}
                         >
-                          {type.price}
+                          <IconComponent
+                            className={`h-6 w-6 transition-all duration-300 ${
+                              selectedType === type.id ? "scale-110" : ""
+                            }`}
+                            style={{
+                              color:
+                                selectedType === type.id
+                                  ? colors.lightBg
+                                  : type.color,
+                            }}
+                          />
                         </div>
-                      </div>
 
-                      <Button
-                        className="w-full font-semibold rounded-xl gap-2 py-3 border-2"
-                        variant={
-                          selectedType === type.id ? "default" : "outline"
-                        }
-                        style={
-                          selectedType === type.id
-                            ? {
-                                backgroundColor: type.color,
-                                color: colors.lightBg,
-                                borderColor: type.color,
-                              }
-                            : {
-                                borderColor: type.color,
-                                color: type.color,
-                              }
-                        }
-                        onClick={() => handleTypeSelect(type)}
-                      >
-                        {selectedType === type.id
-                          ? "✓ Sélectionné"
-                          : "Choisir ce conseil"}
-                        <ChevronRight className="h-3 w-3" />
-                      </Button>
-                    </Card>
+                        <h3
+                          className="text-xl font-bold mb-3"
+                          style={{ color: colors.textPrimary }}
+                        >
+                          {type.title}
+                        </h3>
+
+                        <p
+                          className="leading-relaxed mb-4 text-sm"
+                          style={{ color: colors.textSecondary }}
+                        >
+                          {type.description}
+                        </p>
+
+                        <div className="mb-4">
+                          <ul className="space-y-2">
+                            {type.details.map((detail, index) => (
+                              <li key={index} className="flex items-start gap-2">
+                                <CheckCircle
+                                  className="h-4 w-4 flex-shrink-0 mt-0.5"
+                                  style={{ color: type.color }}
+                                />
+                                <span
+                                  className="text-xs"
+                                  style={{ color: colors.textSecondary }}
+                                >
+                                  {detail}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <Clock
+                              className="h-3 w-3"
+                              style={{ color: colors.textSecondary }}
+                            />
+                            <span
+                              className="text-xs font-medium"
+                              style={{ color: colors.textPrimary }}
+                            >
+                              {type.duration}
+                            </span>
+                          </div>
+                          <div
+                            className="text-sm font-bold"
+                            style={{ color: type.color }}
+                          >
+                            {type.price}
+                          </div>
+                        </div>
+
+                        <Button
+                          className="w-full font-semibold rounded-xl gap-2 py-3 border-2"
+                          variant={
+                            selectedType === type.id ? "default" : "outline"
+                          }
+                          style={
+                            selectedType === type.id
+                              ? {
+                                  backgroundColor: type.color,
+                                  color: colors.lightBg,
+                                  borderColor: type.color,
+                                }
+                              : {
+                                  borderColor: type.color,
+                                  color: type.color,
+                                }
+                          }
+                          onClick={() => handleTypeSelect(type)}
+                        >
+                          {selectedType === type.id
+                            ? "✓ Sélectionné"
+                            : "Choisir ce conseil"}
+                          <ChevronRight className="h-3 w-3" />
+                        </Button>
+                      </Card>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+                );
+              })}
+            </motion.div>
+          ) : (
+            <motion.div className="text-center py-12">
+              <div
+                className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: `${colors.separator}30`,
+                  border: `2px dashed ${colors.separator}`,
+                }}
+              >
+                <Search
+                  className="h-12 w-12"
+                  style={{ color: colors.textSecondary }}
+                />
+              </div>
+              <h3
+                className="text-xl font-semibold mb-2"
+                style={{ color: colors.textPrimary }}
+              >
+                Aucun conseil trouvé
+              </h3>
+              <p
+                className="text-lg mb-6"
+                style={{ color: colors.textSecondary }}
+              >
+                Essayez avec d'autres critères de recherche
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setActiveCategory("tous");
+                }}
+                style={{
+                  borderColor: colors.primaryDark,
+                  color: colors.primaryDark,
+                }}
+              >
+                Réinitialiser les filtres
+              </Button>
+            </motion.div>
+          )
         ) : (
           <motion.div className="text-center py-12">
             <div
               className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
-              style={{
-                backgroundColor: `${colors.separator}30`,
-                border: `2px dashed ${colors.separator}`,
-              }}
+              style={{ backgroundColor: `${colors.separator}30` }}
             >
-              <Search
+              <BarChart
                 className="h-12 w-12"
                 style={{ color: colors.textSecondary }}
               />
@@ -1629,55 +1405,41 @@ const ConseilPage = () => {
               className="text-xl font-semibold mb-2"
               style={{ color: colors.textPrimary }}
             >
-              Aucun conseil trouvé
+              Aucun type de conseil disponible
             </h3>
-            <p className="text-lg mb-6" style={{ color: colors.textSecondary }}>
-              Essayez avec d'autres critères de recherche
+            <p className="text-lg" style={{ color: colors.textSecondary }}>
+              Les types de conseil seront bientôt disponibles
             </p>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchTerm("");
-                setActiveCategory("tous");
-              }}
-              style={{
-                borderColor: colors.primaryDark,
-                color: colors.primaryDark,
-              }}
-            >
-              Réinitialiser les filtres
-            </Button>
           </motion.div>
         )}
       </motion.section>
 
-      {/* Section Nos Experts - CORRECTION ICI */}
-      <motion.section
-        className="container mx-auto px-4"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <div className="p-8 lg:p-12">
-          <motion.div variants={itemVariants} className="text-center mb-12">
-            <h2
-              className="text-3xl lg:text-4xl font-bold mb-4"
-              style={{ color: colors.textPrimary }}
-            >
-              Nos <span style={{ color: colors.secondaryText }}>Experts</span>
-            </h2>
-            <p
-              className="text-lg max-w-3xl mx-auto"
-              style={{ color: colors.textSecondary }}
-            >
-              Rencontrez notre équipe d'experts dédiés à votre réussite
-            </p>
-          </motion.div>
+      {/* Section Nos Experts */}
+      {conseillers.length > 0 && (
+        <motion.section
+          className="container mx-auto px-4"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <div className="p-8 lg:p-12">
+            <motion.div variants={itemVariants} className="text-center mb-12">
+              <h2
+                className="text-3xl lg:text-4xl font-bold mb-4"
+                style={{ color: colors.textPrimary }}
+              >
+                Nos <span style={{ color: colors.secondaryText }}>Experts</span>
+              </h2>
+              <p
+                className="text-lg max-w-3xl mx-auto"
+                style={{ color: colors.textSecondary }}
+              >
+                Rencontrez notre équipe d'experts dédiés à votre réussite
+              </p>
+            </motion.div>
 
-          {conseillers.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
               {conseillers.map((conseiller) => {
-                console.log("Rendu expert:", conseiller);
                 return (
                   <motion.div
                     key={conseiller.id}
@@ -1830,115 +1592,96 @@ const ConseilPage = () => {
                 );
               })}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <div
-                className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: `${colors.separator}30` }}
-              >
-                <Users
-                  className="h-12 w-12"
-                  style={{ color: colors.textSecondary }}
-                />
-              </div>
-              <h3
-                className="text-xl font-semibold mb-2"
-                style={{ color: colors.textPrimary }}
-              >
-                Aucun expert disponible pour le moment
-              </h3>
-              <p className="text-lg" style={{ color: colors.textSecondary }}>
-                Revenez plus tard pour découvrir nos experts
-              </p>
-            </div>
-          )}
-        </div>
-      </motion.section>
+          </div>
+        </motion.section>
+      )}
 
       {/* Section Avantages */}
-      <motion.section
-        className="container mx-auto px-4"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <Card
-          className="rounded-3xl overflow-hidden border-0"
-          style={{
-            background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.logo} 100%)`,
-            color: colors.lightBg,
-          }}
+      {avantages.length > 0 && (
+        <motion.section
+          className="container mx-auto px-4"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
         >
-          <div className="p-8 lg:p-12">
-            <motion.div variants={itemVariants} className="text-center mb-12">
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4 text-white">
-                Nos <span style={{ color: colors.accentGold }}>Avantages</span>
-              </h2>
-              <p className="text-lg max-w-3xl mx-auto text-white/80">
-                Ce qui fait la différence dans notre approche du conseil
-              </p>
-            </motion.div>
+          <Card
+            className="rounded-3xl overflow-hidden border-0"
+            style={{
+              background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.logo} 100%)`,
+              color: colors.lightBg,
+            }}
+          >
+            <div className="p-8 lg:p-12">
+              <motion.div variants={itemVariants} className="text-center mb-12">
+                <h2 className="text-3xl lg:text-4xl font-bold mb-4 text-white">
+                  Nos <span style={{ color: colors.accentGold }}>Avantages</span>
+                </h2>
+                <p className="text-lg max-w-3xl mx-auto text-white/80">
+                  Ce qui fait la différence dans notre approche du conseil
+                </p>
+              </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {avantages.map((avantage, index) => {
-                const IconComponent = getIconComponent(avantage.icon);
-                return (
-                  <motion.div
-                    key={index}
-                    variants={itemVariants}
-                    whileHover={{ y: -5 }}
-                  >
-                    <Card className="p-6 rounded-2xl h-full border-0 bg-white/10 backdrop-blur-sm">
-                      <div
-                        className="w-14 h-14 rounded-xl mb-6 flex items-center justify-center mx-auto"
-                        style={{ backgroundColor: `${avantage.color}30` }}
-                      >
-                        <IconComponent
-                          className="h-7 w-7"
-                          style={{ color: avantage.color }}
-                        />
-                      </div>
-                      <h3 className="text-xl font-bold mb-3 text-white">
-                        {avantage.title}
-                      </h3>
-                      <p className="text-sm text-white/80">
-                        {avantage.description}
-                      </p>
-                    </Card>
-                  </motion.div>
-                );
-              })}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {avantages.map((avantage, index) => {
+                  const IconComponent = getIconComponent(avantage.icon);
+                  return (
+                    <motion.div
+                      key={index}
+                      variants={itemVariants}
+                      whileHover={{ y: -5 }}
+                    >
+                      <Card className="p-6 rounded-2xl h-full border-0 bg-white/10 backdrop-blur-sm">
+                        <div
+                          className="w-14 h-14 rounded-xl mb-6 flex items-center justify-center mx-auto"
+                          style={{ backgroundColor: `${avantage.color}30` }}
+                        >
+                          <IconComponent
+                            className="h-7 w-7"
+                            style={{ color: avantage.color }}
+                          />
+                        </div>
+                        <h3 className="text-xl font-bold mb-3 text-white">
+                          {avantage.title}
+                        </h3>
+                        <p className="text-sm text-white/80">
+                          {avantage.description}
+                        </p>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </Card>
-      </motion.section>
+          </Card>
+        </motion.section>
+      )}
 
       {/* Section Témoignages */}
-      <motion.section
-        className="container mx-auto px-4"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <motion.div variants={itemVariants} className="text-center mb-12">
-          <h2
-            className="text-3xl lg:text-4xl font-bold mb-4"
-            style={{ color: colors.primaryDark }}
-          >
-            Ils nous font{" "}
-            <span style={{ color: colors.secondaryText }}>Confiance</span>
-          </h2>
-          <p
-            className="text-lg max-w-3xl mx-auto mb-8"
-            style={{ color: colors.textSecondary }}
-          >
-            Découvrez les retours d'expérience de nos clients conseillés
-          </p>
-        </motion.div>
+      {temoignages.length > 0 && (
+        <motion.section
+          className="container mx-auto px-4"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants} className="text-center mb-12">
+            <h2
+              className="text-3xl lg:text-4xl font-bold mb-4"
+              style={{ color: colors.primaryDark }}
+            >
+              Ils nous font{" "}
+              <span style={{ color: colors.secondaryText }}>Confiance</span>
+            </h2>
+            <p
+              className="text-lg max-w-3xl mx-auto mb-8"
+              style={{ color: colors.textSecondary }}
+            >
+              Découvrez les retours d'expérience de nos clients conseillés
+            </p>
+          </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {Array.isArray(temoignages) && temoignages.length > 0 ? (
-            temoignages.map((temoignage) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {temoignages.map((temoignage) => (
               <motion.div
                 key={temoignage.id}
                 variants={itemVariants}
@@ -2024,32 +1767,10 @@ const ConseilPage = () => {
                   </div>
                 </Card>
               </motion.div>
-            ))
-          ) : (
-            // Si pas de témoignages, afficher un message
-            <div className="col-span-3 text-center py-12">
-              <div
-                className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: `${colors.separator}30` }}
-              >
-                <MessageCircle
-                  className="h-12 w-12"
-                  style={{ color: colors.textSecondary }}
-                />
-              </div>
-              <h3
-                className="text-xl font-semibold mb-2"
-                style={{ color: colors.textPrimary }}
-              >
-                Aucun témoignage pour le moment
-              </h3>
-              <p className="text-lg" style={{ color: colors.textSecondary }}>
-                Soyez le premier à partager votre expérience
-              </p>
-            </div>
-          )}
-        </div>
-      </motion.section>
+            ))}
+          </div>
+        </motion.section>
+      )}
 
       {/* CTA Final */}
       <section className="py-16" style={{ backgroundColor: colors.lightBg }}>
@@ -2081,14 +1802,14 @@ const ConseilPage = () => {
             <div className="flex flex-wrap gap-4 m-2 justify-center">
               <motion.div whileHover={{ scale: 1.05 }}>
                 <Button
-                  className="rounded-xl  text-lg font-semibold"
+                  className="rounded-xl text-lg font-semibold"
                   style={{
                     backgroundColor: colors.primaryDark,
                     color: colors.lightBg,
                   }}
                   onClick={handleOpenContactModal}
                 >
-                  <Calendar className="h-5 w-5 " />
+                  <Calendar className="h-5 w-5" />
                   Demander un conseil personnalisé
                 </Button>
               </motion.div>
@@ -2336,6 +2057,7 @@ const ConseilPage = () => {
                         </SelectItem>
                       );
                     })}
+                    <SelectItem value="autre">Autre</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
