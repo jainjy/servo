@@ -103,7 +103,7 @@ const Index = () => {
       >
         <Suspense fallback={<LoadingFallback />}>
           <Hero />
-          <ServiceCards />
+          {/* <ServiceCards /> */}
           <AdvertisementPopup />
           <TravauxPreview homeCards />
 

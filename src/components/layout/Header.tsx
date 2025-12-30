@@ -1548,13 +1548,9 @@ const Header = () => {
                   )}
                 </div>
               ) : (
-                <Link
-                  to={section.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-sm font-semibold text-gray-900 hover:text-gray-700 py-2"
-                >
+                <span className="block text-sm font-semibold text-gray-900 py-2">
                   {section.title}
-                </Link>
+                </span>
               )}
             </div>
           ))}
@@ -1732,316 +1728,99 @@ const Header = () => {
     <>
       <header
         id="head"
-        className="fixed w-screen top-0 z-50 bg-[#FFFFFF] backdrop-blur-md border shadow-lg"
+        className="fixed w-screen top-0 z-50  bg-white rounded-full mt-4 backdrop-blur-md shadow-lg"
       >
-        <div className="container flex h-16 items-center justify-between px-6">
-          <Link to={"/"}>
-            <ServoLogo />
-          </Link>
-          {/* Menu desktop */}
-          <nav className="hidden md:hidden lg:flex items-center gap-2">
-            <ul className="flex items-center">
-              {menuSections.slice(0, 4).map((section, index) => (
+        <div className="w-full flex h-16 items-center justify-between px-6">
+          {/* Left Navigation - 2 links */}
+          <nav className="hidden lg:flex items-center justify-end gap-8 flex-1">
+            <ul className="flex items-center gap-8">
+              {menuSections.slice(0, 2).map((section, index) => (
                 <li key={index} className="group relative">
                   {section.items ? (
                     <>
                       <Button
                         variant="ghost"
-                        className="flex items-center gap-1 text-[11px] font-bold text-gray-700 hover:text-gray-900 transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]"
+                        className="flex items-center gap-1 text-[12px] font-bold text-gray-800 hover:text-gray-900 transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]"
                       >
                         {section.title}
                         <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
                       </Button>
                       <div className="absolute left-0 top-full w-[320px] p-2 rounded-lg border bg-[#FFFFFF] shadow-xl opacity-0 translate-y-1 scale-95 pointer-events-none transition ease-out duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto z-[1050]">
                         {section.items.map((item, itemIndex) => (
-                          <div
+                          <Link
                             key={itemIndex}
-                            className="relative group/item"
-                            onMouseEnter={() =>
-                              item.submenu && setHoveredItem(item.title)
-                            }
-                            onMouseLeave={() =>
-                              item.submenu && setHoveredItem(null)
-                            }
+                            to={item.href}
+                            className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
                           >
-                            <Link
-                              to={item.href}
-                              className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <div className="font-semibold">
-                                    {item.title}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    {item.description}
-                                  </div>
-                                </div>
-                                {item.submenu && (
-                                  <ChevronRight className="h-4 w-4 text-gray-600 transition-opacity" />
-                                )}
+                            <div>
+                              <div className="font-semibold">
+                                {item.title}
                               </div>
-                            </Link>
-                            {/* Submenu for main menu items */}
-                            {item.submenu && hoveredItem === item.title && (
-                              <div className="absolute left-full top-0 ml-0 w-56 bg-white rounded-lg border border-[#D3D3D3] shadow-lg overflow-hidden z-[1100]">
-                                <div className="p-3">
-                                  <div className="space-y-1">
-                                    {item.submenu.map((subitem, subidx) => (
-                                      <Link
-                                        key={subidx}
-                                        to={subitem.href}
-                                        className="block p-2 rounded-lg hover:bg-gray-100 transition-colors text-xs text-gray-700 hover:text-gray-900"
-                                      >
-                                        <div className="font-medium">
-                                          {subitem.title}
-                                        </div>
-                                        {subitem.description && (
-                                          <div className="text-[11px] text-gray-500 mt-0.5">
-                                            {subitem.description}
-                                          </div>
-                                        )}
-                                      </Link>
-                                    ))}
-                                  </div>
-                                </div>
+                              <div className="text-xs text-gray-500">
+                                {item.description}
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          </Link>
                         ))}
                       </div>
                     </>
                   ) : (
-                    <Link
-                      to={section.href}
-                      className="flex items-center gap-1 text-[11px] font-bold bg-transparent hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-all duration-200 px-4 py-2 rounded-lg border border-transparent hover:border-[#D3D3D3] group"
-                    >
-                      {section.title}
-                    </Link>
+                    <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700 px-3 py-2">{section.title}</span>
                   )}
                 </li>
               ))}
             </ul>
-            {/* Desktop hamburger: Popover avec animation GSAP */}
-            <div className="hidden lg:block">
-              <Popover
-                open={isPopoverOpen}
-                onOpenChange={handlePopoverOpenChange}
-              >
-                <PopoverTrigger asChild>
-                  {/* <Button className="h-9 hover:bg-logo/80 bg-logo">
-                    <Menu className="text-white" />
-                  </Button> */}
-                </PopoverTrigger>
-                <PopoverContent
-                  side="bottom"
-                  align="center"
-                  className="relative -mt-16 w-screen max-w-full p-0 overflow-hidden z-50 rounded-none shadow-lg bg-black text-white border-none"
-                >
-                  <button
-                    className="absolute z-50 text-white text-5xl font-extralight right-10 top-4"
-                    onClick={() => setIsPopoverOpen(false)}
-                    aria-label="Close popover"
-                  >
-                    &times;
-                  </button>
-                  <div className="w-full h-screen overflow-auto">
-                    <div className="flex flex-col lg:flex-row h-full w-full">
-                      {/* Left: Titles column */}
-                      <div className="w-full lg:w-64 border-[#D3D3D3]/40 border-b lg:border-b-0 lg:border-r p-4 lg:sticky lg:top-4 lg:h-[500px]">
-                        <Link to="/" onClick={() => setIsPopoverOpen(false)}>
-                          <div className="flex items-center gap-2 mb-4">
-                            <ServoLogo />
-                          </div>
-                        </Link>
-                        <nav className="space-y-1 overflow-y-auto">
-                          {menuSections.map((section, si) => {
-                            const hasItems =
-                              !!section.items && section.items.length > 0;
-                            const isActive = hoveredSection === section.title;
-                            return (
-                              <div
-                                key={si}
-                                onMouseEnter={() =>
-                                  hasItems && setHoveredSection(section.title)
-                                }
-                                onFocus={() =>
-                                  hasItems && setHoveredSection(section.title)
-                                }
-                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
-                                  isActive
-                                    ? "bg-[#FFFFFF]/10"
-                                    : "hover:bg-[#FFFFFF]/5"
-                                }`}
-                              >
-                                {hasItems ? (
-                                  <button className="scramble w-full text-left text-xs font-semibold text-white">
-                                    {section.title}
-                                  </button>
-                                ) : (
-                                  <Link
-                                    to={section.href || "/"}
-                                    onClick={() => setIsPopoverOpen(false)}
-                                    className="w-full text-left text-xs font-semibold text-white hover:underline"
-                                  >
-                                    {section.title}
-                                  </Link>
-                                )}
-                              </div>
-                            );
-                          })}
-                          <div className=" absolute -bottom-36 left-8 w-auto flex items-start justify-start z-50 gap-5 h-20">
-                            {!isAuthenticated ? (
-                              <Link
-                                to="/login"
-                                className="group relative bg-[#FFFFFF] text-[#556B2F] py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
-                              >
-                                <span className="relative z-10 group-hover:text-[#FFFFFF]">
-                                  Se connecter
-                                </span>
-                                <span className="absolute inset-0 bg-[#556B2F] border-[#556B2F] scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
-                              </Link>
-                            ) : (
-                              <Link
-                                to="/"
-                                onClick={handleLogout}
-                                className="group relative border-2 border-red-600 text-red-600 py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
-                              >
-                                <span className="relative z-10 group-hover:text-[#FFFFFF]">
-                                  Déconnexion
-                                </span>
-                                <span className="absolute inset-0 bg-red-700 border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
-                              </Link>
-                            )}
-                          </div>
-                        </nav>
-                      </div>
-                      {/* Right: Detail/content for hovered title */}
-                      <div className="flex-1 p-6 relative">
-                        {hoveredSection ? (
-                          (() => {
-                            const current = menuSections.find(
-                              (s) => s.title === hoveredSection
-                            );
-                            if (!current) return null;
-                            if (!current.items || current.items.length === 0) {
-                              return (
-                                <div className="relative z-10 text-[#FFFFFF]">
-                                  <div className="p-6">
-                                    <Link
-                                      to={current.href || "/"}
-                                      onClick={() => setIsPopoverOpen(false)}
-                                      className="text-lg font-semibold hover:underline"
-                                    >
-                                      {current.title}
-                                    </Link>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return (
-                              <div className="relative">
-                                <div className="relative z-10 grid grid-cols-3 gap-6 p-6 mt-5">
-                                  {current.items.map((item, idx) => (
-                                    <div
-                                      key={idx}
-                                      onMouseEnter={() =>
-                                        item.submenu &&
-                                        setHoveredItem(item.title)
-                                      }
-                                      onMouseLeave={() => setHoveredItem(null)}
-                                      className="relative group"
-                                    >
-                                      <Link
-                                        to={item.href}
-                                        onClick={() => setIsPopoverOpen(false)}
-                                        className="block rounded-lg overflow-hidden hover:ring-2 hover:ring-[#FFFFFF]/20 transition-all"
-                                      >
-                                        <div className="relative aspect-video">
-                                          {item.image && (
-                                            <img
-                                              src={item.image}
-                                              alt={item.title}
-                                              className="w-full h-full object-cover opacity-40"
-                                            />
-                                          )}
-                                          <div className="absolute inset-0 bg-gradient-to-t from-black to-[#556B2F]/20 p-4 flex flex-col justify-end">
-                                            <div className="flex items-center justify-between">
-                                              <div>
-                                                <div className="text-[#FFFFFF] font-semibold group-hover:translate-x-2 transition-transform">
-                                                  {item.title}
-                                                </div>
-                                                {item.description && (
-                                                  <div className="text-sm text-[#D3D3D3] mt-1 group-hover:translate-x-2 transition-transform">
-                                                    {item.description}
-                                                  </div>
-                                                )}
-                                              </div>
-                                              {item.submenu && (
-                                                <ChevronLeft className="text-[#FFFFFF] h-5 w-5 transition-opacity" />
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </Link>
-                                      {/* Submenu */}
-                                      {item.submenu &&
-                                        hoveredItem === item.title && (
-                                          <div
-                                            className="absolute left-full top-0 ml-2 w-64 bg-black rounded-lg border border-[#FFFFFF]/20 shadow-xl overflow-hidden z-[1100]"
-                                            onMouseLeave={() =>
-                                              setHoveredItem(null)
-                                            }
-                                          >
-                                            <div className="p-4">
-                                              <h3 className="text-[#FFFFFF] font-semibold mb-3 flex items-center gap-2">
-                                                <ChevronLeft className="h-4 w-4" />
-                                                {item.title}
-                                              </h3>
-                                              <div className="space-y-2">
-                                                {item.submenu.map(
-                                                  (subitem, subidx) => (
-                                                    <Link
-                                                      key={subidx}
-                                                      to={subitem.href}
-                                                      onClick={() =>
-                                                        setIsPopoverOpen(false)
-                                                      }
-                                                      className="block p-2 rounded-lg hover:bg-[#FFFFFF]/10 transition-colors text-sm text-[#D3D3D3] hover:text-[#FFFFFF]"
-                                                    >
-                                                      <div className="font-medium">
-                                                        {subitem.title}
-                                                      </div>
-                                                      {subitem.description && (
-                                                        <div className="text-xs text-[#999999] mt-1">
-                                                          {subitem.description}
-                                                        </div>
-                                                      )}
-                                                    </Link>
-                                                  )
-                                                )}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        )}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })()
-                        ) : (
-                          <div className="text-[#D3D3D3] p-6">
-                            Survolez un titre à gauche pour voir les détails
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
           </nav>
+
+          {/* Center Logo */}
+          <div className="flex-1 flex justify-center">
+            <Link to={"/"}>
+              <ServoLogo />
+            </Link>
+          </div>
+
+          {/* Right Navigation - 2 links */}
+          <nav className="hidden lg:flex items-center gap-2 flex-1 justify-start">
+            <ul className="flex items-center gap-8">
+              {menuSections.slice(2, 4).map((section, index) => (
+                <li key={index} className="group relative">
+                  {section.items ? (
+                    <>
+                      <Button
+                        variant="ghost"
+                        className="flex items-center gap-1 text-[12px] font-bold text-gray-800 hover:text-gray-900 transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]"
+                      >
+                        {section.title}
+                        <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
+                      </Button>
+                      <div className="absolute left-0 top-full w-[320px] p-2 rounded-lg border bg-[#FFFFFF] shadow-xl opacity-0 translate-y-1 scale-95 pointer-events-none transition ease-out duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto z-[1050]">
+                        {section.items.map((item, itemIndex) => (
+                          <Link
+                            key={itemIndex}
+                            to={item.href}
+                            className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
+                          >
+                            <div>
+                              <div className="font-semibold">
+                                {item.title}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {item.description}
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700 px-3 py-2">{section.title}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Right section - Icons and actions */}
           <div className="flex items-center gap-1">
             <div className="relative flex items-center">
               {/* Bouton de recherche */}

@@ -18,3 +18,14 @@
 .redhawk {
   font-family: 'MaPolice', sans-serif;
 }
+
+@font-face {
+  font-family: 'MaPolice';
+  src: url('/fonts/space.ttf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+.space {
+  font-family: 'MaPolice', sans-serif;
+}
