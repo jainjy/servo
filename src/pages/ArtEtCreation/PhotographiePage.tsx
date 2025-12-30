@@ -157,7 +157,7 @@ const PhotographiePage: React.FC = () => {
       params.limit = 50; // Augmenter la limite pour avoir plus de résultats
       
       console.log('🌐 Fetching all photographers with params:', params);
-      const response = await api.get('/art-creation/products', { params });
+      const response = await api.get('/art-creation/photographers', { params });
       
       console.log('📦 All photographers response:', {
         success: response.data.success,
