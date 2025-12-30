@@ -76,15 +76,16 @@ class SecureStorage {
     }
   }
 }
+
 class AuthService {
   static tokenRefreshInterval = null;
   // Connexion
   static async login(email, password) {
     try {
       const response = await api.post("/auth/login", { email, password });
-      const { user, token } = response.data;
-      this.setAuthData(user, token);
-      this.startTokenRefresh();
+      const { user, token, refreshToken } = response.data;
+      // On stocke les deux tokens
+      this.setAuthData(user, token, refreshToken);
       return { user, token };
     } catch (error) {
       throw this.handleAuthError(error);
@@ -120,9 +121,9 @@ class AuthService {
         metiers: userData.metiers,
       };
       const response = await api.post("/auth/signup", registerData);
-      const { user, token } = response.data;
-      this.setAuthData(user, token);
-      this.startTokenRefresh();
+      const { user, token, refreshToken } = response.data;
+      this.setAuthData(user, token, refreshToken);
+
       return { user, token, route: AuthService.getRoleBasedRedirect() };
     } catch (error) {
       throw this.handleError(error, "Erreur lors de l'inscription");
@@ -144,10 +145,9 @@ class AuthService {
         },
         planId,
       });
-      const { user, token } = response.data;
+      const { user, token, refreshToken } = response.data;
       if (user && token) {
-        this.setAuthData(user, token);
-        this.startTokenRefresh();
+        this.setAuthData(user, token, refreshToken);
       }
       return response.data;
     } catch (error) {
@@ -163,10 +163,9 @@ class AuthService {
       const response = await api.post("/auth/confirm-payment", {
         paymentIntentId,
       });
-      const { user, token } = response.data;
+      const { user, token, refreshToken } = response.data;
       if (user && token) {
-        this.setAuthData(user, token);
-        this.startTokenRefresh();
+        this.setAuthData(user, token, refreshToken);
       }
       return response.data;
     } catch (error) {
@@ -177,54 +176,46 @@ class AuthService {
     }
   }
   // Stockage des données d'authentification
-  static setAuthData(user, token) {
+  static setAuthData(user, token, refreshToken) {
     SecureStorage.setItem("auth-token", token);
+    if (refreshToken) {
+      SecureStorage.setItem("refresh-token", refreshToken);
+    }
     SecureStorage.setItem("user-data", JSON.stringify(user));
-    // Notifier les composants du changement d'authentification
     window.dispatchEvent(new Event("auth-change"));
   }
   // Déconnexion
   static logout() {
+    const refreshToken = SecureStorage.getItem("refresh-token");
+    // Optionnel : Appeler l'API logout pour révoquer le token en base
+    if (refreshToken)
+      api.post("/auth/logout", { refreshToken }).catch(() => {});
+
     SecureStorage.removeItem("auth-token");
+    SecureStorage.removeItem("refresh-token");
     SecureStorage.removeItem("user-data");
-    // Arrêter le rafraîchissement automatique
-    if (this.tokenRefreshInterval) {
-      clearInterval(this.tokenRefreshInterval);
-      this.tokenRefreshInterval = null;
-    }
-    // Notifier la déconnexion
     window.dispatchEvent(new Event("auth-change"));
+
+    // Rediriger vers le login
+    window.location.href = "/login/particular";
   }
-  // Rafraîchissement automatique du token
-  static startTokenRefresh() {
-    // Nettoyer l'intervalle existant
-    if (this.tokenRefreshInterval) {
-      clearInterval(this.tokenRefreshInterval);
-    }
-    // Rafraîchir toutes les 55 minutes
-    this.tokenRefreshInterval = setInterval(async () => {
-      if (this.isAuthenticated()) {
-        try {
-          await this.refreshToken();
-        } catch (error) {
-          console.warn("Échec du rafraîchissement du token:", error);
-          this.logout();
-        }
-      }
-    }, 55 * 60 * 1000);
-  }
+
   // Rafraîchir le token
   static async refreshToken() {
     try {
-      const response = await api.post("/auth/refresh");
+      const refreshToken = SecureStorage.getItem("refresh-token");
+      if (!refreshToken) throw new Error("No refresh token");
+
+      // Envoi du refresh token dans le body comme attendu par le backend corrigé
+      const response = await api.post("/auth/refresh", { refreshToken });
       const { token } = response.data;
-      const currentUser = this.getCurrentUser();
-      if (currentUser) {
-        this.setAuthData(currentUser, token);
-      }
+
+      // On ne met à jour que l'access token
+      SecureStorage.setItem("auth-token", token);
       return token;
     } catch (error) {
-      throw this.handleError(error, "Impossible de rafraîchir le token");
+      this.logout();
+      throw error;
     }
   }
   // Obtenir l'utilisateur actuel
@@ -240,6 +231,9 @@ class AuthService {
   // Obtenir le token
   static getToken() {
     return SecureStorage.getItem("auth-token");
+  }
+  static getRefreshToken() {
+    return SecureStorage.getItem("refresh-token");
   }
   // Vérifier si authentifié
   static isAuthenticated() {
@@ -393,8 +387,9 @@ class AuthService {
   // Mettre à jour les données utilisateur
   static updateUserData(updatedUser) {
     const currentToken = this.getToken();
+    const currentRefreshToken = this.getRefreshToken();
     if (currentToken && updatedUser) {
-      this.setAuthData(updatedUser, currentToken);
+      this.setAuthData(updatedUser, currentToken, currentRefreshToken);
     }
   }
   // Dans AuthService, ajoutez ces méthodes :
@@ -405,8 +400,9 @@ class AuthService {
       const updatedUser = response.data;
       // Mettre à jour les données locales
       const currentToken = this.getToken();
+      const currentRefreshToken = this.getRefreshToken();
       if (currentToken) {
-        this.setAuthData(updatedUser, currentToken);
+        this.setAuthData(updatedUser, currentToken, currentRefreshToken);
       }
       return updatedUser;
     } catch (error) {
@@ -451,4 +447,5 @@ class AuthService {
     }
   }
 }
+
 export default AuthService;
