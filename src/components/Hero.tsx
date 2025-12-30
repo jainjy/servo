@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/hero-house.jpg";
 import "../styles/font.css";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
@@ -39,6 +38,8 @@ const Hero = () => {
   const [waveOffset, setWaveOffset] = useState(0);
   const animationRef = useRef<number | null>(null);
   const mouseInactiveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const heroImage = "https://i.pinimg.com/736x/e8/45/fd/e845fddd197e23cb546f49d1a8f2b5ac.jpg"
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -198,7 +199,7 @@ const Hero = () => {
           <img
             src={heroImage}
             alt="Background"
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full object-center  h-full"
             style={{
               transform: `translateY(${scrollProgress * 30}px)`,
             }}
@@ -211,13 +212,13 @@ const Hero = () => {
         {/* Content Container */}
         <div className="relative z-20 h-full min-h-screen flex items-start pt-32 lg:items-center lg:pt-0">
           <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 lg:gap-16 lg:items-center">
               {/* Left Content */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8 }}
-                className="space-y-4  lg:space-y-6"
+                className="space-y-4 lg:space-y-12"
               >
 
                 {/* Main Title */}
@@ -226,7 +227,7 @@ const Hero = () => {
                     initial={{ opacity: 0, x: -40 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.1 }}
-                    className="hero-title space text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white leading-tight"
+                    className="hero-title font-serif text-4xl leading-loose md:text-5xl lg:text-7xl uppercase tracking-widest font-light text-white"
                   >
                     Votre plateforme
                     <br />
@@ -241,7 +242,7 @@ const Hero = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.5 }}
-                  className="mx-auto max-w-2xl w-full px-4 pointer-events-auto mt-4"
+                  className=" max-w-2xl w-full px-4 pointer-events-auto"
                   onClick={openModal}
                 >
                   <div className="flex items-center gap-2 bg-white/10 backdrop-blur-lg rounded-full p-2 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-300">
@@ -278,112 +279,31 @@ const Hero = () => {
               </motion.div>
 
               {/* Right Card - Service Cards */}
-              <motion.div
-                initial={{ opacity: 0, x: 60 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="hero-card hidden lg:block w-3/4 py-5"
-              >
-                <div className="grid grid-cols-2 grid-rows-4 mt-5">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.2 }} className="hero-card hidden lg:block absolute bottom-8 right-8 w-auto">
+                <div className="grid grid-cols-4 gap-2">
                   {[
-                    {
-                      icon: Home,
-                      title: "Annonces Immobilières",
-                      description: "Trouver votre futur logement",
-                      href: "/immobilier"
-                    },
-                    {
-                      icon: TrendingUp,
-                      title: "Services professionnels",
-                      description: "Trouver un professionnel",
-                      href: "/service"
-                    },
-                    {
-                      icon: Package,
-                      title: "Décoration & Mobilier",
-                      description: "Tous les produits pour la maison",
-                      href: "/produits"
-                    },
-                    {
-                      icon: User2Icon,
-                      title: "Vivre à la réunion",
-                      description: "Une douceur de vie tropicale",
-                      href: "/tourisme"
-                    },
-                  ].map((service, index) => {
-                    const colStart = index % 2 === 0 ? 'col-start-1' : 'col-start-2';
-                    const rowStart = index === 0 ? 'row-start-1' : index === 1 ? 'row-start-2' : index === 2 ? 'row-start-3' : 'row-start-4';
-                    
-                    return (
-                      <Link to={service.href} key={service.title} className={`no-underline ${colStart} ${rowStart}`}>
-                        <Card
-                          className="
-                            p-2 lg:p-3
-                            text-center flex flex-col items-center justify-center
-                            hover:shadow-2xl shadow-lg transition-all duration-500
-                            cursor-pointer
-                            bg-transparent hover:bg-white/10
-                            group relative overflow-hidden border-b-0 border-r-0
-                            h-full min-h-[110px]
-                          "
-                        >
-                          {/* Effet de fond animé */}
-                          <div className="absolute inset-0 backdrop-blur-xl bg-gradient-to-tr from-black via-transparent to-white"></div>
-
-                          {/* Icône */}
-                          <div className="relative mb-2 z-10">
-                            <div className="
-                              rounded-2xl bg-gradient-to-br from-white/20 to-white/10
-                              flex items-center justify-center
-                              transition-all duration-500 group-hover:from-white/30 group-hover:to-white/15
-                              group-hover:scale-110 group-hover:rotate-3
-                              w-12 h-12
-                              border border-white/30
-                            ">
-                              <service.icon className="
-                                transition-transform duration-500
-                                h-6 w-6
-                                text-white
-                                group-hover:scale-110
-                              " />
-                            </div>
-                          </div>
-
-                          {/* Contenu */}
-                          <div className="relative z-10 flex-1 w-full">
-                            <h3 className="
-                              font-bold text-white text-center group-hover:text-white
-                              transition-colors duration-300
-                              text-xs lg:text-sm
-                              mb-1
-                              line-clamp-2
-                            ">
-                              {service.title}
-                            </h3>
-
-                            <p className="
-                              text-white/70 leading-tight text-center
-                              text-xs
-                              line-clamp-2
-                              opacity-80 group-hover:opacity-100
-                              transition-opacity duration-300
-                            ">
-                              {service.description}
-                            </p>
-                          </div>
-
-                          {/* Indicateur hover */}
-                          <div className="
-                            absolute bottom-0 left-1/2 transform -translate-x-1/2
-                            w-0 h-0.5 bg-white
-                            group-hover:w-4/5 transition-all duration-500
-                          "></div>
-                        </Card>
-                      </Link>
-                    );
-                  })}
+                    { icon: Home, title: "Annonces Immobilières", description: "Trouver votre futur logement", href: "/immobilier" },
+                    { icon: TrendingUp, title: "Services professionnels", description: "Trouver un professionnel", href: "/service" },
+                    { icon: Package, title: "Décoration & Mobilier", description: "Tous les produits pour la maison", href: "/produits" },
+                    { icon: User2Icon, title: "Vivre à la réunion", description: "Une douceur de vie tropicale", href: "/tourisme" },
+                  ].map((service) => (
+                    <Link to={service.href} key={service.title} className="no-underline">
+                      <Card className="p-2 text-center flex flex-col items-center justify-center hover:shadow-2xl shadow-lg transition-all duration-500 cursor-pointer bg-transparent hover:bg-white/10 group relative overflow-hidden border-b-0 border-r-0 h-full min-h-[100px]">
+                        <div className="absolute inset-0 backdrop-blur-xl bg-gradient-to-tr from-black via-transparent to-white" />
+                        <div className="relative mb-1 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-white/20 to-white/10 border border-white/30 transition-all duration-500 group-hover:from-white/30 group-hover:to-white/15 group-hover:scale-110 group-hover:rotate-3">
+                          <service.icon className="h-4 w-4 text-white transition-transform duration-500 group-hover:scale-110" />
+                        </div>
+                        <div className="relative z-10 flex-1 w-full px-1">
+                          <h3 className="font-bold text-white text-center transition-colors duration-300 text-xs leading-tight line-clamp-1 mb-0.5">{service.title}</h3>
+                          <p className="text-white/70 text-center text-xs line-clamp-1 opacity-80 group-hover:opacity-100 transition-opacity duration-300">{service.description}</p>
+                        </div>
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-white group-hover:w-2/3 transition-all duration-500" />
+                      </Card>
+                    </Link>
+                  ))}
                 </div>
               </motion.div>
+
             </div>
           </div>
         </div>
