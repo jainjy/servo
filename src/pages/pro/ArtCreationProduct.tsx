@@ -1,30 +1,47 @@
-// ArtCreationProduct.tsx
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { 
   Search, Plus, Edit3, Trash2, Palette, Camera, 
   Cpu, Mountain, Filter, BarChart3, Calendar, 
   User, CheckCircle, Clock, AlertCircle, DollarSign,
-  Image as ImageIcon, Tag, Layers, Eye, ShoppingCart,
-  Mail, Phone, TrendingUp, X, FileSearch, Sparkles,
-  MoreVertical, Heart, Eye as EyeIcon,
-  Download, Bookmark
+  Tag, Layers, ShoppingCart, Mail, TrendingUp, 
+  X, FileSearch, Sparkles, Eye as EyeIcon
 } from 'lucide-react';
 import { ProductCreateModal } from './ProductCreateModal';
 import { useToast } from '@/hooks/use-toast';
 
+// Types compatibles avec ProductCreateModal
 interface ArtProduct {
   id: number | string;
   title: string;
-  type?: 'tableau' | 'sculpture' | 'photographie' | 'digital' | string;
-  status?: string;
-  category?: string;
-  price?: number;
+  name: string;
+  type: 'photographie' | 'sculpture' | 'peinture' | 'artisanat' | string;
+  category: string;
+  status: 'published' | 'draft' | 'sold' | string;
+  price: number;
+  description: string;
   artist?: string;
   creationDate?: string;
   images?: string[];
+  dimensions?: {
+    creationDate?: string;
+    dimensions?: string;
+    materials?: string;
+    [key: string]: string | undefined;
+  };
   views?: number;
   likes?: number;
-  description?: string;
+  userId?: string;
+  slug?: string;
+  createdAt?: string;
+  publishedAt?: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+    companyName?: string;
+    commercialName?: string;
+  };
 }
 
 interface Reservation {
@@ -41,11 +58,25 @@ interface Reservation {
   notes?: string;
 }
 
+// Catégories correspondant à ProductCreateModal
+const TYPE_LABELS: Record<string, string> = {
+  'photographie': 'Photographie',
+  'sculpture': 'Sculpture',
+  'peinture': 'Peinture',
+  'artisanat': 'Artisanat'
+};
+
+const STATUS_OPTIONS = [
+  { value: 'published', label: 'Publié' },
+  { value: 'draft', label: 'Brouillon' },
+  { value: 'sold', label: 'Vendu' }
+] as const;
+
 const ArtCreationProduct: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('tous');
-  const [typeFilter, setTypeFilter] = useState<string>('tous');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<ArtProduct[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -84,65 +115,36 @@ const ArtCreationProduct: React.FC = () => {
       const response = await res.json();
       const productsData = response.data || [];
       
+      // Formater les produits pour correspondre à l'interface ArtProduct
       const mapped: ArtProduct[] = productsData.map((p: any) => ({
         id: p.id,
         title: p.name || p.title || 'Sans titre',
-        type: p.category || '',
-        status: p.status || '',
+        name: p.name || p.title || 'Sans titre',
+        type: p.type || p.subcategory || '',
         category: p.category || '',
+        status: p.status || 'draft',
         price: p.price || 0,
-        artist: p.user?.firstName || p.user?.lastName || 
-                p.user?.companyName || 'Artiste',
-        creationDate: p.dimensions?.creationDate || p.createdAt || '',
-        images: Array.isArray(p.images) ? p.images : [],
-        views: p.views || Math.floor(Math.random() * 500),
-        likes: p.likes || Math.floor(Math.random() * 100),
-        description: p.description || ''
+        description: p.description || '',
+        artist: p.user?.firstName ? `${p.user.firstName} ${p.user.lastName || ''}`.trim() : 
+                p.user?.companyName || p.user?.commercialName || 'Artiste',
+        creationDate: p.dimensions?.creationDate || p.dimensions?.date || p.createdAt || '',
+        images: Array.isArray(p.images) ? p.images.map((img: string) => 
+          img.startsWith('http') ? img : `${apiBase}${img}`
+        ) : [],
+        dimensions: p.dimensions || {},
+        views: p.viewCount || Math.floor(Math.random() * 500),
+        likes: Math.floor(Math.random() * 100),
+        userId: p.userId,
+        slug: p.slug,
+        createdAt: p.createdAt,
+        publishedAt: p.publishedAt,
+        user: p.user
       }));
       
       setProducts(mapped);
       
       // Simuler des réservations pour la démo
-      const demoReservations: Reservation[] = [
-        {
-          id: 1,
-          productId: productsData[0]?.id || '1',
-          productTitle: productsData[0]?.name || 'Soleil Couchant',
-          customerName: 'Marie Dupont',
-          customerEmail: 'marie.dupont@email.com',
-          customerPhone: '06 12 34 56 78',
-          status: 'confirmed',
-          date: '2024-03-15',
-          price: 1200,
-          commission: 120,
-          notes: 'Client intéressé par une œuvre similaire'
-        },
-        {
-          id: 2,
-          productId: productsData[1]?.id || '2',
-          productTitle: productsData[1]?.name || 'Abstraction Urbaine',
-          customerName: 'Jean Martin',
-          customerEmail: 'jean.martin@email.com',
-          status: 'pending',
-          date: '2024-03-14',
-          price: 850,
-          commission: 85,
-          notes: 'À confirmer avant vendredi'
-        },
-        {
-          id: 3,
-          productId: productsData[2]?.id || '3',
-          productTitle: productsData[2]?.name || 'Sculpture Bronze',
-          customerName: 'Sophie Laurent',
-          customerEmail: 'sophie.laurent@email.com',
-          customerPhone: '07 87 65 43 21',
-          status: 'completed',
-          date: '2024-03-10',
-          price: 3200,
-          commission: 320
-        }
-      ];
-      setReservations(demoReservations);
+      
       
     } catch (err: any) {
       console.error('fetchProducts error', err);
@@ -167,83 +169,54 @@ const ArtCreationProduct: React.FC = () => {
   const filteredProducts = useMemo(() => products.filter(product => {
     const matchesSearch = (product.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (product.artist || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (product.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+                         (product.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (product.category || '').toLowerCase().includes(searchTerm.toLowerCase());
     
-    let productStatus = (product.status || '').toLowerCase();
-    let filterStatus = statusFilter.toLowerCase();
+    const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
     
-    const matchesStatus = 
-      filterStatus === 'tous' || 
-      productStatus === filterStatus ||
-      (filterStatus === 'publié' && productStatus === 'published') ||
-      (filterStatus === 'en attente' && productStatus === 'draft') ||
-      (filterStatus === 'vendu' && productStatus === 'sold');
-    
-    const matchesType = typeFilter === 'tous' || (product.type || '') === typeFilter;
+    const matchesType = typeFilter === 'all' || product.type === typeFilter;
     
     return matchesSearch && matchesStatus && matchesType;
   }), [products, searchTerm, statusFilter, typeFilter]);
 
   const stats = useMemo(() => ({
     total: products.length,
-    published: products.filter(p => 
-      (p.status || '').toLowerCase() === 'published' || 
-      (p.status || '').toLowerCase() === 'publié'
-    ).length,
-    pending: products.filter(p => 
-      (p.status || '').toLowerCase() === 'draft' || 
-      (p.status || '').toLowerCase() === 'en attente'
-    ).length,
-    archived: products.filter(p => 
-      (p.status || '').toLowerCase() === 'archived' || 
-      (p.status || '').toLowerCase() === 'archivé'
-    ).length,
-    sold: products.filter(p => 
-      (p.status || '').toLowerCase() === 'sold' || 
-      (p.status || '').toLowerCase() === 'vendu'
-    ).length,
+    published: products.filter(p => p.status === 'published').length,
+    draft: products.filter(p => p.status === 'draft').length,
+    sold: products.filter(p => p.status === 'sold').length,
     totalRevenue: reservations
       .filter(r => r.status === 'completed' || r.status === 'confirmed')
       .reduce((sum, r) => sum + r.price, 0)
   }), [products, reservations]);
 
-  const getStatusColor = (status: string | undefined) => {
-    switch ((status || '').toLowerCase()) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
       case 'published':
-      case 'publié':
         return { 
           bg: 'bg-green-50', 
           text: 'text-green-700', 
           border: 'border-green-200',
           darkBg: 'bg-green-500/10',
-          darkText: 'text-green-600'
+          darkText: 'text-green-600',
+          label: 'Publié'
         };
       case 'draft':
-      case 'en attente':
         return { 
           bg: 'bg-yellow-50', 
           text: 'text-yellow-700', 
           border: 'border-yellow-200',
           darkBg: 'bg-yellow-500/10',
-          darkText: 'text-yellow-600'
-        };
-      case 'archived':
-      case 'archivé':
-        return { 
-          bg: 'bg-gray-50', 
-          text: 'text-gray-700', 
-          border: 'border-gray-200',
-          darkBg: 'bg-gray-500/10',
-          darkText: 'text-gray-600'
+          darkText: 'text-yellow-600',
+          label: 'Brouillon'
         };
       case 'sold':
-      case 'vendu':
         return { 
           bg: 'bg-blue-50', 
           text: 'text-blue-700', 
           border: 'border-blue-200',
           darkBg: 'bg-blue-500/10',
-          darkText: 'text-blue-600'
+          darkText: 'text-blue-600',
+          label: 'Vendu'
         };
       default:
         return { 
@@ -251,7 +224,43 @@ const ArtCreationProduct: React.FC = () => {
           text: 'text-gray-700', 
           border: 'border-gray-200',
           darkBg: 'bg-gray-500/10',
-          darkText: 'text-gray-600'
+          darkText: 'text-gray-600',
+          label: status
+        };
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'photographie':
+        return { 
+          bg: 'bg-blue-500/10', 
+          text: 'text-blue-600',
+          icon: Camera
+        };
+      case 'sculpture':
+        return { 
+          bg: 'bg-amber-500/10', 
+          text: 'text-amber-600',
+          icon: Mountain
+        };
+      case 'peinture':
+        return { 
+          bg: 'bg-red-500/10', 
+          text: 'text-red-600',
+          icon: Palette
+        };
+      case 'artisanat':
+        return { 
+          bg: 'bg-green-500/10', 
+          text: 'text-green-600',
+          icon: Layers
+        };
+      default:
+        return { 
+          bg: 'bg-gray-500/10', 
+          text: 'text-gray-600',
+          icon: Cpu
         };
     }
   };
@@ -259,25 +268,15 @@ const ArtCreationProduct: React.FC = () => {
   const getReservationStatusColor = (status: Reservation['status']) => {
     switch (status) {
       case 'confirmed':
-        return { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle };
+        return { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle, label: 'Confirmée' };
       case 'pending':
-        return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock };
+        return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock, label: 'En attente' };
       case 'cancelled':
-        return { bg: 'bg-red-100', text: 'text-red-800', icon: AlertCircle };
+        return { bg: 'bg-red-100', text: 'text-red-800', icon: AlertCircle, label: 'Annulée' };
       case 'completed':
-        return { bg: 'bg-blue-100', text: 'text-blue-800', icon: CheckCircle };
+        return { bg: 'bg-blue-100', text: 'text-blue-800', icon: CheckCircle, label: 'Terminée' };
       default:
-        return { bg: 'bg-gray-100', text: 'text-gray-800', icon: AlertCircle };
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'tableau': return Palette;
-      case 'sculpture': return Mountain;
-      case 'photographie': return Camera;
-      case 'digital': return Cpu;
-      default: return Mountain;
+        return { bg: 'bg-gray-100', text: 'text-gray-800', icon: AlertCircle, label: status };
     }
   };
 
@@ -336,18 +335,19 @@ const ArtCreationProduct: React.FC = () => {
 
   const handleEdit = (product: ArtProduct) => {
     const initial = {
-      name: product.title,
+      name: product.name || product.title,
       description: product.description || '',
+      type: product.type || '',
       category: product.category || '',
       price: product.price || 0,
-      status: (product.status || 'draft') as 'published' | 'draft' | 'sold',
+      status: product.status as 'published' | 'draft' | 'sold',
       images: product.images || [],
-      dimensions: { 
+      dimensions: product.dimensions || {
         creationDate: product.creationDate,
         dimensions: '',
         materials: ''
       },
-      userId: currentUserId,
+      userId: product.userId || currentUserId,
       id: product.id
     };
     setEditingInitial(initial);
@@ -360,10 +360,24 @@ const ArtCreationProduct: React.FC = () => {
     fetchProducts();
   };
 
+  // Formater la date
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '—';
+    try {
+      return new Date(dateString).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch {
+      return '—';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Section titre et statistiques - Full Width */}
+        {/* Section titre et statistiques */}
         <div className="mb-8">
           <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6" 
                style={{ 
@@ -375,12 +389,13 @@ const ArtCreationProduct: React.FC = () => {
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                        style={{ backgroundColor: `${theme.logo}15` }}>
+                    <Palette size={24} style={{ color: theme.logo }} />
                   </div>
                   <div>
                     <h1 className="text-3xl md:text-4xl font-bold" style={{ color: theme.secondaryText }}>
-                      Art et Création
+                      Mes Créations Artistiques
                     </h1>
-                    <p className="text-gray-600 mt-1">Gérez vos créations artistiques</p>
+                    <p className="text-gray-600 mt-1">Gérez vos œuvres d'art et artisanat</p>
                   </div>
                 </div>
               </div>
@@ -401,13 +416,39 @@ const ArtCreationProduct: React.FC = () => {
               </button>
             </div>
 
-            {/* Statistiques - Design moderne */}
+            {/* Statistiques */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {[
-                { label: 'Total œuvres', value: stats.total, color: theme.logo, icon: BarChart3 },
-                { label: 'Publiées', value: stats.published, color: '#10B981', icon: EyeIcon },
-                { label: 'En attente', value: stats.pending, color: '#F59E0B', icon: Clock },
-                { label: 'Archivées', value: stats.archived, color: '#6B7280', icon: Bookmark },
+                { 
+                  label: 'Total œuvres', 
+                  value: stats.total, 
+                  color: theme.logo, 
+                  icon: BarChart3 
+                },
+                { 
+                  label: 'Publiées', 
+                  value: stats.published, 
+                  color: '#10B981', 
+                  icon: EyeIcon 
+                },
+                { 
+                  label: 'Brouillons', 
+                  value: stats.draft, 
+                  color: '#F59E0B', 
+                  icon: Clock 
+                },
+                { 
+                  label: 'Vendues', 
+                  value: stats.sold, 
+                  color: '#3B82F6', 
+                  icon: CheckCircle 
+                },
+                { 
+                  label: 'Chiffre d\'affaires', 
+                  value: `${stats.totalRevenue.toLocaleString('fr-FR')} €`, 
+                  color: '#8B5CF6', 
+                  icon: TrendingUp 
+                },
               ].map((stat, index) => (
                 <div 
                   key={index} 
@@ -434,7 +475,7 @@ const ArtCreationProduct: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Section principale des œuvres - Pleine largeur jusqu'à la recherche */}
+          {/* Section principale des œuvres */}
           <div className="lg:col-span-2 space-y-6">
             {/* Barre de recherche et filtres */}
             <div className="bg-white rounded-2xl shadow-xl p-6" 
@@ -444,7 +485,7 @@ const ArtCreationProduct: React.FC = () => {
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
-                    placeholder="Rechercher une œuvre, un artiste, une description..."
+                    placeholder="Rechercher par titre, artiste, catégorie..."
                     className="w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-offset-2 focus:outline-none transition-all bg-gray-50 hover:bg-white"
                     style={{ 
                       borderColor: theme.separator,
@@ -458,35 +499,37 @@ const ArtCreationProduct: React.FC = () => {
                   <div className="relative">
                     <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                     <select
-                      className="pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-gray-50 hover:bg-white cursor-pointer"
+                      className="pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-offset-2 focus:outline-none appearance-none bg-gray-50 hover:bg-white cursor-pointer"
                       style={{ 
                         borderColor: theme.separator,
                       }}
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
                     >
-                      <option value="tous">Tous les statuts</option>
-                      <option value="publié">Publié</option>
-                      <option value="en attente">En attente</option>
-                      <option value="archivé">Archivé</option>
-                      <option value="vendu">Vendu</option>
+                      <option value="all">Tous les statuts</option>
+                      {STATUS_OPTIONS.map((status) => (
+                        <option key={status.value} value={status.value}>
+                          {status.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   
                   <div className="relative">
                     <select
-                      className="pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-gray-50 hover:bg-white cursor-pointer"
+                      className="pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-offset-2 focus:outline-none appearance-none bg-gray-50 hover:bg-white cursor-pointer"
                       style={{ 
                         borderColor: theme.separator,
                       }}
                       value={typeFilter}
                       onChange={(e) => setTypeFilter(e.target.value)}
                     >
-                      <option value="tous">Tous les types</option>
-                      <option value="tableau">Tableau</option>
-                      <option value="sculpture">Sculpture</option>
-                      <option value="photographie">Photographie</option>
-                      <option value="digital">Digital</option>
+                      <option value="all">Tous les types</option>
+                      {Object.entries(TYPE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -513,6 +556,7 @@ const ArtCreationProduct: React.FC = () => {
                     {products.length === 0 ? (
                       <div className="relative">
                         <Plus size={28} className="absolute -top-2 -right-2 text-white bg-gray-400 rounded-full p-1.5" />
+                        <Palette size={48} className="text-gray-300" />
                       </div>
                     ) : (
                       <div className="relative">
@@ -539,8 +583,8 @@ const ArtCreationProduct: React.FC = () => {
                       setShowModal(true);
                     } else {
                       setSearchTerm('');
-                      setStatusFilter('tous');
-                      setTypeFilter('tous');
+                      setStatusFilter('all');
+                      setTypeFilter('all');
                     }
                   }}
                   className="inline-flex items-center gap-3 px-6 py-3 rounded-xl hover:shadow-xl transition-all duration-300 hover:scale-105"
@@ -565,16 +609,16 @@ const ArtCreationProduct: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredProducts.map((product) => {
-                  const TypeIcon = getTypeIcon(product.type || '');
                   const statusColors = getStatusColor(product.status);
+                  const typeColors = getTypeColor(product.type);
+                  const TypeIcon = typeColors.icon;
                   
                   return (
                     <div 
                       key={product.id} 
-                      className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border"
+                      className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border hover:-translate-y-1"
                       style={{ 
                         borderColor: theme.separator,
-                        transform: 'translateY(0)'
                       }}
                     >
                       {/* Image avec overlay */}
@@ -582,13 +626,7 @@ const ArtCreationProduct: React.FC = () => {
                         {product.images && product.images[0] ? (
                           <>
                             <img 
-                              src={
-                                product.images[0].startsWith('http') 
-                                  ? product.images[0] 
-                                  : product.images[0].startsWith('/')
-                                    ? `${apiBase}${product.images[0]}`
-                                    : `https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800&q=80`
-                              } 
+                              src={product.images[0]}
                               alt={product.title} 
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                               onError={(e) => {
@@ -600,87 +638,74 @@ const ArtCreationProduct: React.FC = () => {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center" 
                                style={{ backgroundColor: `${theme.logo}10` }}>
-                            <TypeIcon size={64} style={{ color: `${theme.logo}50` }} />
+                            <TypeIcon size={64} style={{ color: `${theme.logo}30` }} />
                           </div>
                         )}
                         
-                        {/* Badges supérieurs */}
+                        {/* Badge statut */}
                         <div className="absolute top-3 left-3">
                           <span className={`px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm ${statusColors.darkBg} ${statusColors.darkText}`}>
-                            {((product.status || '').charAt(0).toUpperCase() + (product.status || '').slice(1)) || '—'}
+                            {statusColors.label}
                           </span>
                         </div>
                         
+                        {/* Badge type */}
                         <div className="absolute top-3 right-3">
-                          <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm">
-                            <TypeIcon size={18} style={{ color: theme.logo }} />
+                          <div className={`px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm flex items-center gap-1.5 ${typeColors.bg} ${typeColors.text}`}>
+                            <TypeIcon size={12} />
+                            <span>{TYPE_LABELS[product.type] || product.type}</span>
                           </div>
                         </div>
                         
+                        {/* Prix overlay */}
+                        <div className="absolute bottom-3 right-3">
+                          <div className="px-3 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm">
+                            <span className="font-bold text-lg" style={{ color: theme.logo }}>
+                              {product.price ? `${product.price.toLocaleString('fr-FR')} €` : '—'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       
                       {/* Contenu de la carte */}
-                      <div className="p-4">
-                        {/* Titre et artiste */}
-                        <div className="mb-3">
-                          <h3 className="font-bold text-lg text-gray-900 truncate group-hover:text-gray-800 transition-colors">
+                      <div className="p-5">
+                        {/* Titre et catégorie */}
+                        <div className="mb-4">
+                          <h3 className="font-bold text-xl text-gray-900 truncate group-hover:text-gray-800 transition-colors mb-1">
                             {product.title}
                           </h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <User size={14} className="text-gray-400" />
-                            <span className="text-sm text-gray-600">
-                              {product.artist || 'Artiste anonyme'}
+                          <div className="flex items-center gap-2">
+                            <Tag size={14} className="text-gray-400" />
+                            <span className="text-sm text-gray-600 truncate">
+                              {product.category || 'Non catégorisé'}
                             </span>
                           </div>
                         </div>
                         
+                        {/* Description */}
+                        {product.description && (
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {product.description}
+                            </p>
+                          </div>
+                        )}
+                        
                         {/* Métriques */}
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-between mb-5">
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <div className="flex items-center gap-1.5">
-                              <Eye size={14} />
-                              <span className="font-medium">{product.views || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Heart size={14} />
-                              <span className="font-medium">{product.likes || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
                               <Calendar size={14} />
-                              <span className="font-medium">{product.creationDate ? new Date(product.creationDate).toLocaleDateString('fr-FR') : '—'}</span>
-                            </div>
-                          </div>
-                          <button className="text-gray-400 hover:text-gray-600">
-                            <MoreVertical size={18} />
-                          </button>
-                        </div>
-                        
-                        {/* Prix et catégorie */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="px-2 py-1 rounded-md text-xs font-medium"
-                                 style={{ 
-                                   backgroundColor: `${theme.logo}15`,
-                                   color: theme.logo
-                                 }}>
-                              {product.type || '—'}
-                            </div>
-                            <div className="px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
-                              {product.category || '—'}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold" style={{ color: theme.logo }}>
-                              {product.price ? product.price.toLocaleString('fr-FR') + ' €' : '—'}
+                              <span className="font-medium">{formatDate(product.creationDate || product.createdAt)}</span>
                             </div>
                           </div>
                         </div>
                         
                         {/* Actions */}
-                        <div className="flex items-center gap-2 pt-3 border-t" style={{ borderColor: theme.separator }}>
+                        <div className="flex items-center gap-2 pt-4 border-t" style={{ borderColor: theme.separator }}>
                           <button 
                             onClick={() => handleEdit(product)} 
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg hover:scale-105 transition-all duration-300 group/edit"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg hover:scale-105 transition-all duration-300 group/edit"
                             style={{ 
                               backgroundColor: `${theme.logo}10`,
                               color: theme.logo
@@ -688,17 +713,14 @@ const ArtCreationProduct: React.FC = () => {
                           >
                             <Edit3 size={16} className="group-hover/edit:rotate-12 transition-transform" />
                             <span className="text-sm font-medium">Modifier</span>
-                          </button>
-                          
+                          </button>                          
                           <button 
                             onClick={() => handleDelete(product.id)} 
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg hover:scale-105 transition-all duration-300 group/delete bg-red-50 text-red-600 hover:bg-red-100"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg hover:scale-105 transition-all duration-300 group/delete bg-red-50 text-red-600 hover:bg-red-100"
                           >
                             <Trash2 size={16} className="group-hover/delete:shake transition-transform" />
                             <span className="text-sm font-medium">Supprimer</span>
                           </button>
-                          
-                          
                         </div>
                       </div>
                     </div>
@@ -780,9 +802,7 @@ const ArtCreationProduct: React.FC = () => {
                         </div>
                         <div className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 ${statusColors.bg} ${statusColors.text}`}>
                           <StatusIcon size={12} />
-                          {reservation.status === 'pending' ? 'En attente' : 
-                           reservation.status === 'confirmed' ? 'Confirmée' : 
-                           reservation.status === 'cancelled' ? 'Annulée' : 'Terminée'}
+                          {statusColors.label}
                         </div>
                       </div>
 
@@ -853,6 +873,12 @@ const ArtCreationProduct: React.FC = () => {
         }
         .group-hover\\/delete:shake {
           animation: shake 0.5s ease-in-out;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       `}</style>
     </div>
