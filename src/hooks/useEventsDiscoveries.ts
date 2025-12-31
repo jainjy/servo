@@ -31,43 +31,54 @@ export const useEventsDiscoveries = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Fonction pour formater un événement de l'API
-  const formatEventFromApi = (event: any): EventItem => {
-    return {
-      id: event.id,
-      title: event.title,
-      date: new Date(event.date).toISOString().split('T')[0],
-      time: `${event.startTime || ''}${event.endTime ? ` - ${event.endTime}` : ''}`,
-      location: event.location,
-      category: event.category,
-      description: event.description || '',
-      image: event.image || 'https://via.placeholder.com/300x200',
-      status: event.status.toLowerCase(),
-      participants: event.participants || 0,
-      capacity: event.capacity || 0,
-      revenue: event.revenue || 0,
-      featured: event.featured || false,
-      organizer: event.organizer || '',
-      price: event.price || 0,
-      address: event.address || '',
-      city: event.city || '',
-      postalCode: event.postalCode || '',
-      contactEmail: event.contactEmail || '',
-      contactPhone: event.contactPhone || '',
-      duration: event.duration || '',
-      registrationDeadline: event.registrationDeadline || '',
-      earlyBirdDeadline: event.earlyBirdDeadline || '',
-      earlyBirdPrice: event.earlyBirdPrice || 0,
-      tags: event.tags || [],
-      requirements: event.requirements || '',
-      highlights: event.highlights || [],
-      includes: event.includes || [],
-      notIncludes: event.notIncludes || [],
-      cancellationPolicy: event.cancellationPolicy || '',
-      refundPolicy: event.refundPolicy || '',
-      visibility: event.visibility || 'public',
-      user: event.user || null
-    };
+ const formatEventFromApi = (event: any): EventItem => {
+  const date = new Date(event.date);
+  
+  return {
+    id: event.id,
+    title: event.title,
+    date: date.toISOString(), // Conserver ISO format
+    time: `${event.startTime || ''}${event.endTime ? ` - ${event.endTime}` : ''}`,
+    location: event.location,
+    category: event.category,
+    description: event.description || '',
+    image: event.image || 'https://via.placeholder.com/300x200',
+    status: event.status.toLowerCase(),
+    participants: event.participants || 0,
+    capacity: event.capacity || 0,
+    revenue: event.revenue || 0,
+    featured: event.featured || false,
+    organizer: event.organizer || '',
+    price: event.price || 0,
+    address: event.address || '',
+    city: event.city || '',
+    postalCode: event.postalCode || '',
+    contactEmail: event.contactEmail || '',
+    contactPhone: event.contactPhone || '',
+    duration: event.duration || '',
+    
+    // Nouveaux champs
+    currency: event.currency || 'EUR',
+    subCategory: event.subCategory,
+    discountPrice: event.discountPrice,
+    images: event.images || [],
+    tags: event.tags || [],
+    requirements: event.requirements || '',
+    highlights: event.highlights || [],
+    difficulty: event.difficulty?.toLowerCase() as "easy" | "medium" | "hard" || undefined,
+    targetAudience: event.targetAudience || [],
+    includes: event.includes || [],
+    notIncludes: event.notIncludes || [],
+    cancellationPolicy: event.cancellationPolicy || '',
+    refundPolicy: event.refundPolicy || '',
+    visibility: event.visibility?.toLowerCase(),
+    website: event.website || '',
+    registrationDeadline: event.registrationDeadline || '',
+    earlyBirdDeadline: event.earlyBirdDeadline || '',
+    earlyBirdPrice: event.earlyBirdPrice || undefined,
+    userId: event.userId
   };
+};
 
   // Fonction pour formater une découverte de l'API
   const formatDiscoveryFromApi = (discovery: any): DiscoveryItem => {
@@ -132,7 +143,7 @@ export const useEventsDiscoveries = () => {
   const fetchEvents = useCallback(async (params?: any) => {
     try {
       setLoading(prev => ({ ...prev, events: true }));
-      const response = await api.get("/events", { 
+      const response = await api.get("/event", { 
         params: {
           ...params,
           includeUser: "true"
@@ -188,7 +199,7 @@ export const useEventsDiscoveries = () => {
       setLoading(prev => ({ ...prev, stats: true }));
       
       // Récupérer les statistiques des événements
-      const eventsResponse = await api.get("/events/stats");
+      const eventsResponse = await api.get("/event/stats");
       const discoveriesResponse = await api.get("/discoveries/stats");
       
       const eventsStats = eventsResponse.data.data || {};
@@ -270,7 +281,7 @@ export const useEventsDiscoveries = () => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
       try {
         if (activeTab === "events") {
-          await api.delete(`/events/${id}`);
+          await api.delete(`/event/${id}`);
           setEvents(prev => prev.filter((item) => item.id !== id));
         } else {
           await api.delete(`/discoveries/${id}`);
@@ -295,7 +306,7 @@ export const useEventsDiscoveries = () => {
       if (activeTab === "events") {
         const event = events.find(e => e.id === id);
         if (event) {
-          const response = await api.patch(`/events/${id}/featured`, {
+          const response = await api.patch(`/event/${id}/featured`, {
             featured: !event.featured
           });
           
@@ -352,47 +363,125 @@ export const useEventsDiscoveries = () => {
   }, [activeTab]);
 
   // Ajouter un événement
-  const handleAddEvent = useCallback(async (newEvent: EventItem) => {
-    try {
-      // Préparer les données pour l'API
-      const eventData = {
-        title: newEvent.title,
-        description: newEvent.description,
-        date: newEvent.date,
-        startTime: newEvent.time.split(" - ")[0],
-        endTime: newEvent.time.split(" - ")[1] || undefined,
-        location: newEvent.location,
-        category: newEvent.category,
-        capacity: newEvent.capacity,
-        price: newEvent.price,
-        currency: "EUR",
-        image: newEvent.image,
-        featured: newEvent.featured,
-        status: newEvent.status.toUpperCase(),
-        organizer: newEvent.organizer,
-        address: newEvent.address,
-        city: newEvent.city,
-        postalCode: newEvent.postalCode,
-        contactEmail: newEvent.contactEmail,
-        contactPhone: newEvent.contactPhone,
-        duration: newEvent.duration,
-        visibility: "public"
-      };
-      
-      const response = await api.post("/events", eventData);
-      const formattedEvent = formatEventFromApi(response.data.data);
-      
-      setEvents(prev => [...prev, formattedEvent]);
-      await fetchStats();
-      setError(null);
-      
-      return formattedEvent;
-    } catch (error: any) {
-      console.error("Erreur lors de l'ajout de l'événement:", error);
-      setError(error.response?.data?.message || "Erreur lors de l'ajout de l'événement");
-      throw error;
+const handleAddEvent = useCallback(async (newEvent: EventItem) => {
+  try {
+    // Formater la date correctement (YYYY-MM-DD)
+    let formattedDate: string;
+    if (newEvent.date) {
+      const date = new Date(newEvent.date);
+      if (isNaN(date.getTime())) {
+        throw new Error("Format de date invalide");
+      }
+      formattedDate = date.toISOString().split('T')[0]; // "2024-01-15"
+    } else {
+      formattedDate = new Date().toISOString().split('T')[0];
     }
-  }, [fetchStats]);
+    
+    // Extraire les heures du champ time
+    const timeParts = newEvent.time?.split(" - ") || [];
+    const startTime = timeParts[0] || "10:00";
+    const endTime = timeParts[1] || undefined;
+    
+    // Préparer les données pour l'API selon les validations
+    const eventData = {
+      // Champs requis
+      title: newEvent.title,
+      description: newEvent.description || "",
+      date: formattedDate, // Format YYYY-MM-DD
+      location: newEvent.location,
+      category: newEvent.category || "cultural",
+      
+      // Champs optionnels avec validation
+      startTime: startTime, // Format HH:MM
+      endTime: endTime, // Format HH:MM
+      address: newEvent.address || "",
+      city: newEvent.city || "",
+      postalCode: newEvent.postalCode || "",
+      subCategory: newEvent.subCategory || undefined,
+      capacity: parseInt(String(newEvent.capacity)) || 0,
+      price: parseFloat(String(newEvent.price)) || 0,
+      discountPrice: newEvent.discountPrice ? parseFloat(String(newEvent.discountPrice)) : undefined,
+      currency: newEvent.currency || "EUR",
+      image: newEvent.image || undefined,
+      images: newEvent.images || undefined,
+      featured: newEvent.featured || false,
+      
+      // CORRECTION : Status en MAJUSCULES selon les validations
+      status: (newEvent.status || "DRAFT").toUpperCase(), // "DRAFT", "ACTIVE", etc.
+      
+      organizer: newEvent.organizer || "",
+      contactEmail: newEvent.contactEmail || "",
+      contactPhone: newEvent.contactPhone || "",
+      website: newEvent.website || undefined,
+      tags: newEvent.tags || [],
+      requirements: newEvent.requirements || "",
+      highlights: newEvent.highlights || [],
+      duration: newEvent.duration || "",
+      
+      // CORRECTION : Difficulty en MAJUSCULES
+      difficulty: newEvent.difficulty ? newEvent.difficulty.toUpperCase() : undefined, // "EASY", "MEDIUM", "HARD"
+      
+      targetAudience: newEvent.targetAudience || [],
+      includes: newEvent.includes || [],
+      notIncludes: newEvent.notIncludes || [],
+      cancellationPolicy: newEvent.cancellationPolicy || "",
+      refundPolicy: newEvent.refundPolicy || "",
+      
+      // CORRECTION : Visibility en MAJUSCULES
+      visibility: (newEvent.visibility || "PUBLIC").toUpperCase(), // "PUBLIC", "PRIVATE", "INVITE_ONLY"
+      
+      registrationDeadline: newEvent.registrationDeadline 
+        ? new Date(newEvent.registrationDeadline).toISOString().split('T')[0] // Format YYYY-MM-DD
+        : undefined,
+      earlyBirdDeadline: newEvent.earlyBirdDeadline 
+        ? new Date(newEvent.earlyBirdDeadline).toISOString().split('T')[0] // Format YYYY-MM-DD
+        : undefined,
+      earlyBirdPrice: newEvent.earlyBirdPrice 
+        ? parseFloat(String(newEvent.earlyBirdPrice)) 
+        : undefined,
+      
+      // Ces champs sont probablement gérés côté serveur
+      participants: undefined, // Laisser le serveur gérer
+      revenue: undefined, // Laisser le serveur gérer
+      userId: undefined, // Sera ajouté par l'authentification
+    };
+    
+    // Nettoyer les champs undefined pour éviter d'envoyer "null"
+    Object.keys(eventData).forEach(key => {
+      if (eventData[key] === undefined || eventData[key] === null) {
+        delete eventData[key];
+      }
+    });
+    
+    console.log("✅ Données envoyées à /event:", JSON.stringify(eventData, null, 2));
+    
+    const response = await api.post("/event", eventData);
+    console.log("✅ Réponse API:", response.data);
+    
+    const formattedEvent = formatEventFromApi(response.data.data);
+    
+    setEvents(prev => [...prev, formattedEvent]);
+    await fetchStats();
+    setError(null);
+    
+    return formattedEvent;
+  } catch (error: any) {
+    console.error("❌ Erreur détaillée:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      config: error.config
+    });
+    
+    setError(
+      error.response?.data?.message || 
+      error.response?.data?.error || 
+      error.message || 
+      "Erreur lors de l'ajout de l'événement"
+    );
+    throw error;
+  }
+}, [fetchStats]);
 
   // Mettre à jour un événement
   const handleUpdateEvent = useCallback(async (updatedEvent: EventItem) => {
@@ -420,8 +509,8 @@ export const useEventsDiscoveries = () => {
         contactPhone: updatedEvent.contactPhone,
         duration: updatedEvent.duration
       };
-      
-      const response = await api.put(`/events/${updatedEvent.id}`, eventData);
+
+      const response = await api.put(`/event/${updatedEvent.id}`, eventData);
       const formattedEvent = formatEventFromApi(response.data.data);
       
       setEvents(prev =>
