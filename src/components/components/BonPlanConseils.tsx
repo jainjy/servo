@@ -5,6 +5,7 @@ import confetiAnim from "../../assets/Confeti.json";
 import coolAnim from "../../assets/Cool.json";
 import cryAnim from "../../assets/Cry.json";
 import TourismNavigation from "../TourismNavigation";
+import { conseilsService } from '@/services/conseilsService';
 
 const BonsPlansConseils = () => {
   const [activeCategory, setActiveCategory] = useState("tous");
@@ -12,224 +13,85 @@ const BonsPlansConseils = () => {
   const [selectedTip, setSelectedTip] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [bookmarkedTips, setBookmarkedTips] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [tips, setTips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({});
   const canvasRef = useRef(null);
   const tipsContainerRef = useRef(null);
 
-  // Données des bons plans et conseils
-  const tips = [
-    {
-      id: 1,
-      title: "Randonnée en sécurité",
-      category: "nature",
-      difficulty: "Débutant",
-      duration: "5 min",
-      description:
-        "Comment préparer sa randonnée en montagne : check-list essentielle pour éviter les imprévus.",
-      content: [
-        "Vérifier la météo la veille et le matin même",
-        "Prévoir 2L d'eau par personne",
-        "Avoir une carte physique en plus du GPS",
-        "Prévenir quelqu'un de son itinéraire",
-        "Emporter une trousse de premiers secours",
-      ],
-      icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-      color: "emerald",
-      urgency: "Important",
-      views: "12.4K",
-      saves: "2.3K",
-      expert: "Guide de montagne certifié",
-      location: "Tous les cirques",
-    },
-    {
-      id: 2,
-      title: "Marché local malin",
-      category: "shopping",
-      difficulty: "Facile",
-      duration: "3 min",
-      description:
-        "Astuces pour faire ses courses au marché : qualité, prix et relations avec les producteurs.",
-      content: [
-        "Yaller tôt pour avoir le meilleur choix",
-        "Préférer les produits de saison",
-        "Négocier poliment en achetant en quantité",
-        "Demander l'origine des produits",
-        "Apporter ses propres sacs",
-      ],
-      icon: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z",
-      color: "amber",
-      urgency: "Utile",
-      views: "8.7K",
-      saves: "1.8K",
-      expert: "Producteur local",
-      location: "Marchés de l'île",
-    },
-    {
-      id: 3,
-      title: "Économies énergie",
-      category: "maison",
-      difficulty: "Facile",
-      duration: "4 min",
-      description:
-        "Réduire sa facture d'électricité sous les tropiques sans sacrifier le confort.",
-      content: [
-        "Utiliser des ventilateurs avant la clim",
-        "Faire sécher le linge à l'air libre",
-        "Entretenir régulièrement la climatisation",
-        "Installer des stores extérieurs",
-        "Privilégier les heures creuses",
-      ],
-      icon: "M13 10V3L4 14h7v7l9-11h-7z",
-      color: "blue",
-      urgency: "Économique",
-      views: "15.2K",
-      saves: "3.1K",
-      expert: "Ingénieur énergie",
-      location: "Toute l'île",
-    },
-    {
-      id: 4,
-      title: "Cuisine anti-gaspi",
-      category: "cuisine",
-      difficulty: "Moyen",
-      duration: "6 min",
-      description:
-        "Transformer vos restes en délices : recettes simples pour ne rien jeter.",
-      content: [
-        "Pain dur → pain perdu ou chapelure",
-        "Fruits trop mûrs → compote ou smoothie",
-        "Légumes flétris → soupe ou bouillon",
-        "Riz restant → riz sauté ou salade",
-        "Poulet restant → salade ou sandwich",
-      ],
-      icon: "M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7",
-      color: "green",
-      urgency: "Écologique",
-      views: "9.8K",
-      saves: "2.5K",
-      expert: "Chef zéro déchet",
-      location: "Cuisine domestique",
-    },
-    {
-      id: 5,
-      title: "Transport optimisé",
-      category: "transport",
-      difficulty: "Débutant",
-      duration: "4 min",
-      description:
-        "Se déplacer malin sur l'île : combiner transports en commun et covoiturage.",
-      content: [
-        "Utiliser l'appli Car Jaune pour les bus",
-        "Covoiturer pour les trajets réguliers",
-        "Éviter les heures de pointe (7-9h, 16-18h)",
-        "Vérifier les travaux routiers avant de partir",
-        "Privilégier le vélo pour les courtes distances",
-      ],
-      icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-      color: "cyan",
-      urgency: "Pratique",
-      views: "7.3K",
-      saves: "1.6K",
-      expert: "Urbaniste local",
-      location: "Routes réunionnaises",
-    },
-    {
-      id: 6,
-      title: "Jardin tropical",
-      category: "jardin",
-      difficulty: "Moyen",
-      duration: "7 min",
-      description:
-        "Créer un jardin résilient : plantes adaptées au climat et économes en eau.",
-      content: [
-        "Choisir des plantes endémiques",
-        "Pailler pour conserver l'humidité",
-        "Arroser tôt le matin ou tard le soir",
-        "Composter les déchets verts",
-        "Associer les plantes compatibles",
-      ],
-      icon: "M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3",
-      color: "lime",
-      urgency: "Durable",
-      views: "6.9K",
-      saves: "1.9K",
-      expert: "Jardinier permaculteur",
-      location: "Jardins familiaux",
-    },
-    {
-      id: 7,
-      title: "Santé tropicale",
-      category: "santé",
-      difficulty: "Débutant",
-      duration: "5 min",
-      description:
-        "Prévenir les petits maux sous les tropiques : moustiques, soleil, hydratation.",
-      content: [
-        "Utiliser du répulsif naturel (géranium, citronnelle)",
-        "Boire 2L d'eau minimum par jour",
-        "Protection solaire même par temps couvert",
-        "Vêtements légers et couvrants",
-        "Surveiller les signes de déshydratation",
-      ],
-      icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
-      color: "rose",
-      urgency: "Santé",
-      views: "14.1K",
-      saves: "3.4K",
-      expert: "Médecin généraliste",
-      location: "Climat tropical",
-    },
-    {
-      id: 8,
-      title: "Culture locale",
-      category: "culture",
-      difficulty: "Facile",
-      duration: "4 min",
-      description:
-        "S'intégrer et comprendre les codes culturels réunionnais en douceur.",
-      content: [
-        "Apprendre quelques mots de créole",
-        "Respecter le 'lontan' (temps long)",
-        "Participer aux fêtes traditionnelles",
-        "Goûter tous les plats typiques",
-        "Écouter les histoires des anciens",
-      ],
-      icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
-      color: "purple",
-      urgency: "Social",
-      views: "5.6K",
-      saves: "1.2K",
-      expert: "Anthropologue local",
-      location: "Vie quotidienne",
-    },
-  ];
+  // Initialisation des données
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  // Catégories
-  const categories = [
-    { id: "tous", label: "Tous les conseils" },
-    { id: "nature", label: "Nature" },
-    { id: "shopping", label: "Shopping" },
-    { id: "maison", label: "Maison" },
-    { id: "cuisine", label: "Cuisine" },
-    { id: "transport", label: "Transport" },
-    { id: "jardin", label: "Jardin" },
-    { id: "santé", label: "Santé" },
-    { id: "culture", label: "Culture" },
-  ];
+  // Charger les données
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Charger les catégories
+      const categoriesResponse = await conseilsService.getCategories();
+      if (categoriesResponse.success) {
+        const formattedCategories = [
+          { id: "tous", label: "Tous les conseils" },
+          ...categoriesResponse.data.map(cat => ({
+            id: cat.name.toLowerCase(),
+            label: cat.name,
+            count: cat._count?.conseils || 0
+          }))
+        ];
+        setCategories(formattedCategories);
+      }
+
+      // Charger les conseils
+      const conseilsResponse = await conseilsService.getConseils();
+      if (conseilsResponse.success) {
+        setTips(conseilsResponse.data);
+      }
+
+      // Charger les statistiques
+      const statsResponse = await conseilsService.getGlobalStats();
+      if (statsResponse.success) {
+        setStats(statsResponse.data);
+      }
+
+      // Charger les conseils sauvegardés si utilisateur connecté
+      const token = localStorage.getItem('auth-token');
+      if (token) {
+        const savedResponse = await conseilsService.getSavedConseils();
+        if (savedResponse.success) {
+          setSavedTips(savedResponse.data.map(tip => tip.id));
+        }
+
+        const bookmarkedResponse = await conseilsService.getBookmarkedConseils();
+        if (bookmarkedResponse.success) {
+          const bookmarks = {};
+          bookmarkedResponse.data.forEach(tip => {
+            bookmarks[tip.id] = true;
+          });
+          setBookmarkedTips(bookmarks);
+        }
+      }
+
+    } catch (error) {
+      console.error('Erreur chargement données:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filtrage des conseils
-  const filteredTips =
-    activeCategory === "tous"
-      ? tips.filter(
-          (tip) =>
-            tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            tip.description.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : tips.filter(
-          (tip) =>
-            tip.category === activeCategory &&
-            (tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              tip.description.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
+  const filteredTips = activeCategory === "tous"
+    ? tips.filter(tip =>
+        tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tip.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : tips.filter(tip =>
+        tip.category === activeCategory &&
+        (tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         tip.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
 
   // Animation du canvas (effet de bulles/idées)
   useEffect(() => {
@@ -244,9 +106,7 @@ const BonsPlansConseils = () => {
       y: Math.random() * canvas.height,
       radius: Math.random() * 15 + 5,
       speed: Math.random() * 0.5 + 0.2,
-      color: `rgba(${Math.random() * 100 + 155}, ${
-        Math.random() * 100 + 155
-      }, 255, 0.1)`,
+      color: `rgba(${Math.random() * 100 + 155}, ${Math.random() * 100 + 155}, 255, 0.1)`,
     }));
 
     const draw = () => {
@@ -287,23 +147,45 @@ const BonsPlansConseils = () => {
   }, []);
 
   // Sauvegarder un conseil
-  const handleSaveTip = (tipId) => {
-    if (savedTips.includes(tipId)) {
-      setSavedTips(savedTips.filter((id) => id !== tipId));
-    } else {
-      setSavedTips([...savedTips, tipId]);
+  const handleSaveTip = async (tipId) => {
+    try {
+      const response = await conseilsService.saveConseil(tipId);
+      if (response.success) {
+        if (response.data.saved) {
+          setSavedTips([...savedTips, tipId]);
+          // Mettre à jour le compteur local
+          setTips(prevTips => prevTips.map(tip => 
+            tip.id === tipId ? { ...tip, saves: response.data.saves } : tip
+          ));
+        } else {
+          setSavedTips(savedTips.filter(id => id !== tipId));
+          // Mettre à jour le compteur local
+          setTips(prevTips => prevTips.map(tip => 
+            tip.id === tipId ? { ...tip, saves: response.data.saves } : tip
+          ));
+        }
+      }
+    } catch (error) {
+      console.error('Erreur sauvegarde:', error);
     }
   };
 
   // Bookmark un conseil
-  const handleBookmarkTip = (tipId) => {
-    setBookmarkedTips((prev) => ({
-      ...prev,
-      [tipId]: !prev[tipId],
-    }));
+  const handleBookmarkTip = async (tipId) => {
+    try {
+      const response = await conseilsService.bookmarkConseil(tipId);
+      if (response.success) {
+        setBookmarkedTips(prev => ({
+          ...prev,
+          [tipId]: response.data.bookmarked
+        }));
+      }
+    } catch (error) {
+      console.error('Erreur bookmark:', error);
+    }
   };
 
-  // Composant Carte Conseil
+  // Composant Carte Conseil (identique mais avec les nouvelles données)
   const TipCard = ({ tip }) => {
     const isSaved = savedTips.includes(tip.id);
     const isBookmarked = bookmarkedTips[tip.id];
@@ -516,6 +398,8 @@ const BonsPlansConseils = () => {
   const SavedTipsSection = () => {
     if (savedTips.length === 0) return null;
 
+    const savedConseils = tips.filter(tip => savedTips.includes(tip.id));
+
     return (
       <div className="mb-12">
         <div className="flex items-center justify-between mb-6">
@@ -527,44 +411,97 @@ const BonsPlansConseils = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {tips
-            .filter((tip) => savedTips.includes(tip.id))
-            .map((tip) => (
+          {savedConseils.map((tip) => (
+            <div
+              key={tip.id}
+              className="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-6 border-2 border-emerald-200"
+            >
               <div
-                key={tip.id}
-                className="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-6 border-2 border-emerald-200"
+                className={`w-12 h-12 bg-${tip.color}-100 rounded-xl flex items-center justify-center mb-4`}
               >
-                <div
-                  className={`w-12 h-12 bg-${tip.color}-100 rounded-xl flex items-center justify-center mb-4`}
+                <svg
+                  className={`w-6 h-6 text-${tip.color}-600`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    className={`w-6 h-6 text-${tip.color}-600`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d={tip.icon}
-                    />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">{tip.title}</h4>
-                <p className="text-gray-600 text-sm mb-4">{tip.description}</p>
-                <button
-                  onClick={() => setSelectedTip(tip)}
-                  className="text-emerald-600 font-medium hover:text-emerald-700"
-                >
-                  Voir le détail →
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d={tip.icon}
+                  />
+                </svg>
               </div>
-            ))}
+              <h4 className="font-bold text-gray-900 mb-2">{tip.title}</h4>
+              <p className="text-gray-600 text-sm mb-4">{tip.description}</p>
+              <button
+                onClick={() => setSelectedTip(tip)}
+                className="text-emerald-600 font-medium hover:text-emerald-700"
+              >
+                Voir le détail →
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     );
   };
+
+  // Statistiques rapides
+  const QuickStats = () => {
+    if (!stats.totalConseils) return null;
+
+    const statsData = [
+      {
+        value: stats.totalConseils || 0,
+        label: "Conseils disponibles",
+        color: "emerald",
+      },
+      {
+        value: "24",
+        label: "Experts locaux",
+        color: "blue"
+      },
+      {
+        value: "98%",
+        label: "Satisfaction",
+        color: "amber"
+      },
+      {
+        value: `${stats.totalSaves || 0}+`,
+        label: "Astuces appliquées",
+        color: "purple"
+      }
+    ];
+
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        {statsData.map((stat, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-2xl p-6 shadow-lg flex items-center justify-around border border-gray-100"
+          >
+            <div className={`text-xl font-bold text-${stat.color}-600`}>
+              {stat.value}
+            </div>
+            <div className="text-gray-600 text-md">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des conseils...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen overflow-hidden">
@@ -633,6 +570,11 @@ const BonsPlansConseils = () => {
                 }`}
               >
                 {category.label}
+                {category.count > 0 && (
+                  <span className="ml-2 bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded-full">
+                    {category.count}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -642,28 +584,7 @@ const BonsPlansConseils = () => {
         <SavedTipsSection />
 
         {/* Stats rapides */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          {[
-            {
-              value: tips.length,
-              label: "Conseils disponibles",
-              color: "emerald",
-            },
-            { value: "24", label: "Experts locaux", color: "blue" },
-            { value: "98%", label: "Satisfaction", color: "amber" },
-            { value: "45K+", label: "Astuces appliquées", color: "purple" },
-          ].map((stat, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl p-6 shadow-lg flex items-center justify-around border border-gray-100"
-            >
-              <div className={`text-xl font-bold text-${stat.color}-600`}>
-                {stat.value}
-              </div>
-              <div className="text-gray-600 text-md">{stat.label}</div>
-            </div>
-          ))}
-        </div>
+        <QuickStats />
 
         {/* Grille de conseils */}
         <div
@@ -675,48 +596,22 @@ const BonsPlansConseils = () => {
           ))}
         </div>
 
-        {/* Conseils du jour */}
-        <div className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-bold text-gray-900">
-              Conseils du jour
+        {/* Message si aucun résultat */}
+        {filteredTips.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              Aucun conseil trouvé
             </h3>
+            <p className="text-gray-500">
+              Essayez de modifier vos critères de recherche
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {tips.slice(0, 3).map((tip) => (
-              <div
-                key={tip.id}
-                className="bg-white rounded-2xl p-6 border-2 border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all"
-              >
-                <div
-                  className={`w-14 h-14 bg-${tip.color}-100 rounded-xl flex items-center justify-center mb-4`}
-                >
-                  <svg
-                    className={`w-7 h-7 text-${tip.color}-600`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d={tip.icon}
-                    />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">{tip.title}</h4>
-                <p className="text-gray-600 text-sm mb-4">{tip.description}</p>
-                <button
-                  onClick={() => setSelectedTip(tip)}
-                  className={`text-${tip.color}-600 font-medium hover:text-${tip.color}-700`}
-                >
-                  Lire les astuces →
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* Détail du conseil sélectionné */}
         {selectedTip && (
@@ -941,8 +836,8 @@ const BonsPlansConseils = () => {
                           <span>Succès</span>
                           <span>
                             {Math.round(
-                              (parseInt(selectedTip.saves) /
-                                parseInt(selectedTip.views)) *
+                              (parseInt(selectedTip.saves.replace(/[^0-9]/g, '')) /
+                                parseInt(selectedTip.views.replace(/[^0-9]/g, ''))) *
                                 100
                             )}
                             %
@@ -953,8 +848,8 @@ const BonsPlansConseils = () => {
                             className={`h-full bg-${selectedTip.color}-500 rounded-full`}
                             style={{
                               width: `${
-                                (parseInt(selectedTip.saves) /
-                                  parseInt(selectedTip.views)) *
+                                (parseInt(selectedTip.saves.replace(/[^0-9]/g, '')) /
+                                  parseInt(selectedTip.views.replace(/[^0-9]/g, ''))) *
                                 100
                               }%`,
                             }}

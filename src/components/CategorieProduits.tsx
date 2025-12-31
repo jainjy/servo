@@ -32,7 +32,7 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useCart } from "@/hooks/useCart";
+import { useCart } from "../components/contexts/CartContext";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
