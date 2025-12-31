@@ -871,12 +871,12 @@ export default function ProDiscussions() {
                   // Vérifier si le message doit être affiché
                   // Les messages système s'affichent toujours
                   if (
-                    message.type !== "SYSTEM" &&
-                    message.expediteurId !== currentUserId &&
-                    conversation?.creatorId !== currentUserId
+                    (message.type !== "SYSTEM" &&
+                      message.expediteurId !== currentUserId &&
+                      conversation?.creatorId !== currentUserId &&
+                      notAssignedMe)
                   ) {
-                     console.log(message.expediteurId !== currentUserId +" et "+conversation?.creatorId !== currentUserId);
-                     return null;
+                    return null;
                   }
 
                   return (
@@ -1405,9 +1405,10 @@ export default function ProDiscussions() {
                       // Vérifier si le message doit être affiché
                       // Les messages système s'affichent toujours
                       if (
-                        message.type !== "SYSTEM" &&
-                        message.expediteurId !== currentUserId &&
-                        conversation?.creatorId !== currentUserId
+                        (message.type !== "SYSTEM" &&
+                          message.expediteurId !== currentUserId &&
+                          conversation?.creatorId !== currentUserId &&
+                        notAssignedMe)
                       ) {
                         return null;
                       }
