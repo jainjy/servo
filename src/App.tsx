@@ -244,6 +244,7 @@ import VideosComponent from "./components/components/VideosInspirer";
 import PortraitsLocaux from "./components/components/PortraitLocaux";
 import BonsPlansConseils from "./components/components/BonPlanConseils";
 import OeuvrePages from "./pages/ArtEtCreation/OeuvrePages";
+import ConseilsAdminPage from "./pages/ConseilsAdminPanel";
 
 
 import PortraitsAdmin from "./pages/admin/PortraitsAdmin";
@@ -948,6 +949,7 @@ const App = () => {
                     <Route path="conseil" element={<AdminConseilPage />} />
                     <Route path="rendezvous" element={<RendezVous />} />
                     <Route path="media" element={<AdminMedia />} />
+                    <Route path="conseils" element={<ConseilsAdminPage />} />
                     <Route
                       path="demandeDroitFamille"
                       element={<DemandeDroitFamille />}
