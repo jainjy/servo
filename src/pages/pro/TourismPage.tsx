@@ -404,21 +404,120 @@ export default function TourismPage() {
     }
   };
 
-  const loadNaturePatrimoine = async () => {
-    try {
-      setNaturePatrimoineLoading(true);
-      const response = await tourismeAPI.getNaturePatrimoine();
-      
-      if (response.data.success) {
-        setNaturePatrimoine(response.data.data);
-      }
-    } catch (error) {
-      console.error("Erreur lors du chargement des sites naturels:", error);
-      toast.error("Erreur lors du chargement des sites naturels");
-    } finally {
-      setNaturePatrimoineLoading(false);
+// Dans TourismPage.jsx, remplacez la fonction loadNaturePatrimoine par :
+ 
+const loadNaturePatrimoine = async () => {
+  try {
+    setNaturePatrimoineLoading(true);
+    
+    console.log("Chargement des patrimoines...");
+    
+    const response = await tourismeAPI.getNaturePatrimoine();
+    
+    console.log("Réponse API complète:", response);
+    console.log("Données de réponse:", response.data);
+    
+    // Vérifier la structure de la réponse
+    if (!response.data) {
+      console.error("Aucune donnée dans la réponse");
+      toast.error("Aucune donnée reçue du serveur");
+      setNaturePatrimoine([]);
+      return;
     }
-  };
+    
+    if (response.data.success) {
+      const data = response.data.data;
+      console.log("Data reçue:", data);
+      console.log("Type de data:", typeof data);
+      console.log("Est-ce un array?", Array.isArray(data));
+      
+      // Vérifier si c'est un tableau
+      if (Array.isArray(data)) {
+        // Transformer les données
+        const patrimoineData = data.map(item => ({
+          id: item.id || item._id || Date.now().toString(),
+          title: item.title || item.name || item.nom || "Sans titre",
+          type: item.type || "nature",
+          category: item.category || "site_naturel",
+          location: item.location || item.city || item.ville || item.adresse || "Localisation inconnue",
+          description: item.description || item.desc || "Aucune description",
+          images: item.images || (item.image ? [item.image] : []),
+          altitude: item.altitude,
+          year: item.year,
+          rating: item.rating || 0,
+          reviewCount: item.reviewCount || 0,
+          featured: item.featured || false,
+          available: item.available !== false,
+          userId: item.userId,
+          user: item.user,
+          // Ajouter d'autres champs si nécessaire
+          ...item
+        }));
+        
+        console.log("Données transformées:", patrimoineData);
+        setNaturePatrimoine(patrimoineData);
+      } else {
+        // Si ce n'est pas un tableau, créer un tableau avec l'objet unique
+        console.log("Data n'est pas un tableau, conversion en tableau");
+        const item = data;
+        const patrimoineData = [{
+          id: item.id || item._id || Date.now().toString(),
+          title: item.title || item.name || item.nom || "Sans titre",
+          type: item.type || "nature",
+          category: item.category || "site_naturel",
+          location: item.location || item.city || item.ville || item.adresse || "Localisation inconnue",
+          description: item.description || item.desc || "Aucune description",
+          images: item.images || (item.image ? [item.image] : []),
+          altitude: item.altitude,
+          year: item.year,
+          rating: item.rating || 0,
+          reviewCount: item.reviewCount || 0,
+          featured: item.featured || false,
+          available: item.available !== false,
+          userId: item.userId,
+          user: item.user,
+          ...item
+        }];
+        
+        setNaturePatrimoine(patrimoineData);
+      }
+    } else {
+      console.error("API a retourné success: false", response.data);
+      toast.error(response.data.message || "Erreur lors du chargement des données");
+      setNaturePatrimoine([]);
+    }
+  } catch (error) {
+    console.error("Erreur complète lors du chargement des sites naturels:", error);
+    
+    // Afficher plus de détails
+    if (error.response) {
+      console.error("Status de l'erreur:", error.response.status);
+      console.error("Données de l'erreur:", error.response.data);
+      console.error("URL de la requête:", error.response.config?.url);
+      
+      if (error.response.status === 404) {
+        toast.error("Route API non trouvée. Vérifiez l'URL.");
+      } else if (error.response.status === 401) {
+        toast.error("Session expirée. Veuillez vous reconnecter.");
+      } else if (error.response.status === 403) {
+        toast.error("Accès refusé. Vous n'avez pas les permissions nécessaires.");
+      } else {
+        toast.error(`Erreur serveur (${error.response.status}): ${error.response.data?.message || 'Erreur inconnue'}`);
+      }
+    } else if (error.request) {
+      console.error("Pas de réponse du serveur:", error.request);
+      toast.error("Serveur inaccessible. Vérifiez votre connexion internet.");
+    } else {
+      console.error("Erreur de configuration:", error.message);
+      toast.error(`Erreur: ${error.message}`);
+    }
+    
+    // Initialiser avec un tableau vide pour éviter les erreurs
+    setNaturePatrimoine([]);
+  } finally {
+    setNaturePatrimoineLoading(false);
+  }
+};
 
   const loadStats = async () => {
     try {
@@ -828,13 +927,13 @@ export default function TourismPage() {
           stats={stats}
           flights={flights}
           activities={activities}
-          naturePatrimoine={naturePatrimoine}
+          naturePatrimoine={naturePatrimoine} // ← Doit être présent
           listings={listings}
           filteredListings={filteredListings}
           loading={loading}
           flightsLoading={flightsLoading}
           activitiesLoading={activitiesLoading}
-          naturePatrimoineLoading={naturePatrimoineLoading}
+          naturePatrimoineLoading={naturePatrimoineLoading} // ← Doit être présent
           user={user}
           onContentTypeChange={handleContentTypeChange}
           onAddClick={handleAddClick}
@@ -842,7 +941,7 @@ export default function TourismPage() {
           renderListingCards={renderListingCards}
           renderFlightCards={renderFlightCards}
           renderActivityCards={renderActivityCards}
-          renderNaturePatrimoineCards={renderNaturePatrimoineCards}
+          renderNaturePatrimoineCards={renderNaturePatrimoineCards} // ← Doit être présent
         />
       </div>
 
