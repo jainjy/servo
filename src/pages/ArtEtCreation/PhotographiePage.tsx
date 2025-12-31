@@ -8,15 +8,13 @@ import {
   Heart,
   Star,
   MapPin,
-  Phone,
-  Mail,
   Users,
   AlertCircle,
   RefreshCw,
   Briefcase,
-  Eye,
   Search,
-  ImageIcon
+  ImageIcon,
+  ChevronRight
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '@/lib/api';
@@ -66,8 +64,8 @@ const PhotographiePage: React.FC = () => {
   
   // Catégories FIXES - toujours affichées
   const [categories] = useState<Category[]>([
-    { id: 1, name: 'Photographe portrait',slug: 'portrait' },
-    { id: 2, name: 'Photographe paysage',slug: 'paysage' },
+    { id: 1, name: 'Photographe portrait', slug: 'portrait' },
+    { id: 2, name: 'Photographe paysage', slug: 'paysage' },
     { id: 3, name: 'Photographe événementiel', slug: 'evenementiel' },
     { id: 4, name: 'Photographe artistique', slug: 'artistique' },
     { id: 5, name: 'Photographe de mode', slug: 'mode' },
@@ -210,17 +208,11 @@ const PhotographiePage: React.FC = () => {
         });
         
         // Mettre à jour les catégories avec les counts
-        // Note: On ne modifie pas les catégories elles-mêmes, seulement leurs counts
-        // car elles sont fixes
         console.log('📊 Category counts:', categoryCounts);
-        
-        // Les counts sont calculés mais les catégories restent les mêmes
-        // On affiche toujours les 5 catégories même avec count = 0
         
       }
     } catch (err) {
       console.error('❌ Error fetching category counts:', err);
-      // On continue avec count = 0 pour toutes les catégories
     } finally {
       setLoadingCategories(false);
     }
@@ -291,8 +283,35 @@ const PhotographiePage: React.FC = () => {
     navigate(`/contact?subject=${subject}&recipient=${recipient}`);
   }, [navigate]);
 
-  const handleViewProfile = useCallback((id: string) => {
-    navigate(`/professional/${id}`);
+  // Fonction pour voir le profil (clic sur la carte)
+  const handleViewProfile = useCallback((professional: Professional) => {
+    console.log('👤 Viewing profile:', professional);
+    
+    navigate(`/professional/${professional.id}`, {
+      state: {
+        professional: professional,
+        name: professional.name,
+        specialty: professional.specialty,
+        city: professional.city,
+        rating: professional.rating,
+        avatar: professional.avatar,
+        metiers: professional.metiers,
+        bio: professional.bio
+      },
+    });
+  }, [navigate]);
+
+  const handleViewArtworks = useCallback((professional: Professional) => {
+    console.log('🎨 View artworks for professional:', {
+      id: professional.id,
+      name: professional.name
+    });
+    
+    navigate(`/oeuvres/${professional.id}`, {
+      state: {
+        professionalName: professional.name,
+      },
+    });
   }, [navigate]);
 
   // Icones pour les catégories
@@ -310,22 +329,19 @@ const PhotographiePage: React.FC = () => {
     ? `Photographes ${categories.find(c => c.slug === selectedCategory)?.name.toLowerCase()}`
     : ' Nos Photographes';
 
-    
-  const handleViewArtworks = useCallback(
-  (professional: Professional) => {
-    navigate(`/oeuvres/${professional.id}`, {
-      state: {
-        professionalName: professional.name,
-      },
-    });
-  },
-  [navigate]
-);
   return (
-    <div className="min-h-screen bg-[#FFFFFF0]">
+    <div className="min-h-screen bg-[#FFFFFF]">
       {/* Section principale */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold text-[#8B4513] mb-2 flex items-center">
+            <Camera className="mr-3" size={28} />
+            Photographie
+          </h1>
+          <div className="h-1 w-20 bg-[#8B4513] rounded-full"></div>
+        </div>
 
         {/* Erreur principale */}
         {error && (
@@ -343,7 +359,6 @@ const PhotographiePage: React.FC = () => {
             </div>
           </div>
         )}
-
 
         {/* Catégories - TOUJOURS affichées */}
         {!isCategoryPage && (
@@ -374,6 +389,7 @@ const PhotographiePage: React.FC = () => {
                     <p className="mt-2 text-gray-600 text-sm">
                       Découvrez nos photographes spécialisés
                     </p>
+                    <ChevronRight size={16} className="text-gray-400 group-hover:text-[#8B4513] transition-colors" />
                   </div>
                 </div>
               ))}
@@ -446,6 +462,11 @@ const PhotographiePage: React.FC = () => {
                 </div>
               )}
             </div>
+            {!loading && photographersToDisplay.length > 0 && (
+              <div className="text-sm text-gray-600">
+                {photographersToDisplay.length} photographe{photographersToDisplay.length > 1 ? 's' : ''}
+              </div>
+            )}
           </div>
 
           {loading ? (
@@ -464,24 +485,26 @@ const PhotographiePage: React.FC = () => {
               {photographersToDisplay.map((professional) => (
                 <div
                   key={professional.id}
-                  className="rounded-lg border border-[#D3D3D3] overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-white"
+                  className="group relative rounded-lg border border-[#D3D3D3] overflow-hidden hover:border-[#556B2F] hover:shadow-xl transition-all duration-300 bg-white cursor-pointer"
+                  onClick={() => handleViewProfile(professional)}
                 >
+                  {/* Effet de hover sur toute la carte */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#8B4513]/0 via-transparent to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                  
                   {/* Avatar */}
                   <div className="h-48 relative overflow-hidden bg-gray-100">
                     {professional.avatar ? (
                       <img 
                         src={professional.avatar} 
                         alt={professional.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
                           const parent = (e.target as HTMLImageElement).parentElement;
                           if (parent) {
                             parent.innerHTML = `
                               <div class="w-full h-full flex items-center justify-center">
-                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
+                                <User size={64} class="text-gray-400" />
                               </div>
                             `;
                           }
@@ -492,13 +515,27 @@ const PhotographiePage: React.FC = () => {
                         <User size={64} className="text-gray-400" />
                       </div>
                     )}
+                    
+                    {/* Overlay sur l'image au hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                    
+                    {/* Badge vérifié */}
+                    {professional.verified && (
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                          ✓ Vérifié
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Info */}
-                  <div className="p-4">
+                  <div className="p-4 relative z-10 bg-white">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg truncate">{professional.name}</h3>
+                        <h3 className="font-bold text-lg text-gray-900 group-hover:text-[#8B4513] transition-colors truncate">
+                          {professional.name}
+                        </h3>
                         <div className="flex items-center mt-1">
                           <Briefcase size={14} className="mr-1 text-gray-500 flex-shrink-0" />
                           <span className="text-gray-600 text-sm truncate">
@@ -506,11 +543,6 @@ const PhotographiePage: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                      {professional.verified && (
-                        <span className="px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 flex-shrink-0 ml-2">
-                          ✓ Vérifié
-                        </span>
-                      )}
                     </div>
 
                     {/* Localisation */}
@@ -540,23 +572,24 @@ const PhotographiePage: React.FC = () => {
                       </div>
                     )}
 
-                    
+                    {/* Note discrète */}
+                    <div className="text-center mb-2">
+                      <p className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Cliquez pour voir le profil
+                      </p>
+                    </div>
 
-                    {/* Boutons d'action */}
-                    <div className="flex gap-2">
+                    {/* Bouton "Voir les œuvres" */}
+                    <div className="pt-3 border-t border-gray-100">
                       <button
-                        onClick={() => handleViewProfile(professional.id)}
-                        className="flex-1 py-2 rounded-md font-medium text-center border border-[#556B2F] text-[#556B2F] hover:bg-gray-50 transition-colors flex items-center justify-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewArtworks(professional);
+                        }}
+                        className="w-full py-2.5 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center group/btn"
                       >
-                        <Eye size={16} className="mr-2" />
-                        Profil
-                      </button>
-                      <button
-                        onClick={() => handleViewArtworks(professional)}
-                        className="flex-1 py-2 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center"
-                      >
-                        <ImageIcon size={16} className="mr-2" />
-                        voir les Œuvres
+                        <ImageIcon size={16} className="mr-2 group-hover/btn:animate-pulse" />
+                        Voir les œuvres
                       </button>
                     </div>
                   </div>
@@ -564,7 +597,7 @@ const PhotographiePage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 border border-[#D3D3D3] rounded-lg">
+            <div className="text-center py-12 border border-[#D3D3D3] rounded-lg bg-white">
               <Users size={48} className="mx-auto mb-4 text-gray-400" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {isCategoryPage 
@@ -588,6 +621,17 @@ const PhotographiePage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Styles inline pour les effets */}
+      <style>{`
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        .group-hover\\/btn\\:animate-pulse:hover {
+          animation: pulse-slow 1.5s infinite;
+        }
+      `}</style>
     </div>
   );
 };
