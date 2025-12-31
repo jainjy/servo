@@ -17,8 +17,8 @@ const SejoursExperiences = () => {
     totalPages: 1
   });
 
-  // Base URL de l'API - ajustez selon votre configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  // CORRECTION : Utilisez le proxy Vite ou l'URL de base correcte
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
   // Récupérer les expériences depuis l'API
   const fetchExperiences = async (filter = activeFilter, page = 1) => {
@@ -38,11 +38,17 @@ const SejoursExperiences = () => {
         params.category = filter;
       }
 
+      // CORRECTION : Utilisez la bonne URL
       const response = await axios.get(`${API_BASE_URL}/experiences`, { params });
       
       if (response.data.success) {
         setExperiences(response.data.data);
         setPagination(response.data.pagination);
+        setError(null);
+      } else {
+        // Si l'API ne retourne pas success=true, utilisez fallback
+        console.warn('API returned success:false, using fallback data');
+        setExperiences(getFallbackExperiences());
         setError(null);
       }
     } catch (err) {
@@ -58,10 +64,15 @@ const SejoursExperiences = () => {
   // Récupérer les catégories depuis l'API
   const fetchCategories = async () => {
     try {
+      // CORRECTION : Vérifiez si cette route existe dans votre API
+      // Si elle n'existe pas, utilisez les catégories par défaut
       const response = await axios.get(`${API_BASE_URL}/experiences/categories`);
       
       if (response.data.success) {
         setCategories(response.data.data);
+      } else {
+        // Si la route n'existe pas, utilisez fallback
+        setCategories(getFallbackCategories());
       }
     } catch (err) {
       console.error('Error fetching categories:', err);
@@ -155,6 +166,42 @@ const SejoursExperiences = () => {
         difficulty: "Intermédiaire",
         groupSize: "8 personnes max",
         season: "Mai à Octobre"
+      },
+      {
+        id: 4,
+        title: "Découverte Culturelle",
+        category: "culture",
+        duration: "2 jours",
+        location: "Saint-Denis, Réunion",
+        description: "Immersion dans la culture créole avec visites historiques et ateliers culinaires.",
+        highlights: ["Visite du Musée Léon Dierx", "Atelier cuisine créole", "Rencontre avec artisans", "Concert Maloya"],
+        price: 450,
+        rating: 4.6,
+        reviewCount: 15,
+        images: [
+          "https://images.unsplash.com/photo-1527838832700-5059252407fa?auto=format&fit=crop&w=1200&q=80"
+        ],
+        difficulty: "Facile",
+        groupSize: "12 personnes max",
+        season: "Toute l'année"
+      },
+      {
+        id: 5,
+        title: "Séjour Luxe Privatif",
+        category: "luxe",
+        duration: "7 jours",
+        location: "Saint-Gilles, Réunion",
+        description: "Villa exclusive avec service privé, chef personnel et excursions sur mesure.",
+        highlights: ["Villa 5 étoiles", "Chef privé", "Spa quotidien", "Excursions VIP"],
+        price: 3500,
+        rating: 5.0,
+        reviewCount: 8,
+        images: [
+          "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80"
+        ],
+        difficulty: "Facile",
+        groupSize: "4 personnes max",
+        season: "Toute l'année"
       }
     ];
   };
@@ -162,10 +209,11 @@ const SejoursExperiences = () => {
   const getFallbackCategories = (): Category[] => {
     return [
       { id: 'tous', label: 'Toutes les expériences', count: 5 },
-      { id: 'aventure', label: 'Aventure', count: 2 },
+      { id: 'aventure', label: 'Aventure', count: 1 },
       { id: 'bienetre', label: 'Bien-être', count: 1 },
       { id: 'marine', label: 'Marine', count: 1 },
-      { id: 'culture', label: 'Culture', count: 1 }
+      { id: 'culture', label: 'Culture', count: 1 },
+      { id: 'luxe', label: 'Luxe', count: 1 }
     ];
   };
 
@@ -622,7 +670,7 @@ const SejoursExperiences = () => {
               <div className="text-gray-600">Taux de satisfaction</div>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="text-4xl font-bold text-gray-900 mb-2">{pagination.total}+</div>
+              <div className="text-4xl font-bold text-gray-900 mb-2">{experiences.length}+</div>
               <div className="text-gray-600">Expériences disponibles</div>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-lg">
