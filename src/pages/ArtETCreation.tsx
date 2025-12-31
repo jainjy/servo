@@ -91,8 +91,7 @@ const ArtEtCreation = () => {
   // Fonction appelée après succès de la demande
   const handleDemandeSuccess = (artworkId: string) => {
     console.log(`Demande envoyée pour l'œuvre ${artworkId}`);
-    // Vous pouvez ajouter ici des actions supplémentaires
-    // comme mettre à jour l'UI ou notifier l'utilisateur
+    
   };
 
   // Fonction de suivi du contact (optionnel)
@@ -119,7 +118,7 @@ const ArtEtCreation = () => {
       case 'marketplace':
         return <MarketplaceCreateurs {...commonProps} />;
       default:
-        return <PhotographiePage {...commonProps} />;
+        return <MarketplaceCreateurs {...commonProps} />;
     }
   };
 

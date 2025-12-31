@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ImageIcon, Calendar, Euro } from 'lucide-react';
+import { ArrowLeft, ImageIcon, Calendar, ShoppingCart, Euro} from 'lucide-react';
 import api from '@/lib/api';
 
 interface Oeuvre {
   id: string;
-  title?: string;
+  title: string;
   description?: string;
-  image: string;
+  image: string;  
+  images?: string[]; 
   createdAt?: string;
+  publishedAt?: string;
   price?: number;
+  artist?: string;
+  category?: string;
+  type?: string;
+  userId?: string;
 }
 
 const OeuvrePages: React.FC = () => {
@@ -30,36 +36,47 @@ const OeuvrePages: React.FC = () => {
       return;
     }
 
-    const fetchOeuvres = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    // Dans OeuvrePages.js
+  const fetchOeuvres = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const response = await api.get('/art-creation/products', {
-          params: {
-            professionalId,
-          },
-        });
+      console.log('🔄 Fetching œuvres for professionalId:', professionalId);
 
-        if (response.data?.success) {
-          setOeuvres(response.data.data || []);
-        } else {
-          setError('Impossible de charger les œuvres');
-        }
-      } catch (err: any) {
-        console.error('❌ Erreur chargement œuvres :', err);
+      // UTILISEZ LA NOUVELLE ROUTE PUBLIQUE
+      const response = await api.get(`/art-creation/products/professional/${professionalId}`);
+      
+      // Vérifiez la structure de réponse
+      console.log('✅ Response data:', {
+        success: response.data.success,
+        count: response.data.count,
+        dataLength: response.data.data?.length,
+        data: response.data.data
+      });
 
-        if (err.response?.status === 401) {
-          setError('Vous devez être connecté');
-        } else if (err.response?.status === 404) {
-          setError('Aucune œuvre trouvée');
-        } else {
-          setError('Erreur serveur');
-        }
-      } finally {
-        setLoading(false);
+      if (response.data?.success) {
+        // La donnée est dans response.data.data
+        setOeuvres(response.data.data || []);
+      } else {
+        setError(response.data.error || 'Impossible de charger les œuvres');
       }
-    };
+    } catch (err: any) {
+      console.error('❌ Erreur chargement œuvres :', err);
+      console.error('❌ Status:', err.response?.status);
+      console.error('❌ Response data:', err.response?.data);
+      
+      if (err.response?.status === 404) {
+        setError('Aucune œuvre trouvée pour ce professionnel');
+      } else if (err.response?.status === 500) {
+        setError('Erreur serveur, veuillez réessayer plus tard');
+      } else {
+        setError('Erreur de connexion : ' + (err.message || 'Erreur inconnue'));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
     fetchOeuvres();
   }, [professionalId]);
@@ -178,7 +195,7 @@ const OeuvrePages: React.FC = () => {
                       onClick={() => handleAcheter(oeuvre.id)}
                       className="w-full bg-[#8B4513] hover:bg-[#6B3410] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center"
                     >
-                      <Euro size={18} className="mr-2" />
+                      <ShoppingCart size={18} className="mr-2" />
                       Acheter
                     </button>
                   </div>
