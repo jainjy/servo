@@ -89,6 +89,7 @@ export default function ProDiscussions() {
 
   useEffect(() => {
     setCurrentUserId(user?.id);
+    console.log("les messages :",messages)
   }, []);
 
   // Gérer l'affichage du bouton scroll
@@ -874,7 +875,8 @@ export default function ProDiscussions() {
                     message.expediteurId !== currentUserId &&
                     conversation?.creatorId !== currentUserId
                   ) {
-                    return null;
+                     console.log(message.expediteurId !== currentUserId +" et "+conversation?.creatorId !== currentUserId);
+                     return null;
                   }
 
                   return (
@@ -2345,4 +2347,4 @@ export default function ProDiscussions() {
       )}
     </div>
   );
-}
+} 

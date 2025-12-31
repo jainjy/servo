@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./useAuth";
 import { toast } from "@/hooks/use-toast";
 import { io } from "socket.io-client";
+import AuthService from "../services/authService";
+
 const VITE_API_URL = import.meta.env.VITE_API_URL2 || "http://localhost:3001";
 
 export const useWebSocket = () => {
@@ -12,70 +14,32 @@ export const useWebSocket = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user?.id) {
-      console.log("🚫 WebSocket: user ID manquant");
-      return;
-    }
+    const token = AuthService.getToken();
+    if (!token || !user?.id) return;
 
-    const wsURL = VITE_API_URL;
-
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-    }
-
-    console.log("🔗 Connexion WebSocket vers", wsURL);
-
-    const socket = io(wsURL, {
+    const socket = io(VITE_API_URL, {
       transports: ["websocket"],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      query: { userId: user.id },
+      auth: { token }, // 🔥 CORRECTION
     });
 
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("🔥 WebSocket connecté");
       setIsConnected(true);
+      // Plus besoin d'envoyer l'ID, le serveur le connaît via le token
       socket.emit("join-user-room", user.id);
     });
 
-    socket.on("disconnect", () => {
-      console.log("❌ WebSocket déconnecté");
-      setIsConnected(false);
-    });
-
     socket.on("new-notification", (data) => {
-      console.log("📨 Notification temps réel reçue :", data);
-
-      // 🔥 Mise à jour instantanée du compteur
       setNotificationCount((prev) => prev + 1);
-
-      // Préviens le Header.js de recharger la LISTE si elle est ouverte
       window.dispatchEvent(new CustomEvent("notifications:reload"));
-
-      // Affichage toast
-      toast({
-        title: "Nouvelle notification",
-        description: data.titre || data.message,
-        duration: 4000,
-      });
+      toast({ title: "Nouvelle notification", description: data.titre });
     });
 
-    socket.on("notification-count-update", (payload) => {
-      console.log("🔢 Mise à jour compteur :", payload.count);
-      setNotificationCount(payload.count);
-    });
+    socket.on("disconnect", () => setIsConnected(false));
 
-    return () => {
-      console.log("🧹 Fermeture WebSocket");
-      socket.disconnect();
-    };
+    return () => socket.disconnect();
   }, [user?.id]);
 
-  return {
-    isConnected,
-    notificationCount,
-    setNotificationCount,
-  };
+  return { isConnected, notificationCount, setNotificationCount };
 };
