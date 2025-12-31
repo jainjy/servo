@@ -19,8 +19,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // ✅ CORRECTION: Exclure les routes d'auth du refresh automatique
+    const isAuthRoute = originalRequest.url.includes("/auth/");
+
     // Si erreur 401 et que ce n'est pas déjà une tentative de rafraîchissement
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // ET que ce n'est pas une route d'authentification
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthRoute // 🔥 IMPORTANT: Ne pas refresh sur les routes auth
+    ) {
       originalRequest._retry = true;
 
       try {

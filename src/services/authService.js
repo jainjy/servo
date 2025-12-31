@@ -88,7 +88,17 @@ class AuthService {
       this.setAuthData(user, token, refreshToken);
       return { user, token };
     } catch (error) {
-      throw this.handleAuthError(error);
+      
+      // Juste extraire le message d'erreur
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("Erreur lors de la connexion");
+      }
     }
   }
   // register
@@ -344,21 +354,7 @@ class AuthService {
       throw new Error(defaultMessage);
     }
   }
-  // Gestion spécifique des erreurs d'authentification
-  static handleAuthError(error) {
-    if (error.response?.status === 401) {
-      this.logout();
-      return new Error("Session expirée");
-    }
-    if (error.response?.status === 403) {
-      console.error("Accès non autorisé détecté", error);
-      return new Error("Accès non autorisé");
-    }
-    return this.handleError(
-      error,
-      "Une erreur est survenue lors de l'authentification"
-    );
-  }
+
   // Dans AuthService, ajoutez cette fonction :
   static canAccess(pathname) {
     if (!this.isAuthenticated()) return false;

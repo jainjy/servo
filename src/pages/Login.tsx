@@ -51,7 +51,11 @@ const LoginPage = () => {
       }
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("Identifiants invalides. Veuillez réessayer.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Une erreur est survenue lors de la connexion."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -149,7 +153,6 @@ const LoginPage = () => {
         <div className=" flex items-center justify-center bg-[#FFFFFF] overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
           <div className="w-full max-w-md">
             <Card className="border-0 shadow-none px-0 lg:px-5 py-4 lg:py-0 bg-[#FFFFFF]">
-
               <CardHeader className="space-y-0">
                 <div className="flex justify-center mb-4 lg:hidden">
                   <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
