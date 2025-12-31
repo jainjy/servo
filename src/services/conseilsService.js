@@ -7,16 +7,37 @@ export const conseilsService = {
   // ==============================================
 
   // Récupérer les catégories
-  getCategories: async () => {
-    try {
-      const response = await api.get("/conseils/categories");
-      return response.data;
-    } catch (error) {
-      console.error('Erreur récupération catégories:', error);
-      return { success: false, data: [] };
+// Récupérer les catégories
+getCategories: async () => {
+  try {
+    const response = await api.get("/conseils/categories");
+    
+    // Adapter la réponse si nécessaire
+    if (response.data.success && Array.isArray(response.data.data)) {
+      // S'assurer que chaque catégorie a le bon format
+      const formattedData = response.data.data.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        description: cat.description,
+        icon: cat.icon,
+        color: cat.color,
+        _count: {
+          conseils: cat.conseilsCount || cat._count?.conseils || 0
+        }
+      }));
+      
+      return {
+        ...response.data,
+        data: formattedData
+      };
     }
-  },
-
+    
+    return response.data;
+  } catch (error) {
+    console.error('Erreur récupération catégories:', error);
+    return { success: false, data: [] };
+  }
+},
   // Récupérer tous les conseils
   getConseils: async (params = {}) => {
     try {
@@ -246,18 +267,37 @@ export const conseilsService = {
   },
 
   // Statistiques admin
-  getAdminStats: async () => {
-    try {
-      const response = await api.get("/conseils/admin/stats");
-      return response.data;
-    } catch (error) {
-      console.error('Erreur récupération stats admin:', error);
-      if (error.response?.status === 403) {
-        return { success: false, error: "Accès non autorisé" };
-      }
-      return { success: false, data: {} };
+getAdminStats: async () => {
+  try {
+    const response = await api.get("/conseils/admin/stats");
+    console.log('📊 Stats admin récupérées:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Erreur récupération stats admin:', error);
+    if (error.response?.status === 403) {
+      return { success: false, error: "Accès non autorisé" };
+    } else if (error.response?.status === 500) {
+      return { 
+        success: false, 
+        error: "Erreur serveur",
+        data: {
+          totals: {
+            conseils: 0,
+            active: 0,
+            featured: 0,
+            saves: 0,
+            views: 0
+          },
+          topConseils: [],
+          categoryStats: [],
+          monthlyStats: [],
+          recentActivity: []
+        }
+      };
     }
-  },
+    return { success: false, data: {} };
+  }
+},
 
   // Gestion des catégories
   getAllCategoriesAdmin: async () => {
