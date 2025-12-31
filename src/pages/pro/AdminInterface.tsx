@@ -8,7 +8,9 @@ import {
   Mountain,
   ChevronDown,
   PlusCircle,
-  RefreshCw
+  RefreshCw,
+  Shield,
+  TreePine
 } from 'lucide-react';
 
 interface Stats {
@@ -31,11 +33,13 @@ interface AdminInterfaceProps {
   stats: Stats | null;
   flights: any[];
   activities: any[];
+  naturePatrimoine: any[];
   listings: any[];
   filteredListings: any[];
   loading: boolean;
   flightsLoading: boolean;
   activitiesLoading: boolean;
+  naturePatrimoineLoading: boolean;
   user?: { role: string };
   onContentTypeChange: (type: string) => void;
   onAddClick: () => void;
@@ -43,6 +47,7 @@ interface AdminInterfaceProps {
   renderListingCards: () => React.ReactNode;
   renderFlightCards: () => React.ReactNode;
   renderActivityCards: () => React.ReactNode;
+  renderNaturePatrimoineCards: () => React.ReactNode;
 }
 
 const AdminInterface: React.FC<AdminInterfaceProps> = ({
@@ -51,18 +56,21 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
   stats,
   flights,
   activities,
+  naturePatrimoine,
   listings,
   filteredListings,
   loading,
   flightsLoading,
   activitiesLoading,
+  naturePatrimoineLoading,
   user,
   onContentTypeChange,
   onAddClick,
   onRefreshActivities,
   renderListingCards,
   renderFlightCards,
-  renderActivityCards
+  renderActivityCards,
+  renderNaturePatrimoineCards,
 }) => {
   const [showContentTypeDropdown, setShowContentTypeDropdown] = useState(false);
   const currentContentType = contentTypeOptions.find(
@@ -75,7 +83,8 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
       case 'touristic_places': return 'Ajouter un lieu touristique';
       case 'flights': return 'Ajouter un vol';
       case 'activities': return 'Ajouter une activité';
-      default: return 'Ajouter des patrimoines';
+      case 'nature_patrimoine': return 'Ajouter un site';
+      default: return 'Ajouter';
     }
   };
 
@@ -152,7 +161,7 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
       </div>
 
       {/* Stats Section */}
-      {stats && contentType !== "flights" && contentType !== "activities" && (
+      {stats && contentType !== "flights" && contentType !== "activities" && contentType !== "nature_patrimoine" && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-[#D3D3D3]">
             <div className="flex items-center">
@@ -340,8 +349,68 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
         </div>
       )}
 
+      {/* Nature & Patrimoine Stats */}
+      {contentType === "nature_patrimoine" && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-[#D3D3D3]">
+            <div className="flex items-center">
+              <TreePine className="w-8 h-8 mr-4 text-[#6B8E23]" />
+              <div>
+                <div className="text-2xl font-bold text-black">{naturePatrimoine.length}</div>
+                <div className="text-[#556B2F]">Sites</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-[#D3D3D3]">
+            <div className="flex items-center">
+              <Star className="w-8 h-8 mr-4 text-[#6B8E23]" />
+              <div>
+                <div className="text-2xl font-bold text-black">
+                  {naturePatrimoine.length > 0
+                    ? (naturePatrimoine.reduce(
+                      (total, item) => total + (item.rating || 0),
+                      0
+                    ) / naturePatrimoine.length).toFixed(2)
+                    : "0.00"}
+                </div>
+                <div className="text-[#556B2F]">Note moyenne</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-[#D3D3D3]">
+            <div className="flex items-center">
+              <TrendingUp className="w-8 h-8 mr-4 text-[#6B8E23]" />
+              <div>
+                <div className="text-2xl font-bold text-black">
+                  {naturePatrimoine.length > 0
+                    ? naturePatrimoine.filter((item) => item.featured).length
+                    : 0}
+                </div>
+                <div className="text-[#556B2F]">En vedette</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-[#D3D3D3]">
+            <div className="flex items-center">
+              <Shield className="w-8 h-8 mr-4 text-[#6B8E23]" />
+              <div>
+                <div className="text-2xl font-bold text-black">
+                  {naturePatrimoine.length > 0
+                    ? naturePatrimoine.filter((item) => item.available !== false).length
+                    : 0}
+                </div>
+                <div className="text-[#556B2F]">Disponibles</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Loading State */}
-      {loading || flightsLoading || activitiesLoading ? (
+      {loading || flightsLoading || activitiesLoading || naturePatrimoineLoading ? (
         <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
           <img src="/loading.gif" alt="Chargement" className="w-24 h-24" />
           <p className="mt-4 text-xl font-semibold text-black">
@@ -536,6 +605,96 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
                       >
                         <RefreshCw className="w-5 h-5 inline mr-2" />
                         Rafraîchir
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Nature & Patrimoine Content */}
+          {contentType === "nature_patrimoine" && (
+            <div className="space-y-8">
+              {/* Nature & Patrimoine Header */}
+            
+
+              {/* Nature & Patrimoine Content */}
+              {naturePatrimoineLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="bg-white rounded-2xl shadow-sm border overflow-hidden border-[#D3D3D3]">
+                      <div className="h-48 bg-gray-200"></div>
+                      <div className="p-6 space-y-4">
+                        <div className="h-6 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="flex space-x-2">
+                          <div className="h-8 bg-gray-200 rounded w-20"></div>
+                          <div className="h-8 bg-gray-200 rounded w-20"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : naturePatrimoine.length > 0 ? (
+                <>
+                  {/* Quick Filters */}
+                  <div className="flex flex-wrap gap-3">
+                    <button className="px-4 py-2 rounded-lg font-medium transition-colors bg-[#6B8E23] bg-opacity-20 text-[#6B8E23]">
+                      Tous ({naturePatrimoine.length})
+                    </button>
+                    <button className="px-4 py-2 rounded-lg font-medium transition-colors bg-[#D3D3D3] bg-opacity-50 text-black hover:bg-opacity-70">
+                      Nature ({naturePatrimoine.filter(item => item.type === "nature").length})
+                    </button>
+                    <button className="px-4 py-2 rounded-lg font-medium transition-colors bg-[#D3D3D3] bg-opacity-50 text-black hover:bg-opacity-70">
+                      Patrimoine ({naturePatrimoine.filter(item => item.type === "patrimoine").length})
+                    </button>
+                    <button className="px-4 py-2 rounded-lg font-medium transition-colors bg-[#D3D3D3] bg-opacity-50 text-black hover:bg-opacity-70">
+                      En vedette ({naturePatrimoine.filter(item => item.featured).length})
+                    </button>
+                  </div>
+
+                  {/* Nature & Patrimoine Grid */}
+                  {renderNaturePatrimoineCards()}
+
+                  {/* Pagination */}
+                  <div className="flex items-center justify-between pt-8 border-t border-[#D3D3D3]">
+                    <div className="text-[#556B2F]">
+                      Affichage de <span className="font-semibold text-black">{naturePatrimoine.length}</span> site{naturePatrimoine.length > 1 ? 's' : ''}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 border-[#D3D3D3] text-black">
+                        ← Précédent
+                      </button>
+                      <span className="px-4 py-2 rounded-lg font-medium text-white bg-[#6B8E23]">1</span>
+                      <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors border-[#D3D3D3] text-black">
+                        Suivant →
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* Empty State */
+                <div className="rounded-2xl border-2 border-dashed p-12 text-center bg-[#D3D3D3] bg-opacity-20 border-[#D3D3D3]">
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-gradient-to-br from-[#556B2F] from-opacity-20 to-[#6B8E23] to-opacity-20">
+                    <div className="text-4xl">🌿</div>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 text-[#8B4513]">
+                    Aucun site trouvé
+                  </h3>
+                  <p className="max-w-md mx-auto mb-8 text-[#556B2F]">
+                    {user?.role === "professional"
+                      ? "Commencez par créer votre premier site naturel ou patrimonial."
+                      : "Revenez plus tard pour découvrir nos sites naturels et patrimoniaux."}
+                  </p>
+                  {user?.role === "professional" && (
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <button
+                        onClick={onAddClick}
+                        className="text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg hover:shadow-xl bg-[#6B8E23] hover:bg-[#556B2F]"
+                      >
+                        <PlusCircle className="w-6 h-6" />
+                        <span>Créer un site</span>
                       </button>
                     </div>
                   )}

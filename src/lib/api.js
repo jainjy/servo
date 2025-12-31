@@ -196,6 +196,23 @@ export const tourismeAPI = {
 
   // Méthode de secours
   getListings: (params = {}) => api.get("/admin/tourisme", { params }),
+
+
+  getNaturePatrimoine: (params = {}) => 
+    api.get("/patrimoine", { params }), // Récupère tous les patrimoines
+  
+  getNaturePatrimoineById: (id) => 
+    api.get(`/patrimoine/${id}`), // Récupère un patrimoine spécifique
+  
+  createNaturePatrimoine: (data) => 
+    api.post("/patrimoine", data), // Crée un nouveau patrimoine
+  
+  updateNaturePatrimoine: (id, data) => 
+    api.put(`/patrimoine/${id}`, data), // Met à jour un patrimoine
+  
+  deleteNaturePatrimoine: (id) => 
+    api.delete(`/patrimoine/${id}`), // Supprime un patrimoine
+  
 };
 // Services pour l'upload
 export const uploadAPI = {
