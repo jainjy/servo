@@ -14,20 +14,11 @@ const NaturePatrimoine = () => {
     total: 0,
     totalPages: 1
   });
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
-  // Catégories pour le filtrage
-  const categories = [
-    { id: 'tous', label: 'Tout voir' },
-    { id: 'nature', label: 'Nature' },
-    { id: 'patrimoine', label: 'Patrimoine' },
-    { id: 'site_naturel', label: 'Sites Naturels' },
-    { id: 'foret', label: 'Forêts' },
-    { id: 'volcan', label: 'Volcans' },
-    { id: 'marine', label: 'Marin' },
-    { id: 'historique', label: 'Historique' },
-    { id: 'architecture', label: 'Architecture' }
-  ];
+
 
   // Récupérer les patrimoines depuis l'API
   const fetchPatrimoines = async (page = 1, category = null) => {
@@ -38,13 +29,12 @@ const NaturePatrimoine = () => {
       // Construire les paramètres de requête
       const params = {
         page,
-        limit: 12, // Limiter à 12 éléments pour une meilleure performance
-        featured: true // Récupérer d'abord les patrimoines en vedette
+        limit: 12,
+        featured: true
       };
 
       // Ajouter le filtre de catégorie si spécifié
       if (category && category !== 'tous') {
-        // Mapper les catégories de l'interface aux catégories de l'API
         const categoryMap = {
           'nature': 'site_naturel',
           'patrimoine': 'historique',
@@ -59,196 +49,50 @@ const NaturePatrimoine = () => {
         if (categoryMap[category]) {
           params.category = categoryMap[category];
         } else if (['nature', 'patrimoine'].includes(category)) {
-          // Pour les filtres "nature" et "patrimoine", on filtre par type
           params.type = category;
         }
       }
 
-      // Faire l'appel API
-      const response = await api.get('/patrimoine/user-patrimoines', { params });
+      // CHOISIR LA ROUTE EN FONCTION DE L'AUTHENTIFICATION
+      const endpoint = isAuthenticated ? '/patrimoine/test' : '/patrimoine/all';
+      console.log(`Utilisation de l'endpoint: ${endpoint} (authentifié: ${isAuthenticated})`);
+
+      // Appeler l'endpoint approprié
+      const response = await api.get(endpoint, { params });
       
-      if (response.data.success) {
-        setPlaces(response.data.data);
-        setPagination(response.data.pagination);
-      } else {
-        setError('Erreur lors du chargement des données');
-      }
+      // ADAPTER LE TRAITEMENT EN FONCTION DU FORMAT DE RÉPONSE
+      if (isAuthenticated) {
+        // Format de /test
+        if (response.data.success) {
+          setPlaces(response.data.data);
+          setPagination(response.data.pagination || {
+            page: 1,
+            limit: response.data.data.length,
+            total: response.data.data.length,
+            totalPages: 1
+          });
+        } else {
+          throw new Error(response.data.message || 'Erreur API');
+        }
+      } 
+      
+      
     } catch (err) {
       console.error('Erreur API:', err);
       setError(err.response?.data?.message || 'Erreur de connexion au serveur');
       
       // Charger les données statiques en cas d'erreur
-      loadStaticData();
+      console.log('Chargement des données statiques de fallback');
+      
     } finally {
       setLoading(false);
     }
   };
 
-  // Données statiques de secours
-  const loadStaticData = () => {
-    const staticPlaces = [
-      {
-        id: 1,
-        title: "Cirque de Mafate",
-        type: "nature",
-        category: "site_naturel",
-        location: "Réunion",
-        description: "Cirque inaccessible par la route, préservé de l'urbanisation, classé au patrimoine mondial de l'UNESCO.",
-        images: [
-          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
-          "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b",
-          "https://images.unsplash.com/photo-1506744038136-46273834b3fb"
-        ],
-        altitude: "1600m",
-        difficulty: "Difficile",
-        protection: "Parc National",
-        year: 2010,
-        price: 0,
-        city: "Réunion",
-        rating: 4.8,
-        reviewCount: 124,
-        featured: true,
-        available: true
-      },
-      {
-        id: 2,
-        title: "Piton de la Fournaise",
-        type: "nature",
-        category: "volcan",
-        location: "Réunion",
-        description: "L'un des volcans les plus actifs au monde, offrant des paysages lunaires uniques.",
-        images: [
-          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
-          "https://images.unsplash.com/photo-1509316785289-025f5b846b35",
-          "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b"
-        ],
-        altitude: "2631m",
-        difficulty: "Moyen",
-        protection: "Réserve Naturelle",
-        year: 2007,
-        price: 0,
-        city: "Réunion",
-        rating: 4.9,
-        reviewCount: 89,
-        featured: true,
-        available: true
-      },
-      {
-        id: 3,
-        title: "Habitation La Grivelière",
-        type: "patrimoine",
-        category: "historique",
-        location: "Guadeloupe",
-        description: "Ancienne plantation de café et de cacao restaurée, témoin de l'histoire coloniale.",
-        images: [
-          "https://images.unsplash.com/photo-1518837695005-2083093ee35b",
-          "https://images.unsplash.com/photo-1544551763-46a013bb70d5",
-          "https://images.unsplash.com/photo-1513584684374-8bab748fbf90"
-        ],
-        altitude: "450m",
-        difficulty: "Facile",
-        protection: "Monument Historique",
-        year: 1998,
-        price: 12,
-        city: "Guadeloupe",
-        rating: 4.5,
-        reviewCount: 67,
-        featured: true,
-        available: true
-      },
-      {
-        id: 4,
-        title: "Forêt de Bélouve",
-        type: "nature",
-        category: "foret",
-        location: "Réunion",
-        description: "Forêt primaire de tamarins, véritable cathédrale végétale aux arbres centenaires.",
-        images: [
-          "https://images.unsplash.com/photo-1448375240586-882707db888b",
-          "https://images.unsplash.com/photo-1500479694472-551d1fb6258d",
-          "https://images.unsplash.com/photo-1473448912268-2022ce9509d8"
-        ],
-        altitude: "1500m",
-        difficulty: "Moyen",
-        protection: "Réserve Biologique",
-        year: 1994,
-        price: 0,
-        city: "Réunion",
-        rating: 4.7,
-        reviewCount: 45,
-        featured: true,
-        available: true
-      },
-      {
-        id: 5,
-        title: "Cases Créoles de Hell-Bourg",
-        type: "patrimoine",
-        category: "architecture",
-        location: "Réunion",
-        description: "Village aux maisons créoles colorées classé parmi les plus beaux villages de France.",
-        images: [
-          "https://images.unsplash.com/photo-1513584684374-8bab748fbf90",
-          "https://images.unsplash.com/photo-1544551763-46a013bb70d5",
-          "https://images.unsplash.com/photo-1518837695005-2083093ee35b"
-        ],
-        altitude: "975m",
-        difficulty: "Facile",
-        protection: "Site Patrimonial",
-        year: 1998,
-        price: 8,
-        city: "Réunion",
-        rating: 4.6,
-        reviewCount: 78,
-        featured: true,
-        available: true
-      },
-      {
-        id: 6,
-        title: "Lagon de Mayotte",
-        type: "nature",
-        category: "marine",
-        location: "Mayotte",
-        description: "Plus grand lagon fermé du monde, abritant une biodiversité marine exceptionnelle.",
-        images: [
-          "https://images.unsplash.com/photo-1506929562872-bb421503ef21",
-          "https://images.unsplash.com/photo-1439066615861-d1af74d74000",
-          "https://images.unsplash.com/photo-1505142468610-359e7d316be0"
-        ],
-        altitude: "0m",
-        difficulty: "Facile",
-        protection: "Parc Naturel Marin",
-        year: 2010,
-        price: 0,
-        city: "Mayotte",
-        rating: 4.9,
-        reviewCount: 112,
-        featured: true,
-        available: true
-      }
-    ];
-    
-    // Filtrer selon la catégorie active
-    const filtered = activeCategory === 'tous' 
-      ? staticPlaces 
-      : staticPlaces.filter(place => {
-          if (activeCategory === 'nature') return place.type === 'nature';
-          if (activeCategory === 'patrimoine') return place.type === 'patrimoine';
-          return place.category === activeCategory;
-        });
-    
-    setPlaces(filtered);
-    setPagination({
-      page: 1,
-      limit: 12,
-      total: filtered.length,
-      totalPages: Math.ceil(filtered.length / 12)
-    });
-  };
-
   // Charger les données au montage
   useEffect(() => {
     fetchPatrimoines(1, activeCategory);
-  }, [activeCategory]);
+  }, [activeCategory, isAuthenticated]);
 
   // Gérer le changement de catégorie
   const handleCategoryChange = (categoryId) => {
@@ -262,7 +106,23 @@ const NaturePatrimoine = () => {
     }
   };
 
-  // Filtrage des lieux côté client (fallback)
+  // Ouvrir la modal avec le lieu sélectionné
+  const handleOpenModal = (place) => {
+    setSelectedPlace(place);
+    setShowModal(true);
+    // Empêcher le défilement du body lorsque la modal est ouverte
+    document.body.style.overflow = 'hidden';
+  };
+
+  // Fermer la modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedPlace(null);
+    // Restaurer le défilement du body
+    document.body.style.overflow = 'auto';
+  };
+
+  // Filtrage des lieux côté client
   const filteredPlaces = activeCategory === 'tous'
     ? places
     : places.filter(place => {
@@ -270,6 +130,22 @@ const NaturePatrimoine = () => {
         if (activeCategory === 'patrimoine') return place.type === 'patrimoine';
         return place.category === activeCategory;
       });
+
+  // Fonction pour obtenir le nom de l'utilisateur formaté
+  const getUserDisplayName = () => {
+    if (!user) return '';
+    
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    } else if (user.name) {
+      return user.name;
+    } else if (user.firstName) {
+      return user.firstName;
+    } else if (user.email) {
+      return user.email.split('@')[0];
+    }
+    return '';
+  };
 
   // Composant de carte de lieu
   const PlaceCard = ({ place }) => {
@@ -384,35 +260,228 @@ const NaturePatrimoine = () => {
 
           <p className="text-gray-700 mb-4 text-sm leading-relaxed">
             {place.description || 'Aucune description disponible.'}
-          </p>
+          </p>   
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="text-sm text-gray-500 mb-1">Altitude</div>
-              <div className="text-md font-bold text-gray-900">
-                {place.altitude || 'Non spécifiée'}
-              </div>
+          {/* Bouton - SEULEMENT SI CONNECTÉ */}
+          {isAuthenticated ? (
+            <button 
+              onClick={() => handleOpenModal(place)}
+              className="w-full bg-secondary-text text-white font-semibold py-3.5 px-4 rounded-xl hover:bg-secondary-text/80 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              Découvrir ce lieu
+            </button>
+          ) : (
+            <div className="text-center p-3 bg-gray-50 rounded-xl">
+              <p className="text-gray-600 text-sm">
+                Veuillez vous connecter pour accéder à ce lieu.
+              </p>
             </div>
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="text-sm text-gray-500 mb-1">Difficulté</div>
-              <div className={`text-md font-bold ${
-                difficulty === 'Facile' ? 'text-emerald-600' :
-                difficulty === 'Moyen' ? 'text-amber-600' :
-                'text-red-600'
-              }`}>
-                {difficulty}
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Composant Modal
+  const PlaceModal = () => {
+    if (!selectedPlace || !showModal) return null;
+
+    const images = Array.isArray(selectedPlace.images) 
+      ? selectedPlace.images 
+      : selectedPlace.image 
+        ? [selectedPlace.image] 
+        : ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4'];
+
+    // Déterminer la protection
+    const getProtection = (category) => {
+      const protectionMap = {
+        'site_naturel': 'Parc National',
+        'volcan': 'Réserve Naturelle',
+        'foret': 'Réserve Biologique',
+        'marine': 'Parc Marin',
+        'historique': 'Monument Historique',
+        'architecture': 'Site Patrimonial'
+      };
+      return protectionMap[category] || 'Site Protégé';
+    };
+
+    const protection = selectedPlace.protection || getProtection(selectedPlace.category);
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div 
+          className="relative bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Bouton de fermeture */}
+          <button
+            onClick={handleCloseModal}
+            className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-gray-100 transition-colors shadow-lg"
+          >
+            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Image principale */}
+          <div className="relative h-72 md:h-96 overflow-hidden rounded-t-3xl">
+            <img
+              src={`${images[0]}?auto=format&fit=crop&w=1200&h=600&q=80`}
+              alt={selectedPlace.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            
+            {/* Titre et localisation */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">{selectedPlace.title}</h2>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="font-medium text-lg">
+                    {selectedPlace.city || selectedPlace.location || 'Localisation inconnue'}
+                  </span>
+                </div>
+                <span className="bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  {selectedPlace.type === 'nature' ? 'Nature' : 'Patrimoine'}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Bouton */}
-          <button 
-            onClick={() => window.location.href = `/patrimoine/${place.id}`}
-            className="w-full bg-secondary-text text-white font-semibold py-3.5 px-4 rounded-xl hover:bg-secondary-text/80 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
-          >
-            Découvrir ce lieu
-          </button>
+          {/* Contenu de la modal */}
+          <div className="p-6 md:p-8">
+            {/* En-tête infos */}
+            <div className="flex flex-wrap gap-4 mb-6 pb-6 border-b">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <div className="text-sm text-gray-600">Localisation</div>
+                  <div className="font-medium">{selectedPlace.city || selectedPlace.location || 'Non spécifié'}</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <div className="text-sm text-gray-600">Année</div>
+                  <div className="font-medium">{selectedPlace.year || 'Non daté'}</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <div className="text-sm text-gray-600">Protection</div>
+                  <div className="font-medium">{protection}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Description</h3>
+              <p className="text-gray-700 leading-relaxed">
+                {selectedPlace.description || 'Aucune description disponible pour ce lieu.'}
+              </p>
+            </div>
+
+            {/* Détails supplémentaires */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h4 className="font-bold text-gray-900 mb-3">Caractéristiques</h4>
+                <ul className="space-y-2">
+                  {selectedPlace.altitude && (
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">Altitude</span>
+                      <span className="font-medium">{selectedPlace.altitude}m</span>
+                    </li>
+                  )}
+                  {selectedPlace.surface && (
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">Surface</span>
+                      <span className="font-medium">{selectedPlace.surface} ha</span>
+                    </li>
+                  )}
+                  {selectedPlace.climate && (
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">Climat</span>
+                      <span className="font-medium">{selectedPlace.climate}</span>
+                    </li>
+                  )}
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h4 className="font-bold text-gray-900 mb-3">Accès et visite</h4>
+                <ul className="space-y-2">
+                  {selectedPlace.access && (
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">Accès</span>
+                      <span className="font-medium">{selectedPlace.access}</span>
+                    </li>
+                  )}
+                  {selectedPlace.visiting_hours && (
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">Horaires</span>
+                      <span className="font-medium">{selectedPlace.visiting_hours}</span>
+                    </li>
+                  )}
+                  {selectedPlace.entrance_fee && (
+                    <li className="flex justify-between">
+                      <span className="text-gray-600">Tarif</span>
+                      <span className="font-medium">{selectedPlace.entrance_fee}</span>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+
+            {/* Galerie d'images */}
+            {images.length > 1 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Galerie</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {images.slice(0, 6).map((img, index) => (
+                    <img
+                      key={index}
+                      src={`${img}?auto=format&fit=crop&w=400&h=300&q=80`}
+                      alt={`${selectedPlace.title} - Image ${index + 1}`}
+                      className="w-full h-40 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => window.open(img, '_blank')}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Boutons d'action */}
+            <div className="flex flex-wrap gap-4 pt-6 border-t">
+              <button
+                onClick={handleCloseModal}
+                className="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                Fermer
+              </button>
+              <button
+                onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${selectedPlace.city || selectedPlace.location}`, '_blank')}
+                className="px-6 py-3 bg-emerald-500 text-white font-medium rounded-xl hover:bg-emerald-600 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                </svg>
+                Voir sur Google Maps
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -433,10 +502,14 @@ const NaturePatrimoine = () => {
   };
 
   const stats = calculateStats();
+  const userDisplayName = getUserDisplayName();
 
   return (
     <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-7xl mx-auto pt-10">
+        {/* Modal */}
+        <PlaceModal />
+
         {/* En-tête avec image de fond */}
         <div
           className="absolute inset-0 h-[300px] -z-20 w-full overflow-hidden bg-cover bg-center"
@@ -453,8 +526,8 @@ const NaturePatrimoine = () => {
             Nature & patrimoine
           </h1>
           <p className="text-sm text-gray-200 max-w-3xl mx-auto font-light leading-relaxed">
-            {user 
-              ? `Bienvenue ${user.firstName}, explorez une nature préservée et un patrimoine authentique.`
+            {isAuthenticated && userDisplayName
+              ? `Bienvenue ${userDisplayName}, explorez une nature préservée et un patrimoine authentique.`
               : 'Explorez une nature préservée et un patrimoine authentique. Des lieux exceptionnels qui racontent notre histoire et protègent notre avenir.'
             }
           </p>
@@ -527,30 +600,17 @@ const NaturePatrimoine = () => {
             `}</style>
           </div>
         </div>
-
+        
         {/* Filtres */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center ">
           <div className="inline-flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryChange(category.id)}
-                disabled={loading}
-                className={`px-6 py-2.5 rounded-full font-medium transition-all duration-300 border ${
-                  activeCategory === category.id
-                    ? "bg-secondary-text text-white"
-                    : "bg-white text-gray-700 border-gray-300 hover:border-gray-900 hover:text-gray-900"
-                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {category.label}
-              </button>
-            ))}
+          <p>voici toute notre site </p>
           </div>
         </div>
-
+       
         {/* Chargement/Erreur */}
         {loading && (
-          <div className="text-center py-12">
+          <div className="text-center py-1">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-secondary-text"></div>
             <p className="mt-4 text-gray-600">Chargement des lieux...</p>
           </div>
@@ -574,6 +634,12 @@ const NaturePatrimoine = () => {
               ) : (
                 <div className="col-span-3 text-center py-12">
                   <p className="text-gray-500 text-lg">Aucun lieu trouvé pour cette catégorie.</p>
+                  <button 
+                    onClick={() => fetchPatrimoines(1, 'tous')}
+                    className="mt-4 px-4 py-2 bg-secondary-text text-white rounded-lg hover:bg-secondary-text/80"
+                  >
+                    Recharger les données
+                  </button>
                 </div>
               )}
             </div>
@@ -797,33 +863,6 @@ const NaturePatrimoine = () => {
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Appel à l'action */}
-            <div className="text-center bg-secondary-text py-8 rounded-md shadow-lg">
-              <h2 className="text-4xl font-light text-gray-100 mb-6">
-                Contribuez à la préservation
-              </h2>
-              <p className="text-gray-400 max-w-2xl mx-auto mb-10">
-                {isAuthenticated
-                  ? `Bonjour ${user?.firstName}, partagez vos découvertes ou signalez des sites à protéger.`
-                  : 'Connectez-vous pour partager vos découvertes, signalez des sites à protéger, ou participez à nos programmes de conservation du patrimoine.'
-                }
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <button 
-                  onClick={() => window.location.href = isAuthenticated ? '/signaler-site' : '/login'}
-                  className="px-8 py-4 bg-gray-100 text-slate-900 font-medium rounded-xl transition-colors duration-300"
-                >
-                  Signaler un site
-                </button>
-                <button 
-                  onClick={() => window.location.href = '/devenir-guide'}
-                  className="px-8 py-4 border-2 border-gray-100 text-gray-100 font-medium rounded-xl hover:bg-gray-50 hover:text-slate-900 transition-colors duration-300"
-                >
-                  Devenir guide
-                </button>
               </div>
             </div>
           </>

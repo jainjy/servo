@@ -1,11 +1,12 @@
 import { 
-  X, MapPin, Calendar, Mountain, Star, ExternalLink, 
-  Users, Globe, Shield, Clock, TrendingUp, Image as ImageIcon,
-  ChevronLeft, ChevronRight, Edit, Trash2, Share2, Download,
-  Heart, Bookmark, Navigation, Phone, Mail, Facebook, Twitter,
-  Instagram, Linkedin, AlertCircle, CheckCircle
+  X, MapPin, Calendar, Mountain, Star, 
+   Globe, Shield, Image as ImageIcon,
+  ChevronLeft, ChevronRight, Edit, Trash2, 
+  Maximize2,
+  Info, Award, Map, Users as UsersIcon, Thermometer,
+  Droplets, Wind, Sunrise
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface NatureDetailModalProps {
   isOpen: boolean;
@@ -57,6 +58,9 @@ export default function NatureDetailModal({
   const [isFavorite, setIsFavorite] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (item && isOpen) {
@@ -65,6 +69,37 @@ export default function NatureDetailModal({
       setIsBookmarked(false);
     }
   }, [item, isOpen]);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        } else {
+          onClose();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isFullscreen, onClose]);
+
+  const handleFullscreen = () => {
+    if (!imageContainerRef.current) return;
+    
+    if (!isFullscreen) {
+      if (imageContainerRef.current.requestFullscreen) {
+        imageContainerRef.current.requestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+      setIsFullscreen(false);
+    }
+  };
 
   if (!isOpen || !item) return null;
 
@@ -83,28 +118,6 @@ export default function NatureDetailModal({
 
   const getCategoryLabel = (category: string) => {
     return categoryLabels[category] || category.replace('_', ' ');
-  };
-
-  const handleShare = (platform: string) => {
-    const url = window.location.href;
-    const text = `Découvrez ${item.title} - ${item.description.substring(0, 100)}...`;
-    
-    switch (platform) {
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'whatsapp':
-        window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
-        break;
-      case 'copy':
-        navigator.clipboard.writeText(url);
-        toast.success("Lien copié dans le presse-papier !");
-        break;
-    }
-    setShareMenuOpen(false);
   };
 
   const nextImage = () => {
@@ -126,437 +139,411 @@ export default function NatureDetailModal({
     }
   };
 
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Lien copié dans le presse-papier");
+  };
+
+  const handleShare = (platform: string) => {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(item.title);
+    
+    const urls = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      twitter: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+      linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`,
+    };
+    
+    if (urls[platform as keyof typeof urls]) {
+      window.open(urls[platform as keyof typeof urls], '_blank', 'width=600,height=400');
+    }
+  };
+
+  // Données météo fictives (à remplacer par une API réelle)
+  const weatherData = {
+    temperature: "22°C",
+    condition: "Ensoleillé",
+    humidity: "65%",
+    wind: "12 km/h",
+    sunrise: "06:45",
+    sunset: "18:30"
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 z-50 overflow-y-auto">
-      <div className="min-h-screen">
-        {/* Header avec navigation */}
-        <div className="sticky top-0 z-50 bg-gradient-to-b from-black/80 to-transparent">
-          <div className="container mx-auto px-4 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={onClose}
-                className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5" />
-                Retour
-              </button>
+    <div 
+      className={`fixed inset-0 z-50 overflow-y-auto transition-all duration-300 ${
+        isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+      }`}
+      ref={modalRef}
+    >
+      {/* Overlay avec flou */}
+      <div 
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
+        onClick={onClose}
+      />
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsFavorite(!isFavorite)}
-                  className="p-2.5 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-colors"
-                  title={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
-                >
-                  <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                </button>
-
-                <button
-                  onClick={() => setIsBookmarked(!isBookmarked)}
-                  className="p-2.5 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-colors"
-                  title={isBookmarked ? "Retirer des signets" : "Ajouter aux signets"}
-                >
-                  <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-blue-500 text-blue-500' : ''}`} />
-                </button>
-
-                <div className="relative">
+      {/* Modal Container */}
+      <div className="min-h-screen px-4 py-8 flex items-center justify-center">
+        <div 
+          className={`bg-white rounded-3xl shadow-2xl w-full max-w-7xl mx-auto overflow-hidden transform transition-all duration-300 ${
+            isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          }`}
+        >
+          {/* Header */}
+          <div className="sticky top-0 z-40 bg-gradient-to-b from-black/90 to-black/70 backdrop-blur-md border-b border-white/10">
+            <div className="px-6 lg:px-8 py-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setShareMenuOpen(!shareMenuOpen)}
-                    className="p-2.5 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-colors"
-                    title="Partager"
+                    onClick={onClose}
+                    className="flex items-center justify-center w-10 h-10 bg-white/10 backdrop-blur-sm text-white rounded-full hover:bg-white/20 transition-all hover:scale-105"
+                    aria-label="Fermer"
                   >
-                    <Share2 className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                   </button>
-
-                  {shareMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                      <button
-                        onClick={() => handleShare('facebook')}
-                        className="flex items-center gap-3 w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      >
-                        <Facebook className="w-4 h-4 text-blue-600" />
-                        Facebook
-                      </button>
-                      <button
-                        onClick={() => handleShare('twitter')}
-                        className="flex items-center gap-3 w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      >
-                        <Twitter className="w-4 h-4 text-sky-500" />
-                        Twitter
-                      </button>
-                      <button
-                        onClick={() => handleShare('whatsapp')}
-                        className="flex items-center gap-3 w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      >
-                        <div className="w-4 h-4 bg-green-500 rounded flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">WA</span>
-                        </div>
-                        WhatsApp
-                      </button>
-                      <button
-                        onClick={() => handleShare('copy')}
-                        className="flex items-center gap-3 w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      >
-                        <CopyIcon className="w-4 h-4 text-gray-600" />
-                        Copier le lien
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${typeColor.replace('bg-gradient-to-r', 'bg')}`} />
+                    <span className="text-white/80 text-sm font-medium">
+                      {getTypeLabel(item.type)}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="h-6 w-px bg-white/30"></div>
+                <div className="flex items-center gap-2">
+                 
+                  <div className="h-6 w-px bg-white/20 mx-2" />
 
-                <button
-                  onClick={() => onEdit(item)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Edit className="w-4 h-4" />
-                  Modifier
-                </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onEdit(item)}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-600/20"
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span className="hidden sm:inline">Modifier</span>
+                    </button>
 
-                <button
-                  onClick={handleDelete}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Supprimer
-                </button>
+                    <button
+                      onClick={handleDelete}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-red-600/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span className="hidden sm:inline">Supprimer</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Contenu principal */}
-        <div className="container mx-auto px-4 lg:px-8 py-8">
-          <div className="bg-white rounded-3xl overflow-hidden shadow-2xl">
-            {/* Image principale avec navigation */}
-            <div className="relative h-96 md:h-[500px] bg-gradient-to-br from-gray-900 to-black">
+          {/* Contenu principal avec disposition responsive */}
+          <div className="flex flex-col lg:flex-row h-[calc(100vh-200px)] max-h-[800px]">
+            {/* Section image - 60% sur desktop */}
+            <div 
+              className="lg:w-[60%] relative bg-gradient-to-br from-gray-900 to-black"
+              ref={imageContainerRef}
+            >
               {item.images && item.images.length > 0 ? (
-                <>
+                <div className="relative h-full">
                   <img
                     src={item.images[currentImageIndex]}
                     alt={item.title}
-                    className="w-full h-full object-cover opacity-90"
+                    className="w-full h-full object-cover"
                   />
                   
-                  {/* Navigation images */}
-                  <button
-                    onClick={prevImage}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-white/20 backdrop-blur-sm text-white rounded-full hover:bg-white/30 transition-colors"
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </button>
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                   
-                  <button
-                    onClick={nextImage}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-white/20 backdrop-blur-sm text-white rounded-full hover:bg-white/30 transition-colors"
-                  >
-                    <ChevronRight className="w-6 h-6" />
-                  </button>
+                  {/* Contenu sur l'image */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8">
+                    <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6">
+                      <div className="flex-1">
+                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${typeColor} text-white text-sm font-semibold mb-4 shadow-lg`}>
+                          <span className="text-lg">{typeIcon}</span>
+                          {getTypeLabel(item.type)}
+                          <span className="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                            {getCategoryLabel(item.category)}
+                          </span>
+                        </div>
+                        <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
+                          {item.title}
+                        </h1>
+                        <div className="flex flex-wrap items-center gap-4 text-white/90">
+                          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                            <MapPin className="w-4 h-4" />
+                            <span className="font-medium">{item.location}</span>
+                          </div>
+                          {item.year && (
+                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                              <Calendar className="w-4 h-4" />
+                              <span>Découvert en {item.year}</span>
+                            </div>
+                          )}
+                          {item.altitude && (
+                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                              <Mountain className="w-4 h-4" />
+                              <span>{item.altitude}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-                  {/* Image indicators */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                    {item.images.map((_: any, index: number) => (
+                      {item.rating !== undefined && (
+                        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-5 min-w-[140px] border border-white/20 shadow-2xl">
+                          <div className="text-3xl font-bold text-white mb-2 text-center">
+                            {item.rating.toFixed(1)}
+                            <span className="text-lg text-white/70">/5</span>
+                          </div>
+                          <div className="flex justify-center mb-3">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${
+                                  i < Math.floor(item.rating)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-white/30"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <div className="text-center">
+                            <div className="text-white/70 text-sm">
+                              {item.reviewCount || 0} avis
+                            </div>
+                            <div className="text-xs text-white/50 mt-1">
+                              Basé sur {item.reviewCount || 0} évaluations
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Contrôles image */}
+                  <div className="absolute top-1/2 left-4 right-4 transform -translate-y-1/2 flex justify-between">
+                    <button
+                      onClick={prevImage}
+                      className="p-3 bg-white/20 backdrop-blur-sm text-white rounded-full hover:bg-white/30 transition-all hover:scale-110 active:scale-95 shadow-lg"
+                      aria-label="Image précédente"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    
+                    <button
+                      onClick={nextImage}
+                      className="p-3 bg-white/20 backdrop-blur-sm text-white rounded-full hover:bg-white/30 transition-all hover:scale-110 active:scale-95 shadow-lg"
+                      aria-label="Image suivante"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* Bottom controls */}
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                    <div className="flex gap-2">
+                      {item.images.map((_: any, index: number) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`w-8 h-1.5 rounded-full transition-all ${
+                            index === currentImageIndex
+                              ? "bg-white"
+                              : "bg-white/40 hover:bg-white/60"
+                          }`}
+                          aria-label={`Aller à l'image ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="px-3 py-1.5 bg-black/60 text-white text-sm rounded-full backdrop-blur-sm">
+                        {currentImageIndex + 1} / {item.images.length}
+                      </div>
                       <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          index === currentImageIndex
-                            ? "bg-white w-6"
-                            : "bg-white/50 hover:bg-white/80"
-                        }`}
-                      />
-                    ))}
+                        onClick={handleFullscreen}
+                        className="p-2 bg-black/60 text-white rounded-full backdrop-blur-sm hover:bg-black/80 transition-all"
+                        aria-label={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
+                      >
+                        <Maximize2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-
-                  {/* Image count */}
-                  <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/60 text-white text-sm rounded-full backdrop-blur-sm">
-                    {currentImageIndex + 1} / {item.images.length}
-                  </div>
-                </>
+                </div>
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-center text-white">
+                  <div className="text-center text-white p-8">
                     <ImageIcon className="w-24 h-24 mx-auto opacity-30 mb-4" />
-                    <p className="text-xl font-medium">Aucune image disponible</p>
+                    <p className="text-xl font-medium mb-2">Aucune image disponible</p>
+                    <p className="text-white/60">Ajoutez des images pour améliorer cette fiche</p>
                   </div>
                 </div>
               )}
-
-              {/* Overlay avec titre */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-8">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${typeColor} text-white text-sm font-semibold mb-3`}>
-                      <span className="text-lg">{typeIcon}</span>
-                      {getTypeLabel(item.type)}
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                      {item.title}
-                    </h1>
-                    <div className="flex items-center gap-4 text-white/90">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-5 h-5" />
-                        <span className="text-lg">{item.location}</span>
-                      </div>
-                      {item.year && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-5 h-5" />
-                          <span className="text-lg">Découvert en {item.year}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {item.rating !== undefined && (
-                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 min-w-[120px] text-center">
-                      <div className="text-3xl font-bold text-white mb-1">{item.rating.toFixed(1)}</div>
-                      <div className="flex justify-center mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < Math.floor(item.rating)
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-white/40"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <div className="text-white/70 text-sm">
-                        {item.reviewCount || 0} avis
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
 
-            {/* Contenu détaillé */}
-            <div className="p-8 md:p-12">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                {/* Colonne principale */}
-                <div className="lg:col-span-2 space-y-10">
-                  {/* Description */}
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                      <FileTextIcon className="w-6 h-6 text-green-600" />
+            {/* Section informations - 40% sur desktop */}
+            <div className="lg:w-[40%] overflow-y-auto bg-gradient-to-b from-white to-gray-50">
+              <div className="p-6 lg:p-8 space-y-8">
+                {/* En-tête météo */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-5 border border-blue-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Thermometer className="w-5 h-5 text-blue-600" />
+                      Conditions météo
+                    </h3>
+                    <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                      En temps réel
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-gray-900">{weatherData.temperature}</div>
+                      <div className="text-sm text-gray-600">{weatherData.condition}</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Droplets className="w-4 h-4 text-blue-500" />
+                        <span>Humidité: {weatherData.humidity}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Wind className="w-4 h-4 text-blue-500" />
+                        <span>Vent: {weatherData.wind}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Sunrise className="w-4 h-4 text-amber-500" />
+                        <span>Lever: {weatherData.sunrise}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Sunrise className="w-4 h-4 text-orange-500 rotate-180" />
+                        <span>Coucher: {weatherData.sunset}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <section>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <Info className="w-5 h-5 text-green-600" />
                       Description
                     </h2>
-                    <div className="prose prose-lg max-w-none">
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                        {item.description}
-                      </p>
-                    </div>
-                  </section>
-
-                  {/* Caractéristiques */}
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                      <TrendingUp className="w-6 h-6 text-green-600" />
-                      Caractéristiques principales
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-2xl">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <Globe className="w-5 h-5 text-green-600" />
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">Type</div>
-                            <div className="font-bold text-gray-900 text-lg">{getTypeLabel(item.type)}</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-5 rounded-2xl">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <TagIcon className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">Catégorie</div>
-                            <div className="font-bold text-gray-900 text-lg">{getCategoryLabel(item.category)}</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {item.altitude && (
-                        <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-5 rounded-2xl">
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                              <Mountain className="w-5 h-5 text-purple-600" />
-                            </div>
-                            <div>
-                              <div className="text-sm text-gray-500">Altitude</div>
-                              <div className="font-bold text-gray-900 text-lg">{item.altitude}</div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-2xl">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="p-2 bg-amber-100 rounded-lg">
-                            <Shield className="w-5 h-5 text-amber-600" />
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">Statut</div>
-                            <div className={`font-bold text-lg ${item.available !== false ? 'text-green-600' : 'text-red-600'}`}>
-                              {item.available !== false ? '✅ Ouvert au public' : '❌ Temporairement fermé'}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Galerie d'images */}
-                  {item.images && item.images.length > 1 && (
-                    <section>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        <ImageIcon className="w-6 h-6 text-green-600" />
-                        Galerie ({item.images.length} photos)
-                      </h2>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {item.images.map((image: string, index: number) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentImageIndex(index)}
-                            className={`aspect-square overflow-hidden rounded-xl border-2 transition-all ${
-                              index === currentImageIndex
-                                ? 'border-green-500 ring-2 ring-green-200'
-                                : 'border-gray-200 hover:border-green-300'
-                            }`}
-                          >
-                            <img
-                              src={image}
-                              alt={`${item.title} - ${index + 1}`}
-                              className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                </div>
-
-                {/* Sidebar */}
-                <div className="space-y-8">
-                  {/* Carte d'action rapide */}
-                  <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6">
-                    <h3 className="font-bold text-gray-900 mb-4">Visiter ce site</h3>
-                    
-                    <div className="space-y-3">
-                      <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all">
-                        <Navigation className="w-5 h-5" />
-                        Voir l'itinéraire
-                      </button>
-
-                      <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        <Phone className="w-5 h-5" />
-                        Contacter
-                      </button>
-
-                      <button className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                        <Download className="w-5 h-5" />
-                        Télécharger la brochure
-                      </button>
-                    </div>
-
-                    <div className="mt-6 pt-6 border-t border-gray-200">
-                      <h4 className="font-medium text-gray-900 mb-3">Statistiques</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">Popularité</span>
-                          <span className="font-semibold text-gray-900">
-                            {item.featured ? 'Élevée' : 'Moyenne'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">Accessibilité</span>
-                          <span className="font-semibold text-green-600">Facile</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">Meilleure période</span>
-                          <span className="font-semibold text-gray-900">Avril - Octobre</span>
-                        </div>
-                      </div>
-                    </div>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      {item.description?.length || 0} caractères
+                    </span>
                   </div>
-
-                  {/* Informations pratiques */}
-                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl p-6">
-                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-blue-600" />
-                      Informations pratiques
-                    </h3>
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3">
-                        <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <div className="font-medium text-gray-900">Horaires</div>
-                          <div className="text-sm text-gray-600">Ouvert tous les jours de 8h à 18h</div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-3">
-                        <Users className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <div className="font-medium text-gray-900">Visites guidées</div>
-                          <div className="text-sm text-gray-600">Disponibles sur réservation</div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <div className="font-medium text-gray-900">Recommandations</div>
-                          <div className="text-sm text-gray-600">Prévoir de bonnes chaussures</div>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="bg-white rounded-xl border border-gray-200 p-5">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {item.description || "Aucune description disponible."}
+                    </p>
                   </div>
+                </section>
 
-                  {/* Badges */}
-                  <div className="space-y-3">
-                    {item.featured && (
-                      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white rounded-full">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span className="font-semibold">Site en vedette</span>
-                      </div>
+                {/* Caractéristiques détaillées */}
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Award className="w-5 h-5 text-purple-600" />
+                    Caractéristiques
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FeatureCard
+                      icon={<Globe className="w-5 h-5" />}
+                      title="Type"
+                      value={getTypeLabel(item.type)}
+                      color="green"
+                    />
+                    <FeatureCard
+                      icon={<TagIcon className="w-5 h-5" />}
+                      title="Catégorie"
+                      value={getCategoryLabel(item.category)}
+                      color="blue"
+                    />
+                    {item.area && (
+                      <FeatureCard
+                        icon={<Map className="w-5 h-5" />}
+                        title="Superficie"
+                        value={item.area}
+                        color="purple"
+                      />
                     )}
-                    
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full">
-                      <CheckCircle className="w-4 h-4" />
-                      <span className="font-semibold">Éco-responsable</span>
-                    </div>
+                    {item.visitors && (
+                      <FeatureCard
+                        icon={<UsersIcon className="w-5 h-5" />}
+                        title="Visiteurs annuels"
+                        value={item.visitors.toLocaleString()}
+                        color="amber"
+                      />
+                    )}
+                    <FeatureCard
+                      icon={<Shield className="w-5 h-5" />}
+                      title="Statut"
+                      value={item.available !== false ? 'Ouvert au public' : 'Fermé'}
+                      status={item.available !== false ? 'success' : 'error'}
+                    />
+                    {item.bestSeason && (
+                      <FeatureCard
+                        icon={<Calendar className="w-5 h-5" />}
+                        title="Meilleure saison"
+                        value={item.bestSeason}
+                        color="sky"
+                      />
+                    )}
                   </div>
-                </div>
+                </section>
+
+                
+
+                {/* Galerie miniatures */}
+                {item.images && item.images.length > 1 && (
+                  <section>
+                    <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5 text-indigo-600" />
+                      Galerie ({item.images.length} photos)
+                    </h2>
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-3">
+                      {item.images.map((image: string, index: number) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`aspect-square overflow-hidden rounded-xl border-2 transition-all hover:scale-[1.02] ${
+                            index === currentImageIndex
+                              ? 'border-indigo-500 ring-2 ring-indigo-200'
+                              : 'border-gray-200 hover:border-indigo-300'
+                          }`}
+                        >
+                          <img
+                            src={image}
+                            alt={`${item.title} - ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                )}
               </div>
             </div>
+          </div>
 
-            {/* Footer */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 px-8 py-6">
-              <div className="flex flex-wrap items-center justify-between gap-4">
+          {/* Footer */}
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
+            <div className="px-6 lg:px-8 py-4">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="text-sm text-gray-600">
-                  © {new Date().getFullYear()} Tourism Platform • Tous droits réservés
+                  <span className="font-medium">© {new Date().getFullYear()} Tourism Platform</span>
+                  <span className="mx-2">•</span>
+                  <span>Tous droits réservés</span>
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600">Partager :</span>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleShare('facebook')} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
-                      <Facebook className="w-5 h-5" />
-                    </button>
-                    <button onClick={() => handleShare('twitter')} className="p-2 text-sky-500 hover:bg-sky-50 rounded-lg">
-                      <Twitter className="w-5 h-5" />
-                    </button>
-                    <button onClick={() => handleShare('whatsapp')} className="p-2 text-green-600 hover:bg-green-50 rounded-lg">
-                      <div className="w-5 h-5 flex items-center justify-center">
-                        <span className="text-sm font-bold">WA</span>
-                      </div>
-                    </button>
+                  <div className="text-xs text-gray-500">
+                    Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">ID:</span>
+                    <code className="px-2 py-1 bg-gray-200 rounded text-xs font-mono text-gray-700">
+                      {item.id?.substring(0, 8)}
+                    </code>
                   </div>
                 </div>
               </div>
@@ -568,12 +555,71 @@ export default function NatureDetailModal({
   );
 }
 
-// Composants d'icônes supplémentaires
-function FileTextIcon({ className }: { className?: string }) {
+// Composants auxiliaires
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  color?: string;
+  status?: 'success' | 'error';
+}
+
+function FeatureCard({ icon, title, value, color, status }: FeatureCardProps) {
+  const colorClasses = {
+    green: 'from-green-50 to-emerald-50 border-green-100 text-green-700',
+    blue: 'from-blue-50 to-cyan-50 border-blue-100 text-blue-700',
+    purple: 'from-purple-50 to-violet-50 border-purple-100 text-purple-700',
+    amber: 'from-amber-50 to-orange-50 border-amber-100 text-amber-700',
+    sky: 'from-sky-50 to-blue-50 border-sky-100 text-sky-700',
+  };
+
+  const statusClasses = {
+    success: 'text-green-700 bg-green-50 border-green-200',
+    error: 'text-red-700 bg-red-50 border-red-200',
+  };
+
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
+    <div className={`bg-gradient-to-br rounded-xl p-4 border ${
+      status ? statusClasses[status] : colorClasses[color as keyof typeof colorClasses] || 'from-gray-50 to-gray-100 border-gray-200'
+    }`}>
+      <div className="flex items-center gap-3 mb-2">
+        <div className={`p-2 rounded-lg ${
+          status 
+            ? status === 'success' ? 'bg-green-100' : 'bg-red-100'
+            : 'bg-white/50'
+        }`}>
+          {icon}
+        </div>
+        <div className="text-sm font-medium text-gray-500">{title}</div>
+      </div>
+      <div className="font-semibold text-lg">{value}</div>
+    </div>
+  );
+}
+
+interface ActionButtonProps {
+  icon: React.ReactNode;
+  label: string;
+  color: string;
+  onClick: () => void;
+}
+
+function ActionButton({ icon, label, color, onClick }: ActionButtonProps) {
+  const colorClasses = {
+    blue: 'bg-blue-600 hover:bg-blue-700 text-white',
+    green: 'bg-green-600 hover:bg-green-700 text-white',
+    purple: 'bg-purple-600 hover:bg-purple-700 text-white',
+    amber: 'bg-amber-600 hover:bg-amber-700 text-white',
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] ${colorClasses[color as keyof typeof colorClasses]}`}
+    >
+      {icon}
+      <span className="text-xs mt-1.5 font-medium">{label}</span>
+    </button>
   );
 }
 
@@ -595,5 +641,8 @@ function CopyIcon({ className }: { className?: string }) {
 
 // Utilitaire toast (à remplacer par votre implémentation)
 const toast = {
-  success: (message: string) => console.log('Success:', message),
+  success: (message: string) => {
+    // Implémentation réelle de votre système de notifications
+    console.log('Success:', message);
+  },
 };
