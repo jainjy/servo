@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import TourismNavigation from '../TourismNavigation';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../lib/api';
+import Lottie from "lottie-react";
+import loginAnimation from "@/assets/Data.json"
 
 const NaturePatrimoine = () => {
   const [activeCategory, setActiveCategory] = useState('tous');
@@ -25,7 +27,7 @@ const NaturePatrimoine = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Construire les paramètres de requête
       const params = {
         page,
@@ -45,7 +47,7 @@ const NaturePatrimoine = () => {
           'historique': 'historique',
           'architecture': 'architecture'
         };
-        
+
         if (categoryMap[category]) {
           params.category = categoryMap[category];
         } else if (['nature', 'patrimoine'].includes(category)) {
@@ -59,7 +61,7 @@ const NaturePatrimoine = () => {
 
       // Appeler l'endpoint approprié
       const response = await api.get(endpoint, { params });
-      
+
       // ADAPTER LE TRAITEMENT EN FONCTION DU FORMAT DE RÉPONSE
       if (isAuthenticated) {
         // Format de /test
@@ -74,16 +76,16 @@ const NaturePatrimoine = () => {
         } else {
           throw new Error(response.data.message || 'Erreur API');
         }
-      } 
-      
-      
+      }
+
+
     } catch (err) {
       console.error('Erreur API:', err);
       setError(err.response?.data?.message || 'Erreur de connexion au serveur');
-      
+
       // Charger les données statiques en cas d'erreur
       console.log('Chargement des données statiques de fallback');
-      
+
     } finally {
       setLoading(false);
     }
@@ -126,15 +128,15 @@ const NaturePatrimoine = () => {
   const filteredPlaces = activeCategory === 'tous'
     ? places
     : places.filter(place => {
-        if (activeCategory === 'nature') return place.type === 'nature';
-        if (activeCategory === 'patrimoine') return place.type === 'patrimoine';
-        return place.category === activeCategory;
-      });
+      if (activeCategory === 'nature') return place.type === 'nature';
+      if (activeCategory === 'patrimoine') return place.type === 'patrimoine';
+      return place.category === activeCategory;
+    });
 
   // Fonction pour obtenir le nom de l'utilisateur formaté
   const getUserDisplayName = () => {
     if (!user) return '';
-    
+
     if (user.firstName && user.lastName) {
       return `${user.firstName} ${user.lastName}`;
     } else if (user.name) {
@@ -152,10 +154,10 @@ const NaturePatrimoine = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     // S'assurer que place.images est un tableau
-    const images = Array.isArray(place.images) 
-      ? place.images 
-      : place.image 
-        ? [place.image] 
+    const images = Array.isArray(place.images)
+      ? place.images
+      : place.image
+        ? [place.image]
         : ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4'];
 
     useEffect(() => {
@@ -215,21 +217,19 @@ const NaturePatrimoine = () => {
               {images.map((_, index) => (
                 <div
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentImageIndex
-                      ? 'bg-white w-6'
-                      : 'bg-white/50'
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentImageIndex
+                    ? 'bg-white w-6'
+                    : 'bg-white/50'
+                    }`}
                 />
               ))}
             </div>
           )}
 
           {/* Badge type */}
-          <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full font-semibold text-sm ${
-              place.type === 'nature'
-                ? 'bg-emerald-500/90 text-white'
-                : 'bg-amber-600/90 text-white'
+          <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full font-semibold text-sm ${place.type === 'nature'
+            ? 'bg-emerald-500/90 text-white'
+            : 'bg-amber-600/90 text-white'
             }`}>
             {formatType(place.type)}
           </div>
@@ -260,11 +260,11 @@ const NaturePatrimoine = () => {
 
           <p className="text-gray-700 mb-4 text-sm leading-relaxed">
             {place.description || 'Aucune description disponible.'}
-          </p>   
+          </p>
 
           {/* Bouton - SEULEMENT SI CONNECTÉ */}
           {isAuthenticated ? (
-            <button 
+            <button
               onClick={() => handleOpenModal(place)}
               className="w-full bg-secondary-text text-white font-semibold py-3.5 px-4 rounded-xl hover:bg-secondary-text/80 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
             >
@@ -286,10 +286,10 @@ const NaturePatrimoine = () => {
   const PlaceModal = () => {
     if (!selectedPlace || !showModal) return null;
 
-    const images = Array.isArray(selectedPlace.images) 
-      ? selectedPlace.images 
-      : selectedPlace.image 
-        ? [selectedPlace.image] 
+    const images = Array.isArray(selectedPlace.images)
+      ? selectedPlace.images
+      : selectedPlace.image
+        ? [selectedPlace.image]
         : ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4'];
 
     // Déterminer la protection
@@ -309,7 +309,7 @@ const NaturePatrimoine = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div 
+        <div
           className="relative bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
@@ -331,7 +331,7 @@ const NaturePatrimoine = () => {
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            
+
             {/* Titre et localisation */}
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
               <h2 className="text-3xl md:text-4xl font-bold mb-2">{selectedPlace.title}</h2>
@@ -364,7 +364,7 @@ const NaturePatrimoine = () => {
                   <div className="font-medium">{selectedPlace.city || selectedPlace.location || 'Non spécifié'}</div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
@@ -374,7 +374,7 @@ const NaturePatrimoine = () => {
                   <div className="font-medium">{selectedPlace.year || 'Non daté'}</div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
@@ -492,7 +492,7 @@ const NaturePatrimoine = () => {
     const totalSites = places.length;
     const natureSites = places.filter(p => p.type === 'nature').length;
     const patrimoineSites = places.filter(p => p.type === 'patrimoine').length;
-    
+
     return {
       totalSites,
       natureSites,
@@ -519,7 +519,7 @@ const NaturePatrimoine = () => {
         >
           <div className="absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70" />
         </div>
-        
+
         {/* En-tête minimaliste */}
         <div className="text-center mb-20">
           <h1 className="text-xl md:text-4xl font-light text-gray-100 mb-6 tracking-tight">
@@ -555,7 +555,14 @@ const NaturePatrimoine = () => {
           >
             {/* Utiliser les images des lieux pour le bandeau */}
             <div className="flex w-max gap-4 pr-4 animate-[move_25s_linear_infinite] animation-pausable">
-              {places.slice(0, 6).map((place, index) => (
+              {(places.length > 0 ? places : [
+                { title: 'Découverte Nature', images: ['https://i.pinimg.com/1200x/5a/cb/46/5acb4680585a8962184e1d96c2a3f9ba.jpg'] },
+                { title: 'Patrimoine Historique', images: ['https://i.pinimg.com/1200x/17/d2/5e/17d25e4edd5fc383662aa6beeb27aed0.jpg'] },
+                { title: 'Paysages Majestueux', images: ['https://i.pinimg.com/736x/90/30/98/903098b7ef3597130e4a5fa313e90b7b.jpg'] },
+                { title: 'Réserves Naturelles', images: ['https://i.pinimg.com/1200x/5b/e5/40/5be540b82f8745b2f468f1d6ea46b9a7.jpg'] },
+                { title: 'Sites Archéologiques', images: ['https://i.pinimg.com/736x/02/59/69/0259699a168aea21ba838cd4873a1fdc.jpg'] },
+                { title: 'Monuments Classés', images: ['https://i.pinimg.com/736x/4b/90/0a/4b900aa8b4ede5e17a63c1ba67b78784.jpg'] },
+              ]).slice(0, 6).map((place, index) => (
                 <div key={index} className="flex-none h-48 w-64 flex-shrink-0">
                   <img
                     src={`${place.images?.[0] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4'}?auto=format&fit=crop&w=400&h=200&q=80`}
@@ -571,7 +578,14 @@ const NaturePatrimoine = () => {
               aria-hidden
               className="flex w-max gap-4 pr-4 animate-[move_25s_linear_infinite] animation-pausable"
             >
-              {places.slice(0, 6).map((place, index) => (
+              {(places.length > 0 ? places : [
+                { title: 'Découverte Nature', images: ['https://i.pinimg.com/1200x/5a/cb/46/5acb4680585a8962184e1d96c2a3f9ba.jpg'] },
+                { title: 'Patrimoine Historique', images: ['https://i.pinimg.com/1200x/17/d2/5e/17d25e4edd5fc383662aa6beeb27aed0.jpg'] },
+                { title: 'Paysages Majestueux', images: ['https://i.pinimg.com/736x/90/30/98/903098b7ef3597130e4a5fa313e90b7b.jpg'] },
+                { title: 'Réserves Naturelles', images: ['https://i.pinimg.com/1200x/5b/e5/40/5be540b82f8745b2f468f1d6ea46b9a7.jpg'] },
+                { title: 'Sites Archéologiques', images: ['https://i.pinimg.com/736x/02/59/69/0259699a168aea21ba838cd4873a1fdc.jpg'] },
+                { title: 'Monuments Classés', images: ['https://i.pinimg.com/736x/4b/90/0a/4b900aa8b4ede5e17a63c1ba67b78784.jpg'] },
+              ]).slice(0, 6).map((place, index) => (
                 <div
                   key={`duplicate-${index}`}
                   className="flex-none h-48 w-64 flex-shrink-0"
@@ -600,14 +614,14 @@ const NaturePatrimoine = () => {
             `}</style>
           </div>
         </div>
-        
+
         {/* Filtres */}
         <div className="flex justify-center ">
-          <div className="inline-flex flex-wrap justify-center gap-3">
-          <p>voici toute notre site </p>
-          </div>
+          {/* <div className="inline-flex flex-wrap justify-center gap-3">
+            <p>voici toute notre site </p>
+          </div> */}
         </div>
-       
+
         {/* Chargement/Erreur */}
         {loading && (
           <div className="text-center py-1">
@@ -622,9 +636,47 @@ const NaturePatrimoine = () => {
             <p className="text-gray-600 text-sm">Affichage des données statiques</p>
           </div>
         )}
+        {/* Message si aucune donnée n'est disponible */}
+        {!loading && places.length === 0 && (
+          <div className="bg-white rounded-2xl p-8 md:p-12 mb-16 shadow-sm backdrop-blur-sm mx-auto max-w-6xl">
+            <div className="text-center">
+              <div className="w-48 h-48 md:w-56 md:h-56 mx-auto mb-8 flex items-center justify-center">
+                <Lottie animationData={loginAnimation} loop autoplay />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6 px-4 md:px-0">
+                Collection en cours
+              </h2>
+              <p className="text-gray-700 text-base md:text-lg mb-8 leading-relaxed px-6 md:px-12 max-w-2xl mx-auto">
+                Notre collection de sites naturels et patrimoniaux se construit jour après jour.
+                De nouvelles destinations exceptionnelles arrivent bientôt.
+              </p>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 md:p-7 shadow-md inline-block border border-white/50 max-w-md mx-auto">
+                <div className="text-sm font-semibold text-gray-800 mb-4">À venir :</div>
+                <div className="grid grid-cols-1 gap-2.5 text-sm text-gray-700">
+                  <div className="flex items-center gap-2.5 py-1">
+                    <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex-shrink-0" />
+                    Paysages naturels époustouflants
+                  </div>
+                  <div className="flex items-center gap-2.5 py-1">
+                    <div className="w-2 h-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex-shrink-0" />
+                    Patrimoine historique authentique
+                  </div>
+                  <div className="flex items-center gap-2.5 py-1">
+                    <div className="w-2 h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex-shrink-0" />
+                    Réserves naturelles préservées
+                  </div>
+                  <div className="flex items-center gap-2.5 py-1">
+                    <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full flex-shrink-0" />
+                    Destinations uniques à explorer
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Grille des lieux */}
-        {!loading && (
+        {!loading && places.length > 0 && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
               {filteredPlaces.length > 0 ? (
@@ -634,7 +686,7 @@ const NaturePatrimoine = () => {
               ) : (
                 <div className="col-span-3 text-center py-12">
                   <p className="text-gray-500 text-lg">Aucun lieu trouvé pour cette catégorie.</p>
-                  <button 
+                  <button
                     onClick={() => fetchPatrimoines(1, 'tous')}
                     className="mt-4 px-4 py-2 bg-secondary-text text-white rounded-lg hover:bg-secondary-text/80"
                   >
@@ -667,204 +719,208 @@ const NaturePatrimoine = () => {
               </div>
             )}
 
-            {/* Section statistiques */}
-            <div className="bg-gray-50 rounded-3xl mb-8">
-              <div className="grid grid-cols-1 bg-white py-8 rounded-sm md:grid-cols-4 gap-8">
-                <div className="text-center">
-                  <div className="text-5xl font-light text-gray-900 mb-3">
-                    {stats.totalSites}
-                  </div>
-                  <div className="text-gray-600 font-medium">Sites protégés</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-5xl font-light text-gray-900 mb-3">
-                    {stats.natureSites}
-                  </div>
-                  <div className="text-gray-600 font-medium">
-                    Sites naturels
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-5xl font-light text-gray-900 mb-3">
-                    {stats.territoryPreserved}%
-                  </div>
-                  <div className="text-gray-600 font-medium">
-                    Territoire préservé
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-5xl font-light text-gray-900 mb-3">
-                    {stats.patrimoineSites}
-                  </div>
-                  <div className="text-gray-600 font-medium">Monuments classés</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Carte interactive dynamique */}
-            <div className="mb-20 relative">
-              <h3 className="text-3xl font-light text-gray-900 mb-4 text-center">
-                Exploration géographique
-              </h3>
-              <p className="text-gray-600 text-center mb-4">
-                Découvrez nos {places.length} sites naturels et patrimoniaux
-                répartis à travers les territoires ultramarins
-              </p>
-              <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl bg-white border border-gray-200">
-                {/* Conteneur SVG pour la carte */}
-                <svg
-                  className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 1000 600"
-                >
-                  {/* Dégradé de fond */}
-                  <defs>
-                    <linearGradient
-                      id="mapGradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="100%"
-                    >
-                      <stop
-                        offset="0%"
-                        style={{ stopColor: "#f0fdf4", stopOpacity: 1 }}
-                      />
-                      <stop
-                        offset="100%"
-                        style={{ stopColor: "#fffbeb", stopOpacity: 1 }}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <rect width="1000" height="600" fill="url(#mapGradient)" />
-
-                  {/* Formes géométriques de continents/îles */}
-                  <circle
-                    cx="200"
-                    cy="250"
-                    r="80"
-                    fill="#d1fae5"
-                    opacity="0.6"
-                    stroke="#10b981"
-                    strokeWidth="2"
-                  />
-                  <circle
-                    cx="600"
-                    cy="180"
-                    r="70"
-                    fill="#d1fae5"
-                    opacity="0.5"
-                    stroke="#10b981"
-                    strokeWidth="2"
-                  />
-                  <ellipse
-                    cx="350"
-                    cy="400"
-                    rx="60"
-                    ry="50"
-                    fill="#d1fae5"
-                    opacity="0.5"
-                    stroke="#10b981"
-                    strokeWidth="2"
-                  />
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="40"
-                    fill="#d1fae5"
-                    opacity="0.6"
-                    stroke="#10b981"
-                    strokeWidth="2"
-                  />
-                </svg>
-
-                {/* Points interactifs sur la carte */}
-                <div className="absolute inset-0">
-                  {places.slice(0, 6).map((place) => {
-                    // Déterminer la position sur la carte
-                    const getPosition = (location) => {
-                      const positions = {
-                        'Réunion': { top: "42%", left: "25%" },
-                        'Guadeloupe': { top: "35%", left: "15%" },
-                        'Mayotte': { top: "58%", left: "37%" },
-                        'France': { top: "15%", left: "8%" },
-                      };
-                      return positions[location] || { top: "50%", left: "50%" };
-                    };
-
-                    const pos = getPosition(place.location || place.city);
-
-                    return (
-                      <div
-                        key={place.id}
-                        className="absolute group"
-                        style={{
-                          top: pos.top,
-                          left: pos.left,
-                          transform: "translate(-50%, -50%)",
-                        }}
-                      >
-                        {/* Cercle pulsant */}
-                        <div className="relative w-8 h-8">
-                          <div className="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-75"></div>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-3 h-3 bg-emerald-600 rounded-full shadow-lg"></div>
-                          </div>
-                        </div>
-
-                        {/* Popup au survol */}
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto z-10">
-                          <div className="bg-gray-900 text-white px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap shadow-2xl">
-                            <div className="font-bold text-emerald-400">
-                              {place.location || place.city}
-                            </div>
-                            <div className="text-gray-300 text-xs mt-1">
-                              {place.title}
-                            </div>
-                          </div>
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Légende */}
-                <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="flex items-center justify-center">
-                      <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                      <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping opacity-50 absolute"></div>
+            {/* Section statistiques - Affichée seulement si données */}
+            {places.length > 0 && (
+              <div className="bg-gray-50 rounded-3xl mb-8">
+                <div className="grid grid-cols-1 bg-white py-8 rounded-sm md:grid-cols-4 gap-8">
+                  <div className="text-center">
+                    <div className="text-5xl font-light text-gray-900 mb-3">
+                      {stats.totalSites}
                     </div>
-                    <span className="text-sm text-gray-700 font-medium">
-                      Sites disponibles
-                    </span>
+                    <div className="text-gray-600 font-medium">Sites protégés</div>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    Survolez pour plus de détails
+                  <div className="text-center">
+                    <div className="text-5xl font-light text-gray-900 mb-3">
+                      {stats.natureSites}
+                    </div>
+                    <div className="text-gray-600 font-medium">
+                      Sites naturels
+                    </div>
                   </div>
-                </div>
-
-                {/* Compteur de sites par région */}
-                <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200">
-                  <div className="text-xs font-semibold text-gray-600 mb-3">
-                    Sites par région
+                  <div className="text-center">
+                    <div className="text-5xl font-light text-gray-900 mb-3">
+                      {stats.territoryPreserved}%
+                    </div>
+                    <div className="text-gray-600 font-medium">
+                      Territoire préservé
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    {Array.from(new Set(places.map(p => p.location || p.city))).slice(0, 3).map((location) => (
-                      <div
-                        key={location}
-                        className="flex justify-between items-center"
-                      >
-                        <span className="text-sm text-gray-700">{location}</span>
-                        <span className="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 rounded-full w-6 h-6 text-xs font-bold">
-                          {places.filter((p) => (p.location || p.city) === location).length}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="text-center">
+                    <div className="text-5xl font-light text-gray-900 mb-3">
+                      {stats.patrimoineSites}
+                    </div>
+                    <div className="text-gray-600 font-medium">Monuments classés</div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Carte interactive dynamique - Affichée seulement si données */}
+            {places.length > 0 && (
+              <div className="mb-20 relative">
+                <h3 className="text-3xl font-light text-gray-900 mb-4 text-center">
+                  Exploration géographique
+                </h3>
+                <p className="text-gray-600 text-center mb-4">
+                  Découvrez nos {places.length} sites naturels et patrimoniaux
+                  répartis à travers les territoires ultramarins
+                </p>
+                <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl bg-white border border-gray-200">
+                  {/* Conteneur SVG pour la carte */}
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 1000 600"
+                  >
+                    {/* Dégradé de fond */}
+                    <defs>
+                      <linearGradient
+                        id="mapGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
+                        <stop
+                          offset="0%"
+                          style={{ stopColor: "#f0fdf4", stopOpacity: 1 }}
+                        />
+                        <stop
+                          offset="100%"
+                          style={{ stopColor: "#fffbeb", stopOpacity: 1 }}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <rect width="1000" height="600" fill="url(#mapGradient)" />
+
+                    {/* Formes géométriques de continents/îles */}
+                    <circle
+                      cx="200"
+                      cy="250"
+                      r="80"
+                      fill="#d1fae5"
+                      opacity="0.6"
+                      stroke="#10b981"
+                      strokeWidth="2"
+                    />
+                    <circle
+                      cx="600"
+                      cy="180"
+                      r="70"
+                      fill="#d1fae5"
+                      opacity="0.5"
+                      stroke="#10b981"
+                      strokeWidth="2"
+                    />
+                    <ellipse
+                      cx="350"
+                      cy="400"
+                      rx="60"
+                      ry="50"
+                      fill="#d1fae5"
+                      opacity="0.5"
+                      stroke="#10b981"
+                      strokeWidth="2"
+                    />
+                    <circle
+                      cx="100"
+                      cy="100"
+                      r="40"
+                      fill="#d1fae5"
+                      opacity="0.6"
+                      stroke="#10b981"
+                      strokeWidth="2"
+                    />
+                  </svg>
+
+                  {/* Points interactifs sur la carte */}
+                  <div className="absolute inset-0">
+                    {places.slice(0, 6).map((place) => {
+                      // Déterminer la position sur la carte
+                      const getPosition = (location) => {
+                        const positions = {
+                          'Réunion': { top: "42%", left: "25%" },
+                          'Guadeloupe': { top: "35%", left: "15%" },
+                          'Mayotte': { top: "58%", left: "37%" },
+                          'France': { top: "15%", left: "8%" },
+                        };
+                        return positions[location] || { top: "50%", left: "50%" };
+                      };
+
+                      const pos = getPosition(place.location || place.city);
+
+                      return (
+                        <div
+                          key={place.id}
+                          className="absolute group"
+                          style={{
+                            top: pos.top,
+                            left: pos.left,
+                            transform: "translate(-50%, -50%)",
+                          }}
+                        >
+                          {/* Cercle pulsant */}
+                          <div className="relative w-8 h-8">
+                            <div className="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-75"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-3 h-3 bg-emerald-600 rounded-full shadow-lg"></div>
+                            </div>
+                          </div>
+
+                          {/* Popup au survol */}
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto z-10">
+                            <div className="bg-gray-900 text-white px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap shadow-2xl">
+                              <div className="font-bold text-emerald-400">
+                                {place.location || place.city}
+                              </div>
+                              <div className="text-gray-300 text-xs mt-1">
+                                {place.title}
+                              </div>
+                            </div>
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Légende */}
+                  <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
+                        <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping opacity-50 absolute"></div>
+                      </div>
+                      <span className="text-sm text-gray-700 font-medium">
+                        Sites disponibles
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Survolez pour plus de détails
+                    </div>
+                  </div>
+
+                  {/* Compteur de sites par région */}
+                  <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200">
+                    <div className="text-xs font-semibold text-gray-600 mb-3">
+                      Sites par région
+                    </div>
+                    <div className="space-y-2">
+                      {Array.from(new Set(places.map(p => p.location || p.city))).slice(0, 3).map((location) => (
+                        <div
+                          key={location}
+                          className="flex justify-between items-center"
+                        >
+                          <span className="text-sm text-gray-700">{location}</span>
+                          <span className="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 rounded-full w-6 h-6 text-xs font-bold">
+                            {places.filter((p) => (p.location || p.city) === location).length}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

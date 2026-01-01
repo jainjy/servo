@@ -579,559 +579,538 @@ export default function AjoutPatrimoineModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-green-600 to-green-700 px-8 py-6 text-white z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                {editingItem ? (
-                  <Edit className="w-6 h-6" />
-                ) : (
-                  <Landmark className="w-6 h-6" />
-                )}
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">
-                  {editingItem ? "Modifier le Patrimoine" : "Nouveau Patrimoine Culturel"}
-                </h2>
-                <p className="text-green-100 text-sm mt-1">
-                  {editingItem ? "Modifiez les informations" : "Ajoutez un nouveau patrimoine culturel"}
+    <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm">
+  <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    {/* Header compact */}
+    <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+            {editingItem ? (
+              <Edit className="w-5 h-5" />
+            ) : (
+              <Landmark className="w-5 h-5" />
+            )}
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {editingItem ? "Modifier le Patrimoine" : "Nouveau Patrimoine"}
+            </h2>
+            <p className="text-gray-500 text-sm">
+              {editingItem ? "Modifiez les informations" : "Ajoutez un nouveau patrimoine"}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
+          disabled={loading || uploadingImages}
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+
+    <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-80px)]">
+      <div className="p-6 space-y-6">
+        {/* Section 1: Informations de base */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+          <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Tag className="w-4 h-4 text-green-600" />
+            Informations principales
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Titre */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Titre du patrimoine <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => {
+                  setFormData({ ...formData, title: e.target.value });
+                  if (errors.title) {
+                    const newErrors = { ...errors };
+                    delete newErrors.title;
+                    setErrors(newErrors);
+                  }
+                }}
+                className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                  errors.title ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="Ex: Cathédrale Notre-Dame"
+                disabled={loading || uploadingImages}
+              />
+              {errors.title && (
+                <p className="text-red-600 text-sm flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.title}
                 </p>
+              )}
+            </div>
+
+            {/* Catégorie */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Catégorie <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => {
+                  setFormData({ ...formData, category: e.target.value });
+                  if (errors.category) {
+                    const newErrors = { ...errors };
+                    delete newErrors.category;
+                    setErrors(newErrors);
+                  }
+                }}
+                className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                  errors.category ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                disabled={loading || uploadingImages}
+              >
+                <option value="">Sélectionner une catégorie</option>
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {errors.category && (
+                <p className="text-red-600 text-sm flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.category}
+                </p>
+              )}
+            </div>
+
+            {/* Localisation */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Localisation <span className="text-red-500">*</span>
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) => {
+                      setFormData({ ...formData, city: e.target.value });
+                      if (errors.city) {
+                        const newErrors = { ...errors };
+                        delete newErrors.city;
+                        setErrors(newErrors);
+                      }
+                    }}
+                    className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                      errors.city ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
+                    placeholder="Cliquez sur la carte pour sélectionner"
+                    disabled={loading || uploadingImages}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMap(true)}
+                  className="px-3 py-2.5 border border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors"
+                  disabled={loading || uploadingImages}
+                  title="Définir sur la carte"
+                >
+                  <Map className="w-4 h-4" />
+                </button>
+              </div>
+              {errors.city && (
+                <p className="text-red-600 text-sm flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.city}
+                </p>
+              )}
+              <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-3 h-3" />
+                  <span>Coordonnées: {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}</span>
+                </div>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
-              disabled={loading || uploadingImages}
-            >
-              <X className="w-6 h-6" />
-            </button>
+
+            {/* Année */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Année (optionnel)
+              </label>
+              <input
+                type="number"
+                value={formData.year}
+                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                min="50"
+                max="2100"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Année de construction"
+                disabled={loading || uploadingImages}
+              />
+            </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(95vh-120px)]">
-          <div className="p-8 space-y-8">
-            {/* Section 1: Informations de base */}
-            <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                <Tag className="w-5 h-5 text-green-600" />
-                Informations principales
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Titre */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <span className="text-red-500">*</span>
-                    Titre du patrimoine
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => {
-                      setFormData({ ...formData, title: e.target.value });
-                      if (errors.title) {
-                        const newErrors = { ...errors };
-                        delete newErrors.title;
-                        setErrors(newErrors);
-                      }
-                    }}
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${
-                      errors.title ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                    }`}
-                    placeholder="Ex: Cathédrale Notre-Dame"
-                    disabled={loading || uploadingImages}
-                  />
-                  {errors.title && (
-                    <div className="flex items-center gap-1 text-red-600 text-sm">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.title}
+        {/* Modal de la carte - Conservée telle quelle */}
+        {showMap && (
+          <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+              <div className="bg-green-600 px-6 py-4 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Map className="w-5 h-5" />
+                    <div>
+                      <h3 className="font-semibold">Sélectionner l'emplacement</h3>
+                      <p className="text-green-100 text-sm">Cliquez sur la carte pour définir les coordonnées</p>
                     </div>
-                  )}
-                </div>
-
-                {/* Catégorie */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <span className="text-red-500">*</span>
-                    <Tag className="w-4 h-4" />
-                    Catégorie
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => {
-                      setFormData({ ...formData, category: e.target.value });
-                      if (errors.category) {
-                        const newErrors = { ...errors };
-                        delete newErrors.category;
-                        setErrors(newErrors);
-                      }
-                    }}
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                      errors.category ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                    }`}
-                    disabled={loading || uploadingImages}
+                  </div>
+                  <button
+                    onClick={() => setShowMap(false)}
+                    className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
                   >
-                    <option value="">Sélectionner une catégorie</option>
-                    {categoryOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.category && (
-                    <div className="flex items-center gap-1 text-red-600 text-sm">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.category}
-                    </div>
-                  )}
-                </div>
-
-                {/* Localisation */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <span className="text-red-500">*</span>
-                    <MapPin className="w-4 h-4" />
-                    Localisation
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={formData.city}
-                        onChange={(e) => {
-                          setFormData({ ...formData, city: e.target.value });
-                          if (errors.city) {
-                            const newErrors = { ...errors };
-                            delete newErrors.city;
-                            setErrors(newErrors);
-                          }
-                        }}
-                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                          errors.city ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                        }`}
-                        placeholder="Cliquez sur la carte pour sélectionner"
-                        disabled={loading || uploadingImages}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowMap(true)}
-                      className="px-4 py-3 border border-gray-300 rounded-xl hover:border-green-500 hover:bg-green-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={loading || uploadingImages}
-                      title="Définir sur la carte"
-                    >
-                      <Map className="w-5 h-5" />
-                    </button>
-                  </div>
-                  {errors.city && (
-                    <div className="flex items-center gap-1 text-red-500 text-sm">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.city}
-                    </div>
-                  )}
-                  <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3 h-3" />
-                      <span>Coordonnées: {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Année */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                    <Calendar className="w-4 h-4" />
-                    Année (optionnel)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.year}
-                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                    min="50"
-                    max="2100"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Année de construction ou inscription"
-                    disabled={loading || uploadingImages}
-                  />
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Modal de la carte */}
-            {showMap && (
-              <div className="fixed inset-0 bg-black bg-opacity-70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-                  <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4 text-white">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Map className="w-6 h-6" />
-                        <div>
-                          <h3 className="text-xl font-bold">Sélectionner l'emplacement sur la carte</h3>
-                          <p className="text-green-100 text-sm">Cliquez sur la carte pour définir les coordonnées</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowMap(false)}
-                        className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                      >
-                        <X className="w-6 h-6" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6 space-y-4">
-                    {/* Barre de recherche */}
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          value={formData.city}
-                          onChange={(e) => setFormData({...formData, city: e.target.value})}
-                          placeholder="Rechercher une adresse..."
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          onKeyPress={(e) => e.key === 'Enter' && handleSearchLocation()}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleSearchLocation}
-                        className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors flex items-center gap-2"
-                      >
-                        <MapPin className="w-4 h-4" />
-                        Rechercher
-                      </button>
-                      <button
-                        type="button"
-                        onClick={getCurrentLocation}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2"
-                        disabled={loading}
-                      >
-                        <MapPin className="w-4 h-4" />
-                        {loading ? "Chargement..." : "Ma position"}
-                      </button>
-                    </div>
-
-                    {/* Carte */}
-                    <div className="h-[400px] rounded-xl overflow-hidden border-2 border-gray-300">
-                      <MapContainer
-                        center={[location.lat, location.lng]}
-                        zoom={13}
-                        style={{ height: "100%", width: "100%" }}
-                        ref={mapRef}
-                      >
-                        <TileLayer
-                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        />
-                        <Marker position={[location.lat, location.lng]} />
-                        <MapClickHandler onLocationSelect={handleLocationSelect} />
-                      </MapContainer>
-                    </div>
-
-                    {/* Informations sélectionnées */}
-                    <div className="bg-gray-50 p-4 rounded-xl">
-                      <h4 className="font-medium text-gray-700 mb-2">Informations sélectionnées</h4>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-sm text-gray-600 mb-1">Adresse/Localisation</label>
-                          <div className="bg-white p-3 rounded-lg border border-gray-300 min-h-[48px]">
-                            {formData.city || "Non défini"}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm text-gray-600 mb-1">Latitude</label>
-                            <div className="bg-white p-3 rounded-lg border border-gray-300 font-mono">
-                              {formData.lat.toFixed(6)}
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-sm text-gray-600 mb-1">Longitude</label>
-                            <div className="bg-white p-3 rounded-lg border border-gray-300 font-mono">
-                              {formData.lng.toFixed(6)}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Boutons */}
-                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                      <button
-                        type="button"
-                        onClick={() => setShowMap(false)}
-                        className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                      >
-                        Annuler
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!formData.city.trim()) {
-                            toast.error("Veuillez cliquer sur la carte pour définir une localisation");
-                            return;
-                          }
-                          toast.success("Localisation enregistrée !");
-                          setShowMap(false);
-                        }}
-                        className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium"
-                      >
-                        Valider la localisation
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Section 2: Description */}
-            <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-green-600" />
-                Description détaillée
-              </h3>
               
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <span className="text-red-500">*</span>
-                  Description complète
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => {
-                    setFormData({ ...formData, description: e.target.value });
-                    if (errors.description) {
-                      const newErrors = { ...errors };
-                      delete newErrors.description;
-                      setErrors(newErrors);
-                    }
-                  }}
-                  rows={6}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${
-                    errors.description ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                  placeholder="Décrivez le patrimoine, son histoire, son importance culturelle, son architecture..."
-                  disabled={loading || uploadingImages}
-                />
-                {errors.description && (
-                  <div className="flex items-center gap-1 text-red-600 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.description}
-                  </div>
-                )}
-                <div className="text-xs text-gray-500 mt-1 flex justify-between">
-                  <span>{formData.description.length} caractères</span>
-                  <span className={formData.description.length < 20 ? "text-red-500" : "text-green-500"}>
-                    Minimum 20 caractères
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 3: Images */}
-            <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-green-600" />
-                  Galerie d'images ({imagePreviews.length}/10)
-                  {uploadingImages && (
-                    <span className="text-sm font-normal text-green-600 ml-2">
-                      <Loader2 className="w-4 h-4 animate-spin inline mr-1" />
-                      Upload en cours...
-                    </span>
-                  )}
-                </h3>
+              <div className="p-6 space-y-4">
                 <div className="flex gap-2">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => setFormData({...formData, city: e.target.value})}
+                      placeholder="Rechercher une adresse..."
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      onKeyPress={(e) => e.key === 'Enter' && handleSearchLocation()}
+                    />
+                  </div>
                   <button
                     type="button"
-                    onClick={triggerFileInput}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={imagePreviews.length >= 10 || loading || uploadingImages}
+                    onClick={handleSearchLocation}
+                    className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
                   >
-                    <Upload className="w-4 h-4" />
-                    Ajouter des images
+                    <MapPin className="w-4 h-4" />
+                    Rechercher
                   </button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    multiple
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    disabled={loading || uploadingImages}
-                  />
+                  <button
+                    type="button"
+                    onClick={getCurrentLocation}
+                    className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    disabled={loading}
+                  >
+                    <MapPin className="w-4 h-4" />
+                    {loading ? "Chargement..." : "Position"}
+                  </button>
                 </div>
-              </div>
 
-              {/* Images grid */}
-              {imagePreviews.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                  {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative group">
-                      <div 
-                        className="aspect-square overflow-hidden rounded-lg border-2 border-gray-300 group-hover:border-green-500 transition-colors cursor-pointer"
-                        onClick={() => setSelectedPreview(preview)}
-                      >
-                        <img
-                          src={preview}
-                          alt={`Image ${index + 1}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedPreview(preview)}
-                            className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-                            title="Voir en grand"
-                          >
-                            <Eye className="w-3 h-3" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(index)}
-                            className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                            title="Supprimer"
-                            disabled={loading || uploadingImages}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                        {index + 1}
+                <div className="h-[300px] rounded-lg overflow-hidden border border-gray-300">
+                  <MapContainer
+                    center={[location.lat, location.lng]}
+                    zoom={13}
+                    style={{ height: "100%", width: "100%" }}
+                    ref={mapRef}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    <Marker position={[location.lat, location.lng]} />
+                    <MapClickHandler onLocationSelect={handleLocationSelect} />
+                  </MapContainer>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-700 mb-2">Informations sélectionnées</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Adresse</label>
+                      <div className="bg-white p-2.5 rounded border border-gray-300 min-h-[42px]">
+                        {formData.city || "Non défini"}
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-xl mb-4">
-                  <ImageIcon className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                  <p className="text-gray-500 mb-2">Aucune image importée</p>
-                  <p className="text-sm text-gray-400">Cliquez sur "Ajouter des images" pour commencer</p>
-                </div>
-              )}
-
-              {errors.images && (
-                <div className="flex items-center gap-1 text-red-600 text-sm mb-4">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.images}
-                </div>
-              )}
-
-              <div className="text-xs text-gray-500">
-                Formats acceptés: JPG, PNG, WebP, GIF, SVG • Max 10MB par image • Max 10 images
-              </div>
-            </div>
-
-            {/* Modal de preview d'image */}
-            {selectedPreview && (
-              <div className="fixed inset-0 bg-black bg-opacity-90 z-[70] flex items-center justify-center p-4">
-                <div className="relative max-w-4xl max-h-[90vh]">
-                  <button
-                    onClick={() => setSelectedPreview(null)}
-                    className="absolute -top-10 right-0 p-2 text-white hover:text-gray-300"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                  <img
-                    src={selectedPreview}
-                    alt="Preview"
-                    className="max-w-full max-h-[80vh] object-contain rounded-lg"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Section 4: Options */}
-            <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                <Star className="w-5 h-5 text-green-600" />
-                Options et paramètres
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Note */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Note (1-5)
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="1"
-                      max="5"
-                      step="0.1"
-                      value={formData.rating}
-                      onChange={(e) => setFormData({...formData, rating: parseFloat(e.target.value)})}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={loading || uploadingImages}
-                    />
-                    <div className="flex items-center gap-1.5 min-w-[80px]">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-bold text-lg">{formData.rating.toFixed(1)}</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">Latitude</label>
+                        <div className="bg-white p-2.5 rounded border border-gray-300 font-mono text-sm">
+                          {formData.lat.toFixed(6)}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">Longitude</label>
+                        <div className="bg-white p-2.5 rounded border border-gray-300 font-mono text-sm">
+                          {formData.lng.toFixed(6)}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Nombre d'avis */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nombre d'avis
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.reviewCount}
-                    onChange={(e) => setFormData({...formData, reviewCount: parseInt(e.target.value) || 0})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    disabled={loading || uploadingImages}
-                  />
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => setShowMap(false)}
+                    className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!formData.city.trim()) {
+                        toast.error("Veuillez cliquer sur la carte pour définir une localisation");
+                        return;
+                      }
+                      toast.success("Localisation enregistrée !");
+                      setShowMap(false);
+                    }}
+                    className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Valider
+                  </button>
                 </div>
-              
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section 2: Description */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+          <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-green-600" />
+            Description
+          </h3>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              Description <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => {
+                setFormData({ ...formData, description: e.target.value });
+                if (errors.description) {
+                  const newErrors = { ...errors };
+                  delete newErrors.description;
+                  setErrors(newErrors);
+                }
+              }}
+              rows={4}
+              className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${
+                errors.description ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+              placeholder="Décrivez le patrimoine, son histoire, son importance..."
+              disabled={loading || uploadingImages}
+            />
+            {errors.description && (
+              <p className="text-red-600 text-sm flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.description}
+              </p>
+            )}
+            <div className="text-xs text-gray-500 flex justify-between">
+              <span>{formData.description.length} caractères</span>
+              <span className={formData.description.length < 20 ? "text-red-500" : "text-green-500"}>
+                Minimum 20 caractères
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Images */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-green-600" />
+              Galerie d'images ({imagePreviews.length}/10)
+              {uploadingImages && (
+                <span className="text-sm font-normal text-green-600 ml-2">
+                  <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
+                  Upload...
+                </span>
+              )}
+            </h3>
+            <button
+              type="button"
+              onClick={triggerFileInput}
+              className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              disabled={imagePreviews.length >= 10 || loading || uploadingImages}
+            >
+              <Upload className="w-4 h-4" />
+              Ajouter
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              multiple
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+              disabled={loading || uploadingImages}
+            />
+          </div>
+
+          {/* Images grid */}
+          {imagePreviews.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative group">
+                  <div 
+                    className="aspect-square overflow-hidden rounded-md border border-gray-300 group-hover:border-green-500 transition-colors cursor-pointer"
+                    onClick={() => setSelectedPreview(preview)}
+                  >
+                    <img
+                      src={preview}
+                      alt={`Image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPreview(preview)}
+                      className="p-1 bg-black/70 text-white rounded hover:bg-black/90"
+                    >
+                      <Eye className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      disabled={loading || uploadingImages}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="absolute top-1 left-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+                    {index + 1}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6 border border-dashed border-gray-300 rounded-lg mb-3">
+              <ImageIcon className="w-10 h-10 mx-auto text-gray-400 mb-2" />
+              <p className="text-gray-500 text-sm">Aucune image importée</p>
+            </div>
+          )}
+
+          {errors.images && (
+            <p className="text-red-600 text-sm flex items-center gap-1 mb-2">
+              <AlertCircle className="w-3 h-3" />
+              {errors.images}
+            </p>
+          )}
+
+          <div className="text-xs text-gray-500">
+            Formats: JPG, PNG, WebP, GIF, SVG • Max 10MB • Max 10 images
+          </div>
+        </div>
+
+        {/* Modal de preview d'image */}
+        {selectedPreview && (
+          <div className="fixed inset-0 bg-black/90 z-[70] flex items-center justify-center p-4">
+            <div className="relative">
+              <button
+                onClick={() => setSelectedPreview(null)}
+                className="absolute -top-8 right-0 p-1 text-white hover:text-gray-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <img
+                src={selectedPreview}
+                alt="Preview"
+                className="max-w-full max-h-[80vh] object-contain rounded"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Section 4: Options */}
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+          <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Star className="w-4 h-4 text-green-600" />
+            Options
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Note (1-5)
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={formData.rating}
+                  onChange={(e) => setFormData({...formData, rating: parseFloat(e.target.value)})}
+                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-green-600"
+                  disabled={loading || uploadingImages}
+                />
+                <div className="flex items-center gap-1 min-w-[60px]">
+                  <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                  <span className="font-bold">{formData.rating.toFixed(1)}</span>
+                </div>
               </div>
             </div>
 
-            {/* Boutons d'action */}
-            <div className="flex justify-end gap-4 pt-8 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={onClose}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Nombre d'avis
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.reviewCount}
+                onChange={(e) => setFormData({...formData, reviewCount: parseInt(e.target.value) || 0})}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 disabled={loading || uploadingImages}
-                className="px-8 py-3.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={loading || uploadingImages}
-                className="px-8 py-3.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-medium hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Enregistrement...
-                  </>
-                ) : uploadingImages ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Upload des images...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-5 h-5" />
-                    {editingItem ? "Mettre à jour" : "Créer le patrimoine"}
-                  </>
-                )}
-              </button>
+              />
             </div>
           </div>
-        </form>
+        </div>
+
+        {/* Boutons d'action */}
+        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={loading || uploadingImages}
+            className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading || uploadingImages}
+            className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Enregistrement...
+              </>
+            ) : uploadingImages ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Upload...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="w-4 h-4" />
+                {editingItem ? "Mettre à jour" : "Créer"}
+              </>
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
+  </div>
+</div>
   );
 }
