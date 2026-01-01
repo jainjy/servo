@@ -243,6 +243,10 @@ import PodcastsComponent from "./components/components/PodcastsInspirer";
 import VideosComponent from "./components/components/VideosInspirer";
 import PortraitsLocaux from "./components/components/PortraitLocaux";
 import BonsPlansConseils from "./components/components/BonPlanConseils";
+import OeuvrePages from "./pages/ArtEtCreation/OeuvrePages";
+import ConseilsAdminPage from "./pages/ConseilsAdminPanel";
+
+
 import PortraitsAdmin from "./pages/admin/PortraitsAdmin";
 import EventsDiscoveriesPro from "./components/pro/Evenement&Decouverte/EventsDiscoveriesPro";
 
@@ -945,6 +949,7 @@ const App = () => {
                     <Route path="conseil" element={<AdminConseilPage />} />
                     <Route path="rendezvous" element={<RendezVous />} />
                     <Route path="media" element={<AdminMedia />} />
+                    <Route path="conseils" element={<ConseilsAdminPage />} />
                     <Route
                       path="demandeDroitFamille"
                       element={<DemandeDroitFamille />}
@@ -1014,6 +1019,11 @@ const App = () => {
                     element={<SculpturePage onContactClick={undefined} />}
                   />
                   <Route path="/peinture" element={<PeinturePage />} />
+
+                  <Route
+                    path="/oeuvres/:professionalId"
+                    element={<OeuvrePages />}
+                  />
                   {/* <Route path="/artisanat" element={<ArtisanatPage />} />*/}
                   <Route
                     path="/marketplace-createurs"

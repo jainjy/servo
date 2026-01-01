@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import api from "../../lib/api";
+import api, { portraitsAPI } from "../../lib/api";
 
 const PortraitsAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,19 +40,22 @@ const PortraitsAdmin = () => {
     isActive: true,
   });
 
+  // Nouveaux états pour les fichiers
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadedAudio, setUploadedAudio] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const queryClient = useQueryClient();
 
   // Récupérer les portraits
   const { data: portraitsData, isLoading } = useQuery({
     queryKey: ["adminPortraits", page, limit, searchTerm],
     queryFn: async () => {
-      const response = await api.get("/portraits", {
-        params: {
-          page,
-          limit,
-          search: searchTerm || undefined,
-          isActive: undefined, // Récupérer tous, même inactifs
-        },
+      const response = await portraitsAPI.getAll({
+        page,
+        limit,
+        search: searchTerm || undefined,
+        isActive: undefined, // Récupérer tous, même inactifs
       });
       return response.data;
     },
@@ -62,16 +65,15 @@ const PortraitsAdmin = () => {
   const { data: statsData } = useQuery({
     queryKey: ["portraitStats"],
     queryFn: async () => {
-      const response = await api.get("/portraits/stats");
+      const response = await portraitsAPI.getStats();
       return response.data.data;
     },
   });
 
   // Mutation pour créer un portrait
   const createMutation = useMutation({
-    mutationFn: async (data) => {
-      const response = await api.post("/portraits", data);
-      return response.data;
+    mutationFn: async ({ data, files }) => {
+      return await portraitsAPI.create(data, files);
     },
     onSuccess: () => {
       toast.success("Portrait créé avec succès");
@@ -86,9 +88,8 @@ const PortraitsAdmin = () => {
 
   // Mutation pour mettre à jour un portrait
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }) => {
-      const response = await api.put(`/portraits/${id}`, data);
-      return response.data;
+    mutationFn: async ({ id, data, files }) => {
+      return await portraitsAPI.update(id, data, files);
     },
     onSuccess: () => {
       toast.success("Portrait mis à jour avec succès");
@@ -106,8 +107,7 @@ const PortraitsAdmin = () => {
   // Mutation pour supprimer un portrait
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const response = await api.delete(`/portraits/${id}`);
-      return response.data;
+      return await portraitsAPI.delete(id);
     },
     onSuccess: () => {
       toast.success("Portrait supprimé avec succès");
@@ -153,6 +153,8 @@ const PortraitsAdmin = () => {
       region: "",
       isActive: true,
     });
+    setUploadedImages([]);
+    setUploadedAudio(null);
   };
 
   const handleEdit = (portrait) => {
@@ -185,6 +187,8 @@ const PortraitsAdmin = () => {
       region: portrait.region || "",
       isActive: portrait.isActive !== false,
     });
+    setUploadedImages([]);
+    setUploadedAudio(null);
     setIsEditModalOpen(true);
   };
 
@@ -218,22 +222,73 @@ const PortraitsAdmin = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Gérer l'upload des images
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setUploadedImages((prev) => [...prev, ...files]);
+  };
 
-    // Préparer les données
-    const data = {
-      ...formData,
-      age: parseInt(formData.age),
-      latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-      longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-      featured: formData.featured === true || formData.featured === "true",
-    };
+  const removeUploadedImage = (index) => {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
-    if (selectedPortrait) {
-      updateMutation.mutate({ id: selectedPortrait.id, data });
+  // Gérer l'upload de l'audio
+  const handleAudioUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("audio/")) {
+      setUploadedAudio(file);
     } else {
-      createMutation.mutate(data);
+      toast.error("Veuillez sélectionner un fichier audio valide");
+    }
+  };
+
+  const removeUploadedAudio = () => {
+    setUploadedAudio(null);
+    setFormData((prev) => ({ ...prev, interviewAudioUrl: "" }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsUploading(true);
+
+    try {
+      // Préparer les données
+      const data = {
+        ...formData,
+        age: parseInt(formData.age),
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+        featured: formData.featured === true || formData.featured === "true",
+        // Inclure les URLs existantes si en mode édition
+        existingImages: selectedPortrait ? formData.images : [],
+        existingAudioUrl: selectedPortrait ? formData.interviewAudioUrl : "",
+      };
+
+      // Préparer les fichiers
+      const files = {};
+      if (uploadedImages.length > 0) {
+        files.images = uploadedImages;
+      }
+      if (uploadedAudio) {
+        files.interviewAudio = uploadedAudio;
+      }
+
+      if (selectedPortrait) {
+        await updateMutation.mutateAsync({
+          id: selectedPortrait.id,
+          data,
+          files: Object.keys(files).length > 0 ? files : null,
+        });
+      } else {
+        await createMutation.mutateAsync({
+          data,
+          files: Object.keys(files).length > 0 ? files : null,
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting portrait:", error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -573,6 +628,7 @@ const PortraitsAdmin = () => {
                     setIsEditModalOpen(false);
                     setIsCreateModalOpen(false);
                     setSelectedPortrait(null);
+                    resetForm();
                   }}
                   className="text-gray-400 hover:text-gray-500"
                 >
@@ -626,6 +682,8 @@ const PortraitsAdmin = () => {
                           onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                           required
+                          min="0"
+                          max="120"
                         />
                       </div>
                       <div>
@@ -788,18 +846,112 @@ const PortraitsAdmin = () => {
                       </div>
                     </div>
 
+                    {/* Upload des images */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Images (URLs séparées par des virgules)
+                        Images
                       </label>
-                      <textarea
-                        value={formData.images.join(", ")}
-                        onChange={(e) =>
-                          handleArrayChange("images", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        rows={3}
-                      />
+                      <div className="space-y-4">
+                        {/* Images existantes */}
+                        {formData.images.length > 0 && (
+                          <div>
+                            <p className="text-sm text-gray-600 mb-2">
+                              Images existantes :
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {formData.images.map((image, index) => (
+                                <div key={index} className="relative">
+                                  <img
+                                    src={image}
+                                    alt={`Image ${index + 1}`}
+                                    className="w-20 h-20 object-cover rounded"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newImages = [...formData.images];
+                                      newImages.splice(index, 1);
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        images: newImages,
+                                      }));
+                                    }}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Nouvelles images uploadées */}
+                        {uploadedImages.length > 0 && (
+                          <div>
+                            <p className="text-sm text-gray-600 mb-2">
+                              Nouvelles images :
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {uploadedImages.map((file, index) => (
+                                <div key={index} className="relative">
+                                  <img
+                                    src={URL.createObjectURL(file)}
+                                    alt={`Upload ${index + 1}`}
+                                    className="w-20 h-20 object-cover rounded"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeUploadedImage(index)}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                                  >
+                                    ×
+                                  </button>
+                                  <p className="text-xs text-gray-500 truncate w-20">
+                                    {file.name}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Bouton d'upload */}
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                          <input
+                            type="file"
+                            id="imageUpload"
+                            multiple
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                          <label
+                            htmlFor="imageUpload"
+                            className="cursor-pointer flex flex-col items-center"
+                          >
+                            <svg
+                              className="w-8 h-8 text-gray-400 mb-2"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                            <span className="text-sm text-gray-600">
+                              Cliquez pour ajouter des images
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              PNG, JPG, JPEG (max 5MB par image)
+                            </span>
+                          </label>
+                        </div>
+                      </div>
                     </div>
 
                     <div>
@@ -856,17 +1008,104 @@ const PortraitsAdmin = () => {
                     </h3>
 
                     <div className="space-y-4">
+                      {/* Audio existant */}
+                      {formData.interviewAudioUrl && (
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">
+                            Audio existant :
+                          </p>
+                          <div className="flex items-center gap-2 bg-gray-50 p-3 rounded">
+                            <svg
+                              className="w-6 h-6 text-gray-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                              />
+                            </svg>
+                            <span className="text-sm text-gray-700 truncate">
+                              Interview audio
+                            </span>
+                            <button
+                              type="button"
+                              onClick={removeUploadedAudio}
+                              className="ml-auto text-red-500 hover:text-red-700"
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Audio uploadé */}
+                      {uploadedAudio && (
+                        <div>
+                          <p className="text-sm text-gray-600 mb-2">
+                            Nouvel audio :
+                          </p>
+                          <div className="flex items-center gap-2 bg-gray-50 p-3 rounded">
+                            <svg
+                              className="w-6 h-6 text-gray-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                              />
+                            </svg>
+                            <span className="text-sm text-gray-700 truncate">
+                              {uploadedAudio.name}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={removeUploadedAudio}
+                              className="ml-auto text-red-500 hover:text-red-700"
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bouton d'upload audio */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          URL de l'audio
-                        </label>
                         <input
-                          type="url"
-                          name="interviewAudioUrl"
-                          value={formData.interviewAudioUrl}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                          type="file"
+                          id="audioUpload"
+                          accept="audio/*"
+                          onChange={handleAudioUpload}
+                          className="hidden"
                         />
+                        <label
+                          htmlFor="audioUpload"
+                          className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                          <svg
+                            className="w-5 h-5 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                            />
+                          </svg>
+                          {formData.interviewAudioUrl || uploadedAudio
+                            ? "Remplacer l'audio"
+                            : "Ajouter un audio d'interview"}
+                        </label>
                       </div>
 
                       <div>
@@ -956,6 +1195,50 @@ const PortraitsAdmin = () => {
                           />
                         </div>
                       </div>
+
+                      {/* Coordonnées géographiques */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Latitude
+                          </label>
+                          <input
+                            type="text"
+                            name="latitude"
+                            value={formData.latitude}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            placeholder="-21.1151"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Longitude
+                          </label>
+                          <input
+                            type="text"
+                            name="longitude"
+                            value={formData.longitude}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            placeholder="55.5364"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Région
+                        </label>
+                        <input
+                          type="text"
+                          name="region"
+                          value={formData.region}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                          placeholder="Sud, Est, Ouest, Nord"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -968,6 +1251,7 @@ const PortraitsAdmin = () => {
                       setIsEditModalOpen(false);
                       setIsCreateModalOpen(false);
                       setSelectedPortrait(null);
+                      resetForm();
                     }}
                     className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                   >
@@ -976,11 +1260,36 @@ const PortraitsAdmin = () => {
                   <button
                     type="submit"
                     disabled={
-                      createMutation.isLoading || updateMutation.isLoading
+                      isUploading ||
+                      createMutation.isLoading ||
+                      updateMutation.isLoading
                     }
                     className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {createMutation.isLoading || updateMutation.isLoading ? (
+                    {isUploading ? (
+                      <span className="flex items-center">
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        Upload en cours...
+                      </span>
+                    ) : createMutation.isLoading || updateMutation.isLoading ? (
                       <span className="flex items-center">
                         <svg
                           className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

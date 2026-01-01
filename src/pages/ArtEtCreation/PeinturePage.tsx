@@ -24,7 +24,8 @@ import {
   AlertCircle,
   RefreshCw,
   ChevronLeft,
-  Briefcase
+  Briefcase,
+  ImageIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
@@ -57,28 +58,22 @@ interface Professional {
 }
 
 interface PeinturePageProps {
-  searchQuery?: string;
   onContactClick?: (subject: string, recipientName?: string) => void;
 }
 
-const PeinturePage: React.FC<PeinturePageProps> = ({ searchQuery, onContactClick }) => {
-  const [showPaintingDetail, setShowPaintingDetail] = useState(false);
-  const [selectedPainting, setSelectedPainting] = useState(null);
-  const [showAllPaintings, setShowAllPaintings] = useState(false);
-  const [showAllArtists, setShowAllArtists] = useState(false);
-  const [likedPaintings, setLikedPaintings] = useState([]);
-  const [selectedStyle, setSelectedStyle] = useState(null);
-  
+const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
   // États pour l'API
   const [loading, setLoading] = useState(true);
   const [painters, setPainters] = useState<Professional[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [cityFilter, setCityFilter] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isCategoryPage, setIsCategoryPage] = useState(false);
   
   const navigate = useNavigate();
 
-  // Types de peinture avec keywords pour le filtrage
+  // Types de peinture
   const paintingStyles = [
     { 
       id: 1, 
@@ -130,7 +125,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ searchQuery, onContactClick
     },
   ];
 
-  // Fonction pour récupérer les peintres depuis l'API
+  // Fonction pour récupérer les peintres
   const fetchPainters = useCallback(async () => {
     console.log('📡 Fetching painters...');
     setLoading(true);
@@ -173,7 +168,30 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ searchQuery, onContactClick
     }
   }, [searchTerm, cityFilter]);
 
-  // Fonction pour compter les peintres par catégorie
+  // Filtrer les peintres par catégorie
+  const filterPaintersByCategory = useCallback((categorySlug: string): Professional[] => {
+    if (categorySlug === 'all') return painters;
+    
+    const category = paintingStyles.find(cat => cat.slug === categorySlug);
+    if (!category) return painters;
+    
+    return painters.filter(painter => {
+      const hasMatchingMetier = painter.metiers?.some(metier => 
+        category.keywords.some(keyword => 
+          metier.name.toLowerCase().includes(keyword.toLowerCase())
+        )
+      );
+      
+      const hasMatchingSpecialty = painter.specialty && 
+        category.keywords.some(keyword => 
+          painter.specialty.toLowerCase().includes(keyword.toLowerCase())
+        );
+      
+      return hasMatchingMetier || hasMatchingSpecialty;
+    });
+  }, [painters]);
+
+  // Compter les peintres par catégorie
   const countPaintersByCategory = useCallback((categorySlug: string): number => {
     if (categorySlug === 'all') return painters.length;
     
@@ -196,67 +214,66 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ searchQuery, onContactClick
     }).length;
   }, [painters]);
 
-  // Fonction pour explorer un style
-  const handleExploreStyle = useCallback((style) => {
-    setSelectedStyle(style);
-    // Filtrer les peintres par style
-    const filteredPainters = painters.filter(painter => {
-      const hasMatchingMetier = painter.metiers?.some(metier => 
-        style.keywords.some(keyword => 
-          metier.name.toLowerCase().includes(keyword.toLowerCase())
-        )
-      );
-      
-      const hasMatchingSpecialty = painter.specialty && 
-        style.keywords.some(keyword => 
-          painter.specialty.toLowerCase().includes(keyword.toLowerCase())
-        );
-      
-      return hasMatchingMetier || hasMatchingSpecialty;
-    });
-    
-    // Scroll vers la section des artistes
-    setTimeout(() => {
-      document.getElementById('artists-section')?.scrollIntoView({ 
-        behavior: 'smooth' 
-      });
-    }, 100);
-  }, [painters]);
-
-  // Fonction pour recharger les données
+  // Recharger les données
   const handleRetry = useCallback(() => {
     console.log('🔄 Retry loading data');
     setError(null);
     fetchPainters();
   }, [fetchPainters]);
 
-  // Fonction pour voir le profil
-  const handleViewProfile = useCallback((id: string) => {
-    navigate(`/professional/${id}`);
+  // Gestion du clic sur une catégorie — afficher les pros en place
+  const handleCategoryClick = useCallback((categorySlug: string) => {
+    console.log('🎯 Category clicked (in-place):', categorySlug);
+
+    // Définir la catégorie sélectionnée et afficher la vue catégorie
+    setSelectedCategory(categorySlug);
+    setIsCategoryPage(true);
+
+    // Si les peintres sont déjà chargés
+    if (painters.length > 0) {
+      console.log(`🔍 Filtering ${painters.length} painters for category: ${categorySlug}`);
+    } else {
+      fetchPainters();
+    }
+  }, [painters, fetchPainters]);
+
+  // Gestion du clic "Retour à tous les peintres"
+  const handleViewAll = useCallback(() => {
+    console.log('🔙 Back to all painters (in-place)');
+    setSelectedCategory(null);
+    setIsCategoryPage(false);
+  }, []);
+
+  // Voir tous les peintres (sans filtres)
+  const handleViewAllPainters = useCallback(() => {
+    setSelectedCategory('all');
+    setIsCategoryPage(true);
+  }, []);
+
+  // Voir le profil (clic sur la carte)
+  const handleViewProfile = useCallback((painter: Professional) => {
+    navigate(`/professional/${painter.id}`, {
+      state: {
+        professional: painter,
+        name: painter.name,
+        specialty: painter.specialty,
+        city: painter.city,
+        rating: painter.rating,
+        avatar: painter.avatar,
+        metiers: painter.metiers,
+        bio: painter.bio
+      },
+    });
   }, [navigate]);
 
-  // Fonction pour liker une peinture (fonctionnalité frontend seulement)
-  const handleLikePainting = (paintingId) => {
-    if (likedPaintings.includes(paintingId)) {
-      setLikedPaintings(likedPaintings.filter(id => id !== paintingId));
-    } else {
-      setLikedPaintings([...likedPaintings, paintingId]);
-    }
-  };
-
-  // Fonction pour partager une peinture
-  const handleSharePainting = (painting) => {
-    if (navigator.share) {
-      navigator.share({
-        title: painting.title,
-        text: painting.description || `Découvrez "${painting.title}" par ${painting.artist}`,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Lien copié dans le presse-papier !');
-    }
-  };
+  // Voir les œuvres
+  const handleViewArtworks = useCallback((painter: Professional) => {
+    navigate(`/oeuvres/${painter.id}`, {
+      state: {
+        professionalName: painter.name,
+      },
+    });
+  }, [navigate]);
 
   // Appel initial
   useEffect(() => {
@@ -273,196 +290,250 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ searchQuery, onContactClick
     return () => clearTimeout(timeoutId);
   }, [searchTerm, cityFilter, fetchPainters]);
 
-  // Déterminer quel peintres afficher
-  const displayedPainters = showAllArtists ? painters : painters.slice(0, 3);
+  // Déterminer quelle liste de peintres afficher
+  const paintersToDisplay = isCategoryPage 
+    ? (selectedCategory === 'all' ? painters : filterPaintersByCategory(selectedCategory || ''))
+    : painters.slice(0, 6);
+
+  // Déterminer le titre
+  const displayTitle = isCategoryPage 
+    ? (selectedCategory === 'all' 
+        ? 'Tous les peintres' 
+        : `Peintres ${paintingStyles.find(c => c.slug === selectedCategory)?.name.toLowerCase()}`)
+    : 'Nos Peintres';
 
   return (
-    <div>
-      {/* Erreur */}
-      {error && (
-        <div className="mb-6 p-4 rounded-md border border-red-300 bg-red-50">
-          <div className="flex items-center">
-            <AlertCircle className="mr-2 text-red-600" />
-            <p className="text-red-600 flex-1">{error}</p>
-            <button 
-              onClick={handleRetry}
-              className="ml-4 flex items-center px-3 py-2 rounded-md text-sm bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors"
+    <div className="min-h-screen bg-[#FFFFFF]">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold text-[#8B4513] mb-2 flex items-center">
+            <Palette className="mr-3" size={28} />
+            Peinture
+          </h1>
+          <div className="h-1 w-20 bg-[#8B4513] rounded-full"></div>
+        </div>
+
+        {/* Erreur */}
+        {error && (
+          <div className="mb-6 p-4 rounded-md border border-red-300 bg-red-50">
+            <div className="flex items-center">
+              <AlertCircle className="mr-2 text-red-600" />
+              <p className="text-red-600 flex-1">{error}</p>
+              <button 
+                onClick={handleRetry}
+                className="ml-4 flex items-center px-3 py-2 rounded-md text-sm bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors"
+              >
+                <RefreshCw size={14} className="mr-1" />
+                Réessayer
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Styles et techniques - TOUJOURS affichés */}
+        {!isCategoryPage && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Palette size={24} className="mr-2 text-[#8B4513]" />
+                <h2 className="text-2xl font-bold text-[#8B4513]">
+                  Styles et techniques
+                </h2>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {paintingStyles.map((style) => (
+                <div
+                  key={style.id}
+                  className="text-center group cursor-pointer"
+                  onClick={() => handleCategoryClick(style.slug)}
+                >
+                  <div
+                    className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform border-4 hover:border-[#556B2F]"
+                    style={{ 
+                      backgroundColor: style.color,
+                      borderColor: selectedCategory === style.slug ? '#556B2F' : 'transparent'
+                    }}
+                  >
+                    {countPaintersByCategory(style.slug)}+
+                  </div>
+                  <h3 className="font-semibold mb-1">{style.name}</h3>
+                  <p className="text-sm text-gray-600">{countPaintersByCategory(style.slug)} artistes</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recherche et filtres */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder={isCategoryPage 
+                    ? `Rechercher dans ${selectedCategory === 'all' ? 'tous les peintres' : paintingStyles.find(c => c.slug === selectedCategory)?.name}...`
+                    : "Rechercher un peintre..."
+                  }
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F]"
+                />
+              </div>
+            </div>
+            <div className="md:w-64">
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Ville, code postal..."
+                  value={cityFilter}
+                  onChange={(e) => setCityFilter(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F]"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bouton retour si on est sur une page de catégorie */}
+        {isCategoryPage && (
+          <div className="mb-6">
+            <button
+              onClick={handleViewAll}
+              className="flex items-center px-4 py-2 rounded-md border border-[#556B2F] text-[#556B2F] font-medium hover:bg-gray-50 transition-colors"
             >
-              <RefreshCw size={14} className="mr-1" />
-              Réessayer
+              <Users size={18} className="mr-2" />
+              Voir tous les peintres
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Recherche et filtres */}
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Rechercher un peintre..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F]"
-              />
+        {/* Peintres */}
+        <div className="mb-12" id="artists-section">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center">
+              {!isCategoryPage && (
+                <>
+                  <Award size={24} className="mr-2 text-[#8B4513]" />
+                  <h2 className="text-2xl font-bold text-[#8B4513]">
+                    {displayTitle}
+                  </h2>
+                </>
+              )}
+              {loading && (
+                <div className="ml-4 flex items-center text-gray-500">
+                  <RefreshCw size={16} className="animate-spin mr-2" />
+                  <span className="text-sm">Chargement...</span>
+                </div>
+              )}
             </div>
-          </div>
-          <div className="md:w-64">
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Ville, code postal..."
-                value={cityFilter}
-                onChange={(e) => setCityFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F]"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Painting Styles */}
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-            Styles et techniques
-          </h2>
-          <button 
-            onClick={() => setSelectedStyle(null)}
-            className="text-sm font-medium hover:underline"
-            style={{ color: '#556B2F' }}
-          >
-            Tout voir
-          </button>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {paintingStyles.map((style) => (
-            <div
-              key={style.id}
-              className="text-center group cursor-pointer"
-              onClick={() => handleExploreStyle(style)}
-            >
-              <div
-                className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform border-4 hover:border-[#556B2F]"
-                style={{ 
-                  backgroundColor: style.color,
-                  borderColor: selectedStyle?.id === style.id ? '#556B2F' : 'transparent'
-                }}
-              >
-                {countPaintersByCategory(style.slug)}+
-              </div>
-              <h3 className="font-semibold mb-1">{style.name}</h3>
-              <p className="text-sm text-gray-600">{countPaintersByCategory(style.slug)} artistes</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Featured Paintings */}
-      <div className="mb-12">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-            Œuvres du moment
-          </h2>
-          <button 
-            onClick={() => setShowAllPaintings(!showAllPaintings)}
-            className="flex items-center px-4 py-2 rounded-md border font-medium hover:bg-[#556B2F] hover:text-white transition-colors"
-            style={{ borderColor: '#556B2F', color: '#556B2F' }}
-          >
-            {showAllPaintings ? 'Voir moins' : 'Voir toutes les œuvres'}
-            <ChevronRight size={18} className="ml-2" />
-          </button>
-        </div>
-        {/* Votre section des œuvres reste ici */}
-      </div>
-
-      {/* Artists Section - AVEC DONNÉES RÉELLES DE L'API */}
-      <div className="mb-12" id="artists-section">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center">
-            <Award size={24} className="mr-2" style={{ color: '#8B4513' }} />
-            <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-              {selectedStyle ? `Peintres - ${selectedStyle.name}` : 'Nos peintres'}
-            </h2>
-            {loading && (
-              <div className="ml-4 flex items-center text-gray-500">
-                <RefreshCw size={16} className="animate-spin mr-2" />
-                <span className="text-sm">Chargement...</span>
+            {!loading && paintersToDisplay.length > 0 && (
+              <div className="text-sm text-gray-600">
+                {paintersToDisplay.length} peintre{paintersToDisplay.length > 1 ? 's' : ''}
               </div>
             )}
           </div>
-          <button 
-            onClick={() => setShowAllArtists(!showAllArtists)}
-            className="flex items-center text-sm font-medium hover:underline"
-            style={{ color: '#556B2F' }}
-          >
-            {showAllArtists ? 'Voir moins' : 'Voir tous les peintres'}
-            <ChevronRight size={16} className="ml-1" />
-          </button>
-        </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded mb-3 w-1/2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-              </div>
-            ))}
-          </div>
-        ) : displayedPainters.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {displayedPainters.map((painter) => (
-              <div
-                key={painter.id}
-                className="p-6 rounded-lg border hover:shadow-lg transition-shadow group bg-white"
-                style={{ borderColor: '#D3D3D3' }}
-              >
-                <div className="flex items-start mb-4">
-                  <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 flex-shrink-0"
-                    style={{ borderColor: '#556B2F' }}>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-3 w-1/2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              ))}
+            </div>
+          ) : paintersToDisplay.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {paintersToDisplay.map((painter) => (
+                <div
+                  key={painter.id}
+                  className="group relative rounded-lg border border-[#D3D3D3] overflow-hidden hover:border-[#556B2F] hover:shadow-xl transition-all duration-300 bg-white cursor-pointer"
+                  onClick={() => handleViewProfile(painter)}
+                >
+                  {/* Effet de hover sur toute la carte */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#8B4513]/0 via-transparent to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                  
+                  {/* Avatar */}
+                  <div className="h-48 relative overflow-hidden bg-gray-100">
                     {painter.avatar ? (
-                      <img
-                        src={painter.avatar}
+                      <img 
+                        src={painter.avatar} 
                         alt={painter.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
                           const parent = (e.target as HTMLImageElement).parentElement;
                           if (parent) {
                             parent.innerHTML = `
-                              <div class="w-full h-full flex items-center justify-center bg-gray-100">
-                                <Palette size={24} style="color: #8B4513" />
+                              <div class="w-full h-full flex items-center justify-center">
+                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
                               </div>
                             `;
                           }
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                        <Palette size={24} style={{ color: '#8B4513' }} />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-20 h-20 rounded-full bg-[#8B4513] bg-opacity-10 flex items-center justify-center mx-auto mb-4">
+                            <Palette size={40} className="text-[#8B4513]" />
+                          </div>
+                          <span className="text-gray-600 text-sm">Aucune photo</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Overlay sur l'image au hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                    
+                    {/* Badge vérifié */}
+                    {painter.verified && (
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                          ✓ Vérifié
+                        </span>
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    
-                    <p className="text-gray-600 text-sm mb-2 truncate">
-                      {painter.specialty || 'Peintre'}
-                    </p>
-                    <div className="flex items-center mb-2">
-                      <MapPin size={14} className="mr-1 text-gray-500" />
-                      <span className="text-sm text-gray-600">
+
+                  {/* Info */}
+                  <div className="p-4 relative z-10 bg-white">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg text-gray-900 group-hover:text-[#8B4513] transition-colors truncate">
+                          {painter.name}
+                        </h3>
+                        <div className="flex items-center mt-1">
+                          <Briefcase size={14} className="mr-1 text-gray-500 flex-shrink-0" />
+                          <span className="text-gray-600 text-sm truncate">
+                            {painter.specialty || 'Peintre'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Localisation */}
+                    <div className="flex items-center mb-3">
+                      <MapPin size={14} className="mr-1 text-gray-500 flex-shrink-0" />
+                      <span className="text-gray-600 text-sm truncate">
                         {painter.city || 'Non spécifié'}
                       </span>
                     </div>
+
+                    {/* Métiers */}
                     {painter.metiers && painter.metiers.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
+                      <div className="mb-3 flex flex-wrap gap-1">
                         {painter.metiers.slice(0, 2).map((metier) => (
                           <span
                             key={metier.id}
@@ -471,74 +542,74 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ searchQuery, onContactClick
                             {metier.name}
                           </span>
                         ))}
+                        {painter.metiers.length > 2 && (
+                          <span className="text-gray-500 text-xs">
+                            +{painter.metiers.length - 2}
+                          </span>
+                        )}
                       </div>
                     )}
+
+                    {/* Note discrète */}
+                    <div className="text-center mb-2">
+                      <p className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Cliquez pour voir le profil
+                      </p>
+                    </div>
+
+                    {/* Bouton "Voir les œuvres" */}
+                    <div className="pt-3 border-t border-gray-100">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewArtworks(painter);
+                        }}
+                        className="w-full py-2.5 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center group/btn"
+                      >
+                        <ImageIcon size={16} className="mr-2 group-hover/btn:animate-pulse" />
+                        Voir les œuvres
+                      </button>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <span className="text-sm font-medium">
-                      {painter.works || Math.floor(Math.random() * 30) + 5} œuvres
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <button 
-                      onClick={() => handleViewProfile(painter.id)}
-                      className="px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors"
-                      style={{ border: '1px solid #556B2F', color: '#556B2F' }}
-                    >
-                      <Eye size={14} className="inline mr-1" />
-                      Profil
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  
-                  <button 
-                    onClick={() => onContactClick && onContactClick(`Demande peinture: ${painter.name}`, painter.name)}
-                    className="px-4 py-2 rounded-md text-sm font-medium hover:bg-[#485826] transition-colors flex items-center"
-                    style={{ backgroundColor: '#6B8E23', color: 'white' }}
-                  >
-                    <Mail size={14} className="mr-2" />
-                    Contacter
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 border border-[#D3D3D3] rounded-lg">
-            <Palette size={48} className="mx-auto mb-4 text-gray-400" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Aucun peintre trouvé
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {selectedStyle 
-                ? `Aucun peintre spécialisé en "${selectedStyle.name}" n'a été trouvé.`
-                : 'Aucun peintre ne correspond à vos critères de recherche.'
-              }
-            </p>
-            <div className="flex gap-3 justify-center">
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 border border-[#D3D3D3] rounded-lg bg-white">
+              <Palette size={48} className="mx-auto mb-4 text-gray-400" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {isCategoryPage 
+                  ? `Aucun peintre trouvé dans la catégorie "${selectedCategory === 'all' ? 'tous les peintres' : paintingStyles.find(c => c.slug === selectedCategory)?.name}"`
+                  : 'Aucun peintre disponible pour le moment'
+                }
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {isCategoryPage 
+                  ? 'Essayez de modifier vos critères de recherche.'
+                  : 'Veuillez réessayer ultérieurement.'
+                }
+              </p>
               <button
-                onClick={handleRetry}
+                onClick={isCategoryPage ? handleViewAll : handleRetry}
                 className="px-4 py-2 rounded-md border border-[#556B2F] text-[#556B2F] font-medium hover:bg-gray-50 transition-colors"
               >
-                Réessayer
+                {isCategoryPage ? 'Voir tous les peintres' : 'Réessayer'}
               </button>
-              {selectedStyle && (
-                <button
-                  onClick={() => setSelectedStyle(null)}
-                  className="px-4 py-2 rounded-md bg-[#556B2F] text-white font-medium hover:bg-[#485826] transition-colors"
-                >
-                  Voir tous les peintres
-                </button>
-              )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Styles inline pour les effets */}
+      <style>{`
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        .group-hover\\/btn\\:animate-pulse:hover {
+          animation: pulse-slow 1.5s infinite;
+        }
+      `}</style>
     </div>
   );
 };

@@ -28,6 +28,7 @@ import {
   UserCog,
   Video,
   Image,
+  Lightbulb,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from "../../assets/logo.png";
@@ -45,6 +46,7 @@ const navigation = [
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Annonces", href: "/admin/listings", icon: Building2 },
   { name: "Services", href: "/admin/services", icon: Wrench },
+  
   {
     name: "categorie de services",
     href: "/admin/service-categories",
@@ -85,6 +87,7 @@ const navigation = [
   { name: "blog", href: "/admin/blog", icon: Newspaper },
   { name: "Portraits", href: "/admin/portraits", icon: Image },
   { name: "Gestion des Médias", href: "/admin/media", icon: Video },
+  { name: "Bon Plans & Conseils", href: "/admin/conseils", icon: Lightbulb },
 ];
 
 export function AdminSidebar() {
@@ -148,7 +151,7 @@ export function AdminSidebar() {
         sections.servicesFinanciers.push(item);
       }
       // Marketing & Communication
-      else if (["Publicité", "blog", "Portraits", "Gestion des Médias"].includes(item.name)) {
+      else if (["Publicité", "blog", "Portraits", "Gestion des Médias", "Bon Plans & Conseils"].includes(item.name)) {
         sections.marketing.push(item);
       }
     });

@@ -5,7 +5,7 @@ export const useAuth = () => {
   const [user, setUser] = useState(AuthService.getCurrentUser());
   const [isAuthenticated, setIsAuthenticated] = useState(
     AuthService.isAuthenticated()
-  );
+  );  
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     // Vérifier l'authentification au chargement

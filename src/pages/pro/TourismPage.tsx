@@ -35,25 +35,37 @@ import {
   Calendar,
   Clock3,
   RefreshCw,
+  TreePine,
+  Waves,
 } from "lucide-react";
 import { toast } from "sonner";
 import { tourismeAPI } from "../../lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import AjoutVolModal from "../../components/components/AjoutVol";
 import AjoutActivitesModal from "@/components/components/AjoutActivites";
+import AjoutNaturePatrimoineModal from "./AjoutNaturePatrimoine"; // Nouveau
 import { api } from "@/lib/axios";
 import AdminModal from "./AdminModal";
 import DetailModal from "./DetailModal";
 import AirlineModal from "./AirlineModal";
+import NatureDetailModal from "./NatureDetailModal"; // Nouveau
+
+// Composants importés
+import ListingCard from "./ListingCard";
+import FlightCard from "./FlightCard";
+import ActivityCard from "./ActivityCard";
+import ActivityDetailModal from "./ActivityDetailModal";
+import AdminInterface from "./AdminInterface";
+import NaturePatrimoineCard from "./NaturePatrimoineCard"; // Nouveau
 
 // Constantes de couleur basées sur votre palette
 const COLORS = {
-  logo: "#556B2F",           /* Olive green - logo/accent */
-  primary: "#6B8E23",        /* Yellow-green - primary-dark */
-  lightBg: "#FFFFFF",        /* White - light-bg */
-  separator: "#D3D3D3",      /* Light gray - separator */
-  secondaryText: "#8B4513",  /* Saddle brown - secondary-text */
-  smallText: "#000000",      /* Black for small text */
+  logo: "#556B2F",
+  primary: "#6B8E23",
+  lightBg: "#FFFFFF",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
+  smallText: "#000000",
 };
 
 // Amenities disponibles avec icônes
@@ -82,41 +94,17 @@ const touristicCategories = [
   { id: "natural", label: "Site naturel", icon: null },
 ];
 
-// Options pour le dropdown d'ajout
-const addOptions = [
-  {
-    id: "accommodation",
-    label: "Ajouter un hébergement",
-    icon: Hotel,
-  },
-  {
-    id: "touristic_place",
-    label: "Ajouter un lieu touristique",
-    icon: Landmark,
-  },
-  {
-    id: "flight",
-    label: "Ajouter un vol",
-    icon: Plane,
-  },
-  {
-    id: "activities",
-    label: "Ajouter une activité",
-    icon: Mountain,
-  },
-];
-
 // Options pour le dropdown de type de contenu
 const contentTypeOptions = [
   {
     id: "accommodations",
-    label: " Hébergements",
+    label: "Hébergements",
     icon: Hotel,
     description: "Gérer vos hébergements et propriétés",
   },
   {
     id: "touristic_places",
-    label: " Lieux Touristiques",
+    label: "Lieux Touristiques",
     icon: Landmark,
     description: "Gérer vos lieux touristiques",
   },
@@ -132,20 +120,111 @@ const contentTypeOptions = [
     icon: Mountain,
     description: "Gérer vos activités et loisirs",
   },
+  {
+    id: "nature_patrimoine",
+    label: "Nature & Patrimoine",
+    icon: TreePine,
+    description: "Gérer les sites naturels et patrimoniaux",
+  },
 ];
+
+// Types
+interface Listing {
+  id: string;
+  title: string;
+  city: string;
+  price: number;
+  rating: number;
+  reviewCount: number;
+  type: string;
+  category: string;
+  featured: boolean;
+  available: boolean;
+  instantBook?: boolean;
+  isTouristicPlace: boolean;
+  images: string[];
+  amenities: string[];
+  maxGuests?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  area?: number;
+  entranceFee?: string;
+  openingHours?: string;
+}
+
+interface Flight {
+  id: string;
+  compagnie: string;
+  numeroVol: string;
+  departVille: string;
+  arriveeVille: string;
+  departDateHeure: string;
+  arriveeDateHeure: string;
+  duree: string;
+  escales: number;
+  classe: 'economy' | 'premium' | 'business' | 'first';
+  prix: number;
+  services: string[];
+  image?: string;
+  availableSeats?: number;
+  nbrPersonne?: number;
+}
+
+interface Activity {
+  id: string;
+  name?: string;
+  title?: string;
+  description?: string;
+  location?: string;
+  price: number;
+  duration?: string;
+  capacity?: number;
+  category?: string;
+  image?: string;
+  included?: string[];
+  requirements?: string;
+  isActive?: boolean;
+  color?: string;
+  icon?: string;
+}
+
+interface NaturePatrimoine {
+  id: string;
+  title: string;
+  type: string;
+  category: string;
+  location: string;
+  description: string;
+  images: string[];
+  altitude?: string;
+  year?: number;
+  rating?: number;
+  reviewCount?: number;
+  featured?: boolean;
+  available?: boolean;
+}
+
+interface Stats {
+  totalListings?: number;
+  averageRating?: number;
+  availableListings?: number;
+  totalBookings?: number;
+}
 
 // Composant principal
 export default function TourismPage() {
   const [contentType, setContentType] = useState("accommodations");
-  const [listings, setListings] = useState([]);
-  const [flights, setFlights] = useState([]);
-  const [activities, setActivities] = useState([]);
-  const [filteredListings, setFilteredListings] = useState([]);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [naturePatrimoine, setNaturePatrimoine] = useState<NaturePatrimoine[]>([]);
+  const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [flightsLoading, setFlightsLoading] = useState(false);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
+  const [naturePatrimoineLoading, setNaturePatrimoineLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const { user } = useAuth();
   const [filters, setFilters] = useState({
     destination: "",
@@ -163,17 +242,20 @@ export default function TourismPage() {
     amenities: [],
     instantBook: false,
   });
-  const [currentImageIndex, setCurrentImageIndex] = useState({});
-  const [favorites, setFavorites] = useState(new Set());
+  const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedListing, setSelectedListing] = useState(null);
-  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [selectedNaturePatrimoine, setSelectedNaturePatrimoine] = useState<NaturePatrimoine | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showActivityDetailModal, setShowActivityDetailModal] = useState(false);
-  const [editingListing, setEditingListing] = useState(null);
-  const [editingActivity, setEditingActivity] = useState(null);
+  const [showNatureDetailModal, setShowNatureDetailModal] = useState(false);
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [editingNaturePatrimoine, setEditingNaturePatrimoine] = useState<NaturePatrimoine | null>(null);
   const [bookingForm, setBookingForm] = useState({
     listingId: "",
     checkIn: "",
@@ -191,9 +273,10 @@ export default function TourismPage() {
   const [showContentTypeDropdown, setShowContentTypeDropdown] = useState(false);
   const [showFlightModal, setShowFlightModal] = useState(false);
   const [showActivitiesModal, setShowActivitiesModal] = useState(false);
+  const [showNaturePatrimoineModal, setShowNaturePatrimoineModal] = useState(false);
   const [showAirlineModal, setShowAirlineModal] = useState(false);
 
-  const sliderRef = useRef(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   // Fonction pour réinitialiser complètement les filtres
   const resetAllFilters = () => {
@@ -215,7 +298,6 @@ export default function TourismPage() {
     };
 
     setFilters(resetFilters);
-    // console.log("🔄 Filtres complètement réinitialisés");
   };
 
   // Charger les données en fonction du type de contenu
@@ -228,6 +310,8 @@ export default function TourismPage() {
       loadFlights();
     } else if (contentType === "activities") {
       loadActivities();
+    } else if (contentType === "nature_patrimoine") {
+      loadNaturePatrimoine();
     }
     loadStats();
   }, [contentType]);
@@ -236,20 +320,17 @@ export default function TourismPage() {
     try {
       setLoading(true);
       const response = await tourismeAPI.getAccommodations();
-      // console.log("🏨 Réponse API hébergements:", response.data);
-
+      
       if (response.data.success) {
         const listingsData = response.data.data;
         setListings(listingsData);
         setFilteredListings(listingsData);
 
-        const initialIndexes = {};
-        listingsData.forEach((listing) => {
+        const initialIndexes: Record<string, number> = {};
+        listingsData.forEach((listing: Listing) => {
           initialIndexes[listing.id] = 0;
         });
         setCurrentImageIndex(initialIndexes);
-
-        // console.log("✅ Hébergements chargés:", listingsData.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des hébergements:", error);
@@ -263,20 +344,17 @@ export default function TourismPage() {
     try {
       setLoading(true);
       const response = await tourismeAPI.getTouristicPlaces();
-      // console.log("🏛️ Réponse API lieux touristiques:", response.data);
 
       if (response.data.success) {
         const placesData = response.data.data;
         setListings(placesData);
         setFilteredListings(placesData);
 
-        const initialIndexes = {};
-        placesData.forEach((place) => {
+        const initialIndexes: Record<string, number> = {};
+        placesData.forEach((place: Listing) => {
           initialIndexes[place.id] = 0;
         });
         setCurrentImageIndex(initialIndexes);
-
-        // console.log("✅ Lieux touristiques chargés:", placesData.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des lieux touristiques:", error);
@@ -290,12 +368,10 @@ export default function TourismPage() {
     try {
       setFlightsLoading(true);
       const response = await tourismeAPI.getFlights();
-      // console.log("✈️ Réponse API vols:", response.data);
 
       if (response.data.success) {
         const flightsData = response.data.data;
         setFlights(flightsData);
-        // console.log("✅ Vols chargés:", flightsData.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des vols:", error);
@@ -309,11 +385,9 @@ export default function TourismPage() {
     try {
       setActivitiesLoading(true);
       const response = await api.get('/ActivityCategory');
-      // console.log("🎯 Réponse API activités:", response.data);
 
       if (response.data.success) {
         setActivities(response.data.data);
-        // console.log("✅ Activités chargées:", response.data.data.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des activités:", error);
@@ -330,22 +404,130 @@ export default function TourismPage() {
     }
   };
 
+// Dans TourismPage.jsx, remplacez la fonction loadNaturePatrimoine par :
+ 
+const loadNaturePatrimoine = async () => {
+  try {
+    setNaturePatrimoineLoading(true);
+    
+    console.log("Chargement des patrimoines...");
+    
+    const response = await tourismeAPI.getNaturePatrimoine();
+    
+    console.log("Réponse API complète:", response);
+    console.log("Données de réponse:", response.data);
+    
+    // Vérifier la structure de la réponse
+    if (!response.data) {
+      console.error("Aucune donnée dans la réponse");
+      toast.error("Aucune donnée reçue du serveur");
+      setNaturePatrimoine([]);
+      return;
+    }
+    
+    if (response.data.success) {
+      const data = response.data.data;
+      console.log("Data reçue:", data);
+      console.log("Type de data:", typeof data);
+      console.log("Est-ce un array?", Array.isArray(data));
+      
+      // Vérifier si c'est un tableau
+      if (Array.isArray(data)) {
+        // Transformer les données
+        const patrimoineData = data.map(item => ({
+          id: item.id || item._id || Date.now().toString(),
+          title: item.title || item.name || item.nom || "Sans titre",
+          type: item.type || "nature",
+          category: item.category || "site_naturel",
+          location: item.location || item.city || item.ville || item.adresse || "Localisation inconnue",
+          description: item.description || item.desc || "Aucune description",
+          images: item.images || (item.image ? [item.image] : []),
+          altitude: item.altitude,
+          year: item.year,
+          rating: item.rating || 0,
+          reviewCount: item.reviewCount || 0,
+          featured: item.featured || false,
+          available: item.available !== false,
+          userId: item.userId,
+          user: item.user,
+          // Ajouter d'autres champs si nécessaire
+          ...item
+        }));
+        
+        console.log("Données transformées:", patrimoineData);
+        setNaturePatrimoine(patrimoineData);
+      } else {
+        // Si ce n'est pas un tableau, créer un tableau avec l'objet unique
+        console.log("Data n'est pas un tableau, conversion en tableau");
+        const item = data;
+        const patrimoineData = [{
+          id: item.id || item._id || Date.now().toString(),
+          title: item.title || item.name || item.nom || "Sans titre",
+          type: item.type || "nature",
+          category: item.category || "site_naturel",
+          location: item.location || item.city || item.ville || item.adresse || "Localisation inconnue",
+          description: item.description || item.desc || "Aucune description",
+          images: item.images || (item.image ? [item.image] : []),
+          altitude: item.altitude,
+          year: item.year,
+          rating: item.rating || 0,
+          reviewCount: item.reviewCount || 0,
+          featured: item.featured || false,
+          available: item.available !== false,
+          userId: item.userId,
+          user: item.user,
+          ...item
+        }];
+        
+        setNaturePatrimoine(patrimoineData);
+      }
+    } else {
+      console.error("API a retourné success: false", response.data);
+      toast.error(response.data.message || "Erreur lors du chargement des données");
+      setNaturePatrimoine([]);
+    }
+  } catch (error) {
+    console.error("Erreur complète lors du chargement des sites naturels:", error);
+    
+    // Afficher plus de détails
+    if (error.response) {
+      console.error("Status de l'erreur:", error.response.status);
+      console.error("Données de l'erreur:", error.response.data);
+      console.error("URL de la requête:", error.response.config?.url);
+      
+      if (error.response.status === 404) {
+        toast.error("Route API non trouvée. Vérifiez l'URL.");
+      } else if (error.response.status === 401) {
+        toast.error("Session expirée. Veuillez vous reconnecter.");
+      } else if (error.response.status === 403) {
+        toast.error("Accès refusé. Vous n'avez pas les permissions nécessaires.");
+      } else {
+        toast.error(`Erreur serveur (${error.response.status}): ${error.response.data?.message || 'Erreur inconnue'}`);
+      }
+    } else if (error.request) {
+      console.error("Pas de réponse du serveur:", error.request);
+      toast.error("Serveur inaccessible. Vérifiez votre connexion internet.");
+    } else {
+      console.error("Erreur de configuration:", error.message);
+      toast.error(`Erreur: ${error.message}`);
+    }
+    
+    // Initialiser avec un tableau vide pour éviter les erreurs
+    setNaturePatrimoine([]);
+  } finally {
+    setNaturePatrimoineLoading(false);
+  }
+};
+
   const loadStats = async () => {
     try {
       setStatsLoading(true);
       const response = await tourismeAPI.getStats({
-        contentType: contentType === "flights" || contentType === "activities" ? null : contentType,
+        contentType: contentType === "flights" || contentType === "activities" || contentType === "nature_patrimoine" ? null : contentType,
       });
-
-      // console.log("📊 Réponse API stats:", response.data);
 
       if (response.data.success) {
         setStats(response.data.data);
-        // console.log(
-        //   "✅ Stats mises à jour pour:",
-        //   contentType,
-        //   response.data.data
-        // );
       }
     } catch (error) {
       console.error("Erreur lors du chargement des statistiques:", error);
@@ -356,12 +538,9 @@ export default function TourismPage() {
 
   // Filtrer les résultats (pour hébergements et lieux touristiques)
   useEffect(() => {
-    if (contentType === "flights" || contentType === "activities") return;
+    if (contentType === "flights" || contentType === "activities" || contentType === "nature_patrimoine") return;
 
     let results = listings;
-
-    // console.log("🎯 DÉBUT FILTRAGE - Filtres actuels:", filters);
-    // console.log("🎯 Listings avant filtrage:", listings.length);
 
     if (filters.destination) {
       results = results.filter(
@@ -373,26 +552,22 @@ export default function TourismPage() {
             .toLowerCase()
             .includes(filters.destination.toLowerCase())
       );
-      // console.log("🎯 Après filtre destination:", results.length);
     }
 
     if (contentType === "accommodations" && filters.type.length > 0) {
       results = results.filter((listing) =>
         filters.type.includes(listing.type)
       );
-      // console.log("🎯 Après filtre type:", results.length);
     }
 
     if (contentType === "touristic_places" && filters.category.length > 0) {
       results = results.filter((listing) =>
         filters.category.includes(listing.category)
       );
-      // console.log("🎯 Après filtre catégorie:", results.length);
     }
 
     if (filters.rating > 0) {
       results = results.filter((listing) => listing.rating >= filters.rating);
-      // console.log("🎯 Après filtre rating:", results.length);
     }
 
     if (filters.amenities.length > 0) {
@@ -401,178 +576,22 @@ export default function TourismPage() {
           listing.amenities.includes(amenity)
         )
       );
-      // console.log("🎯 Après filtre amenities:", results.length);
     }
 
     if (filters.instantBook) {
       results = results.filter((listing) => listing.instantBook);
-      // console.log("🎯 Après filtre instantBook:", results.length);
     }
 
     results = results.filter(
       (listing) =>
         listing.price >= filters.minPrice && listing.price <= filters.maxPrice
     );
-    // console.log("🎯 Après filtre prix:", results.length);
-
-    // console.log("🔍 Filtrage appliqué:", {
-    //   total: listings.length,
-    //   filtrés: results.length,
-    //   filtres: filters,
-    // });
 
     setFilteredListings(results);
   }, [filters, listings, contentType]);
 
-  // Fonction pour supprimer une activité
-  const handleDeleteActivity = async (id) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette activité ?")) {
-      return;
-    }
-
-    try {
-      // console.log("🗑️ Suppression activité:", id);
-      const response = await api.delete(`/ActivityCategory/${id}`);
-      
-      if (response.data.success) {
-        toast.success("Activité supprimée avec succès");
-        
-        // Mettre à jour la liste des activités
-        setActivities(prev => prev.filter(activity => activity.id !== id));
-        
-        // Si l'activité sélectionnée est celle qu'on supprime, on la retire
-        if (selectedActivity?.id === id) {
-          setSelectedActivity(null);
-          setShowActivityDetailModal(false);
-        }
-        
-        // console.log("✅ Activité supprimée avec succès");
-      }
-    } catch (error) {
-      console.error("❌ Erreur suppression activité:", error);
-      toast.error(error.response?.data?.error || "Erreur lors de la suppression");
-    }
-  };
-
-  // Fonction pour éditer une activité
-  const handleEditActivity = (activity) => {
-    setEditingActivity(activity);
-    // Si vous avez un modal spécifique pour les activités, utilisez-le
-    // Sinon, vous pouvez utiliser le modal d'activités en mode édition
-    setShowActivitiesModal(true);
-  };
-
-  // Fonction pour voir les détails d'une activité
-  const handleViewActivityDetails = (activity) => {
-    setSelectedActivity(activity);
-    setShowActivityDetailModal(true);
-  };
-
-  const handleDeleteListing = async (id) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
-      return;
-    }
-
-    try {
-      // console.log("🗑️ Suppression:", id);
-      await tourismeAPI.deleteListing(id);
-      toast.success(
-        contentType === "touristic_places"
-          ? "Lieu touristique supprimé avec succès"
-          : "Hébergement supprimé avec succès"
-      );
-
-      setListings((prev) => {
-        const updated = prev.filter((listing) => listing.id !== id);
-        // console.log("📊 Listings après suppression:", updated.length);
-        return updated;
-      });
-
-      resetAllFilters();
-      await loadStats();
-      // console.log("✅ Suppression terminée");
-    } catch (error) {
-      const backendMessage = error.response?.data?.error;
-      toast.error(backendMessage || "Erreur lors de la suppression");
-      console.error("❌ Erreur suppression:", error);
-    }
-  };
-
-  const toggleAvailability = async (id) => {
-    try {
-      // console.log("🔄 Bascule disponibilité:", id);
-      const response = await tourismeAPI.toggleAvailability(id);
-      // console.log("📥 Réponse disponibilité:", response.data);
-
-      if (response.data.success) {
-        setListings((prev) =>
-          prev.map((listing) =>
-            listing.id === id ? response.data.data : listing
-          )
-        );
-
-        setFilteredListings((prev) =>
-          prev.map((listing) =>
-            listing.id === id ? response.data.data : listing
-          )
-        );
-
-        toast.success(response.data.message);
-        await loadStats();
-        // console.log("✅ Disponibilité basculée");
-      }
-    } catch (error) {
-      console.error("❌ Erreur bascule disponibilité:", error);
-      toast.error(
-        error.response?.data?.error ||
-        "Erreur lors du changement de disponibilité"
-      );
-    }
-  };
-
-  const toggleFeatured = async (id) => {
-    try {
-      // console.log("⭐ Bascule vedette:", id);
-      const response = await tourismeAPI.toggleFeatured(id);
-      // console.log("📥 Réponse vedette:", response.data);
-
-      if (response.data.success) {
-        setListings((prev) =>
-          prev.map((listing) =>
-            listing.id === id ? response.data.data : listing
-          )
-        );
-
-        setFilteredListings((prev) =>
-          prev.map((listing) =>
-            listing.id === id ? response.data.data : listing
-          )
-        );
-
-        toast.success(response.data.message);
-        await loadStats();
-        // console.log("✅ Statut vedette basculé");
-      }
-    } catch (error) {
-      console.error("❌ Erreur bascule vedette:", error);
-      toast.error(
-        error.response?.data?.error ||
-        "Erreur lors du changement de statut vedette"
-      );
-    }
-  };
-
-  const openEditModal = (listing) => {
-    setEditingListing(listing);
-    setShowAdminModal(true);
-  };
-
-  const openDetailModal = (listing) => {
-    setSelectedListing(listing);
-    setShowDetailModal(true);
-  };
-
-  const getTypeIcon = (type, isTouristicPlace, category) => {
+  // Fonction pour obtenir l'icône du type
+  const getTypeIcon = (type: string, isTouristicPlace: boolean, category?: string) => {
     if (isTouristicPlace) {
       const categoryObj = touristicCategories.find(
         (cat) => cat.id === category
@@ -594,7 +613,165 @@ export default function TourismPage() {
     }
   };
 
-  const toggleFavorite = (id) => {
+  // Fonction pour supprimer une activité
+  const handleDeleteActivity = async (id: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette activité ?")) {
+      return;
+    }
+
+    try {
+      const response = await api.delete(`/ActivityCategory/${id}`);
+      
+      if (response.data.success) {
+        toast.success("Activité supprimée avec succès");
+        
+        setActivities(prev => prev.filter(activity => activity.id !== id));
+        
+        if (selectedActivity?.id === id) {
+          setSelectedActivity(null);
+          setShowActivityDetailModal(false);
+        }
+      }
+    } catch (error: any) {
+      console.error("❌ Erreur suppression activité:", error);
+      toast.error(error.response?.data?.error || "Erreur lors de la suppression");
+    }
+  };
+
+  // Fonction pour éditer une activité
+  const handleEditActivity = (activity: Activity) => {
+    setEditingActivity(activity);
+    setShowActivitiesModal(true);
+  };
+
+  // Fonction pour voir les détails d'une activité
+  const handleViewActivityDetails = (activity: Activity) => {
+    setSelectedActivity(activity);
+    setShowActivityDetailModal(true);
+  };
+
+  // Fonction pour supprimer un site nature/patrimoine
+  const handleDeleteNaturePatrimoine = async (id: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce site ?")) {
+      return;
+    }
+
+    try {
+      const response = await tourismeAPI.deleteNaturePatrimoine(id);
+      
+      if (response.data.success) {
+        toast.success("Site supprimé avec succès");
+        setNaturePatrimoine(prev => prev.filter(item => item.id !== id));
+        
+        if (selectedNaturePatrimoine?.id === id) {
+          setSelectedNaturePatrimoine(null);
+          setShowNatureDetailModal(false);
+        }
+      }
+    } catch (error: any) {
+      console.error("❌ Erreur suppression site:", error);
+      toast.error(error.response?.data?.error || "Erreur lors de la suppression");
+    }
+  };
+
+  // Fonction pour éditer un site nature/patrimoine
+  const handleEditNaturePatrimoine = (item: NaturePatrimoine) => {
+    setEditingNaturePatrimoine(item);
+    setShowNaturePatrimoineModal(true);
+  };
+
+  // Fonction pour voir les détails d'un site nature/patrimoine
+  const handleViewNatureDetails = (item: NaturePatrimoine) => {
+    setSelectedNaturePatrimoine(item);
+    setShowNatureDetailModal(true);
+  };
+
+  const handleDeleteListing = async (id: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
+      return;
+    }
+
+    try {
+      await tourismeAPI.deleteListing(id);
+      toast.success(
+        contentType === "touristic_places"
+          ? "Lieu touristique supprimé avec succès"
+          : "Hébergement supprimé avec succès"
+      );
+
+      setListings((prev) => {
+        const updated = prev.filter((listing) => listing.id !== id);
+        return updated;
+      });
+
+      resetAllFilters();
+      await loadStats();
+    } catch (error: any) {
+      const backendMessage = error.response?.data?.error;
+      toast.error(backendMessage || "Erreur lors de la suppression");
+      console.error("❌ Erreur suppression:", error);
+    }
+  };
+
+  const toggleAvailability = async (id: string) => {
+    try {
+      const response = await tourismeAPI.toggleAvailability(id);
+
+      if (response.data.success) {
+        setListings((prev) =>
+          prev.map((listing) =>
+            listing.id === id ? response.data.data : listing
+          )
+        );
+
+        setFilteredListings((prev) =>
+          prev.map((listing) =>
+            listing.id === id ? response.data.data : listing
+          )
+        );
+
+        toast.success(response.data.message);
+        await loadStats();
+      }
+    } catch (error: any) {
+      console.error("❌ Erreur bascule disponibilité:", error);
+      toast.error(
+        error.response?.data?.error ||
+        "Erreur lors du changement de disponibilité"
+      );
+    }
+  };
+
+  const toggleFeatured = async (id: string) => {
+    try {
+      const response = await tourismeAPI.toggleFeatured(id);
+
+      if (response.data.success) {
+        setListings((prev) =>
+          prev.map((listing) =>
+            listing.id === id ? response.data.data : listing
+          )
+        );
+
+        setFilteredListings((prev) =>
+          prev.map((listing) =>
+            listing.id === id ? response.data.data : listing
+          )
+        );
+
+        toast.success(response.data.message);
+        await loadStats();
+      }
+    } catch (error: any) {
+      console.error("❌ Erreur bascule vedette:", error);
+      toast.error(
+        error.response?.data?.error ||
+        "Erreur lors du changement de statut vedette"
+      );
+    }
+  };
+
+  const toggleFavorite = (id: string) => {
     setFavorites((prev) => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(id)) {
@@ -608,10 +785,18 @@ export default function TourismPage() {
     });
   };
 
- 
-  const handleAdminSubmit = async (formData) => {
+  const openEditModal = (listing: Listing) => {
+    setEditingListing(listing);
+    setShowAdminModal(true);
+  };
+
+  const openDetailModal = (listing: Listing) => {
+    setSelectedListing(listing);
+    setShowDetailModal(true);
+  };
+
+  const handleAdminSubmit = async (formData: any) => {
     try {
-      // console.log("📤 Envoi des données avec images:", formData);
       setShowAdminModal(false);
       setEditingListing(null);
       resetAllFilters();
@@ -622,8 +807,7 @@ export default function TourismPage() {
         await loadAccommodations();
       }
       await loadStats();
-      // console.log("✅ Opération terminée avec succès");
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Erreur opération:", error);
       toast.error(error.response?.data?.error || "Erreur lors de l'opération");
     }
@@ -644,1318 +828,124 @@ export default function TourismPage() {
     setSelectedActivity(null);
   };
 
-  // Composant Carte pour Hébergements et Lieux Touristiques
-  const ListingCard = ({ listing }) => {
-    const isTouristicPlace = listing.isTouristicPlace;
-    const TypeIcon = getTypeIcon(
-      listing.type,
-      isTouristicPlace,
-      listing.category
-    );
-    const isFavorite = favorites.has(listing.id);
-
-    return (
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-        <div className="relative h-48 overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
-          {listing.images && listing.images.length > 0 ? (
-            <img
-              src={listing.images[0]}
-              alt={listing.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
-              <div className="text-center">
-                <TypeIcon className="w-12 h-12 mx-auto mb-2" />
-                <div>Galerie d'images</div>
-                <div className="text-xs mt-1">
-                  {listing.images?.length || 0} photos
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="absolute top-3 left-3 flex flex-col space-y-2">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/90 backdrop-blur-sm text-gray-800 capitalize">
-              {isTouristicPlace ? listing.category : listing.type}
-            </span>
-            {listing.featured && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white">
-                <Star className="w-3 h-3 mr-1" />
-                Vedette
-              </span>
-            )}
-          </div>
-
-          <div className="absolute top-3 right-3 flex space-x-2">
-            <button
-              onClick={() => toggleFavorite(listing.id)}
-              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isFavorite
-                ? "bg-red-500 text-white"
-                : "bg-white/90 text-gray-600 hover:bg-white"
-                }`}
-            >
-              <Heart
-                className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`}
-              />
-            </button>
-            {!isTouristicPlace && listing.instantBook && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500 text-white">
-                Instant
-              </span>
-            )}
-          </div>
-
-          {listing.price > 0 && (
-            <div className="absolute bottom-3 left-3">
-              <div className="bg-black/70 text-white px-3 py-2 rounded-xl backdrop-blur-sm">
-                <span className="text-lg font-bold">{listing.price}€</span>
-                {!isTouristicPlace && (
-                  <span className="text-sm opacity-90">/nuit</span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {user?.role === "professional" && (
-            <div className="absolute bottom-3 right-3">
-              <button
-                onClick={() => toggleAvailability(listing.id)}
-                className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm transition-all duration-300 ${listing.available
-                  ? "bg-green-500 text-white hover:bg-green-600"
-                  : "bg-red-500 text-white hover:bg-red-600"
-                  }`}
-              >
-                {listing.available ? "✓ Disponible" : "✗ Indisponible"}
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="p-5">
-          <div className="mb-3">
-            <h3 className="font-bold text-lg line-clamp-1" style={{ color: COLORS.secondaryText }}>
-              {listing.title}
-            </h3>
-            <p className="flex items-center text-sm mt-1" style={{ color: COLORS.logo }}>
-              <MapPin className="w-4 h-4 mr-1" />
-              {listing.city}
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-              <span className="font-semibold" style={{ color: COLORS.smallText }}>
-                {listing.rating}
-              </span>
-              <span className="ml-1" style={{ color: COLORS.logo }}>
-                ({listing.reviewCount} avis)
-              </span>
-            </div>
-
-            {user?.role === "professional" && (
-              <button
-                onClick={() => toggleFeatured(listing.id)}
-                className={`p-1 rounded-full transition-all duration-300 ${listing.featured
-                  ? "text-yellow-500 bg-yellow-50"
-                  : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
-                  }`}
-                title={
-                  listing.featured
-                    ? "Retirer des vedettes"
-                    : "Mettre en vedette"
-                }
-              >
-                <Star
-                  className={`w-4 h-4 ${listing.featured ? "fill-current" : ""
-                    }`}
-                />
-              </button>
-            )}
-          </div>
-
-          {isTouristicPlace ? (
-            <div className="mb-4 space-y-2">
-              {listing.entranceFee && (
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: COLORS.logo }}>Tarif d'entrée:</span>
-                  <span className="font-semibold" style={{ color: COLORS.primary }}>
-                    {listing.entranceFee}
-                  </span>
-                </div>
-              )}
-              {listing.openingHours && (
-                <div className="flex items-center text-sm" style={{ color: COLORS.logo }}>
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span>{listing.openingHours}</span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center justify-between text-sm mb-4" style={{ color: COLORS.logo }}>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <Users className="w-4 h-4 mr-1" />
-                  <span>{listing.maxGuests}</span>
-                </div>
-                {listing.bedrooms && (
-                  <div className="flex items-center">
-                    <Bed className="w-4 h-4 mr-1" />
-                    <span>{listing.bedrooms}</span>
-                  </div>
-                )}
-                {listing.bathrooms && (
-                  <div className="flex items-center">
-                    <Bath className="w-4 h-4 mr-1" />
-                    <span>{listing.bathrooms}</span>
-                  </div>
-                )}
-                {listing.area && (
-                  <div className="flex items-center">
-                    <Square className="w-4 h-4 mr-1" />
-                    <span>{listing.area}m²</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-1">
-              {listing.amenities.slice(0, 4).map((amenityId) => {
-                const amenity = availableAmenities.find(
-                  (a) => a.id === amenityId
-                );
-                const IconComponent = amenity?.icon || CheckCircle;
-                return (
-                  <div
-                    key={amenityId}
-                    className="flex items-center p-1 bg-gray-100 rounded-lg"
-                  >
-                    <IconComponent className="w-3 h-3 mr-1" style={{ color: COLORS.primary }} />
-                    <span className="text-xs" style={{ color: COLORS.smallText }}>
-                      {amenity?.label}
-                    </span>
-                  </div>
-                );
-              })}
-              {listing.amenities.length > 4 && (
-                <div className="flex items-center p-1 bg-gray-100 rounded-lg">
-                  <span className="text-xs" style={{ color: COLORS.smallText }}>
-                    +{listing.amenities.length - 4}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex space-x-2">
-            <button
-              onClick={() => openDetailModal(listing)}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center"
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              Détails
-            </button>
-
-            {user?.role === "professional" && (
-              <>
-                <button
-                  onClick={() => openEditModal(listing)}
-                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300"
-                  title="Modifier"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDeleteListing(listing.id)}
-                  className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+  const handleCloseNatureDetailModal = () => {
+    setShowNatureDetailModal(false);
+    setSelectedNaturePatrimoine(null);
   };
 
-  // Composant Carte pour Vols
-  const FlightCard = ({ flight }) => {
-    return (
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-        <div className="relative h-48 overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
-          {flight.image ? (
-            <img
-              src={flight.image}
-              alt={`${flight.compagnie} - ${flight.numeroVol}`}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
-              <div className="text-center">
-                <Plane className="w-12 h-12 mx-auto mb-2" />
-                <div>{flight.compagnie}</div>
-                <div className="text-xs mt-1">{flight.numeroVol}</div>
-              </div>
-            </div>
-          )}
-
-          <div className="absolute bottom-3 left-3">
-            <div className="bg-black/70 text-white px-3 py-2 rounded-xl backdrop-blur-sm">
-              <span className="text-lg font-bold">{flight.prix}€</span>
-              <span className="text-sm opacity-90"> par personne</span>
-            </div>
-          </div>
-
-          <div className="absolute top-3 left-3">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/90 backdrop-blur-sm text-gray-800 capitalize">
-              {flight.classe === "economy" && "✈️ Économique"}
-              {flight.classe === "premium" && "✨ Premium"}
-              {flight.classe === "business" && "💼 Affaires"}
-              {flight.classe === "first" && "👑 Première"}
-            </span>
-          </div>
-        </div>
-
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h3 className="font-bold text-lg" style={{ color: COLORS.secondaryText }}>
-                {flight.departVille} → {flight.arriveeVille}
-              </h3>
-              <p className="text-sm" style={{ color: COLORS.logo }}>
-                {flight.compagnie} • {flight.numeroVol}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <div className="text-sm" style={{ color: COLORS.logo }}>Départ</div>
-              <div className="font-semibold text-sm" style={{ color: COLORS.smallText }}>
-                {new Date(flight.departDateHeure).toLocaleString("fr-FR")}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm" style={{ color: COLORS.logo }}>Arrivée</div>
-              <div className="font-semibold text-sm" style={{ color: COLORS.smallText }}>
-                {new Date(flight.arriveeDateHeure).toLocaleString("fr-FR")}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between text-sm mb-4 pb-4 border-b" style={{ borderColor: COLORS.separator }}>
-            <div className="flex items-center" style={{ color: COLORS.logo }}>
-              <Clock className="w-4 h-4 mr-1" />
-              <span>Durée: {flight.duree}</span>
-            </div>
-            <div className="flex items-center" style={{ color: COLORS.logo }}>
-              <MapPin className="w-4 h-4 mr-1" />
-              <span>
-                {flight.escales} escale{flight.escales > 1 ? "s" : ""}
-              </span>
-            </div>
-          </div>
-
-          {flight.services && flight.services.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs mb-2" style={{ color: COLORS.logo }}>Services inclus:</p>
-              <div className="flex flex-wrap gap-1">
-                {flight.services.map((service) => (
-                  <span
-                    key={service}
-                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
-                  >
-                    {service === "meal" && "🍽️ Repas"}
-                    {service === "baggage" && "🧳 Bagage"}
-                    {service === "wifi" && "📡 Wi-Fi"}
-                    {service === "entertainment" && "🎬 Divertissement"}
-                    {service === "power" && "🔌 Électricité"}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex space-x-2">
-            {user?.role === "professional" && (
-              <>
-                <button className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300">
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+  // Fonctions de rendu pour AdminInterface
+  const renderListingCards = () => {
+    return filteredListings.map((listing) => (
+      <ListingCard
+        key={listing.id}
+        listing={listing}
+        user={user}
+        isFavorite={favorites.has(listing.id)}
+        onToggleFavorite={toggleFavorite}
+        onToggleAvailability={toggleAvailability}
+        onToggleFeatured={toggleFeatured}
+        onOpenDetailModal={openDetailModal}
+        onOpenEditModal={openEditModal}
+        onDeleteListing={handleDeleteListing}
+        getTypeIcon={getTypeIcon}
+        availableAmenities={availableAmenities}
+      />
+    ));
   };
 
-  // Composant Carte pour Activités
-  const ActivityCard = ({ activity }) => {
-    return (
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-        <div className="relative h-48 overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
-          {activity.image ? (
-            <img
-              src={activity.image}
-              alt={activity.name || activity.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
-              <div className="text-center">
-                <div className="text-6xl mb-2">🎯</div>
-                <div>Activité</div>
-              </div>
-            </div>
-          )}
-
-          {activity.price > 0 && (
-            <div className="absolute bottom-3 left-3">
-              <div className="bg-black/70 text-white px-3 py-2 rounded-xl backdrop-blur-sm">
-                <span className="text-lg font-bold">{activity.price}€</span>
-                <span className="text-sm opacity-90">/personne</span>
-              </div>
-            </div>
-          )}
-
-          {activity.category && (
-            <div className="absolute top-3 left-3">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/90 backdrop-blur-sm text-gray-800">
-                {activity.category}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="p-5">
-          <div className="mb-3">
-            <h3 className="font-bold text-lg line-clamp-1" style={{ color: COLORS.secondaryText }}>
-              {activity.name || activity.title}
-            </h3>
-            
-            {activity.location && (
-              <p className="flex items-center text-sm mt-1" style={{ color: COLORS.logo }}>
-                <MapPin className="w-4 h-4 mr-1" />
-                {activity.location}
-              </p>
-            )}
-          </div>
-
-          {activity.description && (
-            <p className="text-sm mb-4 line-clamp-2" style={{ color: COLORS.smallText }}>
-              {activity.description}
-            </p>
-          )}
-
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-sm" style={{ color: COLORS.logo }}>
-              {activity.duration && (
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span>{activity.duration}</span>
-                </div>
-              )}
-              {activity.capacity && (
-                <div className="flex items-center">
-                  <Users className="w-4 h-4 mr-1" />
-                  <span>{activity.capacity} pers. max</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex space-x-2">
-            <button
-              onClick={() => handleViewActivityDetails(activity)}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center"
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              Détails
-            </button>
-
-            {user?.role === "professional" && (
-              <>
-                <button
-                  onClick={() => handleEditActivity(activity)}
-                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300"
-                  title="Modifier"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDeleteActivity(activity.id)}
-                  className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+  const renderFlightCards = () => {
+    return flights.map((flight) => (
+      <FlightCard
+        key={flight.id}
+        flight={flight}
+        user={user}
+      />
+    ));
   };
 
-  // Modal pour les détails d'activité
-  const ActivityDetailModal = ({ isOpen, onClose, activity }) => {
-    if (!isOpen || !activity) return null;
-
+  const renderActivityCards = () => {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6 border-b" style={{ borderColor: COLORS.separator }}>
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>
-                {activity.name || activity.title}
-              </h3>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            {activity.location && (
-              <p className="flex items-center mt-2" style={{ color: COLORS.logo }}>
-                <MapPin className="w-4 h-4 mr-1" />
-                {activity.location}
-              </p>
-            )}
-          </div>
-
-          <div className="p-6 space-y-6">
-            {activity.image ? (
-              <div className="relative h-64 rounded-xl overflow-hidden">
-                <img
-                  src={activity.image}
-                  alt={activity.name || activity.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="relative h-64 rounded-xl overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
-                <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
-                  <div className="text-center">
-                    <div className="text-6xl mb-2">🎯</div>
-                    <div>Activité</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activity.description && (
-              <div>
-                <h4 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
-                  Description
-                </h4>
-                <p style={{ color: COLORS.smallText }}>{activity.description}</p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activity.category && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-sm" style={{ color: COLORS.logo }}>Catégorie</div>
-                  <div className="font-semibold" style={{ color: COLORS.smallText }}>{activity.category}</div>
-                </div>
-              )}
-              
-              {activity.price > 0 && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-sm" style={{ color: COLORS.logo }}>Prix</div>
-                  <div className="font-semibold" style={{ color: COLORS.primary }}>
-                    {activity.price}€ / personne
-                  </div>
-                </div>
-              )}
-              
-              {activity.duration && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <Clock className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
-                  <div className="text-sm" style={{ color: COLORS.logo }}>Durée</div>
-                  <div className="font-semibold" style={{ color: COLORS.smallText }}>{activity.duration}</div>
-                </div>
-              )}
-              
-              {activity.capacity && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <Users className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
-                  <div className="text-sm" style={{ color: COLORS.logo }}>Capacité</div>
-                  <div className="font-semibold" style={{ color: COLORS.smallText }}>
-                    {activity.capacity} personnes max
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {activity.included && activity.included.length > 0 && (
-              <div>
-                <h4 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
-                  Inclus dans l'activité
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {activity.included.map((item, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activity.requirements && (
-              <div>
-                <h4 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
-                  Prérequis
-                </h4>
-                <p style={{ color: COLORS.smallText }}>{activity.requirements}</p>
-              </div>
-            )}
-
-            <div className="flex space-x-4 pt-4">
-              <button
-                onClick={onClose}
-                className="flex-1 py-3 px-6 border-2 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
-                style={{ borderColor: COLORS.separator }}
-              >
-                Fermer
-              </button>
-              {user?.role === "professional" && (
-                <>
-                  <button
-                    onClick={() => {
-                      onClose();
-                      handleEditActivity(activity);
-                    }}
-                    className="flex-1 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
-                    style={{ backgroundColor: COLORS.primary }}
-                  >
-                    Modifier
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm("Êtes-vous sûr de vouloir supprimer cette activité ?")) {
-                        handleDeleteActivity(activity.id);
-                        onClose();
-                      }
-                    }}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
-                  >
-                    Supprimer
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Interface Admin avec cartes
-  const AdminInterface = () => {
-    const currentContentType = contentTypeOptions.find(
-      (opt) => opt.id == contentType
-    );
-
-    return (
-      <div className="space-y-6">
-        <div className="lg:flex grid gap-4 justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold" style={{ color: COLORS.secondaryText }}>
-              {currentContentType?.label || "Gestion du Tourisme"}
-            </h1>
-            <p style={{ color: COLORS.logo }}>
-              {currentContentType?.description ||
-                "Administrez vos services touristiques"}
-            </p>
-          </div>
-
-          <div className="grid gap-4 lg:flex items-center space-x-4">
-            <div className="relative">
-              <button
-                onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
-                className="bg-white border-2 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
-                style={{ borderColor: COLORS.separator }}
-              >
-                <div className="flex items-center">
-                  {currentContentType?.icon && (
-                    <currentContentType.icon className="w-5 h-5 mr-3" />
-                  )}
-                  <span style={{ color: COLORS.smallText }}>{currentContentType?.label || "Sélectionner"}</span>
-                </div>
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </button>
-
-              {showContentTypeDropdown && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border z-50" style={{ borderColor: COLORS.separator }}>
-                  <div className="p-2">
-                    {contentTypeOptions.map((option) => {
-                      const IconComponent = option.icon;
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={() => {
-                            setContentType(option.id);
-                            setShowContentTypeDropdown(false);
-                          }}
-                          className="w-full flex items-center px-4 py-4 text-left rounded-lg transition-all duration-300 border-b last:border-b-0"
-                          style={{ 
-                            color: COLORS.smallText,
-                            borderColor: COLORS.separator
-                          }}
-                        >
-                          <IconComponent className="w-6 h-6 mr-4" style={{ color: COLORS.primary }} />
-                          <div className="flex-1">
-                            <div className="font-semibold">{option.label}</div>
-                            <div className="text-sm" style={{ color: COLORS.logo }}>
-                              {option.description}
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {user?.role === "professional" && (
-              <button
-                onClick={() => {
-                  if (contentType === "accommodations") {
-                    setEditingListing(null);
-                    setShowAdminModal(true);
-                  } else if (contentType === "touristic_places") {
-                    setEditingListing(null);
-                    setShowAdminModal(true);
-                  } else if (contentType === "flights") {
-                    setShowFlightModal(true);
-                  } else if (contentType === "activities") {
-                    setEditingActivity(null);
-                    setShowActivitiesModal(true);
-                  }
-                }}
-                className="text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
-                style={{ backgroundColor: COLORS.primary }}
-              >
-                <PlusCircle className="w-5 h-5 mr-2" />
-                {contentType === "accommodations" && "Ajouter un hébergement"}
-                {contentType === "touristic_places" && "Ajouter un lieu touristique"}
-                {contentType === "flights" && "Ajouter un vol"}
-                {contentType === "activities" && "Ajouter une activité"}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {stats && contentType !== "flights" && contentType !== "activities" && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Building className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {stats.totalListings || 0}
-                  </div>
-                  <div style={{ color: COLORS.logo }}>
-                    {contentType === "accommodations"
-                      ? "Hébergements"
-                      : contentType === "touristic_places"
-                        ? "Lieux touristiques"
-                        : "Total"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Star className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {stats.averageRating?.toFixed(2) || "0.00"}
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Note moyenne</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <TrendingUp className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {stats.availableListings || 0}
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Disponibles</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Users className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {stats.totalBookings || 0}
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Réservations</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {contentType === "flights" && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Plane className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>{flights.length}</div>
-                  <div style={{ color: COLORS.logo }}>Vols actifs</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <TrendingUp className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {flights.length > 0
-                      ? flights.reduce(
-                        (total, flight) =>
-                          total + (flight.availableSeats || 0),
-                        0
-                      )
-                      : 0}
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Places disponibles</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Star className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {flights.length > 0
-                      ? Math.min(...flights.map((f) => f.prix || Infinity)) ===
-                        Infinity
-                        ? 0
-                        : Math.min(...flights.map((f) => f.prix || Infinity))
-                      : 0}
-                    €
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Prix minimum</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Users className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {flights.length > 0
-                      ? flights.reduce(
-                        (total, flight) => total + (flight.nbrPersonne || 0),
-                        0
-                      )
-                      : 0}
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Réservations</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {contentType === "activities" && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Mountain className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>{activities.length}</div>
-                  <div style={{ color: COLORS.logo }}>Activités</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <TrendingUp className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {activities.length > 0
-                      ? (activities.reduce(
-                        (total, activity) => total + (activity.price || 0),
-                        0
-                      ) / activities.length).toFixed(2)
-                      : "0.00"}
-                    €
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Prix moyen</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Star className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {activities.length > 0
-                      ? Math.min(...activities.map((a) => a.price || Infinity)) ===
-                        Infinity
-                        ? 0
-                        : Math.min(...activities.map((a) => a.price || Infinity))
-                      : 0}
-                    €
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Prix minimum</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
-              <div className="flex items-center">
-                <Users className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
-                    {activities.length > 0
-                      ? activities.filter((a) => a.available !== false).length
-                      : 0}
-                  </div>
-                  <div style={{ color: COLORS.logo }}>Disponibles</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {loading || flightsLoading || activitiesLoading ? (
-          <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
-            <img src="/loading.gif" alt="" className='w-24 h-24' />
-            <p className="mt-4 text-xl font-semibold" style={{ color: COLORS.smallText }}>
-              Chargement...
-            </p>
-          </div>
-        ) : (
-          <>
-            {(contentType === "accommodations" ||
-              contentType === "touristic_places") && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredListings.map((listing) => (
-                      <ListingCard key={listing.id} listing={listing} />
-                    ))}
-                  </div>
-
-                  {filteredListings.length === 0 && (
-                    <div className="text-center py-12">
-                      {contentType === "accommodations" ? (
-                        <Building className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
-                      ) : (
-                        <Landmark className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
-                      )}
-                      <h3 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
-                        {contentType === "accommodations"
-                          ? "Aucun hébergement trouvé"
-                          : "Aucun lieu touristique trouvé"}
-                      </h3>
-                      <p className="mb-4" style={{ color: COLORS.logo }}>
-                        {listings.length === 0
-                          ? `Commencez par ajouter votre premier ${contentType === "accommodations"
-                            ? "hébergement"
-                            : "lieu touristique"
-                          }.`
-                          : "Aucun élément ne correspond à vos critères de recherche."}
-                      </p>
-                      {listings.length === 0 && user?.role === "professional" && (
-                        <button
-                          onClick={() => {
-                            setEditingListing(null);
-                            setShowAdminModal(true);
-                          }}
-                          className="text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
-                          style={{ backgroundColor: COLORS.primary }}
-                        >
-                          <PlusCircle className="w-5 h-5 mr-2" />
-                          {contentType === "accommodations"
-                            ? "Ajouter un hébergement"
-                            : "Ajouter un lieu touristique"}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-
-            {contentType === "flights" && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {flights.map((flight) => (
-                    <FlightCard key={flight.id} flight={flight} />
-                  ))}
-                </div>
-
-                {flights.length === 0 && (
-                  <div className="text-center py-12">
-                    <Plane className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
-                    <h3 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
-                      Aucun vol trouvé
-                    </h3>
-                    <p className="mb-4" style={{ color: COLORS.logo }}>
-                      {user?.role === "professional"
-                        ? "Commencez par ajouter votre premier vol."
-                        : "Aucun vol disponible pour le moment."}
-                    </p>
-                    {user?.role === "professional" && (
-                      <button
-                        onClick={() => setShowFlightModal(true)}
-                        className="text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
-                        style={{ backgroundColor: COLORS.primary }}
-                      >
-                        <PlusCircle className="w-5 h-5 mr-2" />
-                        Ajouter un vol
-                      </button>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-
-        {contentType === "activities" && (
-  <div className="space-y-8">
-    {/* En-tête avec statistiques */}
-    <div className="rounded-2xl p-6 border" style={{ backgroundColor: `${COLORS.primary}10`, borderColor: COLORS.separator }}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>Gestion des Activités</h2>
-          <p className="mt-1" style={{ color: COLORS.logo }}>
-            Gérez vos activités touristiques et catégories
-          </p>
-        </div>
-        
-        {user?.role === "professional" && (
-          <div className="flex items-center space-x-3">
-            <div className="hidden md:flex items-center space-x-2 px-4 py-2 bg-white rounded-xl border" style={{ borderColor: COLORS.separator }}>
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-sm" style={{ color: COLORS.smallText }}>
-                {activities.filter(a => a.isActive !== false).length} actives
-              </span>
-            </div>
-            <button
-              onClick={() => {
-                setEditingActivity(null);
-                setShowActivitiesModal(true);
-              }}
-              className="text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl"
-              style={{ backgroundColor: COLORS.primary }}
-            >
-              <PlusCircle className="w-5 h-5" />
-              <span>Nouvelle activité</span>
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-
-    {/* Cartes d'activités avec effet de vitrine */}
-    {activitiesLoading ? (
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-pulse">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-white rounded-2xl shadow-sm border overflow-hidden" style={{ borderColor: COLORS.separator }}>
-            <div className="h-48 bg-gray-200"></div>
-            <div className="p-6 space-y-4">
-              <div className="h-6 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="flex space-x-2">
-                <div className="h-8 bg-gray-200 rounded w-20"></div>
-                <div className="h-8 bg-gray-200 rounded w-20"></div>
-              </div>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        {activities.map((activity) => (
+          <ActivityCard
+            key={activity.id}
+            activity={activity}
+            user={user}
+            onViewDetails={handleViewActivityDetails}
+            onEdit={handleEditActivity}
+            onDelete={handleDeleteActivity}
+          />
         ))}
       </div>
-    ) : activities.length > 0 ? (
-      <>
-        {/* Filtres rapides */}
-        <div className="flex flex-wrap gap-3">
-          <button className="px-4 py-2 rounded-lg font-medium transition-colors" style={{ backgroundColor: `${COLORS.primary}20`, color: COLORS.primary }}>
-            Toutes ({activities.length})
-          </button>
-          <button className="px-4 py-2 rounded-lg font-medium transition-colors" style={{ backgroundColor: `${COLORS.separator}50`, color: COLORS.smallText }}>
-            Actives ({activities.filter(a => a.isActive !== false).length})
-          </button>
-          <button className="px-4 py-2 rounded-lg font-medium transition-colors" style={{ backgroundColor: `${COLORS.separator}50`, color: COLORS.smallText }}>
-            Inactives ({activities.filter(a => a.isActive === false).length})
-          </button>
-        </div>
+    );
+  };
 
-        {/* Grille d'activités améliorée */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {activities.map((activity) => (
-            <div 
-              key={activity.id} 
-              className="group bg-white rounded-2xl shadow-lg border overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-              style={{ borderColor: COLORS.separator }}
-            >
-              {/* En-tête avec image et badge de statut */}
-              <div className="relative h-56 overflow-hidden">
-                {activity.image ? (
-                  <img
-                    src={activity.image}
-                    alt={activity.name || activity.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
-                    <div className="text-center text-white">
-                      <div className="text-5xl mb-2">🎯</div>
-                      <div className="font-medium">Activité</div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Badge de statut */}
-                <div className="absolute top-4 left-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${activity.isActive === false
-                    ? 'bg-gray-100 text-gray-800'
-                    : 'bg-green-100 text-green-800'
-                  }`}>
-                    {activity.isActive === false ? 'Inactive' : 'Active'}
-                  </span>
-                </div>
-                
-                {/* Prix en overlay */}
-                {activity.price > 0 && (
-                  <div className="absolute bottom-4 left-4">
-                    <div className="bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-xl">
-                      <span className="text-xl font-bold">{activity.price}€</span>
-                      <span className="text-sm opacity-90">/personne</span>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Icône de catégorie */}
-                {activity.icon && (
-                  <div className="absolute top-4 right-4">
-                    <div 
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg"
-                      style={{ backgroundColor: activity.color || COLORS.primary }}
-                    >
-                      <span className="font-bold">{activity.icon.charAt(0)}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Contenu de la carte */}
-              <div className="p-6">
-                {/* Titre et catégorie */}
-                <div className="mb-4">
-                  <div className="flex items-start justify-between">
-                    <h3 className="font-bold text-xl line-clamp-1" style={{ color: COLORS.secondaryText }}>
-                      {activity.name || activity.title}
-                    </h3>
-                    <div className="flex space-x-2">
-                      {user?.role === "professional" && (
-                        <>
-                          <button
-                            onClick={() => handleEditActivity(activity)}
-                            className="p-2 rounded-lg transition-colors"
-                            style={{ backgroundColor: `${COLORS.primary}15`, color: COLORS.primary }}
-                            title="Modifier"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteActivity(activity.id)}
-                            className="p-2 rounded-lg transition-colors"
-                            style={{ backgroundColor: `${COLORS.primary}15`, color: COLORS.primary }}
-                            title="Supprimer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {activity.category && (
-                    <div className="mt-2">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" style={{ backgroundColor: `${COLORS.primary}20`, color: COLORS.primary }}>
-                        {activity.category}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Description */}
-                {activity.description && (
-                  <p className="text-sm mb-4 line-clamp-2" style={{ color: COLORS.smallText }}>
-                    {activity.description}
-                  </p>
-                )}
-
-                {/* Métadonnées */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  {activity.location && (
-                    <div className="flex items-center" style={{ color: COLORS.logo }}>
-                      <MapPin className="w-4 h-4 mr-2" />
-                      <span className="text-sm truncate">{activity.location}</span>
-                    </div>
-                  )}
-                  
-                  {activity.duration && (
-                    <div className="flex items-center" style={{ color: COLORS.logo }}>
-                      <Clock className="w-4 h-4 mr-2" />
-                      <span className="text-sm">{activity.duration}</span>
-                    </div>
-                  )}
-                  
-                  {activity.capacity && (
-                    <div className="flex items-center" style={{ color: COLORS.logo }}>
-                      <Users className="w-4 h-4 mr-2" />
-                      <span className="text-sm">{activity.capacity} pers.</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Inclus dans l'activité */}
-                {activity.included && activity.included.length > 0 && (
-                  <div className="mb-6">
-                    <p className="text-xs mb-2" style={{ color: COLORS.logo }}>Inclus :</p>
-                    <div className="flex flex-wrap gap-1">
-                      {activity.included.slice(0, 3).map((item, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-green-50 text-green-700"
-                        >
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          {item}
-                        </span>
-                      ))}
-                      {activity.included.length > 3 && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-600">
-                          +{activity.included.length - 3} plus
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Boutons d'action */}
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => handleViewActivityDetails(activity)}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600"
-                    style={{ color: COLORS.smallText }}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Détails
-                  </button>
-                  
-                  {!user?.role === "professional" && activity.price > 0 && (
-                    <button className="px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-medium text-sm transition-all duration-300">
-                      Réserver
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination ou compteur */}
-        <div className="flex items-center justify-between pt-8 border-t" style={{ borderColor: COLORS.separator }}>
-          <div style={{ color: COLORS.logo }}>
-            Affichage de <span className="font-semibold" style={{ color: COLORS.smallText }}>{activities.length}</span> activité{activities.length > 1 ? 's' : ''}
-          </div>
-          <div className="flex items-center space-x-2">
-            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50" style={{ borderColor: COLORS.separator, color: COLORS.smallText }}>
-              ← Précédent
-            </button>
-            <span className="px-4 py-2 rounded-lg font-medium text-white" style={{ backgroundColor: COLORS.primary }}>1</span>
-            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors" style={{ borderColor: COLORS.separator, color: COLORS.smallText }}>
-              Suivant →
-            </button>
-          </div>
-        </div>
-      </>
-    ) : (
-      /* État vide amélioré */
-      <div className="rounded-2xl border-2 border-dashed p-12 text-center" style={{ backgroundColor: `${COLORS.separator}20`, borderColor: COLORS.separator }}>
-        <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}20, ${COLORS.primary}20)` }}>
-          <div className="text-4xl">🎯</div>
-        </div>
-        <h3 className="text-2xl font-bold mb-3" style={{ color: COLORS.secondaryText }}>
-          Aucune activité disponible
-        </h3>
-        <p className="max-w-md mx-auto mb-8" style={{ color: COLORS.logo }}>
-          {user?.role === "professional"
-            ? "Commencez par créer votre première activité pour enrichir votre catalogue touristique."
-            : "Revenez plus tard pour découvrir nos activités passionnantes."}
-        </p>
-        {user?.role === "professional" && (
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => {
-                setEditingActivity(null);
-                setShowActivitiesModal(true);
-              }}
-              className="text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg hover:shadow-xl"
-              style={{ backgroundColor: COLORS.primary }}
-            >
-              <PlusCircle className="w-6 h-6" />
-              <span>Créer une activité</span>
-            </button>
-            <button
-              onClick={() => loadActivities()}
-              className="px-8 py-4 border-2 rounded-xl font-semibold transition-all duration-300"
-              style={{ borderColor: COLORS.separator, color: COLORS.smallText }}
-            >
-              <RefreshCw className="w-5 h-5 inline mr-2" />
-              Rafraîchir
-            </button>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-)}
-          </>
-        )}
+  const renderNaturePatrimoineCards = () => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {naturePatrimoine.map((item) => (
+          <NaturePatrimoineCard
+            key={item.id}
+            item={item}
+            onViewDetails={handleViewNatureDetails}
+            onEdit={handleEditNaturePatrimoine}
+            onDelete={handleDeleteNaturePatrimoine}
+          />
+        ))}
       </div>
     );
+  };
+
+  const handleContentTypeChange = (type: string) => {
+    setContentType(type);
+  };
+
+  const handleAddClick = () => {
+    if (contentType === "accommodations") {
+      setEditingListing(null);
+      setShowAdminModal(true);
+    } else if (contentType === "touristic_places") {
+      setEditingListing(null);
+      setShowAdminModal(true);
+    } else if (contentType === "flights") {
+      setShowFlightModal(true);
+    } else if (contentType === "activities") {
+      setEditingActivity(null);
+      setShowActivitiesModal(true);
+    } else if (contentType === "nature_patrimoine") {
+      setEditingNaturePatrimoine(null);
+      setShowNaturePatrimoineModal(true);
+    }
   };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: COLORS.lightBg }}>
       <div className="container mx-auto px-4 lg:p-0 py-4">
-        <AdminInterface />
+        <AdminInterface
+          contentType={contentType}
+          contentTypeOptions={contentTypeOptions}
+          stats={stats}
+          flights={flights}
+          activities={activities}
+          naturePatrimoine={naturePatrimoine} // ← Doit être présent
+          listings={listings}
+          filteredListings={filteredListings}
+          loading={loading}
+          flightsLoading={flightsLoading}
+          activitiesLoading={activitiesLoading}
+          naturePatrimoineLoading={naturePatrimoineLoading} // ← Doit être présent
+          user={user}
+          onContentTypeChange={handleContentTypeChange}
+          onAddClick={handleAddClick}
+          onRefreshActivities={loadActivities}
+          renderListingCards={renderListingCards}
+          renderFlightCards={renderFlightCards}
+          renderActivityCards={renderActivityCards}
+          renderNaturePatrimoineCards={renderNaturePatrimoineCards} // ← Doit être présent
+        />
       </div>
 
+      {/* Modals */}
       <AdminModal
         isOpen={showAdminModal}
         onClose={handleCloseAdminModal}
@@ -1974,6 +964,9 @@ export default function TourismPage() {
         isOpen={showActivityDetailModal}
         onClose={handleCloseActivityDetailModal}
         activity={selectedActivity}
+        user={user}
+        onEdit={handleEditActivity}
+        onDelete={handleDeleteActivity}
       />
 
       {showFlightModal && (
@@ -1981,7 +974,6 @@ export default function TourismPage() {
           isOpen={showFlightModal}
           onClose={() => setShowFlightModal(false)}
           onSubmit={(flightData) => {
-            // console.log("Nouveau vol:", flightData);
             toast.success("Vol ajouté avec succès");
             setShowFlightModal(false);
             loadFlights();
@@ -1995,12 +987,36 @@ export default function TourismPage() {
           onClose={() => setShowActivitiesModal(false)}
           editingActivity={editingActivity}
           onSubmit={(activitesData) => {
-            // console.log("Nouvelle activité:", activitesData);
             toast.success(editingActivity ? "Activité modifiée avec succès" : "Activité ajoutée avec succès");
             setShowActivitiesModal(false);
             setEditingActivity(null);
             loadActivities();
           }}
+        />
+      )}
+
+      {showNaturePatrimoineModal && (
+        <AjoutNaturePatrimoineModal
+          isOpen={showNaturePatrimoineModal}
+          onClose={() => setShowNaturePatrimoineModal(false)}
+          editingItem={editingNaturePatrimoine}
+          onSubmit={(data) => {
+            toast.success(editingNaturePatrimoine ? "Site modifié avec succès" : "Site ajouté avec succès");
+            setShowNaturePatrimoineModal(false);
+            setEditingNaturePatrimoine(null);
+            loadNaturePatrimoine();
+            // refreshSites();
+          }}
+        />
+      )}
+
+      {showNatureDetailModal && selectedNaturePatrimoine && (
+        <NatureDetailModal
+          isOpen={showNatureDetailModal}
+          onClose={handleCloseNatureDetailModal}
+          item={selectedNaturePatrimoine}
+          onEdit={handleEditNaturePatrimoine}
+          onDelete={handleDeleteNaturePatrimoine}
         />
       )}
 

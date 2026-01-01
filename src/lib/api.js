@@ -1,48 +1,54 @@
 // lib/api.js
 import axios from "axios";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+import AuthService from "@/services/authService";
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
 });
-export default api;
 
-// Intercepteur pour ajouter le token d'authentification
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("auth-token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// Intercepteur de requête (Injecte le token)
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("auth-token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-// Intercepteur pour gérer les erreurs globales
+// Intercepteur de réponse (Gère le rafraîchissement automatique)
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const currentPath = window.location.pathname;
-      if (
-        currentPath != "/login/particular" ||
-        currentPath != "/login/professional"
-      ) {
-        //window.location.href = "/login";
+  async (error) => {
+    const originalRequest = error.config;
+
+    // ✅ CORRECTION: Exclure les routes d'auth du refresh automatique
+    const isAuthRoute = originalRequest.url.includes("/auth/");
+
+    // Si erreur 401 et que ce n'est pas déjà une tentative de rafraîchissement
+    // ET que ce n'est pas une route d'authentification
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthRoute // 🔥 IMPORTANT: Ne pas refresh sur les routes auth
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        // Appeler la méthode de refresh
+        const newToken = await AuthService.refreshToken();
+
+        // Mettre à jour le header et relancer la requête initiale
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Si le refresh échoue (token expiré ou révoqué), déconnexion
+        AuthService.logout();
+        return Promise.reject(refreshError);
       }
-      console.log("erreur", error);
     }
     return Promise.reject(error);
   }
 );
+export default api;
+
 // Services pour les demandes immobilières
 export const demandeImmobilierAPI = {
   // Récupérer toutes les demandes (admin)
@@ -198,8 +204,24 @@ export const tourismeAPI = {
 
   // Méthode de secours
   getListings: (params = {}) => api.get("/admin/tourisme", { params }),
-};
 
+
+  getNaturePatrimoine: (params = {}) => 
+    api.get("/patrimoine", { params }), // Récupère tous les patrimoines
+  
+  getNaturePatrimoineById: (id) => 
+    api.get(`/patrimoine/${id}`), // Récupère un patrimoine spécifique
+  
+  createNaturePatrimoine: (data) => 
+    api.post("/patrimoine", data), // Crée un nouveau patrimoine
+  
+  updateNaturePatrimoine: (id, data) => 
+    api.put(`/patrimoine/${id}`, data), // Met à jour un patrimoine
+  
+  deleteNaturePatrimoine: (id) => 
+    api.delete(`/patrimoine/${id}`), // Supprime un patrimoine
+  
+};
 // Services pour l'upload
 export const uploadAPI = {
   // Upload d'images pour le tourisme
@@ -221,7 +243,6 @@ export const uploadAPI = {
   // Supprimer une image
   deleteImage: (path) => api.delete("/upload/image", { data: { path } }),
 };
-
 // Services pour les publicités
 export const advertisementsAPI = {
   // Récupérer toutes les publicités (Admin)
@@ -431,7 +452,6 @@ export const planningAPI = {
   // Supprimer un rendez-vous
   deleteAppointment: (id) => api.delete(`/planning/${id}`),
 };
-// Ajoutez cette section dans votre lib/api.js
 
 // Services pour les commandes
 export const ordersAPI = {
@@ -483,6 +503,7 @@ export const offresExclusivesAPI = {
   // Récupérer les catégories
   getCategories: () => api.get("/offres-exclusives/categories"),
 };
+
 export const touristicPlaceBookingsAPI = {
   // Créer une réservation
   createBooking: (userId, data) =>
@@ -566,6 +587,7 @@ export const bookingService = {
     return `data:image/svg+xml;base64,${btoa(JSON.stringify(data))}`;
   },
 };
+
 export const flightsAPI = {
   // Récupérer tous les vols
   getFlights: (params = {}) => api.get("/vol", { params }),
@@ -592,7 +614,7 @@ export const flightsAPI = {
   updateReservationStatus: (id, status) =>
     api.put(`/Vol/reservations/${id}/status`, { status }),
 };
-// Services pour les commandes professionnelles
+
 // Services pour les commandes professionnelles
 export const ordersProAPI = {
   // Récupérer les commandes du pro avec filtres
@@ -611,3 +633,137 @@ export const ordersProAPI = {
   // Récupérer les détails d'une commande spécifique
   getOrderDetails: (orderId) => api.get(`/orders/pro/${orderId}`),
 };
+
+// Fonction pour uploader des fichiers avec FormData
+export const uploadPortraitFiles = async (files, portraitId = null) => {
+  const formData = new FormData();
+
+  // Ajouter les images
+  if (files.images && files.images.length > 0) {
+    files.images.forEach((image) => {
+      formData.append("images", image);
+    });
+  }
+
+  // Ajouter l'audio
+  if (files.interviewAudio) {
+    formData.append("interviewAudio", files.interviewAudio);
+  }
+
+  // Si c'est une mise à jour, ajouter l'ID
+  if (portraitId) {
+    formData.append("portraitId", portraitId);
+  }
+
+  const response = await api.post("/portraits/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
+
+// Fonctions spécifiques pour les portraits
+export const portraitsAPI = {
+  // Récupérer les portraits
+  getAll: (params = {}) => api.get("/portraits", { params }),
+
+  // Récupérer un portrait spécifique
+  getById: (id) => api.get(`/portraits/${id}`),
+
+  // Créer un portrait
+  create: (data, files = null) => {
+    if (files) {
+      const formData = new FormData();
+
+      // Ajouter les données JSON
+      Object.keys(data).forEach((key) => {
+        if (Array.isArray(data[key])) {
+          formData.append(key, JSON.stringify(data[key]));
+        } else if (data[key] !== null && data[key] !== undefined) {
+          formData.append(key, data[key]);
+        }
+      });
+
+      // Ajouter les fichiers
+      if (files.images && files.images.length > 0) {
+        files.images.forEach((image) => {
+          formData.append("images", image);
+        });
+      }
+
+      if (files.interviewAudio) {
+        formData.append("interviewAudio", files.interviewAudio);
+      }
+
+      return api.post("/portraits", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } else {
+      return api.post("/portraits", data);
+    }
+  },
+
+  // Mettre à jour un portrait
+  update: (id, data, files = null) => {
+    if (files) {
+      const formData = new FormData();
+
+      // Ajouter les données JSON
+      Object.keys(data).forEach((key) => {
+        if (Array.isArray(data[key])) {
+          formData.append(key, JSON.stringify(data[key]));
+        } else if (data[key] !== null && data[key] !== undefined) {
+          formData.append(key, data[key]);
+        }
+      });
+
+      // Ajouter les fichiers
+      if (files.images && files.images.length > 0) {
+        files.images.forEach((image) => {
+          formData.append("images", image);
+        });
+      }
+
+      if (files.interviewAudio) {
+        formData.append("interviewAudio", files.interviewAudio);
+      }
+
+      return api.put(`/portraits/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } else {
+      return api.put(`/portraits/${id}`, data);
+    }
+  },
+
+  // Supprimer un portrait
+  delete: (id) => api.delete(`/portraits/${id}`),
+
+  // Statistiques
+  getStats: () => api.get("/portraits/stats"),
+
+  // Commentaires
+  getComments: (portraitId, params = {}) =>
+    api.get(`/portraits/${portraitId}/comments`, { params }),
+
+  createComment: (portraitId, data) =>
+    api.post(`/portraits/${portraitId}/comments`, data),
+
+  likeComment: (portraitId, commentId) =>
+    api.post(`/portraits/${portraitId}/comments/${commentId}/like`),
+
+  // Partage
+  recordShare: (portraitId, platform) =>
+    api.post(`/portraits/${portraitId}/share`, { platform }),
+
+  // Écoute
+  recordListen: (portraitId, data) =>
+    api.post(`/portraits/${portraitId}/listen`, data),
+};
+

@@ -1,4 +1,3 @@
-// components/pro/EventModal.tsx
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
@@ -20,7 +19,8 @@ import {
   CreditCard,
   Percent,
   Timer,
-  Star
+  Star,
+  AlertTriangle
 } from 'lucide-react';
 
 // Interface pour les données de l'événement
@@ -28,41 +28,44 @@ export interface EventFormData {
   id?: number;
   title: string;
   description: string;
-  date: string;
+  date: string; // Format: "YYYY-MM-DD"
   startTime: string;
   endTime: string;
   location: string;
-  address: string;
-  city: string;
-  postalCode: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
   category: string;
   subCategory?: string;
   capacity: number;
   price: number;
   discountPrice?: number;
   currency: string;
-  image: string;
-  images: string[];
+  image?: string; // Doit être une URL valide ou undefined
+  images?: string[];
   featured: boolean;
-  status: 'draft' | 'active' | 'upcoming' | 'completed' | 'cancelled';
-  organizer: string;
-  contactEmail: string;
-  contactPhone: string;
+  status: 'DRAFT' | 'ACTIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED' | 'ARCHIVED';
+  organizer?: string;
+  contactEmail?: string; // Soit email valide, soit undefined
+  contactPhone?: string;
   website?: string;
-  tags: string[];
+  tags?: string[];
   requirements?: string;
   highlights?: string[];
-  duration: string;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  duration?: string;
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
   targetAudience?: string[];
   includes?: string[];
   notIncludes?: string[];
   cancellationPolicy?: string;
   refundPolicy?: string;
-  visibility: 'public' | 'private' | 'invite_only';
-  registrationDeadline?: string;
-  earlyBirdDeadline?: string;
+  visibility: 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY';
+  registrationDeadline?: string; // Format: "YYYY-MM-DD"
+  earlyBirdDeadline?: string; // Format: "YYYY-MM-DD"
   earlyBirdPrice?: number;
+  participants?: number;
+  revenue?: number;
+  userId?: string;
 }
 
 interface EventModalProps {
@@ -87,24 +90,33 @@ const SUB_CATEGORIES: Record<string, string[]> = {
   'Culture': ['Visite guidée', 'Exposition', 'Conférence', 'Spectacle', 'Tradition']
 };
 
-// Public cible
-const TARGET_AUDIENCE = [
-  'Tous publics',
-  'Adultes',
-  'Enfants',
-  'Familles',
-  'Professionnels',
-  'Étudiants',
-  'Seniors',
-  'Couples'
-];
-
 // Niveaux de difficulté
 const DIFFICULTY_LEVELS = [
-  { value: 'easy', label: 'Facile', color: 'bg-green-100 text-green-800' },
-  { value: 'medium', label: 'Moyen', color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'hard', label: 'Difficile', color: 'bg-red-100 text-red-800' }
+  { value: 'EASY', label: 'Facile', color: 'bg-green-100 text-green-800' },
+  { value: 'MEDIUM', label: 'Moyen', color: 'bg-yellow-100 text-yellow-800' },
+  { value: 'HARD', label: 'Difficile', color: 'bg-red-100 text-red-800' }
 ];
+
+// Types de visibilité
+const VISIBILITY_TYPES = [
+  { value: 'PUBLIC', label: 'Public' },
+  { value: 'PRIVATE', label: 'Privé' },
+  { value: 'INVITE_ONLY', label: 'Sur invitation' }
+];
+
+// Statuts d'événement
+const STATUS_TYPES = [
+  { value: 'DRAFT', label: 'Brouillon' },
+  { value: 'ACTIVE', label: 'Actif' },
+  { value: 'UPCOMING', label: 'À venir' },
+  { value: 'COMPLETED', label: 'Terminé' },
+  { value: 'CANCELLED', label: 'Annulé' },
+  { value: 'ARCHIVED', label: 'Archivé' }
+];
+
+interface FormErrors {
+  [key: string]: string;
+}
 
 const EventModal: React.FC<EventModalProps> = ({
   isOpen,
@@ -113,7 +125,7 @@ const EventModal: React.FC<EventModalProps> = ({
   initialData,
   mode
 }) => {
-  // Données initiales par défaut
+  // Données initiales par défaut basées sur le modèle Prisma
   const defaultFormData: EventFormData = {
     title: '',
     description: '',
@@ -121,26 +133,19 @@ const EventModal: React.FC<EventModalProps> = ({
     startTime: '14:00',
     endTime: '17:00',
     location: '',
-    address: '',
-    city: '',
-    postalCode: '',
     category: '',
     capacity: 20,
     price: 0,
     currency: 'EUR',
-    image: '',
-    images: [],
     featured: false,
-    status: 'draft',
-    organizer: '',
-    contactEmail: '',
-    contactPhone: '',
+    status: 'DRAFT',
+    visibility: 'PUBLIC',
     tags: [],
-    duration: '3 heures',
-    visibility: 'public',
-    registrationDeadline: '',
-    earlyBirdDeadline: '',
-    earlyBirdPrice: 0
+    highlights: [],
+    includes: [],
+    notIncludes: [],
+    targetAudience: [],
+    images: []
   };
 
   const [formData, setFormData] = useState<EventFormData>(defaultFormData);
@@ -151,45 +156,133 @@ const EventModal: React.FC<EventModalProps> = ({
   const [newHighlight, setNewHighlight] = useState('');
   const [newInclude, setNewInclude] = useState('');
   const [newNotInclude, setNewNotInclude] = useState('');
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Initialiser le formulaire avec les données existantes
   useEffect(() => {
     if (mode === 'edit' && initialData) {
-      setFormData(initialData);
-      setImagePreview(initialData.image);
+      const formattedData = {
+        ...initialData,
+        status: initialData.status || 'DRAFT',
+        visibility: initialData.visibility || 'PUBLIC',
+        tags: initialData.tags || [],
+        highlights: initialData.highlights || [],
+        includes: initialData.includes || [],
+        notIncludes: initialData.notIncludes || [],
+        targetAudience: initialData.targetAudience || [],
+        images: initialData.images || []
+      };
+      
+      setFormData(formattedData);
+      setImagePreview(initialData.image || '');
       setAdditionalImages(initialData.images || []);
     } else {
       setFormData(defaultFormData);
       setImagePreview('');
       setAdditionalImages([]);
     }
+    setFormErrors({});
   }, [mode, initialData, isOpen]);
 
-  // Calculer la durée automatiquement
-  useEffect(() => {
+  // Valider les champs requis selon le modèle Prisma
+  const validateForm = (): boolean => {
+    const errors: FormErrors = {};
+    
+    // Champs requis dans le modèle Prisma
+    if (!formData.title.trim()) errors.title = 'Le titre est requis';
+    if (!formData.description.trim()) errors.description = 'La description est requise';
+    if (!formData.date) errors.date = 'La date est requise';
+    if (!formData.startTime) errors.startTime = "L'heure de début est requise";
+    if (!formData.endTime) errors.endTime = "L'heure de fin est requise";
+    if (!formData.location.trim()) errors.location = 'Le lieu est requis';
+    if (!formData.category) errors.category = 'La catégorie est requise';
+    if (formData.capacity <= 0) errors.capacity = 'La capacité doit être supérieure à 0';
+    if (formData.price < 0) errors.price = 'Le prix ne peut pas être négatif';
+    
+    // Validation des heures
     if (formData.startTime && formData.endTime) {
       const start = new Date(`2000-01-01T${formData.startTime}`);
       const end = new Date(`2000-01-01T${formData.endTime}`);
-      const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-      
-      if (diffHours > 0) {
-        if (diffHours < 1) {
-          setFormData(prev => ({ ...prev, duration: `${Math.round(diffHours * 60)} minutes` }));
-        } else if (diffHours === 1) {
-          setFormData(prev => ({ ...prev, duration: '1 heure' }));
-        } else if (diffHours < 24) {
-          setFormData(prev => ({ ...prev, duration: `${Math.round(diffHours)} heures` }));
+      if (start >= end) errors.endTime = "L'heure de fin doit être après l'heure de début";
+    }
+    
+    // Validation de la date
+    if (formData.date) {
+      const eventDate = new Date(formData.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (eventDate < today) errors.date = "La date ne peut pas être dans le passé";
+    }
+    
+    // Validation des deadlines
+    if (formData.registrationDeadline) {
+      const regDeadline = new Date(formData.registrationDeadline);
+      const eventDate = new Date(formData.date);
+      if (regDeadline > eventDate) {
+        errors.registrationDeadline = 'La date limite d\'inscription ne peut pas être après la date de l\'événement';
+      }
+    }
+    
+    if (formData.earlyBirdDeadline) {
+      const earlyBirdDeadline = new Date(formData.earlyBirdDeadline);
+      const eventDate = new Date(formData.date);
+      if (earlyBirdDeadline > eventDate) {
+        errors.earlyBirdDeadline = 'La date limite early bird ne peut pas être après la date de l\'événement';
+      }
+    }
+    
+    // Validation du prix early bird
+    if (formData.earlyBirdPrice !== undefined && formData.earlyBirdPrice >= formData.price) {
+      errors.earlyBirdPrice = 'Le prix early bird doit être inférieur au prix standard';
+    }
+    
+    // CORRECTION : Validation de l'email - soit valide, soit undefined
+    if (formData.contactEmail && formData.contactEmail.trim() !== "") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)) {
+        errors.contactEmail = 'Email invalide';
+      }
+    }
+    
+    // Validation du téléphone (format français)
+    if (formData.contactPhone && formData.contactPhone.trim() !== "") {
+      if (!/^(\+33|0)[1-9](\d{2}){4}$/.test(formData.contactPhone.replace(/\s/g, ''))) {
+        errors.contactPhone = 'Format de téléphone invalide (ex: 0612345678)';
+      }
+    }
+    
+    // CORRECTION : Validation de l'URL de l'image
+    if (formData.image && formData.image.trim() !== "") {
+      try {
+        // Vérifier si c'est une URL valide
+        const url = new URL(formData.image);
+        if (!url.protocol.startsWith('http')) {
+          errors.image = 'URL invalide. Doit commencer par http:// ou https://';
+        }
+      } catch {
+        // Ce n'est pas une URL valide
+        if (formData.image.startsWith('data:image/')) {
+          // C'est une data URL (upload), c'est ok
+        } else if (formData.image.includes('via.placeholder.com') || 
+                  formData.image.includes('placeholder.com')) {
+          // C'est un placeholder, c'est ok
         } else {
-          const days = Math.floor(diffHours / 24);
-          const hours = diffHours % 24;
-          setFormData(prev => ({ 
-            ...prev, 
-            duration: hours > 0 ? `${days} jours ${Math.round(hours)} heures` : `${days} jours`
-          }));
+          errors.image = 'URL d\'image invalide';
         }
       }
     }
-  }, [formData.startTime, formData.endTime]);
+    
+    // Validation du site web
+    if (formData.website && formData.website.trim() !== "") {
+      try {
+        new URL(formData.website);
+      } catch {
+        errors.website = 'URL invalide';
+      }
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   // Gestion des changements de formulaire
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -199,9 +292,26 @@ const EventModal: React.FC<EventModalProps> = ({
       const checkbox = e.target as HTMLInputElement;
       setFormData(prev => ({ ...prev, [name]: checkbox.checked }));
     } else if (type === 'number') {
-      setFormData(prev => ({ ...prev, [name]: value === '' ? 0 : Number(value) }));
+      setFormData(prev => ({ 
+        ...prev, 
+        [name]: value === '' ? 0 : parseFloat(value) 
+      }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      // Pour les champs optionnels, convertir les chaînes vides en undefined
+      const optionalFields = ['contactEmail', 'contactPhone', 'website', 'image', 'address', 
+                             'city', 'postalCode', 'subCategory', 'requirements', 'duration',
+                             'cancellationPolicy', 'refundPolicy', 'organizer'];
+      
+      if (optionalFields.includes(name) && value.trim() === '') {
+        setFormData(prev => ({ ...prev, [name]: undefined }));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+    }
+    
+    // Effacer l'erreur quand l'utilisateur corrige
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -209,26 +319,81 @@ const EventModal: React.FC<EventModalProps> = ({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validation de la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setFormErrors(prev => ({ 
+          ...prev, 
+          image: 'L\'image ne doit pas dépasser 5MB' 
+        }));
+        return;
+      }
+      
+      // Validation du type
+      if (!file.type.startsWith('image/')) {
+        setFormErrors(prev => ({ 
+          ...prev, 
+          image: 'Veuillez uploader une image valide' 
+        }));
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         const imageUrl = reader.result as string;
         setFormData(prev => ({ ...prev, image: imageUrl }));
         setImagePreview(imageUrl);
+        if (formErrors.image) {
+          setFormErrors(prev => ({ ...prev, image: '' }));
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleAddAdditionalImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageUrl = reader.result as string;
-        setAdditionalImages(prev => [...prev, imageUrl]);
-        setFormData(prev => ({ ...prev, images: [...prev.images, imageUrl] }));
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      const newImages: string[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Validation de la taille (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          setFormErrors(prev => ({ 
+            ...prev, 
+            images: 'Une image dépasse la taille maximale de 5MB' 
+          }));
+          continue;
+        }
+        
+        // Validation du type
+        if (!file.type.startsWith('image/')) {
+          setFormErrors(prev => ({ 
+            ...prev, 
+            images: 'Un fichier n\'est pas une image valide' 
+          }));
+          continue;
+        }
+        
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const imageUrl = reader.result as string;
+          newImages.push(imageUrl);
+          
+          if (newImages.length === files.length) {
+            setAdditionalImages(prev => [...prev, ...newImages]);
+            setFormData(prev => ({ 
+              ...prev, 
+              images: [...(prev.images || []), ...newImages] 
+            }));
+            if (formErrors.images) {
+              setFormErrors(prev => ({ ...prev, images: '' }));
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -240,10 +405,10 @@ const EventModal: React.FC<EventModalProps> = ({
 
   // Gestion des tags
   const handleAddTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+    if (newTag.trim() && !formData.tags?.includes(newTag.trim())) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, newTag.trim()]
+        tags: [...(prev.tags || []), newTag.trim()]
       }));
       setNewTag('');
     }
@@ -252,7 +417,7 @@ const EventModal: React.FC<EventModalProps> = ({
   const removeTag = (tagToRemove: string) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags?.filter(tag => tag !== tagToRemove)
     }));
   };
 
@@ -310,10 +475,81 @@ const EventModal: React.FC<EventModalProps> = ({
     }));
   };
 
+  // Nettoyer les données avant envoi
+  const cleanFormData = (data: EventFormData): EventFormData => {
+    const cleaned = { ...data };
+    
+    // Liste des champs qui doivent être undefined si vides
+    const optionalFields: (keyof EventFormData)[] = [
+      'contactEmail', 'contactPhone', 'website', 'image',
+      'address', 'city', 'postalCode', 'subCategory',
+      'requirements', 'duration', 'cancellationPolicy', 
+      'refundPolicy', 'organizer'
+    ];
+    
+    optionalFields.forEach(field => {
+      if (cleaned[field] === '' || cleaned[field] === null) {
+        (cleaned[field] as any) = undefined;
+      }
+    });
+    
+    // Pour l'image, utiliser un placeholder valide si undefined
+    if (!cleaned.image) {
+      cleaned.image = 'https://via.placeholder.com/300x200?text=Event+Image';
+    }
+    
+    // S'assurer que les tableaux sont des tableaux vides si undefined
+    const arrayFields: (keyof EventFormData)[] = [
+      'tags', 'highlights', 'includes', 'notIncludes', 
+      'targetAudience', 'images'
+    ];
+    
+    arrayFields.forEach(field => {
+      if (!cleaned[field]) {
+        (cleaned[field] as any) = [];
+      }
+    });
+    
+    // Convertir les nombres
+    cleaned.capacity = Number(cleaned.capacity);
+    cleaned.price = Number(cleaned.price);
+    if (cleaned.discountPrice !== undefined) cleaned.discountPrice = Number(cleaned.discountPrice);
+    if (cleaned.earlyBirdPrice !== undefined) cleaned.earlyBirdPrice = Number(cleaned.earlyBirdPrice);
+    
+    return cleaned;
+  };
+
   // Soumission du formulaire
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    if (!validateForm()) {
+      // Trouver le premier onglet avec des erreurs
+      const fieldsWithErrors = Object.keys(formErrors);
+      const errorFields = {
+        basic: ['title', 'description', 'date', 'startTime', 'endTime', 'category'],
+        details: ['location', 'capacity'],
+        pricing: ['price', 'earlyBirdPrice'],
+        advanced: ['contactEmail', 'contactPhone', 'website'],
+        media: ['image']
+      };
+      
+      for (const [tab, fields] of Object.entries(errorFields)) {
+        if (fields.some(field => fieldsWithErrors.includes(field))) {
+          setActiveTab(tab as any);
+          break;
+        }
+      }
+      
+      return;
+    }
+    
+    // Nettoyer et formater les données
+    const cleanedData = cleanFormData(formData);
+    
+    console.log("📤 Données nettoyées pour l'API:", JSON.stringify(cleanedData, null, 2));
+    
+    onSubmit(cleanedData);
   };
 
   // Réinitialiser le formulaire
@@ -321,10 +557,19 @@ const EventModal: React.FC<EventModalProps> = ({
     setFormData(defaultFormData);
     setImagePreview('');
     setAdditionalImages([]);
+    setFormErrors({});
   };
 
   // Si la modal n'est pas ouverte
   if (!isOpen) return null;
+
+  // Composant pour afficher les erreurs
+  const ErrorMessage = ({ error }: { error: string }) => (
+    <div className="flex items-center gap-1 mt-1 text-sm text-red-600">
+      <AlertTriangle className="h-3 w-3" />
+      <span>{error}</span>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -404,10 +649,13 @@ const EventModal: React.FC<EventModalProps> = ({
                       name="title"
                       value={formData.title}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                        formErrors.title ? 'border-red-300' : 'border-gray-300'
+                      }`}
                       placeholder="ex: Atelier Culinaire Premium"
                       required
                     />
+                    {formErrors.title && <ErrorMessage error={formErrors.title} />}
                   </div>
 
                   <div>
@@ -419,10 +667,13 @@ const EventModal: React.FC<EventModalProps> = ({
                       value={formData.description}
                       onChange={handleChange}
                       rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                        formErrors.description ? 'border-red-300' : 'border-gray-300'
+                      }`}
                       placeholder="Décrivez votre événement en détail..."
                       required
                     />
+                    {formErrors.description && <ErrorMessage error={formErrors.description} />}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -437,10 +688,14 @@ const EventModal: React.FC<EventModalProps> = ({
                           name="date"
                           value={formData.date}
                           onChange={handleChange}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                            formErrors.date ? 'border-red-300' : 'border-gray-300'
+                          }`}
                           required
+                          min={new Date().toISOString().split('T')[0]}
                         />
                       </div>
+                      {formErrors.date && <ErrorMessage error={formErrors.date} />}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -455,10 +710,13 @@ const EventModal: React.FC<EventModalProps> = ({
                             name="startTime"
                             value={formData.startTime}
                             onChange={handleChange}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                              formErrors.startTime ? 'border-red-300' : 'border-gray-300'
+                            }`}
                             required
                           />
                         </div>
+                        {formErrors.startTime && <ErrorMessage error={formErrors.startTime} />}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -471,10 +729,13 @@ const EventModal: React.FC<EventModalProps> = ({
                             name="endTime"
                             value={formData.endTime}
                             onChange={handleChange}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                              formErrors.endTime ? 'border-red-300' : 'border-gray-300'
+                            }`}
                             required
                           />
                         </div>
+                        {formErrors.endTime && <ErrorMessage error={formErrors.endTime} />}
                       </div>
                     </div>
                   </div>
@@ -488,7 +749,9 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                          formErrors.category ? 'border-red-300' : 'border-gray-300'
+                        }`}
                         required
                       >
                         <option value="">Sélectionnez une catégorie</option>
@@ -496,6 +759,7 @@ const EventModal: React.FC<EventModalProps> = ({
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
                       </select>
+                      {formErrors.category && <ErrorMessage error={formErrors.category} />}
                     </div>
 
                     {formData.category && SUB_CATEGORIES[formData.category] && (
@@ -520,13 +784,15 @@ const EventModal: React.FC<EventModalProps> = ({
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Durée (calculée automatiquement)
+                      Durée
                     </label>
                     <input
                       type="text"
-                      value={formData.duration}
-                      readOnly
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                      name="duration"
+                      value={formData.duration || ''}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                      placeholder="ex: 3 heures"
                     />
                   </div>
                 </div>
@@ -546,11 +812,14 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="location"
                         value={formData.location}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                          formErrors.location ? 'border-red-300' : 'border-gray-300'
+                        }`}
                         placeholder="ex: Centre Ville, Restaurant La Villa"
                         required
                       />
                     </div>
+                    {formErrors.location && <ErrorMessage error={formErrors.location} />}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -561,7 +830,7 @@ const EventModal: React.FC<EventModalProps> = ({
                       <input
                         type="text"
                         name="address"
-                        value={formData.address}
+                        value={formData.address || ''}
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                         placeholder="123 Rue de la République"
@@ -576,7 +845,7 @@ const EventModal: React.FC<EventModalProps> = ({
                         <input
                           type="text"
                           name="city"
-                          value={formData.city}
+                          value={formData.city || ''}
                           onChange={handleChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                           placeholder="Paris"
@@ -589,7 +858,7 @@ const EventModal: React.FC<EventModalProps> = ({
                         <input
                           type="text"
                           name="postalCode"
-                          value={formData.postalCode}
+                          value={formData.postalCode || ''}
                           onChange={handleChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                           placeholder="75001"
@@ -611,10 +880,13 @@ const EventModal: React.FC<EventModalProps> = ({
                           value={formData.capacity}
                           onChange={handleChange}
                           min="1"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                            formErrors.capacity ? 'border-red-300' : 'border-gray-300'
+                          }`}
                           required
                         />
                       </div>
+                      {formErrors.capacity && <ErrorMessage error={formErrors.capacity} />}
                     </div>
 
                     <div>
@@ -642,41 +914,6 @@ const EventModal: React.FC<EventModalProps> = ({
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Public cible
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {TARGET_AUDIENCE.map(audience => (
-                        <button
-                          key={audience}
-                          type="button"
-                          onClick={() => {
-                            const current = formData.targetAudience || [];
-                            if (current.includes(audience)) {
-                              setFormData(prev => ({
-                                ...prev,
-                                targetAudience: current.filter(a => a !== audience)
-                              }));
-                            } else {
-                              setFormData(prev => ({
-                                ...prev,
-                                targetAudience: [...current, audience]
-                              }));
-                            }
-                          }}
-                          className={`px-3 py-1.5 rounded-full text-sm border ${
-                            formData.targetAudience?.includes(audience)
-                              ? 'bg-[#6B8E23] text-white border-[#6B8E23]'
-                              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                          }`}
-                        >
-                          {audience}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Tags
                     </label>
                     <div className="flex gap-2 mb-3">
@@ -697,7 +934,7 @@ const EventModal: React.FC<EventModalProps> = ({
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {formData.tags.map(tag => (
+                      {formData.tags?.map(tag => (
                         <div
                           key={tag}
                           className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm"
@@ -763,11 +1000,13 @@ const EventModal: React.FC<EventModalProps> = ({
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image principale *
+                      Image principale
                     </label>
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="flex-1">
-                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#6B8E23] transition-colors">
+                        <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                          formErrors.image ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-[#6B8E23]'
+                        }`}>
                           <input
                             type="file"
                             id="imageUpload"
@@ -785,14 +1024,18 @@ const EventModal: React.FC<EventModalProps> = ({
                             </p>
                           </label>
                         </div>
+                        {formErrors.image && <ErrorMessage error={formErrors.image} />}
                         <input
                           type="url"
                           name="image"
-                          value={formData.image}
+                          value={formData.image || ''}
                           onChange={handleChange}
-                          placeholder="Ou collez une URL d'image"
+                          placeholder="https://via.placeholder.com/300x200?text=Event+Image"
                           className="w-full mt-4 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Laisser vide pour utiliser l'image par défaut
+                        </p>
                       </div>
                       
                       {imagePreview && (
@@ -808,7 +1051,7 @@ const EventModal: React.FC<EventModalProps> = ({
                               type="button"
                               onClick={() => {
                                 setImagePreview('');
-                                setFormData(prev => ({ ...prev, image: '' }));
+                                setFormData(prev => ({ ...prev, image: undefined }));
                               }}
                               className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600"
                             >
@@ -824,7 +1067,9 @@ const EventModal: React.FC<EventModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Galerie d'images supplémentaires
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#6B8E23] transition-colors mb-4">
+                    <div className={`border-2 border-dashed rounded-xl p-6 text-center mb-4 transition-colors ${
+                      formErrors.images ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-[#6B8E23]'
+                    }`}>
                       <input
                         type="file"
                         id="additionalImages"
@@ -838,8 +1083,12 @@ const EventModal: React.FC<EventModalProps> = ({
                         <p className="text-gray-700 font-medium">
                           Ajouter des images supplémentaires
                         </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Maximum 10 images, 5MB par image
+                        </p>
                       </label>
                     </div>
+                    {formErrors.images && <ErrorMessage error={formErrors.images} />}
 
                     {additionalImages.length > 0 && (
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -882,7 +1131,9 @@ const EventModal: React.FC<EventModalProps> = ({
                           onChange={handleChange}
                           min="0"
                           step="0.01"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                            formErrors.price ? 'border-red-300' : 'border-gray-300'
+                          }`}
                           required
                         />
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -898,6 +1149,7 @@ const EventModal: React.FC<EventModalProps> = ({
                           </select>
                         </div>
                       </div>
+                      {formErrors.price && <ErrorMessage error={formErrors.price} />}
                     </div>
 
                     <div>
@@ -934,10 +1186,13 @@ const EventModal: React.FC<EventModalProps> = ({
                           onChange={handleChange}
                           min="0"
                           step="0.01"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                            formErrors.earlyBirdPrice ? 'border-red-300' : 'border-gray-300'
+                          }`}
                           placeholder="Optionnel"
                         />
                       </div>
+                      {formErrors.earlyBirdPrice && <ErrorMessage error={formErrors.earlyBirdPrice} />}
                     </div>
 
                     <div>
@@ -949,8 +1204,12 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="earlyBirdDeadline"
                         value={formData.earlyBirdDeadline || ''}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                          formErrors.earlyBirdDeadline ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                        min={new Date().toISOString().split('T')[0]}
                       />
+                      {formErrors.earlyBirdDeadline && <ErrorMessage error={formErrors.earlyBirdDeadline} />}
                     </div>
                   </div>
 
@@ -964,8 +1223,12 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="registrationDeadline"
                         value={formData.registrationDeadline || ''}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                          formErrors.registrationDeadline ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                        min={new Date().toISOString().split('T')[0]}
                       />
+                      {formErrors.registrationDeadline && <ErrorMessage error={formErrors.registrationDeadline} />}
                     </div>
 
                     <div>
@@ -1075,31 +1338,33 @@ const EventModal: React.FC<EventModalProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Organisateur *
+                        Organisateur
                       </label>
                       <input
                         type="text"
                         name="organizer"
-                        value={formData.organizer}
+                        value={formData.organizer || ''}
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                         placeholder="Votre entreprise ou nom"
-                        required
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email de contact *
+                        Email de contact
                       </label>
                       <input
                         type="email"
                         name="contactEmail"
-                        value={formData.contactEmail}
+                        value={formData.contactEmail || ''}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
-                        required
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                          formErrors.contactEmail ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                        placeholder="email@exemple.com"
                       />
+                      {formErrors.contactEmail && <ErrorMessage error={formErrors.contactEmail} />}
                     </div>
                   </div>
 
@@ -1111,10 +1376,14 @@ const EventModal: React.FC<EventModalProps> = ({
                       <input
                         type="tel"
                         name="contactPhone"
-                        value={formData.contactPhone}
+                        value={formData.contactPhone || ''}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                          formErrors.contactPhone ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                        placeholder="0612345678"
                       />
+                      {formErrors.contactPhone && <ErrorMessage error={formErrors.contactPhone} />}
                     </div>
 
                     <div>
@@ -1126,9 +1395,12 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="website"
                         value={formData.website || ''}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                          formErrors.website ? 'border-red-300' : 'border-gray-300'
+                        }`}
                         placeholder="https://"
                       />
+                      {formErrors.website && <ErrorMessage error={formErrors.website} />}
                     </div>
                   </div>
 
@@ -1143,11 +1415,11 @@ const EventModal: React.FC<EventModalProps> = ({
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                       >
-                        <option value="draft">Brouillon</option>
-                        <option value="active">Actif</option>
-                        <option value="upcoming">À venir</option>
-                        <option value="completed">Terminé</option>
-                        <option value="cancelled">Annulé</option>
+                        {STATUS_TYPES.map(status => (
+                          <option key={status.value} value={status.value}>
+                            {status.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -1161,9 +1433,11 @@ const EventModal: React.FC<EventModalProps> = ({
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                       >
-                        <option value="public">Public</option>
-                        <option value="private">Privé</option>
-                        <option value="invite_only">Sur invitation</option>
+                        {VISIBILITY_TYPES.map(visibility => (
+                          <option key={visibility.value} value={visibility.value}>
+                            {visibility.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -1213,6 +1487,21 @@ const EventModal: React.FC<EventModalProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Afficher les erreurs générales */}
+              {Object.keys(formErrors).length > 0 && (
+                <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-red-700 font-medium mb-2">
+                    <AlertTriangle className="h-5 w-5" />
+                    <span>Veuillez corriger les erreurs suivantes :</span>
+                  </div>
+                  <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
+                    {Object.values(formErrors).map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Pied de page */}
@@ -1239,7 +1528,12 @@ const EventModal: React.FC<EventModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-[#6B8E23] to-[#556B2F] text-white font-semibold rounded-lg hover:opacity-90 transition-all"
+                  className={`px-6 py-2.5 font-semibold rounded-lg transition-all ${
+                    Object.keys(formErrors).length > 0
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-[#6B8E23] to-[#556B2F] text-white hover:opacity-90'
+                  }`}
+                  disabled={Object.keys(formErrors).length > 0}
                 >
                   {mode === 'create' ? 'Créer l\'événement' : 'Mettre à jour'}
                 </button>

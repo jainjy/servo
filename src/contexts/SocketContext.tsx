@@ -1,14 +1,21 @@
 // Contexts/SocketContext.tsx
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import { io, Socket } from "socket.io-client";
-const VITE_API_URL=import.meta.env.VITE_API_URL2 || "http://localhost:3001"
-// 1️⃣ Définir le type du contexte
+import AuthService from "../services/authService"; // Importez votre service de token
+
+const VITE_API_URL = import.meta.env.VITE_API_URL2 || "http://localhost:3001";
+
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
 }
 
-// 2️⃣ Fournir une valeur par défaut pour createContext
 const defaultValue: SocketContextType = {
   socket: null,
   isConnected: false,
@@ -16,47 +23,42 @@ const defaultValue: SocketContextType = {
 
 const SocketContext = createContext<SocketContextType>(defaultValue);
 
-// 3️⃣ Hook personnalisé pour utiliser le contexte
 export const useSocket = () => {
   const context = useContext(SocketContext);
-  if (!context) {
+  if (!context)
     throw new Error("useSocket must be used within a SocketProvider");
-  }
   return context;
 };
 
-// 4️⃣ Typage des props du Provider
-interface SocketProviderProps {
-  children: ReactNode;
-  userId: string;
-}
-
-// 5️⃣ Provider
-export const SocketProvider: React.FC<SocketProviderProps> = ({ children, userId }) => {
+export const SocketProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    const token = AuthService.getToken(); // Récupérer le JWT
+    if (!token) return;
+
+    // 🔥 CORRECTION: On envoie le token dans 'auth', pas l'ID dans 'query'
     const newSocket = io(VITE_API_URL, {
-      query: { userId },
+      auth: { token },
     });
 
     setSocket(newSocket);
 
-    newSocket.on("connect", () => {
-      // console.log("Connected to server");
-      setIsConnected(true);
-    });
+    newSocket.on("connect", () => setIsConnected(true));
+    newSocket.on("disconnect", () => setIsConnected(false));
 
-    newSocket.on("disconnect", () => {
-      // console.log("Disconnected from server");
-      setIsConnected(false);
+    // Gérer l'erreur d'authentification envoyée par le serveur
+    newSocket.on("connect_error", (err) => {
+      console.error("❌ Erreur connexion Socket:", err.message);
     });
 
     return () => {
       newSocket.close();
     };
-  }, [userId]);
+  }, []); // Se reconnecte si le token change
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

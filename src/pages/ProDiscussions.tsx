@@ -89,6 +89,7 @@ export default function ProDiscussions() {
 
   useEffect(() => {
     setCurrentUserId(user?.id);
+    console.log("les messages :",messages)
   }, []);
 
   // Gérer l'affichage du bouton scroll
@@ -870,9 +871,10 @@ export default function ProDiscussions() {
                   // Vérifier si le message doit être affiché
                   // Les messages système s'affichent toujours
                   if (
-                    message.type !== "SYSTEM" &&
-                    message.expediteurId !== currentUserId &&
-                    conversation?.creatorId !== currentUserId
+                    (message.type !== "SYSTEM" &&
+                      message.expediteurId !== currentUserId &&
+                      conversation?.creatorId !== currentUserId &&
+                      notAssignedMe)
                   ) {
                     return null;
                   }
@@ -1403,9 +1405,10 @@ export default function ProDiscussions() {
                       // Vérifier si le message doit être affiché
                       // Les messages système s'affichent toujours
                       if (
-                        message.type !== "SYSTEM" &&
-                        message.expediteurId !== currentUserId &&
-                        conversation?.creatorId !== currentUserId
+                        (message.type !== "SYSTEM" &&
+                          message.expediteurId !== currentUserId &&
+                          conversation?.creatorId !== currentUserId &&
+                        notAssignedMe)
                       ) {
                         return null;
                       }
@@ -2345,4 +2348,4 @@ export default function ProDiscussions() {
       )}
     </div>
   );
-}
+} 
