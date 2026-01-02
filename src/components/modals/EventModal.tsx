@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Calendar, 
@@ -9,8 +9,6 @@ import {
   DollarSign, 
   Upload,
   Image as ImageIcon,
-  Eye,
-  EyeOff,
   Check,
   AlertCircle,
   Building2,
@@ -20,17 +18,21 @@ import {
   Percent,
   Timer,
   Star,
-  AlertTriangle
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Target,
+  ChevronRight
 } from 'lucide-react';
 
-// Interface pour les données de l'événement
+// Interface pour les données de l'événement basée sur le modèle Prisma
 export interface EventFormData {
   id?: number;
   title: string;
   description: string;
   date: string; // Format: "YYYY-MM-DD"
-  startTime: string;
-  endTime: string;
+  startTime?: string; // Optionnel dans Prisma
+  endTime?: string; // Optionnel dans Prisma
   location: string;
   address?: string;
   city?: string;
@@ -41,31 +43,29 @@ export interface EventFormData {
   price: number;
   discountPrice?: number;
   currency: string;
-  image?: string; // Doit être une URL valide ou undefined
-  images?: string[];
+  image?: string;
+  images?: string[]; // JSON dans Prisma
   featured: boolean;
   status: 'DRAFT' | 'ACTIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED' | 'ARCHIVED';
   organizer?: string;
-  contactEmail?: string; // Soit email valide, soit undefined
+  contactEmail?: string;
   contactPhone?: string;
   website?: string;
-  tags?: string[];
+  tags?: string[]; // JSON dans Prisma
   requirements?: string;
-  highlights?: string[];
+  highlights?: string[]; // JSON dans Prisma
   duration?: string;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
-  targetAudience?: string[];
-  includes?: string[];
-  notIncludes?: string[];
+  targetAudience?: string[]; // JSON dans Prisma
+  includes?: string[]; // JSON dans Prisma
+  notIncludes?: string[]; // JSON dans Prisma
   cancellationPolicy?: string;
   refundPolicy?: string;
   visibility: 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY';
   registrationDeadline?: string; // Format: "YYYY-MM-DD"
   earlyBirdDeadline?: string; // Format: "YYYY-MM-DD"
   earlyBirdPrice?: number;
-  participants?: number;
-  revenue?: number;
-  userId?: string;
+  // participants et revenue sont gérés automatiquement
 }
 
 interface EventModalProps {
@@ -76,35 +76,28 @@ interface EventModalProps {
   mode: 'create' | 'edit';
 }
 
-// Catégories prédéfinies
+// Catégories prédéfinies - simplifiées
 const CATEGORIES = [
   'Cuisine', 'Nature', 'Musique', 'Artisanat', 'Culture', 
   'Sport', 'Art', 'Bien-être', 'Éducation', 'Technologie',
   'Business', 'Famille', 'Loisirs', 'Autre'
 ];
 
-const SUB_CATEGORIES: Record<string, string[]> = {
-  'Cuisine': ['Atelier', 'Dégustation', 'Cours', 'Dîner', 'Food Tour'],
-  'Nature': ['Randonnée', 'Observation', 'Camping', 'Jardinage', 'Éco-tourisme'],
-  'Musique': ['Concert', 'Festival', 'Jam Session', 'Cours', 'Masterclass'],
-  'Culture': ['Visite guidée', 'Exposition', 'Conférence', 'Spectacle', 'Tradition']
-};
-
-// Niveaux de difficulté
+// Niveaux de difficulté selon l'enum Prisma
 const DIFFICULTY_LEVELS = [
   { value: 'EASY', label: 'Facile', color: 'bg-green-100 text-green-800' },
   { value: 'MEDIUM', label: 'Moyen', color: 'bg-yellow-100 text-yellow-800' },
   { value: 'HARD', label: 'Difficile', color: 'bg-red-100 text-red-800' }
 ];
 
-// Types de visibilité
+// Types de visibilité selon l'enum Prisma
 const VISIBILITY_TYPES = [
   { value: 'PUBLIC', label: 'Public' },
   { value: 'PRIVATE', label: 'Privé' },
   { value: 'INVITE_ONLY', label: 'Sur invitation' }
 ];
 
-// Statuts d'événement
+// Statuts d'événement selon l'enum Prisma
 const STATUS_TYPES = [
   { value: 'DRAFT', label: 'Brouillon' },
   { value: 'ACTIVE', label: 'Actif' },
@@ -114,9 +107,96 @@ const STATUS_TYPES = [
   { value: 'ARCHIVED', label: 'Archivé' }
 ];
 
+// Devises supportées selon votre modèle
+const CURRENCIES = ['EUR', 'USD', 'MGA', 'GBP', 'JPY', 'CNY'];
+
 interface FormErrors {
   [key: string]: string;
 }
+
+// Mappage des champs aux onglets
+const FIELD_TO_TAB: Record<string, 'basic' | 'details' | 'media' | 'pricing' | 'advanced'> = {
+  'title': 'basic',
+  'description': 'basic',
+  'date': 'basic',
+  'startTime': 'basic',
+  'endTime': 'basic',
+  'category': 'basic',
+  'duration': 'basic',
+  'location': 'details',
+  'address': 'details',
+  'city': 'details',
+  'postalCode': 'details',
+  'capacity': 'details',
+  'subCategory': 'details',
+  'difficulty': 'details',
+  'requirements': 'details',
+  'image': 'media',
+  'images': 'media',
+  'price': 'pricing',
+  'discountPrice': 'pricing',
+  'currency': 'pricing',
+  'earlyBirdPrice': 'pricing',
+  'earlyBirdDeadline': 'pricing',
+  'registrationDeadline': 'pricing',
+  'cancellationPolicy': 'pricing',
+  'refundPolicy': 'pricing',
+  'organizer': 'advanced',
+  'contactEmail': 'advanced',
+  'contactPhone': 'advanced',
+  'website': 'advanced',
+  'status': 'advanced',
+  'visibility': 'advanced',
+  'featured': 'advanced'
+};
+
+// Fonction pour compresser une image
+const compressImage = (file: File, maxWidth = 800, quality = 0.7): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Redimensionner si l'image est trop large
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convertir en JPEG avec qualité réduite
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedDataUrl);
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Erreur lors du chargement de l\'image'));
+      };
+    };
+    
+    reader.onerror = () => {
+      reject(new Error('Erreur lors de la lecture du fichier'));
+    };
+  });
+};
+
+// Fonction pour vérifier si une URL est une data URL valide
+const isValidDataUrl = (url: string): boolean => {
+  return url.startsWith('data:image/') && url.includes('base64,');
+};
 
 const EventModal: React.FC<EventModalProps> = ({
   isOpen,
@@ -156,9 +236,20 @@ const EventModal: React.FC<EventModalProps> = ({
   const [newHighlight, setNewHighlight] = useState('');
   const [newInclude, setNewInclude] = useState('');
   const [newNotInclude, setNewNotInclude] = useState('');
+  const [newTarget, setNewTarget] = useState('');
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [showErrorList, setShowErrorList] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Initialiser le formulaire avec les données existantes
+  // Références pour les champs de formulaire
+  const titleRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
+  const locationRef = useRef<HTMLInputElement>(null);
+  const categoryRef = useRef<HTMLSelectElement>(null);
+  const capacityRef = useRef<HTMLInputElement>(null);
+  const priceRef = useRef<HTMLInputElement>(null);
+
+  // Initialiser le formulaire
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       const formattedData = {
@@ -182,6 +273,7 @@ const EventModal: React.FC<EventModalProps> = ({
       setAdditionalImages([]);
     }
     setFormErrors({});
+    setShowErrorList(false);
   }, [mode, initialData, isOpen]);
 
   // Valider les champs requis selon le modèle Prisma
@@ -190,84 +282,40 @@ const EventModal: React.FC<EventModalProps> = ({
     
     // Champs requis dans le modèle Prisma
     if (!formData.title.trim()) errors.title = 'Le titre est requis';
-    if (!formData.description.trim()) errors.description = 'La description est requise';
     if (!formData.date) errors.date = 'La date est requise';
-    if (!formData.startTime) errors.startTime = "L'heure de début est requise";
-    if (!formData.endTime) errors.endTime = "L'heure de fin est requise";
     if (!formData.location.trim()) errors.location = 'Le lieu est requis';
     if (!formData.category) errors.category = 'La catégorie est requise';
     if (formData.capacity <= 0) errors.capacity = 'La capacité doit être supérieure à 0';
     if (formData.price < 0) errors.price = 'Le prix ne peut pas être négatif';
     
-    // Validation des heures
-    if (formData.startTime && formData.endTime) {
-      const start = new Date(`2000-01-01T${formData.startTime}`);
-      const end = new Date(`2000-01-01T${formData.endTime}`);
-      if (start >= end) errors.endTime = "L'heure de fin doit être après l'heure de début";
+    // Validation des heures (optionnelles mais doivent être valides si fournies)
+    if (formData.startTime && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(formData.startTime)) {
+      errors.startTime = "Format d'heure invalide (HH:MM)";
+    }
+    if (formData.endTime && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(formData.endTime)) {
+      errors.endTime = "Format d'heure invalide (HH:MM)";
     }
     
-    // Validation de la date
-    if (formData.date) {
-      const eventDate = new Date(formData.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (eventDate < today) errors.date = "La date ne peut pas être dans le passé";
-    }
-    
-    // Validation des deadlines
-    if (formData.registrationDeadline) {
-      const regDeadline = new Date(formData.registrationDeadline);
-      const eventDate = new Date(formData.date);
-      if (regDeadline > eventDate) {
-        errors.registrationDeadline = 'La date limite d\'inscription ne peut pas être après la date de l\'événement';
-      }
-    }
-    
-    if (formData.earlyBirdDeadline) {
-      const earlyBirdDeadline = new Date(formData.earlyBirdDeadline);
-      const eventDate = new Date(formData.date);
-      if (earlyBirdDeadline > eventDate) {
-        errors.earlyBirdDeadline = 'La date limite early bird ne peut pas être après la date de l\'événement';
-      }
-    }
-    
-    // Validation du prix early bird
-    if (formData.earlyBirdPrice !== undefined && formData.earlyBirdPrice >= formData.price) {
-      errors.earlyBirdPrice = 'Le prix early bird doit être inférieur au prix standard';
-    }
-    
-    // CORRECTION : Validation de l'email - soit valide, soit undefined
+    // Validation de l'email - soit valide, soit undefined
     if (formData.contactEmail && formData.contactEmail.trim() !== "") {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)) {
         errors.contactEmail = 'Email invalide';
       }
     }
     
-    // Validation du téléphone (format français)
-    if (formData.contactPhone && formData.contactPhone.trim() !== "") {
-      if (!/^(\+33|0)[1-9](\d{2}){4}$/.test(formData.contactPhone.replace(/\s/g, ''))) {
-        errors.contactPhone = 'Format de téléphone invalide (ex: 0612345678)';
-      }
-    }
-    
-    // CORRECTION : Validation de l'URL de l'image
+    // Validation de l'URL de l'image - accepter les data URLs
     if (formData.image && formData.image.trim() !== "") {
       try {
-        // Vérifier si c'est une URL valide
-        const url = new URL(formData.image);
-        if (!url.protocol.startsWith('http')) {
-          errors.image = 'URL invalide. Doit commencer par http:// ou https://';
+        // Si c'est une URL normale, la valider
+        if (!formData.image.startsWith('data:')) {
+          new URL(formData.image);
+        }
+        // Si c'est une data URL, vérifier qu'elle est valide
+        else if (!isValidDataUrl(formData.image)) {
+          errors.image = 'Format d\'image invalide';
         }
       } catch {
-        // Ce n'est pas une URL valide
-        if (formData.image.startsWith('data:image/')) {
-          // C'est une data URL (upload), c'est ok
-        } else if (formData.image.includes('via.placeholder.com') || 
-                  formData.image.includes('placeholder.com')) {
-          // C'est un placeholder, c'est ok
-        } else {
-          errors.image = 'URL d\'image invalide';
-        }
+        errors.image = 'URL d\'image invalide';
       }
     }
     
@@ -281,6 +329,7 @@ const EventModal: React.FC<EventModalProps> = ({
     }
     
     setFormErrors(errors);
+    setShowErrorList(Object.keys(errors).length > 0);
     return Object.keys(errors).length === 0;
   };
 
@@ -300,7 +349,9 @@ const EventModal: React.FC<EventModalProps> = ({
       // Pour les champs optionnels, convertir les chaînes vides en undefined
       const optionalFields = ['contactEmail', 'contactPhone', 'website', 'image', 'address', 
                              'city', 'postalCode', 'subCategory', 'requirements', 'duration',
-                             'cancellationPolicy', 'refundPolicy', 'organizer'];
+                             'cancellationPolicy', 'refundPolicy', 'organizer',
+                             'startTime', 'endTime', 'discountPrice', 'earlyBirdPrice',
+                             'registrationDeadline', 'earlyBirdDeadline'];
       
       if (optionalFields.includes(name) && value.trim() === '') {
         setFormData(prev => ({ ...prev, [name]: undefined }));
@@ -311,96 +362,161 @@ const EventModal: React.FC<EventModalProps> = ({
     
     // Effacer l'erreur quand l'utilisateur corrige
     if (formErrors[name]) {
-      setFormErrors(prev => ({ ...prev, [name]: '' }));
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
   };
 
-  // Gestion des images
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Naviguer vers un champ avec erreur
+  const navigateToError = (fieldName: string) => {
+    const tab = FIELD_TO_TAB[fieldName];
+    if (tab) {
+      setActiveTab(tab);
+      
+      // Attendre un peu pour que l'onglet soit changé avant de focus
+      setTimeout(() => {
+        const element = document.querySelector(`[name="${fieldName}"]`) as HTMLElement;
+        if (element) {
+          element.focus();
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  };
+
+  // Gestion des images - version corrigée
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validation de la taille (max 5MB)
+    if (!file) return;
+    
+    // Réinitialiser l'input file
+    e.target.value = '';
+    
+    // Vérifications de base
+    if (file.size > 5 * 1024 * 1024) {
+      setFormErrors(prev => ({ 
+        ...prev, 
+        image: 'L\'image ne doit pas dépasser 5MB' 
+      }));
+      return;
+    }
+    
+    if (!file.type.startsWith('image/')) {
+      setFormErrors(prev => ({ 
+        ...prev, 
+        image: 'Veuillez uploader une image valide (PNG, JPG, JPEG, WEBP)' 
+      }));
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    try {
+      // Compresser l'image avant de la convertir en base64
+      const compressedImage = await compressImage(file, 1200, 0.7);
+      
+      // Vérifier la taille de l'image compressée
+      const base64Size = compressedImage.length * 0.75; // Estimation taille en bytes
+      if (base64Size > 2 * 1024 * 1024) { // Limite à 2MB après compression
+        setFormErrors(prev => ({ 
+          ...prev, 
+          image: 'L\'image compressée est trop grande. Veuillez choisir une image plus petite.' 
+        }));
+        setIsUploading(false);
+        return;
+      }
+      
+      console.log('📏 Taille image compressée:', Math.round(base64Size / 1024), 'KB');
+      
+      setFormData(prev => ({ ...prev, image: compressedImage }));
+      setImagePreview(compressedImage);
+      
+      if (formErrors.image) {
+        setFormErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.image;
+          return newErrors;
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'upload de l\'image:', error);
+      setFormErrors(prev => ({ 
+        ...prev, 
+        image: 'Erreur lors du traitement de l\'image' 
+      }));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAddAdditionalImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    // Réinitialiser l'input file
+    e.target.value = '';
+    
+    setIsUploading(true);
+    const newImages: string[] = [];
+    let hasError = false;
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
       if (file.size > 5 * 1024 * 1024) {
         setFormErrors(prev => ({ 
           ...prev, 
-          image: 'L\'image ne doit pas dépasser 5MB' 
+          images: 'Certaines images dépassent la taille maximale de 5MB' 
         }));
-        return;
+        hasError = true;
+        continue;
       }
       
-      // Validation du type
       if (!file.type.startsWith('image/')) {
         setFormErrors(prev => ({ 
           ...prev, 
-          image: 'Veuillez uploader une image valide' 
+          images: 'Certains fichiers ne sont pas des images valides' 
         }));
-        return;
+        hasError = true;
+        continue;
       }
       
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageUrl = reader.result as string;
-        setFormData(prev => ({ ...prev, image: imageUrl }));
-        setImagePreview(imageUrl);
-        if (formErrors.image) {
-          setFormErrors(prev => ({ ...prev, image: '' }));
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleAddAdditionalImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newImages: string[] = [];
-      
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      try {
+        // Compresser l'image
+        const compressedImage = await compressImage(file, 800, 0.6);
+        newImages.push(compressedImage);
         
-        // Validation de la taille (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          setFormErrors(prev => ({ 
-            ...prev, 
-            images: 'Une image dépasse la taille maximale de 5MB' 
-          }));
-          continue;
-        }
-        
-        // Validation du type
-        if (!file.type.startsWith('image/')) {
-          setFormErrors(prev => ({ 
-            ...prev, 
-            images: 'Un fichier n\'est pas une image valide' 
-          }));
-          continue;
-        }
-        
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const imageUrl = reader.result as string;
-          newImages.push(imageUrl);
-          
-          if (newImages.length === files.length) {
-            setAdditionalImages(prev => [...prev, ...newImages]);
-            setFormData(prev => ({ 
-              ...prev, 
-              images: [...(prev.images || []), ...newImages] 
-            }));
-            if (formErrors.images) {
-              setFormErrors(prev => ({ ...prev, images: '' }));
-            }
-          }
-        };
-        reader.readAsDataURL(file);
+        console.log(`📏 Image ${i+1} compressée:`, Math.round(compressedImage.length * 0.75 / 1024), 'KB');
+      } catch (error) {
+        console.error(`Erreur avec l'image ${i+1}:`, error);
+        hasError = true;
       }
     }
+    
+    if (!hasError && newImages.length > 0) {
+      setAdditionalImages(prev => [...prev, ...newImages]);
+      setFormData(prev => ({ 
+        ...prev, 
+        images: [...(prev.images || []), ...newImages] 
+      }));
+    }
+    
+    setIsUploading(false);
   };
 
   const removeAdditionalImage = (index: number) => {
     const newImages = additionalImages.filter((_, i) => i !== index);
     setAdditionalImages(newImages);
     setFormData(prev => ({ ...prev, images: newImages }));
+  };
+
+  // Supprimer l'image principale
+  const removeMainImage = () => {
+    setImagePreview('');
+    setFormData(prev => ({ ...prev, image: undefined }));
   };
 
   // Gestion des tags
@@ -475,6 +591,24 @@ const EventModal: React.FC<EventModalProps> = ({
     }));
   };
 
+  // Gestion du public cible
+  const handleAddTarget = () => {
+    if (newTarget.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        targetAudience: [...(prev.targetAudience || []), newTarget.trim()]
+      }));
+      setNewTarget('');
+    }
+  };
+
+  const removeTarget = (targetToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      targetAudience: prev.targetAudience?.filter(t => t !== targetToRemove)
+    }));
+  };
+
   // Nettoyer les données avant envoi
   const cleanFormData = (data: EventFormData): EventFormData => {
     const cleaned = { ...data };
@@ -484,7 +618,9 @@ const EventModal: React.FC<EventModalProps> = ({
       'contactEmail', 'contactPhone', 'website', 'image',
       'address', 'city', 'postalCode', 'subCategory',
       'requirements', 'duration', 'cancellationPolicy', 
-      'refundPolicy', 'organizer'
+      'refundPolicy', 'organizer', 'startTime', 'endTime',
+      'discountPrice', 'earlyBirdPrice', 'registrationDeadline',
+      'earlyBirdDeadline', 'difficulty'
     ];
     
     optionalFields.forEach(field => {
@@ -498,7 +634,7 @@ const EventModal: React.FC<EventModalProps> = ({
       cleaned.image = 'https://via.placeholder.com/300x200?text=Event+Image';
     }
     
-    // S'assurer que les tableaux sont des tableaux vides si undefined
+    // S'assurer que les tableaux JSON sont des tableaux
     const arrayFields: (keyof EventFormData)[] = [
       'tags', 'highlights', 'includes', 'notIncludes', 
       'targetAudience', 'images'
@@ -516,6 +652,15 @@ const EventModal: React.FC<EventModalProps> = ({
     if (cleaned.discountPrice !== undefined) cleaned.discountPrice = Number(cleaned.discountPrice);
     if (cleaned.earlyBirdPrice !== undefined) cleaned.earlyBirdPrice = Number(cleaned.earlyBirdPrice);
     
+    // Formater les dates pour l'API
+    if (cleaned.registrationDeadline) {
+      cleaned.registrationDeadline = new Date(cleaned.registrationDeadline).toISOString();
+    }
+    if (cleaned.earlyBirdDeadline) {
+      cleaned.earlyBirdDeadline = new Date(cleaned.earlyBirdDeadline).toISOString();
+    }
+    cleaned.date = new Date(cleaned.date).toISOString();
+    
     return cleaned;
   };
 
@@ -524,31 +669,20 @@ const EventModal: React.FC<EventModalProps> = ({
     e.preventDefault();
     
     if (!validateForm()) {
-      // Trouver le premier onglet avec des erreurs
-      const fieldsWithErrors = Object.keys(formErrors);
-      const errorFields = {
-        basic: ['title', 'description', 'date', 'startTime', 'endTime', 'category'],
-        details: ['location', 'capacity'],
-        pricing: ['price', 'earlyBirdPrice'],
-        advanced: ['contactEmail', 'contactPhone', 'website'],
-        media: ['image']
-      };
-      
-      for (const [tab, fields] of Object.entries(errorFields)) {
-        if (fields.some(field => fieldsWithErrors.includes(field))) {
-          setActiveTab(tab as any);
-          break;
-        }
+      // Naviguer vers le premier champ avec erreur
+      const firstErrorField = Object.keys(formErrors)[0];
+      if (firstErrorField) {
+        navigateToError(firstErrorField);
       }
-      
       return;
     }
     
-    // Nettoyer et formater les données
     const cleanedData = cleanFormData(formData);
-    
-    console.log("📤 Données nettoyées pour l'API:", JSON.stringify(cleanedData, null, 2));
-    
+    console.log("📤 Données nettoyées pour l'API:", {
+      ...cleanedData,
+      image: cleanedData.image?.substring(0, 100) + '...', // Log partiel pour éviter l'overflow
+      images: cleanedData.images?.map(img => img.substring(0, 50) + '...')
+    });
     onSubmit(cleanedData);
   };
 
@@ -558,12 +692,31 @@ const EventModal: React.FC<EventModalProps> = ({
     setImagePreview('');
     setAdditionalImages([]);
     setFormErrors({});
+    setShowErrorList(false);
+    setIsUploading(false);
   };
 
-  // Si la modal n'est pas ouverte
+  // Obtenir le label du champ pour l'affichage des erreurs
+  const getFieldLabel = (fieldName: string): string => {
+    const labels: Record<string, string> = {
+      'title': 'Titre',
+      'date': 'Date',
+      'location': 'Lieu',
+      'category': 'Catégorie',
+      'capacity': 'Capacité',
+      'price': 'Prix',
+      'startTime': 'Heure de début',
+      'endTime': 'Heure de fin',
+      'contactEmail': 'Email de contact',
+      'website': 'Site web',
+      'image': 'Image principale'
+    };
+    
+    return labels[fieldName] || fieldName;
+  };
+
   if (!isOpen) return null;
 
-  // Composant pour afficher les erreurs
   const ErrorMessage = ({ error }: { error: string }) => (
     <div className="flex items-center gap-1 mt-1 text-sm text-red-600">
       <AlertTriangle className="h-3 w-3" />
@@ -574,13 +727,11 @@ const EventModal: React.FC<EventModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Overlay */}
         <div 
           className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" 
           onClick={onClose}
         />
 
-        {/* Modal */}
         <div className="inline-block w-full max-w-6xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
           {/* En-tête */}
           <div className="px-6 py-4 bg-gradient-to-r from-[#6B8E23] to-[#556B2F] text-white">
@@ -637,7 +788,238 @@ const EventModal: React.FC<EventModalProps> = ({
           {/* Formulaire */}
           <form onSubmit={handleSubmit}>
             <div className="max-h-[calc(100vh-300px)] overflow-y-auto p-6">
-              {/* Onglet: Informations de base */}
+              {/* Liste des erreurs avec navigation */}
+              {showErrorList && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center justify-between text-red-700 font-medium mb-2">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      <span>Veuillez corriger les erreurs suivantes :</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowErrorList(false)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <ul className="space-y-2">
+                    {Object.entries(formErrors).map(([field, error]) => (
+                      <li key={field} className="flex items-center justify-between">
+                        <div className="text-sm text-red-600">
+                          <span className="font-medium">{getFieldLabel(field)} :</span> {error}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => navigateToError(field)}
+                          className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          Corriger
+                          <ChevronRight className="h-3 w-3" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Onglet: Médias - CORRIGÉ */}
+              {activeTab === 'media' && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Image principale *
+                    </label>
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="flex-1">
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-600 mb-2">URL de l'image :</p>
+                          <input
+                            type="text"
+                            name="image"
+                            value={formData.image && !formData.image.startsWith('data:') ? formData.image : ''}
+                            onChange={handleChange}
+                            placeholder="https://example.com/image.jpg"
+                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
+                              formErrors.image ? 'border-red-300' : 'border-gray-300'
+                            }`}
+                          />
+                        </div>
+                        {formErrors.image && <ErrorMessage error={formErrors.image} />}
+                        
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-600 mb-2">Ou uploader une image :</p>
+                          <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                            isUploading 
+                              ? 'border-blue-300 bg-blue-50' 
+                              : 'border-gray-300 hover:border-[#6B8E23]'
+                          }`}>
+                            <input
+                              type="file"
+                              id="imageUpload"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                              disabled={isUploading}
+                            />
+                            <label htmlFor="imageUpload" className={`cursor-pointer ${isUploading ? 'opacity-70' : ''}`}>
+                              {isUploading ? (
+                                <div className="flex flex-col items-center">
+                                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6B8E23] mb-3"></div>
+                                  <p className="text-gray-700 font-medium">
+                                    Compression en cours...
+                                  </p>
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    Veuillez patienter
+                                  </p>
+                                </div>
+                              ) : (
+                                <>
+                                  <Upload className="mx-auto text-gray-400 mb-3 h-8 w-8" />
+                                  <p className="text-gray-700 font-medium">
+                                    Cliquez pour uploader
+                                  </p>
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    PNG, JPG, WEBP (max 5MB) - L'image sera automatiquement compressée
+                                  </p>
+                                </>
+                              )}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Aperçu de l'image */}
+                      <div className="w-64">
+                        <p className="text-sm text-gray-600 mb-2">Aperçu :</p>
+                        <div className="relative rounded-lg overflow-hidden border border-gray-200 min-h-[200px] bg-gray-50 flex items-center justify-center">
+                          {imagePreview ? (
+                            <>
+                              <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="w-full h-auto max-h-64 object-cover"
+                                onError={() => {
+                                  setFormErrors(prev => ({ 
+                                    ...prev, 
+                                    image: 'Erreur de chargement de l\'image' 
+                                  }));
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={removeMainImage}
+                                className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="text-center p-4">
+                              <ImageIcon className="mx-auto text-gray-300 h-12 w-12 mb-2" />
+                              <p className="text-sm text-gray-500">Aucune image sélectionnée</p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                Utilisera l'image par défaut
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        {imagePreview && (
+                          <div className="mt-2 text-xs text-gray-500">
+                            <div className="flex items-center justify-between">
+                              <span>Taille: {Math.round((imagePreview.length * 0.75) / 1024)} KB</span>
+                              <span className="text-green-600">
+                                ✓ Image compressée
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Galerie d'images supplémentaires
+                    </label>
+                    <div className={`border-2 border-dashed rounded-xl p-6 text-center mb-4 transition-colors ${
+                      isUploading 
+                        ? 'border-blue-300 bg-blue-50' 
+                        : 'border-gray-300 hover:border-[#6B8E23]'
+                    }`}>
+                      <input
+                        type="file"
+                        id="additionalImages"
+                        accept="image/*"
+                        onChange={handleAddAdditionalImage}
+                        className="hidden"
+                        multiple
+                        disabled={isUploading}
+                      />
+                      <label htmlFor="additionalImages" className={`cursor-pointer ${isUploading ? 'opacity-70' : ''}`}>
+                        {isUploading ? (
+                          <div className="flex flex-col items-center">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6B8E23] mb-3"></div>
+                            <p className="text-gray-700 font-medium">
+                              Compression en cours...
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              Veuillez patienter
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <ImageIcon className="mx-auto text-gray-400 mb-3 h-8 w-8" />
+                            <p className="text-gray-700 font-medium">
+                              Ajouter des images supplémentaires
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              Maximum 10 images, 5MB par image - Compression automatique
+                            </p>
+                          </>
+                        )}
+                      </label>
+                    </div>
+
+                    {additionalImages.length > 0 && (
+                      <>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          {additionalImages.map((img, index) => (
+                            <div key={index} className="relative group">
+                              <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                                <img
+                                  src={img}
+                                  alt={`Gallery ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                  onError={() => {
+                                    console.error(`Erreur de chargement de l'image ${index + 1}`);
+                                  }}
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeAdditionalImage(index)}
+                                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                              <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                {Math.round((img.length * 0.75) / 1024)} KB
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="text-xs text-gray-500 text-center">
+                          {additionalImages.length} image{additionalImages.length > 1 ? 's' : ''} dans la galerie
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+             {/* Onglet: Informations de base */}
               {activeTab === 'basic' && (
                 <div className="space-y-6">
                   <div>
@@ -645,6 +1027,7 @@ const EventModal: React.FC<EventModalProps> = ({
                       Titre de l'événement *
                     </label>
                     <input
+                      ref={titleRef}
                       type="text"
                       name="title"
                       value={formData.title}
@@ -660,20 +1043,16 @@ const EventModal: React.FC<EventModalProps> = ({
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description *
+                      Description
                     </label>
                     <textarea
                       name="description"
                       value={formData.description}
                       onChange={handleChange}
                       rows={4}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                        formErrors.description ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                       placeholder="Décrivez votre événement en détail..."
-                      required
                     />
-                    {formErrors.description && <ErrorMessage error={formErrors.description} />}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -684,6 +1063,7 @@ const EventModal: React.FC<EventModalProps> = ({
                       <div className="relative">
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                         <input
+                          ref={dateRef}
                           type="date"
                           name="date"
                           value={formData.date}
@@ -692,7 +1072,6 @@ const EventModal: React.FC<EventModalProps> = ({
                             formErrors.date ? 'border-red-300' : 'border-gray-300'
                           }`}
                           required
-                          min={new Date().toISOString().split('T')[0]}
                         />
                       </div>
                       {formErrors.date && <ErrorMessage error={formErrors.date} />}
@@ -701,38 +1080,36 @@ const EventModal: React.FC<EventModalProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Heure de début *
+                          Heure de début
                         </label>
                         <div className="relative">
                           <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                           <input
                             type="time"
                             name="startTime"
-                            value={formData.startTime}
+                            value={formData.startTime || ''}
                             onChange={handleChange}
                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
                               formErrors.startTime ? 'border-red-300' : 'border-gray-300'
                             }`}
-                            required
                           />
                         </div>
                         {formErrors.startTime && <ErrorMessage error={formErrors.startTime} />}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Heure de fin *
+                          Heure de fin
                         </label>
                         <div className="relative">
                           <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                           <input
                             type="time"
                             name="endTime"
-                            value={formData.endTime}
+                            value={formData.endTime || ''}
                             onChange={handleChange}
                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
                               formErrors.endTime ? 'border-red-300' : 'border-gray-300'
                             }`}
-                            required
                           />
                         </div>
                         {formErrors.endTime && <ErrorMessage error={formErrors.endTime} />}
@@ -746,6 +1123,7 @@ const EventModal: React.FC<EventModalProps> = ({
                         Catégorie *
                       </label>
                       <select
+                        ref={categoryRef}
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
@@ -762,38 +1140,60 @@ const EventModal: React.FC<EventModalProps> = ({
                       {formErrors.category && <ErrorMessage error={formErrors.category} />}
                     </div>
 
-                    {formData.category && SUB_CATEGORIES[formData.category] && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Sous-catégorie
-                        </label>
-                        <select
-                          name="subCategory"
-                          value={formData.subCategory || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
-                        >
-                          <option value="">Sélectionnez une sous-catégorie</option>
-                          {SUB_CATEGORIES[formData.category].map(subCat => (
-                            <option key={subCat} value={subCat}>{subCat}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Durée
+                      </label>
+                      <input
+                        type="text"
+                        name="duration"
+                        value={formData.duration || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        placeholder="ex: 3 heures"
+                        maxLength={50}
+                      />
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Durée
+                      Points forts
                     </label>
-                    <input
-                      type="text"
-                      name="duration"
-                      value={formData.duration || ''}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
-                      placeholder="ex: 3 heures"
-                    />
+                    <div className="flex gap-2 mb-3">
+                      <input
+                        type="text"
+                        value={newHighlight}
+                        onChange={(e) => setNewHighlight(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddHighlight())}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        placeholder="Ajouter un point fort"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddHighlight}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                      >
+                        Ajouter
+                      </button>
+                    </div>
+                    <ul className="space-y-2">
+                      {formData.highlights?.map((highlight, index) => (
+                        <li key={index} className="flex items-center justify-between px-3 py-2 bg-green-50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>{highlight}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeHighlight(highlight)}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               )}
@@ -808,6 +1208,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                       <input
+                        ref={locationRef}
                         type="text"
                         name="location"
                         value={formData.location}
@@ -875,6 +1276,7 @@ const EventModal: React.FC<EventModalProps> = ({
                       <div className="relative">
                         <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                         <input
+                          ref={capacityRef}
                           type="number"
                           name="capacity"
                           value={formData.capacity}
@@ -891,24 +1293,57 @@ const EventModal: React.FC<EventModalProps> = ({
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Difficulté
+                        Sous-catégorie
                       </label>
-                      <div className="flex gap-2">
-                        {DIFFICULTY_LEVELS.map(level => (
+                      <input
+                        type="text"
+                        name="subCategory"
+                        value={formData.subCategory || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        placeholder="ex: Atelier, Dégustation"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Public cible
+                    </label>
+                    <div className="flex gap-2 mb-3">
+                      <input
+                        type="text"
+                        value={newTarget}
+                        onChange={(e) => setNewTarget(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTarget())}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        placeholder="ex: Adultes, Familles, Professionnels"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddTarget}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                      >
+                        Ajouter
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.targetAudience?.map((target, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full text-sm"
+                        >
+                          <Target className="h-3 w-3" />
+                          {target}
                           <button
-                            key={level.value}
                             type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, difficulty: level.value as any }))}
-                            className={`flex-1 px-4 py-2 rounded-lg border ${
-                              formData.difficulty === level.value
-                                ? `${level.color} border-transparent font-medium`
-                                : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
+                            onClick={() => removeTarget(target)}
+                            className="ml-1 text-purple-500 hover:text-purple-700"
                           >
-                            {level.label}
+                            <X className="h-3 w-3" />
                           </button>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -953,163 +1388,42 @@ const EventModal: React.FC<EventModalProps> = ({
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Points forts
-                    </label>
-                    <div className="flex gap-2 mb-3">
-                      <input
-                        type="text"
-                        value={newHighlight}
-                        onChange={(e) => setNewHighlight(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddHighlight())}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
-                        placeholder="Ajouter un point fort"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddHighlight}
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-                      >
-                        Ajouter
-                      </button>
-                    </div>
-                    <ul className="space-y-2">
-                      {formData.highlights?.map((highlight, index) => (
-                        <li key={index} className="flex items-center justify-between px-3 py-2 bg-green-50 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            <span>{highlight}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeHighlight(highlight)}
-                            className="text-gray-400 hover:text-red-500"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-
-              {/* Onglet: Médias */}
-              {activeTab === 'media' && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image principale
-                    </label>
-                    <div className="flex flex-col md:flex-row gap-6">
-                      <div className="flex-1">
-                        <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                          formErrors.image ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-[#6B8E23]'
-                        }`}>
-                          <input
-                            type="file"
-                            id="imageUpload"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                          />
-                          <label htmlFor="imageUpload" className="cursor-pointer">
-                            <Upload className="mx-auto text-gray-400 mb-4 h-12 w-12" />
-                            <p className="text-gray-700 font-medium mb-2">
-                              {imagePreview ? 'Changer l\'image' : 'Cliquez pour uploader'}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              PNG, JPG, WEBP (max 5MB)
-                            </p>
-                          </label>
-                        </div>
-                        {formErrors.image && <ErrorMessage error={formErrors.image} />}
-                        <input
-                          type="url"
-                          name="image"
-                          value={formData.image || ''}
-                          onChange={handleChange}
-                          placeholder="https://via.placeholder.com/300x200?text=Event+Image"
-                          className="w-full mt-4 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Laisser vide pour utiliser l'image par défaut
-                        </p>
-                      </div>
-                      
-                      {imagePreview && (
-                        <div className="w-64">
-                          <p className="text-sm text-gray-600 mb-2">Aperçu :</p>
-                          <div className="relative rounded-lg overflow-hidden border border-gray-200">
-                            <img
-                              src={imagePreview}
-                              alt="Preview"
-                              className="w-full h-64 object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setImagePreview('');
-                                setFormData(prev => ({ ...prev, image: undefined }));
-                              }}
-                              className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Galerie d'images supplémentaires
-                    </label>
-                    <div className={`border-2 border-dashed rounded-xl p-6 text-center mb-4 transition-colors ${
-                      formErrors.images ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-[#6B8E23]'
-                    }`}>
-                      <input
-                        type="file"
-                        id="additionalImages"
-                        accept="image/*"
-                        onChange={handleAddAdditionalImage}
-                        className="hidden"
-                        multiple
-                      />
-                      <label htmlFor="additionalImages" className="cursor-pointer">
-                        <ImageIcon className="mx-auto text-gray-400 mb-3 h-10 w-10" />
-                        <p className="text-gray-700 font-medium">
-                          Ajouter des images supplémentaires
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Maximum 10 images, 5MB par image
-                        </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Difficulté
                       </label>
-                    </div>
-                    {formErrors.images && <ErrorMessage error={formErrors.images} />}
-
-                    {additionalImages.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {additionalImages.map((img, index) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={img}
-                              alt={`Gallery ${index + 1}`}
-                              className="w-full h-32 object-cover rounded-lg"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeAdditionalImage(index)}
-                              className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </div>
+                      <div className="flex gap-2">
+                        {DIFFICULTY_LEVELS.map(level => (
+                          <button
+                            key={level.value}
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, difficulty: level.value as any }))}
+                            className={`flex-1 px-4 py-2 rounded-lg border ${
+                              formData.difficulty === level.value
+                                ? `${level.color} border-transparent font-medium`
+                                : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {level.label}
+                          </button>
                         ))}
                       </div>
-                    )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Exigences particulières
+                      </label>
+                      <input
+                        type="text"
+                        name="requirements"
+                        value={formData.requirements || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        placeholder="ex: Âge minimum, Tenue vestimentaire"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -1125,6 +1439,7 @@ const EventModal: React.FC<EventModalProps> = ({
                       <div className="relative">
                         <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                         <input
+                          ref={priceRef}
                           type="number"
                           name="price"
                           value={formData.price}
@@ -1143,9 +1458,9 @@ const EventModal: React.FC<EventModalProps> = ({
                             onChange={handleChange}
                             className="bg-transparent text-gray-600 focus:outline-none"
                           >
-                            <option value="EUR">€</option>
-                            <option value="USD">$</option>
-                            <option value="GBP">£</option>
+                            {CURRENCIES.map(currency => (
+                              <option key={currency} value={currency}>{currency}</option>
+                            ))}
                           </select>
                         </div>
                       </div>
@@ -1154,7 +1469,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Prix promo
+                        Prix réduit
                       </label>
                       <div className="relative">
                         <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -1186,13 +1501,10 @@ const EventModal: React.FC<EventModalProps> = ({
                           onChange={handleChange}
                           min="0"
                           step="0.01"
-                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                            formErrors.earlyBirdPrice ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                           placeholder="Optionnel"
                         />
                       </div>
-                      {formErrors.earlyBirdPrice && <ErrorMessage error={formErrors.earlyBirdPrice} />}
                     </div>
 
                     <div>
@@ -1204,12 +1516,9 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="earlyBirdDeadline"
                         value={formData.earlyBirdDeadline || ''}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                          formErrors.earlyBirdDeadline ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                         min={new Date().toISOString().split('T')[0]}
                       />
-                      {formErrors.earlyBirdDeadline && <ErrorMessage error={formErrors.earlyBirdDeadline} />}
                     </div>
                   </div>
 
@@ -1223,30 +1532,9 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="registrationDeadline"
                         value={formData.registrationDeadline || ''}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                          formErrors.registrationDeadline ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                         min={new Date().toISOString().split('T')[0]}
                       />
-                      {formErrors.registrationDeadline && <ErrorMessage error={formErrors.registrationDeadline} />}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Conditions d'annulation
-                      </label>
-                      <select
-                        name="cancellationPolicy"
-                        value={formData.cancellationPolicy || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
-                      >
-                        <option value="">Sélectionnez une politique</option>
-                        <option value="flexible">Flexible (remboursement jusqu'à 24h avant)</option>
-                        <option value="moderate">Modérée (remboursement jusqu'à 7 jours avant)</option>
-                        <option value="strict">Stricte (non remboursable)</option>
-                        <option value="custom">Personnalisée</option>
-                      </select>
                     </div>
                   </div>
 
@@ -1329,6 +1617,36 @@ const EventModal: React.FC<EventModalProps> = ({
                       ))}
                     </ul>
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Conditions d'annulation
+                      </label>
+                      <input
+                        type="text"
+                        name="cancellationPolicy"
+                        value={formData.cancellationPolicy || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        placeholder="ex: Flexible, modérée, stricte"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Politique de remboursement
+                      </label>
+                      <input
+                        type="text"
+                        name="refundPolicy"
+                        value={formData.refundPolicy || ''}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
+                        placeholder="ex: Remboursement jusqu'à 48h avant"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1378,12 +1696,9 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="contactPhone"
                         value={formData.contactPhone || ''}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                          formErrors.contactPhone ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
                         placeholder="0612345678"
                       />
-                      {formErrors.contactPhone && <ErrorMessage error={formErrors.contactPhone} />}
                     </div>
 
                     <div>
@@ -1442,64 +1757,19 @@ const EventModal: React.FC<EventModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="featured"
-                        name="featured"
-                        checked={formData.featured}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-[#6B8E23] rounded focus:ring-[#6B8E23]"
-                      />
-                      <label htmlFor="featured" className="ml-2 text-sm text-gray-700">
-                        Mettre en vedette
-                      </label>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Exigences particulières
-                      </label>
-                      <input
-                        type="text"
-                        name="requirements"
-                        value={formData.requirements || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
-                        placeholder="ex: Âge minimum, Tenue vestimentaire"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Politique de remboursement
-                    </label>
-                    <textarea
-                      name="refundPolicy"
-                      value={formData.refundPolicy || ''}
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      name="featured"
+                      checked={formData.featured}
                       onChange={handleChange}
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent"
-                      placeholder="Décrivez votre politique de remboursement..."
+                      className="h-4 w-4 text-[#6B8E23] rounded focus:ring-[#6B8E23]"
                     />
+                    <label htmlFor="featured" className="ml-2 text-sm text-gray-700">
+                      Mettre en vedette (featured)
+                    </label>
                   </div>
-                </div>
-              )}
-
-              {/* Afficher les erreurs générales */}
-              {Object.keys(formErrors).length > 0 && (
-                <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-red-700 font-medium mb-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    <span>Veuillez corriger les erreurs suivantes :</span>
-                  </div>
-                  <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
-                    {Object.values(formErrors).map((error, index) => (
-                      <li key={index}>{error}</li>
-                    ))}
-                  </ul>
                 </div>
               )}
             </div>
@@ -1530,12 +1800,12 @@ const EventModal: React.FC<EventModalProps> = ({
                   type="submit"
                   className={`px-6 py-2.5 font-semibold rounded-lg transition-all ${
                     Object.keys(formErrors).length > 0
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-[#6B8E23] to-[#556B2F] text-white hover:opacity-90 opacity-80'
                       : 'bg-gradient-to-r from-[#6B8E23] to-[#556B2F] text-white hover:opacity-90'
                   }`}
-                  disabled={Object.keys(formErrors).length > 0}
+                  disabled={isUploading}
                 >
-                  {mode === 'create' ? 'Créer l\'événement' : 'Mettre à jour'}
+                  {isUploading ? 'Traitement...' : mode === 'create' ? 'Créer l\'événement' : 'Mettre à jour'}
                 </button>
               </div>
             </div>

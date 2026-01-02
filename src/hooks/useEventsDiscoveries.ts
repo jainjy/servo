@@ -2,7 +2,109 @@
 import { useState, useEffect, useCallback } from "react";
 import { EventItem, DiscoveryItem, Stats, ActiveTab, FilterStatus } from "@/components/pro/Evenement&Decouverte/types";
 import { filterItems } from "@/components/pro/Evenement&Decouverte/utils";
-import api from "@/lib/api"; // Assurez-vous d'avoir une instance axios configurée
+import api from "@/lib/api";
+
+// Interface pour EventFormData
+interface APIEventData {
+  id?: number;
+  title: string;
+  description: string;
+  date: string;
+  startTime?: string;
+  endTime?: string;
+  location: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  category: string;
+  subCategory?: string;
+  capacity: number;
+  price: number;
+  discountPrice?: number;
+  currency: string;
+  image?: string;
+  images?: string[];
+  featured: boolean;
+  status: 'DRAFT' | 'ACTIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED' | 'ARCHIVED';
+  organizer?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  website?: string;
+  tags?: string[];
+  requirements?: string;
+  highlights?: string[];
+  duration?: string;
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+  targetAudience?: string[];
+  includes?: string[];
+  notIncludes?: string[];
+  cancellationPolicy?: string;
+  refundPolicy?: string;
+  visibility: 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY';
+  registrationDeadline?: string;
+  earlyBirdDeadline?: string;
+  earlyBirdPrice?: number;
+  participants?: number;
+  revenue?: number;
+  userId?: string;
+}
+
+// Interface pour DiscoveryFormData
+interface APIDiscoveryData {
+  id?: number;
+  title: string;
+  type: string;
+  location: string;
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'ACTIVE';
+  description?: string;
+  price?: number;
+  currency?: string;
+  duration?: string;
+  rating?: number;
+  sustainabilityRating?: number;
+  featured?: boolean;
+  images?: string[];
+  tags?: string[];
+  highlights?: string[];
+  bestSeason?: string[];
+  bestTime?: string[];
+  equipment?: string[];
+  includes?: string[];
+  notIncludes?: string[];
+  languages?: string[];
+  includedServices?: string[];
+  requirements?: string[];
+  availableDates?: string[];
+  coordinates?: { lat: number; lng: number };
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  organizer?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  website?: string;
+  recommendations?: string;
+  accessibility?: string;
+  safety?: string;
+  carbonFootprint?: string;
+  maxVisitors?: number;
+  groupSizeMin?: number;
+  groupSizeMax?: number;
+  ageRestrictionMin?: number;
+  ageRestrictionMax?: number;
+  guideIncluded?: boolean;
+  transportIncluded?: boolean;
+  mealIncluded?: boolean;
+  parkingAvailable?: boolean;
+  wifiAvailable?: boolean;
+  familyFriendly?: boolean;
+  petFriendly?: boolean;
+  wheelchairAccessible?: boolean;
+  visits?: number;
+  revenue?: number;
+  userId?: string;
+}
 
 export const useEventsDiscoveries = () => {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -30,58 +132,88 @@ export const useEventsDiscoveries = () => {
   });
   const [error, setError] = useState<string | null>(null);
 
-  // Fonction pour formater un événement de l'API
- const formatEventFromApi = (event: any): EventItem => {
-  const date = new Date(event.date);
-  
-  return {
-    id: event.id,
-    title: event.title,
-    date: date.toISOString(), // Conserver ISO format
-    time: `${event.startTime || ''}${event.endTime ? ` - ${event.endTime}` : ''}`,
-    location: event.location,
-    category: event.category,
-    description: event.description || '',
-    image: event.image || 'https://via.placeholder.com/300x200',
-    status: event.status.toLowerCase(),
-    participants: event.participants || 0,
-    capacity: event.capacity || 0,
-    revenue: event.revenue || 0,
-    featured: event.featured || false,
-    organizer: event.organizer || '',
-    price: event.price || 0,
-    address: event.address || '',
-    city: event.city || '',
-    postalCode: event.postalCode || '',
-    contactEmail: event.contactEmail || '',
-    contactPhone: event.contactPhone || '',
-    duration: event.duration || '',
+  // Fonction pour formater un événement de l'API vers EventItem
+  const formatEventFromApi = (event: any): EventItem => {
+    const date = new Date(event.date);
     
-    // Nouveaux champs
-    currency: event.currency || 'EUR',
-    subCategory: event.subCategory,
-    discountPrice: event.discountPrice,
-    images: event.images || [],
-    tags: event.tags || [],
-    requirements: event.requirements || '',
-    highlights: event.highlights || [],
-    difficulty: event.difficulty?.toLowerCase() as "easy" | "medium" | "hard" || undefined,
-    targetAudience: event.targetAudience || [],
-    includes: event.includes || [],
-    notIncludes: event.notIncludes || [],
-    cancellationPolicy: event.cancellationPolicy || '',
-    refundPolicy: event.refundPolicy || '',
-    visibility: event.visibility?.toLowerCase(),
-    website: event.website || '',
-    registrationDeadline: event.registrationDeadline || '',
-    earlyBirdDeadline: event.earlyBirdDeadline || '',
-    earlyBirdPrice: event.earlyBirdPrice || undefined,
-    userId: event.userId
+    let startTime = '';
+    let endTime = '';
+    
+    if (event.startTime && event.endTime) {
+      startTime = event.startTime;
+      endTime = event.endTime;
+    } else if (event.time) {
+      const timeParts = event.time.split(' - ');
+      startTime = timeParts[0] || '';
+      endTime = timeParts[1] || '';
+    }
+    
+    return {
+      id: event.id,
+      title: event.title,
+      date: date.toISOString(),
+      time: startTime && endTime ? `${startTime} - ${endTime}` : (startTime || ''),
+      location: event.location,
+      category: event.category,
+      description: event.description || '',
+      image: event.image || 'https://via.placeholder.com/300x200',
+      status: event.status.toLowerCase() as any,
+      participants: event.participants || 0,
+      capacity: event.capacity || 0,
+      revenue: event.revenue || 0,
+      featured: event.featured || false,
+      organizer: event.organizer || '',
+      price: event.price || 0,
+      address: event.address || '',
+      city: event.city || '',
+      postalCode: event.postalCode || '',
+      contactEmail: event.contactEmail || '',
+      contactPhone: event.contactPhone || '',
+      duration: event.duration || '',
+      
+      // Nouveaux champs
+      currency: event.currency || 'EUR',
+      subCategory: event.subCategory,
+      discountPrice: event.discountPrice,
+      images: event.images || [],
+      tags: event.tags || [],
+      requirements: event.requirements || '',
+      highlights: event.highlights || [],
+      difficulty: event.difficulty?.toLowerCase() as "easy" | "medium" | "hard" || undefined,
+      targetAudience: event.targetAudience || [],
+      includes: event.includes || [],
+      notIncludes: event.notIncludes || [],
+      cancellationPolicy: event.cancellationPolicy || '',
+      refundPolicy: event.refundPolicy || '',
+      visibility: event.visibility?.toLowerCase() as any,
+      website: event.website || '',
+      registrationDeadline: event.registrationDeadline || '',
+      earlyBirdDeadline: event.earlyBirdDeadline || '',
+      earlyBirdPrice: event.earlyBirdPrice || undefined,
+      userId: event.userId
+    };
   };
-};
 
-  // Fonction pour formater une découverte de l'API
+  // Fonction pour formater une découverte de l'API vers DiscoveryItem
   const formatDiscoveryFromApi = (discovery: any): DiscoveryItem => {
+    let coordinates = { lat: 0, lng: 0 };
+    
+    try {
+      if (discovery.coordinates) {
+        if (typeof discovery.coordinates === 'string') {
+          coordinates = JSON.parse(discovery.coordinates);
+        } else if (typeof discovery.coordinates === 'object') {
+          coordinates = discovery.coordinates;
+        }
+      }
+    } catch (error) {
+      console.error('Erreur parsing coordinates:', error);
+    }
+
+    // Convertir la difficulté en minuscules pour la compatibilité
+    const difficulty = discovery.difficulty ? 
+      discovery.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard' : 'medium';
+
     return {
       id: discovery.id,
       title: discovery.title,
@@ -94,36 +226,47 @@ export const useEventsDiscoveries = () => {
       rating: discovery.rating || 0,
       revenue: discovery.revenue || 0,
       featured: discovery.featured || false,
-      tags: discovery.tags || [],
-      difficulty: discovery.difficulty?.toLowerCase() || 'medium',
+      tags: Array.isArray(discovery.tags) ? discovery.tags : 
+            (typeof discovery.tags === 'string' ? JSON.parse(discovery.tags || '[]') : []),
+      difficulty,
       duration: discovery.duration || '',
       price: discovery.price || 0,
       organizer: discovery.organizer || '',
-      coordinates: discovery.coordinates || { lat: 0, lng: 0 },
-      includedServices: discovery.includedServices || [],
-      requirements: discovery.requirements || [],
+      coordinates,
+      includedServices: Array.isArray(discovery.includedServices) ? discovery.includedServices : 
+                       (typeof discovery.includedServices === 'string' ? JSON.parse(discovery.includedServices || '[]') : []),
+      requirements: Array.isArray(discovery.requirements) ? discovery.requirements : 
+                    (typeof discovery.requirements === 'string' ? JSON.parse(discovery.requirements || '[]') : []),
       maxVisitors: discovery.maxVisitors || 0,
-      availableDates: discovery.availableDates || [],
+      availableDates: Array.isArray(discovery.availableDates) ? discovery.availableDates : 
+                      (typeof discovery.availableDates === 'string' ? JSON.parse(discovery.availableDates || '[]') : []),
       address: discovery.address || '',
       city: discovery.city || '',
       postalCode: discovery.postalCode || '',
       contactEmail: discovery.contactEmail || '',
       contactPhone: discovery.contactPhone || '',
       website: discovery.website || '',
-      highlights: discovery.highlights || [],
+      highlights: Array.isArray(discovery.highlights) ? discovery.highlights : 
+                  (typeof discovery.highlights === 'string' ? JSON.parse(discovery.highlights || '[]') : []),
       recommendations: discovery.recommendations || '',
-      bestSeason: discovery.bestSeason || [],
-      bestTime: discovery.bestTime || [],
+      bestSeason: Array.isArray(discovery.bestSeason) ? discovery.bestSeason : 
+                  (typeof discovery.bestSeason === 'string' ? JSON.parse(discovery.bestSeason || '[]') : []),
+      bestTime: Array.isArray(discovery.bestTime) ? discovery.bestTime : 
+                (typeof discovery.bestTime === 'string' ? JSON.parse(discovery.bestTime || '[]') : []),
       accessibility: discovery.accessibility || '',
-      equipment: discovery.equipment || [],
+      equipment: Array.isArray(discovery.equipment) ? discovery.equipment : 
+                 (typeof discovery.equipment === 'string' ? JSON.parse(discovery.equipment || '[]') : []),
       safety: discovery.safety || '',
-      includes: discovery.includes || [],
-      notIncludes: discovery.notIncludes || [],
+      includes: Array.isArray(discovery.includes) ? discovery.includes : 
+                (typeof discovery.includes === 'string' ? JSON.parse(discovery.includes || '[]') : []),
+      notIncludes: Array.isArray(discovery.notIncludes) ? discovery.notIncludes : 
+                   (typeof discovery.notIncludes === 'string' ? JSON.parse(discovery.notIncludes || '[]') : []),
       groupSizeMin: discovery.groupSizeMin || 1,
       groupSizeMax: discovery.groupSizeMax || 10,
       ageRestrictionMin: discovery.ageRestrictionMin || 0,
       ageRestrictionMax: discovery.ageRestrictionMax || 99,
-      languages: discovery.languages || [],
+      languages: Array.isArray(discovery.languages) ? discovery.languages : 
+                 (typeof discovery.languages === 'string' ? JSON.parse(discovery.languages || '[]') : []),
       guideIncluded: discovery.guideIncluded || false,
       transportIncluded: discovery.transportIncluded || false,
       mealIncluded: discovery.mealIncluded || false,
@@ -139,6 +282,153 @@ export const useEventsDiscoveries = () => {
     };
   };
 
+  // Convertir EventItem en données pour l'API
+  const formatEventToApi = (eventItem: EventItem): Partial<APIEventData> => {
+    let formattedDate = '';
+    try {
+      const date = new Date(eventItem.date);
+      if (isNaN(date.getTime())) {
+        throw new Error("Date invalide");
+      }
+      formattedDate = date.toISOString().split('T')[0];
+    } catch {
+      formattedDate = new Date().toISOString().split('T')[0];
+    }
+
+    const timeParts = eventItem.time?.split(" - ") || [];
+    const startTime = timeParts[0]?.trim() || '';
+    const endTime = timeParts[1]?.trim() || undefined;
+
+    const formatOptionalDate = (dateStr?: string): string | undefined => {
+      if (!dateStr) return undefined;
+      try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return undefined;
+        return date.toISOString().split('T')[0];
+      } catch {
+        return undefined;
+      }
+    };
+
+    const apiData: Partial<APIEventData> = {
+      title: eventItem.title,
+      date: formattedDate,
+      location: eventItem.location,
+      category: eventItem.category || 'Autre',
+      capacity: parseInt(String(eventItem.capacity)) || 0,
+      price: parseFloat(String(eventItem.price)) || 0,
+      currency: eventItem.currency || 'EUR',
+      featured: eventItem.featured || false,
+      status: (eventItem.status || 'DRAFT').toUpperCase() as any,
+      visibility: (eventItem.visibility || 'PUBLIC').toUpperCase() as any,
+
+      description: eventItem.description || undefined,
+      startTime: startTime || undefined,
+      endTime: endTime,
+      address: eventItem.address || undefined,
+      city: eventItem.city || undefined,
+      postalCode: eventItem.postalCode || undefined,
+      subCategory: eventItem.subCategory || undefined,
+      discountPrice: eventItem.discountPrice ? parseFloat(String(eventItem.discountPrice)) : undefined,
+      image: eventItem.image || undefined,
+      images: eventItem.images?.length ? eventItem.images : undefined,
+      organizer: eventItem.organizer || undefined,
+      contactEmail: eventItem.contactEmail || undefined,
+      contactPhone: eventItem.contactPhone || undefined,
+      website: eventItem.website || undefined,
+      tags: eventItem.tags?.length ? eventItem.tags : undefined,
+      requirements: eventItem.requirements || undefined,
+      highlights: eventItem.highlights?.length ? eventItem.highlights : undefined,
+      duration: eventItem.duration || undefined,
+      difficulty: eventItem.difficulty ? eventItem.difficulty.toUpperCase() as any : undefined,
+      targetAudience: eventItem.targetAudience?.length ? eventItem.targetAudience : undefined,
+      includes: eventItem.includes?.length ? eventItem.includes : undefined,
+      notIncludes: eventItem.notIncludes?.length ? eventItem.notIncludes : undefined,
+      cancellationPolicy: eventItem.cancellationPolicy || undefined,
+      refundPolicy: eventItem.refundPolicy || undefined,
+      registrationDeadline: formatOptionalDate(eventItem.registrationDeadline),
+      earlyBirdDeadline: formatOptionalDate(eventItem.earlyBirdDeadline),
+      earlyBirdPrice: eventItem.earlyBirdPrice ? parseFloat(String(eventItem.earlyBirdPrice)) : undefined,
+    };
+
+    Object.keys(apiData).forEach(key => {
+      if (apiData[key as keyof APIEventData] === undefined) {
+        delete apiData[key as keyof APIEventData];
+      }
+    });
+
+    return apiData;
+  };
+
+  // Convertir DiscoveryItem en données pour l'API
+  const formatDiscoveryToApi = (discoveryItem: DiscoveryItem): Partial<APIDiscoveryData> => {
+    const apiData: Partial<APIDiscoveryData> = {
+      // Champs requis
+      title: discoveryItem.title,
+      type: discoveryItem.type,
+      location: discoveryItem.location,
+      difficulty: discoveryItem.difficulty?.toUpperCase() as 'EASY' | 'MEDIUM' | 'HARD' || 'MEDIUM',
+      status: (discoveryItem.status || 'DRAFT').toUpperCase() as any,
+
+      // Champs optionnels
+      description: discoveryItem.description || undefined,
+      price: discoveryItem.price ? parseFloat(String(discoveryItem.price)) : undefined,
+      currency: discoveryItem.currency || 'EUR',
+      duration: discoveryItem.duration || undefined,
+      rating: discoveryItem.rating ? parseFloat(String(discoveryItem.rating)) : undefined,
+      sustainabilityRating: discoveryItem.sustainabilityRating ? parseFloat(String(discoveryItem.sustainabilityRating)) : undefined,
+      featured: discoveryItem.featured || false,
+      images: discoveryItem.images?.length ? discoveryItem.images : undefined,
+      tags: discoveryItem.tags?.length ? discoveryItem.tags : undefined,
+      highlights: discoveryItem.highlights?.length ? discoveryItem.highlights : undefined,
+      bestSeason: discoveryItem.bestSeason?.length ? discoveryItem.bestSeason : undefined,
+      bestTime: discoveryItem.bestTime?.length ? discoveryItem.bestTime : undefined,
+      equipment: discoveryItem.equipment?.length ? discoveryItem.equipment : undefined,
+      includes: discoveryItem.includes?.length ? discoveryItem.includes : undefined,
+      notIncludes: discoveryItem.notIncludes?.length ? discoveryItem.notIncludes : undefined,
+      languages: discoveryItem.languages?.length ? discoveryItem.languages : undefined,
+      includedServices: discoveryItem.includedServices?.length ? discoveryItem.includedServices : undefined,
+      requirements: discoveryItem.requirements?.length ? discoveryItem.requirements : undefined,
+      availableDates: discoveryItem.availableDates?.length ? discoveryItem.availableDates : undefined,
+      coordinates: discoveryItem.coordinates || undefined,
+      address: discoveryItem.address || undefined,
+      city: discoveryItem.city || undefined,
+      postalCode: discoveryItem.postalCode || undefined,
+      organizer: discoveryItem.organizer || undefined,
+      contactEmail: discoveryItem.contactEmail || undefined,
+      contactPhone: discoveryItem.contactPhone || undefined,
+      website: discoveryItem.website || undefined,
+      recommendations: discoveryItem.recommendations || undefined,
+      accessibility: discoveryItem.accessibility || undefined,
+      safety: discoveryItem.safety || undefined,
+      carbonFootprint: discoveryItem.carbonFootprint || undefined,
+      maxVisitors: discoveryItem.maxVisitors ? parseInt(String(discoveryItem.maxVisitors)) : undefined,
+      groupSizeMin: discoveryItem.groupSizeMin ? parseInt(String(discoveryItem.groupSizeMin)) : undefined,
+      groupSizeMax: discoveryItem.groupSizeMax ? parseInt(String(discoveryItem.groupSizeMax)) : undefined,
+      ageRestrictionMin: discoveryItem.ageRestrictionMin ? parseInt(String(discoveryItem.ageRestrictionMin)) : undefined,
+      ageRestrictionMax: discoveryItem.ageRestrictionMax ? parseInt(String(discoveryItem.ageRestrictionMax)) : undefined,
+      guideIncluded: discoveryItem.guideIncluded,
+      transportIncluded: discoveryItem.transportIncluded,
+      mealIncluded: discoveryItem.mealIncluded,
+      parkingAvailable: discoveryItem.parkingAvailable,
+      wifiAvailable: discoveryItem.wifiAvailable,
+      familyFriendly: discoveryItem.familyFriendly,
+      petFriendly: discoveryItem.petFriendly,
+      wheelchairAccessible: discoveryItem.wheelchairAccessible,
+      visits: discoveryItem.visits ? parseInt(String(discoveryItem.visits)) : undefined,
+      revenue: discoveryItem.revenue ? parseFloat(String(discoveryItem.revenue)) : undefined,
+    };
+
+    // Nettoyer les champs undefined
+    Object.keys(apiData).forEach(key => {
+      if (apiData[key as keyof APIDiscoveryData] === undefined) {
+        delete apiData[key as keyof APIDiscoveryData];
+      }
+    });
+
+    return apiData;
+  };
+
   // Charger les événements
   const fetchEvents = useCallback(async (params?: any) => {
     try {
@@ -150,15 +440,21 @@ export const useEventsDiscoveries = () => {
         }
       });
       
-      const formattedEvents: EventItem[] = response.data.data.map((event: any) => 
-        formatEventFromApi(event)
-      );
+      console.log("📥 Événements reçus:", response.data);
       
-      setEvents(formattedEvents);
-      setError(null);
-      return formattedEvents;
+      if (response.data.success && Array.isArray(response.data.data)) {
+        const formattedEvents: EventItem[] = response.data.data.map((event: any) => 
+          formatEventFromApi(event)
+        );
+        
+        setEvents(formattedEvents);
+        setError(null);
+        return formattedEvents;
+      } else {
+        throw new Error("Format de réponse invalide");
+      }
     } catch (error: any) {
-      console.error("Erreur lors du chargement des événements:", error);
+      console.error("❌ Erreur lors du chargement des événements:", error);
       setError(error.response?.data?.message || "Erreur lors du chargement des événements");
       throw error;
     } finally {
@@ -177,19 +473,57 @@ export const useEventsDiscoveries = () => {
         }
       });
       
-      const formattedDiscoveries: DiscoveryItem[] = response.data.data.map((discovery: any) => 
-        formatDiscoveryFromApi(discovery)
-      );
+      console.log("📥 Découvertes reçues:", response.data);
       
-      setDiscoveries(formattedDiscoveries);
-      setError(null);
-      return formattedDiscoveries;
+      if (response.data.success && Array.isArray(response.data.data)) {
+        const formattedDiscoveries: DiscoveryItem[] = response.data.data.map((discovery: any) => 
+          formatDiscoveryFromApi(discovery)
+        );
+        
+        setDiscoveries(formattedDiscoveries);
+        setError(null);
+        return formattedDiscoveries;
+      } else {
+        throw new Error("Format de réponse invalide");
+      }
     } catch (error: any) {
-      console.error("Erreur lors du chargement des découvertes:", error);
+      console.error("❌ Erreur lors du chargement des découvertes:", error);
       setError(error.response?.data?.message || "Erreur lors du chargement des découvertes");
       throw error;
     } finally {
       setLoading(prev => ({ ...prev, discoveries: false }));
+    }
+  }, []);
+
+  // Charger les statistiques des événements
+  const fetchEventStats = useCallback(async () => {
+    try {
+      const response = await api.get("/event/stats");
+      console.log("📊 Statistiques événements:", response.data);
+      
+      if (response.data.success) {
+        return response.data.data;
+      }
+      return {};
+    } catch (error) {
+      console.error("Erreur statistiques événements:", error);
+      return {};
+    }
+  }, []);
+
+  // Charger les statistiques des découvertes
+  const fetchDiscoveryStats = useCallback(async () => {
+    try {
+      const response = await api.get("/discoveries/stats/global");
+      console.log("📊 Statistiques découvertes:", response.data);
+      
+      if (response.data.success) {
+        return response.data.data;
+      }
+      return {};
+    } catch (error) {
+      console.error("Erreur statistiques découvertes:", error);
+      return {};
     }
   }, []);
 
@@ -198,29 +532,32 @@ export const useEventsDiscoveries = () => {
     try {
       setLoading(prev => ({ ...prev, stats: true }));
       
-      // Récupérer les statistiques des événements
-      const eventsResponse = await api.get("/event/stats");
-      const discoveriesResponse = await api.get("/discoveries/stats");
+      const [eventsStats, discoveriesStats] = await Promise.all([
+        fetchEventStats(),
+        fetchDiscoveryStats()
+      ]);
       
-      const eventsStats = eventsResponse.data.data || {};
-      const discoveriesStats = discoveriesResponse.data.data || {};
+      console.log("📊 Stats événements:", eventsStats);
+      console.log("📊 Stats découvertes:", discoveriesStats);
       
-      // Calculer les statistiques globales
-      const totalRevenue = (eventsStats.financials?.totalRevenue || 0) + (discoveriesStats.financials?.totalRevenue || 0);
-      const totalParticipants = eventsStats.totals?.participants || 0;
-      const totalVisits = discoveriesStats.totals?.visits || 0;
-      const avgRating = discoveriesStats.ratings?.averageRating || 0;
+      // Statistiques événements
+      const totalRevenueEvents = eventsStats.financials?.totalRevenue || 0;
+      const totalParticipants = eventsStats.participants?.total || 0;
+      const totalEvents = eventsStats.totals?.total || 0;
+      const activeEvents = eventsStats.totals?.active || 0;
+      const upcomingEvents = eventsStats.totals?.upcoming || 0;
       
-      // Trouver la catégorie la plus populaire
-      const eventsByType = eventsStats.breakdown?.byCategory || {};
-      const discoveriesByType = discoveriesStats.breakdown?.byType || {};
+      // Statistiques découvertes
+      const totalRevenueDiscoveries = discoveriesStats.financials?.totalRevenue || 0;
+      const totalDiscoveries = discoveriesStats.totals?.total || 0;
+      const totalVisits = discoveriesStats.visits?.total || 0;
       
-      // Fusionner et compter
-      const allCategories = { ...eventsByType, ...discoveriesByType };
+      // Catégorie populaire
+      const eventsByCategory = eventsStats.breakdown?.byCategory || {};
       let popularCategory = "";
       let maxCount = 0;
       
-      Object.entries(allCategories).forEach(([category, data]: [string, any]) => {
+      Object.entries(eventsByCategory).forEach(([category, data]: [string, any]) => {
         const count = data.count || 0;
         if (count > maxCount) {
           maxCount = count;
@@ -228,27 +565,39 @@ export const useEventsDiscoveries = () => {
         }
       });
       
-      setStats({
-        totalEvents: eventsStats.totals?.total || 0,
-        totalDiscoveries: discoveriesStats.totals?.total || 0,
-        activeEvents: eventsStats.totals?.active || 0,
-        totalRevenue,
-        upcomingEvents: eventsStats.totals?.upcoming || 0,
-        avgRating,
-        conversionRate: totalParticipants > 0 ? Math.round((totalParticipants / (eventsStats.totals?.total || 1)) * 100) : 0,
+      // Taux de conversion
+      const conversionRate = totalEvents > 0 
+        ? Math.min(100, Math.round((totalParticipants / (totalEvents * 10)) * 100)) 
+        : 0;
+      
+      // Note moyenne
+      const avgEventsRating = eventsStats.financials?.averageRating || 0;
+      const avgDiscoveriesRating = discoveriesStats.financials?.averageRating || 0;
+      const avgRating = (avgEventsRating + avgDiscoveriesRating) / 2 || 0;
+      
+      const updatedStats: Stats = {
+        totalEvents,
+        totalDiscoveries,
+        activeEvents,
+        totalRevenue: totalRevenueEvents + totalRevenueDiscoveries,
+        upcomingEvents,
+        avgRating: parseFloat(avgRating.toFixed(1)),
+        conversionRate,
         totalParticipants,
         totalVisits,
         popularCategory: popularCategory || "Aucune"
-      });
+      };
       
+      console.log("📊 Stats mises à jour:", updatedStats);
+      setStats(updatedStats);
       setError(null);
     } catch (error: any) {
-      console.error("Erreur lors du chargement des statistiques:", error);
+      console.error("❌ Erreur lors du chargement des statistiques:", error);
       setError(error.response?.data?.message || "Erreur lors du chargement des statistiques");
     } finally {
       setLoading(prev => ({ ...prev, stats: false }));
     }
-  }, []);
+  }, [fetchEventStats, fetchDiscoveryStats]);
 
   // Charger les données initiales
   useEffect(() => {
@@ -276,81 +625,262 @@ export const useEventsDiscoveries = () => {
     activeTab
   );
 
-  // Gérer la suppression
-  const handleDelete = useCallback(async (id: number) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
+  // Gérer la suppression d'un événement
+  const handleDeleteEvent = useCallback(async (id: number) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet événement ?")) {
       try {
-        if (activeTab === "events") {
-          await api.delete(`/event/${id}`);
-          setEvents(prev => prev.filter((item) => item.id !== id));
-        } else {
-          await api.delete(`/discoveries/${id}`);
-          setDiscoveries(prev => prev.filter((item) => item.id !== id));
-        }
-        
-        // Recharger les statistiques
+        await api.delete(`/event/${id}`);
+        setEvents(prev => prev.filter((item) => item.id !== id));
         await fetchStats();
-        
         setError(null);
       } catch (error: any) {
-        console.error("Erreur lors de la suppression:", error);
+        console.error("❌ Erreur lors de la suppression:", error);
         setError(error.response?.data?.message || "Erreur lors de la suppression");
         throw error;
       }
     }
-  }, [activeTab, fetchStats]);
+  }, [fetchStats]);
 
-  // Gérer le statut "featured"
-  const handleToggleFeatured = useCallback(async (id: number) => {
+  // Gérer la suppression d'une découverte
+  const handleDeleteDiscovery = useCallback(async (id: number) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette découverte ?")) {
+      try {
+        await api.delete(`/discoveries/${id}`);
+        setDiscoveries(prev => prev.filter((item) => item.id !== id));
+        await fetchStats();
+        setError(null);
+      } catch (error: any) {
+        console.error("❌ Erreur lors de la suppression:", error);
+        setError(error.response?.data?.message || "Erreur lors de la suppression");
+        throw error;
+      }
+    }
+  }, [fetchStats]);
+
+  // Gérer le statut "featured" pour un événement
+  const handleToggleEventFeatured = useCallback(async (id: number) => {
     try {
-      if (activeTab === "events") {
-        const event = events.find(e => e.id === id);
-        if (event) {
-          const response = await api.patch(`/event/${id}/featured`, {
-            featured: !event.featured
-          });
-          
-          setEvents(prev =>
-            prev.map((item) =>
-              item.id === id ? formatEventFromApi(response.data.data) : item
-            )
-          );
-        }
-      } else {
-        const discovery = discoveries.find(d => d.id === id);
-        if (discovery) {
-          const response = await api.patch(`/discoveries/${id}/featured`, {
-            featured: !discovery.featured
-          });
-          
-          setDiscoveries(prev =>
-            prev.map((item) =>
-              item.id === id ? formatDiscoveryFromApi(response.data.data) : item
-            )
-          );
-        }
+      const event = events.find(e => e.id === id);
+      if (!event) {
+        throw new Error("Événement non trouvé");
+      }
+
+      const response = await api.patch(`/event/${id}/featured`, {
+        featured: !event.featured
+      });
+      
+      console.log("✅ Featured updated:", response.data);
+      
+      if (response.data.success) {
+        setEvents(prev =>
+          prev.map((item) =>
+            item.id === id ? formatEventFromApi(response.data.data) : item
+          )
+        );
       }
       
       setError(null);
     } catch (error: any) {
-      console.error("Erreur lors du changement du statut featured:", error);
+      console.error("❌ Erreur lors du changement du statut featured:", error);
       setError(error.response?.data?.message || "Erreur lors du changement du statut featured");
       throw error;
     }
-  }, [activeTab, events, discoveries]);
+  }, [events]);
+
+  // Gérer le statut "featured" pour une découverte
+  const handleToggleDiscoveryFeatured = useCallback(async (id: number) => {
+    try {
+      const discovery = discoveries.find(d => d.id === id);
+      if (!discovery) {
+        throw new Error("Découverte non trouvée");
+      }
+
+      const response = await api.patch(`/discoveries/${id}/featured`, {
+        featured: !discovery.featured
+      });
+      
+      console.log("✅ Featured updated:", response.data);
+      
+      if (response.data.success) {
+        setDiscoveries(prev =>
+          prev.map((item) =>
+            item.id === id ? formatDiscoveryFromApi(response.data.data) : item
+          )
+        );
+      }
+      
+      setError(null);
+    } catch (error: any) {
+      console.error("❌ Erreur lors du changement du statut featured:", error);
+      setError(error.response?.data?.message || "Erreur lors du changement du statut featured");
+      throw error;
+    }
+  }, [discoveries]);
+
+  // Ajouter un événement
+  const handleAddEvent = useCallback(async (newEvent: EventItem) => {
+    try {
+      console.log("📤 Ajout d'événement:", newEvent);
+      
+      const eventData = formatEventToApi(newEvent);
+      
+      console.log("📤 Données envoyées à l'API:", JSON.stringify(eventData, null, 2));
+      
+      const response = await api.post("/event", eventData);
+      
+      console.log("✅ Réponse API:", response.data);
+      
+      if (response.data.success) {
+        const formattedEvent = formatEventFromApi(response.data.data);
+        
+        setEvents(prev => [...prev, formattedEvent]);
+        await fetchStats();
+        setError(null);
+        
+        return formattedEvent;
+      } else {
+        throw new Error(response.data.message || "Erreur lors de l'ajout");
+      }
+    } catch (error: any) {
+      console.error("❌ Erreur détaillée:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config
+      });
+      
+      setError(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        error.message || 
+        "Erreur lors de l'ajout de l'événement"
+      );
+      throw error;
+    }
+  }, [fetchStats]);
+
+  // Ajouter une découverte
+  const handleAddDiscovery = useCallback(async (newDiscovery: DiscoveryItem) => {
+    try {
+      console.log("📤 Ajout de découverte:", newDiscovery);
+      
+      const discoveryData = formatDiscoveryToApi(newDiscovery);
+      
+      console.log("📤 Données envoyées à l'API:", JSON.stringify(discoveryData, null, 2));
+      
+      const response = await api.post("/discoveries", discoveryData);
+      
+      console.log("✅ Réponse API:", response.data);
+      
+      if (response.data.success) {
+        const formattedDiscovery = formatDiscoveryFromApi(response.data.data);
+        
+        setDiscoveries(prev => [...prev, formattedDiscovery]);
+        await fetchStats();
+        setError(null);
+        
+        return formattedDiscovery;
+      } else {
+        throw new Error(response.data.message || "Erreur lors de l'ajout");
+      }
+    } catch (error: any) {
+      console.error("❌ Erreur détaillée:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config
+      });
+      
+      setError(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        error.message || 
+        "Erreur lors de l'ajout de la découverte"
+      );
+      throw error;
+    }
+  }, [fetchStats]);
+
+  // Mettre à jour un événement
+  const handleUpdateEvent = useCallback(async (updatedEvent: EventItem) => {
+    try {
+      console.log("📤 Mise à jour événement:", updatedEvent);
+      
+      const eventData = formatEventToApi(updatedEvent);
+      
+      console.log("📤 Données envoyées à l'API:", JSON.stringify(eventData, null, 2));
+      
+      const response = await api.put(`/event/${updatedEvent.id}`, eventData);
+      
+      console.log("✅ Réponse API:", response.data);
+      
+      if (response.data.success) {
+        const formattedEvent = formatEventFromApi(response.data.data);
+        
+        setEvents(prev =>
+          prev.map((event) =>
+            event.id === updatedEvent.id ? formattedEvent : event
+          )
+        );
+        
+        setError(null);
+        return formattedEvent;
+      } else {
+        throw new Error(response.data.message || "Erreur lors de la mise à jour");
+      }
+    } catch (error: any) {
+      console.error("❌ Erreur lors de la mise à jour de l'événement:", error);
+      setError(error.response?.data?.message || "Erreur lors de la mise à jour de l'événement");
+      throw error;
+    }
+  }, []);
+
+  // Mettre à jour une découverte
+  const handleUpdateDiscovery = useCallback(async (updatedDiscovery: DiscoveryItem) => {
+    try {
+      console.log("📤 Mise à jour découverte:", updatedDiscovery);
+      
+      const discoveryData = formatDiscoveryToApi(updatedDiscovery);
+      
+      console.log("📤 Données envoyées à l'API:", JSON.stringify(discoveryData, null, 2));
+      
+      const response = await api.put(`/discoveries/${updatedDiscovery.id}`, discoveryData);
+      
+      console.log("✅ Réponse API:", response.data);
+      
+      if (response.data.success) {
+        const formattedDiscovery = formatDiscoveryFromApi(response.data.data);
+        
+        setDiscoveries(prev =>
+          prev.map((discovery) =>
+            discovery.id === updatedDiscovery.id ? formattedDiscovery : discovery
+          )
+        );
+        
+        setError(null);
+        return formattedDiscovery;
+      } else {
+        throw new Error(response.data.message || "Erreur lors de la mise à jour");
+      }
+    } catch (error: any) {
+      console.error("❌ Erreur lors de la mise à jour de la découverte:", error);
+      setError(error.response?.data?.message || "Erreur lors de la mise à jour de la découverte");
+      throw error;
+    }
+  }, []);
 
   // Gérer l'export
   const handleExport = useCallback(async () => {
     try {
-      const response = await api.get(`/${activeTab}/export`, {
-        params: { format: "json" },
+      const endpoint = activeTab === 'events' ? 'event/export/csv' : 'discoveries/export/csv';
+      const response = await api.get(`/${endpoint}`, {
         responseType: "blob"
       });
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `${activeTab}-${new Date().toISOString().split("T")[0]}.json`);
+      link.setAttribute("download", `${activeTab}-${new Date().toISOString().split("T")[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -362,272 +892,19 @@ export const useEventsDiscoveries = () => {
     }
   }, [activeTab]);
 
-  // Ajouter un événement
-const handleAddEvent = useCallback(async (newEvent: EventItem) => {
-  try {
-    // Formater la date correctement (YYYY-MM-DD)
-    let formattedDate: string;
-    if (newEvent.date) {
-      const date = new Date(newEvent.date);
-      if (isNaN(date.getTime())) {
-        throw new Error("Format de date invalide");
-      }
-      formattedDate = date.toISOString().split('T')[0]; // "2024-01-15"
-    } else {
-      formattedDate = new Date().toISOString().split('T')[0];
-    }
-    
-    // Extraire les heures du champ time
-    const timeParts = newEvent.time?.split(" - ") || [];
-    const startTime = timeParts[0] || "10:00";
-    const endTime = timeParts[1] || undefined;
-    
-    // Préparer les données pour l'API selon les validations
-    const eventData = {
-      // Champs requis
-      title: newEvent.title,
-      description: newEvent.description || "",
-      date: formattedDate, // Format YYYY-MM-DD
-      location: newEvent.location,
-      category: newEvent.category || "cultural",
-      
-      // Champs optionnels avec validation
-      startTime: startTime, // Format HH:MM
-      endTime: endTime, // Format HH:MM
-      address: newEvent.address || "",
-      city: newEvent.city || "",
-      postalCode: newEvent.postalCode || "",
-      subCategory: newEvent.subCategory || undefined,
-      capacity: parseInt(String(newEvent.capacity)) || 0,
-      price: parseFloat(String(newEvent.price)) || 0,
-      discountPrice: newEvent.discountPrice ? parseFloat(String(newEvent.discountPrice)) : undefined,
-      currency: newEvent.currency || "EUR",
-      image: newEvent.image || undefined,
-      images: newEvent.images || undefined,
-      featured: newEvent.featured || false,
-      
-      // CORRECTION : Status en MAJUSCULES selon les validations
-      status: (newEvent.status || "DRAFT").toUpperCase(), // "DRAFT", "ACTIVE", etc.
-      
-      organizer: newEvent.organizer || "",
-      contactEmail: newEvent.contactEmail || "",
-      contactPhone: newEvent.contactPhone || "",
-      website: newEvent.website || undefined,
-      tags: newEvent.tags || [],
-      requirements: newEvent.requirements || "",
-      highlights: newEvent.highlights || [],
-      duration: newEvent.duration || "",
-      
-      // CORRECTION : Difficulty en MAJUSCULES
-      difficulty: newEvent.difficulty ? newEvent.difficulty.toUpperCase() : undefined, // "EASY", "MEDIUM", "HARD"
-      
-      targetAudience: newEvent.targetAudience || [],
-      includes: newEvent.includes || [],
-      notIncludes: newEvent.notIncludes || [],
-      cancellationPolicy: newEvent.cancellationPolicy || "",
-      refundPolicy: newEvent.refundPolicy || "",
-      
-      // CORRECTION : Visibility en MAJUSCULES
-      visibility: (newEvent.visibility || "PUBLIC").toUpperCase(), // "PUBLIC", "PRIVATE", "INVITE_ONLY"
-      
-      registrationDeadline: newEvent.registrationDeadline 
-        ? new Date(newEvent.registrationDeadline).toISOString().split('T')[0] // Format YYYY-MM-DD
-        : undefined,
-      earlyBirdDeadline: newEvent.earlyBirdDeadline 
-        ? new Date(newEvent.earlyBirdDeadline).toISOString().split('T')[0] // Format YYYY-MM-DD
-        : undefined,
-      earlyBirdPrice: newEvent.earlyBirdPrice 
-        ? parseFloat(String(newEvent.earlyBirdPrice)) 
-        : undefined,
-      
-      // Ces champs sont probablement gérés côté serveur
-      participants: undefined, // Laisser le serveur gérer
-      revenue: undefined, // Laisser le serveur gérer
-      userId: undefined, // Sera ajouté par l'authentification
-    };
-    
-    // Nettoyer les champs undefined pour éviter d'envoyer "null"
-    Object.keys(eventData).forEach(key => {
-      if (eventData[key] === undefined || eventData[key] === null) {
-        delete eventData[key];
-      }
-    });
-    
-    console.log("✅ Données envoyées à /event:", JSON.stringify(eventData, null, 2));
-    
-    const response = await api.post("/event", eventData);
-    console.log("✅ Réponse API:", response.data);
-    
-    const formattedEvent = formatEventFromApi(response.data.data);
-    
-    setEvents(prev => [...prev, formattedEvent]);
-    await fetchStats();
-    setError(null);
-    
-    return formattedEvent;
-  } catch (error: any) {
-    console.error("❌ Erreur détaillée:", {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-      config: error.config
-    });
-    
-    setError(
-      error.response?.data?.message || 
-      error.response?.data?.error || 
-      error.message || 
-      "Erreur lors de l'ajout de l'événement"
-    );
-    throw error;
-  }
-}, [fetchStats]);
-
-  // Mettre à jour un événement
-  const handleUpdateEvent = useCallback(async (updatedEvent: EventItem) => {
-    try {
-      // Préparer les données pour l'API
-      const eventData = {
-        title: updatedEvent.title,
-        description: updatedEvent.description,
-        date: updatedEvent.date,
-        startTime: updatedEvent.time.split(" - ")[0],
-        endTime: updatedEvent.time.split(" - ")[1] || undefined,
-        location: updatedEvent.location,
-        category: updatedEvent.category,
-        capacity: updatedEvent.capacity,
-        price: updatedEvent.price,
-        currency: "EUR",
-        image: updatedEvent.image,
-        featured: updatedEvent.featured,
-        status: updatedEvent.status.toUpperCase(),
-        organizer: updatedEvent.organizer,
-        address: updatedEvent.address,
-        city: updatedEvent.city,
-        postalCode: updatedEvent.postalCode,
-        contactEmail: updatedEvent.contactEmail,
-        contactPhone: updatedEvent.contactPhone,
-        duration: updatedEvent.duration
-      };
-
-      const response = await api.put(`/event/${updatedEvent.id}`, eventData);
-      const formattedEvent = formatEventFromApi(response.data.data);
-      
-      setEvents(prev =>
-        prev.map((event) =>
-          event.id === updatedEvent.id ? formattedEvent : event
-        )
-      );
-      
-      setError(null);
-      return formattedEvent;
-    } catch (error: any) {
-      console.error("Erreur lors de la mise à jour de l'événement:", error);
-      setError(error.response?.data?.message || "Erreur lors de la mise à jour de l'événement");
-      throw error;
-    }
-  }, []);
-
-  // Ajouter une découverte
-  const handleAddDiscovery = useCallback(async (newDiscovery: DiscoveryItem) => {
-    try {
-      // Préparer les données pour l'API
-      const discoveryData = {
-        title: newDiscovery.title,
-        description: newDiscovery.description,
-        type: newDiscovery.type,
-        location: newDiscovery.location,
-        difficulty: newDiscovery.difficulty.toUpperCase(),
-        duration: newDiscovery.duration,
-        price: newDiscovery.price,
-        currency: "EUR",
-        image: newDiscovery.image,
-        featured: newDiscovery.featured,
-        status: newDiscovery.status.toUpperCase(),
-        organizer: newDiscovery.organizer,
-        coordinates: newDiscovery.coordinates,
-        includedServices: newDiscovery.includedServices,
-        requirements: newDiscovery.requirements,
-        maxVisitors: newDiscovery.maxVisitors,
-        availableDates: newDiscovery.availableDates,
-        tags: newDiscovery.tags,
-        address: newDiscovery.address,
-        city: newDiscovery.city,
-        postalCode: newDiscovery.postalCode,
-        contactEmail: newDiscovery.contactEmail,
-        contactPhone: newDiscovery.contactPhone
-      };
-      
-      const response = await api.post("/discoveries", discoveryData);
-      const formattedDiscovery = formatDiscoveryFromApi(response.data.data);
-      
-      setDiscoveries(prev => [...prev, formattedDiscovery]);
-      await fetchStats();
-      setError(null);
-      
-      return formattedDiscovery;
-    } catch (error: any) {
-      console.error("Erreur lors de l'ajout de la découverte:", error);
-      setError(error.response?.data?.message || "Erreur lors de l'ajout de la découverte");
-      throw error;
-    }
-  }, [fetchStats]);
-
-  // Mettre à jour une découverte
-  const handleUpdateDiscovery = useCallback(async (updatedDiscovery: DiscoveryItem) => {
-    try {
-      // Préparer les données pour l'API
-      const discoveryData = {
-        title: updatedDiscovery.title,
-        description: updatedDiscovery.description,
-        type: updatedDiscovery.type,
-        location: updatedDiscovery.location,
-        difficulty: updatedDiscovery.difficulty.toUpperCase(),
-        duration: updatedDiscovery.duration,
-        price: updatedDiscovery.price,
-        currency: "EUR",
-        image: updatedDiscovery.image,
-        featured: updatedDiscovery.featured,
-        status: updatedDiscovery.status.toUpperCase(),
-        organizer: updatedDiscovery.organizer,
-        coordinates: updatedDiscovery.coordinates,
-        includedServices: updatedDiscovery.includedServices,
-        requirements: updatedDiscovery.requirements,
-        maxVisitors: updatedDiscovery.maxVisitors,
-        availableDates: updatedDiscovery.availableDates,
-        tags: updatedDiscovery.tags,
-        address: updatedDiscovery.address,
-        city: updatedDiscovery.city,
-        postalCode: updatedDiscovery.postalCode,
-        contactEmail: updatedDiscovery.contactEmail,
-        contactPhone: updatedDiscovery.contactPhone
-      };
-      
-      const response = await api.put(`/discoveries/${updatedDiscovery.id}`, discoveryData);
-      const formattedDiscovery = formatDiscoveryFromApi(response.data.data);
-      
-      setDiscoveries(prev =>
-        prev.map((discovery) =>
-          discovery.id === updatedDiscovery.id ? formattedDiscovery : discovery
-        )
-      );
-      
-      setError(null);
-      return formattedDiscovery;
-    } catch (error: any) {
-      console.error("Erreur lors de la mise à jour de la découverte:", error);
-      setError(error.response?.data?.message || "Erreur lors de la mise à jour de la découverte");
-      throw error;
-    }
-  }, []);
-
   // Gérer la recherche
   const handleSearch = useCallback(async () => {
     try {
       if (activeTab === "events") {
-        await fetchEvents({ search: searchTerm, status: filterStatus !== "all" ? filterStatus : undefined });
+        await fetchEvents({ 
+          search: searchTerm || undefined, 
+          status: filterStatus !== "all" ? filterStatus : undefined 
+        });
       } else {
-        await fetchDiscoveries({ search: searchTerm, status: filterStatus !== "all" ? filterStatus : undefined });
+        await fetchDiscoveries({ 
+          search: searchTerm || undefined, 
+          status: filterStatus !== "all" ? filterStatus : undefined 
+        });
       }
     } catch (error) {
       console.error("Erreur lors de la recherche:", error);
@@ -640,10 +917,28 @@ const handleAddEvent = useCallback(async (newEvent: EventItem) => {
       if (searchTerm || filterStatus !== "all") {
         handleSearch();
       }
-    }, 500); // Délai de 500ms pour éviter trop de requêtes
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchTerm, filterStatus, handleSearch]);
+
+  // Fonction générique pour la suppression
+  const handleDelete = useCallback((id: number) => {
+    if (activeTab === "events") {
+      return handleDeleteEvent(id);
+    } else {
+      return handleDeleteDiscovery(id);
+    }
+  }, [activeTab, handleDeleteEvent, handleDeleteDiscovery]);
+
+  // Fonction générique pour featured
+  const handleToggleFeatured = useCallback((id: number) => {
+    if (activeTab === "events") {
+      return handleToggleEventFeatured(id);
+    } else {
+      return handleToggleDiscoveryFeatured(id);
+    }
+  }, [activeTab, handleToggleEventFeatured, handleToggleDiscoveryFeatured]);
 
   return {
     // State
@@ -664,12 +959,20 @@ const handleAddEvent = useCallback(async (newEvent: EventItem) => {
     setSearchTerm,
     setFilterStatus,
     
-    // Actions
+    // Actions génériques
     handleDelete,
     handleToggleFeatured,
     handleExport,
+    
+    // Actions spécifiques événements
+    handleDeleteEvent,
+    handleToggleEventFeatured,
     handleAddEvent,
     handleUpdateEvent,
+    
+    // Actions spécifiques découvertes
+    handleDeleteDiscovery,
+    handleToggleDiscoveryFeatured,
     handleAddDiscovery,
     handleUpdateDiscovery,
     
@@ -681,6 +984,12 @@ const handleAddEvent = useCallback(async (newEvent: EventItem) => {
         return fetchDiscoveries();
       }
     },
-    refreshStats: fetchStats
+    refreshStats: fetchStats,
+    
+    // Formatteurs
+    formatEventToApi,
+    formatEventFromApi,
+    formatDiscoveryToApi,
+    formatDiscoveryFromApi
   };
 };
