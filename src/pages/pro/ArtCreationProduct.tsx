@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { 
   Search, Plus, Edit3, Trash2, Palette, Camera, 
   Cpu, Mountain, Filter, BarChart3, Calendar, 
-  User, CheckCircle, Clock, AlertCircle, DollarSign,
-  Tag, Layers, ShoppingCart, Mail, TrendingUp, 
+  Tag, Layers, ShoppingCart, TrendingUp, 
   X, FileSearch, Sparkles, Eye as EyeIcon
 } from 'lucide-react';
 import { ProductCreateModal } from './ProductCreateModal';
@@ -44,20 +43,6 @@ interface ArtProduct {
   };
 }
 
-interface Reservation {
-  id: number | string;
-  productId: number | string;
-  productTitle: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  date: string;
-  price: number;
-  commission?: number;
-  notes?: string;
-}
-
 // Catégories correspondant à ProductCreateModal
 const TYPE_LABELS: Record<string, string> = {
   'photographie': 'Photographie',
@@ -79,7 +64,6 @@ const ArtCreationProduct: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<ArtProduct[]>([]);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [editingInitial, setEditingInitial] = useState<any | undefined>(undefined);
   const { toast } = useToast();
 
@@ -143,9 +127,6 @@ const ArtCreationProduct: React.FC = () => {
       
       setProducts(mapped);
       
-      // Simuler des réservations pour la démo
-      
-      
     } catch (err: any) {
       console.error('fetchProducts error', err);
       toast({ 
@@ -154,7 +135,6 @@ const ArtCreationProduct: React.FC = () => {
         variant: 'destructive' 
       });
       setProducts([]);
-      setReservations([]);
     } finally {
       setLoading(false);
     }
@@ -184,10 +164,8 @@ const ArtCreationProduct: React.FC = () => {
     published: products.filter(p => p.status === 'published').length,
     draft: products.filter(p => p.status === 'draft').length,
     sold: products.filter(p => p.status === 'sold').length,
-    totalRevenue: reservations
-      .filter(r => r.status === 'completed' || r.status === 'confirmed')
-      .reduce((sum, r) => sum + r.price, 0)
-  }), [products, reservations]);
+    // Supprimé totalRevenue car lié aux réservations
+  }), [products]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -262,21 +240,6 @@ const ArtCreationProduct: React.FC = () => {
           text: 'text-gray-600',
           icon: Cpu
         };
-    }
-  };
-
-  const getReservationStatusColor = (status: Reservation['status']) => {
-    switch (status) {
-      case 'confirmed':
-        return { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle, label: 'Confirmée' };
-      case 'pending':
-        return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock, label: 'En attente' };
-      case 'cancelled':
-        return { bg: 'bg-red-100', text: 'text-red-800', icon: AlertCircle, label: 'Annulée' };
-      case 'completed':
-        return { bg: 'bg-blue-100', text: 'text-blue-800', icon: CheckCircle, label: 'Terminée' };
-      default:
-        return { bg: 'bg-gray-100', text: 'text-gray-800', icon: AlertCircle, label: status };
     }
   };
 
@@ -417,7 +380,7 @@ const ArtCreationProduct: React.FC = () => {
             </div>
 
             {/* Statistiques */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { 
                   label: 'Total œuvres', 
@@ -435,18 +398,12 @@ const ArtCreationProduct: React.FC = () => {
                   label: 'Brouillons', 
                   value: stats.draft, 
                   color: '#F59E0B', 
-                  icon: Clock 
+                  icon: TrendingUp 
                 },
                 { 
                   label: 'Vendues', 
                   value: stats.sold, 
                   color: '#3B82F6', 
-                  icon: CheckCircle 
-                },
-                { 
-                  label: 'Chiffre d\'affaires', 
-                  value: `${stats.totalRevenue.toLocaleString('fr-FR')} €`, 
-                  color: '#8B5CF6', 
                   icon: TrendingUp 
                 },
               ].map((stat, index) => (
@@ -476,7 +433,7 @@ const ArtCreationProduct: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Section principale des œuvres */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6"> {/* Changé de lg:col-span-2 à lg:col-span-3 */}
             {/* Barre de recherche et filtres */}
             <div className="bg-white rounded-2xl shadow-xl p-6" 
                  style={{ border: `1px solid ${theme.separator}` }}>
@@ -607,7 +564,7 @@ const ArtCreationProduct: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => {
                   const statusColors = getStatusColor(product.status);
                   const typeColors = getTypeColor(product.type);
@@ -730,130 +687,7 @@ const ArtCreationProduct: React.FC = () => {
             )}
           </div>
 
-          {/* Section réservations - Barre latérale */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-6" 
-                 style={{ 
-                   border: `1px solid ${theme.separator}`,
-                   background: 'linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)'
-                 }}>
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-bold" style={{ color: theme.secondaryText }}>
-                    Réservations
-                  </h2>
-                  <p className="text-gray-600 text-sm">Demandes et ventes récentes</p>
-                </div>
-                <div className="px-3 py-1.5 rounded-full text-sm font-medium" 
-                     style={{ 
-                       backgroundColor: `${theme.logo}15`, 
-                       color: theme.logo,
-                       border: `1px solid ${theme.separator}`
-                     }}>
-                  {reservations.length} réservation{reservations.length > 1 ? 's' : ''}
-                </div>
-              </div>
-
-              {/* Statistiques des réservations */}
-              <div className="mb-6 p-4 rounded-xl border" 
-                   style={{ 
-                     borderColor: theme.separator, 
-                     backgroundColor: `${theme.logo}05` 
-                   }}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Chiffre d'affaires</span>
-                  <DollarSign size={18} className="text-green-600" />
-                </div>
-                <div className="text-2xl font-bold" style={{ color: theme.secondaryText }}>
-                  {stats.totalRevenue.toLocaleString('fr-FR')} €
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {reservations.filter(r => r.status === 'completed' || r.status === 'confirmed').length} transaction{reservations.filter(r => r.status === 'completed' || r.status === 'confirmed').length > 1 ? 's' : ''} validée{reservations.filter(r => r.status === 'completed' || r.status === 'confirmed').length > 1 ? 's' : ''}
-                </div>
-              </div>
-
-              {/* Liste des réservations */}
-              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                {reservations.map((reservation) => {
-                  const statusColors = getReservationStatusColor(reservation.status);
-                  const StatusIcon = statusColors.icon;
-                  
-                  return (
-                    <div 
-                      key={reservation.id} 
-                      className="border rounded-xl p-4 hover:shadow-lg transition-all duration-300 bg-white group/reservation"
-                      style={{ borderColor: theme.separator }}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="w-2 h-2 rounded-full" 
-                                 style={{ 
-                                   backgroundColor: statusColors.bg.replace('bg-', '').split('-')[1]
-                                 }}></div>
-                            <h4 className="font-semibold text-gray-800 truncate">
-                              {reservation.productTitle}
-                            </h4>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <User size={12} className="text-gray-400" />
-                            <span className="text-sm text-gray-600">{reservation.customerName}</span>
-                          </div>
-                        </div>
-                        <div className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 ${statusColors.bg} ${statusColors.text}`}>
-                          <StatusIcon size={12} />
-                          {statusColors.label}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-gray-400" />
-                          <span>Réservé le {new Date(reservation.date).toLocaleDateString('fr-FR')}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <DollarSign size={14} className="text-gray-400" />
-                          <span>
-                            <span className="font-medium" style={{ color: theme.logo }}>
-                              {reservation.price.toLocaleString('fr-FR')} €
-                            </span>
-                            <span className="text-gray-500 ml-1 text-xs">
-                              (comm. {reservation.commission || 0} €)
-                            </span>
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Mail size={14} className="text-gray-400" />
-                          <span className="truncate text-gray-600">{reservation.customerEmail}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 mt-4 pt-3 border-t" style={{ borderColor: theme.separator }}>
-                        <button className="flex-1 text-center py-2 text-sm rounded-lg border hover:bg-gray-50 transition-colors font-medium"
-                                style={{ borderColor: theme.separator }}>
-                          Détails
-                        </button>
-                        {reservation.status === 'pending' && (
-                          <button className="flex-1 text-center py-2 text-sm rounded-lg text-white hover:shadow-md transition-all font-medium"
-                                  style={{ backgroundColor: theme.logo }}>
-                            Valider
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {reservations.length === 0 && (
-                  <div className="text-center py-8 rounded-xl border-2 border-dashed" style={{ borderColor: theme.separator }}>
-                    <ShoppingCart className="mx-auto text-gray-400 mb-3" size={40} />
-                    <p className="text-gray-600">Aucune réservation pour le moment</p>
-                    <p className="text-sm text-gray-500 mt-1">Les réservations apparaîtront ici</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          {/* SUPPRIMÉ : Section réservations - Barre latérale */}
         </div>
       </div>
       
