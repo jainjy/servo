@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ImageIcon, Calendar, ShoppingCart, Euro} from 'lucide-react';
+import { ArrowLeft, ImageIcon, Calendar, ShoppingCart, Euro } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/components/contexts/CartContext';
 import api from '@/lib/api';
+import { toast } from 'sonner';
 
 interface Oeuvre {
   id: string;
   title: string;
   description?: string;
-  image: string;  
-  images?: string[]; 
+  image: string;
+  images?: string[];
   createdAt?: string;
   publishedAt?: string;
   price?: number;
@@ -16,18 +19,25 @@ interface Oeuvre {
   category?: string;
   type?: string;
   userId?: string;
+  quantity?: number;
+  vendor?: {
+    companyName?: string;
+  };
 }
 
 const OeuvrePages: React.FC = () => {
   const { professionalId } = useParams<{ professionalId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { addToCart } = useCart();
 
   const professionalName = (location.state as any)?.professionalName;
 
   const [loading, setLoading] = useState<boolean>(true);
   const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [addingOeuvreId, setAddingOeuvreId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!professionalId) {
@@ -36,55 +46,113 @@ const OeuvrePages: React.FC = () => {
       return;
     }
 
-    // Dans OeuvrePages.js
-  const fetchOeuvres = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    const fetchOeuvres = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      console.log('🔄 Fetching œuvres for professionalId:', professionalId);
+        console.log('🔄 Fetching œuvres for professionalId:', professionalId);
 
-      // UTILISEZ LA NOUVELLE ROUTE PUBLIQUE
-      const response = await api.get(`/art-creation/products/professional/${professionalId}`);
-      
-      // Vérifiez la structure de réponse
-      console.log('✅ Response data:', {
-        success: response.data.success,
-        count: response.data.count,
-        dataLength: response.data.data?.length,
-        data: response.data.data
-      });
+        const response = await api.get(`/art-creation/products/professional/${professionalId}`);
 
-      if (response.data?.success) {
-        // La donnée est dans response.data.data
-        setOeuvres(response.data.data || []);
-      } else {
-        setError(response.data.error || 'Impossible de charger les œuvres');
+        console.log('✅ Response data:', {
+          success: response.data.success,
+          count: response.data.count,
+          dataLength: response.data.data?.length,
+          data: response.data.data
+        });
+
+        if (response.data?.success) {
+          const oeuvresData = response.data.data || [];
+          
+          // S'assurer que chaque œuvre a une quantité par défaut si non définie
+          const oeuvresWithQuantity = oeuvresData.map((oeuvre: Oeuvre) => ({
+            ...oeuvre,
+            quantity: oeuvre.quantity || 1, // Par défaut en stock
+            name: oeuvre.title // Pour la compatibilité avec addToCart
+          }));
+          
+          setOeuvres(oeuvresWithQuantity);
+        } else {
+          setError(response.data.error || 'Impossible de charger les œuvres');
+        }
+      } catch (err: any) {
+        console.error('❌ Erreur chargement œuvres :', err);
+        console.error('❌ Status:', err.response?.status);
+        console.error('❌ Response data:', err.response?.data);
+
+        if (err.response?.status === 404) {
+          setError('Aucune œuvre trouvée pour ce professionnel');
+        } else if (err.response?.status === 500) {
+          setError('Erreur serveur, veuillez réessayer plus tard');
+        } else {
+          setError('Erreur de connexion : ' + (err.message || 'Erreur inconnue'));
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      console.error('❌ Erreur chargement œuvres :', err);
-      console.error('❌ Status:', err.response?.status);
-      console.error('❌ Response data:', err.response?.data);
-      
-      if (err.response?.status === 404) {
-        setError('Aucune œuvre trouvée pour ce professionnel');
-      } else if (err.response?.status === 500) {
-        setError('Erreur serveur, veuillez réessayer plus tard');
-      } else {
-        setError('Erreur de connexion : ' + (err.message || 'Erreur inconnue'));
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
     fetchOeuvres();
   }, [professionalId]);
 
-  const handleAcheter = (oeuvreId: string) => {
-    console.log('Achat de l\'œuvre:', oeuvreId);
-    // Ajoutez ici la logique d'achat
-    alert(`Achat de l'œuvre ${oeuvreId} en cours...`);
+  const handleAcheter = async (oeuvre: Oeuvre) => {
+    // Vérifier si l'utilisateur est connecté
+    if (!user) {
+      toast.warning(
+        "Veuillez vous connecter pour ajouter des œuvres au panier"
+      );
+      return;
+    }
+
+    // Vérifier si l'œuvre est en stock
+    if (oeuvre.quantity === 0) {
+      toast.error("Cette œuvre n'est plus disponible");
+      return;
+    }
+
+    try {
+      setAddingOeuvreId(oeuvre.id);
+
+      // Préparer l'objet produit pour le panier
+      const productToAdd = {
+        id: oeuvre.id,
+        name: oeuvre.title,
+        description: oeuvre.description,
+        price: oeuvre.price || 0,
+        image: oeuvre.image,
+        images: oeuvre.images || [oeuvre.image],
+        quantity: 1, // Quantité à ajouter au panier
+        maxQuantity: oeuvre.quantity || 1, // Stock disponible
+        vendor: {
+          companyName: professionalName || oeuvre.artist || 'Artiste',
+          id: professionalId
+        },
+        category: oeuvre.category || 'art',
+        type: 'oeuvre'
+      };
+
+      // Ajouter l'œuvre au panier
+      addToCart(productToAdd);
+
+      // Petit délai pour laisser le temps à l'état de se mettre à jour
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Afficher une confirmation
+      toast.success(`"${oeuvre.title}" ajoutée au panier !`, {
+        description: `Prix : ${oeuvre.price?.toFixed(2) || '0.00'}€`,
+        action: {
+          label: 'Voir le panier',
+          onClick: () => navigate('/panier')
+        }
+      });
+
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout au panier:', error);
+      toast.error("Erreur lors de l'ajout au panier");
+    } finally {
+      setAddingOeuvreId(null);
+    }
   };
 
   const formatDate = (dateString?: string) => {
@@ -158,8 +226,14 @@ const OeuvrePages: React.FC = () => {
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
                       <span className="text-[#8B4513] font-bold flex items-center">
                         <Euro size={16} className="mr-1" />
-                        {oeuvre.price.toFixed(2)}
+                        {oeuvre.price.toFixed(2)}€
                       </span>
+                    </div>
+                  )}
+                  {/* Badge de disponibilité */}
+                  {oeuvre.quantity === 0 && (
+                    <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full shadow-md">
+                      <span className="text-sm font-medium">Vendu</span>
                     </div>
                   )}
                 </div>
@@ -174,7 +248,7 @@ const OeuvrePages: React.FC = () => {
                       </h3>
                     )}
                     {oeuvre.description && (
-                      <p className="text-gray-600 text-sm leading-relaxed">
+                      <p className="text-gray-600 text-sm leading-relaxed line-clamp-2">
                         {oeuvre.description}
                       </p>
                     )}
@@ -190,13 +264,42 @@ const OeuvrePages: React.FC = () => {
                       </div>
                     )}
 
+                    {/* Info vendeur */}
+                    {professionalName && (
+                      <div className="flex items-center text-gray-500 text-sm">
+                        <ShoppingCart size={16} className="mr-2" />
+                        <span>{professionalName}</span>
+                      </div>
+                    )}
+
                     {/* Bouton Acheter */}
                     <button
-                      onClick={() => handleAcheter(oeuvre.id)}
-                      className="w-full bg-[#8B4513] hover:bg-[#6B3410] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center"
+                      onClick={() => handleAcheter(oeuvre)}
+                      disabled={oeuvre.quantity === 0 || addingOeuvreId === oeuvre.id}
+                      className={`w-full font-semibold py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center ${
+                        oeuvre.quantity === 0
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : addingOeuvreId === oeuvre.id
+                          ? 'bg-[#6B3410] text-white'
+                          : 'bg-[#8B4513] hover:bg-[#6B3410] text-white'
+                      }`}
                     >
-                      <ShoppingCart size={18} className="mr-2" />
-                      Acheter
+                      {addingOeuvreId === oeuvre.id ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Ajout...
+                        </div>
+                      ) : oeuvre.quantity === 0 ? (
+                        <>
+                          <ShoppingCart size={18} className="mr-2" />
+                          Vendu
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart size={18} className="mr-2" />
+                          Ajouter au panier
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
