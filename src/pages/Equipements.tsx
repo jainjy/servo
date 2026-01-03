@@ -721,10 +721,7 @@ const Equipements = ({ onOpenModal, searchTerm = "" }: EquipementsProps) => {
       });
       
       toast.success(`${product.name} a été ajouté au panier !`, {
-        action: {
-          label: "Voir le panier",
-          onClick: () => navigate('/cart')
-        }
+
       });
     } catch (error) {
       toast.error("Erreur lors de l'ajout au panier");
