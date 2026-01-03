@@ -212,7 +212,6 @@ import Soin from "./pages/Soin";
 import Therapeute from "./pages/Therapeute";
 import HuilesEssentielles from "./pages/HuilesEssentielles";
 import Nutrition from "./pages/Nutrition";
-import path from "path";
 import EmploiFormationsPage from "./pages/EmploiFormationsPage/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
@@ -247,6 +246,9 @@ import ConseilsAdminPage from "./pages/ConseilsAdminPanel";
 
 import PortraitsAdmin from "./pages/admin/PortraitsAdmin";
 import EventsDiscoveriesPro from "./components/pro/Evenement&Decouverte/EventsDiscoveriesPro";
+// 🔥 NOUVEAUX IMPORTS POUR LES EXPÉRIENCES 🔥
+import ExperienceDetail from "./components/components/ExperienceDetail";
+import ExperienceBooking from "./components/components/ExperienceBooking";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -379,6 +381,16 @@ const App = () => {
                   <Route path="/achat" element={<PropertyBuy />} />
                   <Route path="/location" element={<PropertyRent />} />
                   <Route path="/rachat" element={<RachatServiceCard />} />
+
+                  {/* 🔥 ROUTES DES EXPÉRIENCES - CORRIGÉES 🔥 */}
+                  <Route path="/sejour-experience" element={<SejoursExperiences />} />
+                  <Route path="/sejour-experience/:id" element={<ExperienceDetail />} />
+                  <Route path="/sejour-experience/:id/book" element={<ExperienceBooking />} />
+                  
+                  {/* Routes alternatives (optionnel) */}
+                  <Route path="/experiences" element={<SejoursExperiences />} />
+                  <Route path="/experiences/:id" element={<ExperienceDetail />} />
+                  <Route path="/experiences/:id/book" element={<ExperienceBooking />} />
 
                   <Route path="/explorer-vivre" element={<ExplorerVivre />} />
                   <Route
