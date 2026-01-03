@@ -431,39 +431,82 @@ export const useAlternance = () => {
     }
   };
 
+// ✅ Fonction exportCSV corrigée
   const exportCSV = async () => {
-    const token = getToken();
-    if (!isAuthenticated || !token || !user?.id) {
-      toast.error('Veuillez vous connecter pour exporter');
-      throw new Error('Non authentifié');
-    }
-
+    console.log('📥 Exporting CSV');
+    
     try {
-      console.log('📥 Exporting CSV');
-      toast.info("Export CSV en cours...");
+      setIsLoading(true); // <-- Utilise setIsLoading au lieu de setLoading
       
-      const config = getAxiosConfig({ responseType: 'blob' });
-      const response = await axios.get('/api/pro/alternance/export/csv', config);
-
-      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      // Log des infos d'authentification
+      const config = await getAxiosConfig();
+      console.log('🔄 Axios config for export:', {
+        hasAuthHeaders: config.headers && config.headers.Authorization,
+        tokenLength: config.headers?.Authorization?.length || 0
+      });
+      
+      // Utiliser fetch pour télécharger le fichier
+      const response = await fetch('/api/pro/alternance/export/csv', {
+        method: 'GET',
+        headers: {
+          'Authorization': config.headers.Authorization,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erreur HTTP ${response.status}`);
+      }
+      
+      // Récupérer le blob
+      const blob = await response.blob();
+      
+      // Créer un URL pour le blob
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `offres-alternance-${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
       
-      toast.success("Export CSV terminé");
-      return true;
-    } catch (err) {
-      console.error('❌ Error exporting CSV:', err);
-      const errorMsg = err.response?.data?.message || 'Erreur lors de l\'export CSV';
-      toast.error(errorMsg);
-      throw new Error(errorMsg);
+      // Créer un lien pour le téléchargement
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `offres-alternance-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      // Déclencher le téléchargement
+      document.body.appendChild(a);
+      a.click();
+      
+      // Nettoyer
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      console.log('✅ CSV exporté avec succès');
+      toast.success('CSV exporté avec succès');
+      
+    } catch (error) {
+      console.error('❌ Error exporting CSV:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
+      let errorMessage = 'Erreur lors de l\'export CSV';
+      
+      if (error.message.includes('401')) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+      } else if (error.message.includes('500')) {
+        errorMessage = 'Erreur serveur lors de l\'export. Veuillez réessayer.';
+      } else if (error.message.includes('Network Error')) {
+        errorMessage = 'Erreur réseau. Vérifiez votre connexion.';
+      }
+      
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false); // <-- Utilise setIsLoading ici aussi
     }
   };
+
 
   const changePage = async (page) => {
     const token = getToken();
