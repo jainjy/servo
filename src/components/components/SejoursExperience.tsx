@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TourismNavigation from "@/components/TourismNavigation";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const SejoursExperiences = () => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -17,7 +18,7 @@ const SejoursExperiences = () => {
     totalPages: 1
   });
 
-  // CORRECTION : Utilisez le proxy Vite ou l'URL de base correcte
+  const navigate = useNavigate();
   const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
   // Récupérer les expériences depuis l'API
@@ -25,7 +26,6 @@ const SejoursExperiences = () => {
     try {
       setLoading(true);
       
-      // Créer un objet params typé explicitement
       const params: Record<string, any> = {
         page,
         limit: 20,
@@ -33,12 +33,10 @@ const SejoursExperiences = () => {
         sortOrder: 'desc'
       };
 
-      // Ajouter le filtre de catégorie si différent de "tous"
       if (filter !== 'tous') {
         params.category = filter;
       }
 
-      // CORRECTION : Utilisez la bonne URL
       const response = await axios.get(`${API_BASE_URL}/experiences`, { params });
       
       if (response.data.success) {
@@ -46,7 +44,6 @@ const SejoursExperiences = () => {
         setPagination(response.data.pagination);
         setError(null);
       } else {
-        // Si l'API ne retourne pas success=true, utilisez fallback
         console.warn('API returned success:false, using fallback data');
         setExperiences(getFallbackExperiences());
         setError(null);
@@ -54,7 +51,6 @@ const SejoursExperiences = () => {
     } catch (err) {
       console.error('Error fetching experiences:', err);
       setError('Erreur lors du chargement des expériences');
-      // En cas d'erreur, utiliser des données de fallback
       setExperiences(getFallbackExperiences());
     } finally {
       setLoading(false);
@@ -64,19 +60,15 @@ const SejoursExperiences = () => {
   // Récupérer les catégories depuis l'API
   const fetchCategories = async () => {
     try {
-      // CORRECTION : Vérifiez si cette route existe dans votre API
-      // Si elle n'existe pas, utilisez les catégories par défaut
       const response = await axios.get(`${API_BASE_URL}/experiences/categories`);
       
       if (response.data.success) {
         setCategories(response.data.data);
       } else {
-        // Si la route n'existe pas, utilisez fallback
         setCategories(getFallbackCategories());
       }
     } catch (err) {
       console.error('Error fetching categories:', err);
-      // Utiliser des catégories par défaut en cas d'erreur
       setCategories(getFallbackCategories());
     }
   };
@@ -279,7 +271,7 @@ const SejoursExperiences = () => {
     return [];
   };
 
-  // Formater les highlights (si c'est un tableau de strings)
+  // Formater les highlights
   const getHighlights = (experience: Experience) => {
     if (Array.isArray(experience.highlights)) {
       return experience.highlights;
@@ -307,7 +299,7 @@ const SejoursExperiences = () => {
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
-          {/* Colonne image - Effet parallaxe */}
+          {/* Colonne image */}
           <div className="relative overflow-hidden">
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-1000"
@@ -316,8 +308,6 @@ const SejoursExperiences = () => {
                 transform: isActive ? 'scale(1.1)' : 'scale(1)'
               }}
             />
-
-            {/* Overlay gradient subtil */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
 
             {/* Badge catégorie */}
@@ -347,20 +337,12 @@ const SejoursExperiences = () => {
               </div>
             )}
 
-            {/* Mini-galerie en bas */}
+            {/* Mini-galerie */}
             {secondaryImages.length > 0 && (
               <div className="absolute bottom-6 left-6 right-6 flex space-x-2">
                 {secondaryImages.slice(0, 3).map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="flex-1 h-20 rounded-lg overflow-hidden opacity-80 hover:opacity-100 transition-opacity"
-                  >
-                    <img
-                      src={`${img}?auto=format&fit=crop&w=200&h=100&q=70`}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                  <div key={idx} className="flex-1 h-20 rounded-lg overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
+                    <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                 ))}
               </div>
@@ -369,7 +351,6 @@ const SejoursExperiences = () => {
 
           {/* Colonne contenu */}
           <div className="bg-white p-8 md:p-12 flex flex-col justify-center">
-            {/* En-tête */}
             <div className="">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">{experience.title}</h2>
@@ -397,12 +378,10 @@ const SejoursExperiences = () => {
               </div>
             </div>
 
-            {/* Description */}
             <p className="text-gray-700 text-lg leading-relaxed mb-8">
               {experience.description}
             </p>
 
-            {/* Highlights */}
             {highlights.length > 0 && (
               <div className="mb-10">
                 <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
@@ -419,7 +398,6 @@ const SejoursExperiences = () => {
               </div>
             )}
 
-            {/* Détails */}
             <div className="grid grid-cols-3 gap-4 mb-10">
               <div className="text-center p-3 bg-gray-50 rounded-xl">
                 <div className="text-sm text-gray-500 mb-1">Difficulté</div>
@@ -443,16 +421,16 @@ const SejoursExperiences = () => {
               </div>
             </div>
 
-            {/* CTA */}
+            {/* CTA CORRIGÉ - Utilisation de navigate() */}
             <div className="flex space-x-4">
               <button 
-                onClick={() => window.location.href = `/experiences/${experience.id}/book`}
+                onClick={() => navigate(`/sejour-experience/${experience.id}/book`)}
                 className="flex-1 bg-logo text-white font-semibold py-4 px-6 rounded-xl hover:bg-logo/90 transition-colors duration-300"
               >
                 Réserver cette expérience
               </button>
               <button 
-                onClick={() => window.location.href = `/experiences/${experience.id}`}
+                onClick={() => navigate(`/sejour-experience/${experience.id}`)}
                 className="px-6 py-4 border-2 border-logo text-logo font-semibold rounded-xl hover:bg-gray-50 transition-colors duration-300"
               >
                 Voir détails
@@ -464,7 +442,6 @@ const SejoursExperiences = () => {
     );
   };
 
-  // Loading state
   if (loading && experiences.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -476,7 +453,6 @@ const SejoursExperiences = () => {
     );
   }
 
-  // Error state
   if (error && experiences.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -498,7 +474,6 @@ const SejoursExperiences = () => {
   return (
     <div className="min-h-screen overflow-hidden">
       <div className="relative pt-20 pb-10 border-b border-gray-100">
-        {/* Header background */}
         <div 
           className="absolute inset-0 -z-20 w-full overflow-hidden bg-cover bg-center"
           style={{
@@ -508,7 +483,6 @@ const SejoursExperiences = () => {
           <div className="absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70" />
         </div>
         
-        {/* Header content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-100 mb-4">
@@ -520,16 +494,13 @@ const SejoursExperiences = () => {
           </div>
         </div>
 
-        {/* Navigation - Outside header background */}
         <div className="relative z-20">
           <TourismNavigation page="sejour" />
         </div>
       </div>
 
-      {/* Contenu principal */}
       <div className="pt-10 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Filtres */}
           <div className="mb-12">
             <div className="flex overflow-x-auto pb-4 space-x-3 hide-scrollbar">
               {(categories as Category[]).map((filter: Category) => (
@@ -551,7 +522,6 @@ const SejoursExperiences = () => {
             </div>
           </div>
 
-          {/* Message si pas d'expériences */}
           {experiences.length === 0 && !loading ? (
             <div className="text-center py-20">
               <div className="text-4xl mb-4">🏔️</div>
@@ -560,13 +530,11 @@ const SejoursExperiences = () => {
             </div>
           ) : (
             <>
-              {/* Slider principal */}
               <div className="relative h-[700px] rounded-3xl overflow-hidden shadow-xl mb-16">
                 {(experiences as Experience[]).map((exp, index) => (
                   <ExperienceSlide key={exp.id} experience={exp} index={index} />
                 ))}
 
-                {/* Contrôles de navigation */}
                 {experiences.length > 1 && (
                   <>
                     <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
@@ -585,7 +553,6 @@ const SejoursExperiences = () => {
                       </div>
                     </div>
 
-                    {/* Flèches de navigation */}
                     <button
                       onClick={() =>
                         setActiveSlide((prev) =>
@@ -632,7 +599,6 @@ const SejoursExperiences = () => {
                   </>
                 )}
 
-                {/* Indicateur de progression */}
                 {experiences.length > 0 && (
                   <div className="absolute top-6 right-6 z-30">
                     <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full">
@@ -644,7 +610,6 @@ const SejoursExperiences = () => {
                 )}
               </div>
 
-              {/* Pagination */}
               {pagination.totalPages > 1 && (
                 <div className="flex justify-center mb-16">
                   <button
@@ -663,7 +628,6 @@ const SejoursExperiences = () => {
             </>
           )}
 
-          {/* Stats et témoignages */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
             <div className="bg-white p-8 rounded-2xl shadow-lg">
               <div className="text-4xl font-bold text-gray-900 mb-2">98%</div>
@@ -679,7 +643,6 @@ const SejoursExperiences = () => {
             </div>
           </div>
 
-          {/* Section "Pourquoi nous choisir" */}
           <div className="mb-20">
             <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
               Une expérience unique, de nombreuses raisons
@@ -688,20 +651,17 @@ const SejoursExperiences = () => {
               {[
                 {
                   title: "Guides experts",
-                  description:
-                    "Nos guides sont passionnés et certifiés dans leur domaine.",
+                  description: "Nos guides sont passionnés et certifiés dans leur domaine.",
                   icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
                 },
                 {
                   title: "Petits groupes",
-                  description:
-                    "Limités pour préserver l'authenticité et la qualité.",
+                  description: "Limités pour préserver l'authenticité et la qualité.",
                   icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
                 },
                 {
                   title: "Impact positif",
-                  description:
-                    "Nous reversons 5% de chaque réservation à des projets locaux.",
+                  description: "Nous reversons 5% de chaque réservation à des projets locaux.",
                   icon: "M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3",
                 },
                 {
@@ -710,43 +670,24 @@ const SejoursExperiences = () => {
                   icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
                 },
               ].map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow"
-                >
+                <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow">
                   <div className="w-12 h-12 bg-gray-900 text-white rounded-xl flex items-center justify-center mb-4">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d={item.icon}
-                      />
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {item.title}
-                  </h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
                   <p className="text-gray-600 text-sm">{item.description}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* CTA final */}
           <div className="text-center">
             <div className="bg-secondary-text text-white rounded-3xl p-12 mb-8">
-              <h2 className="text-3xl font-bold mb-4">
-                Prêt à vivre l'extraordinaire ?
-              </h2>
+              <h2 className="text-3xl font-bold mb-4">Prêt à vivre l'extraordinaire ?</h2>
               <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-                Contactez nos experts pour créer le séjour parfaitement adapté à
-                vos envies.
+                Contactez nos experts pour créer le séjour parfaitement adapté à vos envies.
               </p>
               <button className="bg-white text-gray-900 font-semibold px-8 py-4 rounded-xl hover:bg-gray-100 transition-colors duration-300">
                 Parler à un expert

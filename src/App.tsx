@@ -211,7 +211,6 @@ import Soin from "./pages/Soin";
 import Therapeute from "./pages/Therapeute";
 import HuilesEssentielles from "./pages/HuilesEssentielles";
 import Nutrition from "./pages/Nutrition";
-import path from "path";
 import EmploiFormationsPage from "./pages/EmploiFormationsPage/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
@@ -238,7 +237,9 @@ import VideosComponent from "./components/components/VideosInspirer";
 import PortraitsLocaux from "./components/components/PortraitLocaux";
 import BonsPlansConseils from "./components/components/BonPlanConseils";
 
-
+// 🔥 NOUVEAUX IMPORTS POUR LES EXPÉRIENCES 🔥
+import ExperienceDetail from "./components/components/ExperienceDetail";
+import ExperienceBooking from "./components/components/ExperienceBooking";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -372,10 +373,19 @@ const App = () => {
                   <Route path="/location" element={<PropertyRent />} />
                   <Route path="/rachat" element={<RachatServiceCard />} />
 
+                  {/* 🔥 ROUTES DES EXPÉRIENCES - CORRIGÉES 🔥 */}
+                  <Route path="/sejour-experience" element={<SejoursExperiences />} />
+                  <Route path="/sejour-experience/:id" element={<ExperienceDetail />} />
+                  <Route path="/sejour-experience/:id/book" element={<ExperienceBooking />} />
+                  
+                  {/* Routes alternatives (optionnel) */}
+                  <Route path="/experiences" element={<SejoursExperiences />} />
+                  <Route path="/experiences/:id" element={<ExperienceDetail />} />
+                  <Route path="/experiences/:id/book" element={<ExperienceBooking />} />
+
                   <Route path="/explorer-vivre" element={<ExplorerVivre />} />
                   <Route path="/evenement-decouverte" element={<EventsDiscoveries />} />
                   <Route path="/nature-patrimoine" element={<NaturePatrimoine />} />
-                  <Route path="/sejour-experience" element={<SejoursExperiences />} />
                   <Route path="/bien-etre-alimentation" element={<BienEtreAlimentation />} />
                   <Route path="/depannage-entretien" element={<DepannageEntretien />} />
                   <Route path="/artistes-createurs" element={<ArtistesCreateurs />} />
