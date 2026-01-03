@@ -221,7 +221,6 @@ import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
 
 // Ajoutez cette ligne avec les autres imports
 import MesCandidatures from "@/pages/EmploiFormationsPage/MesCandidatures";
-         
 
 import ProjetsPage from "./pages/ProjetsPage";
 import LocationSaisonniere from "./pages/LocationSaisonniere";
@@ -245,7 +244,6 @@ import PortraitsLocaux from "./components/components/PortraitLocaux";
 import BonsPlansConseils from "./components/components/BonPlanConseils";
 import OeuvrePages from "./pages/ArtEtCreation/OeuvrePages";
 import ConseilsAdminPage from "./pages/ConseilsAdminPanel";
-
 
 import PortraitsAdmin from "./pages/admin/PortraitsAdmin";
 import EventsDiscoveriesPro from "./components/pro/Evenement&Decouverte/EventsDiscoveriesPro";
@@ -872,12 +870,14 @@ const App = () => {
                       element={<GestionFormationsPage />}
                     />
                     <Route
-  path="gestion-formations"
-  element={<GestionFormationsPage />}
-  
-/>
+                      path="gestion-formations"
+                      element={<GestionFormationsPage />}
+                    />
 
-<Route path="gestion-emplois" element={<GestionEmploisPage />} />
+                    <Route
+                      path="gestion-emplois"
+                      element={<GestionEmploisPage />}
+                    />
                     <Route
                       path="gestion-alternance"
                       element={<GestionAlternancePage />}
@@ -887,9 +887,9 @@ const App = () => {
                       element={<DeleteAccountPage />}
                     />
                     <Route
-                    path="events-discoveries"
-                    element={<EventsDiscoveriesPro />}
-                  />
+                      path="events-discoveries"
+                      element={<EventsDiscoveriesPro />}
+                    />
                   </Route>
                   {/* Section Mon Compte Routes */}
                   <Route
@@ -908,8 +908,8 @@ const App = () => {
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
                     <Route path="conseil" element={<UserConseilPage />} />
- {/* AJOUTEZ CETTE ROUTE */}
-  <Route path="candidatures" element={<MesCandidatures />} />
+                    {/* AJOUTEZ CETTE ROUTE */}
+                    <Route path="candidatures" element={<MesCandidatures />} />
 
                     <Route
                       path="locationSaisonniere"
