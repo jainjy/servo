@@ -13,17 +13,19 @@ import {
   Hammer,
   Target,
   ChevronDown,
-  Sliders,
   Grid,
   List,
   ChevronLeft,
   ChevronRight,
   ImageIcon,
   AlertCircle,
-  Loader2
+  Loader2,
+  Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
+import { useCart } from '@/components/contexts/CartContext'; // Import du contexte panier
+import { toast } from 'sonner'; // Pour les notifications
 
 interface Oeuvre {
   id: string;
@@ -48,10 +50,12 @@ interface Oeuvre {
     creationDate?: string;
     dimensions?: string;
     materials?: string;
+    isArtwork?: boolean;
   };
   views?: number;
   likes?: number;
   status: 'published' | 'draft' | 'sold';
+  quantity?: number; // Pour le stock
 }
 
 interface FilterOptions {
@@ -69,15 +73,16 @@ const MarketplaceCreateurs: React.FC = () => {
   const [filteredOeuvres, setFilteredOeuvres] = useState<Oeuvre[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [likedOeuvres, setLikedOeuvres] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const itemsPerPage = 12;
+  const [addingOeuvreId, setAddingOeuvreId] = useState<string | null>(null); // Pour le bouton loading
 
+  const itemsPerPage = 12;
   const navigate = useNavigate();
+  const { addToCart, cartItems, isLoading: cartLoading } = useCart(); // Utilisation du contexte panier
 
   const [filters, setFilters] = useState<FilterOptions>({
     type: 'all',
@@ -136,8 +141,20 @@ const MarketplaceCreateurs: React.FC = () => {
       
       if (response.data?.success) {
         const allOeuvres = response.data.data || [];
-        setOeuvres(allOeuvres);
-        setFilteredOeuvres(allOeuvres);
+        
+        // S'assurer que chaque œuvre a une quantité par défaut
+        const formattedOeuvres = allOeuvres.map((oeuvre: any) => ({
+          ...oeuvre,
+          quantity: 1, // Par défaut en stock
+          images: oeuvre.images || [oeuvre.image],
+          dimensions: {
+            ...oeuvre.dimensions,
+            isArtwork: true
+          }
+        }));
+        
+        setOeuvres(formattedOeuvres);
+        setFilteredOeuvres(formattedOeuvres);
         setTotalCount(response.data.total || 0);
         setTotalPages(response.data.pagination?.totalPages || 1);
       } else {
@@ -179,7 +196,13 @@ const MarketplaceCreateurs: React.FC = () => {
               avatar: product.user?.avatar,
               city: product.user?.city
             },
-            status: product.status
+            status: product.status,
+            quantity: 1, // Stock par défaut
+            dimensions: {
+              isArtwork: true,
+              type: product.type || product.subcategory,
+              category: product.category
+            }
           }));
           
           setOeuvres(formattedOeuvres);
@@ -272,10 +295,89 @@ const MarketplaceCreateurs: React.FC = () => {
     });
   }, [navigate]);
 
-  const handleBuyOeuvre = useCallback((oeuvre: Oeuvre, e: React.MouseEvent) => {
+  const handleBuyOeuvre = useCallback(async (oeuvre: Oeuvre, e: React.MouseEvent) => {
     e.stopPropagation();
-    alert(`Commande de "${oeuvre.title}" initiée !\nPrix: ${formatPrice(oeuvre.price)}\nArtiste: ${oeuvre.artist}`);
-  }, []);
+    setAddingOeuvreId(oeuvre.id);
+    
+    try {
+      // Vérifier la disponibilité de l'œuvre
+      const stockCheck = await api.post('/cart/check-artwork', {
+        productId: oeuvre.id,
+        quantity: 1
+      });
+      
+      if (!stockCheck.data.available) {
+        toast.error(`L'œuvre "${oeuvre.title}" n'est plus disponible.${stockCheck.data.message ? '\n' + stockCheck.data.message : ''}`);
+        return;
+      }
+      
+      // Vérifier si l'œuvre est déjà dans le panier
+      const alreadyInCart = cartItems.some(item => item.id === oeuvre.id);
+      if (alreadyInCart) {
+        toast.warning(`"${oeuvre.title}" est déjà dans votre panier`);
+        return;
+      }
+      
+      // Préparer l'objet pour le panier (identique à votre système produit)
+      const productToAdd = {
+        id: oeuvre.id,
+        name: oeuvre.title,
+        description: oeuvre.description,
+        price: oeuvre.price,
+        image: oeuvre.image,
+        images: oeuvre.images || [oeuvre.image],
+        quantity: 1,
+        
+        // Propriétés spécifiques pour les œuvres d'art
+        itemType: 'product',
+        productType: 'artwork',
+        trackQuantity: true,
+        sellerId: oeuvre.userId,
+        
+        // Informations artistiques
+        dimensions: {
+          isArtwork: true,
+          type: oeuvre.type,
+          category: oeuvre.category,
+          creationDate: oeuvre.dimensions?.creationDate,
+          materials: oeuvre.dimensions?.materials,
+          artistName: oeuvre.artist
+        },
+        
+        // Informations du vendeur
+        vendor: {
+          id: oeuvre.userId,
+          companyName: oeuvre.professional?.name || oeuvre.artist,
+          city: oeuvre.professional?.city
+        },
+        
+        // Pour la validation du panier
+        status: 'published',
+        available: true
+      };
+      
+      // Ajouter au panier
+      await addToCart(productToAdd);
+      
+      // Petit délai pour laisser le temps à l'état de se mettre à jour
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Message de confirmation
+      toast.success(`"${oeuvre.title}" ajoutée au panier !`, {
+        description: `Prix: ${formatPrice(oeuvre.price)}`,
+        action: {
+          label: 'Voir le panier',
+          onClick: () => navigate('/panier')
+        }
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Erreur ajout au panier:', error);
+      toast.error(error?.message || "Erreur lors de l'ajout au panier");
+    } finally {
+      setAddingOeuvreId(null);
+    }
+  }, [addToCart, cartItems, navigate]);
 
   const handleViewArtworks = useCallback((professionalId: string, professionalName: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -323,6 +425,16 @@ const MarketplaceCreateurs: React.FC = () => {
       case 'peinture': return <Palette size={16} />;
       case 'artisanat': return <Target size={16} />;
       default: return <ImageIcon size={16} />;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'photographie': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'sculpture': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'peinture': return 'bg-red-100 text-red-700 border-red-200';
+      case 'artisanat': return 'bg-green-100 text-green-700 border-green-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
@@ -482,6 +594,26 @@ const MarketplaceCreateurs: React.FC = () => {
             </div>
           ) : filteredOeuvres.length > 0 ? (
             <>
+              <div className="flex justify-between items-center mb-6">
+                <div className="text-sm text-gray-600">
+                  {totalCount} œuvre{totalCount > 1 ? 's' : ''} trouvée{totalCount > 1 ? 's' : ''}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-[#8B4513] text-white' : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    <Grid size={20} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-[#8B4513] text-white' : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    <List size={20} />
+                  </button>
+                </div>
+              </div>
+
               {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {filteredOeuvres.map((oeuvre) => (
@@ -501,12 +633,13 @@ const MarketplaceCreateurs: React.FC = () => {
                         />
                         
                         <div className="absolute top-3 left-3">
-                          <div className="px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/90 flex items-center gap-1.5">
+                          <div className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/90 flex items-center gap-1.5 ${getTypeColor(oeuvre.type)}`}>
                             {getTypeIcon(oeuvre.type)}
                             <span className="capitalize">{oeuvre.type}</span>
                           </div>
                         </div>
-                                                
+                        
+                        {/* Badge prix */}
                         <div className="absolute bottom-3 right-3">
                           <div className="px-3 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm">
                             <span className="font-bold text-lg text-[#8B4513]">
@@ -514,6 +647,13 @@ const MarketplaceCreateurs: React.FC = () => {
                             </span>
                           </div>
                         </div>
+                        
+                        {/* Badge vendu si quantity = 0 */}
+                        {oeuvre.quantity === 0 && (
+                          <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                            Vendu
+                          </div>
+                        )}
                       </div>
 
                       <div className="p-4">
@@ -580,10 +720,31 @@ const MarketplaceCreateurs: React.FC = () => {
                           </button>
                           <button
                             onClick={(e) => handleBuyOeuvre(oeuvre, e)}
-                            className="flex-1 py-2.5 rounded-lg bg-[#8B4513] text-white font-medium hover:bg-[#7a3b0f] transition-colors flex items-center justify-center text-sm"
+                            disabled={cartLoading || addingOeuvreId === oeuvre.id || oeuvre.quantity === 0}
+                            className={`flex-1 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center text-sm ${
+                              addingOeuvreId === oeuvre.id
+                                ? 'bg-[#6B8E23] text-white cursor-wait'
+                                : oeuvre.quantity === 0
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-[#8B4513] text-white hover:bg-[#7a3b0f]'
+                            }`}
                           >
-                            <ShoppingCart  size={14} className="mr-2" />
-                            Acheter
+                            {addingOeuvreId === oeuvre.id ? (
+                              <>
+                                <Loader2 size={14} className="mr-2 animate-spin" />
+                                Ajout...
+                              </>
+                            ) : oeuvre.quantity === 0 ? (
+                              <>
+                                <ShoppingCart size={14} className="mr-2" />
+                                Vendu
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingCart size={14} className="mr-2" />
+                                Ajouter au panier
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
@@ -606,7 +767,7 @@ const MarketplaceCreateurs: React.FC = () => {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                           <div className="absolute top-3 left-3">
-                            <div className="px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/90 flex items-center gap-1.5">
+                            <div className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/90 flex items-center gap-1.5 ${getTypeColor(oeuvre.type)}`}>
                               {getTypeIcon(oeuvre.type)}
                               <span className="capitalize">{oeuvre.type}</span>
                             </div>
@@ -684,10 +845,31 @@ const MarketplaceCreateurs: React.FC = () => {
                             </button>
                             <button
                               onClick={(e) => handleBuyOeuvre(oeuvre, e)}
-                              className="px-6 py-2 rounded-lg bg-[#8B4513] text-white font-medium hover:bg-[#7a3b0f] transition-colors flex items-center"
+                              disabled={cartLoading || addingOeuvreId === oeuvre.id || oeuvre.quantity === 0}
+                              className={`px-6 py-2 rounded-lg font-medium transition-colors flex items-center ${
+                                addingOeuvreId === oeuvre.id
+                                  ? 'bg-[#6B8E23] text-white cursor-wait'
+                                  : oeuvre.quantity === 0
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : 'bg-[#8B4513] text-white hover:bg-[#7a3b0f]'
+                              }`}
                             >
-                              <ShoppingCart size={18} className="mr-2" />
-                              Acheter maintenant
+                              {addingOeuvreId === oeuvre.id ? (
+                                <>
+                                  <Loader2 size={18} className="mr-2 animate-spin" />
+                                  Ajout...
+                                </>
+                              ) : oeuvre.quantity === 0 ? (
+                                <>
+                                  <ShoppingCart size={18} className="mr-2" />
+                                  Vendu
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingCart size={18} className="mr-2" />
+                                  Ajouter au panier
+                                </>
+                              )}
                             </button>
                           </div>
                         </div>

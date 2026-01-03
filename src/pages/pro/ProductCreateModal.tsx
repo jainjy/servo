@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { X, Upload, Loader2, ChevronDown, Package, Palette, Camera, Scissors } from 'lucide-react';
+import {  X,Upload, Loader2, ChevronDown, Package, Palette, Camera, Scissors } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth'; // Ajout de useAuth
@@ -674,13 +674,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => { resetForm(); onOpenChange(false); }}
-              aria-label="Fermer"
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <X className="h-5 w-5 text-gray-500" />
-            </button>
+            
           </div>
         </DialogHeader>
 
@@ -1080,6 +1074,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
           </div>
         </div>
 
+
         <DialogFooter className="gap-3 pt-6 border-t border-[#D3D3D3]">
           <Button
             type="button"
@@ -1090,45 +1085,28 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
           >
             Annuler
           </Button>
-         
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              onClick={() => handleSubmit('draft')}
-              disabled={isSubmitting || uploadingImages}
-              className="min-w-[140px] bg-gray-600 text-white hover:bg-gray-700 rounded-xl px-6 py-2.5"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Sauvegarde...
-                </>
-              ) : (
-                'Sauvegarder brouillon'
-              )}
-            </Button>
-            
-            <Button
-              type="button"
-              onClick={() => handleSubmit('published')}
-              disabled={isSubmitting || uploadingImages || formData.images.length === 0}
-              className="min-w-[160px] bg-[#6B8E23] text-white hover:bg-[#556B2F] hover:shadow-lg rounded-xl px-8 py-2.5 font-medium"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Publication...
-                </>
-              ) : uploadingImages ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Téléchargement...
-                </>
-              ) : (
-                'Publier l\'œuvre'
-              )}
-            </Button>
-          </div>
+        
+          {/* SUPPRIMÉ : Le bouton "Sauvegarder brouillon" et son conteneur flex */}
+          <Button
+            type="button"
+            onClick={() => handleSubmit('published')}
+            disabled={isSubmitting || uploadingImages || formData.images.length === 0}
+            className="min-w-[160px] bg-[#6B8E23] text-white hover:bg-[#556B2F] hover:shadow-lg rounded-xl px-8 py-2.5 font-medium"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Publication...
+              </>
+            ) : uploadingImages ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Téléchargement...
+              </>
+            ) : (
+              'Publier l\'œuvre'
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
