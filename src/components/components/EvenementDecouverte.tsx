@@ -4,6 +4,9 @@ import { useEventsDiscoveriesUser } from '@/hooks/useEventDiscoveriesUser';
 
 const EventsDiscoveries = () => {
   const [activeTab, setActiveTab] = useState('events');
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedDiscovery, setSelectedDiscovery] = useState<any>(null);
+  
   const { 
     events, 
     discoveries, 
@@ -14,32 +17,6 @@ const EventsDiscoveries = () => {
     getDifficultyLabel,
     refreshData 
   } = useEventsDiscoveriesUser();
-
-  // Statistiques formatées avec useMemo pour éviter les re-calculs
-  const displayStats = useMemo(() => [
-    { 
-      label: "Événements à venir", 
-      value: stats.upcomingEvents > 0 ? `${stats.upcomingEvents}+` : "0",
-      description: "Prochainement"
-    },
-    { 
-      label: "Découvertes uniques", 
-      value: stats.totalDiscoveries.toString(),
-      description: "Expériences disponibles"
-    },
-    { 
-      label: "Participants actifs", 
-      value: stats.totalParticipants > 1000 
-        ? `${(stats.totalParticipants / 1000).toFixed(1)}k` 
-        : stats.totalParticipants.toString(),
-      description: "Déjà inscrits"
-    },
-    { 
-      label: "Taux de satisfaction", 
-      value: `${((stats.avgRating / 5) * 100).toFixed(0)}%`,
-      description: "Basé sur les avis"
-    }
-  ], [stats]);
 
   // Données à afficher avec useMemo
   const displayEvents = useMemo(() => 
@@ -57,7 +34,6 @@ const EventsDiscoveries = () => {
   );
 
   const isLoading = loading.events || loading.discoveries;
-  const hasData = displayEvents.length > 0 || displayDiscoveries.length > 0;
 
   // Fonction pour formater la date
   const formatDate = (dateString: string) => {
@@ -71,6 +47,17 @@ const EventsDiscoveries = () => {
     } catch {
       return dateString;
     }
+  };
+
+  // Fonction pour fermer la modal
+  const closeModal = () => {
+    setSelectedEvent(null);
+    setSelectedDiscovery(null);
+  };
+
+  // Empêcher la propagation du clic dans la modal
+  const handleModalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
@@ -108,28 +95,6 @@ const EventsDiscoveries = () => {
             >
               Réessayer le chargement
             </button>
-          </div>
-        )}
-
-        {/* Statistiques - seulement si on a des données */}
-        {!isLoading && hasData && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-            {displayStats.map((stat, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-lg p-6 text-center transition-all hover:shadow-xl"
-              >
-                <div className="text-3xl font-bold text-secondary-text mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-gray-700 font-medium mb-1">
-                  {stat.label}
-                </div>
-                <div className="text-sm text-gray-500">
-                  {stat.description}
-                </div>
-              </div>
-            ))}
           </div>
         )}
 
@@ -178,21 +143,44 @@ const EventsDiscoveries = () => {
             events={displayEvents}
             getEventSpotsInfo={getEventSpotsInfo}
             formatDate={formatDate}
+            onEventClick={setSelectedEvent}
           />
         ) : (
           <DiscoveriesContent 
             discoveries={displayDiscoveries}
             getDifficultyLabel={getDifficultyLabel}
+            onDiscoveryClick={setSelectedDiscovery}
           />
         )}
 
-        {/* Section newsletter - seulement si on a des données */}
-        {hasData && !isLoading && (
-          <>
-            <NewsletterSection />
-            <CallToActionSection />
-          </>
+        {/* Modal pour événement agrandi */}
+        {(selectedEvent || selectedDiscovery) && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={closeModal}
+          >
+            <div 
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={handleModalClick}
+            >
+              {selectedEvent ? (
+                <ExpandedEvent 
+                  event={selectedEvent}
+                  getEventSpotsInfo={getEventSpotsInfo}
+                  formatDate={formatDate}
+                  onClose={closeModal}
+                />
+              ) : (
+                <ExpandedDiscovery 
+                  discovery={selectedDiscovery}
+                  getDifficultyLabel={getDifficultyLabel}
+                  onClose={closeModal}
+                />
+              )}
+            </div>
+          </div>
         )}
+
       </div>
     </div>
   );
@@ -225,7 +213,7 @@ const LoadingSkeleton = ({ activeTab }: { activeTab: string }) => {
 };
 
 // Composant Événements
-const EventsContent = ({ events, getEventSpotsInfo, formatDate }: any) => {
+const EventsContent = ({ events, getEventSpotsInfo, formatDate, onEventClick }: any) => {
   if (events.length === 0) {
     return (
       <div className="text-center py-12">
@@ -243,9 +231,10 @@ const EventsContent = ({ events, getEventSpotsInfo, formatDate }: any) => {
         return (
           <div
             key={event.id}
-            className={`bg-white relative rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
+            className={`bg-white relative rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer ${
               event.featured ? 'md:col-span-2 lg:col-span-2' : ''
             }`}
+            onClick={() => onEventClick(event)}
           >
             {/* Image */}
             <div className="relative p-2 z-10 h-64 overflow-hidden">
@@ -310,15 +299,10 @@ const EventsContent = ({ events, getEventSpotsInfo, formatDate }: any) => {
                   </div>
                 </div>
               )}
-
-              {/* Prix et bouton */}
-              <div className="flex items-center justify-between">
-                <div className="text-lg font-bold text-secondary-text">
-                  {event.price > 0 ? `${event.price} ${event.currency || 'EUR'}` : 'Gratuit'}
-                </div>
-                <button className="bg-logo text-white font-semibold py-2 px-6 rounded-xl hover:bg-logo/70 transition-all duration-300">
-                  S'inscrire
-                </button>
+              
+              {/* Indicateur de clic */}
+              <div className="text-xs text-gray-500 text-center mt-4">
+                Cliquez pour voir les détails
               </div>
             </div>
           </div>
@@ -329,7 +313,7 @@ const EventsContent = ({ events, getEventSpotsInfo, formatDate }: any) => {
 };
 
 // Composant Découvertes
-const DiscoveriesContent = ({ discoveries, getDifficultyLabel }: any) => {
+const DiscoveriesContent = ({ discoveries, getDifficultyLabel, onDiscoveryClick }: any) => {
   if (discoveries.length === 0) {
     return (
       <div className="text-center py-12">
@@ -343,7 +327,8 @@ const DiscoveriesContent = ({ discoveries, getDifficultyLabel }: any) => {
       {discoveries.map((discovery: any) => (
         <div
           key={discovery.id}
-          className="bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
+          className="bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer"
+          onClick={() => onDiscoveryClick(discovery)}
         >
           {/* Image */}
           <div className="relative h-48 p-2 overflow-hidden">
@@ -396,15 +381,10 @@ const DiscoveriesContent = ({ discoveries, getDifficultyLabel }: any) => {
                 <span className="line-clamp-1">{discovery.location || 'Lieu non spécifié'}</span>
               </div>
             </div>
-
-            {/* Prix et bouton */}
-            <div className="flex items-center justify-between">
-              <div className="text-lg font-bold text-secondary-text">
-                {discovery.price > 0 ? `${discovery.price} ${discovery.currency || 'EUR'}` : 'Gratuit'}
-              </div>
-              <button className="bg-logo text-white font-semibold py-2 px-4 rounded-xl hover:bg-logo/70 transition-all duration-300">
-                Découvrir
-              </button>
+            
+            {/* Indicateur de clic */}
+            <div className="text-xs text-gray-500 text-center">
+              Cliquez pour voir les détails
             </div>
           </div>
         </div>
@@ -413,45 +393,360 @@ const DiscoveriesContent = ({ discoveries, getDifficultyLabel }: any) => {
   );
 };
 
-// Sections supplémentaires
-const NewsletterSection = () => (
-  <div className="mt-20 bg-gradient-to-r from-secondary-text to-secondary-text/50 rounded-3xl p-8 md:p-12 text-white">
-    <div className="max-w-2xl mx-auto text-center">
-      <h2 className="text-3xl font-bold mb-4">
-        Ne manquez aucune découverte
-      </h2>
-      <p className="text-blue-100 mb-8">
-        Inscrivez-vous à notre newsletter pour recevoir en avant-première les nouveaux événements et découvertes.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-        <input
-          type="email"
-          placeholder="Votre adresse email"
-          className="flex-grow px-6 py-3 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
+// Composant Événement agrandi
+const ExpandedEvent = ({ event, getEventSpotsInfo, formatDate, onClose }: any) => {
+  const spotsInfo = getEventSpotsInfo(event);
+  const formattedDate = formatDate(event.date);
+  
+  return (
+    <>
+      {/* Bouton de fermeture */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-50 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all"
+      >
+        <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      {/* Image en tête */}
+      <div className="relative h-80 overflow-hidden">
+        <img
+          src={event.image || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1600'}
+          alt={event.title}
+          className="w-full h-full object-cover"
         />
-        <button className="bg-white text-secondary-text font-semibold px-8 py-3 rounded-xl hover:bg-gray-100 transition-colors duration-300">
-          S'abonner
-        </button>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+        <div className="absolute bottom-6 left-6 right-6 text-white">
+          {event.featured && (
+            <span className="bg-yellow-500 text-white px-4 py-1 rounded-full text-sm font-semibold mb-2 inline-block">
+              ⭐ Événement spécial
+            </span>
+          )}
+          <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
+          <div className="flex items-center space-x-4 text-white/90">
+            <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg">
+              {event.category || 'Événement'}
+            </span>
+            <span>•</span>
+            <span>Organisé par {event.organizer || 'Non spécifié'}</span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-);
+      
+      {/* Contenu détaillé */}
+      <div className="p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Colonne principale */}
+          <div className="lg:col-span-2">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+            <p className="text-gray-700 mb-6 whitespace-pre-line">
+              {event.description || 'Pas de description disponible'}
+            </p>
+            
+            {/* Informations détaillées */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Informations pratiques</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">📅 Date et heure</h4>
+                  <p className="text-gray-600">
+                    {formattedDate}
+                    {event.time && <span className="block">⏰ {event.time}</span>}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">📍 Lieu</h4>
+                  <p className="text-gray-600">
+                    {event.location}
+                    {event.address && <span className="block">{event.address}</span>}
+                    {event.city && <span className="block">{event.city} {event.postalCode}</span>}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">🎯 Niveau de difficulté</h4>
+                  <p className="text-gray-600">
+                    {event.difficulty ? 
+                      event.difficulty.charAt(0).toUpperCase() + event.difficulty.slice(1) : 
+                      'Non spécifié'}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">⏱️ Durée</h4>
+                  <p className="text-gray-600">{event.duration || 'Non spécifié'}</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Inclus / Non inclus */}
+            {(event.includes?.length > 0 || event.notIncludes?.length > 0) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {event.includes?.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">✅ Ce qui est inclus</h3>
+                    <ul className="space-y-2">
+                      {event.includes.map((item: string, index: number) => (
+                        <li key={index} className="flex items-center text-gray-700">
+                          <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {event.notIncludes?.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">❌ Ce qui n'est pas inclus</h3>
+                    <ul className="space-y-2">
+                      {event.notIncludes.map((item: string, index: number) => (
+                        <li key={index} className="flex items-center text-gray-700">
+                          <svg className="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Colonne latérale (réservation) */}
+          <div className="lg:col-span-1">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg sticky top-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Réservation</h3>
+              
+              {/* Prix */}
+              <div className="mb-6">
+                <div className="text-3xl font-bold text-logo mb-2">
+                  {event.price > 0 ? `${event.price} ${event.currency || 'EUR'}` : 'Gratuit'}
+                </div>
+                {event.discountPrice && (
+                  <div className="text-gray-500 line-through">
+                    {event.discountPrice} {event.currency || 'EUR'}
+                  </div>
+                )}
+              </div>
+              
+              {/* Places disponibles */}
+              {spotsInfo.total > 0 && (
+                <div className="mb-6">
+                  <div className="flex justify-between text-gray-700 mb-2">
+                    <span>Places disponibles</span>
+                    <span className="font-semibold">{spotsInfo.available} / {spotsInfo.total}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-green-500 h-3 rounded-full transition-all duration-500"
+                      style={{ width: `${spotsInfo.percentage}%` }}
+                    />
+                  </div>
+                  <div className="text-sm text-gray-600 mt-2">
+                    {spotsInfo.booked} personnes déjà inscrites
+                  </div>
+                </div>
+              )}
+              
+              {/* Informations complémentaires */}
+              <div className="mt-6 space-y-4 text-sm text-gray-600">
+                {event.contactEmail && (
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                    {event.contactEmail}
+                  </div>
+                )}
+                {event.contactPhone && (
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                    </svg>
+                    {event.contactPhone}
+                  </div>
+                )}
+                {event.website && (
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                    </svg>
+                    <a href={event.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      Site web
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
-const CallToActionSection = () => (
-  <div className="text-center mt-16">
-    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-      Vous organisez un événement ou avez une découverte à partager ?
-    </h3>
-    <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-      Rejoignez notre communauté de passionnés et faites découvrir vos expériences uniques.
-    </p>
-    <button className="inline-flex items-center bg-secondary-text text-white font-semibold py-3 px-8 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:-translate-y-0.5">
-      Proposer une expérience
-      <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-      </svg>
-    </button>
-  </div>
-);
+// Composant Découverte agrandie
+const ExpandedDiscovery = ({ discovery, getDifficultyLabel, onClose }: any) => {
+  return (
+    <>
+      {/* Bouton de fermeture */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-50 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all"
+      >
+        <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      {/* Image en tête */}
+      <div className="relative h-80 overflow-hidden">
+        <img
+          src={discovery.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600'}
+          alt={discovery.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+        <div className="absolute bottom-6 left-6 right-6 text-white">
+          <span className="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-semibold mb-2 inline-block">
+            {discovery.type || 'Découverte'}
+          </span>
+          <h1 className="text-3xl font-bold mb-2">{discovery.title}</h1>
+          <div className="flex items-center space-x-4 text-white/90">
+            <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg flex items-center">
+              <svg className="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <span className="font-bold">{(discovery.rating || 0).toFixed(1)}</span>
+            </div>
+            <span>•</span>
+            <span>{discovery.visits || 0} visites</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Contenu détaillé */}
+      <div className="p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Colonne principale */}
+          <div className="lg:col-span-2">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+            <p className="text-gray-700 mb-6 whitespace-pre-line">
+              {discovery.description || 'Pas de description disponible'}
+            </p>
+            
+            {/* Caractéristiques */}
+            {discovery.highlights?.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Points forts</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {discovery.highlights.map((highlight: string, index: number) => (
+                    <div key={index} className="flex items-start bg-gray-50 p-4 rounded-lg">
+                      <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700">{highlight}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Informations détaillées */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Informations pratiques</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">📍 Localisation</h4>
+                  <p className="text-gray-600">{discovery.location || 'Non spécifié'}</p>
+                  {discovery.coordinates && (
+                    <p className="text-gray-500 text-sm mt-1">
+                      Coordonnées: {discovery.coordinates.lat}, {discovery.coordinates.lng}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">🎯 Niveau de difficulté</h4>
+                  <p className="text-gray-600">{getDifficultyLabel(discovery.difficulty)}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">⏱️ Durée estimée</h4>
+                  <p className="text-gray-600">{discovery.duration || 'Non spécifié'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-700 mb-2">👥 Recommandé pour</h4>
+                  <p className="text-gray-600">Tous les âges</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Tags */}
+            {discovery.tags?.length > 0 && (
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Thématiques</h3>
+                <div className="flex flex-wrap gap-2">
+                  {discovery.tags.map((tag: string, index: number) => (
+                    <span
+                      key={index}
+                      className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Colonne latérale (réservation) */}
+          <div className="lg:col-span-1">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg sticky top-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Découvrir</h3>
+              
+              {/* Prix */}
+              <div className="mb-6">
+                <div className="text-3xl font-bold text-logo mb-2">
+                  {discovery.price > 0 ? `${discovery.price} ${discovery.currency || 'EUR'}` : 'Gratuit'}
+                </div>
+              </div>
+              
+              {/* Statistiques */}
+              <div className="space-y-4 mb-6">
+                <div className="flex justify-between text-gray-700">
+                  <span>Note moyenne</span>
+                  <span className="font-semibold">{(discovery.rating || 0).toFixed(1)}/5</span>
+                </div>
+                <div className="flex justify-between text-gray-700">
+                  <span>Nombre de visites</span>
+                  <span className="font-semibold">{discovery.visits || 0}</span>
+                </div>
+                {discovery.organizer && (
+                  <div className="flex justify-between text-gray-700">
+                    <span>Organisateur</span>
+                    <span className="font-semibold">{discovery.organizer}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Conseils */}
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">💡 Conseil</h4>
+                <p className="text-blue-700 text-sm">
+                  Pensez à prévoir de l'eau et des chaussures confortables pour profiter pleinement de cette découverte.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default EventsDiscoveries;

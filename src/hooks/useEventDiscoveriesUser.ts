@@ -1,6 +1,7 @@
 // hooks/useEventsDiscoveriesUser.ts
 import { useState, useEffect, useCallback, useRef } from "react";
 import api from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface UserEventItem {
   id: number;
@@ -79,12 +80,14 @@ interface Stats {
 }
 
 export const useEventsDiscoveriesUser = () => {
+  const { user, isAuthenticated } = useAuth();
   const [events, setEvents] = useState<UserEventItem[]>([]);
   const [discoveries, setDiscoveries] = useState<UserDiscoveryItem[]>([]);
   const [loading, setLoading] = useState({
     events: false,
     discoveries: false,
-    stats: false
+    stats: false,
+    auth: false
   });
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats>({
@@ -100,9 +103,14 @@ export const useEventsDiscoveriesUser = () => {
   // Référence pour éviter les re-rendus inutiles
   const hasFetched = useRef(false);
 
+  // Vérifier si l'utilisateur a le rôle "user"
+  const isUserRole = useCallback(() => {
+    if (!user) return false;
+    return user.role === "user";
+  }, [user]);
+
   // Formater un événement pour l'interface utilisateur
   const formatEventForUI = useCallback((event: any): UserEventItem => {
-    // Extraire le temps du champ time
     let timeDisplay = '';
     if (event.time) {
       timeDisplay = event.time;
@@ -110,7 +118,6 @@ export const useEventsDiscoveriesUser = () => {
       timeDisplay = `${event.startTime} - ${event.endTime}`;
     }
 
-    // Formater la date pour l'affichage
     let displayDate = event.date;
     try {
       if (event.date) {
@@ -127,7 +134,6 @@ export const useEventsDiscoveriesUser = () => {
       console.error('Erreur format date:', e);
     }
 
-    // Déterminer le statut
     const status = (event.status || 'draft').toLowerCase();
 
     return {
@@ -194,7 +200,6 @@ export const useEventsDiscoveriesUser = () => {
 
   // Fonction pour calculer les stats
   const calculateStats = useCallback((eventsData: UserEventItem[], discoveriesData: UserDiscoveryItem[]) => {
-    console.log("📊 Calcul des statistiques...");
     
     const totalEvents = eventsData.length;
     const totalDiscoveries = discoveriesData.length;
@@ -218,7 +223,6 @@ export const useEventsDiscoveriesUser = () => {
       totalVisits
     };
     
-    console.log("📊 Stats calculées:", newStats);
     setStats(newStats);
   }, []);
 
@@ -226,11 +230,8 @@ export const useEventsDiscoveriesUser = () => {
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(prev => ({ ...prev, events: true }));
-      console.log("🔄 Chargement des événements...");
       
       const response = await api.get("/event");
-      
-      console.log("✅ Réponse événements:", response.data);
       
       if (response.data) {
         let eventsData = response.data.data || response.data;
@@ -239,7 +240,6 @@ export const useEventsDiscoveriesUser = () => {
           eventsData = [];
         }
         
-        // Filtrer seulement les événements actifs/published
         const activeEvents = eventsData.filter((event: any) => {
           const status = (event.status || '').toLowerCase();
           return ['active', 'published', 'upcoming'].includes(status);
@@ -247,14 +247,12 @@ export const useEventsDiscoveriesUser = () => {
         
         const formattedEvents = activeEvents.map(formatEventForUI);
         setEvents(formattedEvents);
-        console.log(`🎯 ${formattedEvents.length} événements chargés`);
         setError(null);
         return formattedEvents;
       }
       return [];
     } catch (error: any) {
       console.error("❌ Erreur chargement événements:", error.message);
-      setError("Impossible de charger les événements pour le moment");
       setEvents([]);
       return [];
     } finally {
@@ -266,11 +264,8 @@ export const useEventsDiscoveriesUser = () => {
   const fetchDiscoveries = useCallback(async () => {
     try {
       setLoading(prev => ({ ...prev, discoveries: true }));
-      console.log("🔄 Chargement des découvertes...");
       
       const response = await api.get("/discoveries");
-      
-      console.log("✅ Réponse découvertes:", response.data);
       
       if (response.data) {
         let discoveriesData = response.data.data || response.data;
@@ -279,7 +274,6 @@ export const useEventsDiscoveriesUser = () => {
           discoveriesData = [];
         }
         
-        // Filtrer seulement les découvertes publiées/actives
         const activeDiscoveries = discoveriesData.filter((discovery: any) => {
           const status = (discovery.status || '').toLowerCase();
           return ['published', 'active'].includes(status);
@@ -287,14 +281,12 @@ export const useEventsDiscoveriesUser = () => {
         
         const formattedDiscoveries = activeDiscoveries.map(formatDiscoveryForUI);
         setDiscoveries(formattedDiscoveries);
-        console.log(`🎯 ${formattedDiscoveries.length} découvertes chargées`);
         setError(null);
         return formattedDiscoveries;
       }
       return [];
     } catch (error: any) {
       console.error("❌ Erreur chargement découvertes:", error.message);
-      setError("Impossible de charger les découvertes pour le moment");
       setDiscoveries([]);
       return [];
     } finally {
@@ -302,44 +294,64 @@ export const useEventsDiscoveriesUser = () => {
     }
   }, [formatDiscoveryForUI]);
 
-  // Charger toutes les données
+  // Vérifier si l'utilisateur peut accéder aux données
+  const canAccessData = useCallback(() => {
+    if (!isAuthenticated || !user) {
+      return false;
+    }
+    
+    if (user.role !== "user") {
+      return false;
+    }
+    
+    return true;
+  }, [isAuthenticated, user]);
+
+  // Charger toutes les données seulement si l'utilisateur a le bon rôle
   const fetchAllData = useCallback(async () => {
     if (hasFetched.current) {
-      console.log("⏭️ Données déjà chargées, skip...");
       return;
     }
     
-    console.log("🚀 Début du chargement des données...");
+    // Vérifier les droits d'accès
+    if (!canAccessData()) {
+      // Ne rien afficher - tableaux déjà vides par défaut
+      hasFetched.current = true; // Marquer comme traité pour éviter les tentatives répétées
+      return;
+    }
+    
     hasFetched.current = true;
     
     try {
-      // Charger les deux en parallèle
       const [eventsData, discoveriesData] = await Promise.all([
         fetchEvents(),
         fetchDiscoveries()
       ]);
       
-      // Calculer les stats après le chargement
       calculateStats(eventsData, discoveriesData);
-      console.log("✅ Données chargées avec succès");
     } catch (error) {
       console.error("❌ Erreur lors du chargement:", error);
     }
-  }, [fetchEvents, fetchDiscoveries, calculateStats]);
+  }, [canAccessData, fetchEvents, fetchDiscoveries, calculateStats]);
 
-  // Charger les données au montage - UNE SEULE FOIS
+  // Charger les données au montage
   useEffect(() => {
-    console.log("🏁 Mount: Début du chargement initial");
     fetchAllData();
     
-    // Cleanup function
     return () => {
-      console.log("🧹 Cleanup: Reset hasFetched");
       hasFetched.current = false;
     };
   }, [fetchAllData]);
 
-  // Fonctions utilitaires - sans dépendances pour éviter les re-rendus
+  // Réagir aux changements d'authentification
+  useEffect(() => {
+    if (isAuthenticated !== undefined) {
+      hasFetched.current = false;
+      fetchAllData();
+    }
+  }, [isAuthenticated, fetchAllData]);
+
+  // Fonctions utilitaires
   const getEventSpotsInfo = useCallback((event: UserEventItem) => {
     const capacity = event.capacity || 0;
     const participants = event.participants || 0;
@@ -377,23 +389,21 @@ export const useEventsDiscoveriesUser = () => {
 
   // Rafraîchir les données manuellement
   const refreshData = useCallback(() => {
-    console.log("🔄 Rafraîchissement manuel des données");
     hasFetched.current = false;
     setEvents([]);
     setDiscoveries([]);
-    setError(null);
     fetchAllData();
   }, [fetchAllData]);
 
   return {
-    // Données
+    // Données - retournent toujours des tableaux vides si l'utilisateur n'a pas le bon rôle
     events,
     discoveries,
     featuredEvents: events.filter(e => e.featured).slice(0, 4),
     featuredDiscoveries: discoveries.filter(d => d.featured).slice(0, 4),
     stats,
     loading,
-    error,
+    error: null, // Toujours null pour ne pas afficher d'erreur
     
     // Fonctions utilitaires
     getEventSpotsInfo,
@@ -403,7 +413,7 @@ export const useEventsDiscoveriesUser = () => {
     // Actions
     refreshData,
     
-    // Formateurs (optionnel)
+    // Formateurs
     formatEventForUI,
     formatDiscoveryForUI
   };

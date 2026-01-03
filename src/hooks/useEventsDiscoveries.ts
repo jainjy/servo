@@ -440,8 +440,6 @@ export const useEventsDiscoveries = () => {
         }
       });
       
-      console.log("📥 Événements reçus:", response.data);
-      
       if (response.data.success && Array.isArray(response.data.data)) {
         const formattedEvents: EventItem[] = response.data.data.map((event: any) => 
           formatEventFromApi(event)
@@ -473,8 +471,6 @@ export const useEventsDiscoveries = () => {
         }
       });
       
-      console.log("📥 Découvertes reçues:", response.data);
-      
       if (response.data.success && Array.isArray(response.data.data)) {
         const formattedDiscoveries: DiscoveryItem[] = response.data.data.map((discovery: any) => 
           formatDiscoveryFromApi(discovery)
@@ -499,7 +495,6 @@ export const useEventsDiscoveries = () => {
   const fetchEventStats = useCallback(async () => {
     try {
       const response = await api.get("/event/stats");
-      console.log("📊 Statistiques événements:", response.data);
       
       if (response.data.success) {
         return response.data.data;
@@ -515,7 +510,6 @@ export const useEventsDiscoveries = () => {
   const fetchDiscoveryStats = useCallback(async () => {
     try {
       const response = await api.get("/discoveries/stats/global");
-      console.log("📊 Statistiques découvertes:", response.data);
       
       if (response.data.success) {
         return response.data.data;
@@ -536,9 +530,6 @@ export const useEventsDiscoveries = () => {
         fetchEventStats(),
         fetchDiscoveryStats()
       ]);
-      
-      console.log("📊 Stats événements:", eventsStats);
-      console.log("📊 Stats découvertes:", discoveriesStats);
       
       // Statistiques événements
       const totalRevenueEvents = eventsStats.financials?.totalRevenue || 0;
@@ -587,8 +578,7 @@ export const useEventsDiscoveries = () => {
         totalVisits,
         popularCategory: popularCategory || "Aucune"
       };
-      
-      console.log("📊 Stats mises à jour:", updatedStats);
+
       setStats(updatedStats);
       setError(null);
     } catch (error: any) {
@@ -669,8 +659,6 @@ export const useEventsDiscoveries = () => {
         featured: !event.featured
       });
       
-      console.log("✅ Featured updated:", response.data);
-      
       if (response.data.success) {
         setEvents(prev =>
           prev.map((item) =>
@@ -699,8 +687,6 @@ export const useEventsDiscoveries = () => {
         featured: !discovery.featured
       });
       
-      console.log("✅ Featured updated:", response.data);
-      
       if (response.data.success) {
         setDiscoveries(prev =>
           prev.map((item) =>
@@ -720,15 +706,10 @@ export const useEventsDiscoveries = () => {
   // Ajouter un événement
   const handleAddEvent = useCallback(async (newEvent: EventItem) => {
     try {
-      console.log("📤 Ajout d'événement:", newEvent);
       
       const eventData = formatEventToApi(newEvent);
       
-      console.log("📤 Données envoyées à l'API:", JSON.stringify(eventData, null, 2));
-      
       const response = await api.post("/event", eventData);
-      
-      console.log("✅ Réponse API:", response.data);
       
       if (response.data.success) {
         const formattedEvent = formatEventFromApi(response.data.data);
@@ -762,15 +743,10 @@ export const useEventsDiscoveries = () => {
   // Ajouter une découverte
   const handleAddDiscovery = useCallback(async (newDiscovery: DiscoveryItem) => {
     try {
-      console.log("📤 Ajout de découverte:", newDiscovery);
       
       const discoveryData = formatDiscoveryToApi(newDiscovery);
       
-      console.log("📤 Données envoyées à l'API:", JSON.stringify(discoveryData, null, 2));
-      
       const response = await api.post("/discoveries", discoveryData);
-      
-      console.log("✅ Réponse API:", response.data);
       
       if (response.data.success) {
         const formattedDiscovery = formatDiscoveryFromApi(response.data.data);
@@ -804,15 +780,10 @@ export const useEventsDiscoveries = () => {
   // Mettre à jour un événement
   const handleUpdateEvent = useCallback(async (updatedEvent: EventItem) => {
     try {
-      console.log("📤 Mise à jour événement:", updatedEvent);
       
       const eventData = formatEventToApi(updatedEvent);
       
-      console.log("📤 Données envoyées à l'API:", JSON.stringify(eventData, null, 2));
-      
       const response = await api.put(`/event/${updatedEvent.id}`, eventData);
-      
-      console.log("✅ Réponse API:", response.data);
       
       if (response.data.success) {
         const formattedEvent = formatEventFromApi(response.data.data);
@@ -838,15 +809,10 @@ export const useEventsDiscoveries = () => {
   // Mettre à jour une découverte
   const handleUpdateDiscovery = useCallback(async (updatedDiscovery: DiscoveryItem) => {
     try {
-      console.log("📤 Mise à jour découverte:", updatedDiscovery);
       
       const discoveryData = formatDiscoveryToApi(updatedDiscovery);
       
-      console.log("📤 Données envoyées à l'API:", JSON.stringify(discoveryData, null, 2));
-      
       const response = await api.put(`/discoveries/${updatedDiscovery.id}`, discoveryData);
-      
-      console.log("✅ Réponse API:", response.data);
       
       if (response.data.success) {
         const formattedDiscovery = formatDiscoveryFromApi(response.data.data);
