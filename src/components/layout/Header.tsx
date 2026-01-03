@@ -1581,9 +1581,17 @@ const Header = () => {
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-[#556B2F] text-white text-xs">
-                    {initials}
-                  </AvatarFallback>
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={`${user?.firstName} ${user?.lastName}`}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <AvatarFallback className="bg-[#556B2F] text-white text-xs">
+                      {initials}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div className="text-left min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
@@ -1683,7 +1691,7 @@ const Header = () => {
                   <Building2Icon className="h-4 w-4" />
                   <span>Gestion des locations saisonnieres</span>
                 </button>
-                <button
+                {/* <button
                   onClick={() => {
                     navigate("/mon-compte/payement");
                     setIsMobileMenuOpen(false);
@@ -1692,7 +1700,7 @@ const Header = () => {
                 >
                   <CreditCard className="h-4 w-4" />
                   <span>Paiements</span>
-                </button>
+                </button> */}
                 <button
                   onClick={() => {
                     navigate("/mon-compte/documents");
@@ -1728,6 +1736,12 @@ const Header = () => {
       </div>
     </div>
   );
+  const profilePathDesktop =
+    role === "admin"
+      ? "/admin"
+      : role === "professional"
+      ? "/pro"
+      : "/mon-compte/profil";
   return (
     <>
       <header
@@ -2304,9 +2318,17 @@ const Header = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger className="hidden lg:flex p-0 w-10 h-10 rounded-full border border-[#D3D3D3] hover:bg-gray-50 items-center justify-center z-50 relative">
                   <Avatar className="w-10 h-10">
-                    <AvatarFallback className="bg-[#556B2F] text-[#FFFFFF] text-sm font-semibold">
-                      {initials}
-                    </AvatarFallback>
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={`${user?.firstName} ${user?.lastName}`}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <AvatarFallback className="bg-[#556B2F] text-[#FFFFFF] text-sm font-semibold ">
+                        {initials}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -2391,12 +2413,12 @@ const Header = () => {
                         <Calendar className="mr-2 h-4 w-4" />
                         Réservations tourisme et bien etre
                       </DropdownMenuItem>
-                      <DropdownMenuItem
+                      {/* <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/payement")}
                       >
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/documents")}
                       >

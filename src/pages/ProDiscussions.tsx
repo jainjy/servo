@@ -24,6 +24,7 @@ import {
   ArrowDown,
   User,
   ArrowLeft,
+  Euro,
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -69,8 +70,8 @@ export default function ProDiscussions() {
   const [devisDescription, setDevisDescription] = useState("");
   const [devisFile, setDevisFile] = useState(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false); // État pour la modale de chat mobile
-  const [showMobileActionsMenu, setShowMobileActionsMenu] = useState(false); // État pour le menu d'actions mobile
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [showMobileActionsMenu, setShowMobileActionsMenu] = useState(false);
   const messagesContainerRef = useRef(null);
   const actionsMenuRef = useRef(null);
   const { isConnected } = useSocket();
@@ -89,10 +90,8 @@ export default function ProDiscussions() {
 
   useEffect(() => {
     setCurrentUserId(user?.id);
-    console.log("les messages :",messages)
-  }, []);
+  }, [user]);
 
-  // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
     const container = e.target;
     const isAtBottom =
@@ -106,7 +105,6 @@ export default function ProDiscussions() {
     setShowScrollButton(false);
   };
 
-  // Charger les détails de l'artisan
   useEffect(() => {
     const fetchArtisanDetails = async () => {
       try {
@@ -116,7 +114,6 @@ export default function ProDiscussions() {
           );
           setArtisanDetails(response.data);
 
-          // Pré-remplir les formulaires si des données existent
           if (response.data.rdv) {
             const rdvDate = new Date(response.data.rdv);
             setCurrentRendezVous({
@@ -155,7 +152,6 @@ export default function ProDiscussions() {
       toast.success("Rendez-vous proposé avec succès");
       setShowRendezVousModal(false);
 
-      // Recharger les détails
       const detailsResponse = await api.get(
         `/demande-actions/${id}/details-artisan`
       );
@@ -168,33 +164,26 @@ export default function ProDiscussions() {
     }
   };
 
-  // Fonction pour confirmer le paiement
-  const handleConfirmerPaiement = async (confirmer) => {
+  // NOUVEAU: Fonction pour confirmer la réception du paiement
+  const handleConfirmerReceptionPaiement = async () => {
     try {
       const response = await api.post(
-        `/demande-actions/${id}/confirmer-paiement`,
-        {
-          confirmer,
-        }
+        `/demande-actions/${id}/confirmer-reception-paiement`
       );
 
-      const message = confirmer
-        ? "Paiement confirmé avec succès"
-        : "Paiement refusé";
-      toast.success(message);
+      toast.success("Réception du paiement confirmée avec succès");
 
-      // Recharger les détails
       const detailsResponse = await api.get(
         `/demande-actions/${id}/details-artisan`
       );
       setArtisanDetails(detailsResponse.data);
     } catch (error) {
-      console.error("Erreur confirmation paiement:", error);
-      toast.error("Erreur lors de la confirmation du paiement");
+      console.error("Erreur confirmation réception paiement:", error);
+      toast.error("Erreur lors de la confirmation de la réception");
     }
   };
 
-  // Fonction pour marquer les travaux comme terminés
+  // NOUVEAU: Fonction pour terminer les travaux
   const handleTerminerTravaux = async () => {
     try {
       const response = await api.post(
@@ -203,7 +192,6 @@ export default function ProDiscussions() {
 
       toast.success("Travaux marqués comme terminés avec succès");
 
-      // Recharger les détails
       const detailsResponse = await api.get(
         `/demande-actions/${id}/details-artisan`
       );
@@ -214,13 +202,11 @@ export default function ProDiscussions() {
     }
   };
 
-  // Fonction pour extraire la note du message AVIS_LAISSE
   const extractRatingFromMessage = (content) => {
     const match = content.match(/Note:\s*(\d+)\/5/);
     return match ? parseInt(match[1]) : 0;
   };
 
-  // Composant pour afficher les étoiles
   const RatingStars = ({ rating }) => {
     return (
       <div className="flex gap-1 mt-2">
@@ -260,11 +246,10 @@ export default function ProDiscussions() {
           },
         }
       );
-      // console.log("Response envoyer devis:", response);
+
       toast.success("Devis envoyé avec succès");
       setShowDevisModal(false);
 
-      // Recharger les détails
       const detailsResponse = await api.get(
         `/demande-actions/${id}/details-artisan`
       );
@@ -293,12 +278,10 @@ export default function ProDiscussions() {
           },
         }
       );
-      // console.log("Response envoyer facture:", response);
 
       toast.success("Facture envoyée avec succès");
       setShowFactureModal(false);
 
-      // Recharger les détails
       const detailsResponse = await api.get(
         `/demande-actions/${id}/details-artisan`
       );
@@ -323,7 +306,6 @@ export default function ProDiscussions() {
       toast.success("Rendez-vous modifié avec succès");
       setShowEditRendezVousModal(false);
 
-      // Recharger les détails
       const detailsResponse = await api.get(
         `/demande-actions/${id}/details-artisan`
       );
@@ -355,12 +337,10 @@ export default function ProDiscussions() {
           },
         }
       );
-      // console.log("Response modifier devis:", response);
 
       toast.success("Devis modifié avec succès");
       setShowEditDevisModal(false);
 
-      // Recharger les détails
       const detailsResponse = await api.get(
         `/demande-actions/${id}/details-artisan`
       );
@@ -370,26 +350,6 @@ export default function ProDiscussions() {
       toast.error("Erreur lors de la modification du devis");
     } finally {
       setLoadingEditDevis(false);
-    }
-  };
-
-  // Fonction pour valider/refuser une facture
-  const handleValiderFacture = async (artisanId, statut) => {
-    try {
-      const response = await api.put(`/demande-actions/${id}/valider-facture`, {
-        artisanId,
-        statut,
-      });
-
-      const message =
-        statut === "validee" ? "Facture validée" : "Facture refusée";
-      toast.success(`${message} avec succès`);
-
-      // Recharger les données
-      // (Pour l'admin, vous devrez peut-être recharger la liste des artisans)
-    } catch (error) {
-      console.error("Erreur validation facture:", error);
-      toast.error("Erreur lors de la validation de la facture");
     }
   };
 
@@ -409,32 +369,6 @@ export default function ProDiscussions() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const getUrgencyBg = (urgency) => {
-    switch (urgency) {
-      case "Urgent":
-        return "bg-red-500";
-      case "Moyen":
-        return "bg-orange-500";
-      case "Faible":
-        return "bg-green-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
-  const getUrgencyIcon = (urgency) => {
-    switch (urgency) {
-      case "Urgent":
-        return <AlertCircle className="w-4 h-4" />;
-      case "Moyen":
-        return <Clock className="w-4 h-4" />;
-      case "Faible":
-        return <CheckCircle className="w-4 h-4" />;
-      default:
-        return <Clock className="w-4 h-4" />;
-    }
-  };
 
   // Charger la demande
   useEffect(() => {
@@ -478,7 +412,6 @@ export default function ProDiscussions() {
     try {
       setUploadingFile(true);
 
-      // Upload du fichier
       const formData = new FormData();
       formData.append("file", file);
 
@@ -488,7 +421,6 @@ export default function ProDiscussions() {
         },
       });
 
-      // Envoyer le message avec le fichier
       await sendMessage(`Fichier: ${file.name}`, getMessageType(file.type), {
         url: uploadResponse.data.url,
         name: file.name,
@@ -535,7 +467,6 @@ export default function ProDiscussions() {
   };
 
   const renderMessageContent = (message) => {
-    // Vérifier si l'utilisateur a le droit de voir ce message
     if (
       message.expediteurId !== currentUserId &&
       conversation?.creatorId !== currentUserId
@@ -556,7 +487,6 @@ export default function ProDiscussions() {
     const user = message.expediteur;
     if (!user) return null;
 
-    // Si l'utilisateur a un avatar/logo, l'afficher
     if (user.avatar) {
       return (
         <img
@@ -567,7 +497,6 @@ export default function ProDiscussions() {
       );
     }
 
-    // Sinon, afficher les initiales
     return (
       <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#F0F8FF] text-[#556B2F] font-semibold text-xs">
         {getInitials(user)}
@@ -578,7 +507,6 @@ export default function ProDiscussions() {
   const handleProposerRendezVous = () => {
     setShowActionsMenu(false);
     setShowRendezVousModal(true);
-    // console.log(artisanDetails);
   };
 
   const handleEnvoyerFacture = () => {
@@ -594,7 +522,6 @@ export default function ProDiscussions() {
   const handleAfficherActions = () => {
     setShowActionsMenu(false);
     setShowActionsPanel(true);
-    // console.log(artisanDetails);
   };
 
   const handleFileChange = (setFileFunction) => (event) => {
@@ -612,7 +539,6 @@ export default function ProDiscussions() {
     return <div className="p-8 text-center">Demande non trouvée</div>;
   }
 
-  // NOUVEAU: Afficher le message si la demande est assignée à un autre artisan
   if (notAssignedMe) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-red-50 to-red-100 p-4">
@@ -660,6 +586,7 @@ export default function ProDiscussions() {
                 <span>Retour</span>
               </button>
             </div>
+
             {/* Header avec badge */}
             <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
               <div className="flex items-start gap-3">
@@ -851,7 +778,6 @@ export default function ProDiscussions() {
             ref={messagesContainerRef}
             onScroll={handleScroll}
           >
-            {/* Bouton scroll vers le bas */}
             {showScrollButton && (
               <button
                 onClick={handleScrollToBottom}
@@ -868,13 +794,11 @@ export default function ProDiscussions() {
             ) : (
               <div className="space-y-4">
                 {messages.map((message, index) => {
-                  // Vérifier si le message doit être affiché
-                  // Les messages système s'affichent toujours
                   if (
-                    (message.type !== "SYSTEM" &&
-                      message.expediteurId !== currentUserId &&
-                      conversation?.creatorId !== currentUserId &&
-                      notAssignedMe)
+                    message.type !== "SYSTEM" &&
+                    message.expediteurId !== currentUserId &&
+                    conversation?.creatorId !== currentUserId &&
+                    notAssignedMe
                   ) {
                     return null;
                   }
@@ -900,7 +824,6 @@ export default function ProDiscussions() {
                           isCurrentUser(message) ? "order-first" : ""
                         }`}
                       >
-                        {/* Nom de l'expéditeur pour les messages des autres */}
                         {!isCurrentUser(message) && (
                           <div className="text-xs font-medium text-[#8B4513] mb-1">
                             {getSenderName(message)}
@@ -914,7 +837,6 @@ export default function ProDiscussions() {
                               : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                           }`}
                         >
-                          {/* Fichier joint */}
                           {message.urlFichier && (
                             <div className="mb-2">
                               <a
@@ -936,27 +858,38 @@ export default function ProDiscussions() {
                           <p className="text-sm whitespace-pre-wrap">
                             {message.contenu}
                           </p>
-                          {message.evenementType == "FACTURE_PAYEE" && (
+
+                          {/* NOUVEAU: Messages pour paiement direct */}
+                          {message.evenementType ===
+                            "PAIEMENT_CONFIRME_CLIENT" && (
                             <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                               <p className="text-sm font-medium mb-2">
-                                Paiement effectué par le client.
+                                Le client a confirmé le paiement
                               </p>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleConfirmerPaiement(true)}
-                                  className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
-                                >
-                                  Confirmer
-                                </button>
-                                <button
-                                  onClick={() => handleConfirmerPaiement(false)}
-                                  className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                                >
-                                  Refuser
-                                </button>
-                              </div>
+                              {artisanDetails &&
+                                !artisanDetails.artisanConfirmeReception && (
+                                  <button
+                                    onClick={handleConfirmerReceptionPaiement}
+                                    className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                  >
+                                    Confirmer réception
+                                  </button>
+                                )}
                             </div>
                           )}
+
+                          {message.evenementType ===
+                            "PAIEMENT_RECU_ARTISAN" && (
+                            <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                              <p className="text-sm font-medium mb-2 text-green-600">
+                                ✅ Paiement confirmé par les deux parties
+                              </p>
+                              <p className="text-sm">
+                                Vous pouvez maintenant procéder aux travaux
+                              </p>
+                            </div>
+                          )}
+
                           {message.evenementType === "AVIS_LAISSE" && (
                             <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                               <RatingStars
@@ -1001,9 +934,9 @@ export default function ProDiscussions() {
                     </p>
                   </div>
                 )}
-                {/* Référence pour scroller vers le bas */}
+
                 <div ref={messagesEndRef} />
-                {/* Affichage si la demande est terminée */}
+
                 {demande?.statut === "terminée" && (
                   <div className="mt-8 flex flex-col items-center justify-center py-12 px-6 bg-gradient-to-b from-green-50 to-green-100 rounded-2xl border-2 border-green-300">
                     <div className="mb-4 p-4 bg-green-500 rounded-full">
@@ -1045,6 +978,7 @@ export default function ProDiscussions() {
                 >
                   <MoreVertical className="w-4 h-4 text-[#556B2F]" />
                 </button>
+
                 {/* Menu déroulant des actions */}
                 {showActionsMenu && (
                   <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-[#D3D3D3] z-10 overflow-hidden">
@@ -1064,6 +998,7 @@ export default function ProDiscussions() {
                           <span>Proposer un rendez-vous</span>
                         )}
                       </button>
+
                       <button
                         onClick={handleEnvoyerDevis}
                         className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F0FFF0] hover:text-[#6B8E23] rounded-lg transition-colors duration-200"
@@ -1098,28 +1033,20 @@ export default function ProDiscussions() {
                         )}
                       </button>
 
-                      {/* NOUVEAU: Bouton pour confirmer le paiement */}
-                      {artisanDetails?.factureStatus === "validee" &&
-                        !artisanDetails?.factureConfirmee && (
+                      {/* NOUVEAU: Bouton pour confirmer la réception du paiement */}
+                      {artisanDetails?.clientConfirmePaiement &&
+                        !artisanDetails?.artisanConfirmeReception && (
                           <button
-                            onClick={() => handleConfirmerPaiement(true)}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
-                            disabled={artisanDetails?.factureConfirmee}
+                            onClick={handleConfirmerReceptionPaiement}
+                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                           >
-                            <CheckCircle className="w-4 h-4" />
-                            {artisanDetails?.factureConfirmee ? (
-                              <>
-                                <span>Paiement confirmé</span>
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                              </>
-                            ) : (
-                              <span>Confirmer le paiement</span>
-                            )}
+                            <Euro className="w-4 h-4" />
+                            <span>Confirmer réception paiement</span>
                           </button>
                         )}
 
                       {/* NOUVEAU: Bouton pour terminer les travaux */}
-                      {artisanDetails?.factureConfirmee &&
+                      {artisanDetails?.artisanConfirmeReception &&
                         !artisanDetails?.travauxTermines && (
                           <button
                             onClick={handleTerminerTravaux}
@@ -1138,16 +1065,14 @@ export default function ProDiscussions() {
                           </button>
                         )}
 
-                      <>
-                        <div className="border-t border-[#D3D3D3] my-2"></div>
-                        <button
-                          onClick={handleAfficherActions}
-                          className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>Afficher mes actions</span>
-                        </button>
-                      </>
+                      <div className="border-t border-[#D3D3D3] my-2"></div>
+                      <button
+                        onClick={handleAfficherActions}
+                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>Afficher mes actions</span>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -1276,6 +1201,7 @@ export default function ProDiscussions() {
                               <span>Proposer un rendez-vous</span>
                             )}
                           </button>
+
                           <button
                             onClick={() => {
                               handleEnvoyerDevis();
@@ -1318,29 +1244,21 @@ export default function ProDiscussions() {
                             )}
                           </button>
 
-                          {artisanDetails?.factureStatus === "validee" &&
-                            !artisanDetails?.factureConfirmee && (
+                          {artisanDetails?.clientConfirmePaiement &&
+                            !artisanDetails?.artisanConfirmeReception && (
                               <button
                                 onClick={() => {
-                                  handleConfirmerPaiement(true);
+                                  handleConfirmerReceptionPaiement();
                                   setShowMobileActionsMenu(false);
                                 }}
-                                className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
-                                disabled={artisanDetails?.factureConfirmee}
+                                className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                               >
-                                <CheckCircle className="w-4 h-4" />
-                                {artisanDetails?.factureConfirmee ? (
-                                  <>
-                                    <span>Paiement confirmé</span>
-                                    <CheckCircle className="w-4 h-4 text-green-600" />
-                                  </>
-                                ) : (
-                                  <span>Confirmer le paiement</span>
-                                )}
+                                <Euro className="w-4 h-4" />
+                                <span>Confirmer réception paiement</span>
                               </button>
                             )}
 
-                          {artisanDetails?.factureConfirmee &&
+                          {artisanDetails?.artisanConfirmeReception &&
                             !artisanDetails?.travauxTermines && (
                               <button
                                 onClick={() => {
@@ -1362,19 +1280,17 @@ export default function ProDiscussions() {
                               </button>
                             )}
 
-                          <>
-                            <div className="border-t border-[#D3D3D3] my-2"></div>
-                            <button
-                              onClick={() => {
-                                handleAfficherActions();
-                                setShowMobileActionsMenu(false);
-                              }}
-                              className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
-                            >
-                              <Eye className="w-4 h-4" />
-                              <span>Afficher mes actions</span>
-                            </button>
-                          </>
+                          <div className="border-t border-[#D3D3D3] my-2"></div>
+                          <button
+                            onClick={() => {
+                              handleAfficherActions();
+                              setShowMobileActionsMenu(false);
+                            }}
+                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span>Afficher mes actions</span>
+                          </button>
                         </div>
                       </div>
                     )}
@@ -1402,13 +1318,11 @@ export default function ProDiscussions() {
                 ) : (
                   <div className="space-y-4">
                     {messages.map((message, index) => {
-                      // Vérifier si le message doit être affiché
-                      // Les messages système s'affichent toujours
                       if (
-                        (message.type !== "SYSTEM" &&
-                          message.expediteurId !== currentUserId &&
-                          conversation?.creatorId !== currentUserId &&
-                        notAssignedMe)
+                        message.type !== "SYSTEM" &&
+                        message.expediteurId !== currentUserId &&
+                        conversation?.creatorId !== currentUserId &&
+                        notAssignedMe
                       ) {
                         return null;
                       }
@@ -1420,7 +1334,6 @@ export default function ProDiscussions() {
                             isCurrentUser(message) ? "justify-end" : ""
                           }`}
                         >
-                          {/* Nom de l'expéditeur pour les messages des autres */}
                           {!isCurrentUser(message) && (
                             <div className="text-xs font-medium text-[#8B4513] mb-1">
                               {getSenderName(message)}
@@ -1434,7 +1347,6 @@ export default function ProDiscussions() {
                                 : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                             }`}
                           >
-                            {/* Fichier joint */}
                             {message.urlFichier && (
                               <div className="mb-2">
                                 <a
@@ -1456,38 +1368,23 @@ export default function ProDiscussions() {
                             <p className="text-sm whitespace-pre-wrap">
                               {message.contenu}
                             </p>
-                            {message.evenementType == "FACTURE_PAYEE" && (
+
+                            {/* Messages système pour mobile */}
+                            {message.evenementType ===
+                              "PAIEMENT_CONFIRME_CLIENT" && (
                               <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                                 <p className="text-sm font-medium mb-2">
-                                  Paiement effectué par le client.
+                                  Le client a confirmé le paiement
                                 </p>
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() =>
-                                      handleConfirmerPaiement(true)
-                                    }
-                                    className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
-                                  >
-                                    Confirmer
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleConfirmerPaiement(false)
-                                    }
-                                    className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                                  >
-                                    Refuser
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                            {message.evenementType === "AVIS_LAISSE" && (
-                              <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                                <RatingStars
-                                  rating={extractRatingFromMessage(
-                                    message.contenu
+                                {artisanDetails &&
+                                  !artisanDetails.artisanConfirmeReception && (
+                                    <button
+                                      onClick={handleConfirmerReceptionPaiement}
+                                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                    >
+                                      Confirmer réception
+                                    </button>
                                   )}
-                                />
                               </div>
                             )}
                           </div>
@@ -1515,7 +1412,7 @@ export default function ProDiscussions() {
                         </p>
                       </div>
                     )}
-                    {/* Référence pour scroller vers le bas */}
+
                     <div ref={messagesEndRef} />
                   </div>
                 )}
@@ -1721,21 +1618,6 @@ export default function ProDiscussions() {
                         <strong className="text-[#556B2F]">Montant:</strong>{" "}
                         {artisanDetails.factureMontant}€
                       </p>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          artisanDetails.factureStatus === "validee"
-                            ? "bg-green-100 text-green-800"
-                            : artisanDetails.factureStatus === "refusee"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {artisanDetails.factureStatus === "validee"
-                          ? "Validée"
-                          : artisanDetails.factureStatus === "refusee"
-                          ? "Refusée"
-                          : "En attente"}
-                      </span>
                     </div>
                     <a
                       href={artisanDetails.factureFileUrl}
@@ -1753,40 +1635,88 @@ export default function ProDiscussions() {
                   </p>
                 )}
               </div>
-              {/* Section Confirmation Paiement */}
-              {artisanDetails?.factureStatus === "validee" && (
-                <div className="bg-yellow-50 rounded-xl border border-[#D3D3D3] p-4">
+
+              {/* NOUVEAU: Section Paiement Direct */}
+              {artisanDetails.factureMontant && (
+                <div className="bg-blue-50 rounded-xl border border-[#D3D3D3] p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-yellow-900 text-lg flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5" />
-                      Confirmation Paiement
+                    <h4 className="font-semibold text-blue-900 text-lg flex items-center gap-2">
+                      <Euro className="w-5 h-5" />
+                      État du Paiement
                     </h4>
                   </div>
-                  {artisanDetails.factureConfirmee ? (
-                    <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
-                      <p className="text-sm text-green-600 font-medium">
-                        ✓ Paiement confirmé
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
-                      <p className="text-sm text-gray-700 mb-3">
-                        Le client a payé la facture. Veuillez confirmer la
-                        réception du paiement.
-                      </p>
-                      <button
-                        onClick={() => handleConfirmerPaiement(true)}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+
+                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3] space-y-3">
+                    {/* Statut client */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">
+                        Client a confirmé le paiement:
+                      </span>
+                      <span
+                        className={`text-sm font-medium ${
+                          artisanDetails.clientConfirmePaiement
+                            ? "text-green-600"
+                            : "text-yellow-600"
+                        }`}
                       >
-                        Confirmer le paiement
-                      </button>
+                        {artisanDetails.clientConfirmePaiement
+                          ? "✅ Oui"
+                          : "⏳ En attente"}
+                      </span>
                     </div>
-                  )}
+
+                    {/* Statut artisan */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">
+                        Vous avez confirmé la réception:
+                      </span>
+                      <span
+                        className={`text-sm font-medium ${
+                          artisanDetails.artisanConfirmeReception
+                            ? "text-green-600"
+                            : "text-yellow-600"
+                        }`}
+                      >
+                        {artisanDetails.artisanConfirmeReception
+                          ? "✅ Oui"
+                          : "⏳ En attente"}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    {artisanDetails.clientConfirmePaiement &&
+                      !artisanDetails.artisanConfirmeReception && (
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-600 mb-2">
+                            Le client a confirmé avoir payé{" "}
+                            {artisanDetails.factureMontant}€. Veuillez confirmer
+                            la réception.
+                          </p>
+                          <button
+                            onClick={() => {
+                              setShowActionsPanel(false);
+                              handleConfirmerReceptionPaiement();
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            Confirmer réception du paiement
+                          </button>
+                        </div>
+                      )}
+
+                    {artisanDetails.artisanConfirmeReception && (
+                      <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                        <p className="text-sm text-green-700 font-medium">
+                          ✅ Paiement confirmé par les deux parties
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {/* Section Travaux */}
-              {artisanDetails?.factureConfirmee && (
+              {/* NOUVEAU: Section Travaux */}
+              {artisanDetails.artisanConfirmeReception && (
                 <div className="bg-orange-50 rounded-xl border border-[#D3D3D3] p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-orange-900 text-lg flex items-center gap-2">
@@ -1794,29 +1724,41 @@ export default function ProDiscussions() {
                       État des Travaux
                     </h4>
                   </div>
-                  {artisanDetails.travauxTermines ? (
-                    <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
-                      <p className="text-sm text-green-600 font-medium">
-                        ✓ Travaux marqués comme terminés
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        En attente de confirmation du client
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
-                      <p className="text-sm text-gray-700 mb-3">
-                        Une fois les travaux terminés, vous pouvez les marquer
-                        comme terminés.
-                      </p>
-                      <button
-                        onClick={handleTerminerTravaux}
-                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-                      >
-                        Marquer travaux terminés
-                      </button>
-                    </div>
-                  )}
+
+                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
+                    {artisanDetails.travauxTermines ? (
+                      <div>
+                        <p className="text-sm text-green-600 font-medium mb-2">
+                          ✅ Travaux marqués comme terminés
+                        </p>
+                        {artisanDetails.clientConfirmeTravaux ? (
+                          <p className="text-sm text-green-600">
+                            ✅ Travaux validés par le client
+                          </p>
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            ⏳ En attente de validation du client
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm text-gray-700 mb-3">
+                          Une fois les travaux terminés, vous pouvez les marquer
+                          comme terminés.
+                        </p>
+                        <button
+                          onClick={() => {
+                            setShowActionsPanel(false);
+                            handleTerminerTravaux();
+                          }}
+                          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                        >
+                          Marquer travaux terminés
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -2348,4 +2290,4 @@ export default function ProDiscussions() {
       )}
     </div>
   );
-} 
+}

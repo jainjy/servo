@@ -22,6 +22,7 @@ import {
   Lock,
   ArrowDown,
   ArrowLeft,
+  Euro,
 } from "lucide-react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -46,8 +47,11 @@ export default function UserDiscussions() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false); // État pour la modale de chat mobile
-  const [loadingArtisanId, setLoadingArtisanId] = useState(null); // État pour tracker l'artisan en cours de traitement
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [loadingArtisanId, setLoadingArtisanId] = useState(null);
+  const [showConfirmPaymentModal, setShowConfirmPaymentModal] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("espèces");
   const messagesContainerRef = useRef(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const actionsMenuRef = useRef(null);
@@ -74,7 +78,6 @@ export default function UserDiscussions() {
     }
   }, [isConnected, autoRefresh, refreshMessages]);
 
-  // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
     const container = e.target;
     const isAtBottom =
@@ -88,7 +91,6 @@ export default function UserDiscussions() {
     setShowScrollButton(false);
   };
 
-  // Charger les artisans et leurs détails
   useEffect(() => {
     const fetchArtisans = async () => {
       try {
@@ -96,9 +98,9 @@ export default function UserDiscussions() {
           const response = await api.get(`/demandes/${id}`);
           setDemande(response.data);
 
-          // Extraire les artisans de la réponse
           if (response.data.artisans) {
             setArtisans(response.data.artisans);
+            console.log("Artisans chargés:", response.data.artisans);
           }
         }
       } catch (error) {
@@ -109,7 +111,6 @@ export default function UserDiscussions() {
     fetchArtisans();
   }, [id]);
 
-  // Fermer le menu d'actions en cliquant à l'extérieur
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -126,60 +127,6 @@ export default function UserDiscussions() {
     };
   }, []);
 
-  const getUrgencyBg = (urgency) => {
-    switch (urgency) {
-      case "Urgent":
-        return "bg-red-500";
-      case "Moyen":
-        return "bg-orange-500";
-      case "Faible":
-        return "bg-green-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
-  const getUrgencyIcon = (urgency) => {
-    switch (urgency) {
-      case "Urgent":
-        return <AlertCircle className="w-4 h-4" />;
-      case "Moyen":
-        return <Clock className="w-4 h-4" />;
-      case "Faible":
-        return <CheckCircle className="w-4 h-4" />;
-      default:
-        return <Clock className="w-4 h-4" />;
-    }
-  };
-
-  // Dans UserDiscussions.jsx, ajoutez cette fonction
-  const handleConfirmerTravauxTermines = async (confirmer) => {
-    try {
-      setLoadingArtisanId("confirming");
-      const response = await api.post(
-        `/demande-actions/${id}/confirmer-travaux-termines`,
-        {
-          confirmer,
-        }
-      );
-
-      const message = confirmer
-        ? "Travaux confirmés comme terminés"
-        : "Confirmation refusée - Contactez l'artisan";
-      toast.success(message);
-
-      // Recharger les données
-      const demandeResponse = await api.get(`/demandes/${id}`);
-      setDemande(demandeResponse.data);
-    } catch (error) {
-      console.error("Erreur confirmation travaux:", error);
-      toast.error("Erreur lors de la confirmation des travaux");
-    } finally {
-      setLoadingArtisanId(null);
-    }
-  };
-
-  // Charger la demande
   useEffect(() => {
     const fetchDemande = async () => {
       try {
@@ -268,7 +215,6 @@ export default function UserDiscussions() {
   };
 
   const isCurrentUser = (message) => {
-    // L'utilisateur actuel est celui qui a créé la demande
     return message.expediteurId === demande?.createdById;
   };
 
@@ -283,7 +229,6 @@ export default function UserDiscussions() {
     const user = message.expediteur;
     if (!user) return null;
 
-    // Si l'utilisateur a un avatar/logo, l'afficher
     if (user.avatar) {
       return (
         <button
@@ -301,7 +246,6 @@ export default function UserDiscussions() {
       );
     }
 
-    // Sinon, afficher les initiales
     return (
       <button
         onClick={() => navigate(`/professional/${user.id}`)}
@@ -314,13 +258,11 @@ export default function UserDiscussions() {
     );
   };
 
-  // Fonction pour extraire la note du message AVIS_LAISSE
   const extractRatingFromMessage = (content) => {
     const match = content.match(/Note:\s*(\d+)\/5/);
     return match ? parseInt(match[1]) : 0;
   };
 
-  // Composant pour afficher les étoiles
   const RatingStars = ({ rating }) => {
     return (
       <div className="flex gap-1 mt-2">
@@ -350,11 +292,9 @@ export default function UserDiscussions() {
       const response = await api.post(`/demande-actions/${id}/signer-devis`, {
         artisanId,
       });
-      // console.log("Response signature devis:", response.data);
 
       toast.success("Devis signé avec succès ! L'artisan a été sélectionné.");
 
-      // Recharger les données
       const demandeResponse = await api.get(`/demandes/${id}`);
       setDemande(demandeResponse.data);
     } catch (error) {
@@ -365,34 +305,61 @@ export default function UserDiscussions() {
     }
   };
 
-  // Fonction pour payer une facture
-  const handlePayerFacture = async (artisanId) => {
+  // NOUVEAU: Fonction pour confirmer le paiement (client)
+  const handleConfirmerPaiementClient = async (
+    artisanId,
+    montant,
+    modePaiement
+  ) => {
     try {
-      setSelectedArtisan(artisanId);
-      setShowPaymentModal(true);
-    } catch (error) {
-      console.error("Erreur préparation paiement:", error);
-      toast.error("Erreur lors de la préparation du paiement");
-    }
-  };
+      setLoadingArtisanId(artisanId);
+      const response = await api.post(
+        `/demande-actions/${id}/confirmer-paiement-client`,
+        {
+          artisanId,
+          montant,
+          modePaiement,
+        }
+      );
 
-  const handleConfirmPayment = async () => {
-    try {
-      setLoadingArtisanId(selectedArtisan);
-      const response = await api.post(`/demande-actions/${id}/payer-facture`, {
-        artisanId: selectedArtisan,
-      });
+      toast.success(
+        "Paiement confirmé ! En attente de confirmation de l'artisan"
+      );
+      setShowConfirmPaymentModal(false);
+      setPaymentAmount("");
+      setPaymentMethod("espèces");
 
-      toast.success("Paiement effectué avec succès !");
-      setShowPaymentModal(false);
-      setSelectedArtisan(null);
-
-      // Recharger les données
       const demandeResponse = await api.get(`/demandes/${id}`);
       setDemande(demandeResponse.data);
     } catch (error) {
-      console.error("Erreur paiement:", error);
-      toast.error("Erreur lors du paiement");
+      console.error("Erreur confirmation paiement:", error);
+      toast.error("Erreur lors de la confirmation du paiement");
+    } finally {
+      setLoadingArtisanId(null);
+    }
+  };
+
+  // Fonction pour confirmer la fin des travaux
+  const handleConfirmerTravauxTermines = async (confirmer) => {
+    try {
+      setLoadingArtisanId("confirming");
+      const response = await api.post(
+        `/demande-actions/${id}/confirmer-travaux-termines-client`,
+        {
+          confirmer,
+        }
+      );
+
+      const message = confirmer
+        ? "Travaux confirmés comme terminés"
+        : "Confirmation refusée - Contactez l'artisan";
+      toast.success(message);
+
+      const demandeResponse = await api.get(`/demandes/${id}`);
+      setDemande(demandeResponse.data);
+    } catch (error) {
+      console.error("Erreur confirmation travaux:", error);
+      toast.error("Erreur lors de la confirmation des travaux");
     } finally {
       setLoadingArtisanId(null);
     }
@@ -429,7 +396,6 @@ export default function UserDiscussions() {
       setReviewRating(0);
       setReviewComment("");
 
-      // Recharger les données pour afficher la nouvelle review
       const demandeResponse = await api.get(`/demandes/${id}`);
       setDemande(demandeResponse.data);
     } catch (error) {
@@ -438,19 +404,24 @@ export default function UserDiscussions() {
     }
   };
 
-  // Vérifier si un artisan a envoyé un devis
   const hasDevis = (artisan) => {
     return artisan.devisFileUrl && artisan.devis;
   };
 
-  // Vérifier si un artisan a envoyé une facture
   const hasFacture = (artisan) => {
     return artisan.factureFileUrl && artisan.factureMontant;
   };
 
-  // Vérifier si un artisan peut être noté (travaux terminés)
   const canReviewArtisan = (artisan) => {
-    return artisan.recruited && artisan.factureStatus === "validee";
+    return artisan.recruited && artisan.clientConfirmeTravaux;
+  };
+
+  const canConfirmPayment = (artisan) => {
+    return (
+      artisan.recruited &&
+      hasFacture(artisan) &&
+      !artisan.clientConfirmePaiement
+    );
   };
 
   if (loading) {
@@ -468,7 +439,6 @@ export default function UserDiscussions() {
     return <div className="p-8 text-center">Demande non trouvée</div>;
   }
 
-  // Composant helper pour afficher le loader
   const LoadingSpinnerSmall = () => (
     <div className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
   );
@@ -479,7 +449,6 @@ export default function UserDiscussions() {
         {/* Côté gauche - Informations du projet */}
         <div className="w-full lg:w-1/2 bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-[#D3D3D3] p-4 sm:p-6 lg:p-8 overflow-y-auto mt-16 lg:mt-20">
           <div className="max-w-2xl mx-auto">
-            {/* Informations principales */}
             {/* Bouton de retour */}
             <div className="bg-white border-b border-[#D3D3D3] px-4 py-3 lg:px-6">
               <button
@@ -490,6 +459,7 @@ export default function UserDiscussions() {
                 <span>Retour</span>
               </button>
             </div>
+
             <div className="relative space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
@@ -501,7 +471,6 @@ export default function UserDiscussions() {
                   </p>
                 </div>
 
-                {/* Statut de la demande */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -523,7 +492,6 @@ export default function UserDiscussions() {
                 </div>
               </div>
 
-              {/* Date */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5 pt-2">
                 <h3 className="text-sm sm:text-md font-semibold text-[#8B4513]">
                   Date de la demande :
@@ -536,7 +504,6 @@ export default function UserDiscussions() {
                 </div>
               </div>
 
-              {/* Métier */}
               <div className="mt-4">
                 <h3 className="text-sm sm:text-md font-semibold text-[#8B4513] mb-3">
                   Service demandé
@@ -561,7 +528,6 @@ export default function UserDiscussions() {
                 </div>
               </div>
 
-              {/* Adresse */}
               <div className="mt-4">
                 <h3 className="text-sm sm:text-md font-semibold text-[#8B4513] mb-2">
                   Adresse du projet
@@ -595,7 +561,6 @@ export default function UserDiscussions() {
 
             <div className="border-t border-[#D3D3D3] my-4 sm:my-6"></div>
 
-            {/* Description */}
             <div>
               <h3 className="text-lg sm:text-xl font-bold text-[#8B4513] mb-3">
                 Description
@@ -607,7 +572,6 @@ export default function UserDiscussions() {
               </div>
             </div>
 
-            {/* Informations de contact */}
             <div className="mt-6">
               <h3 className="text-lg sm:text-xl font-bold text-[#8B4513] mb-3">
                 Vos informations
@@ -652,7 +616,6 @@ export default function UserDiscussions() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          {/* Profil cliquable */}
                           <button
                             onClick={() =>
                               navigate(`/professional/${artisan.userId}`)
@@ -666,7 +629,6 @@ export default function UserDiscussions() {
                             <p className="text-xs sm:text-sm text-gray-600 mt-1">
                               {artisan.user.phone}
                             </p>
-                            {/* Avatar si disponible */}
                             {artisan.user.avatar && (
                               <div className="flex items-center gap-2 mt-2">
                                 <img
@@ -695,7 +657,6 @@ export default function UserDiscussions() {
                           {showActionsMenu === artisan.userId && (
                             <div className="absolute right-0 top-full mt-1 w-40 sm:w-48 bg-white rounded-lg shadow-lg border border-[#D3D3D3] z-10">
                               <div className="p-1 sm:p-2 space-y-1">
-                                {/* Lien vers le profil dans le menu */}
                                 <button
                                   onClick={() => {
                                     setShowActionsMenu(false);
@@ -707,47 +668,59 @@ export default function UserDiscussions() {
                                   Voir le profil
                                 </button>
 
-                                {hasDevis(artisan) && !artisan.recruited && (
-                                  <button
-                                    onClick={() =>
-                                      handleSignerDevis(artisan.userId)
-                                    }
-                                    className="flex items-center gap-2 w-full px-2 sm:px-3 py-2 text-left text-xs sm:text-sm text-green-600 hover:bg-green-50 rounded-md"
-                                    disabled={artisan.recruited}
-                                  >
-                                    <FileSignature className="w-3 h-3 sm:w-4 sm:h-4" />
-                                    {artisan.recruited ? (
-                                      <>
-                                        <span>Devis signé</span>
-                                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
-                                      </>
-                                    ) : (
-                                      <span>Signer le devis</span>
-                                    )}
-                                  </button>
-                                )}
-                                {hasFacture(artisan) &&
-                                  artisan.factureStatus === "en_attente" && (
+                                {hasDevis(artisan) &&
+                                  artisan.recruited !== true && (
                                     <button
                                       onClick={() =>
-                                        handlePayerFacture(artisan.userId)
+                                        handleSignerDevis(artisan.userId)
                                       }
-                                      className="flex items-center gap-2 w-full px-2 sm:px-3 py-2 text-left text-xs sm:text-sm text-[#556B2F] hover:bg-[#F0F8FF] rounded-md"
-                                      disabled={
-                                        artisan.factureStatus === "validee"
-                                      }
+                                      className="flex items-center gap-2 w-full px-2 sm:px-3 py-2 text-left text-xs sm:text-sm text-green-600 hover:bg-green-50 rounded-md"
+                                      disabled={artisan.recruited === true}
                                     >
-                                      <CreditCard className="w-3 h-3 sm:w-4 sm:h-4" />
-                                      {artisan.factureStatus === "validee" ? (
+                                      <FileSignature className="w-3 h-3 sm:w-4 sm:h-4" />
+                                      {artisan.recruited === true ? (
                                         <>
-                                          <span>Facture payée</span>
+                                          <span>Devis signé</span>
                                           <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                                         </>
                                       ) : (
-                                        <span>Payer la facture</span>
+                                        <span>Signer le devis</span>
                                       )}
                                     </button>
                                   )}
+
+                                {/* NOUVEAU: Bouton pour confirmer le paiement */}
+                                {canConfirmPayment(artisan) && (
+                                  <button
+                                    onClick={() => {
+                                      setSelectedArtisan(artisan);
+                                      setShowConfirmPaymentModal(true);
+                                      setShowActionsMenu(false);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-2 sm:px-3 py-2 text-left text-xs sm:text-sm text-blue-600 hover:bg-blue-50 rounded-md"
+                                  >
+                                    <Euro className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    <span>Confirmer paiement</span>
+                                  </button>
+                                )}
+
+                                {artisan.recruited &&
+                                  artisan.clientConfirmePaiement &&
+                                  !artisan.artisanConfirmeReception && (
+                                    <div className="px-2 py-1 text-xs text-blue-600">
+                                      <CheckCircle className="w-3 h-3 inline mr-1" />
+                                      Paiement confirmé (en attente artisan)
+                                    </div>
+                                  )}
+
+                                {artisan.recruited &&
+                                  artisan.artisanConfirmeReception && (
+                                    <div className="px-2 py-1 text-xs text-green-600">
+                                      <CheckCircle className="w-3 h-3 inline mr-1" />
+                                      Paiement reçu
+                                    </div>
+                                  )}
+
                                 {canReviewArtisan(artisan) && (
                                   <button
                                     onClick={() => handleNoterArtisan(artisan)}
@@ -757,6 +730,7 @@ export default function UserDiscussions() {
                                     <span>Noter l'artisan</span>
                                   </button>
                                 )}
+
                                 {artisan.devisFileUrl && (
                                   <a
                                     href={artisan.devisFileUrl}
@@ -768,6 +742,7 @@ export default function UserDiscussions() {
                                     Voir le devis
                                   </a>
                                 )}
+
                                 {artisan.factureFileUrl && (
                                   <a
                                     href={artisan.factureFileUrl}
@@ -797,22 +772,24 @@ export default function UserDiscussions() {
                             Devis envoyé
                           </span>
                         )}
-                        {hasFacture(artisan) && (
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${
-                              artisan.factureStatus === "validee"
-                                ? "bg-green-100 text-green-800"
-                                : artisan.factureStatus === "refusee"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            Facture{" "}
-                            {artisan.factureStatus === "validee"
-                              ? "payée"
-                              : artisan.factureStatus === "refusee"
-                              ? "refusée"
-                              : "en attente"}
+                        {artisan.clientConfirmePaiement && (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            Paiement confirmé
+                          </span>
+                        )}
+                        {artisan.artisanConfirmeReception && (
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                            Paiement reçu
+                          </span>
+                        )}
+                        {artisan.travauxTermines && (
+                          <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                            Travaux terminés
+                          </span>
+                        )}
+                        {artisan.clientConfirmeTravaux && (
+                          <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                            Travaux validés
                           </span>
                         )}
                         {canReviewArtisan(artisan) && (
@@ -872,7 +849,6 @@ export default function UserDiscussions() {
             ref={messagesContainerRef}
             onScroll={handleScroll}
           >
-            {/* Bouton scroll vers le bas */}
             {showScrollButton && (
               <button
                 onClick={handleScrollToBottom}
@@ -909,7 +885,6 @@ export default function UserDiscussions() {
                         isCurrentUser(message) ? "order-first" : ""
                       }`}
                     >
-                      {/* Nom de l'expéditeur pour les messages des autres */}
                       {!isCurrentUser(message) && (
                         <div className="text-xs font-medium text-[#8B4513] mb-1">
                           {getSenderName(message)}
@@ -923,7 +898,6 @@ export default function UserDiscussions() {
                             : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                         }`}
                       >
-                        {/* Fichier joint */}
                         {message.urlFichier && (
                           <div className="mb-2">
                             <a
@@ -945,7 +919,31 @@ export default function UserDiscussions() {
                         <p className="text-sm whitespace-pre-wrap">
                           {message.contenu}
                         </p>
-                        {/* Actions pour les messages système de devis/facture */}
+
+                        {/* NOUVEAU: Messages pour paiement direct */}
+                        {message.evenementType ===
+                          "PAIEMENT_CONFIRME_CLIENT" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <p className="text-sm font-medium mb-2">
+                              Client a confirmé le paiement
+                            </p>
+                            <p className="text-sm">
+                              En attente de confirmation de l'artisan...
+                            </p>
+                          </div>
+                        )}
+
+                        {message.evenementType === "PAIEMENT_RECU_ARTISAN" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <p className="text-sm font-medium mb-2 text-green-600">
+                              ✅ Paiement confirmé par les deux parties
+                            </p>
+                            <p className="text-sm">
+                              L'artisan peut maintenant procéder aux travaux
+                            </p>
+                          </div>
+                        )}
+
                         {message.evenementType === "PROPOSITION_DEVIS" && (
                           <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                             <p className="text-sm font-medium mb-2">
@@ -953,38 +951,64 @@ export default function UserDiscussions() {
                             </p>
                             {artisans.find(
                               (a) => a.userId === message.expediteurId
-                            ).devisFileUrl != null ||
+                            )?.devisFileUrl != null ||
                             artisans.find(
                               (a) => a.userId === message.expediteurId
-                            ).devis != null ? (
+                            )?.devis != null ? (
                               <div className="flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    const artisan = artisans.find(
-                                      (a) => a.userId === message.expediteurId
-                                    );
-                                    if (artisan)
-                                      handleSignerDevis(artisan.userId);
-                                  }}
-                                  disabled={
-                                    loadingArtisanId === message.expediteurId ||
-                                    demande?.statut === "terminée"
-                                  }
-                                  className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                                >
-                                  {loadingArtisanId === message.expediteurId ? (
-                                    <>
-                                      <LoadingSpinnerSmall />
-                                      <span>Signature...</span>
-                                    </>
-                                  ) : (
-                                    "Signer"
-                                  )}
-                                </button>
-                                {demande?.statut !== "terminée" && (
-                                  <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
-                                    Refuser
+                               
+                                {artisans.find(
+                                  (a) => a.userId === message.expediteurId
+                                )?.recruited !== true && (
+                                  <button
+                                    onClick={() => {
+                                      const artisan = artisans.find(
+                                        (a) => a.userId === message.expediteurId
+                                      );
+                                      if (artisan)
+                                        handleSignerDevis(artisan.userId);
+                                    }}
+                                    disabled={
+                                      loadingArtisanId ===
+                                        message.expediteurId ||
+                                      demande?.statut === "terminée"
+                                    }
+                                    className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                  >
+                                    {loadingArtisanId ===
+                                    message.expediteurId ? (
+                                      <>
+                                        <LoadingSpinnerSmall />
+                                        <span>Signature...</span>
+                                      </>
+                                    ) : (
+                                      "Signer"
+                                    )}
                                   </button>
+                                )}
+                                {artisans.find(
+                                  (a) => a.userId === message.expediteurId
+                                )?.recruited === true && (
+                                  <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
+                                    déjà signé{" "}
+                                    <CheckCircle className="w-4 h-4" />
+                                  </span>
+                                )}
+                                {demande?.statut !== "terminée" &&
+                                  !artisans.find(
+                                    (a) => a.userId === message.expediteurId
+                                  )?.recruited && (
+                                    <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
+                                      Refuser
+                                    </button>
+                                  )}
+                                {artisans.find(
+                                  (a) => a.userId === message.expediteurId
+                                )?.recruited && (
+                                  <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
+                                    déjà signé{" "}
+                                    <CheckCircle className="w-4 h-4" />
+                                  </span>
                                 )}
                               </div>
                             ) : (
@@ -993,45 +1017,6 @@ export default function UserDiscussions() {
                                   déjà signé <CheckCircle className="w-4 h-4" />
                                 </span>
                               </div>
-                            )}
-                          </div>
-                        )}
-                        {message.evenementType === "FACTURE_ENVOYEE" && (
-                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                            {artisans.find(
-                              (a) => a.userId === message.expediteurId
-                            ).factureStatus != "validee" ? (
-                              <>
-                                <p className="text-sm font-medium mb-2">
-                                  Facture reçue
-                                </p>
-                                <button
-                                  onClick={() => {
-                                    const artisan = artisans.find(
-                                      (a) => a.userId === message.expediteurId
-                                    );
-                                    if (artisan)
-                                      handlePayerFacture(artisan.userId);
-                                  }}
-                                  disabled={
-                                    loadingArtisanId === message.expediteurId
-                                  }
-                                  className="px-3 py-1 bg-[#6B8E23] text-white text-sm rounded hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                                >
-                                  {loadingArtisanId === message.expediteurId ? (
-                                    <>
-                                      <LoadingSpinnerSmall />
-                                      <span>Paiement...</span>
-                                    </>
-                                  ) : (
-                                    "Payer maintenant"
-                                  )}
-                                </button>
-                              </>
-                            ) : (
-                              <p className="text-sm font-medium mb-2 bg-green-500 p-4 text-white rounded">
-                                Facture payée
-                              </p>
                             )}
                           </div>
                         )}
@@ -1067,7 +1052,7 @@ export default function UserDiscussions() {
                                     disabled={loadingArtisanId === "confirming"}
                                     className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                   >
-                                    Refuser
+                                    Signaler problème
                                   </button>
                                 </>
                               ) : (
@@ -1123,9 +1108,9 @@ export default function UserDiscussions() {
                     </p>
                   </div>
                 )}
-                {/* Référence pour scroller vers le bas */}
+
                 <div ref={messagesEndRef} />
-                {/* Affichage si la demande est terminée */}
+
                 {demande?.statut === "terminée" && (
                   <div className="mt-8 flex flex-col items-center justify-center py-12 px-6 bg-gradient-to-b from-green-50 to-green-100 rounded-2xl border-2 border-green-300">
                     <div className="mb-4 p-4 bg-green-500 rounded-full">
@@ -1159,7 +1144,6 @@ export default function UserDiscussions() {
           {/* Zone d'envoi de message */}
           <div className="border-t border-[#D3D3D3] px-6 py-3 bg-[#F8F8FF]">
             <div className="flex gap-3">
-              {/* Bouton d'upload de fichier */}
               <label
                 className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
                   uploadingFile
@@ -1272,7 +1256,6 @@ export default function UserDiscussions() {
                             isCurrentUser(message) ? "order-first" : ""
                           }`}
                         >
-                          {/* Nom de l'expéditeur pour les messages des autres */}
                           {!isCurrentUser(message) && (
                             <div className="text-xs font-medium text-[#8B4513] mb-1">
                               {getSenderName(message)}
@@ -1286,7 +1269,6 @@ export default function UserDiscussions() {
                                 : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                             }`}
                           >
-                            {/* Fichier joint */}
                             {message.urlFichier && (
                               <div className="mb-2">
                                 <a
@@ -1308,103 +1290,26 @@ export default function UserDiscussions() {
                             <p className="text-sm whitespace-pre-wrap">
                               {message.contenu}
                             </p>
-                            {/* Actions pour les messages système de devis/facture */}
-                            {message.evenementType === "PROPOSITION_DEVIS" && (
+
+                            {/* Messages système pour mobile */}
+                            {message.evenementType ===
+                              "PAIEMENT_CONFIRME_CLIENT" && (
                               <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                                 <p className="text-sm font-medium mb-2">
-                                  Nouveau devis reçu
+                                  Client a confirmé le paiement
                                 </p>
-                                {!(
-                                  artisans.find(
-                                    (a) => a.userId === message.expediteurId
-                                  ).devisFileUrl != null ||
-                                  artisans.find(
-                                    (a) => a.userId === message.expediteurId
-                                  ).devis != null
-                                ) ? (
-                                  <div className="flex gap-2">
-                                    <button
-                                      onClick={() => {
-                                        const artisan = artisans.find(
-                                          (a) =>
-                                            a.userId === message.expediteurId
-                                        );
-                                        if (artisan)
-                                          handleSignerDevis(artisan.userId);
-                                      }}
-                                      disabled={
-                                        loadingArtisanId ===
-                                          message.expediteurId ||
-                                        demande?.statut === "terminée"
-                                      }
-                                      className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                                    >
-                                      {loadingArtisanId ===
-                                      message.expediteurId ? (
-                                        <>
-                                          <LoadingSpinnerSmall />
-                                          <span>Signature...</span>
-                                        </>
-                                      ) : (
-                                        "Signer"
-                                      )}
-                                    </button>
-                                    {demande?.statut !== "terminée" && (
-                                      <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
-                                        Refuser
-                                      </button>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div className="flex gap-2">
-                                    <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
-                                      déjà signé{" "}
-                                      <CheckCircle className="w-4 h-4" />
-                                    </span>
-                                  </div>
-                                )}
+                                <p className="text-sm">
+                                  En attente de confirmation de l'artisan...
+                                </p>
                               </div>
                             )}
-                            {message.evenementType === "FACTURE_ENVOYEE" && (
+
+                            {message.evenementType ===
+                              "PAIEMENT_RECU_ARTISAN" && (
                               <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                                {artisans.find(
-                                  (a) => a.userId === message.expediteurId
-                                ).factureStatus != "validee" ? (
-                                  <>
-                                    <p className="text-sm font-medium mb-2">
-                                      Facture reçue
-                                    </p>
-                                    <button
-                                      onClick={() => {
-                                        const artisan = artisans.find(
-                                          (a) =>
-                                            a.userId === message.expediteurId
-                                        );
-                                        if (artisan)
-                                          handlePayerFacture(artisan.userId);
-                                      }}
-                                      disabled={
-                                        loadingArtisanId ===
-                                        message.expediteurId
-                                      }
-                                      className="px-3 py-1 bg-[#6B8E23] text-white text-sm rounded hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                                    >
-                                      {loadingArtisanId ===
-                                      message.expediteurId ? (
-                                        <>
-                                          <LoadingSpinnerSmall />
-                                          <span>Paiement...</span>
-                                        </>
-                                      ) : (
-                                        "Payer maintenant"
-                                      )}
-                                    </button>
-                                  </>
-                                ) : (
-                                  <p className="text-sm font-medium mb-2 bg-green-500 p-4 text-white rounded">
-                                    Facture payée
-                                  </p>
-                                )}
+                                <p className="text-sm font-medium mb-2 text-green-600">
+                                  ✅ Paiement confirmé par les deux parties
+                                </p>
                               </div>
                             )}
 
@@ -1443,7 +1348,7 @@ export default function UserDiscussions() {
                                         }
                                         className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                       >
-                                        Refuser
+                                        Signaler problème
                                       </button>
                                     </>
                                   ) : (
@@ -1455,21 +1360,7 @@ export default function UserDiscussions() {
                                 </div>
                               </div>
                             )}
-
-                            {message.evenementType === "AVIS_LAISSE" && (
-                              <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                                <p className="text-sm font-medium mb-2">
-                                  Avis déposé
-                                </p>
-                                <RatingStars
-                                  rating={extractRatingFromMessage(
-                                    message.contenu
-                                  )}
-                                />
-                              </div>
-                            )}
                           </div>
-                          {/* ...existing code... */}
                         </div>
 
                         {isCurrentUser(message) && (
@@ -1492,16 +1383,15 @@ export default function UserDiscussions() {
                         </p>
                       </div>
                     )}
-                    {/* Référence pour scroller vers le bas */}
+
                     <div ref={messagesEndRef} />
                   </div>
                 )}
               </div>
 
-              {/* Zone d'envoi de message */}
+              {/* Zone d'envoi de message pour mobile */}
               <div className="border-t border-[#D3D3D3] px-4 py-3 bg-[#F8F8FF]">
                 <div className="flex gap-3">
-                  {/* Bouton d'upload de fichier */}
                   <label
                     className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
                       uploadingFile
@@ -1560,17 +1450,22 @@ export default function UserDiscussions() {
         )}
       </div>
 
-      {/* Modale de paiement */}
-      {showPaymentModal && (
+      {/* NOUVEAU: Modale de confirmation de paiement */}
+      {showConfirmPaymentModal && selectedArtisan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
             <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
               <h3 className="text-lg font-bold text-[#8B4513]">
-                Paiement de la facture
+                Confirmer le paiement
               </h3>
               <button
-                onClick={() => setShowPaymentModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={() => {
+                  setShowConfirmPaymentModal(false);
+                  setPaymentAmount("");
+                  setPaymentMethod("espèces");
+                }}
+                disabled={loadingArtisanId === selectedArtisan.userId}
+                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1578,67 +1473,101 @@ export default function UserDiscussions() {
 
             <div className="p-6">
               <div className="text-center mb-6">
-                <CreditCard className="w-12 h-12 text-[#556B2F] mx-auto mb-3" />
+                <Euro className="w-12 h-12 text-[#556B2F] mx-auto mb-3" />
                 <h4 className="text-lg font-semibold text-[#8B4513]">
-                  Simulation de paiement Stripe
+                  Confirmation de paiement direct
                 </h4>
                 <p className="text-gray-600 mt-2">
-                  Cette démonstration simule un paiement sécurisé via Stripe.
+                  Confirmez que vous avez effectué le paiement directement à
+                  l'artisan.
                 </p>
               </div>
 
-              <div className="bg-[#F8F8FF] rounded-lg p-4 mb-6 border border-[#D3D3D3]">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">Montant à payer:</span>
-                  <span className="text-lg font-bold text-[#8B4513]">
-                    {artisans.find((a) => a.userId === selectedArtisan)
-                      ?.factureMontant || 0}
-                    €
-                  </span>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
+                    Montant payé (€) *
+                  </label>
+                  <input
+                    type="number"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F]"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                  />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Artisan:</span>
-                  <span className="text-sm text-[#556B2F]">
-                    {artisans.find((a) => a.userId === selectedArtisan)?.user
-                      .companyName ||
-                      artisans.find((a) => a.userId === selectedArtisan)?.user
-                        .firstName +
-                        " " +
-                        artisans.find((a) => a.userId === selectedArtisan)?.user
-                          .lastName}
-                  </span>
-                </div>
-              </div>
 
-              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
+                    Mode de paiement *
+                  </label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F]"
+                  >
+                    <option value="espèces">Espèces</option>
+                    <option value="virement">Virement bancaire</option>
+                    <option value="lydia">Lydia</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="chèque">Chèque</option>
+                    <option value="autre">Autre</option>
+                  </select>
+                </div>
+
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-sm text-yellow-800 text-center">
-                    ⚠️ Ceci est une simulation. Aucun vrai paiement ne sera
-                    effectué.
+                  <p className="text-sm text-yellow-800">
+                    ⚠️ Cette confirmation indique que vous avez effectué le
+                    paiement directement à l'artisan. L'artisan devra confirmer
+                    à son tour la réception du paiement.
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-3 justify-end mt-6">
                 <button
-                  onClick={() => setShowPaymentModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  onClick={() => {
+                    setShowConfirmPaymentModal(false);
+                    setPaymentAmount("");
+                    setPaymentMethod("espèces");
+                  }}
+                  disabled={loadingArtisanId === selectedArtisan.userId}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
-                  onClick={handleConfirmPayment}
-                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] transition-colors flex items-center gap-2"
+                  onClick={() =>
+                    handleConfirmerPaiementClient(
+                      selectedArtisan.userId,
+                      paymentAmount,
+                      paymentMethod
+                    )
+                  }
+                  disabled={
+                    !paymentAmount ||
+                    loadingArtisanId === selectedArtisan.userId
+                  }
+                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
-                  <CreditCard className="w-4 h-4" />
-                  Simuler le paiement
+                  {loadingArtisanId === selectedArtisan.userId ? (
+                    <>
+                      <LoadingSpinnerSmall />
+                      <span>Confirmation...</span>
+                    </>
+                  ) : (
+                    "Confirmer le paiement"
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-      {/* Modale de notation */}
+
+      {/* Modale de notation (inchangée) */}
       {showReviewModal && reviewArtisan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
@@ -1669,7 +1598,6 @@ export default function UserDiscussions() {
               </div>
 
               <div className="space-y-4">
-                {/* Notation par étoiles */}
                 <div>
                   <label className="block text-sm font-medium text-[#8B4513] mb-3">
                     Votre note *
@@ -1708,7 +1636,6 @@ export default function UserDiscussions() {
                   </p>
                 </div>
 
-                {/* Commentaire */}
                 <div>
                   <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Votre avis (optionnel)
@@ -1722,7 +1649,6 @@ export default function UserDiscussions() {
                   />
                 </div>
 
-                {/* Informations sur ce qui sera noté */}
                 <div className="bg-[#F0F8FF] border border-[#D3D3D3] rounded-lg p-3">
                   <p className="text-sm text-[#556B2F]">
                     <strong>Note concernera :</strong>
