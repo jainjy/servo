@@ -96,25 +96,29 @@ const OeuvrePages: React.FC = () => {
     fetchOeuvres();
   }, [professionalId]);
 
-  const handleAcheter = async (oeuvre: Oeuvre) => {
-    // Vérifier si l'utilisateur est connecté
-    if (!user) {
-      toast.warning(
-        "Veuillez vous connecter pour ajouter des œuvres au panier"
-      );
-      return;
-    }
+  // OeuvrePages.tsx - ADAPTER L'AJOUT AU PANIER
 
-    // Vérifier si l'œuvre est en stock
-    if (oeuvre.quantity === 0) {
-      toast.error("Cette œuvre n'est plus disponible");
+  const handleAcheter = async (oeuvre: Oeuvre) => {
+    if (!user) {
+      toast.warning("Veuillez vous connecter");
       return;
     }
 
     try {
       setAddingOeuvreId(oeuvre.id);
 
-      // Préparer l'objet produit pour le panier
+      // Vérifier la disponibilité avant d'ajouter
+      const stockCheck = await api.post('/cart/check-artwork', {
+        productId: oeuvre.id,
+        quantity: 1
+      });
+
+      if (!stockCheck.data.available) {
+        toast.error(stockCheck.data.message || "Cette œuvre n'est plus disponible");
+        return;
+      }
+
+      // Préparer l'objet pour le panier avec type spécifique
       const productToAdd = {
         id: oeuvre.id,
         name: oeuvre.title,
@@ -122,33 +126,30 @@ const OeuvrePages: React.FC = () => {
         price: oeuvre.price || 0,
         image: oeuvre.image,
         images: oeuvre.images || [oeuvre.image],
-        quantity: 1, // Quantité à ajouter au panier
-        maxQuantity: oeuvre.quantity || 1, // Stock disponible
-        vendor: {
-          companyName: professionalName || oeuvre.artist || 'Artiste',
-          id: professionalId
+        quantity: 1,
+        
+        // Propriétés spécifiques aux œuvres
+        itemType: 'product',
+        productType: 'artwork',
+        artworkInfo: {
+          type: oeuvre.type,
+          category: oeuvre.category,
+          artist: professionalName || oeuvre.artist,
+          creationDate: oeuvre.creationDate
         },
-        category: oeuvre.category || 'art',
-        type: 'oeuvre'
+        
+        // Pour la validation
+        trackQuantity: true,
+        sellerId: professionalId // Important pour les commissions
       };
 
-      // Ajouter l'œuvre au panier
+      // Utiliser votre CartContext existant
       addToCart(productToAdd);
 
-      // Petit délai pour laisser le temps à l'état de se mettre à jour
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Afficher une confirmation
-      toast.success(`"${oeuvre.title}" ajoutée au panier !`, {
-        description: `Prix : ${oeuvre.price?.toFixed(2) || '0.00'}€`,
-        action: {
-          label: 'Voir le panier',
-          onClick: () => navigate('/panier')
-        }
-      });
-
+      toast.success(`"${oeuvre.title}" ajoutée au panier !`);
+      
     } catch (error) {
-      console.error('Erreur lors de l\'ajout au panier:', error);
+      console.error('Erreur:', error);
       toast.error("Erreur lors de l'ajout au panier");
     } finally {
       setAddingOeuvreId(null);
