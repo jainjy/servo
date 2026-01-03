@@ -767,3 +767,103 @@ export const portraitsAPI = {
     api.post(`/portraits/${portraitId}/listen`, data),
 };
 
+// Ajoutez dans lib/api.js après les autres services
+
+// Services pour la livraison
+export const deliveryAPI = {
+  // Créer une commande avec synchronisation livraison
+  createOrderWithDelivery: async (orderData) => {
+    try {
+      const response = await api.post('/orders', orderData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  // Vérifier le statut de livraison d'une commande
+  getDeliveryStatus: async (orderId) => {
+    try {
+      const response = await api.get(`/orders/${orderId}/delivery-status`);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur vérification statut livraison:', error);
+      return null;
+    }
+  },
+
+  // Suivre une livraison (via la plateforme externe)
+  trackDelivery: async (trackingNumber) => {
+    try {
+      // Cette route appelle la plateforme de livraison
+      const response = await api.get(`/delivery/track/${trackingNumber}`);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur tracking livraison:', error);
+      return null;
+    }
+  },
+
+  // Vérifier la synchronisation d'une commande
+  checkSyncStatus: async (orderId) => {
+    try {
+      const response = await api.get(`/orders/${orderId}/sync-status`);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur vérification synchronisation:', error);
+      return null;
+    }
+  }
+};
+
+// Service de notification de livraison
+export const deliveryService = {
+  // Fonction utilitaire pour calculer l'ETA
+  calculateETA: (status, createdAt) => {
+    if (!status || !createdAt) return null;
+    
+    const createdDate = new Date(createdAt);
+    const now = new Date();
+    const hoursSinceCreation = (now - createdDate) / (1000 * 60 * 60);
+    
+    const etaMapping = {
+      'pending': 'En attente de traitement',
+      'processing': `Livraison prévue dans ${Math.max(1, 24 - Math.floor(hoursSinceCreation))}h`,
+      'shipped': `En cours de livraison`,
+      'out_for_delivery': `Livraison aujourd'hui`,
+      'delivered': 'Livrée',
+      'cancelled': 'Annulée',
+      'failed': 'Échec de livraison'
+    };
+    
+    return etaMapping[status] || 'Statut inconnu';
+  },
+
+  // Obtenir l'icône selon le statut
+  getStatusIcon: (status) => {
+    const icons = {
+      'pending': '⏳',
+      'processing': '🚚',
+      'shipped': '📦',
+      'out_for_delivery': '🏍️',
+      'delivered': '✅',
+      'cancelled': '❌',
+      'failed': '⚠️'
+    };
+    return icons[status] || '❓';
+  },
+
+  // Obtenir la couleur selon le statut
+  getStatusColor: (status) => {
+    const colors = {
+      'pending': 'text-yellow-600 bg-yellow-50 border-yellow-200',
+      'processing': 'text-blue-600 bg-blue-50 border-blue-200',
+      'shipped': 'text-indigo-600 bg-indigo-50 border-indigo-200',
+      'out_for_delivery': 'text-green-600 bg-green-50 border-green-200',
+      'delivered': 'text-emerald-600 bg-emerald-50 border-emerald-200',
+      'cancelled': 'text-red-600 bg-red-50 border-red-200',
+      'failed': 'text-orange-600 bg-orange-50 border-orange-200'
+    };
+    return colors[status] || 'text-gray-600 bg-gray-50 border-gray-200';
+  }
+};
