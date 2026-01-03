@@ -78,7 +78,7 @@ const FormationsSection = ({
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const { formations, isLoading: apiLoading, fetchFormations, applyToFormation } = usePublicFormations();
+const { formations, isLoading: apiLoading, fetchFormations } = usePublicFormations();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("tous");
   const [selectedFormat, setSelectedFormat] = useState("tous");
@@ -253,46 +253,71 @@ useEffect(() => {
     setIsContactDialogOpen(true);
   };
 
- const { postuler } = useCandidatures();
+const { postuler, isLoading } = useCandidatures();
 
-const handleApplyToFormation = async () => {
-  if (!selectedFormation || !user) return;
-
-  try {
-    const result = await postuler(
-      selectedFormation.id,
-      'formation',
-      selectedFormation.title,
-      {
-        messageMotivation: contactForm.message,
-        cvUrl: cvFile?.url,
-        nomCandidat: contactForm.name || user.name,
-        emailCandidat: contactForm.email || user.email,
-        telephoneCandidat: contactForm.phone || user.phone
-      }
-    );
-
-    if (result.success) {
-      toast.success("Votre candidature a été envoyée avec succès !");
-      setIsContactDialogOpen(false);
-      setContactForm({ name: "", email: "", phone: "", message: "" });
-      
-      // Mettre à jour la liste des formations appliquées
-      if (handleApply) {
-        handleApply(`formations-${selectedFormation.id}`);
-      }
-      
-      // Recharger les formations pour mettre à jour le compteur
-      await fetchFormations({ status: "active" });
+ // CORRECTION : Fonction handleApplyToFormation corrigée
+  const handleApplyToFormation = async (e) => {
+    e.preventDefault(); // Important pour les formulaires
+    
+    if (!selectedFormation) {
+      toast.error("Aucune formation sélectionnée");
+      return;
     }
-  } catch (error) {
-    if (error.message.includes("Non autorisé") || error.message.includes("déjà postulé")) {
-      toast.error(error.message);
-    } else {
-      toast.error("Erreur lors de l'inscription");
+
+    if (!isAuthenticated || !user) {
+      toast.error("Vous devez être connecté pour postuler");
+      navigate("/login");
+      return;
     }
-  }
-};
+
+    try {
+      // Vérification des champs requis
+      if (!contactForm.message || contactForm.message.trim() === '') {
+        toast.error("Veuillez rédiger un message de motivation");
+        return;
+      }
+
+      const result = await postuler(
+        selectedFormation.id,
+        'formation',
+        selectedFormation.title,
+        {
+          messageMotivation: contactForm.message,
+          cvUrl: cvFile?.url || null,
+          nomCandidat: contactForm.name || user.name || '',
+          emailCandidat: contactForm.email || user.email || '',
+          telephoneCandidat: contactForm.phone || user.phone || null
+        }
+      );
+
+      if (result.success) {
+        toast.success("Votre candidature a été envoyée avec succès !");
+        setIsContactDialogOpen(false);
+        setContactForm({ name: "", email: "", phone: "", message: "" });
+        
+        // Optionnel : Mettre à jour appliedItems si nécessaire
+        if (handleApply && typeof handleApply === 'function') {
+          handleApply(`formations-${selectedFormation.id}`);
+        }
+        
+        // Recharger les formations si nécessaire
+        await fetchFormations({ status: "active" });
+      } else {
+        toast.error(result.error || "Erreur lors de l'envoi de la candidature");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la postulation:", error);
+      
+      if (error.message.includes("Non autorisé") || error.message.includes("connecté")) {
+        toast.error("Veuillez vous connecter pour postuler");
+        navigate("/login");
+      } else if (error.message.includes("déjà postulé")) {
+        toast.error("Vous avez déjà postulé à cette formation");
+      } else {
+        toast.error(error.message || "Erreur lors de l'envoi de la candidature");
+      }
+    }
+  };
 
   const statsData = [
     { label: "Formations disponibles", value: formations?.length || "0", icon: BookOpen },
@@ -809,7 +834,7 @@ const handleApplyToFormation = async () => {
         </div>
       </div>
 
-      {/* Dialog d'inscription */}
+       {/* Dialog d'inscription */}
       <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -824,77 +849,27 @@ const handleApplyToFormation = async () => {
                 : "Un conseiller vous recontactera sous 24h pour répondre à vos questions."}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={selectedFormation ? handleApplyToFormation : handleContactSubmit}>
-            <div className="grid gap-4 py-4">
-              {!selectedFormation && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Nom complet *</Label>
-                      <Input
-                        id="name"
-                        value={contactForm.name}
-                        onChange={(e) =>
-                          setContactForm({ ...contactForm, name: e.target.value })
-                        }
-                        placeholder="Votre nom"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={contactForm.email}
-                        onChange={(e) =>
-                          setContactForm({
-                            ...contactForm,
-                            email: e.target.value,
-                          })
-                        }
-                        placeholder="votre@email.com"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Téléphone</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={contactForm.phone}
-                      onChange={(e) =>
-                        setContactForm({ ...contactForm, phone: e.target.value })
-                      }
-                      placeholder="06 12 34 56 78"
-                    />
-                  </div>
-                </>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="message">
-                  {selectedFormation ? "Lettre de motivation *" : "Message *"}
-                </Label>
-                <Textarea
-                  id="message"
-                  value={contactForm.message}
-                  onChange={(e) =>
-                    setContactForm({
-                      ...contactForm,
-                      message: e.target.value,
-                    })
-                  }
-                  placeholder={
-                    selectedFormation
-                      ? "Pourquoi souhaitez-vous suivre cette formation ?..."
-                      : "Décrivez votre projet de formation..."
-                  }
-                  className="min-h-[100px]"
-                  required
-                />
-              </div>
-              {selectedFormation && (
+          
+          {/* CORRECTION : Séparation des deux formulaires */}
+          {selectedFormation ? (
+            <form onSubmit={handleApplyToFormation}>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="message">Lettre de motivation *</Label>
+                  <Textarea
+                    id="message"
+                    value={contactForm.message}
+                    onChange={(e) =>
+                      setContactForm({
+                        ...contactForm,
+                        message: e.target.value,
+                      })
+                    }
+                    placeholder="Pourquoi souhaitez-vous suivre cette formation ?..."
+                    className="min-h-[100px]"
+                    required
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="cv">CV (optionnel)</Label>
                   <Input
@@ -908,26 +883,105 @@ const handleApplyToFormation = async () => {
                     Formats acceptés : PDF, DOC, DOCX (max 5MB)
                   </p>
                 </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsContactDialogOpen(false)}
-              >
-                Annuler
-              </Button>
-              <Button
-                type="submit"
-                className="bg-[#556B2F] hover:bg-[#6B8E23]"
-              >
-                {selectedFormation ? "Postuler" : "Envoyer la demande"}
-              </Button>
-            </DialogFooter>
-          </form>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsContactDialogOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-[#556B2F] hover:bg-[#6B8E23]"
+                >
+                  Postuler
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <form onSubmit={handleContactSubmit}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nom complet *</Label>
+                    <Input
+                      id="name"
+                      value={contactForm.name}
+                      onChange={(e) =>
+                        setContactForm({ ...contactForm, name: e.target.value })
+                      }
+                      placeholder="Votre nom"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={contactForm.email}
+                      onChange={(e) =>
+                        setContactForm({
+                          ...contactForm,
+                          email: e.target.value,
+                        })
+                      }
+                      placeholder="votre@email.com"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Téléphone</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={contactForm.phone}
+                    onChange={(e) =>
+                      setContactForm({ ...contactForm, phone: e.target.value })
+                    }
+                    placeholder="06 12 34 56 78"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">Message *</Label>
+                  <Textarea
+                    id="message"
+                    value={contactForm.message}
+                    onChange={(e) =>
+                      setContactForm({
+                        ...contactForm,
+                        message: e.target.value,
+                      })
+                    }
+                    placeholder="Décrivez votre projet de formation..."
+                    className="min-h-[100px]"
+                    required
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsContactDialogOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-[#556B2F] hover:bg-[#6B8E23]"
+                >
+                  Envoyer la demande
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
+ 
     </>
   );
 };

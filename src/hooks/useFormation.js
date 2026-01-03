@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
 export const useFormation = () => {
   const [formations, setFormations] = useState([]);
@@ -293,6 +293,18 @@ export const useFormation = () => {
     await fetchFormations({ page });
   };
 
+  const fetchFormationCandidatures = async (formationId) => {
+  try {
+    const response = await axios.get(`${API_URL}/candidatures/formations/${formationId}`, {
+      headers: getAuthHeaders()
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error('Erreur récupération candidatures:', error);
+    throw error;
+  }
+};
+
   return {
     formations,
     stats,
@@ -306,6 +318,7 @@ export const useFormation = () => {
     updateStatus,
     deleteFormation,
     exportCSV,
-    changePage
+    changePage,
+    fetchFormationCandidatures
   };
 };
