@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Entrepreneuriat from "./pages/Entrepreneuriat";
 import {
   BrowserRouter,
   Routes,
@@ -381,17 +382,29 @@ const App = () => {
                   <Route path="/achat" element={<PropertyBuy />} />
                   <Route path="/location" element={<PropertyRent />} />
                   <Route path="/rachat" element={<RachatServiceCard />} />
-
                   {/* 🔥 ROUTES DES EXPÉRIENCES - CORRIGÉES 🔥 */}
-                  <Route path="/sejour-experience" element={<SejoursExperiences />} />
-                  <Route path="/sejour-experience/:id" element={<ExperienceDetail />} />
-                  <Route path="/sejour-experience/:id/book" element={<ExperienceBooking />} />
-                  
+                  <Route
+                    path="/sejour-experience"
+                    element={<SejoursExperiences />}
+                  />
+                  <Route
+                    path="/sejour-experience/:id"
+                    element={<ExperienceDetail />}
+                  />
+                  <Route
+                    path="/sejour-experience/:id/book"
+                    element={<ExperienceBooking />}
+                  />
                   {/* Routes alternatives (optionnel) */}
                   <Route path="/experiences" element={<SejoursExperiences />} />
-                  <Route path="/experiences/:id" element={<ExperienceDetail />} />
-                  <Route path="/experiences/:id/book" element={<ExperienceBooking />} />
-
+                  <Route
+                    path="/experiences/:id"
+                    element={<ExperienceDetail />}
+                  />
+                  <Route
+                    path="/experiences/:id/book"
+                    element={<ExperienceBooking />}
+                  />
                   <Route path="/explorer-vivre" element={<ExplorerVivre />} />
                   <Route
                     path="/evenement-decouverte"
@@ -445,7 +458,6 @@ const App = () => {
                     path="/bon-plan-conseil"
                     element={<BonsPlansConseils />}
                   />
-
                   <Route
                     path="/location-Saisonniere"
                     element={<LocationSaisonniere />}
@@ -703,6 +715,11 @@ const App = () => {
                   <Route
                     path="/service"
                     element={<Navigate to="/services-partners" replace />}
+                  />
+
+                  <Route
+                    path="/entrepreneuriat"
+                    element={<Entrepreneuriat />}
                   />
                   <Route
                     path="/services-partners"
@@ -1021,17 +1038,14 @@ const App = () => {
                     element={<GestionDroitsRGPD />}
                   />
                   <Route path="/contact-dpo" element={<ContactDPO />} />
-
                   {/* Onglets Arts et Creations */}
                   <Route path="/art-et-creation" element={<ArtETCreation />} />
-
                   <Route path="/photographie" element={<PhotographiePage />} />
                   <Route
                     path="/sculpture"
                     element={<SculpturePage onContactClick={undefined} />}
                   />
                   <Route path="/peinture" element={<PeinturePage />} />
-
                   <Route
                     path="/oeuvres/:professionalId"
                     element={<OeuvrePages />}
