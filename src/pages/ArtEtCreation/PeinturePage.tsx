@@ -25,7 +25,8 @@ import {
   RefreshCw,
   ChevronLeft,
   Briefcase,
-  ImageIcon
+  ImageIcon,
+  Store
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
@@ -335,14 +336,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
         {/* Styles et techniques - TOUJOURS affichés */}
         {!isCategoryPage && (
           <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Palette size={24} className="mr-2 text-[#8B4513]" />
-                <h2 className="text-2xl font-bold text-[#8B4513]">
-                  Styles et techniques
-                </h2>
-              </div>
-            </div>
+            
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {paintingStyles.map((style) => (
@@ -497,14 +491,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
                     {/* Overlay sur l'image au hover */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                     
-                    {/* Badge vérifié */}
-                    {painter.verified && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                          ✓ Vérifié
-                        </span>
-                      </div>
-                    )}
+                    
                   </div>
 
                   {/* Info */}
@@ -566,8 +553,8 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
                         }}
                         className="w-full py-2.5 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center group/btn"
                       >
-                        <ImageIcon size={16} className="mr-2 group-hover/btn:animate-pulse" />
-                        Voir les œuvres
+                        <Store size={16} className="mr-2 group-hover/btn:animate-pulse" />
+                        Boutique
                       </button>
                     </div>
                   </div>

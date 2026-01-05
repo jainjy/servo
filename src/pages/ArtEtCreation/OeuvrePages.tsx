@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useLocation, useNavigate,Link } from 'react-router-dom';
 import { ArrowLeft, ImageIcon, Calendar, ShoppingCart, Euro } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/components/contexts/CartContext';
@@ -172,19 +172,28 @@ const OeuvrePages: React.FC = () => {
 
         {/* Header */}
         <div className="flex items-center mb-8">
-          <button
-            onClick={() => navigate(-1)}
+          <Link
+            to={-1 as any} // Ou spécifiez un chemin précis
             className="flex items-center text-[#556B2F] hover:underline font-medium"
           >
             <ArrowLeft size={20} className="mr-2" />
             Retour
-          </button>
+          </Link>
         </div>
 
         <div className="mb-10">
+          <div className="flex items-center mb-8">
+          <Link
+            to={-1 as any} // Ou spécifiez un chemin précis
+            className="flex items-center text-[#556B2F] hover:underline font-medium"
+          >
+            <ArrowLeft size={20} className="mr-2" />
+            Retour
+          </Link>
+        </div>
           <h1 className="text-3xl font-bold text-[#8B4513] mb-2 flex items-center">
-            <ImageIcon className="mr-3" size={28} />
-            Œuvres {professionalName && `de ${professionalName}`}
+            <ShoppingCart className="mr-3" size={28} />
+            Produits {professionalName && `de ${professionalName}`}
           </h1>
           <div className="h-1 w-20 bg-[#8B4513] rounded-full"></div>
         </div>

@@ -19,7 +19,8 @@ import {
   RefreshCw,
   ImageIcon,
   ChevronRight,
-  Filter
+  Filter,
+  Store
 } from 'lucide-react';
 import api from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
@@ -315,12 +316,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ onContactClick }) => {
         {/* Types de sculpture - TOUJOURS affichés */}
         {!isCategoryPage && (
           <div className="mb-12">
-            <div className="flex items-center mb-6">
-              <Hammer size={24} className="mr-2 text-[#8B4513]" />
-              <h2 className="text-2xl font-bold text-[#8B4513]">
-                Types de sculpture
-              </h2>
-            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {sculptureTypes.map((type, index) => (
                 <div
@@ -336,7 +332,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ onContactClick }) => {
                   </div>
                   <div className="flex justify-between items-center">
                     <p className="text-gray-600 text-sm">
-                      {countSculptorsByCategory(type.slug)} artistes disponibles
+                      {countSculptorsByCategory(type.slug)} artistes
                     </p>
                     <ChevronRight size={16} className="text-gray-400 group-hover:text-[#8B4513] transition-colors" />
                   </div>
@@ -475,14 +471,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ onContactClick }) => {
                     {/* Overlay sur l'image au hover */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                     
-                    {/* Badge vérifié */}
-                    {sculptor.verified && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                          ✓ Vérifié
-                        </span>
-                      </div>
-                    )}
+                    
                   </div>
 
                   {/* Info */}
@@ -544,8 +533,8 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ onContactClick }) => {
                         }}
                         className="w-full py-2.5 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center group/btn"
                       >
-                        <ImageIcon size={16} className="mr-2 group-hover/btn:animate-pulse" />
-                        Voir les œuvres
+                        <Store size={16} className="mr-2 group-hover/btn:animate-pulse" />
+                        Boutique
                       </button>
                     </div>
                   </div>
