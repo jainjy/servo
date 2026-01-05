@@ -2,11 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Search,  
   MapPin, 
+  Eye,
   Calendar, 
   ShoppingCart,
-  Eye,
   RefreshCw,
-  TrendingUp,
   Award,
   Palette,
   Camera,
@@ -67,7 +66,11 @@ interface FilterOptions {
   sortBy: 'newest' | 'price_asc' | 'price_desc' | 'popular';
 }
 
-const MarketplaceCreateurs: React.FC = () => {
+interface MarketplaceCreateursProps {
+  onContactClick: (subject: string, recipientName?: string) => void;
+}
+
+const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactClick }) => {
   const [loading, setLoading] = useState(true);
   const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
   const [filteredOeuvres, setFilteredOeuvres] = useState<Oeuvre[]>([]);
@@ -461,22 +464,14 @@ const MarketplaceCreateurs: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-[#8B4513] mb-2">
-                Marketplace des Œuvres d'Art
+                Marketplace des produits d'art
               </h1>
               <p className="text-gray-600">
-                Découvrez et achetez des œuvres uniques d'artistes talentueux
+                Découvrez et achetez des produits uniques d'artistes talentueux
               </p>
             </div>
             
-            <div className="mt-4 md:mt-0 flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-2xl font-bold text-[#8B4513]">{stats.total}</div>
-                <div className="text-sm text-gray-600">Œuvres disponibles</div>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-[#8B4513] flex items-center justify-center">
-                <Award size={24} className="text-white" />
-              </div>
-            </div>
+            
           </div>
           
           <div className="h-1 w-20 bg-[#8B4513] rounded-full"></div>
@@ -705,6 +700,7 @@ const MarketplaceCreateurs: React.FC = () => {
                           )}
                         </div>
                         
+                        {/* Augmentez la largeur de la carte parente si nécessaire */}
                         <div className="flex gap-2">
                           <button
                             onClick={(e) => {
@@ -715,8 +711,8 @@ const MarketplaceCreateurs: React.FC = () => {
                             }}
                             className="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors flex items-center justify-center text-sm"
                           >
-                            <Eye size={14} className="mr-2" />
-                            Plus d'œuvres
+                            <Eye size={14} className="mr-1" />
+                            Plus
                           </button>
                           <button
                             onClick={(e) => handleBuyOeuvre(oeuvre, e)}
@@ -731,18 +727,18 @@ const MarketplaceCreateurs: React.FC = () => {
                           >
                             {addingOeuvreId === oeuvre.id ? (
                               <>
-                                <Loader2 size={14} className="mr-2 animate-spin" />
+                                <Loader2 size={14} className="mr-1 animate-spin" />
                                 Ajout...
                               </>
                             ) : oeuvre.quantity === 0 ? (
                               <>
-                                <ShoppingCart size={14} className="mr-2" />
+                                <ShoppingCart size={14} className="mr-1" />
                                 Vendu
                               </>
                             ) : (
                               <>
-                                <ShoppingCart size={14} className="mr-2" />
-                                Ajouter au panier
+                                <ShoppingCart size={14} className="mr-1" />
+                                Acheter {/* ← Texte raccourci */}
                               </>
                             )}
                           </button>

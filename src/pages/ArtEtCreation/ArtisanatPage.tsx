@@ -19,7 +19,8 @@ import {
   ChevronRight,
   Star,
   Briefcase as BriefcaseIcon,
-  User as UserIcon
+  User as UserIcon,
+  Store
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
@@ -342,14 +343,7 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
 
         {/* Catégories d'artisanat - TOUJOURS affichées */}
         {!isCategoryPage && (
-          <div className="mb-12">
-            <div className="flex items-center mb-6">
-              <Target size={24} className="mr-2 text-[#8B4513]" />
-              <h2 className="text-2xl font-bold text-[#8B4513]">
-                Catégories d'artisanat
-              </h2>
-            </div>
-            
+          <div className="mb-12">        
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {craftCategories.map((category) => (
                 <div
@@ -365,7 +359,7 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
                   </div>
                   <div className="flex justify-between items-center">
                     <p className="text-gray-600 text-sm">
-                      {countArtisansByCategory(category.slug)} artisans disponibles
+                      {countArtisansByCategory(category.slug)} artisans
                     </p>
                     <ChevronRight size={16} className="text-gray-400 group-hover:text-[#8B4513] transition-colors" />
                   </div>
@@ -440,11 +434,6 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
                 </div>
               )}
             </div>
-            {!loading && artisansToDisplay.length > 0 && (
-              <div className="text-sm text-gray-600">
-                {artisansToDisplay.length} artisan{artisansToDisplay.length > 1 ? 's' : ''}
-              </div>
-            )}
           </div>
 
           {loading ? (
@@ -504,14 +493,6 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
                     {/* Overlay sur l'image au hover */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                     
-                    {/* Badge vérifié */}
-                    {artisan.verified && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                          ✓ Vérifié
-                        </span>
-                      </div>
-                    )}
                   </div>
 
                   {/* Info */}
@@ -573,8 +554,8 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
                         }}
                         className="w-full py-2.5 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center group/btn"
                       >
-                        <ImageIcon size={16} className="mr-2 group-hover/btn:animate-pulse" />
-                        Voir les œuvres
+                        <Store size={16} className="mr-2 group-hover/btn:animate-pulse" />
+                        Boutique
                       </button>
                     </div>
                   </div>

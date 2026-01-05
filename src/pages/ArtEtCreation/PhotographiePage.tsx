@@ -14,7 +14,8 @@ import {
   Briefcase,
   Search,
   ImageIcon,
-  ChevronRight
+  ChevronRight,
+  Store
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '@/lib/api';
@@ -56,7 +57,11 @@ interface Category {
   slug: string;
 }
 
-const PhotographiePage: React.FC = () => {
+interface PhotographiePageProps {
+  onContactClick: (subject: string, recipientName?: string) => void;
+}
+
+const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) => {
   const [loading, setLoading] = useState(true);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [photographers, setPhotographers] = useState<Professional[]>([]);
@@ -363,15 +368,7 @@ const PhotographiePage: React.FC = () => {
         {/* Catégories - TOUJOURS affichées */}
         {!isCategoryPage && (
           <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Camera size={24} className="mr-2 text-[#8B4513]" />
-                <h2 className="text-2xl font-bold text-[#8B4513]">
-                  Catégories de photographes
-                </h2>
-              </div>
-            </div>
-            
+                        
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {categories.map((category, index) => (
                 <div
@@ -588,8 +585,8 @@ const PhotographiePage: React.FC = () => {
                         }}
                         className="w-full py-2.5 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center group/btn"
                       >
-                        <ImageIcon size={16} className="mr-2 group-hover/btn:animate-pulse" />
-                        Voir les œuvres
+                        <Store size={16} className="mr-2 group-hover/btn:animate-pulse" />
+                        Boutique
                       </button>
                     </div>
                   </div>

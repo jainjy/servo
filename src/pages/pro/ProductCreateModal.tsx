@@ -561,7 +561,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                    user?.email
       };
 
-      console.log('📤 Envoi création œuvre:', apiData);
+      console.log('📤 Envoi création produit:', apiData);
 
       const res = await fetch(`${apiBase}/api/art-creation/products/create`, {
         method: 'POST',
@@ -580,7 +580,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
 
       toast({
         title: 'Succès',
-        description: result.message || 'Œuvre créée avec succès',
+        description: result.message || 'produit créée avec succès',
         className: 'bg-green-50 text-green-800 border-green-200'
       });
      
@@ -667,7 +667,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
               </div>
               <div>
                 <DialogTitle className="text-2xl font-bold text-[#8B4513]">
-                  {initialData ? 'Modifier une œuvre' : 'Ajouter une nouvelle œuvre'}
+                  {initialData ? 'Modifier une produit' : 'Ajouter un nouveau produit'}
                 </DialogTitle>
                 <p className="text-sm text-[#6B8E23] mt-1">
                   Complétez les informations de votre création artistique
@@ -691,7 +691,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="font-medium text-[#556B2F] flex items-center gap-1">
-                    Titre de l'œuvre <span className="text-red-500">*</span>
+                    Titre du produit <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="name"
@@ -710,7 +710,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                     id="description"
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    placeholder="Décrivez votre œuvre, son inspiration, sa technique, son histoire..."
+                    placeholder="Décrivez votre produit, son inspiration, sa technique, son histoire..."
                     rows={5}
                     className="border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3 min-h-[120px]"
                   />
@@ -725,7 +725,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                     id="artistName"
                     value={formData.artistName}
                     onChange={(e) => handleInputChange('artistName', e.target.value)}
-                    placeholder="Nom sous lequel l'œuvre sera présentée"
+                    placeholder="Nom sous lequel l'produit sera présentée"
                     className="border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3"
                   />
                   <p className="text-xs text-gray-500">
@@ -739,7 +739,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="type" className="font-medium text-[#556B2F] flex items-center gap-1">
-                      Type d'œuvre <span className="text-red-500">*</span>
+                      Type du produit <span className="text-red-500">*</span>
                     </Label>
                     <Select
                       value={formData.type}
@@ -826,7 +826,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                     />
                   </div>
                   <p className="text-xs text-gray-500">
-                    Prix de vente de votre œuvre
+                    Prix de vente de votre produit
                   </p>
                 </div>
                
@@ -938,7 +938,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                       }`} />
                     </div>
                     <div>
-                      <p className="font-bold text-lg text-[#556B2F]">Ajouter des photos de votre œuvre</p>
+                      <p className="font-bold text-lg text-[#556B2F]">Ajouter des photos de votre produit</p>
                       <p className="text-sm text-[#6B8E23] mt-2">
                         Glissez-déposez vos images ou cliquez pour sélectionner
                       </p>
@@ -1064,7 +1064,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                   {/* Note */}
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <p className="text-xs text-blue-800">
-                      💡 <span className="font-medium">Conseil :</span> La première image sera utilisée comme visuel principal de votre œuvre. 
+                      💡 <span className="font-medium">Conseil :</span> La première image sera utilisée comme visuel principal de votre produit. 
                       Choisissez une photo de haute qualité qui met en valeur votre création.
                     </p>
                   </div>
@@ -1104,7 +1104,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                 Téléchargement...
               </>
             ) : (
-              'Publier l\'œuvre'
+              'Publier le produit'
             )}
           </Button>
         </DialogFooter>

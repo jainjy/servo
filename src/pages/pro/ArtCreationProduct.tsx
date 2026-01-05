@@ -3,7 +3,8 @@ import {
   Search, Plus, Edit3, Trash2, Palette, Camera, 
   Cpu, Mountain, Filter, BarChart3, Calendar, 
   Tag, Layers, ShoppingCart, TrendingUp, 
-  X, FileSearch, Sparkles, Eye as EyeIcon
+  X, FileSearch, Sparkles, Eye as EyeIcon,
+  Brush
 } from 'lucide-react';
 import { ProductCreateModal } from './ProductCreateModal';
 import { useToast } from '@/hooks/use-toast';
@@ -131,7 +132,7 @@ const ArtCreationProduct: React.FC = () => {
       console.error('fetchProducts error', err);
       toast({ 
         title: 'Erreur', 
-        description: err?.message || 'Impossible de charger les œuvres', 
+        description: err?.message || 'Impossible de charger les produits', 
         variant: 'destructive' 
       });
       setProducts([]);
@@ -244,7 +245,7 @@ const ArtCreationProduct: React.FC = () => {
   };
 
   const handleDelete = async (id: number | string) => {
-    if (!confirm('Confirmer la suppression de cette œuvre ? Cette action est irréversible.')) return;
+    if (!confirm('Confirmer la suppression de cette produit ? Cette action est irréversible.')) return;
     
     try {
       const token = localStorage.getItem('auth-token') || 
@@ -281,7 +282,7 @@ const ArtCreationProduct: React.FC = () => {
       
       toast({ 
         title: 'Supprimé', 
-        description: "L'œuvre a été supprimée avec succès" 
+        description: "L'produit a été supprimée avec succès" 
       });
       
       setProducts(prev => prev.filter(p => p.id !== id));
@@ -290,7 +291,7 @@ const ArtCreationProduct: React.FC = () => {
       console.error('delete error', err);
       toast({ 
         title: 'Erreur', 
-        description: err?.message || 'Impossible de supprimer l\'œuvre', 
+        description: err?.message || 'Impossible de supprimer l\'produit', 
         variant: 'destructive' 
       });
     }
@@ -352,13 +353,13 @@ const ArtCreationProduct: React.FC = () => {
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                        style={{ backgroundColor: `${theme.logo}15` }}>
-                    <Palette size={24} style={{ color: theme.logo }} />
+                    <Brush size={24} style={{ color: theme.logo }} />
                   </div>
                   <div>
                     <h1 className="text-3xl md:text-4xl font-bold" style={{ color: theme.secondaryText }}>
                       Mes Créations Artistiques
                     </h1>
-                    <p className="text-gray-600 mt-1">Gérez vos œuvres d'art et artisanat</p>
+                    <p className="text-gray-600 mt-1">Gérez vos produits d'art et artisanat</p>
                   </div>
                 </div>
               </div>
@@ -375,7 +376,7 @@ const ArtCreationProduct: React.FC = () => {
                 }}
               >
                 <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
-                <span className="font-medium">Nouvelle œuvre</span>
+                <span className="font-medium">Nouveau produit</span>
               </button>
             </div>
 
@@ -383,7 +384,7 @@ const ArtCreationProduct: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { 
-                  label: 'Total œuvres', 
+                  label: 'Total produits', 
                   value: stats.total, 
                   color: theme.logo, 
                   icon: BarChart3 
@@ -432,7 +433,7 @@ const ArtCreationProduct: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Section principale des œuvres */}
+          {/* Section principale des produits */}
           <div className="lg:col-span-3 space-y-6"> {/* Changé de lg:col-span-2 à lg:col-span-3 */}
             {/* Barre de recherche et filtres */}
             <div className="bg-white rounded-2xl shadow-xl p-6" 
@@ -493,13 +494,13 @@ const ArtCreationProduct: React.FC = () => {
               </div>
             </div>
 
-            {/* Liste des œuvres */}
+            {/* Liste des produits */}
             {loading ? (
               <div className="bg-white rounded-2xl shadow-xl p-12 text-center" 
                    style={{ border: `1px solid ${theme.separator}` }}>
                 <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-t-transparent" 
                      style={{ borderColor: `${theme.logo} ${theme.logo} ${theme.logo} transparent` }}></div>
-                <p className="mt-4 text-gray-600 text-lg">Chargement des œuvres...</p>
+                <p className="mt-4 text-gray-600 text-lg">Chargement des produits...</p>
                 <p className="text-sm text-gray-500">Patience, vos créations arrivent</p>
               </div>
             ) : filteredProducts.length === 0 ? (
@@ -525,13 +526,13 @@ const ArtCreationProduct: React.FC = () => {
                 </div>
                 
                 <h3 className="text-xl font-bold text-gray-800 mb-3">
-                  {products.length === 0 ? "Votre galerie attend ses premières œuvres" : "Aucune correspondance trouvée"}
+                  {products.length === 0 ? "Votre galerie attend ses premières produits" : "Aucune correspondance trouvée"}
                 </h3>
                 
                 <p className="text-gray-600 mb-8 max-w-md mx-auto">
                   {products.length === 0 
                     ? "Transformez votre créativité en art visible. Commencez par ajouter votre première création."
-                    : "Essayez d'autres termes de recherche ou ajustez vos filtres pour découvrir plus d'œuvres."}
+                    : "Essayez d'autres termes de recherche ou ajustez vos filtres pour découvrir plus d'produits."}
                 </p>
                 
                 <button 
@@ -558,7 +559,7 @@ const ArtCreationProduct: React.FC = () => {
                   ) : (
                     <>
                       <Filter size={20} />
-                      <span className="font-medium">Voir toutes les œuvres</span>
+                      <span className="font-medium">Voir toutes les produits</span>
                     </>
                   )}
                 </button>

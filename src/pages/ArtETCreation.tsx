@@ -20,7 +20,7 @@ import SculpturePage from './ArtEtCreation/SculpturePage';
 import ModalDemandeVisite from '@/components/ModalDemandeVisite';
 
 const ArtEtCreation = () => {
-  const [activeTab, setActiveTab] = useState('photographie');
+  const [activeTab, setActiveTab] = useState('marketplace');
   const [searchQuery, setSearchQuery] = useState('');
   const [showDemandeVisite, setShowDemandeVisite] = useState(false);
   const [selectedArtwork, setSelectedArtwork] = useState<any>(null);
