@@ -91,7 +91,7 @@ let globalExitInitiated = false;
 
 export default function LoadingScreen({
   onLoadingComplete,
-  minimumLoadingTime = 7500
+  minimumLoadingTime = 9000
 }: LoadingScreenProps) {
   // États de base
   const [isVisible, setIsVisible] = useState(true);
@@ -217,8 +217,8 @@ export default function LoadingScreen({
         scale: 1.2, // Plus grand pour l'effet initial
         opacity: 1,
         rotation: 0,
-        duration: 1.5,
-        ease: "back.out(1.7)"
+        duration: 2,
+        ease: "back.out(1.3)"
       }
     );
 
@@ -234,17 +234,17 @@ export default function LoadingScreen({
           scale: 1.3, // Taille agrandie pour l'animation initiale
           opacity: 1,
           rotation: 0,
-          duration: 1.2,
+          duration: 1.5,
           ease: "power3.out"
         },
-        "-=0.5"
+        "-=0.8"
       );
 
       // Animation de pulse sur le logo
       tl.to(bigServoLogoRef.current,
         {
           scale: 1.4,
-          duration: 0.3,
+          duration: 0.4,
           ease: "power2.inOut",
           repeat: 2,
           yoyo: true
@@ -258,7 +258,7 @@ export default function LoadingScreen({
       {
         opacity: 1,
         y: 0,
-        duration: 0.8,
+        duration: 1,
         ease: "power2.out"
       },
       "-=0.5"
@@ -269,17 +269,18 @@ export default function LoadingScreen({
       {
         scale: 0.8, // Réduction progressive
         y: -30,
-        duration: 0.8,
+        duration: 1,
         ease: "power2.inOut"
-      }
+      },
+      "+=1.5"
     );
 
-    // Étape 5: Disparition progressive
+    // Étape 5: Disparition progressive (ralentie)
     tl.to(bigLogoContainerRef.current,
       {
         opacity: 0,
         scale: 0.6,
-        duration: 0.5,
+        duration: 0.8,
         ease: "power2.in"
       }
     );
@@ -296,29 +297,33 @@ export default function LoadingScreen({
       return;
     }
 
-    // Afficher le bouton immédiatement et l'animer
-    setShowButton(true);
+    // Ajouter un délai pour la transition smooth du logo au contenu
+    const timer = setTimeout(() => {
+      setShowButton(true);
 
-    // Animation d'entrée du bouton avec GSAP
-    if (mainContainerRef.current) {
-      const button = mainContainerRef.current.querySelector('button');
-      if (button) {
-        gsap.fromTo(button,
-          {
-            opacity: 0,
-            y: 20,
-            scale: 0.9
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.6,
-            ease: "back.out(1.3)"
-          }
-        );
+      // Animation d'entrée du bouton avec GSAP (délai + animation fluide)
+      if (mainContainerRef.current) {
+        const button = mainContainerRef.current.querySelector('button');
+        if (button) {
+          gsap.fromTo(button,
+            {
+              opacity: 0,
+              y: 30,
+              scale: 0.85
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.8,
+              ease: "back.out(1.1)"
+            }
+          );
+        }
       }
-    }
+    }, 300); // Délai avant d'afficher le bouton pour permettre la transition smooth
+
+    return () => clearTimeout(timer);
   }, [initialLoadComplete, showButton, hasAnimationPlayed]);
 
   // LOGIQUE DE CHARGEMENT - exécutée après l'animation initiale
@@ -498,11 +503,13 @@ export default function LoadingScreen({
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-black/50 backdrop-blur-xl"
       style={{
         opacity: fadeOutOpacity,
-        transform: `scale(${scaleEffect})`,
+        transform: `scale(${scaleEffect}) translateZ(0)`,
+        backfaceVisibility: 'hidden',
+        perspective: 1000,
         filter: `blur(${blurEffect}px)`,
-        transition: isExiting ? 'none' : 'opacity 0.3s ease-out',
+        transition: isExiting ? 'none' : 'opacity 0.4s ease-out',
         pointerEvents: isExiting ? 'none' : 'auto',
-        willChange: 'opacity, transform, filter'
+        willChange: isExiting ? 'opacity, transform, filter' : 'auto'
       }}
     >
       {/* Background avec média */}
@@ -570,8 +577,6 @@ export default function LoadingScreen({
             <div ref={bigServoLogoRef} className="transform scale-150">
               <ServoLogo />
             </div>
-
-            <div className="loader"></div>
           </div>
         </div>
       )}
@@ -587,9 +592,12 @@ export default function LoadingScreen({
               backgroundColor: isExiting ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.3)',
               borderColor: isExiting ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)',
               opacity: isExiting ? 0.7 : 1,
-              transform: isExiting ? `scale(${0.95 + (1 - scaleEffect)})` : 'scale(1)',
+              transform: `scale(${0.95 + (1 - scaleEffect)}) translateZ(0)`,
+              backfaceVisibility: 'hidden',
+              perspective: 1000,
               backdropFilter: `blur(${isExiting ? Math.min(blurEffect / 2, 10) : 20}px)`,
-              transition: isExiting ? 'none' : 'all 0.3s ease-out'
+              willChange: 'opacity, transform, backdrop-filter',
+              transition: isExiting ? 'none' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             {/* Indicateurs décoratifs */}
@@ -687,9 +695,11 @@ export default function LoadingScreen({
                 borderRadius: '8px',
                 backgroundColor: isExiting ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.2)',
                 opacity: isExiting ? 0.2 : 1,
-                transform: isExiting ? 'translateY(30px) scale(0.95)' : 'translateY(0) scale(1)',
+                transform: `translateY(${isExiting ? '30px' : '0'}) scale(${isExiting ? 0.95 : 1}) translateZ(0)`,
+                backfaceVisibility: 'hidden',
                 backdropFilter: `blur(${isExiting ? Math.min(blurEffect / 3, 8) : 12}px)`,
-                transition: isExiting ? 'none' : 'all 0.3s ease-out'
+                willChange: isExiting ? 'transform, opacity' : 'auto',
+                transition: isExiting ? 'none' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               <div

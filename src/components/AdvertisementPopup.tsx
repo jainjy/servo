@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
-import { Video, Play, Pause, Volume2, VolumeX, Minimize2, ArrowRight } from 'lucide-react';
+import { Video, Play, Pause, Volume2, VolumeX, Minimize2, ArrowRight, Grid, List } from 'lucide-react';
 
 interface Advertisement {
   id: string;
@@ -17,72 +17,44 @@ interface Advertisement {
 interface Props {
   refreshMinutes?: number;
   displayDuration?: number;
+  listThreshold?: number;
 }
 
-const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDuration = 2 }) => {
-  const [ad, setAd] = useState<Advertisement | null>(null);
-  const [visible, setVisible] = useState(false);
+// Composant pour une publicité individuelle
+const SingleAdvertisement: React.FC<{
+  ad: Advertisement;
+  displayDuration: number;
+  index: number;
+  onClose: (id: string) => void;
+}> = ({ ad, displayDuration, index, onClose }) => {
+  const [visible, setVisible] = useState(true);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [videoProgress, setVideoProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(displayDuration * 60); // en secondes
+  const [timeLeft, setTimeLeft] = useState(displayDuration * 60);
   const videoRef = useRef<HTMLVideoElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const countdownRef = useRef<NodeJS.Timeout>();
 
-  // Fonction pour formater le temps restant
   const formatTimeLeft = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const fetchAdvertisements = async () => {
-    try {
-      const response = await api.get("/advertisements/active");
-      const data = response.data;
-
-      if (data.advertisements && data.advertisements.length > 0) {
-        const randomAd = data.advertisements[Math.floor(Math.random() * data.advertisements.length)];
-        setAd(randomAd);
-        setVisible(true);
-
-        // Réinitialiser l'état vidéo
-        setIsVideoPlaying(false);
-        setVideoProgress(0);
-        setIsMuted(true);
-        setIsMinimized(false);
-
-        // Si c'est une image, on programme la fermeture après displayDuration minutes
-        if (!isVideoAd(randomAd) && !isVideoUrl(randomAd.imageUrl)) {
-          timeoutRef.current = setTimeout(() => {
-            setVisible(false);
-          }, displayDuration * 60 * 1000);
-        }
-      } else {
-        console.warn("Aucune publicité active trouvée");
-        setVisible(false);
-      }
-    } catch (error) {
-      console.error("Erreur chargement publicité :", error);
-      setVisible(false);
-    }
+  const getFileExtension = (url: string) => {
+    return url.split('.').pop()?.toLowerCase();
   };
 
-  useEffect(() => {
-    fetchAdvertisements();
+  const isVideoUrl = (url: string) => {
+    const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi'];
+    const extension = getFileExtension(url);
+    return extension ? videoExtensions.includes(extension) : false;
+  };
 
-    const interval = setInterval(fetchAdvertisements, refreshMinutes * 60 * 1000);
-    return () => {
-      clearInterval(interval);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [refreshMinutes]);
+  const isVideoAd = (advertisement: Advertisement) => advertisement?.type === 'video';
 
-  // Lecture automatique de la vidéo
+  const currentAdIsVideo = ad ? (isVideoAd(ad) || isVideoUrl(ad.imageUrl)) : false;
+
   useEffect(() => {
     if (visible && ad && currentAdIsVideo && videoRef.current) {
       const playVideo = async () => {
@@ -97,27 +69,33 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
       const timer = setTimeout(playVideo, 300);
       return () => clearTimeout(timer);
     }
-  }, [visible, ad]);
+  }, [visible, ad, currentAdIsVideo]);
 
-  // Fonction pour déterminer si c'est une vidéo
-  const isVideoAd = (advertisement: Advertisement) => advertisement?.type === 'video';
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !currentAdIsVideo) return;
 
-  // Fonction pour obtenir l'extension du fichier
-  const getFileExtension = (url: string) => {
-    return url.split('.').pop()?.toLowerCase();
-  };
+    const handlePlay = () => setIsVideoPlaying(true);
+    const handlePause = () => setIsVideoPlaying(false);
+    const handleEnded = () => {
+      setIsVideoPlaying(false);
+      setTimeout(() => {
+        setVisible(false);
+        onClose(ad.id);
+      }, 2000);
+    };
 
-  // Fonction pour vérifier si l'URL est une vidéo
-  const isVideoUrl = (url: string) => {
-    const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi'];
-    const extension = getFileExtension(url);
-    return extension ? videoExtensions.includes(extension) : false;
-  };
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+    video.addEventListener('ended', handleEnded);
 
-  // Vérifier si l'annonce actuelle est une vidéo
-  const currentAdIsVideo = ad ? (isVideoAd(ad) || isVideoUrl(ad.imageUrl)) : false;
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+      video.removeEventListener('ended', handleEnded);
+    };
+  }, [currentAdIsVideo, ad.id, onClose]);
 
-  // Compte à rebours du minuteur
   useEffect(() => {
     if (visible && !currentAdIsVideo) {
       setTimeLeft(displayDuration * 60);
@@ -126,6 +104,7 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
         setTimeLeft(prev => {
           if (prev <= 1) {
             setVisible(false);
+            onClose(ad.id);
             return 0;
           }
           return prev - 1;
@@ -138,41 +117,8 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
         }
       };
     }
-  }, [visible, currentAdIsVideo, displayDuration]);
+  }, [visible, currentAdIsVideo, displayDuration, ad.id, onClose]);
 
-  // Gestion des événements vidéo
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !currentAdIsVideo) return;
-
-    const handleTimeUpdate = () => {
-      if (video.duration) {
-        setVideoProgress((video.currentTime / video.duration) * 100);
-      }
-    };
-
-    const handlePlay = () => setIsVideoPlaying(true);
-    const handlePause = () => setIsVideoPlaying(false);
-    const handleEnded = () => {
-      setIsVideoPlaying(false);
-      // Fermer le popup quand la vidéo se termine
-      setTimeout(() => setVisible(false), 10000);
-    };
-
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('play', handlePlay);
-    video.addEventListener('pause', handlePause);
-    video.addEventListener('ended', handleEnded);
-
-    return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('play', handlePlay);
-      video.removeEventListener('pause', handlePause);
-      video.removeEventListener('ended', handleEnded);
-    };
-  }, [currentAdIsVideo]);
-
-  // Gestion du clic sur la vidéo
   const handleVideoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!videoRef.current) return;
@@ -184,7 +130,6 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
     }
   };
 
-  // Gestion du son
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (videoRef.current) {
@@ -193,26 +138,19 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
     }
   };
 
-  // Minimiser la vidéo
-  const toggleMinimize = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsMinimized(!isMinimized);
-  };
-
   const handleClick = async () => {
-    if (ad) {
-      try {
-        await api.post(`/advertisements/${ad.id}/click`);
-      } catch (error) {
-        console.error("Erreur enregistrement clic :", error);
-      }
-
-      if (ad.targetUrl) {
-        window.open(ad.targetUrl, "_blank");
-      }
-
-      setVisible(false);
+    try {
+      await api.post(`/advertisements/${ad.id}/click`);
+    } catch (error) {
+      console.error("Erreur enregistrement clic :", error);
     }
+
+    if (ad.targetUrl) {
+      window.open(ad.targetUrl, "_blank");
+    }
+
+    setVisible(false);
+    onClose(ad.id);
   };
 
   const handleClose = () => {
@@ -220,13 +158,13 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
       clearTimeout(timeoutRef.current);
     }
     setVisible(false);
+    onClose(ad.id);
   };
 
   return (
     <AnimatePresence>
-      {visible && ad && (
+      {visible && (
         <motion.article
-          key="advertisement"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -236,9 +174,9 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
             stiffness: 250,
             duration: 0.6
           }}
-          className="relative w-full overflow-hidden min-h-[140px] max-w-7xl mx-auto rounded-2xl border border-slate-200 my-5 bg-white shadow-lg"
+          className="relative w-full overflow-hidden min-h-[140px] max-w-7xl mx-auto rounded-2xl border border-slate-200 my-3 bg-white shadow-lg"
         >
-          {/* Badge Publicité avec compteur */}
+          {/* Badge et contrôles */}
           <div className="absolute right-3 top-3 z-10 flex items-center space-x-2">
             <div className="relative">
               <div className="absolute inset-0 animate-ping opacity-20">
@@ -251,24 +189,24 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
               </span>
             </div>
             
-            {/* Compteur */}
-            <div className="flex items-center bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-medium">
-              <svg 
-                className="w-3 h-3 mr-1" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth="2" 
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>{formatTimeLeft(timeLeft)}</span>
-            </div>
-            {/* Bouton fermeture */}
+            {!currentAdIsVideo && (
+              <div className="flex items-center bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-medium">
+                <svg 
+                  className="w-3 h-3 mr-1" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth="2" 
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>{formatTimeLeft(timeLeft)}</span>
+              </div>
+            )}
             <button
               title="Fermer la publicité"
               onClick={handleClose}
@@ -291,7 +229,6 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
                     playsInline
                     loop={false}
                   />
-                  {/* Contrôles vidéo au survol */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <button
                       onClick={(e) => {
@@ -327,14 +264,12 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
                 {ad.description}
               </p>
               
-              {/* Indicateur de durée en bas */}
               <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
                 <div className="flex items-center text-xs text-gray-500">
                   <span>Visible pendant :</span>
                   <span className="font-medium ml-2">{displayDuration} min</span>
                 </div>
 
-                {/* Bouton CTA */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -346,10 +281,98 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3, displayDurati
                 </motion.button>
               </div>
             </div>
-
-            
           </div>
         </motion.article>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const AdvertisementPopup: React.FC<Props> = ({ 
+  refreshMinutes = 3, 
+  displayDuration = 2,
+  listThreshold = 2
+}) => {
+  const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
+  const [visibleAds, setVisibleAds] = useState<Set<string>>(new Set());
+  const [useListView, setUseListView] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  const fetchAdvertisements = async () => {
+    try {
+      const response = await api.get("/advertisements/active");
+      const data = response.data;
+
+      if (data.advertisements && data.advertisements.length > 0) {
+        setAdvertisements(data.advertisements);
+        setUseListView(data.advertisements.length > listThreshold);
+        
+        // Initialiser tous les ads comme visibles
+        const allAdIds = new Set<string>(data.advertisements.map(ad => ad.id));
+        setVisibleAds(allAdIds);
+        setVisible(true);
+      } else {
+        console.warn("Aucune publicité active trouvée");
+        setVisible(false);
+      }
+    } catch (error) {
+      console.error("Erreur chargement publicité :", error);
+      setVisible(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdvertisements();
+
+    const interval = setInterval(fetchAdvertisements, refreshMinutes * 60 * 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [refreshMinutes]);
+
+  const handleAdClose = (adId: string) => {
+    setVisibleAds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(adId);
+      if (newSet.size === 0) {
+        setVisible(false);
+      }
+      return newSet;
+    });
+  };
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <>
+          {useListView ? (
+            // Mode liste : afficher tous les AdvertisementPopup
+            <div className="w-full">
+              {advertisements.map((ad, index) => (
+                <SingleAdvertisement
+                  key={ad.id}
+                  ad={ad}
+                  displayDuration={displayDuration}
+                  index={index}
+                  onClose={handleAdClose}
+                />
+              ))}
+            </div>
+          ) : (
+            // Mode popup classique : afficher chaque publicité individuellement
+            <div className="w-full">
+              {advertisements.map((ad, index) => (
+                <SingleAdvertisement
+                  key={ad.id}
+                  ad={ad}
+                  displayDuration={displayDuration}
+                  index={index}
+                  onClose={handleAdClose}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </AnimatePresence>
   );
