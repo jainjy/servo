@@ -5,6 +5,7 @@ import PointDetailsModal from "../components/PointDetailsModal";
 import { MapPoint } from "../types/map";
 import { MapService } from "../services/mapService";
 import { useNavigate } from "react-router-dom";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 const MapPage: React.FC = () => {
   const [points, setPoints] = useState<MapPoint[]>([]);
@@ -31,7 +32,7 @@ const MapPage: React.FC = () => {
     const R = 6371; // Rayon de la Terre en km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
+    const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -48,7 +49,7 @@ const MapPage: React.FC = () => {
 
     setNearbyLoading(true);
     const [userLat, userLon] = userLocation;
-    
+
     // Filtrer les points à proximité (5km)
     const nearby = points.filter((point) => {
       const distance = calculateDistance(userLat, userLon, point.latitude, point.longitude);
@@ -166,15 +167,15 @@ const MapPage: React.FC = () => {
       setUserLocation(reunionCoords);
       setError("Impossible de déterminer votre position exacte. Recherche autour de la Réunion.");
       setGeoLoading(false);
-      
+
       // Zoom smooth vers Réunion
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('centerMap', { 
-          detail: { 
+        window.dispatchEvent(new CustomEvent('centerMap', {
+          detail: {
             location: reunionCoords,
             zoom: 12,
             smooth: true
-          } 
+          }
         }));
       }, 300);
     }, 15000); // 15 secondes
@@ -186,28 +187,28 @@ const MapPage: React.FC = () => {
         setUserLocation([latitude, longitude]);
         setGeoLoading(false);
         setError(null);
-        
+
         // Zoom smooth vers la position avec effet de transition
         setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('centerMap', { 
-            detail: { 
+          window.dispatchEvent(new CustomEvent('centerMap', {
+            detail: {
               location: [latitude, longitude],
               zoom: 16,
               smooth: true
-            } 
+            }
           }));
         }, 300);
       },
       (error) => {
         clearTimeout(timeout);
         console.error("Erreur de géolocalisation:", error);
-        
+
         // Fallback sur la Réunion
         const reunionCoords: [number, number] = [-21.1351, 55.2471];
         setUserLocation(reunionCoords);
-        
+
         let errorMessage = "Impossible d'obtenir votre position exacte. Recherche autour de la Réunion.";
-        
+
         // Messages d'erreur plus détaillés
         if (error.code === 1) {
           errorMessage = "Permission refusée. Recherche autour de la Réunion.";
@@ -216,18 +217,18 @@ const MapPage: React.FC = () => {
         } else if (error.code === 3) {
           errorMessage = "Délai d'attente dépassé. Recherche autour de la Réunion.";
         }
-        
+
         setError(errorMessage);
         setGeoLoading(false);
-        
+
         // Zoom smooth vers Réunion
         setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('centerMap', { 
-            detail: { 
+          window.dispatchEvent(new CustomEvent('centerMap', {
+            detail: {
               location: reunionCoords,
               zoom: 12,
               smooth: true
-            } 
+            }
           }));
         }, 300);
       },
@@ -295,6 +296,9 @@ const MapPage: React.FC = () => {
   return (
     <div className="px-8 pb-5 pt-28">
       {/* En-tête avec statistiques */}
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
         <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-[#ffffff]/60'></div>
         <img src="https://i.pinimg.com/1200x/01/2d/ea/012dea65a1f79da54266c118fe39e07e.jpg" className='h-full object-cover w-full' alt="" />

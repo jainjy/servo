@@ -24,6 +24,7 @@ import ResultatSearch from "../pages/ResultatSearch";
 import AdvancedSearchBar from "../components/AdvancedSearchBar";
 import Lottie from "lottie-react";
 import search from "@/assets/search.json";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 // Types pour TypeScript
 interface Service {
@@ -673,6 +674,15 @@ const ServicesPartnersPage = () => {
           </div>
         </div>
       </header>
+
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
+
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Barre de recherche toujours montée : évite le démontage lors de l'affichage des résultats */}
