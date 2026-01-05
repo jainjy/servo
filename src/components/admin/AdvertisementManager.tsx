@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   Card,
   CardContent,
@@ -55,7 +55,9 @@ import {
   AlertCircle,
   Home,
   Video,
-  Play
+  Play,
+  X,
+  FileVideo
 } from 'lucide-react'
 import { Textarea } from "@/components/ui/textarea"
 import { advertisementsAPI } from '@/lib/api'
@@ -74,6 +76,9 @@ const AdvertisementManager = () => {
     search: ''
   })
 
+  // Références pour les éléments vidéo
+  const videoPreviewRef = useRef(null)
+
   // Formulaire
   const [formData, setFormData] = useState({
     title: '',
@@ -91,6 +96,7 @@ const AdvertisementManager = () => {
   const [imagePreview, setImagePreview] = useState('')
   const [videoPreview, setVideoPreview] = useState('')
   const [dateError, setDateError] = useState('')
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
 
   // Charger les publicités
   const loadAdvertisements = async () => {
@@ -103,11 +109,9 @@ const AdvertisementManager = () => {
   
       const response = await advertisementsAPI.getAdvertisements(params);
       
-      // CORRECTION : Vérifier si response.data existe directement
       if (response.data && Array.isArray(response.data.advertisements)) {
         setAdvertisements(response.data.advertisements);
       } else if (response.data && response.data.success) {
-        // Fallback pour l'ancienne structure
         setAdvertisements(response.data.advertisements || []);
       } else {
         setAdvertisements([]);
@@ -143,6 +147,18 @@ const AdvertisementManager = () => {
     loadStats()
   }, [filters])
 
+  // Nettoyer les URLs d'aperçu lors du démontage
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+      if (videoPreview) {
+        URL.revokeObjectURL(videoPreview);
+      }
+    };
+  }, []);
+
   // Validation des dates
   const validateDates = (startDate, endDate) => {
     if (!startDate && !endDate) {
@@ -172,10 +188,16 @@ const AdvertisementManager = () => {
     // Réinitialiser les prévisualisations si le type change
     if (field === 'type') {
       if (value === 'video') {
-        setImagePreview('')
+        if (imagePreview) {
+          URL.revokeObjectURL(imagePreview);
+          setImagePreview('');
+        }
         setFormData(prev => ({ ...prev, image: null }))
       } else {
-        setVideoPreview('')
+        if (videoPreview) {
+          URL.revokeObjectURL(videoPreview);
+          setVideoPreview('');
+        }
         setFormData(prev => ({ ...prev, video: null }))
       }
     }
@@ -189,6 +211,7 @@ const AdvertisementManager = () => {
     }
   }
 
+  // Fonction pour gérer l'upload d'image
   const handleImageChange = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -202,12 +225,33 @@ const AdvertisementManager = () => {
         return
       }
       
+      // Validation du type de fichier
+      const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+      if (!imageTypes.includes(file.type)) {
+        toast({
+          title: "Erreur",
+          description: "Format d'image non supporté. Utilisez JPG, PNG, GIF ou WebP",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      // Nettoyer l'ancienne prévisualisation
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+      if (videoPreview) {
+        URL.revokeObjectURL(videoPreview);
+      }
+      
       setFormData(prev => ({ ...prev, image: file, video: null }))
       setImagePreview(URL.createObjectURL(file))
       setVideoPreview('')
+      setIsVideoPlaying(false)
     }
   }
 
+  // Fonction pour gérer l'upload de vidéo
   const handleVideoChange = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -222,23 +266,67 @@ const AdvertisementManager = () => {
       }
       
       // Validation du type de fichier
-      const videoTypes = ['video/mp4', 'video/webm', 'video/ogg']
+      const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo']
       if (!videoTypes.includes(file.type)) {
         toast({
           title: "Erreur",
-          description: "Format vidéo non supporté. Utilisez MP4, WebM ou OGG",
+          description: "Format vidéo non supporté. Utilisez MP4, WebM, OGG, AVI ou MOV",
           variant: "destructive"
         })
         return
       }
       
+      // Nettoyer l'ancienne prévisualisation
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+      if (videoPreview) {
+        URL.revokeObjectURL(videoPreview);
+      }
+      
       setFormData(prev => ({ ...prev, video: file, image: null }))
       setVideoPreview(URL.createObjectURL(file))
       setImagePreview('')
+      setIsVideoPlaying(false)
     }
   }
 
+  // Fonction pour supprimer le média sélectionné
+  const handleRemoveMedia = () => {
+    if (formData.type === 'video' && videoPreview) {
+      URL.revokeObjectURL(videoPreview);
+      setVideoPreview('');
+      setFormData(prev => ({ ...prev, video: null }));
+    } else if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview('');
+      setFormData(prev => ({ ...prev, image: null }));
+    }
+    setIsVideoPlaying(false);
+  };
+
+  // Fonction pour jouer/mettre en pause la vidéo
+  const toggleVideoPlay = () => {
+    if (videoPreviewRef.current) {
+      if (isVideoPlaying) {
+        videoPreviewRef.current.pause();
+      } else {
+        videoPreviewRef.current.play();
+      }
+      setIsVideoPlaying(!isVideoPlaying);
+    }
+  };
+
+  // Fonction pour réinitialiser le formulaire
   const resetForm = () => {
+    // Nettoyer les URLs d'aperçu
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    if (videoPreview) {
+      URL.revokeObjectURL(videoPreview);
+    }
+    
     setFormData({
       title: '',
       description: '',
@@ -255,9 +343,10 @@ const AdvertisementManager = () => {
     setImagePreview('')
     setVideoPreview('')
     setDateError('')
+    setIsVideoPlaying(false)
   }
 
-  // Créer une publicité - CORRIGÉ
+  // CORRECTION CRITIQUE : Créer une publicité avec le bon nom de champ pour le fichier
   const handleCreate = async (e) => {
     e.preventDefault()
     
@@ -266,7 +355,7 @@ const AdvertisementManager = () => {
       return
     }
 
-    // Validation des champs requis selon le type
+    // Validation des champs requis
     if (!formData.title) {
       toast({
         title: "Erreur",
@@ -305,12 +394,20 @@ const AdvertisementManager = () => {
         }
       })
 
-      // Ajouter le fichier approprié selon le type
+      // CORRECTION : Utiliser un nom de champ unique "media" pour le fichier
+      // Cela évite le problème "Unexpected field" avec Multer
       if (formData.type === 'video' && formData.video) {
-        formDataToSend.append('video', formData.video)
+        formDataToSend.append('media', formData.video)
       } else if ((formData.type === 'banner' || formData.type === 'popup') && formData.image) {
-        formDataToSend.append('image', formData.image)
+        formDataToSend.append('media', formData.image)
       }
+
+      console.log('FormData envoyé:', {
+        title: formData.title,
+        type: formData.type,
+        hasFile: !!(formData.video || formData.image),
+        fileType: formData.video ? 'video' : formData.image ? 'image' : 'none'
+      });
 
       const response = await advertisementsAPI.createAdvertisement(formDataToSend)
 
@@ -337,7 +434,7 @@ const AdvertisementManager = () => {
     }
   }
 
-  // Modifier une publicité - CORRIGÉ
+  // CORRECTION CRITIQUE : Modifier une publicité avec le bon nom de champ pour le fichier
   const handleEdit = async (e) => {
     e.preventDefault()
     
@@ -346,7 +443,7 @@ const AdvertisementManager = () => {
       return
     }
 
-    // Validation des champs requis selon le type
+    // Validation des champs requis
     if (!formData.title) {
       toast({
         title: "Erreur",
@@ -354,6 +451,25 @@ const AdvertisementManager = () => {
         variant: "destructive"
       })
       return
+    }
+
+    // Validation: Si on change le type, il faut un nouveau média
+    if (selectedAd && selectedAd.type !== formData.type) {
+      if (formData.type === 'video' && !formData.video) {
+        toast({
+          title: "Erreur",
+          description: "Vous avez changé le type en vidéo. Veuillez sélectionner une nouvelle vidéo.",
+          variant: "destructive"
+        })
+        return
+      } else if ((formData.type === 'banner' || formData.type === 'popup') && !formData.image) {
+        toast({
+          title: "Erreur",
+          description: "Vous avez changé le type en image. Veuillez sélectionner une nouvelle image.",
+          variant: "destructive"
+        })
+        return
+      }
     }
 
     try {
@@ -366,11 +482,12 @@ const AdvertisementManager = () => {
         }
       })
 
-      // Ajouter le fichier approprié selon le type seulement si un nouveau fichier est fourni
+      // CORRECTION : Utiliser un nom de champ unique "media" pour le fichier
+      // Cela évite le problème "Unexpected field" avec Multer
       if (formData.type === 'video' && formData.video) {
-        formDataToSend.append('video', formData.video)
+        formDataToSend.append('media', formData.video)
       } else if ((formData.type === 'banner' || formData.type === 'popup') && formData.image) {
-        formDataToSend.append('image', formData.image)
+        formDataToSend.append('media', formData.image)
       }
 
       const response = await advertisementsAPI.updateAdvertisement(selectedAd.id, formDataToSend)
@@ -443,8 +560,20 @@ const AdvertisementManager = () => {
       image: null,
       video: null
     })
-    setImagePreview(ad.type === 'video' ? '' : ad.imageUrl)
-    setVideoPreview(ad.type === 'video' ? ad.imageUrl : '')
+    
+    // Nettoyer les anciennes prévisualisations
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
+    
+    // Mettre à jour l'aperçu selon le type
+    if (ad.type === 'video') {
+      setVideoPreview(ad.imageUrl || '')
+      setImagePreview('')
+    } else {
+      setImagePreview(ad.imageUrl || '')
+      setVideoPreview('')
+    }
+    setIsVideoPlaying(false)
     setIsEditDialogOpen(true)
   }
 
@@ -543,6 +672,20 @@ const AdvertisementManager = () => {
     } catch {
       return url
     }
+  }
+
+  // Obtenir l'URL de l'aperçu pour une publicité
+  const getAdPreviewUrl = (ad) => {
+    if (!ad) return '';
+    
+    // Si c'est une nouvelle publicité en cours de création/modification
+    if (ad.id === selectedAd?.id) {
+      if (ad.type === 'video' && videoPreview) return videoPreview;
+      if (ad.type !== 'video' && imagePreview) return imagePreview;
+    }
+    
+    // Pour les publicités existantes
+    return ad.imageUrl || '';
   }
 
   // Filtrer les publicités selon les critères
@@ -680,7 +823,7 @@ const AdvertisementManager = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="type" className="text-[#8B4513]">Type de publicité</Label>
+                      <Label htmlFor="type" className="text-[#8B4513]">Type de publicité *</Label>
                       <Select 
                         value={formData.type} 
                         onValueChange={(value) => handleInputChange('type', value)}
@@ -689,14 +832,14 @@ const AdvertisementManager = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="border-[#D3D3D3]">
-                          <SelectItem value="banner">Bannière</SelectItem>
-                          <SelectItem value="popup">Popup</SelectItem>
+                          <SelectItem value="banner">Bannière (image)</SelectItem>
+                          <SelectItem value="popup">Popup (image)</SelectItem>
                           <SelectItem value="video">Vidéo</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="status" className="text-[#8B4513]">Statut</Label>
+                      <Label htmlFor="status" className="text-[#8B4513]">Statut *</Label>
                       <Select 
                         value={formData.status} 
                         onValueChange={(value) => handleInputChange('status', value)}
@@ -786,18 +929,34 @@ const AdvertisementManager = () => {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                     {formData.type === 'video' ? (
-                      <Video className="w-4 h-4" />
+                      <FileVideo className="w-4 h-4" />
                     ) : (
                       <ImageIcon className="w-4 h-4" />
                     )}
-                    {formData.type === 'video' ? 'Vidéo de la publicité' : 'Image de la publicité'}
+                    {formData.type === 'video' ? 'Vidéo de la publicité' : 'Image de la publicité'} *
                   </h3>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="media" className="text-[#8B4513]">
-                      {formData.type === 'video' ? 'Vidéo *' : 'Image *'}
-                    </Label>
-                    <div className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-6 text-center hover:border-[#556B2F] transition-colors">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="media" className="text-[#8B4513]">
+                        {formData.type === 'video' ? 'Sélectionner une vidéo' : 'Sélectionner une image'}
+                      </Label>
+                      {(imagePreview || videoPreview) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRemoveMedia}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-3"
+                        >
+                          <X className="w-3 h-3 mr-1" />
+                          Supprimer
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {/* Zone de dépôt de fichier */}
+                    <div className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-8 text-center hover:border-[#556B2F] transition-colors bg-[#6B8E23]/5">
                       <Input
                         id="media"
                         type="file"
@@ -805,57 +964,135 @@ const AdvertisementManager = () => {
                         onChange={formData.type === 'video' ? handleVideoChange : handleImageChange}
                         className="hidden"
                       />
-                      <Label htmlFor="media" className="cursor-pointer">
-                        <div className="flex flex-col items-center gap-2">
+                      <Label htmlFor="media" className="cursor-pointer block">
+                        <div className="flex flex-col items-center gap-3">
                           {formData.type === 'video' ? (
                             <>
-                              <Video className="w-8 h-8 text-[#8B4513]" />
-                              <span className="text-sm text-[#8B4513]">
-                                Cliquez pour uploader une vidéo
-                              </span>
-                              <span className="text-xs text-[#8B4513]/70">
-                                MP4, WebM, OGG jusqu'à 50MB
-                              </span>
+                              <div className="w-16 h-16 rounded-full bg-[#556B2F]/20 flex items-center justify-center">
+                                <Video className="w-8 h-8 text-[#8B4513]" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-[#8B4513]">
+                                  {videoPreview ? 'Remplacer la vidéo' : 'Cliquez pour uploader une vidéo'}
+                                </p>
+                                <p className="text-xs text-[#8B4513]/70 mt-1">
+                                  Formats supportés: MP4, WebM, OGG, AVI, MOV
+                                </p>
+                                <p className="text-xs text-[#8B4513]/70">
+                                  Taille maximum: 50MB
+                                </p>
+                              </div>
                             </>
                           ) : (
                             <>
-                              <Upload className="w-8 h-8 text-[#8B4513]" />
-                              <span className="text-sm text-[#8B4513]">
-                                Cliquez pour uploader une image
-                              </span>
-                              <span className="text-xs text-[#8B4513]/70">
-                                PNG, JPG, WEBP jusqu'à 5MB
-                              </span>
+                              <div className="w-16 h-16 rounded-full bg-[#556B2F]/20 flex items-center justify-center">
+                                <Upload className="w-8 h-8 text-[#8B4513]" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-[#8B4513]">
+                                  {imagePreview ? 'Remplacer l\'image' : 'Cliquez pour uploader une image'}
+                                </p>
+                                <p className="text-xs text-[#8B4513]/70 mt-1">
+                                  Formats supportés: JPG, PNG, GIF, WebP
+                                </p>
+                                <p className="text-xs text-[#8B4513]/70">
+                                  Taille maximum: 5MB
+                                </p>
+                              </div>
                             </>
                           )}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="mt-2 border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
+                            onClick={() => document.getElementById('media').click()}
+                          >
+                            {formData.type === 'video' ? 'Parcourir les vidéos...' : 'Parcourir les images...'}
+                          </Button>
                         </div>
                       </Label>
                     </div>
                     
-                    {/* Aperçu */}
+                    {/* Aperçu du média */}
                     {imagePreview && formData.type !== 'video' && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu :</p>
-                        <img 
-                          src={imagePreview} 
-                          alt="Aperçu" 
-                          className="max-h-40 rounded-lg object-cover border border-[#D3D3D3]"
-                        />
+                        <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu de l'image :</p>
+                        <div className="relative max-h-60 rounded-lg overflow-hidden border border-[#D3D3D3] group">
+                          <img 
+                            src={imagePreview} 
+                            alt="Aperçu de l'image" 
+                            className="w-full h-full object-contain max-h-60"
+                          />
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              onClick={handleRemoveMedia}
+                              className="h-8 w-8"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     )}
                     
+                    {/* Aperçu de la vidéo */}
                     {videoPreview && formData.type === 'video' && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu :</p>
-                        <div className="relative max-h-40 rounded-lg border border-[#D3D3D3] overflow-hidden">
+                        <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu de la vidéo :</p>
+                        <div className="relative max-h-60 rounded-lg overflow-hidden border border-[#D3D3D3] group">
                           <video 
+                            ref={videoPreviewRef}
                             src={videoPreview} 
-                            className="w-full h-full object-cover"
-                            controls
+                            className="w-full h-full object-contain max-h-60"
+                            controls={isVideoPlaying}
+                            onEnded={() => setIsVideoPlaying(false)}
                           />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                            <Play className="w-12 h-12 text-white" />
+                          {!isVideoPlaying && (
+                            <>
+                              <div className="absolute inset-0 bg-black/20" />
+                              <div 
+                                className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                                onClick={toggleVideoPlay}
+                              >
+                                <div className="bg-white/90 p-4 rounded-full hover:bg-white transition-colors shadow-lg">
+                                  <Play className="w-8 h-8 text-[#8B4513]" />
+                                </div>
+                              </div>
+                            </>
+                          )}
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                onClick={toggleVideoPlay}
+                                className="h-8 w-8 bg-white/90 hover:bg-white"
+                              >
+                                {isVideoPlaying ? (
+                                  <X className="w-4 h-4" />
+                                ) : (
+                                  <Play className="w-4 h-4" />
+                                )}
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                onClick={handleRemoveMedia}
+                                className="h-8 w-8"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
+                        </div>
+                        <div className="mt-2 flex items-center gap-2 text-xs text-[#8B4513]/70">
+                          <Video className="w-3 h-3" />
+                          <span>Cliquez sur le bouton play pour prévisualiser la vidéo</span>
                         </div>
                       </div>
                     )}
@@ -876,7 +1113,7 @@ const AdvertisementManager = () => {
                   </Button>
                   <Button 
                     type="submit" 
-                    disabled={loading || !!dateError}
+                    disabled={loading || !!dateError || (formData.type === 'video' ? !formData.video : !formData.image)}
                     className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                   >
                     {loading ? (
@@ -1072,18 +1309,34 @@ const AdvertisementManager = () => {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {ad.type === 'video' ? (
-                            <div className="relative w-12 h-12 rounded-lg border border-[#D3D3D3] overflow-hidden bg-[#6B8E23]/10 flex items-center justify-center">
-                              <Video className="w-6 h-6 " />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                <Play className="w-4 h-4 text-white" />
+                            <div className="relative w-16 h-16 rounded-lg border border-[#D3D3D3] overflow-hidden bg-gradient-to-br from-[#556B2F]/20 to-[#6B8E23]/10 flex items-center justify-center">
+                              <div className="relative w-full h-full group">
+                                <video
+                                  src={getAdPreviewUrl(ad)}
+                                  className="w-full h-full object-cover"
+                                  preload="metadata"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="bg-white/90 p-2 rounded-full cursor-pointer">
+                                    <Play className="w-4 h-4 text-[#8B4513]" />
+                                  </div>
+                                </div>
+                                <div className="absolute top-1 right-1">
+                                  <Video className="w-3 h-3 text-white bg-black/50 p-0.5 rounded" />
+                                </div>
                               </div>
                             </div>
                           ) : (
-                            <img 
-                              src={ad.imageUrl} 
-                              alt={ad.title}
-                              className="w-12 h-12 rounded-lg object-cover border border-[#D3D3D3]"
-                            />
+                            <div className="relative w-16 h-16">
+                              <img 
+                                src={getAdPreviewUrl(ad)} 
+                                alt={ad.title}
+                                className="w-full h-full rounded-lg object-cover border border-[#D3D3D3]"
+                                onError={(e) => {
+                                  e.target.src = `https://via.placeholder.com/64x64/556B2F/FFFFFF?text=${encodeURIComponent(ad.title.charAt(0))}`;
+                                }}
+                              />
+                            </div>
                           )}
                           <div className="min-w-0 flex-1">
                             <div className="font-semibold truncate flex items-center gap-2 ">
@@ -1269,7 +1522,7 @@ const AdvertisementManager = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-type" className="text-[#8B4513]">Type de publicité</Label>
+                  <Label htmlFor="edit-type" className="text-[#8B4513]">Type de publicité *</Label>
                   <Select 
                     value={formData.type} 
                     onValueChange={(value) => handleInputChange('type', value)}
@@ -1278,14 +1531,14 @@ const AdvertisementManager = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="border-[#D3D3D3]">
-                      <SelectItem value="banner">Bannière</SelectItem>
-                      <SelectItem value="popup">Popup</SelectItem>
+                      <SelectItem value="banner">Bannière (image)</SelectItem>
+                      <SelectItem value="popup">Popup (image)</SelectItem>
                       <SelectItem value="video">Vidéo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-status" className="text-[#8B4513]">Statut</Label>
+                  <Label htmlFor="edit-status" className="text-[#8B4513]">Statut *</Label>
                   <Select 
                     value={formData.status} 
                     onValueChange={(value) => handleInputChange('status', value)}
@@ -1375,7 +1628,7 @@ const AdvertisementManager = () => {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                 {formData.type === 'video' ? (
-                  <Video className="w-4 h-4" />
+                  <FileVideo className="w-4 h-4" />
                 ) : (
                   <ImageIcon className="w-4 h-4" />
                 )}
@@ -1383,10 +1636,26 @@ const AdvertisementManager = () => {
               </h3>
               
               <div className="space-y-2">
-                <Label htmlFor="edit-media" className="text-[#8B4513]">
-                  {formData.type === 'video' ? 'Vidéo' : 'Image'}
-                </Label>
-                <div className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-6 text-center hover:border-[#556B2F] transition-colors">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="edit-media" className="text-[#8B4513]">
+                    {formData.type === 'video' ? 'Sélectionner une vidéo' : 'Sélectionner une image'}
+                  </Label>
+                  {(imagePreview || videoPreview) && (formData.video || formData.image) && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemoveMedia}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-3"
+                    >
+                      <X className="w-3 h-3 mr-1" />
+                      Supprimer
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Zone de dépôt de fichier */}
+                <div className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-8 text-center hover:border-[#556B2F] transition-colors bg-[#6B8E23]/5">
                   <Input
                     id="edit-media"
                     type="file"
@@ -1394,55 +1663,166 @@ const AdvertisementManager = () => {
                     onChange={formData.type === 'video' ? handleVideoChange : handleImageChange}
                     className="hidden"
                   />
-                  <Label htmlFor="edit-media" className="cursor-pointer">
-                    <div className="flex flex-col items-center gap-2">
+                  <Label htmlFor="edit-media" className="cursor-pointer block">
+                    <div className="flex flex-col items-center gap-3">
                       {formData.type === 'video' ? (
                         <>
-                          <Video className="w-8 h-8 text-[#8B4513]" />
-                          <span className="text-sm text-[#8B4513]">
-                            Cliquez pour changer la vidéo
-                          </span>
-                          <span className="text-xs text-[#8B4513]/70">
-                            MP4, WebM, OGG jusqu'à 50MB
-                          </span>
+                          <div className="w-16 h-16 rounded-full bg-[#556B2F]/20 flex items-center justify-center">
+                            <Video className="w-8 h-8 text-[#8B4513]" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-[#8B4513]">
+                              {videoPreview ? 'Remplacer la vidéo' : selectedAd?.type === 'video' ? 'Conserver la vidéo actuelle ou en uploader une nouvelle' : 'Sélectionner une vidéo'}
+                            </p>
+                            <p className="text-xs text-[#8B4513]/70 mt-1">
+                              Formats supportés: MP4, WebM, OGG, AVI, MOV
+                            </p>
+                            <p className="text-xs text-[#8B4513]/70">
+                              Taille maximum: 50MB
+                            </p>
+                          </div>
                         </>
                       ) : (
                         <>
-                          <Upload className="w-8 h-8 text-[#8B4513]" />
-                          <span className="text-sm text-[#8B4513]">
-                            Cliquez pour changer l'image
-                          </span>
-                          <span className="text-xs text-[#8B4513]/70">
-                            PNG, JPG, WEBP jusqu'à 5MB
-                          </span>
+                          <div className="w-16 h-16 rounded-full bg-[#556B2F]/20 flex items-center justify-center">
+                            <Upload className="w-8 h-8 text-[#8B4513]" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-[#8B4513]">
+                              {imagePreview ? 'Remplacer l\'image' : selectedAd?.type !== 'video' ? 'Conserver l\'image actuelle ou en uploader une nouvelle' : 'Sélectionner une image'}
+                            </p>
+                            <p className="text-xs text-[#8B4513]/70 mt-1">
+                              Formats supportés: JPG, PNG, GIF, WebP
+                            </p>
+                            <p className="text-xs text-[#8B4513]/70">
+                              Taille maximum: 5MB
+                            </p>
+                          </div>
                         </>
                       )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="mt-2 border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
+                        onClick={() => document.getElementById('edit-media').click()}
+                      >
+                        {formData.type === 'video' ? 'Parcourir les vidéos...' : 'Parcourir les images...'}
+                      </Button>
                     </div>
                   </Label>
                 </div>
                 
-                {/* Aperçu actuel */}
-                {(imagePreview || videoPreview) && (
+                {/* Aperçu du média */}
+                {imagePreview && formData.type !== 'video' && (
                   <div className="mt-4">
-                    <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu actuel :</p>
-                    {formData.type === 'video' && videoPreview ? (
-                      <div className="relative max-h-40 rounded-lg border border-[#D3D3D3] overflow-hidden">
-                        <video 
-                          src={videoPreview} 
-                          className="w-full h-full object-cover"
-                          controls
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <Play className="w-12 h-12 text-white" />
-                        </div>
-                      </div>
-                    ) : formData.type !== 'video' && imagePreview ? (
+                    <p className="text-sm font-medium mb-2 text-[#8B4513]">
+                      {formData.image ? 'Nouvel aperçu' : 'Aperçu actuel'} :
+                    </p>
+                    <div className="relative max-h-60 rounded-lg overflow-hidden border border-[#D3D3D3] group">
                       <img 
                         src={imagePreview} 
                         alt="Aperçu" 
-                        className="max-h-40 rounded-lg object-cover border border-[#D3D3D3]"
+                        className="w-full h-full object-contain max-h-60"
                       />
-                    ) : null}
+                      {formData.image && (
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={handleRemoveMedia}
+                            className="h-8 w-8"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Aperçu de la vidéo */}
+                {videoPreview && formData.type === 'video' && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2 text-[#8B4513]">
+                      {formData.video ? 'Nouvel aperçu' : 'Aperçu actuel'} :
+                    </p>
+                    <div className="relative max-h-60 rounded-lg overflow-hidden border border-[#D3D3D3] group">
+                      <video 
+                        ref={videoPreviewRef}
+                        src={videoPreview} 
+                        className="w-full h-full object-contain max-h-60"
+                        controls={isVideoPlaying}
+                        onEnded={() => setIsVideoPlaying(false)}
+                      />
+                      {!isVideoPlaying && (
+                        <>
+                          <div className="absolute inset-0 bg-black/20" />
+                          <div 
+                            className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                            onClick={toggleVideoPlay}
+                          >
+                            <div className="bg-white/90 p-4 rounded-full hover:bg-white transition-colors shadow-lg">
+                              <Play className="w-8 h-8 text-[#8B4513]" />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {formData.video && (
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="icon"
+                              onClick={toggleVideoPlay}
+                              className="h-8 w-8 bg-white/90 hover:bg-white"
+                            >
+                              {isVideoPlaying ? (
+                                <X className="w-4 h-4" />
+                              ) : (
+                                <Play className="w-4 h-4" />
+                              )}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              onClick={handleRemoveMedia}
+                              className="h-8 w-8"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {formData.video && (
+                      <div className="mt-2 flex items-center gap-2 text-xs text-[#8B4513]/70">
+                        <Video className="w-3 h-3" />
+                        <span>Cliquez sur le bouton play pour prévisualiser la vidéo</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Message d'information */}
+                {!formData.video && !formData.image && selectedAd && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-blue-800">
+                        <p className="font-medium">Information</p>
+                        <p className="mt-1">
+                          Si vous ne sélectionnez pas de nouveau média, le média actuel sera conservé.
+                          {selectedAd.type !== formData.type && (
+                            <span className="block mt-1 text-red-600 font-medium">
+                              ⚠️ Attention : Vous avez changé le type de publicité. Vous devez sélectionner un nouveau média.
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
