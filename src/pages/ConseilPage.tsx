@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { conseilService } from "@/services/conseilService";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 // Mappage des icônes
 const iconMap = {
@@ -316,15 +317,14 @@ const ConseilPage = () => {
         const expertsData = expertsResponse.value?.data || [];
         if (expertsResponse.value?.success && expertsData.length > 0) {
           console.log(`👨‍💼 Experts reçus: ${expertsData.length}`);
-          
+
           const formattedExperts = expertsData.map(
             (expert: any, index: number) => {
               // DÉTERMINER LE NOM
               let name = expert.name;
               if (!name && (expert.firstName || expert.lastName)) {
-                name = `${expert.firstName || ""} ${
-                  expert.lastName || ""
-                }`.trim();
+                name = `${expert.firstName || ""} ${expert.lastName || ""
+                  }`.trim();
               }
               if (!name) {
                 name =
@@ -365,7 +365,7 @@ const ConseilPage = () => {
                   const joinDate = new Date(expert.createdAt);
                   const years = Math.floor(
                     (now.getTime() - joinDate.getTime()) /
-                      (1000 * 60 * 60 * 24 * 365)
+                    (1000 * 60 * 60 * 24 * 365)
                   );
                   if (years > 10) experience = "Plus de 10 ans d'expérience";
                   else if (years > 5) experience = "5-10 ans d'expérience";
@@ -538,8 +538,8 @@ const ConseilPage = () => {
                 typeof etape.details === "string"
                   ? etape.details.split(", ")
                   : Array.isArray(etape.details)
-                  ? etape.details
-                  : [],
+                    ? etape.details
+                    : [],
             }))
           );
         } else {
@@ -565,7 +565,7 @@ const ConseilPage = () => {
     } catch (error) {
       console.error("❌ Erreur lors du chargement des données:", error);
       setDataError("Impossible de charger les données. Veuillez réessayer.");
-      
+
       // Initialiser tous les tableaux à vide
       setConseilTypes([]);
       setConseillers([]);
@@ -573,7 +573,7 @@ const ConseilPage = () => {
       setStats([]);
       setProcessusConseil([]);
       setAvantages([]);
-      
+
       toast.error("Erreur lors du chargement des données");
     } finally {
       setIsDataLoading(false);
@@ -916,6 +916,14 @@ const ConseilPage = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       {/* Hero Section - Simplifiée */}
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
+
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <section className="relative py-20 bg-slate-900 text-white overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-40"
@@ -1167,13 +1175,13 @@ const ConseilPage = () => {
                     style={
                       activeCategory === category.value
                         ? {
-                            backgroundColor: category.color,
-                            color: colors.lightBg,
-                          }
+                          backgroundColor: category.color,
+                          color: colors.lightBg,
+                        }
                         : {
-                            borderColor: colors.separator,
-                            color: colors.textPrimary,
-                          }
+                          borderColor: colors.separator,
+                          color: colors.textPrimary,
+                        }
                     }
                     onClick={() => setActiveCategory(category.value)}
                   >
@@ -1183,11 +1191,11 @@ const ConseilPage = () => {
                       style={
                         activeCategory === category.value
                           ? {
-                              backgroundColor: colors.lightBg + "20",
-                            }
+                            backgroundColor: colors.lightBg + "20",
+                          }
                           : {
-                              backgroundColor: colors.separator + "40",
-                            }
+                            backgroundColor: colors.separator + "40",
+                          }
                       }
                     >
                       {category.count}
@@ -1229,9 +1237,8 @@ const ConseilPage = () => {
 
                     <motion.div variants={cardHoverVariants} className="h-full">
                       <Card
-                        className={`p-6 h-full rounded-2xl cursor-pointer transition-all duration-500 ${
-                          selectedType === type.id ? "ring-2 ring-offset-2" : ""
-                        }`}
+                        className={`p-6 h-full rounded-2xl cursor-pointer transition-all duration-500 ${selectedType === type.id ? "ring-2 ring-offset-2" : ""
+                          }`}
                         style={{
                           borderColor:
                             selectedType === type.id
@@ -1242,9 +1249,8 @@ const ConseilPage = () => {
                         }}
                       >
                         <div
-                          className={`w-14 h-14 mb-4 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                            selectedType === type.id ? "scale-110" : ""
-                          }`}
+                          className={`w-14 h-14 mb-4 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedType === type.id ? "scale-110" : ""
+                            }`}
                           style={{
                             backgroundColor:
                               selectedType === type.id
@@ -1253,9 +1259,8 @@ const ConseilPage = () => {
                           }}
                         >
                           <IconComponent
-                            className={`h-6 w-6 transition-all duration-300 ${
-                              selectedType === type.id ? "scale-110" : ""
-                            }`}
+                            className={`h-6 w-6 transition-all duration-300 ${selectedType === type.id ? "scale-110" : ""
+                              }`}
                             style={{
                               color:
                                 selectedType === type.id
@@ -1327,14 +1332,14 @@ const ConseilPage = () => {
                           style={
                             selectedType === type.id
                               ? {
-                                  backgroundColor: type.color,
-                                  color: colors.lightBg,
-                                  borderColor: type.color,
-                                }
+                                backgroundColor: type.color,
+                                color: colors.lightBg,
+                                borderColor: type.color,
+                              }
                               : {
-                                  borderColor: type.color,
-                                  color: type.color,
-                                }
+                                borderColor: type.color,
+                                color: type.color,
+                              }
                           }
                           onClick={() => handleTypeSelect(type)}
                         >
@@ -1455,19 +1460,18 @@ const ConseilPage = () => {
                     >
                       {/* Badge disponibilité */}
                       <div
-                        className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 ${
-                          conseiller.disponibilite === "disponible"
+                        className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 ${conseiller.disponibilite === "disponible"
                             ? "bg-green-100 text-green-800 border border-green-200"
                             : conseiller.disponibilite === "limitee"
-                            ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                            : "bg-red-100 text-red-800 border border-red-200"
-                        }`}
+                              ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                              : "bg-red-100 text-red-800 border border-red-200"
+                          }`}
                       >
                         {conseiller.disponibilite === "disponible"
                           ? "Disponible"
                           : conseiller.disponibilite === "limitee"
-                          ? "Limité"
-                          : "Complet"}
+                            ? "Limité"
+                            : "Complet"}
                       </div>
 
                       {/* Avatar de l'expert */}

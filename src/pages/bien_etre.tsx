@@ -9,6 +9,7 @@ import Soin from "./Soin";
 import Therapeute from "./Therapeute";
 import MedecinesNaturelles from "./MedecineNaturelle";
 import HuilesEssentielles from "./HuilesEssentielles";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -112,7 +113,13 @@ const BienEtre = () => {
 
   return (
     <div className="font-sans text-foreground min-h-screen bg-background">
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
 
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       {/* HERO - Toujours visible */}
       <section
         className="relative h-80 py-16 lg:py-20 text-center text-white overflow-hidden"
@@ -126,7 +133,7 @@ const BienEtre = () => {
         <div className="container mx-auto px-4 relative z-10  h-full flex flex-col justify-center">
           <SlideIn direction="up">
             <h1 className="text-4xl sm:text-5xl  lg:text-6xl font-extrabold mb-4 leading-tight" style={{ color: '#8B4513' }}>
-             Santé & Bien-Être 
+              Santé & Bien-Être
             </h1>
           </SlideIn>
           <SlideIn direction="up" delay={200}>
@@ -148,8 +155,8 @@ const BienEtre = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`group relative flex items-center gap-3 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 overflow-hidden flex-shrink-0 ${activeTab === tab.id
-                        ? 'bg-logo text-white shadow-md'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60'
+                      ? 'bg-logo text-white shadow-md'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60'
                       }`}
                   >
                     {activeTab === tab.id && (
@@ -200,19 +207,19 @@ const BienEtre = () => {
             {activeTab === 'Nutrition' && (
               <Nutrition />
             )}
-            
+
             {activeTab === 'Soin' && (
               <Soin />
             )}
-            
+
             {activeTab === 'Therapeute' && (
               <Therapeute />
             )}
-            
+
             {activeTab === 'HuilesEssentielles' && (
               <HuilesEssentielles />
             )}
-            
+
             {activeTab === 'MedecinesNaturelles' && (
               <MedecinesNaturelles />
             )}

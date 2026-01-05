@@ -39,6 +39,7 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 import MateriauxTravauxSection from "./MateriauxTravauxSection";
+import AdvertisementPopup from "./AdvertisementPopup";
 
 // Images de fond pour chaque catégorie
 const backgroundImages = {
@@ -1059,9 +1060,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
     return (
       <button
-        className={`${baseClasses} ${
-          isSelected ? selectedClasses : unselectedClasses
-        } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+        className={`${baseClasses} ${isSelected ? selectedClasses : unselectedClasses
+          } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
         onClick={onClick}
         disabled={disabled}
       >
@@ -1108,6 +1108,14 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   return (
     <>
       <section id={currentCategory.sectionId} className="relative min-h-screen">
+        {/* Advertisement Popup - Absolute Position */}
+        <div className="absolute top-12 left-4 right-4 z-50">
+          <AdvertisementPopup />
+        </div>
+
+        <div className="fixed w-1/2 bottom-0 right-4 z-50">
+          <AdvertisementPopup />
+        </div>
         <div className="absolute inset-0 -z-20 overflow-hidden h-80 w-full">
           <div className="bg-black/50 absolute w-full h-full backdrop-blur-sm "></div>
           <img
@@ -1269,13 +1277,11 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
                     {/* Bouton TOUS */}
                     <button
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${
-                        selectedType === "TOUS"
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${selectedType === "TOUS"
                           ? "bg-[#556B2F] text-white border-transparent shadow-lg scale-105"
                           : "bg-white text-gray-700 border-[#D3D3D3] hover:border-[#6B8E23] hover:text-[#6B8E23] hover:shadow-md"
-                      } ${
-                        isLoadingServices ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                        } ${isLoadingServices ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       onClick={() => setSelectedType("TOUS")}
                       disabled={isLoadingServices}
                     >
@@ -1286,15 +1292,13 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                     {servicesCategorie?.services?.slice(0, 4).map((type) => (
                       <button
                         key={type.id}
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${
-                          selectedType === type.libelle
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${selectedType === type.libelle
                             ? "bg-[#556B2F] text-white border-transparent shadow-lg scale-105"
                             : "bg-white text-gray-700 border-[#D3D3D3] hover:border-[#6B8E23] hover:text-[#6B8E23] hover:shadow-md"
-                        } ${
-                          isLoadingServices
+                          } ${isLoadingServices
                             ? "opacity-50 cursor-not-allowed"
                             : ""
-                        }`}
+                          }`}
                         onClick={() => setSelectedType(type.libelle)}
                         disabled={isLoadingServices}
                       >
@@ -1347,11 +1351,10 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                           <div className="flex flex-wrap gap-2">
                             {/* Bouton TOUS dans le modal */}
                             <button
-                              className={`inline-flex items-center px-3 py-2 rounded-lg text-sm border transition-all duration-200 ${
-                                selectedTypes.includes("TOUS")
+                              className={`inline-flex items-center px-3 py-2 rounded-lg text-sm border transition-all duration-200 ${selectedTypes.includes("TOUS")
                                   ? "bg-[#556B2F] text-white border-[#6B8E23] shadow-lg"
                                   : "bg-gray-50 text-gray-700 border-[#D3D3D3] hover:border-[#6B8E23] hover:text-[#6B8E23]"
-                              }`}
+                                }`}
                               onClick={() => handleToggleType("TOUS")}
                             >
                               TOUS
@@ -1361,11 +1364,10 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                             {servicesCategorie?.services?.map((type) => (
                               <button
                                 key={type.id}
-                                className={`inline-flex items-center px-3 py-2 rounded-full text-sm border transition-all duration-200 ${
-                                  selectedTypes.includes(type.libelle)
+                                className={`inline-flex items-center px-3 py-2 rounded-full text-sm border transition-all duration-200 ${selectedTypes.includes(type.libelle)
                                     ? "bg-[#6B8E23] text-white border-[#556B2F] shadow-lg"
                                     : "text-gray-700 border-[#D3D3D3] hover:border-[#556B2F] hover:text-[#556B2F]"
-                                }`}
+                                  }`}
                                 onClick={() => handleToggleType(type.libelle)}
                               >
                                 {type.libelle}
@@ -1389,11 +1391,10 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                           <div className="flex gap-3">
                             <button
                               onClick={handleApplySelection}
-                              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                selectedTypes.length > 0
+                              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${selectedTypes.length > 0
                                   ? "bg-[#556B2F] text-white hover:bg-[#6B8E23] shadow-lg"
                                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                              }`}
+                                }`}
                               disabled={selectedTypes.length === 0}
                             >
                               Appliquer
