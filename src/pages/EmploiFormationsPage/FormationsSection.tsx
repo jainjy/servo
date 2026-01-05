@@ -63,6 +63,18 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { usePublicFormations } from "@/hooks/usePublicFormations";
 
+  import { 
+  FaLaptop, 
+  FaUserTie, 
+  FaChartLine, 
+  FaBuilding,
+  FaHeartbeat,
+  FaMoneyBillAlt,
+  FaGlobeAmericas,
+  FaTools,
+  FaBook 
+} from 'react-icons/fa';
+
 const FormationsSection = ({
   loading,
   savedItems,
@@ -326,20 +338,22 @@ const { postuler, isLoading } = useCandidatures();
     { label: "Taux de réussite", value: "94%", icon: Star },
   ];
 
-  const getCategoryIcon = (category) => {
-    const icons = {
-      'Informatique & Numérique': '💻',
-      'Management & Leadership': '👔',
-      'Commerce & Marketing': '📈',
-      'Bâtiment & Construction': '🏗️',
-      'Santé & Bien-être': '🏥',
-      'Comptabilité & Finance': '💰',
-      'Langues étrangères': '🌐',
-      'Artisanat & Métiers': '🛠️',
-    };
-    return icons[category] || '📚';
-  };
 
+
+const getCategoryIcon = (category) => {
+  const icons = {
+    'Informatique & Numérique': FaLaptop,
+    'Management & Leadership': FaUserTie,
+    'Commerce & Marketing': FaChartLine,
+    'Bâtiment & Construction': FaBuilding,
+    'Santé & Bien-être': FaHeartbeat,
+    'Comptabilité & Finance': FaMoneyBillAlt,
+    'Langues étrangères': FaGlobeAmericas,
+    'Artisanat & Métiers': FaTools,
+  };
+  
+  return icons[category] || FaBook;
+};
   return (
     <>
       {/* Search Bar */}
@@ -575,8 +589,11 @@ const { postuler, isLoading } = useCandidatures();
                             {/* Formation Image/Logo */}
                             <div className="relative w-full md:w-48 h-48 bg-gradient-to-br from-[#556B2F] to-[#6B8E23] rounded-lg flex items-center justify-center">
                               <div className="text-4xl">
-                                {getCategoryIcon(formation.category)}
-                              </div>
+  {React.createElement(getCategoryIcon(formation.category), {
+    className: "text-white",
+    size: 40  // Augmentez la taille pour le text-4xl
+  })}
+</div>
                               <Button
                                 size="sm"
                                 variant="ghost"

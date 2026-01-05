@@ -94,6 +94,8 @@ const candidatureStatuses = [
 export default function GestionFormationsPage() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+    const [pageLoading, setPageLoading] = useState(true);
   
   const {
     formations,
@@ -255,50 +257,69 @@ for (const token of tokens) {
   }, [searchTerm]);
 
   // Load data on mount and when filters change
+   // Load data on mount - UN SEUL CHARGEMENT
   useEffect(() => {
-    const loadDataAsync = async () => {
-      if (user && !authLoading && !dataLoaded) {
-        try {
-          const token = localStorage.getItem('auth-token') || 
-                localStorage.getItem('token') || 
-                localStorage.getItem('jwt-token');
-  
-          console.log('🔑 Token trouvé:', token);
-          if (!token) {
-            setApiError('Veuillez vous connecter');
-            navigate('/login');
-            return;
-          }
-          
-          // Charger les stats
-          await fetchStats();
-          
-          // Charger les formations
-          await fetchFormations({
+    const loadInitialData = async () => {
+      // Si pas encore connecté, attendre
+      if (authLoading) return;
+      
+      // Si pas d'utilisateur, rediriger
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      // Si pas le bon rôle, rediriger
+      if (user.role !== 'professional' && user.role !== 'admin') {
+        navigate('/unauthorized');
+        return;
+      }
+
+      try {
+        setPageLoading(true);
+        
+        // Vérifier le token
+        const token = localStorage.getItem('auth-token') || 
+                      localStorage.getItem('token') || 
+                      localStorage.getItem('jwt-token');
+        
+        if (!token) {
+          setApiError('Veuillez vous connecter');
+          navigate('/login');
+          return;
+        }
+        
+        console.log('🚀 Début du chargement des données...');
+        
+        // Charger les stats ET les formations en parallèle
+        await Promise.all([
+          fetchStats(),
+          fetchFormations({
             search: debouncedSearch,
             status: statusFilter,
             category: categoryFilter,
             page: 1
-          });
-          
-          setDataLoaded(true);
-        } catch (err) {
-          console.error("Erreur initiale:", err);
-          setApiError(err.message || "Erreur lors du chargement des données");
-          
-          // Redirection si erreur d'authentification
-          if (err.message.includes('authentification') || err.message.includes('Session')) {
-            setTimeout(() => {
-              navigate('/login');
-            }, 2000);
-          }
+          })
+        ]);
+        
+        console.log('✅ Données chargées avec succès');
+        setDataLoaded(true);
+        setApiError("");
+        
+      } catch (err) {
+        console.error("❌ Erreur lors du chargement:", err);
+        setApiError(err.message || "Erreur lors du chargement des données");
+        
+        if (err.message.includes('authentification') || err.message.includes('Session')) {
+          setTimeout(() => navigate('/login'), 1500);
         }
+      } finally {
+        setPageLoading(false);
       }
     };
 
-    loadDataAsync();
-  }, [user, authLoading, navigate, debouncedSearch, statusFilter, categoryFilter, fetchStats, fetchFormations]);
-
+    loadInitialData();
+  }, [authLoading, user, navigate]); // Seulement ces dépendances
   useEffect(() => {
     if (dataLoaded) {
       handleSearch();
