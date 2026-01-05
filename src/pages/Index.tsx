@@ -102,6 +102,9 @@ const Index = () => {
         style={{ backgroundColor: colors["light-bg"] }}
       >
         <Suspense fallback={<LoadingFallback />}>
+          <div className="fixed w-1/2 bottom-0 right-4 z-50">
+            <AdvertisementPopup />
+          </div>
           <Hero />
           <ServiceCards />
           <AdvertisementPopup />
