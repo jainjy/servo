@@ -103,7 +103,11 @@ const Index = () => {
       >
         <Suspense fallback={<LoadingFallback />}>
           <div className="fixed w-1/2 bottom-0 right-4 z-50">
-            <AdvertisementPopup />
+            <AdvertisementPopup
+              refreshMinutes={10}           // Rafraîchir toutes les 3 min
+              displayDuration={2}          // Affichage de 2 min pour les images
+              listThreshold={2}            // Passer en mode liste à partir de 3 pub
+            />
           </div>
           <Hero />
           <ServiceCards />
