@@ -26,6 +26,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import TourismNavigation from "@/components/TourismNavigation";
 
 // Interface pour les interviews
 interface Interview {
@@ -301,7 +302,7 @@ const Entrepreneuriat = () => {
     <div className="min-h-screen bg-gradient-to-b from-white via-[#F5F5F5] to-[#E8E8E8]">
       {/* Hero Section avec image de fond */}
       <section
-        className="relative py-20 px-4 sm:px-6 lg:px-8"
+        className="relative mt-16 pt-4 pb-4 px-4 sm:px-6 lg:px-8"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')",
@@ -330,6 +331,7 @@ const Entrepreneuriat = () => {
             </p>
 
           </motion.div>
+          <TourismNavigation page="inspirer" />
         </div>
       </section>
 
