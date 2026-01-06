@@ -12,80 +12,6 @@ interface LoadingScreenProps {
   minimumLoadingTime?: number;
 }
 
-// Données pour les cartes
-const cardData = [
-  {
-    id: 1,
-    type: 'image',
-    src:"https://i.pinimg.com/1200x/ce/0c/29/ce0c29e8773ca7ce123f1d705677c8cd.jpg",
-    title: 'Plages paradisiaques',
-    color: '#3A7CA5',
-  },
-  {
-    id: 2,
-    type: 'image',
-    src: 'https://i.pinimg.com/736x/fd/8c/53/fd8c53667cb821937c526bcb55e63271.jpg',
-    title: 'Montagnes verdoyantes',
-    color: '#2E933C',
-  },
-  {
-    id: 3,
-    type: 'video',
-    src: vid1,
-    title: 'Océan Indien',
-    color: '#0B5563',
-  },
-  {
-    id: 4,
-    type: 'image',
-    src: 'https://i.pinimg.com/1200x/49/10/51/4910519781331bda9add8a091379e426.jpg',
-    title: 'Culture locale',
-    color: '#7D4E57',
-  },
-  {
-    id: 5,
-    type: 'video',
-    src: vid2,
-    title: 'Couchers de soleil',
-    color: '#E28413',
-  },
-  {
-    id: 6,
-    type: 'image',
-    src: 'https://i.pinimg.com/736x/5c/10/24/5c102464cb7cd9ade5028239fb746a6f.jpg',
-    title: 'Plages paradisiaques',
-    color: '#3A7CA5',
-  },
-  {
-    id: 7,
-    type: 'image',
-    src: 'https://i.pinimg.com/736x/9b/09/40/9b094085219de8b43227a154e934d3ed.jpg',
-    title: 'Montagnes verdoyantes',
-    color: '#2E933C',
-  },
-  {
-    id: 8,
-    type: 'video',
-    src: vid3,
-    title: 'Océan Indien',
-    color: '#0B5563',
-  },
-  {
-    id: 9,
-    type: 'image',
-    src: 'https://i.pinimg.com/736x/b1/0d/5b/b10d5bf8e83151e3e73546d7ee4c6811.jpg',
-    title: 'Culture locale',
-    color: '#7D4E57',
-  },
-  {
-    id: 10,
-    type: 'image',
-    src: 'https://i.pinimg.com/736x/ac/35/aa/ac35aa6ed326403db1758183a49e6f34.jpg',
-    title: 'Couchers de soleil',
-    color: '#E28413',
-  },
-];
-
 // Variable globale pour empêcher le remontage
 let globalExitInitiated = false;
 
@@ -121,6 +47,7 @@ export default function LoadingScreen({
   const bigServoLogoRef = useRef<HTMLDivElement>(null);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const mainServoLogoRef = useRef<HTMLDivElement>(null);
+  const loadingScreenRef = useRef<HTMLDivElement>(null);
 
   // Gestion du SessionStorage - lecture SEULEMENT au montage
   const [hasAnimationPlayed, setHasAnimationPlayed] = useState(() => {
@@ -159,16 +86,6 @@ export default function LoadingScreen({
 
     const videoElements = videoRefs.current;
     
-    const handleCanPlayThrough = (index: number) => {
-      setVideosLoaded(prev => new Set(prev).add(index));
-    };
-
-    // Ajouter les listeners à toutes les vidéos
-    videoElements.forEach((video, index) => {
-      if (video && cardData[index]?.type === 'video') {
-        video.addEventListener('canplaythrough', () => handleCanPlayThrough(index));
-      }
-    });
 
     return () => {
       videoElements.forEach((video) => {
@@ -178,15 +95,6 @@ export default function LoadingScreen({
       });
     };
   }, [initialLoadComplete]);
-
-  // Auto-défilement des cartes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentCardIndex((prev) => (prev + 1) % cardData.length);
-    }, 6500);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // ANIMATION INITIALE GSAP - exécutée une seule fois
   useEffect(() => {
@@ -227,7 +135,7 @@ export default function LoadingScreen({
       tl.fromTo(bigServoLogoRef.current,
         {
           scale: 0.5,
-          opacity: 0,
+          
           
         },
         {
@@ -253,37 +161,8 @@ export default function LoadingScreen({
       );
     }
 
-    // Étape 3: Animation de chargement (texte)
-    tl.to(".loading-text",
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: "power2.out"
-      },
-      "-=0.5"
-    );
-
-    // Étape 4: Réduction du logo vers sa taille normale et position
-    tl.to(bigLogoContainerRef.current,
-      {
-        scale: 0.8, // Réduction progressive
-        y: -30,
-        duration: 1,
-        ease: "power2.inOut"
-      },
-      "+=1.5"
-    );
-
-    // Étape 5: Disparition progressive (ralentie)
-    tl.to(bigLogoContainerRef.current,
-      {
-        opacity: 0,
-        scale: 0.6,
-        duration: 0.8,
-        ease: "power2.in"
-      }
-    );
+    // Attendre avant de finir l'animation du logo
+    tl.to({}, { duration: 1.5 });
 
     // Nettoyer l'animation si le composant est démonté
     return () => {
@@ -291,40 +170,26 @@ export default function LoadingScreen({
     };
   }, [hasAnimationPlayed]);
 
-  // AFFICHAGE DU BOUTON - dès que l'animation GSAP se termine
+  // AUTO-DÉPLACEMENT DU CONTENEUR NOIR VERS LE HAUT APRÈS L'ANIMATION DU LOGO
   useEffect(() => {
-    if (!initialLoadComplete || showButton || hasAnimationPlayed || globalExitInitiated) {
+    if (!initialLoadComplete || isExiting || hasAnimationPlayed || globalExitInitiated || !loadingScreenRef.current) {
       return;
     }
 
-    // Ajouter un délai pour la transition smooth du logo au contenu
-    const timer = setTimeout(() => {
-      setShowButton(true);
-
-      // Animation d'entrée du bouton avec GSAP (délai + animation fluide)
-      if (mainContainerRef.current) {
-        const button = mainContainerRef.current.querySelector('button');
-        if (button) {
-          gsap.fromTo(button,
-            {
-              opacity: 0,
-              y: 30,
-              scale: 0.85
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.8,
-              ease: "back.out(1.1)"
-            }
-          );
+    // Animation GSAP pour faire remonter le conteneur noir comme un rideau
+    gsap.to(loadingScreenRef.current,
+      {
+        y: -window.innerHeight,
+        opacity: 0,
+        duration: 1.2,
+        ease: "power2.inOut",
+        onComplete: () => {
+          handleExit();
         }
       }
-    }, 300); // Délai avant d'afficher le bouton pour permettre la transition smooth
+    );
 
-    return () => clearTimeout(timer);
-  }, [initialLoadComplete, showButton, hasAnimationPlayed]);
+  }, [initialLoadComplete, isExiting, hasAnimationPlayed]);
 
   // LOGIQUE DE CHARGEMENT - exécutée après l'animation initiale
   useEffect(() => {
@@ -346,26 +211,9 @@ export default function LoadingScreen({
 
       // Compter le nombre de vidéos chargées
       const videosLoadedCount = videosLoaded.size;
-      const videosInCardData = cardData.filter(card => card.type === 'video').length;
       
       // Progresser jusqu'à 100% pendant minimumLoadingTime
       let timeProgress = (elapsed / minimumLoadingTime) * 100;
-      
-      // Facteur basé sur le nombre de vidéos chargées (50% de la progression)
-      let videoProgress = videosLoadedCount > 0 
-        ? (videosLoadedCount / videosInCardData) * 50 
-        : 0;
-      
-      let newProgress = Math.min(100, timeProgress * 0.5 + videoProgress);
-
-      if (componentMountedRef.current) {
-        setProgress(newProgress);
-      }
-
-      // Continuer l'animation
-      if (newProgress < 100 && isAnimationActive && componentMountedRef.current) {
-        animationFrameId = requestAnimationFrame(updateProgress);
-      }
     };
 
     animationFrameId = requestAnimationFrame(updateProgress);
@@ -500,279 +348,91 @@ export default function LoadingScreen({
   // Rendu du composant
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-black/50 backdrop-blur-xl"
+  ref={loadingScreenRef}
+  className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-black backdrop-blur-xl"
+  style={{
+    opacity: fadeOutOpacity,
+    transform: `scale(${scaleEffect}) translateZ(0)`,
+    backfaceVisibility: 'hidden',
+    perspective: 1000,
+    filter: `blur(${blurEffect}px)`,
+    transition: isExiting ? 'none' : 'opacity 0.4s ease-out',
+    pointerEvents: isExiting ? 'none' : 'auto',
+    willChange: isExiting ? 'opacity, transform, filter' : 'auto'
+  }}
+>
+  {/* Fond de grilles avec effet de profondeur */}
+  <div className="absolute inset-0 overflow-hidden opacity-20">
+    {/* Première couche de grille (plus proche) */}
+    <div 
+      className="absolute inset-0"
       style={{
-        opacity: fadeOutOpacity,
-        transform: `scale(${scaleEffect}) translateZ(0)`,
-        backfaceVisibility: 'hidden',
-        perspective: 1000,
-        filter: `blur(${blurEffect}px)`,
-        transition: isExiting ? 'none' : 'opacity 0.4s ease-out',
-        pointerEvents: isExiting ? 'none' : 'auto',
-        willChange: isExiting ? 'opacity, transform, filter' : 'auto'
+        backgroundImage: `
+          linear-gradient(rgba(255, 165, 0, 0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 165, 0, 0.3) 1px, transparent 1px)
+        `,
+        backgroundSize: '60px 60px',
+        backgroundPosition: 'center center',
+        transform: 'translateZ(0px)',
+        animation: 'gridFloat 20s ease-in-out infinite'
       }}
-    >
-      {/* Background avec média */}
-      <div className="absolute inset-0 overflow-hidden">
-        {cardData[currentCardIndex]?.type === 'video' ? (
-          <video
-            key={`video-${currentCardIndex}`}
-            ref={el => {
-              if (el) videoRefs.current[currentCardIndex] = el;
-            }}
-            autoPlay
-            muted
-            loop
-            className="absolute inset-0 w-full h-full object-cover"
-            src={cardData[currentCardIndex].src}
-            style={{
-              filter: `brightness(${brightnessEffect})`,
-              transition: isExiting ? 'none' : 'filter 0.3s ease-out'
-            }}
-          />
-        ) : (
-          <div
-            className="absolute inset-0 w-full h-full"
-            style={{
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${cardData[currentCardIndex]?.src})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: `brightness(${brightnessEffect})`,
-              transition: isExiting ? 'none' : 'filter 0.3s ease-out'
-            }}
-          />
-        )}
+    />
+    
+    {/* Deuxième couche de grille (intermédiaire) */}
+    <div 
+      className="absolute inset-0"
+      style={{
+        backgroundImage: `
+          linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
+        `,
+        backgroundSize: '100px 100px',
+        backgroundPosition: 'center center',
+        transform: 'translateZ(-100px) scale(1.2)',
+        animation: 'gridFloat 25s ease-in-out infinite reverse'
+      }}
+    />
+    
+    {/* Troisième couche de grille (plus éloignée) */}
+    <div 
+      className="absolute inset-0"
+      style={{
+        backgroundImage: `
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '150px 150px',
+        backgroundPosition: 'center center',
+        transform: 'translateZ(-200px) scale(1.5)',
+        animation: 'gridFloat 30s ease-in-out infinite'
+      }}
+    />
+    
+    {/* Élément central pour créer un effet de vortex/3D */}
+    <div 
+      className="absolute top-1/2 left-1/2 w-[600px] h-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+      style={{
+        background: 'radial-gradient(circle, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0) 70%)',
+        filter: 'blur(20px)',
+        transform: 'translateZ(50px)'
+      }}
+    />
+  </div>
 
-        {/* Overlay et effets visuels */}
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"
-          style={{
-            opacity: isExiting ? 0.5 : 1,
-            transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            opacity: isExiting ? 0.2 : 0.3,
-            backgroundImage: `
-              linear-gradient(0deg, transparent 24%, rgba(107, 142, 35, 0.06) 25%, rgba(107, 142, 35, 0.06) 26%, transparent 27%, transparent 74%, rgba(107, 142, 35, 0.06) 75%, rgba(107, 142, 35, 0.06) 76%, transparent 77%, transparent),
-              linear-gradient(90deg, transparent 24%, rgba(107, 142, 35, 0.06) 25%, rgba(107, 142, 35, 0.06) 26%, transparent 27%, transparent 74%, rgba(107, 142, 35, 0.06) 75%, rgba(107, 142, 35, 0.06) 76%, transparent 77%, transparent)
-            `,
-            backgroundSize: '200px 200px',
-            transform: 'perspective(800px) rotateX(65deg)',
-            transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-          }}
-        />
+  {/* Logo initial avec animation */}
+  {showInitialLogo && (
+    <div className="absolute inset-0 flex items-center justify-center z-[10000]">
+      <div
+        ref={bigLogoContainerRef}
+        className="flex flex-col items-center justify-center"
+      >
+        {/* ServoLogo agrandi pour l'animation initiale */}
+        <div ref={bigServoLogoRef} className="transform">
+          <ServoLogo />
+        </div>
       </div>
-
-      {/* Logo initial grand avec chargement */}
-      {showInitialLogo && (
-        <div className="absolute inset-0 flex items-center justify-center z-[10000]">
-          <div
-            ref={bigLogoContainerRef}
-            className="flex flex-col items-center justify-center"
-          >
-            {/* ServoLogo agrandi pour l'animation initiale */}
-            <div ref={bigServoLogoRef} className="transform scale-150">
-              <ServoLogo />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Contenu principal (apparaît après l'animation initiale) */}
-      {initialLoadComplete && !showInitialLogo && (
-        <div className="relative w-full max-w-xl px-6 md:px-12 pb-16 flex flex-col h-full justify-center">
-          {/* Carte glassmorphism */}
-          <div
-            ref={mainContainerRef}
-            className="glass-panel rounded-2xl p-8 md:p-12 relative overflow-hidden border"
-            style={{
-              backgroundColor: isExiting ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.3)',
-              borderColor: isExiting ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)',
-              opacity: isExiting ? 0.7 : 1,
-              transform: `scale(${0.95 + (1 - scaleEffect)}) translateZ(0)`,
-              backfaceVisibility: 'hidden',
-              perspective: 1000,
-              backdropFilter: `blur(${isExiting ? Math.min(blurEffect / 2, 10) : 20}px)`,
-              willChange: 'opacity, transform, backdrop-filter',
-              transition: isExiting ? 'none' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            {/* Indicateurs décoratifs */}
-            <div
-              className="absolute top-6 left-6 w-8 h-[1px]"
-              style={{
-                background: colors.sruvol,
-                opacity: isExiting ? 0.3 : 1,
-                transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-              }}
-            />
-            <div
-              className="absolute top-6 left-6 h-8 w-[1px]"
-              style={{
-                background: colors.sruvol,
-                opacity: isExiting ? 0.3 : 1,
-                transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-              }}
-            />
-
-            {/* Contenu avec logo et bouton */}
-            <div className="flex flex-col justify-between items-center gap-8">
-              {/* ServoLogo normal */}
-              <div ref={mainServoLogoRef} className="transform scale-90">
-                <ServoLogo />
-              </div>
-
-              {/* Bouton */}
-              <div className="flex flex-col gap-2">
-                {showButton && (
-                  <button
-                    onClick={handleExit}
-                    disabled={exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed}
-                    className="px-8 py-3 rounded-lg font-mono text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_25px_rgba(107,142,35,0.6)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
-                    style={{
-                      backgroundColor: exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed ? '#888' : colors.sruvol,
-                      border: `1px solid ${exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed ? '#888' : colors.sruvol}`,
-                      boxShadow: isExiting
-                        ? '0 0 10px rgba(136, 136, 136, 0.3)'
-                        : exitInitiatedRef.current || globalExitInitiated || hasAnimationPlayed
-                          ? '0 0 5px rgba(136, 136, 136, 0.2)'
-                          : '0 0 15px rgba(107,142,35,0.4)',
-                      opacity: isExiting ? 0.7 : 1,
-                      transform: isExiting ? 'scale(0.97)' : 'scale(1)',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}
-                  >
-                    {/* Effet de brillance sur hover */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-
-                    <span className="relative z-10">
-                      {exitInitiatedRef.current || globalExitInitiated || isExiting ? 'REDIRECTION EN COURS...' : 'ACCÉDER A L\'APPLICATION'}
-                    </span>
-
-                    {/* Indicateur de statut */}
-                    {(exitInitiatedRef.current || globalExitInitiated) && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse z-20">
-                        !
-                      </span>
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Cartes défilantes */}
-          <div className="fixed bottom-2 right-6 z-[9998]">
-            <style>{`
-              @keyframes scroll-cards {
-                0% { transform: translateX(0); }
-                100% { transform: translateX(-${cardData.length * 96}px); }
-              }
-              @keyframes spin-slow {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-              }
-              @keyframes spin-reverse-slow {
-                from { transform: rotate(360deg); }
-                to { transform: rotate(0deg); }
-              }
-              .animate-spin-slow {
-                animation: spin-slow 3s linear infinite;
-              }
-              .animate-spin-reverse-slow {
-                animation: spin-reverse-slow 4s linear infinite;
-              }
-            `}</style>
-            <div
-              className="p-4 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]"
-              style={{
-                width: '380px',
-                maxWidth: '90vw',
-                overflow: 'hidden',
-                borderRadius: '8px',
-                backgroundColor: isExiting ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.2)',
-                opacity: isExiting ? 0.2 : 1,
-                transform: `translateY(${isExiting ? '30px' : '0'}) scale(${isExiting ? 0.95 : 1}) translateZ(0)`,
-                backfaceVisibility: 'hidden',
-                backdropFilter: `blur(${isExiting ? Math.min(blurEffect / 3, 8) : 12}px)`,
-                willChange: isExiting ? 'transform, opacity' : 'auto',
-                transition: isExiting ? 'none' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-            >
-              <div
-                id="cardsContainer"
-                className="flex gap-4"
-                style={{
-                  animation: isExiting ? 'none' : 'scroll-cards 80s linear infinite',
-                }}
-              >
-                {[...cardData, ...cardData].map((card, index) => (
-                  <div
-                    key={`${card.id}-${index}`}
-                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-pointer relative ${index % cardData.length === currentCardIndex
-                      ? 'ring-1 ring-white scale-110 shadow-xl'
-                      : 'hover:opacity-75'
-                      }`}
-                    onClick={() => !isExiting && setCurrentCardIndex(index % cardData.length)}
-                    style={{
-                      opacity: isExiting ? 0.3 : 1,
-                      transform: isExiting ? 'scale(0.85)' :
-                        (index % cardData.length === currentCardIndex ? 'scale(1.1)' : 'scale(1)'),
-                      transition: isExiting ? 'none' : 'all 0.3s ease-out'
-                    }}
-                  >
-                    {card.type === 'video' ? (
-                      <video
-                        className="absolute inset-0 w-full h-full object-cover"
-                        src={card.src}
-                        style={{
-                          filter: isExiting ? 'brightness(0.2)' : 'brightness(0.5)',
-                          transition: isExiting ? 'none' : 'filter 0.3s ease-out'
-                        }}
-                      />
-                    ) : (
-                      <div
-                        className="absolute inset-0 w-full h-full"
-                        style={{
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${card.src})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        }}
-                      />
-                    )}
-                    {card.type === 'video' && !isExiting && (
-                      <div className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 z-10">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </div>
-                    )}
-                    {index % cardData.length === currentCardIndex && !isExiting && (
-                      <div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-white z-10" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Copyright */}
-          <div className="mt-6 text-center">
-            <p
-              className="text-[10px] azonix uppercase tracking-[0.3em] text-white font-light"
-              style={{
-                opacity: isExiting ? 0.05 : 0.3,
-                transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-              }}
-            >
-              © 2025 OLIPLUS
-            </p>
-          </div>
-        </div>
-      )}
     </div>
+  )}
+</div>
   );
 }
