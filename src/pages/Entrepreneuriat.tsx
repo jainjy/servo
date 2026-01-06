@@ -406,9 +406,9 @@ const Entrepreneuriat = () => {
 
       {/* Contenu principal */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-1 gap-8">
           {/* Interviews - Colonne principale */}
-          <div className="lg:col-span-2">
+          <div className="">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-800 flex items-center">
                 <PlayCircle className="mr-2 text-[#556B2F]" />
@@ -419,7 +419,7 @@ const Entrepreneuriat = () => {
               </Badge>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               {filteredInterviews.map((interview) => (
                 <motion.div
                   key={interview.id}
@@ -516,135 +516,6 @@ const Entrepreneuriat = () => {
                 </motion.div>
               ))}
             </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-8">
-            {/* Ressources */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <FileText className="mr-2 text-[#556B2F]" />
-                Ressources gratuites
-              </h3>
-              <div className="space-y-4">
-                {resources.map((resource) => (
-                  <Card
-                    key={resource.id}
-                    className="bg-white border-[#D3D3D3] hover:border-[#556B2F] transition-all duration-300 cursor-pointer group"
-                    onClick={() => handleDownloadResource(resource)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="text-[#8B4513]">{resource.icon}</div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 group-hover:text-[#556B2F] transition-colors">
-                            {resource.title}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {resource.description}
-                          </p>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#556B2F] transition-colors" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            {/* Événements à venir */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <Calendar className="mr-2 text-[#556B2F]" />
-                Événements à venir
-              </h3>
-              <div className="space-y-4">
-                {events.map((event) => (
-                  <Card key={event.id} className="bg-white border-[#D3D3D3]">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <Badge
-                            className={`mb-2 ${
-                              event.format === "webinar"
-                                ? "bg-blue-500"
-                                : event.format === "workshop"
-                                ? "bg-purple-500"
-                                : "bg-green-500"
-                            }`}
-                          >
-                            {event.format}
-                          </Badge>
-                          <h4 className="font-semibold text-gray-900">
-                            {event.title}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            Par {event.speaker}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-[#8B4513] font-bold">
-                            {event.date}
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            {event.time}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 pt-4 border-t border-[#D3D3D3]">
-                        <div className="flex justify-between items-center">
-                          <div className="text-sm text-gray-600">
-                            {event.registered}/{event.maxParticipants} inscrits
-                          </div>
-                          <Button
-                            onClick={() => handleRegisterEvent(event.id)}
-                            size="sm"
-                            className="bg-[#556B2F] hover:bg-[#556B2F]/90 text-white"
-                          >
-                            S'inscrire
-                          </Button>
-                        </div>
-                        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-[#556B2F] h-2 rounded-full"
-                            style={{
-                              width: `${
-                                (event.registered / event.maxParticipants) * 100
-                              }%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            {/* CTA Newsletter */}
-            <Card className="bg-gradient-to-br from-[#6B8E23] to-[#8FBC8F] border-0">
-              <CardContent className="p-6 text-center">
-                <Target className="w-12 h-12 text-white mx-auto mb-4" />
-                <h4 className="text-xl font-bold text-white mb-2">
-                  Restez informé
-                </h4>
-                <p className="text-white/90 mb-4">
-                  Recevez les nouvelles interviews et ressources directement
-                  dans votre boîte mail
-                </p>
-                <div className="space-y-3">
-                  <input
-                    type="email"
-                    placeholder="Votre email"
-                    className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-white/70 text-white border border-white/30 focus:outline-none focus:border-white"
-                  />
-                  <Button className="w-full bg-white text-[#556B2F] hover:bg-white/90">
-                    S'abonner à la newsletter
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
 
