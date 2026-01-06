@@ -351,23 +351,6 @@ const Entrepreneuriat = () => {
               Découvrez les parcours inspirants, les conseils pratiques et les
               ressources pour lancer et développer votre entreprise
             </p>
-
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Button
-                onClick={handleSuggestInterview}
-                className="bg-white text-[#556B2F] hover:bg-white/90 px-6 py-3"
-              >
-                <User className="w-4 h-4 mr-2" />
-                Proposer une interview
-              </Button>
-              <Button
-                onClick={handleSubmitProject}
-                className="bg-transparent border-2 border-white text-white hover:bg-white/10 px-6 py-3"
-              >
-                <Briefcase className="w-4 h-4 mr-2" />
-                Soumettre mon projet
-              </Button>
-            </div>
           </motion.div>
           <TourismNavigation page="inspirer" />
         </div>
