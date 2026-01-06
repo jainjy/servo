@@ -115,11 +115,23 @@ class EntrepreneuriatService {
   // Statistiques
   static async getStats() {
     try {
-      const response = await api.get("/entrepreneuriat/stats");
-      return response.data;
+      const response = await api.get("/entrepreneuriat/admin/stats");
+      // Retourner directement data.data si c'est la structure
+      return {
+        data: response.data.data || response.data,
+      };
     } catch (error) {
-      console.error("❌ Erreur récupération statistiques:", error);
-      throw error;
+      console.error("❌ Erreur récupération stats:", error);
+      // Retourner les stats par défaut
+      return {
+        data: {
+          totalInterviews: 0,
+          totalResources: 0,
+          totalEvents: 0,
+          totalDownloads: 0,
+          recentInteractions: [],
+        },
+      };
     }
   }
 

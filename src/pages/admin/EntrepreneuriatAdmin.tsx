@@ -253,7 +253,13 @@ const EntrepreneuriatAdmin = () => {
 
       // Charger les statistiques
       const statsResponse = await EntrepreneuriatService.getStats();
-      setStats(statsResponse.data);
+      
+      // Mapper correctement les données - vérifier si c'est nested dans .data
+      if (statsResponse.data) {
+        setStats(statsResponse.data);
+      } else {
+        setStats(statsResponse);
+      }
     } catch (error) {
       console.error("Erreur chargement données:", error);
       toast({
@@ -692,57 +698,45 @@ const EntrepreneuriatAdmin = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Interview</TableHead>
-                          <TableHead>Invité</TableHead>
-                          <TableHead>Catégorie</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Vues</TableHead>
-                          <TableHead>Créé le</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredInterviews.map((interview) => (
-                          <TableRow key={interview.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100">
-                                  {interview.imageUrl && (
-                                    <img
-                                      src={interview.imageUrl}
-                                      alt={interview.title}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  )}
-                                </div>
-                                <div>
-                                  <div className="font-medium">
-                                    {interview.title}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {interview.duration}
-                                  </div>
-                                </div>
-                                {interview.isFeatured && (
-                                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">
-                                  {interview.guest}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                  {interview.company}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredInterviews.map((interview) => (
+                      <Card key={interview.id} className="flex flex-col">
+                        <CardContent className="pt-4 pb-0 flex-1">
+                          <div className="flex gap-3 mb-4">
+                            <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                              {interview.imageUrl && (
+                                <img
+                                  src={interview.imageUrl}
+                                  alt={interview.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-sm line-clamp-2">
+                                {interview.title}
+                              </h3>
+                              <p className="text-xs text-gray-500">
+                                {interview.duration}
+                              </p>
+                            </div>
+                            {interview.isFeatured && (
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0 mt-1" />
+                            )}
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <p className="text-xs text-gray-500">Invité</p>
+                              <p className="font-medium text-sm">
+                                {interview.guest}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {interview.company}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
                               <Badge
                                 variant="outline"
                                 className={
@@ -763,127 +757,118 @@ const EntrepreneuriatAdmin = () => {
                                 {interview.category === "success" &&
                                   "Success story"}
                               </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                {interview.status === "published" ? (
+
+                              <Badge
+                                variant={
+                                  interview.status === "published"
+                                    ? "default"
+                                    : "secondary"
+                                }
+                                className={
+                                  interview.status === "published"
+                                    ? "bg-green-100 text-green-800 border-0"
+                                    : interview.status === "draft"
+                                    ? "bg-yellow-100 text-yellow-800 border-0"
+                                    : "bg-gray-100 text-gray-800 border-0"
+                                }
+                              >
+                                {interview.status === "published" && "Publié"}
+                                {interview.status === "draft" && "Brouillon"}
+                                {interview.status === "archived" && "Archivé"}
+                              </Badge>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-xs text-gray-600 pt-2">
+                              <Eye className="w-3 h-3" />
+                              <span>{interview.views} vues</span>
+                              <span className="text-gray-400">•</span>
+                              <span>
+                                {format(
+                                  new Date(interview.createdAt),
+                                  "dd MMM yyyy",
+                                  { locale: fr }
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+
+                        <div className="pt-4 px-4 pb-4 border-t">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="w-full">
+                                <MoreVertical className="w-4 h-4 mr-2" />
+                                Actions
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  navigate(
+                                    `/entrepreneuriat/interview/${interview.slug}`
+                                  )
+                                }
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                Voir
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => openEditInterview(interview)}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Éditer
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleToggleFeatured(interview)
+                                }
+                              >
+                                {interview.isFeatured ? (
                                   <>
-                                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                    <span className="text-green-700">
-                                      Publié
-                                    </span>
-                                  </>
-                                ) : interview.status === "draft" ? (
-                                  <>
-                                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                                    <span className="text-yellow-700">
-                                      Brouillon
-                                    </span>
+                                    <StarOff className="w-4 h-4 mr-2" />
+                                    Retirer des favoris
                                   </>
                                 ) : (
                                   <>
-                                    <div className="w-2 h-2 rounded-full bg-gray-500"></div>
-                                    <span className="text-gray-700">
-                                      Archivé
-                                    </span>
+                                    <Star className="w-4 h-4 mr-2" />
+                                    Mettre en avant
                                   </>
                                 )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Eye className="w-4 h-4 text-gray-400" />
-                                <span className="font-medium">
-                                  {interview.views}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {format(
-                                new Date(interview.createdAt),
-                                "dd MMM yyyy",
-                                {
-                                  locale: fr,
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleToggleStatus(interview)
                                 }
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      navigate(
-                                        `/entrepreneuriat/interview/${interview.slug}`
-                                      )
-                                    }
-                                  >
+                              >
+                                {interview.status === "published" ? (
+                                  <>
+                                    <EyeOff className="w-4 h-4 mr-2" />
+                                    Désactiver
+                                  </>
+                                ) : (
+                                  <>
                                     <Eye className="w-4 h-4 mr-2" />
-                                    Voir
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => openEditInterview(interview)}
-                                  >
-                                    <Edit className="w-4 h-4 mr-2" />
-                                    Éditer
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleToggleFeatured(interview)
-                                    }
-                                  >
-                                    {interview.isFeatured ? (
-                                      <>
-                                        <StarOff className="w-4 h-4 mr-2" />
-                                        Retirer des favoris
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Star className="w-4 h-4 mr-2" />
-                                        Mettre en avant
-                                      </>
-                                    )}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleToggleStatus(interview)
-                                    }
-                                  >
-                                    {interview.status === "published" ? (
-                                      <>
-                                        <EyeOff className="w-4 h-4 mr-2" />
-                                        Désactiver
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Eye className="w-4 h-4 mr-2" />
-                                        Publier
-                                      </>
-                                    )}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setSelectedItem(interview);
-                                      setShowDeleteModal(true);
-                                    }}
-                                    className="text-red-600"
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                                    Publier
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedItem(interview);
+                                  setShowDeleteModal(true);
+                                }}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </TabsContent>
@@ -915,34 +900,26 @@ const EntrepreneuriatAdmin = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Ressource</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Catégorie</TableHead>
-                          <TableHead>Téléchargements</TableHead>
-                          <TableHead>Gratuit</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Créé le</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredResources.map((resource) => (
-                          <TableRow key={resource.id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">
-                                  {resource.title}
-                                </div>
-                                <div className="text-sm text-gray-500 line-clamp-1">
-                                  {resource.description}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredResources.map((resource) => (
+                      <Card key={resource.id} className="flex flex-col">
+                        <CardContent className="pt-4 pb-0 flex-1">
+                          <div className="mb-4">
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <h3 className="font-semibold text-sm line-clamp-2 flex-1">
+                                {resource.title}
+                              </h3>
+                              {resource.isFeatured && (
+                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 line-clamp-2">
+                              {resource.description}
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap gap-2">
                               <Badge
                                 variant="outline"
                                 className={
@@ -960,21 +937,11 @@ const EntrepreneuriatAdmin = () => {
                                 {resource.type === "tool" && "Outil"}
                                 {resource.type === "checklist" && "Checklist"}
                               </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="secondary">
+
+                              <Badge variant="secondary" className="text-xs">
                                 {resource.category}
                               </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Download className="w-4 h-4 text-gray-400" />
-                                <span className="font-medium">
-                                  {resource.downloads}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
+
                               {resource.isFree ? (
                                 <Badge className="bg-green-100 text-green-800 border-0">
                                   Gratuit
@@ -982,117 +949,113 @@ const EntrepreneuriatAdmin = () => {
                               ) : (
                                 <Badge variant="outline">Payant</Badge>
                               )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                {resource.status === "published" ? (
-                                  <>
-                                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                    <span className="text-green-700">
-                                      Publié
-                                    </span>
-                                  </>
-                                ) : resource.status === "draft" ? (
-                                  <>
-                                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                                    <span className="text-yellow-700">
-                                      Brouillon
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="w-2 h-2 rounded-full bg-gray-500"></div>
-                                    <span className="text-gray-700">
-                                      Archivé
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <Download className="w-3 h-3" />
+                              <span>{resource.downloads} téléchargements</span>
+                            </div>
+
+                            <div className="text-xs text-gray-500">
                               {format(
                                 new Date(resource.createdAt),
                                 "dd MMM yyyy",
-                                {
-                                  locale: fr,
-                                }
+                                { locale: fr }
                               )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem
-                                    onClick={async () => {
-                                      try {
-                                        const downloadData =
-                                          await EntrepreneuriatService.downloadResource(
-                                            resource.id
-                                          );
-                                        const link =
-                                          document.createElement("a");
-                                        link.href =
-                                          downloadData.data.downloadUrl;
-                                        link.download =
-                                          downloadData.data.fileName;
-                                        document.body.appendChild(link);
-                                        link.click();
-                                        document.body.removeChild(link);
-                                      } catch (error) {
-                                        console.error(
-                                          "Erreur téléchargement:",
-                                          error
-                                        );
-                                      }
-                                    }}
-                                  >
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Télécharger
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      // Éditer la ressource
-                                      setSelectedItem(resource);
-                                      setResourceForm({
-                                        title: resource.title,
-                                        description: resource.description,
-                                        type: resource.type,
-                                        category: resource.category,
-                                        fileUrl: resource.fileUrl,
-                                        isFree: resource.isFree,
-                                        status: resource.status,
-                                        isFeatured: resource.isFeatured,
-                                      });
-                                      setModalMode("edit");
-                                      setShowResourceModal(true);
-                                    }}
-                                  >
-                                    <Edit className="w-4 h-4 mr-2" />
-                                    Éditer
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setSelectedItem(resource);
-                                      setShowDeleteModal(true);
-                                    }}
-                                    className="text-red-600"
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                            </div>
+
+                            <div
+                              className={`flex items-center gap-2 px-2 py-1 rounded text-xs ${
+                                resource.status === "published"
+                                  ? "bg-green-100 text-green-800"
+                                  : resource.status === "draft"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              <div className="w-2 h-2 rounded-full bg-current"></div>
+                              <span>
+                                {resource.status === "published" && "Publié"}
+                                {resource.status === "draft" && "Brouillon"}
+                                {resource.status === "archived" && "Archivé"}
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+
+                        <div className="pt-4 px-4 pb-4 border-t">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="w-full">
+                                <MoreVertical className="w-4 h-4 mr-2" />
+                                Actions
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={async () => {
+                                  try {
+                                    const downloadData =
+                                      await EntrepreneuriatService.downloadResource(
+                                        resource.id
+                                      );
+                                    const link =
+                                      document.createElement("a");
+                                    link.href =
+                                      downloadData.data.downloadUrl;
+                                    link.download =
+                                      downloadData.data.fileName;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                  } catch (error) {
+                                    console.error(
+                                      "Erreur téléchargement:",
+                                      error
+                                    );
+                                  }
+                                }}
+                              >
+                                <Download className="w-4 h-4 mr-2" />
+                                Télécharger
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedItem(resource);
+                                  setResourceForm({
+                                    title: resource.title,
+                                    description: resource.description,
+                                    type: resource.type,
+                                    category: resource.category,
+                                    fileUrl: resource.fileUrl,
+                                    isFree: resource.isFree,
+                                    status: resource.status,
+                                    isFeatured: resource.isFeatured,
+                                  });
+                                  setModalMode("edit");
+                                  setShowResourceModal(true);
+                                }}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Éditer
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedItem(resource);
+                                  setShowDeleteModal(true);
+                                }}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </TabsContent>
@@ -1122,32 +1085,21 @@ const EntrepreneuriatAdmin = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Événement</TableHead>
-                          <TableHead>Format</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Inscrits</TableHead>
-                          <TableHead>Inscriptions</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Créé le</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredEvents.map((event) => (
-                          <TableRow key={event.id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">{event.title}</div>
-                                <div className="text-sm text-gray-500 line-clamp-1">
-                                  {event.description}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                    {filteredEvents.map((event) => (
+                      <Card key={event.id} className="flex flex-col">
+                        <CardContent className="pt-4 pb-0 flex-1">
+                          <div className="mb-4">
+                            <h3 className="font-semibold text-sm line-clamp-2 mb-1">
+                              {event.title}
+                            </h3>
+                            <p className="text-xs text-gray-500 line-clamp-2">
+                              {event.description}
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap gap-2">
                               <Badge
                                 variant="outline"
                                 className={
@@ -1165,30 +1117,7 @@ const EntrepreneuriatAdmin = () => {
                                 {event.format === "networking" && "Networking"}
                                 {event.format === "conference" && "Conférence"}
                               </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">
-                                  {format(new Date(event.date), "dd MMM yyyy", {
-                                    locale: fr,
-                                  })}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                  {event.time}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Users className="w-4 h-4 text-gray-400" />
-                                <span className="font-medium">
-                                  {event.registered}
-                                  {event.maxParticipants &&
-                                    `/${event.maxParticipants}`}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
+
                               {event.isRegistrationOpen ? (
                                 <Badge className="bg-green-100 text-green-800 border-0">
                                   <CheckCircle className="w-3 h-3 mr-1" />
@@ -1203,138 +1132,153 @@ const EntrepreneuriatAdmin = () => {
                                   Fermées
                                 </Badge>
                               )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                {event.status === "upcoming" ? (
-                                  <>
-                                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                    <span className="text-blue-700">
-                                      À venir
-                                    </span>
-                                  </>
-                                ) : event.status === "live" ? (
-                                  <>
-                                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                    <span className="text-green-700">
-                                      En direct
-                                    </span>
-                                  </>
-                                ) : event.status === "completed" ? (
-                                  <>
-                                    <div className="w-2 h-2 rounded-full bg-gray-500"></div>
-                                    <span className="text-gray-700">
-                                      Terminé
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                                    <span className="text-red-700">Annulé</span>
-                                  </>
-                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="bg-gray-50 p-2 rounded">
+                                <p className="text-gray-500">Date & Heure</p>
+                                <p className="font-medium">
+                                  {format(
+                                    new Date(event.date),
+                                    "dd MMM",
+                                    { locale: fr }
+                                  )}
+                                </p>
+                                <p className="text-gray-600">{event.time}</p>
                               </div>
-                            </TableCell>
-                            <TableCell>
-                              {format(
-                                new Date(event.createdAt),
-                                "dd MMM yyyy",
-                                {
-                                  locale: fr,
+                              <div className="bg-gray-50 p-2 rounded">
+                                <p className="text-gray-500">Participants</p>
+                                <p className="font-medium flex items-center gap-1">
+                                  <Users className="w-3 h-3" />
+                                  {event.registered}
+                                  {event.maxParticipants &&
+                                    `/${event.maxParticipants}`}
+                                </p>
+                              </div>
+                            </div>
+
+                            {event.speakers && event.speakers.length > 0 && (
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">
+                                  Intervenants
+                                </p>
+                                <p className="text-xs font-medium">
+                                  {event.speakers.join(", ")}
+                                </p>
+                              </div>
+                            )}
+
+                            <div
+                              className={`flex items-center gap-2 px-2 py-1 rounded text-xs w-fit ${
+                                event.status === "upcoming"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : event.status === "live"
+                                  ? "bg-green-100 text-green-800"
+                                  : event.status === "completed"
+                                  ? "bg-gray-100 text-gray-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              <div className="w-2 h-2 rounded-full bg-current"></div>
+                              <span>
+                                {event.status === "upcoming" && "À venir"}
+                                {event.status === "live" && "En direct"}
+                                {event.status === "completed" && "Terminé"}
+                                {event.status === "cancelled" && "Annulé"}
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+
+                        <div className="pt-4 px-4 pb-4 border-t">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="w-full">
+                                <MoreVertical className="w-4 h-4 mr-2" />
+                                Actions
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  window.open(
+                                    event.onlineLink || "#",
+                                    "_blank"
+                                  )
                                 }
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      window.open(
-                                        event.onlineLink || "#",
-                                        "_blank"
-                                      )
-                                    }
-                                  >
-                                    <Link className="w-4 h-4 mr-2" />
-                                    Voir le lien
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      // Éditer l'événement
-                                      setSelectedItem(event);
-                                      setEventForm({
-                                        title: event.title,
-                                        description: event.description,
-                                        format: event.format,
-                                        date: format(
-                                          new Date(event.date),
-                                          "yyyy-MM-dd"
-                                        ),
-                                        time: event.time,
-                                        duration: event.duration || "2h",
-                                        speakers: event.speakers,
-                                        maxParticipants:
-                                          event.maxParticipants || 100,
-                                        isRegistrationOpen:
-                                          event.isRegistrationOpen,
-                                        location: event.location || "",
-                                        onlineLink: event.onlineLink || "",
-                                        status: event.status,
-                                      });
-                                      setModalMode("edit");
-                                      setShowEventModal(true);
-                                    }}
-                                  >
-                                    <Edit className="w-4 h-4 mr-2" />
-                                    Éditer
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={async () => {
-                                      try {
-                                        await EntrepreneuriatService.registerToEvent(
-                                          event.id
-                                        );
-                                        toast({
-                                          title: "Succès",
-                                          description:
-                                            "Inscription enregistrée (test admin)",
-                                        });
-                                        loadData();
-                                      } catch (error) {
-                                        console.error(
-                                          "Erreur inscription:",
-                                          error
-                                        );
-                                      }
-                                    }}
-                                  >
-                                    <Users className="w-4 h-4 mr-2" />
-                                    Tester l'inscription
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setSelectedItem(event);
-                                      setShowDeleteModal(true);
-                                    }}
-                                    className="text-red-600"
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                              >
+                                <Link className="w-4 h-4 mr-2" />
+                                Voir le lien
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedItem(event);
+                                  setEventForm({
+                                    title: event.title,
+                                    description: event.description,
+                                    format: event.format,
+                                    date: format(
+                                      new Date(event.date),
+                                      "yyyy-MM-dd"
+                                    ),
+                                    time: event.time,
+                                    duration: event.duration || "2h",
+                                    speakers: event.speakers,
+                                    maxParticipants:
+                                      event.maxParticipants || 100,
+                                    isRegistrationOpen:
+                                      event.isRegistrationOpen,
+                                    location: event.location || "",
+                                    onlineLink: event.onlineLink || "",
+                                    status: event.status,
+                                  });
+                                  setModalMode("edit");
+                                  setShowEventModal(true);
+                                }}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Éditer
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={async () => {
+                                  try {
+                                    await EntrepreneuriatService.registerToEvent(
+                                      event.id
+                                    );
+                                    toast({
+                                      title: "Succès",
+                                      description:
+                                        "Inscription enregistrée (test admin)",
+                                    });
+                                    loadData();
+                                  } catch (error) {
+                                    console.error(
+                                      "Erreur inscription:",
+                                      error
+                                    );
+                                  }
+                                }}
+                              >
+                                <Users className="w-4 h-4 mr-2" />
+                                Tester l'inscription
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedItem(event);
+                                  setShowDeleteModal(true);
+                                }}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </TabsContent>
