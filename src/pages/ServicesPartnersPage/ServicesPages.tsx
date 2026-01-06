@@ -62,8 +62,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   const [showMessageCard, setShowMessageCard] = useState(false);
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const ITEMS_PER_PAGE = 10;
 
   // Types de propriétés
   const propertyTypes: PropertyType[] = [
@@ -299,8 +301,20 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   // Composant de section des services
   const ServicesSection = () => {
     const filteredServices = getFilteredServices();
-    const displayedServices = filteredServices;
     const hasActiveFilters = servicesSearchQuery || propertyType || serviceCategory;
+    
+    // Pagination logique
+    const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const displayedServices = filteredServices.slice(startIndex, endIndex);
+    
+    // Réinitialiser la page si elle dépasse le nombre de pages
+    useEffect(() => {
+      if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(1);
+      }
+    }, [filteredServices.length, totalPages]);
 
     if (loading) {
       return (
@@ -355,11 +369,21 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                 {filteredServices.length} service{filteredServices.length > 1 ? 's' : ''} trouvé{filteredServices.length > 1 ? 's' : ''}
                 {hasActiveFilters && " avec les filtres actuels"}
               </p>
+              {filteredServices.length > 0 && (
+                <p className="text-[#556B2F] text-sm">
+                  Page {currentPage} sur {totalPages}
+                </p>
+              )}
             </div>
 
             {/* Grille des services */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8 animate-fade-in px-4">
-              {displayedServices.map((service, index) => (
+              {displayedServices.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-600">Aucun service à afficher</p>
+                </div>
+              ) : (
+                displayedServices.map((service, index) => (
                 <div
                   key={service.id || index}
                   className="bg-[#FFFFF0] rounded-2xl overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-[#D3D3D3] group"
@@ -443,8 +467,49 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                     </div>
                   </div>
                 </div>
-              ))}
+              ))
+              )}
             </section>
+            
+            {/* Pagination */}
+            {filteredServices.length > ITEMS_PER_PAGE && (
+              <div className="flex justify-center items-center gap-2 mb-12 px-4 flex-wrap">
+                {/* Bouton Previous */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Précédent
+                </button>
+                
+                {/* Numéros de page */}
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-[#556B2F] text-white'
+                          : 'border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Bouton Next */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
           </>
         )}
       </>
