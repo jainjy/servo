@@ -250,6 +250,7 @@ import EventsDiscoveriesPro from "./components/pro/Evenement&Decouverte/EventsDi
 // 🔥 NOUVEAUX IMPORTS POUR LES EXPÉRIENCES 🔥
 import ExperienceDetail from "./components/components/ExperienceDetail";
 import ExperienceBooking from "./components/components/ExperienceBooking";
+import EntrepreneuriatAdmin from "./pages/admin/EntrepreneuriatAdmin";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -970,6 +971,7 @@ const App = () => {
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="blog" element={<Blog />} />
+                    <Route path="entrepreneuriat" element={<EntrepreneuriatAdmin />} />
                     <Route path="portraits" element={<PortraitsAdmin />} />
                     <Route path="bookings" element={<Bookings />} />
                     <Route path="listings" element={<Listings />} />

@@ -29,6 +29,7 @@ import {
   Video,
   Image,
   Lightbulb,
+  Briefcase,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from "../../assets/logo.png";
@@ -53,6 +54,7 @@ const navigation = [
     icon: Tag,
   },
   { name: "Métiers", href: "/admin/metiers", icon: Ruler },
+  { name: "Entrepreneuriat", href: "/admin/entrepreneuriat", icon: Briefcase },
 
   // === GESTION DES RÉSERVATIONS & PRODUITS ===
   { name: "Réservations", href: "/admin/bookings", icon: Calendar },
@@ -124,7 +126,7 @@ export function AdminSidebar() {
       }
       // Annonces & Services
       else if (
-        ["Annonces", "Services", "categorie de services", "Métiers"].includes(
+        ["Annonces", "Services", "categorie de services", "Métiers", "Entrepreneuriat"].includes(
           item.name
         )
       ) {
