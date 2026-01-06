@@ -67,11 +67,15 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   const [metiers, setMetiers] = useState<Metier[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageMetier, setCurrentPageMetier] = useState(1);
   const navigate = useNavigate();
-  
+
   // États pour les recherches
   const [metierSearchQuery, setMetierSearchQuery] = useState("");
   const [expertSearchQuery, setExpertSearchQuery] = useState("");
+
+  const ITEMS_PER_PAGE = 10;
 
   // Récupérer les métiers depuis l'API
   useEffect(() => {
@@ -95,6 +99,7 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   const handleViewExperts = (metier: Metier) => {
     setSelectedMetier(metier);
     setShowExperts(true);
+    setCurrentPage(1); // Réinitialiser à la première page
   };
 
   // Retour à la liste des métiers
@@ -102,6 +107,7 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
     setSelectedMetier(null);
     setShowExperts(false);
     setExpertSearchQuery("");
+    setCurrentPage(1); // Réinitialiser la page
   };
 
   // Fonction utilitaire pour obtenir une image par défaut
@@ -150,6 +156,94 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
           ?.toLowerCase()
           .includes(expertSearchQuery.toLowerCase()) ||
         expert.email?.toLowerCase().includes(expertSearchQuery.toLowerCase())
+    );
+  };
+
+  // Composant Pagination réutilisable
+  const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="flex justify-end w-full items-center gap-1 ">
+        {/* Bouton Previous */}
+        <button
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className="px-3 py-2 rounded-lg border bg-logo border-[#556B2F] text-white hover:bg-logo/70 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Précédent
+        </button>
+
+        {/* Premier numéro */}
+        <button
+          onClick={() => onPageChange(1)}
+          className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+            currentPage === 1
+              ? "bg-[#556B2F] text-white"
+              : "border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white"
+          }`}
+        >
+          1
+        </button>
+
+        {/* Séparateur "--" si nécessaire */}
+        {currentPage > 3 && (
+          <span className="px-2 text-[#556B2F] font-medium">°°°</span>
+        )}
+
+        {/* Pages autour de la page courante */}
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter((page) => {
+            return (
+              page > 1 &&
+              page < totalPages &&
+              Math.abs(page - currentPage) <= 1
+            );
+          })
+          .map((page) => (
+            <button
+              key={page}
+              onClick={() => onPageChange(page)}
+              className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                currentPage === page
+                  ? "bg-[#556B2F] text-white"
+                  : "border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+        {/* Séparateur "--" si nécessaire */}
+        {currentPage < totalPages - 2 && totalPages > 5 && (
+          <span className="px-2 text-[#556B2F] font-medium">°°°</span>
+        )}
+
+        {/* Dernier numéro (si différent de 1) */}
+        {totalPages > 1 && (
+          <button
+            onClick={() => onPageChange(totalPages)}
+            className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+              currentPage === totalPages
+                ? "bg-[#556B2F] text-white"
+                : "border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white"
+            }`}
+          >
+            {totalPages}
+          </button>
+        )}
+
+        {/* Bouton Next */}
+        <button
+          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className="px-3 py-2 rounded-lg border bg-logo border-[#556B2F] text-white hover:bg-logo/70 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-4"
+        >
+          Suivant
+          <ArrowLeft className="w-4 h-4 rotate-180" />
+        </button>
+      </div>
     );
   };
 
@@ -234,6 +328,19 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   const ExpertsSection = ({ metier }: { metier: Metier }) => {
     const filteredExperts = getFilteredExperts();
 
+    // Pagination logique
+    const totalPages = Math.ceil(filteredExperts.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const displayedExperts = filteredExperts.slice(startIndex, endIndex);
+
+    // Réinitialiser la pagination quand la recherche change ou quand il n'y a plus assez d'experts
+    useEffect(() => {
+      if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(1);
+      }
+    }, [filteredExperts.length, totalPages]);
+
     return (
       <div className="space-y-6 animate-fade-in">
         {/* En-tête avec bouton retour et recherche */}
@@ -257,6 +364,11 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   {filteredExperts.length > 1 ? "s" : ""} disponible
                   {filteredExperts.length > 1 ? "s" : ""}
                   {expertSearchQuery && " (recherche appliquée)"}
+                  {filteredExperts.length > 0 && (
+                    <span className="ml-2">
+                      - Page {currentPage} sur {totalPages}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -296,11 +408,24 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredExperts.map((expert, index) =>
-                renderExpertCard(expert, index)
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                {displayedExperts.map((expert, index) =>
+                  renderExpertCard(expert, index)
+                )}
+              </div>
+
+              {/* Pagination stylisée */}
+              {filteredExperts.length > ITEMS_PER_PAGE && (
+                <div className="flex justify-center items-center gap-2 flex-wrap pt-6 border-t border-[#D3D3D3]">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -359,8 +484,19 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   // Affichage principal des métiers
   const MetiersGrid = () => {
     const filteredMetiers = getFilteredMetiers();
-    const [isFocused, setIsFocused] = useState(false);
-    const inputRef = useRef(null);
+    
+    // Pagination logique pour les métiers
+    const totalPages = Math.ceil(filteredMetiers.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPageMetier - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const displayedMetiers = filteredMetiers.slice(startIndex, endIndex);
+    
+    // Réinitialiser la page si elle dépasse le nombre de pages
+    useEffect(() => {
+      if (currentPageMetier > totalPages && totalPages > 0) {
+        setCurrentPageMetier(1);
+      }
+    }, [filteredMetiers.length, totalPages]);
 
     return (
       <div className="space-y-8">
@@ -381,11 +517,24 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredMetiers.map((metier, index) => (
-              <MetierCard key={metier.id} metier={metier} index={index} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {displayedMetiers.map((metier, index) => (
+                <MetierCard key={metier.id} metier={metier} index={index} />
+              ))}
+            </div>
+            
+            {/* Pagination stylisée pour les métiers */}
+            {filteredMetiers.length > ITEMS_PER_PAGE && (
+              <div className="flex justify-center items-center gap-2 flex-wrap pt-6">
+                <Pagination
+                  currentPage={currentPageMetier}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPageMetier}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     );
