@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";// En haut du fichier, avec les autres imports
+import React, { useState, useEffect } from "react";
 import { useCandidatures } from '@/hooks/useCandidatures';
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,6 +18,9 @@ import {
   CheckCircle,
   DollarSign,
   Zap,
+  Upload,
+  FileText,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,8 +65,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { usePublicFormations } from "@/hooks/usePublicFormations";
-
-  import { 
+import { 
   FaLaptop, 
   FaUserTie, 
   FaChartLine, 
@@ -74,6 +76,9 @@ import { usePublicFormations } from "@/hooks/usePublicFormations";
   FaTools,
   FaBook 
 } from 'react-icons/fa';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:3001/api';
 
 const FormationsSection = ({
   loading,
@@ -83,14 +88,15 @@ const FormationsSection = ({
   handleApply,
   handleShare,
   handleDownloadGuide,
-  handleFileUpload,
+  handleFileUpload,  // Garder cette prop
   cvFile,
   setCvFile,
   setLoading,
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-const { formations, isLoading: apiLoading, fetchFormations } = usePublicFormations();
+  const { formations, isLoading: apiLoading, fetchFormations } = usePublicFormations();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("tous");
   const [selectedFormat, setSelectedFormat] = useState("tous");
@@ -105,6 +111,7 @@ const { formations, isLoading: apiLoading, fetchFormations } = usePublicFormatio
     phone: "",
     message: "",
   });
+  const [userCVUrl, setUserCVUrl] = useState(null); // Pour stocker le CV de la base de données
 
   const categories = [
     { id: "informatique", label: "Informatique & Numérique", count: 45 },
@@ -124,27 +131,168 @@ const { formations, isLoading: apiLoading, fetchFormations } = usePublicFormatio
     { id: "alternance", label: "Alternance", icon: GraduationCap },
   ];
 
-  // Charger les formations depuis l'API
-useEffect(() => {
-  const loadFormations = async () => {
-    setLoading(true);
+  // AJOUT: Fonction pour uploader le CV vers la base de données
+  const uploadCVToDatabase = async (file) => {
+    if (!isAuthenticated || !user) {
+      toast.error('Veuillez vous connecter pour télécharger votre CV');
+      return null;
+    }
+
     try {
-      // Récupérer uniquement les formations actives
-      await fetchFormations({ 
-        status: "active",
-        page: 1,
-        limit: 50
-      });
+      const token = localStorage.getItem('auth-token');
+      if (!token) {
+        toast.error('Session expirée. Veuillez vous reconnecter.');
+        return null;
+      }
+
+      const formData = new FormData();
+      formData.append('cv', file);
+      formData.append('userId', user.id);
+      formData.append('fileName', file.name);
+
+      console.log('📤 Upload CV vers base de données...');
+
+      // Essayez plusieurs endpoints
+      const endpoints = [
+        `${API_URL}/user/upload-cv`,
+        `${API_URL}/upload/cv`,
+        `${API_URL}/cv/upload`
+      ];
+
+      let response = null;
+      
+      for (const endpoint of endpoints) {
+        try {
+          response = await axios.post(endpoint, formData, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          
+          if (response.data.success || response.data.url) {
+            console.log('✅ CV uploadé avec succès via:', endpoint);
+            break;
+          }
+        } catch (error) {
+          console.log(`❌ Échec avec ${endpoint}:`, error.message);
+          continue;
+        }
+      }
+
+      if (!response) {
+        throw new Error('Aucun endpoint ne fonctionne');
+      }
+
+      const cvUrl = response.data.success ? 
+        response.data.data?.cvUrl : 
+        response.data.url;
+
+      if (cvUrl) {
+        setUserCVUrl(cvUrl);
+        toast.success('CV téléchargé avec succès !');
+        return cvUrl;
+      } else {
+        throw new Error('Aucune URL de CV retournée');
+      }
+
     } catch (error) {
-      // L'erreur est déjà gérée dans le hook
-      console.log("Erreur capturée dans FormationsSection:", error);
-    } finally {
-      setLoading(false);
+      console.error('❌ Erreur upload CV:', error);
+      toast.error('Erreur lors du téléchargement du CV');
+      return null;
     }
   };
 
-  loadFormations();
-}, [fetchFormations]); // Ajoutez fetchFormations comme dépendance
+  // MODIFICATION: handleFileUpload amélioré
+  const handleFileUploadEnhanced = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Vérifications
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Le fichier est trop volumineux (max 5MB)');
+      return;
+    }
+
+    const validExtensions = ['.pdf', '.doc', '.docx'];
+    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    
+    if (!validExtensions.includes(fileExtension)) {
+      toast.error('Format de fichier non supporté. Utilisez PDF, DOC ou DOCX');
+      return;
+    }
+
+    // Upload vers la base de données
+    const cvUrl = await uploadCVToDatabase(file);
+    
+    if (cvUrl) {
+      // Stocker aussi localement pour la session
+      const localUrl = URL.createObjectURL(file);
+      setCvFile({
+        file: file,
+        url: localUrl,
+        name: file.name,
+        dbUrl: cvUrl  // URL de la base de données
+      });
+    } else {
+      // Fallback: stocker localement seulement
+      const localUrl = URL.createObjectURL(file);
+      setCvFile({
+        file: file,
+        url: localUrl,
+        name: file.name
+      });
+      toast.success('CV prêt pour la candidature');
+    }
+  };
+
+  // AJOUT: Charger le CV existant de l'utilisateur
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadExistingCV();
+    }
+  }, [isAuthenticated, user]);
+
+  const loadExistingCV = async () => {
+    try {
+      const token = localStorage.getItem('auth-token');
+      if (!token) return;
+
+      const response = await axios.get(`${API_URL}/user/cv`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data.success && response.data.data?.cvUrl) {
+        setUserCVUrl(response.data.data.cvUrl);
+        console.log('✅ CV existant chargé:', response.data.data.cvUrl);
+      }
+    } catch (error) {
+      console.log('ℹ️ Aucun CV existant trouvé ou erreur de chargement');
+    }
+  };
+
+  // Charger les formations
+  useEffect(() => {
+    const loadFormations = async () => {
+      setLoading(true);
+      try {
+        await fetchFormations({ 
+          status: "active",
+          page: 1,
+          limit: 50
+        });
+      } catch (error) {
+        console.log("Erreur capturée dans FormationsSection:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFormations();
+  }, [fetchFormations]);
 
   // Vérifier les actions en attente après connexion
   useEffect(() => {
@@ -208,7 +356,7 @@ useEffect(() => {
       matchesFormat &&
       matchesPrice &&
       matchesTab &&
-      formation.status === "active" // Ne montrer que les formations actives
+      formation.status === "active"
     );
   }) || [];
 
@@ -228,24 +376,79 @@ useEffect(() => {
     toast.success("Filtres réinitialisés");
   };
 
-  const handleContactSubmit = async (e) => {
+  const { postuler, isLoading } = useCandidatures();
+
+  // CORRECTION: Fonction handleApplyToFormation
+  const handleApplyToFormation = async (e) => {
     e.preventDefault();
-    if (!contactForm.name || !contactForm.email || !contactForm.message) {
-      toast.error("Veuillez remplir tous les champs obligatoires");
+    
+    if (!selectedFormation) {
+      toast.error("Aucune formation sélectionnée");
+      return;
+    }
+
+    if (!isAuthenticated || !user) {
+      toast.error("Vous devez être connecté pour postuler");
+      navigate("/login");
+      return;
+    }
+
+    // Vérification des champs requis
+    if (!contactForm.message || contactForm.message.trim() === '') {
+      toast.error("Veuillez rédiger un message de motivation");
       return;
     }
 
     try {
-      // Ici, vous pouvez appeler une API pour envoyer la demande de contact
-      // await sendContactRequest({ ...contactForm, formationId: selectedFormation?.id });
-      
-      toast.success(
-        "Votre demande a été envoyée ! Un conseiller vous contactera sous 24h."
+      // Préparer les données pour l'API
+      const candidatureData = {
+        messageMotivation: contactForm.message,
+        cvUrl: cvFile?.dbUrl || cvFile?.url || userCVUrl, // Utiliser l'URL de la base de données si disponible
+        nomCandidat: contactForm.name || user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        emailCandidat: contactForm.email || user.email || '',
+        telephoneCandidat: contactForm.phone || user.phone || null
+      };
+
+      // Log pour debug
+      console.log('📤 Envoi candidature formation:', {
+        formationId: selectedFormation.id,
+        data: candidatureData
+      });
+
+      const result = await postuler(
+        selectedFormation.id,
+        'formation',
+        selectedFormation.title,
+        candidatureData
       );
-      setContactForm({ name: "", email: "", phone: "", message: "" });
-      setIsContactDialogOpen(false);
+
+      if (result.success) {
+        toast.success("Votre candidature a été envoyée avec succès !");
+        setIsContactDialogOpen(false);
+        setContactForm({ name: "", email: "", phone: "", message: "" });
+        setCvFile(null);
+        
+        // Mettre à jour appliedItems si nécessaire
+        if (handleApply && typeof handleApply === 'function') {
+          handleApply(`formations-${selectedFormation.id}`);
+        }
+        
+        // Recharger les formations si nécessaire
+        await fetchFormations({ status: "active" });
+      } else {
+        toast.error(result.error || "Erreur lors de l'envoi de la candidature");
+      }
     } catch (error) {
-      toast.error("Erreur lors de l'envoi de la demande");
+      console.error("❌ Erreur lors de la postulation:", error);
+      
+      if (error.message.includes("Non autorisé") || error.message.includes("connecté")) {
+        toast.error("Veuillez vous connecter pour postuler");
+        navigate("/login");
+      } else if (error.message.includes("déjà postulé")) {
+        toast.error("Vous avez déjà postulé à cette formation");
+      } else {
+        toast.error(error.message || "Erreur lors de l'envoi de la candidature");
+      }
     }
   };
 
@@ -265,69 +468,21 @@ useEffect(() => {
     setIsContactDialogOpen(true);
   };
 
-const { postuler, isLoading } = useCandidatures();
-
- // CORRECTION : Fonction handleApplyToFormation corrigée
-  const handleApplyToFormation = async (e) => {
-    e.preventDefault(); // Important pour les formulaires
-    
-    if (!selectedFormation) {
-      toast.error("Aucune formation sélectionnée");
-      return;
-    }
-
-    if (!isAuthenticated || !user) {
-      toast.error("Vous devez être connecté pour postuler");
-      navigate("/login");
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
     try {
-      // Vérification des champs requis
-      if (!contactForm.message || contactForm.message.trim() === '') {
-        toast.error("Veuillez rédiger un message de motivation");
-        return;
-      }
-
-      const result = await postuler(
-        selectedFormation.id,
-        'formation',
-        selectedFormation.title,
-        {
-          messageMotivation: contactForm.message,
-          cvUrl: cvFile?.url || null,
-          nomCandidat: contactForm.name || user.name || '',
-          emailCandidat: contactForm.email || user.email || '',
-          telephoneCandidat: contactForm.phone || user.phone || null
-        }
+      toast.success(
+        "Votre demande a été envoyée ! Un conseiller vous contactera sous 24h."
       );
-
-      if (result.success) {
-        toast.success("Votre candidature a été envoyée avec succès !");
-        setIsContactDialogOpen(false);
-        setContactForm({ name: "", email: "", phone: "", message: "" });
-        
-        // Optionnel : Mettre à jour appliedItems si nécessaire
-        if (handleApply && typeof handleApply === 'function') {
-          handleApply(`formations-${selectedFormation.id}`);
-        }
-        
-        // Recharger les formations si nécessaire
-        await fetchFormations({ status: "active" });
-      } else {
-        toast.error(result.error || "Erreur lors de l'envoi de la candidature");
-      }
+      setContactForm({ name: "", email: "", phone: "", message: "" });
+      setIsContactDialogOpen(false);
     } catch (error) {
-      console.error("Erreur lors de la postulation:", error);
-      
-      if (error.message.includes("Non autorisé") || error.message.includes("connecté")) {
-        toast.error("Veuillez vous connecter pour postuler");
-        navigate("/login");
-      } else if (error.message.includes("déjà postulé")) {
-        toast.error("Vous avez déjà postulé à cette formation");
-      } else {
-        toast.error(error.message || "Erreur lors de l'envoi de la candidature");
-      }
+      toast.error("Erreur lors de l'envoi de la demande");
     }
   };
 
@@ -338,22 +493,21 @@ const { postuler, isLoading } = useCandidatures();
     { label: "Taux de réussite", value: "94%", icon: Star },
   ];
 
-
-
-const getCategoryIcon = (category) => {
-  const icons = {
-    'Informatique & Numérique': FaLaptop,
-    'Management & Leadership': FaUserTie,
-    'Commerce & Marketing': FaChartLine,
-    'Bâtiment & Construction': FaBuilding,
-    'Santé & Bien-être': FaHeartbeat,
-    'Comptabilité & Finance': FaMoneyBillAlt,
-    'Langues étrangères': FaGlobeAmericas,
-    'Artisanat & Métiers': FaTools,
+  const getCategoryIcon = (category) => {
+    const icons = {
+      'Informatique & Numérique': FaLaptop,
+      'Management & Leadership': FaUserTie,
+      'Commerce & Marketing': FaChartLine,
+      'Bâtiment & Construction': FaBuilding,
+      'Santé & Bien-être': FaHeartbeat,
+      'Comptabilité & Finance': FaMoneyBillAlt,
+      'Langues étrangères': FaGlobeAmericas,
+      'Artisanat & Métiers': FaTools,
+    };
+    
+    return icons[category] || FaBook;
   };
-  
-  return icons[category] || FaBook;
-};
+
   return (
     <>
       {/* Search Bar */}
@@ -564,19 +718,19 @@ const getCategoryIcon = (category) => {
                 <div className="space-y-4">
                   {apiLoading || loading ? (
                     Array.from({ length: 3 }).map((_, i) => (
-                        <Card key={`skeleton-${i}`} className="border-[#D3D3D3]">
-      <CardContent className="pt-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <Skeleton className="h-48 w-full md:w-48 rounded-lg" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+                      <Card key={`skeleton-${i}`} className="border-[#D3D3D3]">
+                        <CardContent className="pt-6">
+                          <div className="flex flex-col md:flex-row gap-4">
+                            <Skeleton className="h-48 w-full md:w-48 rounded-lg" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-6 w-3/4" />
+                              <Skeleton className="h-4 w-1/2" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-2/3" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))
                   ) : filteredFormations.length > 0 ? (
                     filteredFormations.map((formation) => (
@@ -589,11 +743,11 @@ const getCategoryIcon = (category) => {
                             {/* Formation Image/Logo */}
                             <div className="relative w-full md:w-48 h-48 bg-gradient-to-br from-[#556B2F] to-[#6B8E23] rounded-lg flex items-center justify-center">
                               <div className="text-4xl">
-  {React.createElement(getCategoryIcon(formation.category), {
-    className: "text-white",
-    size: 40  // Augmentez la taille pour le text-4xl
-  })}
-</div>
+                                {React.createElement(getCategoryIcon(formation.category), {
+                                  className: "text-white",
+                                  size: 40
+                                })}
+                              </div>
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -851,7 +1005,7 @@ const getCategoryIcon = (category) => {
         </div>
       </div>
 
-       {/* Dialog d'inscription */}
+      {/* Dialog d'inscription */}
       <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -867,7 +1021,6 @@ const getCategoryIcon = (category) => {
             </DialogDescription>
           </DialogHeader>
           
-          {/* CORRECTION : Séparation des deux formulaires */}
           {selectedFormation ? (
             <form onSubmit={handleApplyToFormation}>
               <div className="grid gap-4 py-4">
@@ -893,12 +1046,33 @@ const getCategoryIcon = (category) => {
                     id="cv"
                     type="file"
                     accept=".pdf,.doc,.docx"
-                    onChange={handleFileUpload}
+                    onChange={handleFileUploadEnhanced} // Utiliser la nouvelle fonction
                     className="cursor-pointer"
                   />
                   <p className="text-xs text-gray-500">
                     Formats acceptés : PDF, DOC, DOCX (max 5MB)
                   </p>
+                  {cvFile && (
+                    <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg mt-2">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">{cvFile.name}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setCvFile(null)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  {userCVUrl && !cvFile && (
+                    <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg mt-2">
+                      <FileText className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">CV déjà téléchargé dans votre profil</span>
+                    </div>
+                  )}
                 </div>
               </div>
               <DialogFooter>
@@ -912,8 +1086,9 @@ const getCategoryIcon = (category) => {
                 <Button
                   type="submit"
                   className="bg-[#556B2F] hover:bg-[#6B8E23]"
+                  disabled={isLoading}
                 >
-                  Postuler
+                  {isLoading ? "Envoi en cours..." : "Postuler"}
                 </Button>
               </DialogFooter>
             </form>
@@ -998,7 +1173,6 @@ const getCategoryIcon = (category) => {
           )}
         </DialogContent>
       </Dialog>
- 
     </>
   );
 };

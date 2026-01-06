@@ -1113,52 +1113,7 @@ const AlternanceSection = ({
                   </div>
                 )}
               </div>
-              <div>
-                <Label className="font-semibold mb-2 block">
-                  Lettre de motivation (optionnelle) :
-                </Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 mb-2">
-                    Glissez-déposez votre lettre de motivation ou
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById("lettre-upload").click()}
-                  >
-                    Parcourir les fichiers
-                  </Button>
-                  <input
-                    id="lettre-upload"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="hidden"
-                    onChange={handleLettreFileChange}
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Formats acceptés : PDF, DOC, DOCX (max 5MB)
-                  </p>
-                </div>
-                {lettreFile && (
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg mt-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-green-600" />
-                      <span className="text-sm">
-                        {lettreFile.name}
-                      </span>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setLettreFile(null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
+             
             </div>
             <DialogFooter>
               <Button

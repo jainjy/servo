@@ -67,7 +67,8 @@ const EmploiSection = ({
   toggleSavedItem,
   handleApply,
   handleShare,
-  handleFileUpload,
+  // Supprimer handleFileUpload des props puisqu'il n'est pas fourni
+  // handleFileUpload,
   cvFile,
   setCvFile,
   setLoading,
@@ -113,6 +114,34 @@ const EmploiSection = ({
     { id: "Alternance", label: "Alternance", color: "bg-yellow-100 text-yellow-800" },
     { id: "Stage", label: "Stage", color: "bg-pink-100 text-pink-800" },
   ];
+
+  // CORRECTION : Ajouter la même fonction de gestion de fichier que dans AlternanceSection
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Vérifier la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Le fichier ne doit pas dépasser 5MB");
+        return;
+      }
+      
+      // Vérifier l'extension
+      const validExtensions = ['.pdf', '.doc', '.docx'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      
+      if (!validExtensions.includes(fileExtension)) {
+        toast.error("Format de fichier non supporté. Utilisez PDF, DOC ou DOCX");
+        return;
+      }
+      
+      setCvFile({
+        name: file.name,
+        size: file.size,
+        url: URL.createObjectURL(file) // Crée une URL locale pour le fichier
+      });
+      toast.success("CV téléchargé avec succès");
+    }
+  };
 
   // Charger les données au montage
   useEffect(() => {
@@ -636,6 +665,7 @@ const EmploiSection = ({
                           type="file"
                           accept=".pdf,.doc,.docx"
                           className="hidden"
+                          // CORRECTION: Utiliser handleFileUpload défini localement
                           onChange={handleFileUpload}
                         />
                         <p className="text-xs text-gray-500 mt-2">
@@ -1085,6 +1115,7 @@ const EmploiSection = ({
                     type="file"
                     accept=".pdf,.doc,.docx"
                     className="hidden"
+                    // CORRECTION: Utiliser handleFileUpload défini localement
                     onChange={handleFileUpload}
                   />
                   <p className="text-xs text-gray-500 mt-2">
