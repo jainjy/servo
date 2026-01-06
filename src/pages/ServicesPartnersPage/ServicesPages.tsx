@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronDown, Search, X, Home, Send, Star, FileText, Loader2, Building, Filter } from "lucide-react";
+import { ChevronDown, Search, X, Home, Send, Star, FileText, Loader2, Building, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -44,17 +44,17 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const isLoggedIn = Boolean(user);
-  
+
   // États de recherche et filtres
   const [servicesSearchQuery, setServicesSearchQuery] = useState("");
   const [propertyType, setPropertyType] = useState("");
-  const [serviceCategory, setServiceCategory] = useState("");  
+  const [serviceCategory, setServiceCategory] = useState("");
   // États d'interface
   const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [dropdownResults, setDropdownResults] = useState<ServiceType[]>([]);
-  
+
   // États modaux
   const [isDevisModalOpen, setIsDevisModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,10 +86,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
       setLoading(true);
       setError(null);
       const response = await api.get("/services");
-      
+
       if (response.status === 200) {
         const data = response.data;
-        
+
         const parseApiData = (data: any): ServiceType[] => {
           if (!data) return [];
           if (Array.isArray(data)) return data;
@@ -109,10 +109,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
           .map(service => service.category)
           .filter(Boolean)
         )].map(category => ({
-            value: category as string,
-            label: (category as string).charAt(0).toUpperCase() + (category as string).slice(1).toLowerCase()
-          }));
-        
+          value: category as string,
+          label: (category as string).charAt(0).toUpperCase() + (category as string).slice(1).toLowerCase()
+        }));
+
         setServiceCategories(prev => [
           { value: "", label: "Toutes les catégories" },
           ...uniqueCategories
@@ -146,7 +146,7 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
         service.category?.toLowerCase().includes(servicesSearchQuery.toLowerCase())
       )
       .slice(0, 6);
-    
+
     setDropdownResults(results);
   }, [servicesSearchQuery, services]);
 
@@ -157,12 +157,12 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
     // Filtre par recherche texte
     if (servicesSearchQuery.trim()) {
       const query = servicesSearchQuery.toLowerCase();
-      filtered = filtered.filter(service => 
+      filtered = filtered.filter(service =>
         service.name?.toLowerCase().includes(query) ||
         service.description?.toLowerCase().includes(query) ||
         service.category?.toLowerCase().includes(query) ||
-        (service.metiers && service.metiers.some(metier => 
-          metier.libelle?.toLowerCase().includes(query) || 
+        (service.metiers && service.metiers.some(metier =>
+          metier.libelle?.toLowerCase().includes(query) ||
           metier.name?.toLowerCase().includes(query)
         ))
       );
@@ -176,7 +176,7 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
         'terrain': ['ESTIMATION', 'FINANCEMENT', 'JURIDIQUE', 'CONSTRUCTION'],
         'hotel': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'JURIDIQUE', 'CONSTRUCTION', 'RENOVATION', 'ENTRETIEN']
       };
-      
+
       filtered = filtered.filter(service => {
         const serviceCategory = service.category || service.type || 'OTHER';
         return typeToCategoryMap[propertyType]?.includes(serviceCategory);
@@ -185,7 +185,7 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
 
     // Filtre par catégorie de service
     if (serviceCategory) {
-      filtered = filtered.filter(service => 
+      filtered = filtered.filter(service =>
         service.category === serviceCategory
       );
     }
@@ -205,7 +205,7 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
       toast.error("Veuillez remplir tous les champs");
       return;
     }
-    
+
     // console.log("Email:", email);
     // console.log("Message:", message);
     setShowMessageCard(false);
@@ -287,8 +287,8 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('.filter-dropdown') && 
-          !target.closest('.category-dropdown')) {
+      if (!target.closest('.filter-dropdown') &&
+        !target.closest('.category-dropdown')) {
         setShowPropertyDropdown(false);
         setShowCategoryDropdown(false);
       }
@@ -302,13 +302,13 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   const ServicesSection = () => {
     const filteredServices = getFilteredServices();
     const hasActiveFilters = servicesSearchQuery || propertyType || serviceCategory;
-    
+
     // Pagination logique
     const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     const displayedServices = filteredServices.slice(startIndex, endIndex);
-    
+
     // Réinitialiser la page si elle dépasse le nombre de pages
     useEffect(() => {
       if (currentPage > totalPages && totalPages > 0) {
@@ -353,7 +353,7 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
             </div>
             <p className="text-gray-600 text-lg mb-4">Aucun service trouvé avec ces critères.</p>
             {hasActiveFilters && (
-              <button 
+              <button
                 onClick={handleResetFilters}
                 className="bg-[#556B2F] text-white px-6 py-3 rounded-lg hover:bg-[#6B8E23] transition-colors font-medium"
               >
@@ -365,15 +365,49 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
           <>
             {/* Compteur de résultats */}
             <div className="flex justify-between items-center mb-6 px-4">
-              <p className="text-[#556B2F] text-sm">
+              <p className="text-white bg-logo py-1 px-5 rounded-full text-xs font-bold">
                 {filteredServices.length} service{filteredServices.length > 1 ? 's' : ''} trouvé{filteredServices.length > 1 ? 's' : ''}
                 {hasActiveFilters && " avec les filtres actuels"}
               </p>
-              {filteredServices.length > 0 && (
-                <p className="text-[#556B2F] text-sm">
-                  Page {currentPage} sur {totalPages}
-                </p>
+              {/* Pagination */}
+              {filteredServices.length > ITEMS_PER_PAGE && (
+                <div className="flex justify-center items-center gap-1.5 px-2 py-2 flex-wrap text-sm">
+                  {/* Previous */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="flex items-center justify-center bg-logo h-8 w-8 rounded-full border border-[#556B2F]/60 text-white hover:bg-[#556B2F] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  {/* Pages */}
+                  <div className="flex gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`h-8 min-w-8 px-2 rounded-full text-xs font-medium transition-colors ${currentPage === page
+                            ? "bg-[#556B2F] text-white"
+                            : "border border-[#556B2F]/50 text-[#556B2F] hover:bg-[#556B2F] hover:text-white"
+                          }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Next */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center justify-center h-8 w-8 rounded-full border bg-logo border-[#556B2F]/60 text-white hover:bg-[#556B2F] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               )}
+
             </div>
 
             {/* Grille des services */}
@@ -384,132 +418,94 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                 </div>
               ) : (
                 displayedServices.map((service, index) => (
-                <div
-                  key={service.id || index}
-                  className="bg-[#FFFFF0] rounded-2xl overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-[#D3D3D3] group"
-                >
-                  {/* Image du service */}
-                  <div className="relative overflow-hidden">
-                    <img 
-                      src={service.images?.[0] || `https://via.placeholder.com/300x200/#D3D3D3/#556B2F?text=${encodeURIComponent(service.name || 'Service')}`} 
-                      alt={service.name}
-                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                      onError={(e) => handleImageError(e, service.name || 'Service')}
-                    />
-                    
-                    {/* Badges */}
-                    <div className="absolute top-3 left-3 bg-[#556B2F] text-white px-3 py-1 rounded-full text-xs font-medium">
-                      {service.images?.length || 1} photo{service.images?.length > 1 ? 's' : ''}
-                    </div>
-                    
-                    {/* Catégorie */}
-                    {service.category && (
-                      <div className="absolute top-3 right-3 bg-[#FFFFF0] bg-opacity-90 text-[#556B2F] px-3 py-1 rounded-full text-xs font-medium">
-                        {service.category}
-                      </div>
-                    )}
-                    
-                    {service.rating && (
-                      <div className="absolute bottom-3 left-3 bg-[#FFFFF0] bg-opacity-90 text-[#556B2F] px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                        {service.rating}
-                      </div>
-                    )}
-                  </div>
+                  <div
+                    key={service.id || index}
+                    className="bg-[#FFFFF0] rounded-2xl overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-[#D3D3D3] group"
+                  >
+                    {/* Image du service */}
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={service.images?.[0] || `https://via.placeholder.com/300x200/#D3D3D3/#556B2F?text=${encodeURIComponent(service.name || 'Service')}`}
+                        alt={service.name}
+                        className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                        onError={(e) => handleImageError(e, service.name || 'Service')}
+                      />
 
-                  {/* Contenu du service */}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-2 leading-tight text-base">
-                        {service.name || 'Service sans nom'}
-                      </h3>
-                      
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
-                        {service.description || 'Description non disponible'}
-                      </p>
-                      
-                      {/* Métiers */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {service.metiers?.slice(0, 3).map((metier, idx) => (
-                          <span 
-                            key={metier.id || idx}
-                            className="inline-block px-2 py-1 bg-[#556B2F]/10 text-[#556B2F] rounded-full text-xs font-medium"
-                          >
-                            {metier.libelle || metier.name}
-                          </span>
-                        ))}
+                      {/* Badges */}
+                      <div className="absolute top-3 left-3 bg-[#556B2F] text-white px-3 py-1 rounded-full text-xs font-medium">
+                        {service.images?.length || 1} photo{service.images?.length > 1 ? 's' : ''}
                       </div>
-                      
-                      {/* Prix et durée */}
-                      <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
-                        {service.price && (
-                          <span className="font-semibold text-[#8B4513] text-base">
-                            {typeof service.price === 'number' ? service.price.toLocaleString() : service.price} €
-                          </span>
-                        )}
-                        {service.duration && (
-                          <span className="bg-[#D3D3D3] px-2 py-1 rounded text-xs text-gray-700">
-                            ⏱ {service.duration}min
-                          </span>
-                        )}
-                      </div>
+
+                      {/* Catégorie */}
+                      {service.category && (
+                        <div className="absolute top-3 right-3 bg-[#FFFFF0] bg-opacity-90 text-[#556B2F] px-3 py-1 rounded-full text-xs font-medium">
+                          {service.category}
+                        </div>
+                      )}
+
+                      {service.rating && (
+                        <div className="absolute bottom-3 left-3 bg-[#FFFFF0] bg-opacity-90 text-[#556B2F] px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                          <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                          {service.rating}
+                        </div>
+                      )}
                     </div>
-                    
-                    {/* Bouton devis */}
-                    <div className="mt-4 pt-4 border-t border-[#D3D3D3]">
-                      <Button
-                        className="text-white font-medium bg-[#556B2F] rounded-lg text-xs hover:bg-[#6B8E23] transition-colors duration-200 flex-1"
-                        onClick={() => handleDevisClick(service)}
-                      >
-                       <FileText className="h-3 w-3 mr-1" />
-                        DEVIS
-                      </Button>           
+
+                    {/* Contenu du service */}
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-2 leading-tight text-base">
+                          {service.name || 'Service sans nom'}
+                        </h3>
+
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
+                          {service.description || 'Description non disponible'}
+                        </p>
+
+                        {/* Métiers */}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {service.metiers?.slice(0, 3).map((metier, idx) => (
+                            <span
+                              key={metier.id || idx}
+                              className="inline-block px-2 py-1 bg-[#556B2F]/10 text-[#556B2F] rounded-full text-xs font-medium"
+                            >
+                              {metier.libelle || metier.name}
+                            </span>
+                          ))}
+                        </div>
+
+                        {/* Prix et durée */}
+                        <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
+                          {service.price && (
+                            <span className="font-semibold text-[#8B4513] text-base">
+                              {typeof service.price === 'number' ? service.price.toLocaleString() : service.price} €
+                            </span>
+                          )}
+                          {service.duration && (
+                            <span className="bg-[#D3D3D3] px-2 py-1 rounded text-xs text-gray-700">
+                              ⏱ {service.duration}min
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Bouton devis */}
+                      <div className="mt-4 pt-4 border-t border-[#D3D3D3]">
+                        <Button
+                          className="text-white font-medium bg-[#556B2F] rounded-lg text-xs hover:bg-[#6B8E23] transition-colors duration-200 flex-1"
+                          onClick={() => handleDevisClick(service)}
+                        >
+                          <FileText className="h-3 w-3 mr-1" />
+                          DEVIS
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))
               )}
             </section>
-            
-            {/* Pagination */}
-            {filteredServices.length > ITEMS_PER_PAGE && (
-              <div className="flex justify-center items-center gap-2 mb-12 px-4 flex-wrap">
-                {/* Bouton Previous */}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-lg border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                >
-                  Précédent
-                </button>
-                
-                {/* Numéros de page */}
-                <div className="flex gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
-                        currentPage === page
-                          ? 'bg-[#556B2F] text-white'
-                          : 'border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-                
-                {/* Bouton Next */}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-lg border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                >
-                  Suivant
-                </button>
-              </div>
-            )}
+
+
           </>
         )}
       </>
@@ -555,10 +551,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nom *
                   </label>
-                  <input 
-                    name="nom" 
-                    placeholder="Votre nom" 
-                    required 
+                  <input
+                    name="nom"
+                    placeholder="Votre nom"
+                    required
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
                   />
@@ -567,10 +563,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Prénom *
                   </label>
-                  <input 
-                    name="prenom" 
-                    placeholder="Votre prénom" 
-                    required 
+                  <input
+                    name="prenom"
+                    placeholder="Votre prénom"
+                    required
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
                   />
@@ -582,11 +578,11 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email *
                   </label>
-                  <input 
-                    name="email" 
-                    type="email" 
-                    placeholder="votre@email.com" 
-                    required 
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="votre@email.com"
+                    required
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
                   />
@@ -595,10 +591,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Téléphone *
                   </label>
-                  <input 
-                    name="telephone" 
-                    placeholder="06 12 34 56 78" 
-                    required 
+                  <input
+                    name="telephone"
+                    placeholder="06 12 34 56 78"
+                    required
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
                   />
@@ -609,9 +605,9 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Adresse du projet
                 </label>
-                <input 
-                  name="adresse" 
-                  placeholder="Adresse complète du projet" 
+                <input
+                  name="adresse"
+                  placeholder="Adresse complète du projet"
                   className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                   disabled={isSubmitting}
                 />
@@ -622,9 +618,9 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Date souhaitée
                   </label>
-                  <input 
-                    name="dateSouhaitee" 
-                    type="date" 
+                  <input
+                    name="dateSouhaitee"
+                    type="date"
                     min={new Date().toISOString().split("T")[0]}
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
@@ -653,10 +649,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Message supplémentaire
                 </label>
-                <textarea 
-                  name="message" 
-                  placeholder="Décrivez votre projet en détail..." 
-                  rows={4} 
+                <textarea
+                  name="message"
+                  placeholder="Décrivez votre projet en détail..."
+                  rows={4}
                   className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                   disabled={isSubmitting}
                 />
