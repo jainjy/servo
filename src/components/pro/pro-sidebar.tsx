@@ -36,6 +36,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
+import ServoLogo from "../components/ServoLogo";
 
 // Interface pour les items de navigation
 interface NavigationItem {
@@ -431,19 +432,12 @@ export function ProSidebar() {
     <>
       {/* Logo & header */}
       <div className="flex h-16 items-center gap-2 border-b border-[#D3D3D3] px-6">
-        <Link to="/pro" className="flex items-center gap-2">
-          <div className="p-1 rounded-full bg-[#FFFFFF] border-black border-2">
-            <img
-              src={logo}
-              alt="OLIPLUSLogo"
-              className="w-10 h-10 rounded-full"
-            />
+         <div>
+          <Link to="/" className="flex items-center gap-2">
+            <ServoLogo />
+          </Link>
+            <p className="text-xs text-[#8B4513] text-center">Espace Pro</p>
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">SERVO</h1>
-            <p className="text-xs text-[#8B4513]">Espace Pro</p>
-          </div>
-        </Link>
       </div>
 
       {/* Navigation avec sections */}

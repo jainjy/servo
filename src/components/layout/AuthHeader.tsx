@@ -269,9 +269,8 @@ export function AuthHeader() {
                 id: listing.id,
                 type: "listing" as const,
                 title: listing.titre || listing.title || "Annonce",
-                subtitle: `${
-                  listing.prixVente || listing.price || "N/A"
-                } Ar • ${listing.type || "Annonce"}`,
+                subtitle: `${listing.prixVente || listing.price || "N/A"
+                  } Ar • ${listing.type || "Annonce"}`,
                 url: `/admin/listings/${listing.id}`,
                 image:
                   listing.image ||
@@ -294,8 +293,8 @@ export function AuthHeader() {
           let servicesData = Array.isArray(servicesResponse.data)
             ? servicesResponse.data
             : servicesResponse.data?.data ||
-              servicesResponse.data?.services ||
-              [];
+            servicesResponse.data?.services ||
+            [];
 
           if (servicesData && servicesData.length > 0) {
             results.push(
@@ -656,11 +655,10 @@ export function AuthHeader() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`h-7 text-xs transition-all duration-300 relative ${
-                          isDeletingAll
-                            ? "delete-all-shaking delete-button-loading bg-red-50 text-red-600 border border-red-200"
-                            : "hover:bg-red-50 hover:text-red-600"
-                        }`}
+                        className={`h-7 text-xs transition-all duration-300 relative ${isDeletingAll
+                          ? "delete-all-shaking delete-button-loading bg-red-50 text-red-600 border border-red-200"
+                          : "hover:bg-red-50 hover:text-red-600"
+                          }`}
                         onClick={markAllAsRead}
                         disabled={isDeletingAll}
                       >
@@ -685,11 +683,10 @@ export function AuthHeader() {
                         className={`
                         p-4 border-b last:border-b-0 hover:bg-[#6B8E23]/5 cursor-pointer group relative 
                         transition-all duration-500 ease-in-out
-                        ${
-                          deletingStates[notification.id]
+                        ${deletingStates[notification.id]
                             ? "notification-deleting"
                             : ""
-                        }
+                          }
                         ${isDeletingAll ? "opacity-50" : ""}
                       `}
                         onClick={() => {
@@ -710,16 +707,14 @@ export function AuthHeader() {
                           }
                           className={`
                           absolute right-2 top-2 p-1 rounded transition-all duration-300
-                          ${
-                            deletingStates[notification.id]
+                          ${deletingStates[notification.id]
                               ? "opacity-100 bg-red-100 text-red-600"
                               : "opacity-0 group-hover:opacity-100 hover:bg-red-100 text-black"
-                          }
-                          ${
-                            isDeletingAll
+                            }
+                          ${isDeletingAll
                               ? "pointer-events-none opacity-30"
                               : ""
-                          }
+                            }
                         `}
                           title="Supprimer la notification"
                           disabled={
@@ -744,11 +739,10 @@ export function AuthHeader() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
                               <p
-                                className={`text-sm font-medium transition-colors ${
-                                  !notification.read
-                                    ? "text-gray-900"
-                                    : "text-[#8B4513]"
-                                }`}
+                                className={`text-sm font-medium transition-colors ${!notification.read
+                                  ? "text-gray-900"
+                                  : "text-[#8B4513]"
+                                  }`}
                               >
                                 {notification.title}
                               </p>
@@ -824,6 +818,14 @@ export function AuthHeader() {
                         <User className="mr-2 h-4 w-4" />
                         Profil
                       </Link>
+                      <Link
+                        to="/"
+                        className="flex items-center px-2 py-2 text-sm hover:bg-[#6B8E23]/10 rounded transition-colors text-[#556B2F]"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Play className="mr-2 h-4 w-4" />
+                        Voir le site
+                      </Link>
 
                     </>
                   ) : (
@@ -843,6 +845,14 @@ export function AuthHeader() {
                       >
                         <Settings className="mr-2 h-4 w-4" />
                         Paramètres
+                      </Link>
+                      <Link
+                        to="/"
+                        className="flex items-center px-2 py-2 text-sm hover:bg-[#6B8E23]/10 rounded transition-colors text-[#556B2F]"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Play className="mr-2 h-4 w-4" />
+                        Voir le site
                       </Link>
                     </>
                   )}
