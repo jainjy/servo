@@ -42,8 +42,9 @@ export const useEmploi = () => {
       
       console.log('✅ Réponse API emplois:', response.data);
       
-      if (response.data.success) {
-        setEmplois(response.data.emplois || []);
+        if (response.data.success) {
+    // ✅ Pas de transformation, utilisez candidaturesCount directement
+    setEmplois(response.data.emplois);
         setPagination(response.data.pagination || {
           page: 1,
           limit: 10,
