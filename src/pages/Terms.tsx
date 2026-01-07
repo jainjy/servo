@@ -417,7 +417,7 @@ export default function Terms() {
         {/* Footer Note */}
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 text-center">
           <p className="text-gray-600 dark:text-gray-400 text-sm">
-            En utilisant SERVO, vous confirmez avoir lu, compris et accepté l'ensemble des conditions ci-dessus.
+            En utilisant OLIPLUS, vous confirmez avoir lu, compris et accepté l'ensemble des conditions ci-dessus.
           </p>
         </div>
       </div>

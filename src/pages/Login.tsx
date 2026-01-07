@@ -160,7 +160,7 @@ const LoginPage = () => {
                   </div>
                 </div>
                 <CardTitle className="text-2xl font-bold text-center text-gray-900">
-                  Connexion SERVO
+                  Connexion OLIPLUS
                 </CardTitle>
                 <CardDescription className="text-center text-gray-600">
                   Accédez à votre espace personnel

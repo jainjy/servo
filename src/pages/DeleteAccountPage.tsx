@@ -778,10 +778,10 @@ const DeleteAccountPage = () => {
             Pour toute question concernant la protection de vos données,
             contactez notre DPO à :{" "}
             <a
-              href="mailto:dpo@servo.fr"
+              href="mailto:dpo@oliplus.re"
               className="text-blue-600 hover:underline font-medium"
             >
-              dpo@servo.fr
+              dpo@oliplus.re
             </a>
             {isProfessional && (
               <span>

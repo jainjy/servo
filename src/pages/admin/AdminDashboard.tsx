@@ -330,7 +330,7 @@ export default function AdminDashboard() {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="exemple@servo.com"
+                      placeholder="exemple@oliplus.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23]"
