@@ -77,6 +77,39 @@ class EntrepreneuriatService {
     }
   }
 
+  // DELETE - Supprimer une ressource
+  static async deleteResource(id) {
+    try {
+      const response = await api.delete(`/entrepreneuriat/resources/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur suppression ressource:", error);
+      throw error;
+    }
+  }
+
+  // POST - Créer une ressource
+  static async createResource(data) {
+    try {
+      const response = await api.post("/entrepreneuriat/resources", data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur création ressource:", error);
+      throw error;
+    }
+  }
+
+  // PUT - Mettre à jour une ressource
+  static async updateResource(id, data) {
+    try {
+      const response = await api.put(`/entrepreneuriat/resources/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur mise à jour ressource:", error);
+      throw error;
+    }
+  }
+
   static async downloadResource(id) {
     try {
       const response = await api.get(
@@ -100,11 +133,43 @@ class EntrepreneuriatService {
     }
   }
 
-  static async registerToEvent(eventId) {
+  // POST - Créer un événement
+  static async createEvent(data) {
     try {
-      const response = await api.post(
-        `/entrepreneuriat/events/${eventId}/register`
-      );
+      const response = await api.post("/entrepreneuriat/events", data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur création événement:", error);
+      throw error;
+    }
+  }
+
+  // PUT - Mettre à jour un événement
+  static async updateEvent(id, data) {
+    try {
+      const response = await api.put(`/entrepreneuriat/events/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur mise à jour événement:", error);
+      throw error;
+    }
+  }
+
+  // DELETE - Supprimer un événement
+  static async deleteEvent(id) {
+    try {
+      const response = await api.delete(`/entrepreneuriat/events/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur suppression événement:", error);
+      throw error;
+    }
+  }
+
+  // POST - S'inscrire à un événement
+  static async registerToEvent(id) {
+    try {
+      const response = await api.post(`/entrepreneuriat/events/${id}/register`);
       return response.data;
     } catch (error) {
       console.error("❌ Erreur inscription événement:", error);

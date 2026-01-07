@@ -406,6 +406,44 @@ const EntrepreneuriatAdmin = () => {
     }
   };
 
+  const handleDeleteResource = async () => {
+    try {
+      await EntrepreneuriatService.deleteResource(selectedItem.id);
+      toast({
+        title: "Succès",
+        description: "Ressource supprimée avec succès",
+      });
+      setShowDeleteModal(false);
+      loadData();
+    } catch (error) {
+      console.error("Erreur suppression ressource:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer la ressource",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteEvent = async () => {
+    try {
+      await EntrepreneuriatService.deleteEvent(selectedItem.id);
+      toast({
+        title: "Succès",
+        description: "Événement supprimé avec succès",
+      });
+      setShowDeleteModal(false);
+      loadData();
+    } catch (error) {
+      console.error("Erreur suppression événement:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'événement",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleToggleFeatured = async (interview: Interview) => {
     try {
       await EntrepreneuriatService.updateInterview(interview.id, {
@@ -1883,7 +1921,7 @@ const EntrepreneuriatAdmin = () => {
 
       {/* Modal Resource */}
       <Dialog open={showResourceModal} onOpenChange={setShowResourceModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {modalMode === "create"
@@ -1969,15 +2007,35 @@ const EntrepreneuriatAdmin = () => {
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="resource-isFree"
-                checked={resourceForm.isFree}
-                onCheckedChange={(checked) =>
-                  setResourceForm({ ...resourceForm, isFree: checked })
-                }
-              />
-              <Label htmlFor="resource-isFree">Ressource gratuite</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="resource-isFree"
+                  checked={resourceForm.isFree}
+                  onCheckedChange={(checked) =>
+                    setResourceForm({ ...resourceForm, isFree: checked })
+                  }
+                />
+                <Label htmlFor="resource-isFree">Ressource gratuite</Label>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="resource-status">Statut</Label>
+                <Select
+                  value={resourceForm.status}
+                  onValueChange={(value: any) =>
+                    setResourceForm({ ...resourceForm, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Brouillon</SelectItem>
+                    <SelectItem value="published">Publié</SelectItem>
+                    <SelectItem value="archived">Archivé</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -2208,7 +2266,7 @@ const EntrepreneuriatAdmin = () => {
                   placeholder="Adresse physique"
                 />
               </div>
-              <div className="space-y-2">
+                           <div className="space-y-2">
                 <Label htmlFor="event-onlineLink">
                   Lien en ligne (optionnel)
                 </Label>
@@ -2273,8 +2331,11 @@ const EntrepreneuriatAdmin = () => {
               onClick={() => {
                 if (activeTab === "interviews") {
                   handleDeleteInterview();
+                } else if (activeTab === "resources") {
+                  handleDeleteResource();
+                } else if (activeTab === "events") {
+                  handleDeleteEvent();
                 }
-                // Ajouter la logique pour ressources et événements
               }}
             >
               Supprimer
