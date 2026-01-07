@@ -366,10 +366,10 @@ export default function GestionDroitsRGPD() {
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Email</p>
               <a
-                href="mailto:dpo@servo.mg"
+                href="mailto:dpo@oliplus.re"
                 className="text-lg font-semibold text-blue-600 dark:text-blue-400 hover:underline"
               >
-                dpo@servo.mg
+                dpo@oliplus.re
               </a>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">

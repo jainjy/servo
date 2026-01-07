@@ -132,8 +132,8 @@ export default function MentionsLegales() {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">DPO</p>
-                                            <a href="mailto:dpo@servo.mg" className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                                                dpo@servo.mg
+                                            <a href="mailto:dpo@oliplus.re" className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                                                dpo@oliplus.re
                                             </a>
                                         </div>
                                     </div>
@@ -233,8 +233,8 @@ export default function MentionsLegales() {
                             <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4">
                                 <p className="text-gray-700 dark:text-gray-300">
                                     Pour exercer ces droits, contactez notre Délégué à la Protection des Données à l'adresse :
-                                    <a href="mailto:dpo@servo.mg" className="text-red-600 dark:text-red-400 font-semibold ml-1 hover:underline">
-                                        dpo@servo.mg
+                                    <a href="mailto:dpo@oliplus.re" className="text-red-600 dark:text-red-400 font-semibold ml-1 hover:underline">
+                                        dpo@oliplus.re
                                     </a>
                                 </p>
                             </div>

@@ -135,10 +135,10 @@ export default function ContactDPO() {
                     <span className="font-semibold text-gray-900 dark:text-white">Email</span>
                   </div>
                   <a
-                    href="mailto:dpo@servo.mg"
+                    href="mailto:dpo@oliplus.re"
                     className="text-blue-600 dark:text-blue-400 hover:underline break-all"
                   >
-                    dpo@servo.mg
+                    dpo@oliplus.re
                   </a>
                 </div>
 
