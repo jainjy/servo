@@ -215,7 +215,7 @@ export default function Terms() {
       
       RGPD et autorités :
       • Conformément au RGPD, vous pouvez saisir votre autorité locale de protection des données
-      • Contact DPO : dpo@servo.mg`,
+      • Contact DPO : dpo@oliplus.re`,
     },
     {
       id: 12,
@@ -227,7 +227,7 @@ export default function Terms() {
       Email : support@servo.mg
       
       Questions RGPD / Données personnelles
-      Email : dpo@servo.mg
+      Email : dpo@oliplus.re
       
       Mentions légales
       Consultez nos mentions légales pour plus d'informations

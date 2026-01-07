@@ -59,7 +59,7 @@ export default function MentionsLegales() {
                         <div className="space-y-4 grid grid-cols-1 lg:grid-cols-2 pl-11">
                             <div className="pb-3 border-b border-gray-100 dark:border-gray-700">
                                 <p className="font-semibold text-gray-900 dark:text-white mb-1">Dénomination sociale</p>
-                                <p className="text-gray-700 dark:text-gray-300">OLIPLUS Platform</p>
+                                <p className="text-gray-700 dark:text-gray-300">OLIPLUS</p>
                             </div>
                             <div className="pb-3 border-b border-gray-100 dark:border-gray-700">
                                 <p className="font-semibold text-gray-900 dark:text-white mb-1">Forme juridique</p>
@@ -67,15 +67,15 @@ export default function MentionsLegales() {
                             </div>
                             <div className="pb-3 border-b border-gray-100 dark:border-gray-700">
                                 <p className="font-semibold text-gray-900 dark:text-white mb-1">Capital social</p>
-                                <p className="text-gray-700 dark:text-gray-300">À compléter</p>
+                                <p className="text-gray-700 dark:text-gray-300">45 rue Monseigneur de Beaumont, 97400 Saint-Denis.</p>
                             </div>
                             <div className="pb-3 border-b border-gray-100 dark:border-gray-700">
                                 <p className="font-semibold text-gray-900 dark:text-white mb-1">Siège social</p>
-                                <p className="text-gray-700 dark:text-gray-300">Madagascar</p>
+                                <p className="text-gray-700 dark:text-gray-300">45 rue Monseigneur de Beaumont, 97400 Saint-Denis.</p>
                             </div>
                             <div>
                                 <p className="font-semibold text-gray-900 dark:text-white mb-1">Numéro SIRET</p>
-                                <p className="text-gray-700 dark:text-gray-300">À compléter avec votre SIRET</p>
+                                <p className="text-gray-700 dark:text-gray-300">OLIPLUS, EURL, immatriculée sous le n° 943 536 540</p>
                             </div>
                         </div>
                     </section>
@@ -132,8 +132,8 @@ export default function MentionsLegales() {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">DPO</p>
-                                            <a href="mailto:dpo@servo.mg" className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                                                dpo@servo.mg
+                                            <a href="mailto:dpo@oliplus.re" className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                                                dpo@oliplus.re
                                             </a>
                                         </div>
                                     </div>
@@ -233,8 +233,8 @@ export default function MentionsLegales() {
                             <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4">
                                 <p className="text-gray-700 dark:text-gray-300">
                                     Pour exercer ces droits, contactez notre Délégué à la Protection des Données à l'adresse :
-                                    <a href="mailto:dpo@servo.mg" className="text-red-600 dark:text-red-400 font-semibold ml-1 hover:underline">
-                                        dpo@servo.mg
+                                    <a href="mailto:dpo@oliplus.re" className="text-red-600 dark:text-red-400 font-semibold ml-1 hover:underline">
+                                        dpo@oliplus.re
                                     </a>
                                 </p>
                             </div>

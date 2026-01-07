@@ -265,7 +265,7 @@ export default function RGPDInfo() {
                   Contacter notre DPO
                 </h3>
                 <p className="text-blue-800 dark:text-blue-200">
-                  Email : <a href="mailto:dpo@servo.mg" className="font-semibold hover:underline">dpo@servo.mg</a>
+                  Email : <a href="mailto:dpo@oliplus.re" className="font-semibold hover:underline">dpo@oliplus.re</a>
                 </p>
                 <p className="text-blue-800 dark:text-blue-200 text-sm mt-1">
                   Délai de réponse : 30 jours maximum conformément au RGPD
