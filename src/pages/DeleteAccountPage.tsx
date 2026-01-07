@@ -105,7 +105,7 @@ const DeleteAccountPage = () => {
   const handleDeleteAccount = async () => {
     try {
       setIsLoading(true);
-      console.log("bollean", allStepsCompleted());
+     // console.log("bollean", allStepsCompleted());
       const response = await api.delete("/users/delete-account", {
         data: {
           password,

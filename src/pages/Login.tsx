@@ -41,7 +41,7 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       const { user } = await login(email, password);
-      console.log("Login successful:", user);
+      //console.log("Login successful:", user);
       // Redirection intelligente
       if (redirectPath) {
         navigate(redirectPath);

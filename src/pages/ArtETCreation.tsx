@@ -103,13 +103,13 @@ const ArtEtCreation = () => {
 
   // Fonction appelée après succès de la demande
   const handleDemandeSuccess = (artworkId: string) => {
-    console.log(`Demande envoyée pour l'œuvre ${artworkId}`);
+    //console.log(`Demande envoyée pour l'œuvre ${artworkId}`);
     
   };
 
   // Fonction de suivi du contact (optionnel)
   const handlePropertyContact = (property: any) => {
-    console.log('Contact tracké pour:', property);
+    //console.log('Contact tracké pour:', property);
     // Ici vous pouvez ajouter du tracking analytique
   };
 

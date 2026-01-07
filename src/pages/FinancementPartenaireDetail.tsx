@@ -93,11 +93,11 @@ export default function FinancementPartenaireDetail() {
     try {
       setLoading(true);
       setError(null);
-      console.log("🔍 ID du partenaire:", id); // ✅ Debug
+      // console.log("🔍 ID du partenaire:", id); // ✅ Debug
       const partenairesResponse = await financementAPI.getPartenairesDetails(
         id
       );
-      console.log("✅ Réponse API:", partenairesResponse.data); // ✅ Debug complet
+      // console.log("✅ Réponse API:", partenairesResponse.data); // ✅ Debug complet
       if (!partenairesResponse.data) {
         setError("Partenaire non trouvé");
         return;
@@ -105,7 +105,7 @@ export default function FinancementPartenaireDetail() {
       setPartenaire(partenairesResponse.data);
       // ✅ Vérifiez la structure des données retournées
       const services = partenairesResponse.data.ServiceFinancier || [];
-      console.log("📊 Services reçus:", services); // ✅ Debug services
+      // console.log("📊 Services reçus:", services); // ✅ Debug services
       setServices(services);
     } catch (error) {
       console.error("❌ Erreur lors du chargement:", error);

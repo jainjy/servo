@@ -33,8 +33,7 @@ export function AdCard({
         const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
         const newTimeRemaining = Math.max(0, savedTime - elapsedTime);
         
-        console.log("📦 État restauré du sessionStorage", { savedIsVisible, newTimeRemaining });
-        
+       
         setIsVisible(savedIsVisible);
         setTimeRemaining(newTimeRemaining);
         setTotalCycleTime(savedIsVisible ? 2 * 60 : 8 * 60);
@@ -43,7 +42,7 @@ export function AdCard({
         setIsVisible(true);
       }
     } else {
-      console.log("🆕 Nouveau state - pas de sessionStorage");
+      // console.log("🆕 Nouveau state - pas de sessionStorage");
       setIsVisible(true);
     }
   }, []);
@@ -67,7 +66,7 @@ export function AdCard({
           
           setIsVisible(newIsVisible);
           setTotalCycleTime(newTotal);
-          console.log("🔄 Phase changée vers:", newIsVisible ? "visible" : "hidden");
+          // console.log("🔄 Phase changée vers:", newIsVisible ? "visible" : "hidden");
         } else {
           setTotalCycleTime(newTotal);
         }
