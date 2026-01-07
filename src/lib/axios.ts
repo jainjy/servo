@@ -11,11 +11,11 @@ export const api = axios.create({
 // Intercepteur pour ajouter le token d'authentification
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth-token');
-  console.log('Intercepteur - Token trouvé:', token ? 'Oui' : 'Non');
+  //console.log('Intercepteur - Token trouvé:', token ? 'Oui' : 'Non');
   
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('Headers de la requête:', config.headers);
+    //console.log('Headers de la requête:', config.headers);
   }
   return config;
 }, (error) => {
@@ -26,11 +26,11 @@ api.interceptors.request.use((config) => {
 // Intercepteur pour gérer les erreurs
 api.interceptors.response.use(
   (response) => {
-    console.log('Réponse reçue:', {
-      status: response.status,
-      url: response.config.url,
-      method: response.config.method
-    });
+    // console.log('Réponse reçue:', {
+    //   status: response.status,
+    //   url: response.config.url,
+    //   method: response.config.method
+    // });
     return response;
   },
   (error) => {

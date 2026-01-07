@@ -136,9 +136,9 @@ export async function trackUserActivity(data: {
           method: "POST",
           body: JSON.stringify({ activities: activitiesToSend }),
         });
-        console.log(`✅ ${activitiesToSend.length} activités envoyées avec succès`);
+        //console.log(`✅ ${activitiesToSend.length} activités envoyées avec succès`);
       } catch (error) {
-        console.error("❌ Erreur envoi batch activités:", error);
+        //console.error("❌ Erreur envoi batch activités:", error);
         // Re-mettre les activités dans la queue en cas d'erreur
         activityQueue = [...activitiesToSend, ...activityQueue];
         
@@ -173,7 +173,7 @@ export async function retryPendingActivities() {
     const pendingActivities = JSON.parse(localStorage.getItem('pendingActivities') || '[]');
     
     if (pendingActivities.length > 0) {
-      console.log(`🔄 Retry de ${pendingActivities.length} activités en attente...`);
+      //(`🔄 Retry de ${pendingActivities.length} activités en attente...`);
       
       // Filtrer les activités de plus de 24h
       const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
@@ -189,7 +189,7 @@ export async function retryPendingActivities() {
         
         // Supprimer seulement celles qui ont été envoyées avec succès
         localStorage.removeItem('pendingActivities');
-        console.log(`✅ ${recentActivities.length} activités en attente récupérées`);
+       //console.log(`✅ ${recentActivities.length} activités en attente récupérées`);
       } else {
         localStorage.removeItem('pendingActivities');
       }

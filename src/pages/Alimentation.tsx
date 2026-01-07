@@ -285,22 +285,22 @@ const Alimentation = () => {
 
   // Charger les données UNE SEULE FOIS au montage
   useEffect(() => {
-    console.log("useEffect de chargement des données exécuté");
+    //console.log("useEffect de chargement des données exécuté");
     let isMounted = true;
 
     const loadData = async () => {
       try {
-        console.log("Début du chargement des données...");
+        //console.log("Début du chargement des données...");
 
         // Charger les catégories
         const categoriesResponse = await api.get("/aliments/categories");
-        console.log("Catégories chargées:", categoriesResponse.data);
+        //console.log("Catégories chargées:", categoriesResponse.data);
 
         // Charger les produits
         const productsResponse = await api.get("/aliments", {
           params: { status: "active" }
         });
-        console.log("Produits chargés:", productsResponse.data);
+        //console.log("Produits chargés:", productsResponse.data);
 
         if (isMounted) {
           // Mettre à jour les états
@@ -318,14 +318,14 @@ const Alimentation = () => {
           setProducts(productsResponse.data?.products || productsResponse.data || []);
           setIsInitialized(true);
           setIsCategoriesLoading(false);
-          console.log("Données initialisées avec succès");
+          //console.log("Données initialisées avec succès");
         }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
         if (isMounted) {
           setIsInitialized(true);
           setIsCategoriesLoading(false);
-          console.log("Initialisation malgré l'erreur");
+          //console.log("Initialisation malgré l'erreur");
         }
       }
     };
@@ -333,7 +333,7 @@ const Alimentation = () => {
     loadData();
 
     return () => {
-      console.log("Cleanup useEffect");
+      //console.log("Cleanup useEffect");
       isMounted = false;
     };
   }, []); // Dépendance vide = exécuté une seule fois
@@ -342,7 +342,7 @@ const Alimentation = () => {
   useEffect(() => {
     if (!isInitialized) return;
 
-    console.log("Configuration de l'intersection observer");
+    //console.log("Configuration de l'intersection observer");
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -365,7 +365,7 @@ const Alimentation = () => {
     });
 
     return () => {
-      console.log("Cleanup observer");
+      //("Cleanup observer");
       observer.disconnect();
     };
   }, [isInitialized]);
@@ -403,7 +403,7 @@ const Alimentation = () => {
   }, [searchQuery, isInitialized]);
 
   const performSearch = async (query) => {
-    console.log("Recherche pour:", query);
+    //console.log("Recherche pour:", query);
     if (!query.trim()) {
       setSearchResults([]);
       return;
@@ -422,7 +422,7 @@ const Alimentation = () => {
 
       const data = response.data;
       const results = data.products || data || [];
-      console.log("Résultats de recherche:", results.length);
+      //console.log("Résultats de recherche:", results.length);
       setSearchResults(Array.isArray(results) ? results : []);
 
     } catch (error) {
@@ -485,7 +485,7 @@ const Alimentation = () => {
 
   // Écran de chargement initial
   if (!isInitialized) {
-    console.log("Affichage de l'écran de chargement");
+    //console.log("Affichage de l'écran de chargement");
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF]">
         <div className="text-center">
@@ -495,8 +495,7 @@ const Alimentation = () => {
       </div>
     );
   }
-
-  console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
+//console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
 
   return (
     <div className="min-h-screen relative pt-16 bg-[#FFFFFF]">
