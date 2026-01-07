@@ -61,20 +61,18 @@ export const ContactModal = ({
     setIsSubmitting(true);
 
     try {
-      // Ici vous pouvez adapter l'appel API selon votre backend
       const contactData = {
-        professionalId: professional.id,
-        contactNom: formData.nom,
-        contactPrenom: formData.prenom,
-        contactEmail: formData.email,
-        contactTel: formData.telephone,
+        senderName: `${formData.nom} ${formData.prenom}`.trim(),
+        senderEmail: formData.email,
+        senderPhone: formData.telephone,
+        subject: `Contact depuis le profil de ${professional.firstName} ${professional.lastName}`,
         message: formData.message,
-        metiers: professional.metiers.map((m) => m.metier.libelle).join(", "),
-        type: "contact_general",
+        recipientId: professional.id,
+        userId: user?.id,
+        messageType: "professional",
       };
 
-      // Remplacez par votre endpoint d'envoi de message
-      const response = await api.post("/messages/contact", contactData);
+      const response = await api.post("/contact-messages", contactData);
 
       if (response.status === 201) {
         toast.success("Votre message a été envoyé avec succès !");

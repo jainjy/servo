@@ -782,7 +782,7 @@ export default function AdminDiscussions() {
           </div>
 
           {/* Zone d'envoi de message */}
-          <div className="border-t border-[#D3D3D3] px-6 py-3 bg-[#F8F8FF]">
+          {/* <div className="border-t border-[#D3D3D3] px-6 py-3 bg-[#F8F8FF]">
             <div className="flex gap-3">
               <label
                 className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
@@ -839,7 +839,7 @@ export default function AdminDiscussions() {
                 )}
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Bouton pour ouvrir la discussion sur mobile */}

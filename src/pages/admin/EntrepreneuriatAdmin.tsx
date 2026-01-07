@@ -80,6 +80,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import EntrepreneuriatService from "@/services/entrepreneuriatService";
+import UploadService from "@/services/uploadService";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -167,6 +168,7 @@ const EntrepreneuriatAdmin = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("interviews");
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
 
   // Données
@@ -206,6 +208,10 @@ const EntrepreneuriatAdmin = () => {
     isFeatured: false,
   });
 
+  // File selection states
+  const [selectedInterviewFile, setSelectedInterviewFile] = useState<File | null>(null);
+  const [selectedResourceFile, setSelectedResourceFile] = useState<File | null>(null);
+
   const [resourceForm, setResourceForm] = useState({
     title: "",
     description: "",
@@ -232,6 +238,9 @@ const EntrepreneuriatAdmin = () => {
     status: "upcoming" as "upcoming" | "live" | "completed" | "cancelled",
   });
 
+  // Upload states
+  const [previewImage, setPreviewImage] = useState("");
+
   useEffect(() => {
     loadData();
   }, [activeTab]);
@@ -243,6 +252,7 @@ const EntrepreneuriatAdmin = () => {
       if (activeTab === "interviews") {
         const response = await EntrepreneuriatService.getInterviews({});
         setInterviews(response.data);
+        console.log(response.data);
       } else if (activeTab === "resources") {
         const response = await EntrepreneuriatService.getResources({});
         setResources(response.data);
@@ -275,7 +285,15 @@ const EntrepreneuriatAdmin = () => {
   // Gestion des interviews
   const handleCreateInterview = async () => {
     try {
-      await EntrepreneuriatService.createInterview(interviewForm);
+      setIsSubmitting(true);
+      let imageUrl = interviewForm.imageUrl;
+
+      if (selectedInterviewFile) {
+        const result = await UploadService.uploadInterviewImage(selectedInterviewFile);
+        imageUrl = result.data.url;
+      }
+
+      await EntrepreneuriatService.createInterview({ ...interviewForm, imageUrl });
       toast({
         title: "Succès",
         description: "Interview créée avec succès",
@@ -290,14 +308,24 @@ const EntrepreneuriatAdmin = () => {
         description: "Impossible de créer l'interview",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleUpdateInterview = async () => {
     try {
+      setIsSubmitting(true);
+      let imageUrl = interviewForm.imageUrl;
+
+      if (selectedInterviewFile) {
+        const result = await UploadService.uploadInterviewImage(selectedInterviewFile);
+        imageUrl = result.data.url;
+      }
+
       await EntrepreneuriatService.updateInterview(
         selectedItem.id,
-        interviewForm
+        { ...interviewForm, imageUrl }
       );
       toast({
         title: "Succès",
@@ -313,6 +341,8 @@ const EntrepreneuriatAdmin = () => {
         description: "Impossible de mettre à jour l'interview",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -388,6 +418,8 @@ const EntrepreneuriatAdmin = () => {
       status: "draft",
       isFeatured: false,
     });
+    setSelectedInterviewFile(null);
+    setPreviewImage("");
   };
 
   const openEditInterview = (interview: Interview) => {
@@ -409,6 +441,8 @@ const EntrepreneuriatAdmin = () => {
       status: interview.status,
       isFeatured: interview.isFeatured,
     });
+    setPreviewImage(interview.imageUrl);
+    setSelectedInterviewFile(null);
     setModalMode("edit");
     setShowInterviewModal(true);
   };
@@ -459,6 +493,130 @@ const EntrepreneuriatAdmin = () => {
     }
     return true;
   });
+
+  // Gestion de la sélection d'image interview
+  const handleInterviewImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedInterviewFile(file);
+    setPreviewImage(URL.createObjectURL(file));
+  };
+
+  // Gestion de la sélection de fichier ressource
+  const handleResourceFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedResourceFile(file);
+  };
+
+  const resetResourceForm = () => {
+    setResourceForm({
+      title: "",
+      description: "",
+      type: "guide",
+      category: "financement",
+      fileUrl: "",
+      isFree: true,
+      status: "draft",
+      isFeatured: false,
+    });
+    setSelectedResourceFile(null);
+  };
+
+  const handleCreateResource = async () => {
+    try {
+      setIsSubmitting(true);
+      let fileUrl = resourceForm.fileUrl;
+
+      if (selectedResourceFile) {
+        const result = await UploadService.uploadResourceFile(selectedResourceFile);
+        fileUrl = result.data.url;
+      }
+
+      await EntrepreneuriatService.createResource({ ...resourceForm, fileUrl });
+      toast({ title: "Succès", description: "Ressource créée avec succès" });
+      setShowResourceModal(false);
+      resetResourceForm();
+      loadData();
+    } catch (error) {
+      console.error("Erreur création ressource:", error);
+      toast({ title: "Erreur", description: "Impossible de créer la ressource", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateResource = async () => {
+    try {
+      setIsSubmitting(true);
+      let fileUrl = resourceForm.fileUrl;
+
+      if (selectedResourceFile) {
+        const result = await UploadService.uploadResourceFile(selectedResourceFile);
+        fileUrl = result.data.url;
+      }
+
+      await EntrepreneuriatService.updateResource(selectedItem.id, { ...resourceForm, fileUrl });
+      toast({ title: "Succès", description: "Ressource mise à jour avec succès" });
+      setShowResourceModal(false);
+      resetResourceForm();
+      loadData();
+    } catch (error) {
+      console.error("Erreur mise à jour ressource:", error);
+      toast({ title: "Erreur", description: "Impossible de mettre à jour la ressource", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetEventForm = () => {
+    setEventForm({
+      title: "",
+      description: "",
+      format: "webinar",
+      date: format(new Date(), "yyyy-MM-dd"),
+      time: "18:30",
+      duration: "2h",
+      speakers: [],
+      maxParticipants: 100,
+      isRegistrationOpen: true,
+      location: "",
+      onlineLink: "",
+      status: "upcoming",
+    });
+  };
+
+  const handleCreateEvent = async () => {
+    try {
+      setIsSubmitting(true);
+      await EntrepreneuriatService.createEvent(eventForm);
+      toast({ title: "Succès", description: "Événement créé avec succès" });
+      setShowEventModal(false);
+      resetEventForm();
+      loadData();
+    } catch (error) {
+      console.error("Erreur création événement:", error);
+      toast({ title: "Erreur", description: "Impossible de créer l'événement", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateEvent = async () => {
+    try {
+      setIsSubmitting(true);
+      await EntrepreneuriatService.updateEvent(selectedItem.id, eventForm);
+      toast({ title: "Succès", description: "Événement mis à jour avec succès" });
+      setShowEventModal(false);
+      resetEventForm();
+      loadData();
+    } catch (error) {
+      console.error("Erreur mise à jour événement:", error);
+      toast({ title: "Erreur", description: "Impossible de mettre à jour l'événement", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -1596,6 +1754,45 @@ const EntrepreneuriatAdmin = () => {
               />
               <Label htmlFor="isFeatured">Mettre en avant</Label>
             </div>
+
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label>Image de l'interview *</Label>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center justify-center w-full">
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        {selectedInterviewFile ? (
+                          <p className="text-sm text-green-600 font-medium">{selectedInterviewFile.name}</p>
+                        ) : (
+                          <>
+                            <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-600">Cliquez pour uploader</p>
+                            <p className="text-xs text-gray-500">PNG, JPG, GIF</p>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleInterviewImageSelect}
+                      />
+                    </label>
+                  </div>
+                </div>
+                {previewImage && (
+                  <div className="w-32 h-32 rounded-lg overflow-hidden bg-gray-100">
+                    <img
+                      src={previewImage}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <DialogFooter>
@@ -1611,8 +1808,10 @@ const EntrepreneuriatAdmin = () => {
                   ? handleCreateInterview
                   : handleUpdateInterview
               }
+              disabled={isSubmitting}
               className="bg-[#556B2F] hover:bg-[#556B2F]/90"
             >
+              {isSubmitting && <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2"></div>}
               {modalMode === "create" ? "Créer" : "Mettre à jour"}
             </Button>
           </DialogFooter>
@@ -1728,6 +1927,40 @@ const EntrepreneuriatAdmin = () => {
               />
               <Label htmlFor="resource-isFeatured">Mettre en avant</Label>
             </div>
+
+            {/* File Upload */}
+            <div className="space-y-2">
+              <Label>Fichier de la ressource *</Label>
+              <div className="flex items-center justify-center w-full">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    {selectedResourceFile ? (
+                      <>
+                        <FileText className="w-6 h-6 text-green-500 mb-2" />
+                        <p className="text-sm text-green-600">{selectedResourceFile.name}</p>
+                      </>
+                    ) : resourceForm.fileUrl ? (
+                      <>
+                        <FileText className="w-6 h-6 text-green-500 mb-2" />
+                        <p className="text-sm text-green-600">Fichier actuel présent</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600">Cliquez pour uploader</p>
+                        <p className="text-xs text-gray-500">PDF, DOC, XLS, etc</p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                    onChange={handleResourceFileSelect}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
 
           <DialogFooter>
@@ -1737,7 +1970,12 @@ const EntrepreneuriatAdmin = () => {
             >
               Annuler
             </Button>
-            <Button className="bg-[#556B2F] hover:bg-[#556B2F]/90">
+            <Button 
+              onClick={modalMode === "create" ? handleCreateResource : handleUpdateResource}
+              disabled={isSubmitting}
+              className="bg-[#556B2F] hover:bg-[#556B2F]/90"
+            >
+              {isSubmitting && <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2"></div>}
               {modalMode === "create" ? "Créer" : "Mettre à jour"}
             </Button>
           </DialogFooter>
@@ -1940,7 +2178,12 @@ const EntrepreneuriatAdmin = () => {
             <Button variant="outline" onClick={() => setShowEventModal(false)}>
               Annuler
             </Button>
-            <Button className="bg-[#556B2F] hover:bg-[#556B2F]/90">
+            <Button 
+              onClick={modalMode === "create" ? handleCreateEvent : handleUpdateEvent}
+              disabled={isSubmitting}
+              className="bg-[#556B2F] hover:bg-[#556B2F]/90"
+            >
+              {isSubmitting && <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2"></div>}
               {modalMode === "create" ? "Créer" : "Mettre à jour"}
             </Button>
           </DialogFooter>
