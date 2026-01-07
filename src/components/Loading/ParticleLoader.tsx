@@ -92,7 +92,7 @@ export default function ParticleLoader() {
           transition={{ delay: 0.5 }}
         >
           <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            Chargement SERVO
+            Chargement OLIPLUS
           </h3>
           <motion.p
             className="text-gray-500 text-sm"

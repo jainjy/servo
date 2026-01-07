@@ -59,7 +59,7 @@ export default function RGPDInfo() {
             </div>
             <div>
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-                Vos Droits RGPD sur SERVO
+                Vos Droits RGPD sur OLIPUS
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Conformité Règlement Général sur la Protection des Données
@@ -79,7 +79,7 @@ export default function RGPDInfo() {
             vous disposez de droits importants sur vos informations.
           </p>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-            Cette page vous explique ces droits et comment les exercer auprès de SERVO.
+            Cette page vous explique ces droits et comment les exercer auprès de OLIPLUS.
           </p>
         </div>
 
@@ -248,7 +248,7 @@ export default function RGPDInfo() {
               </div>
               <div>
                 <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                  Via votre compte SERVO
+                  Via votre compte OLIPLUS
                 </h3>
                 <p className="text-blue-800 dark:text-blue-200">
                   Accédez à la section "Gestion des Droits RGPD" dans vos paramètres pour télécharger vos données ou demander la suppression.
