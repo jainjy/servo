@@ -767,14 +767,7 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
          document.body.removeChild(link);
        }
        
-       // Révoquer les URLs Blob pour libérer la mémoire
-       if (isBlobUrl || (isDataUrl && finalUrl.startsWith('blob:'))) {
-         try {
-           URL.revokeObjectURL(finalUrl);
-         } catch (e) {
-           console.warn('Impossible de révoquer l\'URL blob:', e);
-         }
-       }
+      
      }, 100);
      
      toast.success('CV en cours de téléchargement...');
@@ -1524,9 +1517,7 @@ const deleteCandidature = async (candidatureId) => {
                               <span>
                                 {formation.currentParticipants || 0}/{formation.maxParticipants}
                               </span>
-                              <span className="text-xs text-gray-500">
-                                ({formation.applications_count || 0} candidatures)
-                              </span>
+                              
                             </div>
                           </TableCell>
                           <TableCell>
@@ -1555,7 +1546,7 @@ const deleteCandidature = async (candidatureId) => {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => openCandidaturesModal(formation)}>
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Voir candidatures ({formation.applications_count || 0})
+                                  Voir candidatures 
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {formation.status !== 'active' ? (
@@ -1655,12 +1646,12 @@ const deleteCandidature = async (candidatureId) => {
           </div>
 
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid grid-cols-4 w-full">
+            {/* <TabsList className="grid grid-cols-4 w-full">
               <TabsTrigger value="all">Toutes ({candidatureStats.total})</TabsTrigger>
               <TabsTrigger value="pending">En attente ({candidatureStats.pending})</TabsTrigger>
               <TabsTrigger value="accepted">Acceptées ({candidatureStats.accepted})</TabsTrigger>
               <TabsTrigger value="rejected">Refusées ({candidatureStats.rejected})</TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
             {loadingCandidatures ? (
               <div className="text-center py-8">

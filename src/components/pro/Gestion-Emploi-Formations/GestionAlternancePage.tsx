@@ -825,15 +825,6 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
       if (link.parentNode) {
         document.body.removeChild(link);
       }
-      
-      // Révoquer les URLs Blob pour libérer la mémoire
-      if (isBlobUrl || (isDataUrl && finalUrl.startsWith('blob:'))) {
-        try {
-          URL.revokeObjectURL(finalUrl);
-        } catch (e) {
-          console.warn('Impossible de révoquer l\'URL blob:', e);
-        }
-      }
     }, 100);
     
     toast.success('CV en cours de téléchargement...');
@@ -1718,12 +1709,7 @@ const handleExportCSV = async () => {
     </div>
 
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="grid grid-cols-4 w-full">
-        <TabsTrigger value="all">Toutes ({candidatureStats.total})</TabsTrigger>
-        <TabsTrigger value="pending">En attente ({candidatureStats.pending})</TabsTrigger>
-        <TabsTrigger value="accepted">Acceptées ({candidatureStats.accepted})</TabsTrigger>
-        <TabsTrigger value="rejected">Refusées ({candidatureStats.rejected})</TabsTrigger>
-      </TabsList>
+     
 
       {loadingCandidatures ? (
         <div className="text-center py-8">

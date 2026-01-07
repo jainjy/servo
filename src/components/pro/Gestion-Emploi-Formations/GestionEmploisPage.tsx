@@ -259,6 +259,19 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
       );
       
       toast.success('Statut mis à jour (mode démo)');
+
+        // AJOUTEZ CES LIGNES :
+  // Recharger les stats globales
+  await fetchStats();
+  
+  // Recharger la liste des emplois
+  await fetchEmplois({
+    search: debouncedSearch,
+    status: statusFilter,
+    type: typeFilter,
+    secteur: secteurFilter,
+    page: pagination.page
+  });
       
       // Recalculer les stats
       const updatedCandidatures = candidatures.map(c => 
@@ -376,6 +389,59 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
     } else {
       toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour');
     }
+  }
+};
+
+// Ajoutez cette fonction dans votre composant
+const refreshAllData = async () => {
+  try {
+    // Recharge les stats
+    await fetchStats();
+    
+    // Recharge la liste des emplois (avec les counts mis à jour)
+    await fetchEmplois({
+      search: debouncedSearch,
+      status: statusFilter,
+      type: typeFilter,
+      secteur: secteurFilter,
+      page: pagination.page
+    });
+    
+    // Recharge les candidatures dans le modal si ouvert
+    if (selectedEmploi && candidaturesModalOpen) {
+      await openCandidaturesModal(selectedEmploi);
+    }
+  } catch (error) {
+    console.error('Erreur rafraîchissement données:', error);
+  }
+};
+
+// Puis appelez-la après chaque modification
+const deleteCandidature = async (candidatureId) => {
+  if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette candidature ?')) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('auth-token');
+    
+    const response = await axios.delete(
+      `${API_URL}/candidatures/${candidatureId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.data.success) {
+      toast.success('Candidature supprimée avec succès');
+      await refreshAllData(); // <-- Utilisez cette fonction
+    }
+  } catch (error) {
+    console.error('❌ Erreur suppression candidature:', error);
+    toast.error(error.response?.data?.error || 'Erreur lors de la suppression');
   }
 };
 
@@ -517,14 +583,7 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
         document.body.removeChild(link);
       }
       
-      // Révoquer les URLs Blob pour libérer la mémoire
-      if (isBlobUrl || (isDataUrl && finalUrl.startsWith('blob:'))) {
-        try {
-          URL.revokeObjectURL(finalUrl);
-        } catch (e) {
-          console.warn('Impossible de révoquer l\'URL blob:', e);
-        }
-      }
+     
     }, 100);
     
     toast.success('CV en cours de téléchargement...');
@@ -559,38 +618,7 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
   }
 };
 
-// Fonction pour supprimer une candidature
-const deleteCandidature = async (candidatureId) => {
-  if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette candidature ?')) {
-    return;
-  }
 
-  try {
-    const token = localStorage.getItem('auth-token');
-    
-    const response = await axios.delete(
-      `${API_URL}/candidatures/${candidatureId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    if (response.data.success) {
-      toast.success('Candidature supprimée avec succès');
-      
-      // Recharger les candidatures
-      if (selectedEmploi) {
-        await openCandidaturesModal(selectedEmploi);
-      }
-    }
-  } catch (error) {
-    console.error('❌ Erreur suppression candidature:', error);
-    toast.error(error.response?.data?.error || 'Erreur lors de la suppression');
-  }
-};
 
 
 // Composant pour afficher le tableau des candidatures
@@ -1476,6 +1504,14 @@ const handleSubmit = async (e) => {
                 </TableHeader>
                 <TableBody>
                   {emplois.map((emploi) => {
+
+                     console.log('🔍 Emploi debug:', {
+      id: emploi.id,
+      title: emploi.title,
+      candidaturesCount: emploi.candidaturesCount,
+      candidatures_count: emploi.candidatures_count,
+      allProps: Object.keys(emploi)
+    });
                     const status = statuses.find(s => s.value === emploi.status);
                     return (
                       <TableRow key={emploi.id}>
@@ -1515,13 +1551,14 @@ const handleSubmit = async (e) => {
                             {emploi.salaire}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-3 w-3" />
-                            <span>{emploi.candidatures_count || 0}</span>
-                            <span className="text-xs text-gray-500">({emploi.vues || 0} vues)</span>
-                          </div>
-                        </TableCell>
+                       <TableCell>
+          <div className="flex items-center gap-2">
+            <Users className="h-3 w-3" />
+            <span>
+              {emploi.candidaturesCount || 0} candidatures
+            </span>
+          </div>
+        </TableCell>
                         <TableCell>
                           <Badge className={status?.color}>
                             {status?.label}
@@ -1548,7 +1585,7 @@ const handleSubmit = async (e) => {
                               </DropdownMenuItem>
 <DropdownMenuItem onClick={() => openCandidaturesModal(emploi)}>
   <Users className="h-4 w-4 mr-2" />
-  Voir candidatures ({emploi.candidatures_count || 0})
+  Voir candidatures 
 </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
@@ -1639,12 +1676,7 @@ const handleSubmit = async (e) => {
     </div>
 
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="grid grid-cols-4 w-full">
-        <TabsTrigger value="all">Toutes ({candidatureStats.total})</TabsTrigger>
-        <TabsTrigger value="pending">En attente ({candidatureStats.pending})</TabsTrigger>
-        <TabsTrigger value="accepted">Acceptées ({candidatureStats.accepted})</TabsTrigger>
-        <TabsTrigger value="rejected">Refusées ({candidatureStats.rejected})</TabsTrigger>
-      </TabsList>
+     
 
       {loadingCandidatures ? (
         <div className="text-center py-8">
