@@ -289,11 +289,33 @@ const EntrepreneuriatAdmin = () => {
       let imageUrl = interviewForm.imageUrl;
 
       if (selectedInterviewFile) {
-        const result = await UploadService.uploadInterviewImage(selectedInterviewFile);
-        imageUrl = result.data.url;
+        try {
+          const result = await UploadService.uploadInterviewImage(selectedInterviewFile);
+          if (result.data && result.data.url) {
+            imageUrl = result.data.url;
+          } else {
+            throw new Error("URL d'upload invalide");
+          }
+        } catch (uploadError) {
+          console.error("Erreur upload image interview:", uploadError);
+          toast({
+            title: "Erreur upload",
+            description: "L'image n'a pas pu être uploadée correctement",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
       }
 
-      await EntrepreneuriatService.createInterview({ ...interviewForm, imageUrl });
+      // ✅ CORRECTION: Convertir la date au format ISO-8601
+      const interviewData = {
+        ...interviewForm,
+        imageUrl,
+        date: new Date(interviewForm.date).toISOString(), // Convertir en DateTime ISO
+      };
+
+      await EntrepreneuriatService.createInterview(interviewData);
       toast({
         title: "Succès",
         description: "Interview créée avec succès",
@@ -305,7 +327,7 @@ const EntrepreneuriatAdmin = () => {
       console.error("Erreur création interview:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de créer l'interview",
+        description: error.response?.data?.error || "Impossible de créer l'interview",
         variant: "destructive",
       });
     } finally {
@@ -319,14 +341,33 @@ const EntrepreneuriatAdmin = () => {
       let imageUrl = interviewForm.imageUrl;
 
       if (selectedInterviewFile) {
-        const result = await UploadService.uploadInterviewImage(selectedInterviewFile);
-        imageUrl = result.data.url;
+        try {
+          const result = await UploadService.uploadInterviewImage(selectedInterviewFile);
+          if (result.data && result.data.url) {
+            imageUrl = result.data.url;
+          } else {
+            throw new Error("URL d'upload invalide");
+          }
+        } catch (uploadError) {
+          console.error("Erreur upload image interview:", uploadError);
+          toast({
+            title: "Erreur upload",
+            description: "L'image n'a pas pu être uploadée correctement",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
       }
 
-      await EntrepreneuriatService.updateInterview(
-        selectedItem.id,
-        { ...interviewForm, imageUrl }
-      );
+      // ✅ CORRECTION: Convertir la date au format ISO-8601
+      const interviewData = {
+        ...interviewForm,
+        imageUrl,
+        date: new Date(interviewForm.date).toISOString(), // Convertir en DateTime ISO
+      };
+
+      await EntrepreneuriatService.updateInterview(selectedItem.id, interviewData);
       toast({
         title: "Succès",
         description: "Interview mise à jour avec succès",
@@ -338,7 +379,7 @@ const EntrepreneuriatAdmin = () => {
       console.error("Erreur mise à jour interview:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour l'interview",
+        description: error.response?.data?.error || "Impossible de mettre à jour l'interview",
         variant: "destructive",
       });
     } finally {
@@ -589,14 +630,25 @@ const EntrepreneuriatAdmin = () => {
   const handleCreateEvent = async () => {
     try {
       setIsSubmitting(true);
-      await EntrepreneuriatService.createEvent(eventForm);
+
+      // ✅ CORRECTION: Convertir la date au format ISO-8601
+      const eventData = {
+        ...eventForm,
+        date: new Date(eventForm.date).toISOString(), // Convertir en DateTime ISO
+      };
+
+      await EntrepreneuriatService.createEvent(eventData);
       toast({ title: "Succès", description: "Événement créé avec succès" });
       setShowEventModal(false);
       resetEventForm();
       loadData();
     } catch (error) {
       console.error("Erreur création événement:", error);
-      toast({ title: "Erreur", description: "Impossible de créer l'événement", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: error.response?.data?.error || "Impossible de créer l'événement",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -605,14 +657,25 @@ const EntrepreneuriatAdmin = () => {
   const handleUpdateEvent = async () => {
     try {
       setIsSubmitting(true);
-      await EntrepreneuriatService.updateEvent(selectedItem.id, eventForm);
+
+      // ✅ CORRECTION: Convertir la date au format ISO-8601
+      const eventData = {
+        ...eventForm,
+        date: new Date(eventForm.date).toISOString(), // Convertir en DateTime ISO
+      };
+
+      await EntrepreneuriatService.updateEvent(selectedItem.id, eventData);
       toast({ title: "Succès", description: "Événement mis à jour avec succès" });
       setShowEventModal(false);
       resetEventForm();
       loadData();
     } catch (error) {
       console.error("Erreur mise à jour événement:", error);
-      toast({ title: "Erreur", description: "Impossible de mettre à jour l'événement", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: error.response?.data?.error || "Impossible de mettre à jour l'événement",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -2179,6 +2242,7 @@ const EntrepreneuriatAdmin = () => {
               Annuler
             </Button>
             <Button 
+              
               onClick={modalMode === "create" ? handleCreateEvent : handleUpdateEvent}
               disabled={isSubmitting}
               className="bg-[#556B2F] hover:bg-[#556B2F]/90"
