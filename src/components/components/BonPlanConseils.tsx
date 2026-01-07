@@ -558,12 +558,12 @@ const BonsPlansConseils = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Filtres */}
         <div className="mb-4">
-          <div className="flex overflow-x-auto pb-4 space-x-3 hide-scrollbar">
+          <div className="grid grid-cols-2 md:grid-cols-4 overflow-x-auto pb-4 space-x-3 hide-scrollbar">
             {categories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`flex-shrink-0 px-6 py-3 text-xs rounded-full font-medium transition-all duration-300 border ${
+                className={`flex-shrink-0 px-6 py-3 mt-2 text-xs rounded-full font-medium transition-all duration-300 border ${
                   activeCategory === category.id
                     ? "bg-logo text-white transform scale-105"
                     : "bg-white text-gray-700 border-gray-300 hover:border-emerald-400 hover:text-emerald-700"

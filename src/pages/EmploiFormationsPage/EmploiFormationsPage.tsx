@@ -152,7 +152,7 @@ const EmploiFormationsPage = () => {
               onValueChange={setActiveSection}
               className="w-full max-w-4xl"
             >
-              <TabsList className="grid grid-cols-3 bg-white/20 backdrop-blur-sm">
+              <TabsList className="grid md:grid-cols-3 grid-cols-1 h-auto bg-white/20 backdrop-blur-sm">
                 <TabsTrigger
                   value="formations"
                   className="data-[state=active]:bg-[#8B4513] data-[state=active]:text-white"
