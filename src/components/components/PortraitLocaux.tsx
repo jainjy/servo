@@ -724,12 +724,12 @@ const PortraitsLocaux = () => {
       <div className="max-w-7xl mx-auto px-4 pb-20">
         {/* Filtres par génération */}
         <div className="mb-12">
-          <div className="flex justify-center space-x-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 justify-center space-x-4">
             {generations.map((generation) => (
               <button
                 key={generation.id}
                 onClick={() => setActiveGeneration(generation.id)}
-                className={`px-6 py-3 text-xs rounded-full font-medium transition-all duration-300 border ${
+                className={`px-6 py-3 text-xs mt-2 rounded-full font-medium transition-all duration-300 border ${
                   activeGeneration === generation.id
                     ? "bg-secondary-text text-white transform scale-105"
                     : "bg-white text-gray-700 border-gray-300 hover:border-emerald-400 hover:text-emerald-700"

@@ -868,7 +868,7 @@ const AlternanceSection = ({
                                   )}
                                 </div>
                               )}
-                              <div className="flex gap-2">
+                              <div className="grid md:grid-cols-4 grid-cols-2 gap-2">
                                 <Button
                                   size="sm"
                                   variant="outline"

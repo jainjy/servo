@@ -847,10 +847,6 @@ const MesReservationsVehiculePage = () => {
                     ))}
                   </SelectContent>
                 </Select>
-
-                <Button variant="outline" onClick={fetchReservations}>
-                  Actualiser
-                </Button>
               </div>
             </div>
           </CardContent>
