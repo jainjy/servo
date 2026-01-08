@@ -419,9 +419,12 @@ const VideosComponent = () => {
     setTimeout(() => {
       const vid = videoRefs.current[id];
       if (vid && !document.fullscreenElement) {
-        vid.requestFullscreen?.().catch(err => console.log('Fullscreen error:', err));
+        vid.requestFullscreen?.().catch(err => 
+          console.log('Fullscreen error:', err)
+        );
       }
     }, 50);
+
   };
 
   const handleFullscreen = (videoId) => {

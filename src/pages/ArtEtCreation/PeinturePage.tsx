@@ -128,7 +128,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Fonction pour récupérer les peintres
   const fetchPainters = useCallback(async () => {
-    console.log('📡 Fetching painters...');
+    // console.log('📡 Fetching painters...');
     setLoading(true);
     setError(null);
     
@@ -145,16 +145,11 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
       if (cityFilter) {
         params.location = cityFilter;
       }
-      
-      console.log('🌐 API params:', params);
+
+      // console.log('🌐 API params:', params);
       const response = await api.get('/art-creation/peinture/products', { params });
       
-      console.log('📦 API response:', {
-        success: response.data.success,
-        count: response.data.count,
-        dataLength: response.data.data?.length || 0
-      });
-      
+    
       if (response.data.success) {
         setPainters(response.data.data || []);
       } else {
@@ -217,7 +212,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Recharger les données
   const handleRetry = useCallback(() => {
-    console.log('🔄 Retry loading data');
+    // console.log('🔄 Retry loading data');
     setError(null);
     fetchPainters();
   }, [fetchPainters]);

@@ -456,8 +456,8 @@ const openCandidaturesModal = async (offre) => {
                   localStorage.getItem('token') || 
                   localStorage.getItem('jwt-token');
     
-    console.log('🔑 Token pour candidatures alternance:', token ? 'Présent' : 'Absent');
-    console.log(`📤 Tentative pour offre ID: ${offre.id}`);
+    // console.log('🔑 Token pour candidatures alternance:', token ? 'Présent' : 'Absent');
+    // console.log(`📤 Tentative pour offre ID: ${offre.id}`);
     
     if (!token) {
       toast.error('Session expirée. Veuillez vous reconnecter.');
@@ -465,7 +465,7 @@ const openCandidaturesModal = async (offre) => {
       return;
     }
     
-    console.log('🔄 Appel API vers:', `${API_URL}/alternance/${offre.id}/candidatures`);
+    // console.log('🔄 Appel API vers:', `${API_URL}/alternance/${offre.id}/candidatures`);
     
     // Utilisez la route qui fonctionne
     const response = await axios.get(
@@ -478,13 +478,13 @@ const openCandidaturesModal = async (offre) => {
       }
     );
     
-    console.log('✅ Réponse API:', response.data);
-    console.log('Structure de la réponse:', {
-      keys: Object.keys(response.data),
-      hasData: 'data' in response.data,
-      dataType: typeof response.data.data,
-      isArray: Array.isArray(response.data.data)
-    });
+    // console.log('✅ Réponse API:', response.data);
+    // console.log('Structure de la réponse:', {
+    //   keys: Object.keys(response.data),
+    //   hasData: 'data' in response.data,
+    //   dataType: typeof response.data.data,
+    //   isArray: Array.isArray(response.data.data)
+    // });
     
     // GESTION DES DIFFÉRENTS FORMATS DE RÉPONSE
     let apiCandidatures = [];
@@ -523,13 +523,13 @@ const openCandidaturesModal = async (offre) => {
       }
     }
     
-    console.log(`📝 ${apiCandidatures.length} candidatures extraites`);
+    // console.log(`📝 ${apiCandidatures.length} candidatures extraites`);
     
     // Afficher un échantillon pour debugging
     if (apiCandidatures.length > 0) {
-      console.log('Échantillon de candidatures:', apiCandidatures.slice(0, 2));
+      // console.log('Échantillon de candidatures:', apiCandidatures.slice(0, 2));
     } else {
-      console.log('Structure complète de la réponse:', JSON.stringify(response.data, null, 2));
+      // console.log('Structure complète de la réponse:', JSON.stringify(response.data, null, 2));
     }
     
     if (apiCandidatures.length === 0) {
@@ -539,7 +539,7 @@ const openCandidaturesModal = async (offre) => {
       // Transformer les données de l'API
       const formattedCandidatures = apiCandidatures.map((candidature, index) => {
         // Debug: Afficher la structure de chaque candidature
-        console.log(`Candidature ${index}:`, candidature);
+        // console.log(`Candidature ${index}:`, candidature);
         
         // Extraire nom et prénom
         let nom = '';
@@ -588,7 +588,7 @@ const openCandidaturesModal = async (offre) => {
         };
       });
       
-      console.log(`✅ ${formattedCandidatures.length} candidatures formatées`);
+      // console.log(`✅ ${formattedCandidatures.length} candidatures formatées`);
       
       setCandidatures(formattedCandidatures);
       
@@ -607,7 +607,7 @@ const openCandidaturesModal = async (offre) => {
       };
       setCandidatureStats(stats);
       
-      console.log('📊 Statistiques calculées:', stats);
+      // console.log('📊 Statistiques calculées:', stats);
     }
     
   } catch (error) {
@@ -691,7 +691,7 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
 // Fonction pour télécharger un CV - VERSION CORRIGÉE
 const downloadCV = async (candidatureId, fileName, cvUrl) => {
   try {
-    console.log('📥 Téléchargement CV - URL originale:', cvUrl);
+    // console.log('📥 Téléchargement CV - URL originale:', cvUrl);
     
     if (!cvUrl) {
       toast.error('Aucun CV disponible pour ce candidat');
@@ -704,13 +704,13 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
     const isHttpUrl = cvUrl.startsWith('http://') || cvUrl.startsWith('https://');
     const isRelativeUrl = cvUrl.startsWith('/');
     
-    console.log('🔍 Type d\'URL détecté:', {
-      isBlobUrl,
-      isDataUrl,
-      isHttpUrl,
-      isRelativeUrl,
-      cvUrl
-    });
+    // console.log('🔍 Type d\'URL détecté:', {
+    //   isBlobUrl,
+    //   isDataUrl,
+    //   isHttpUrl,
+    //   isRelativeUrl,
+    //   cvUrl
+    // });
     
     let finalUrl = cvUrl;
     let shouldOpenInNewTab = false;
@@ -718,14 +718,14 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
     // Traitement selon le type d'URL
     if (isBlobUrl) {
       // URL Blob : utiliser directement
-      console.log('📄 Utilisation URL Blob');
+      // console.log('📄 Utilisation URL Blob');
       shouldOpenInNewTab = true;
       // Pour les URLs Blob, on ne peut pas ajouter de query params
       // On utilise l'URL telle quelle
     }
     else if (isDataUrl) {
       // URL Data (base64) : convertir en blob
-      console.log('📄 Utilisation URL Data (base64)');
+      // console.log('📄 Utilisation URL Data (base64)');
       try {
         // Extraire le contenu base64
         const base64Content = cvUrl.split(',')[1];
@@ -750,14 +750,14 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
     }
     else if (isHttpUrl) {
       // URL HTTP complète : ajouter timestamp pour éviter le cache
-      console.log('📄 Utilisation URL HTTP complète');
+      // console.log('📄 Utilisation URL HTTP complète');
       const separator = finalUrl.includes('?') ? '&' : '?';
       finalUrl = `${finalUrl}${separator}t=${Date.now()}`;
       shouldOpenInNewTab = true;
     }
     else if (isRelativeUrl) {
       // URL relative : ajouter la base du serveur
-      console.log('📄 Utilisation URL relative');
+      // console.log('📄 Utilisation URL relative');
       // Nettoyer le chemin (enlever le /api/ s'il est déjà présent)
       let cleanPath = cvUrl;
       if (cvUrl.startsWith('/api/')) {
@@ -767,11 +767,11 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
     }
     else {
       // Autre cas : traiter comme un chemin de fichier
-      console.log('📄 Traitement comme chemin de fichier');
+      // console.log('📄 Traitement comme chemin de fichier');
       finalUrl = `${API_URL}/${cvUrl}?t=${Date.now()}`;
     }
     
-    console.log('🔗 URL finale pour téléchargement:', finalUrl);
+    // console.log('🔗 URL finale pour téléchargement:', finalUrl);
     
     // Créer un nom de fichier par défaut
     const finalFileName = fileName || 'cv_candidat.pdf';
@@ -897,12 +897,12 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   
   // Vérifier l'authentification avant de soumettre
-  console.log('🔐 Auth status before submit:', {
-    checkAuthStatus: checkAuthStatus ? 'Function exists' : 'Function missing',
-    isAuthenticated,
-    user: user?.id,
-    authLoading
-  });
+  // console.log('🔐 Auth status before submit:', {
+  //   checkAuthStatus: checkAuthStatus ? 'Function exists' : 'Function missing',
+  //   isAuthenticated,
+  //   user: user?.id,
+  //   authLoading
+  // });
 
   // Utilisez checkAuthStatus si disponible, sinon vérifiez manuellement
   const authStatus = checkAuthStatus ? checkAuthStatus() : {
@@ -913,11 +913,9 @@ const handleSubmit = async (e) => {
     isReady: isAuthenticated && !authLoading
   };
   
-  console.log('📋 Auth details:', authStatus);
+  // console.log('📋 Auth details:', authStatus);
 
     // Vérifier l'authentification
-  
-  console.log('🔐 Auth status in handleSubmit:', authStatus);
   
   
   if (!authStatus.isReady) {
@@ -961,11 +959,11 @@ const handleSubmit = async (e) => {
       urgent: formData.urgent || false,
     };
 
-    console.log('📤 Submitting data with auth:', {
-      user: user?.id,
-      tokenPresent: !!user?.token,
-      data: apiData
-    });
+    // console.log('📤 Submitting data with auth:', {
+    //   user: user?.id,
+    //   tokenPresent: !!user?.token,
+    //   data: apiData
+    // });
 
     if (editingOffre) {
       await updateOffre(editingOffre.id, apiData);

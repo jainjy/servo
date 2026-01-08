@@ -95,7 +95,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
     if (categoryFromPath) {
       setIsCategoryPage(true);
       setSelectedCategory(categoryFromPath.slug);
-      console.log(`📌 On category page: ${categoryFromPath.slug}`);
+      // console.log(`📌 On category page: ${categoryFromPath.slug}`);
     } else {
       setIsCategoryPage(false);
       setSelectedCategory('');
@@ -142,7 +142,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
 
   // Récupérer TOUS les photographes (toutes catégories)
   const fetchAllPhotographers = useCallback(async () => {
-    console.log('📡 Fetching ALL photographers');
+    // console.log('📡 Fetching ALL photographers');
     setLoading(true);
     setError(null);
     
@@ -160,14 +160,10 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
       // Récupérer TOUS les photographes (sans filtre de catégorie)
       params.limit = 50; // Augmenter la limite pour avoir plus de résultats
       
-      console.log('🌐 Fetching all photographers with params:', params);
+
       const response = await api.get('/art-creation/photographers', { params });
       
-      console.log('📦 All photographers response:', {
-        success: response.data.success,
-        count: response.data.count,
-        dataLength: response.data.data?.length || 0
-      });
+    
       
       if (response.data.success) {
         const allPhotographers = response.data.data || [];
@@ -177,7 +173,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
         if (selectedCategory) {
           const filtered = filterPhotographersByCategory(allPhotographers, selectedCategory);
           setFilteredPhotographers(filtered);
-          console.log(`🔍 Filtered ${filtered.length} photographers for category: ${selectedCategory}`);
+          // console.log(`🔍 Filtered ${filtered.length} photographers for category: ${selectedCategory}`);
         } else {
           setFilteredPhotographers(allPhotographers);
         }
@@ -213,7 +209,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
         });
         
         // Mettre à jour les catégories avec les counts
-        console.log('📊 Category counts:', categoryCounts);
+        // console.log('📊 Category counts:', categoryCounts);
         
       }
     } catch (err) {

@@ -115,7 +115,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ onContactClick }) => {
 
   // Fonction pour récupérer les sculpteurs
   const fetchSculptors = useCallback(async () => {
-    console.log('📡 Fetching sculptors...');
+  
     setLoading(true);
     setError(null);
     
@@ -203,8 +203,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ onContactClick }) => {
 
   // Gestion du clic sur une catégorie — afficher les pros en place (pas de navigation)
   const handleCategoryClick = useCallback((categorySlug: string) => {
-    console.log('🎯 Category clicked (in-place):', categorySlug);
-
+   
     // Définir la catégorie sélectionnée et afficher la vue catégorie
     setSelectedCategory(categorySlug);
     setIsCategoryPage(true);
@@ -212,7 +211,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ onContactClick }) => {
     // Si les sculpteurs sont déjà chargés, filtrer directement
     if (sculptors.length > 0) {
       // Filtrage se fera automatiquement dans le useEffect
-      console.log(`🔍 Filtering ${sculptors.length} sculptors for category: ${categorySlug}`);
+      // console.log(`🔍 Filtering ${sculptors.length} sculptors for category: ${categorySlug}`);
     } else {
       fetchSculptors();
     }
@@ -220,7 +219,7 @@ const SculpturePage: React.FC<SculpturePageProps> = ({ onContactClick }) => {
 
   // Gestion du clic "Retour à tous les sculpteurs" — réinitialiser l'affichage en place
   const handleViewAll = useCallback(() => {
-    console.log('🔙 Back to all sculptors (in-place)');
+    // console.log('🔙 Back to all sculptors (in-place)');
     setSelectedCategory(null);
     setIsCategoryPage(false);
     // On montre tous les sculpteurs (non filtrés)

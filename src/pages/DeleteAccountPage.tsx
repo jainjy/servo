@@ -791,7 +791,7 @@ const DeleteAccountPage = () => {
                   href="mailto:pro@servo.fr"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  pro@servo.fr
+                  pro@oliplus.fr
                 </a>
               </span>
             )}

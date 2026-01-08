@@ -186,8 +186,7 @@ const getAuthHeaders = () => {
   const token = localStorage.getItem('auth-token') || 
                 localStorage.getItem('token') || 
                 localStorage.getItem('jwt-token');
-  
-  console.log('🔑 Token pour API:', token ? 'Présent' : 'Absent');
+
   
   if (!token) {
     console.error('Token non trouvé');
@@ -201,11 +200,7 @@ const getAuthHeaders = () => {
   };
 };
 
-// Ajoutez ce code pour voir quel token est stocké
-console.log('🔑 Token stocké dans localStorage:');
-console.log('- auth-token:', localStorage.getItem('auth-token'));
-console.log('- token:', localStorage.getItem('token'));
-console.log('- jwt-token:', localStorage.getItem('jwt-token'));
+
 
 // Testez quel token fonctionne
 const tokens = [
@@ -216,11 +211,11 @@ const tokens = [
 
 for (const token of tokens) {
   if (token) {
-    console.log(`\n🧪 Test avec token: ${token.substring(0, 20)}...`);
+    // console.log(`\n🧪 Test avec token: ${token.substring(0, 20)}...`);
     
     // Vérifiez le format
     if (token.startsWith('real-jwt-token-')) {
-      console.log('✅ Format correct!');
+      // console.log('✅ Format correct!');
     }
   }
 }
@@ -289,7 +284,7 @@ for (const token of tokens) {
           return;
         }
         
-        console.log('🚀 Début du chargement des données...');
+        // console.log('🚀 Début du chargement des données...');
         
         // Charger les stats ET les formations en parallèle
         await Promise.all([
@@ -302,7 +297,7 @@ for (const token of tokens) {
           })
         ]);
         
-        console.log('✅ Données chargées avec succès');
+        // console.log('✅ Données chargées avec succès');
         setDataLoaded(true);
         setApiError("");
         

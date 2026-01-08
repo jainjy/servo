@@ -175,7 +175,7 @@ const localSellServices = [
     id: "8",
     localImage: sellServices2,
     price: 0,
-    title: "Vendez avec SERVO",
+    title: "Vendez avec OLIPLUS",
     city: "Île de la Réunion",
     surface: 0,
     type: "SERVICE",

@@ -407,10 +407,10 @@ const Cart = ({ isOpen, onClose }) => {
           toast.success("Adresse localisée depuis votre profil");
         }
       } else {
-        console.log("Adresse non trouvée:", address);
+        // console.log("Adresse non trouvée:", address);
       }
     } catch (error) {
-      console.error("Erreur de géocodage:", error);
+      // console.error("Erreur de géocodage:", error);
     } finally {
       setIsGeocoding(false);
     }
@@ -641,7 +641,7 @@ const Cart = ({ isOpen, onClose }) => {
 
   // FONCTION PRINCIPALE DE CHECKOUT - VERSION AVEC SYNCHRONISATION LIVRAISON
   const handleCheckout = async () => {
-    console.log("🎯 Début du processus de commande synchronisée avec livraison");
+    // console.log("🎯 Début du processus de commande synchronisée avec livraison");
 
     // Validation
     if (!isAuthenticated) {
@@ -692,7 +692,7 @@ const Cart = ({ isOpen, onClose }) => {
         }
       };
 
-      console.log("📤 Envoi de la commande avec livraison...", orderData);
+      // console.log("📤 Envoi de la commande avec livraison...", orderData);
 
       // 2. Appeler l'API avec deliveryAPI (nouvelle fonction)
       const response = await deliveryAPI.createOrderWithDelivery(orderData);

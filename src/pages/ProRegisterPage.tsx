@@ -950,7 +950,7 @@ const ProRegisterPage = () => {
                             className="text-xs text-gray-600 cursor-pointer leading-snug"
                           >
                             Les personnes qui utilisent notre service ont pu
-                            importer vos coordonnées sur Servo.{" "}
+                            importer vos coordonnées sur OLIPLUS.{" "}
                             <a
                               href="/import-info"
                               className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"

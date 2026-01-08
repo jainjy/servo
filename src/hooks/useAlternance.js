@@ -50,13 +50,7 @@ export const useAlternance = () => {
   const isAuthReady = useCallback(() => {
     const token = getToken();
     const ready = isAuthenticated && token && user?.id;
-    console.log('🔍 isAuthReady check:', { 
-      ready, 
-      isAuthenticated, 
-      hasToken: !!token,
-      tokenLength: token?.length,
-      userId: user?.id 
-    });
+    
     return ready;
   }, [isAuthenticated, user, getToken]);
 
@@ -66,11 +60,7 @@ export const useAlternance = () => {
       const authHeaders = getAuthHeaders();
       const token = getToken();
       
-      console.log('🔄 Getting axios config:', {
-        hasAuthHeaders: !!authHeaders.Authorization,
-        tokenLength: token?.length,
-        user: user?.id
-      });
+      
       
       return {
         baseURL: 'http://localhost:3001',
@@ -93,16 +83,10 @@ export const useAlternance = () => {
   useEffect(() => {
     const loadDataIfAuthenticated = async () => {
       const token = getToken();
-      console.log('🔄 useAlternance: Auth state changed', {
-        isAuthenticated,
-        token: token ? 'Present' : 'Missing',
-        tokenLength: token?.length,
-        user: user?.id,
-        hasLoaded
-      });
+     
 
       if (isAuthReady() && !hasLoaded && !fetchRef.current.pending) {
-        console.log('🚀 Loading alternance data on auth change');
+        // console.log('🚀 Loading alternance data on auth change');
         try {
           await Promise.all([
             fetchOffres(),
@@ -121,18 +105,14 @@ export const useAlternance = () => {
   const fetchOffres = useCallback(async (params = {}) => {
     // Éviter les appels en double
     if (fetchRef.current.pending) {
-      console.log('⏳ Fetch déjà en cours, annulation...');
+      // console.log('⏳ Fetch déjà en cours, annulation...');
       return;
     }
 
     // Vérifier l'authentification
     const token = getToken();
     if (!isAuthenticated || !token || !user?.id) {
-      console.log('⏳ Authentification non prête, report du fetch...', {
-        isAuthenticated,
-        hasToken: !!token,
-        userId: user?.id
-      });
+     
       return;
     }
 
@@ -141,8 +121,6 @@ export const useAlternance = () => {
     setError(null);
     
     try {
-      console.log('🔍 Fetching alternances avec params:', params);
-      console.log('📤 Token used:', token ? `${token.substring(0, 20)}...` : 'No token');
       
       const config = getAxiosConfig({
         params: {
@@ -157,11 +135,7 @@ export const useAlternance = () => {
 
       const response = await axios.get('/api/pro/alternance', config);
 
-      console.log('✅ Alternances response received:', {
-        success: response.data.success,
-        count: response.data.alternances?.length,
-        pagination: response.data.pagination
-      });
+    
 
       if (response.data.success) {
         setOffres(response.data.alternances || []);

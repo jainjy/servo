@@ -15,9 +15,7 @@ export const useFormation = () => {
     const token = localStorage.getItem('auth-token');
     
     // Debug
-    console.log('🔑 useFormation - Token récupéré (auth-token):', token ? '✓ Présent' : '✗ Absent');
-    console.log('👤 useFormation - User ID extrait:', token ? token.replace('real-jwt-token-', '') : 'Aucun');
-    
+   
     if (!token) {
       console.error('❌ useFormation - ERREUR: Pas de token trouvé avec la clé "auth-token"');
       console.error('   Keys disponibles:', Object.keys(localStorage));
@@ -78,14 +76,13 @@ export const useFormation = () => {
       if (params.page) queryParams.append('page', params.page);
       if (params.limit) queryParams.append('limit', params.limit || 10);
       
-      console.log('📡 useFormation - Fetch formations avec params:', Object.fromEntries(queryParams));
-      
+    
       const response = await axios.get(
         `${API_URL}/pro/formations?${queryParams.toString()}`,
         getAuthHeaders()
       );
       
-      console.log('✅ useFormation - Réponse reçue,', response.data.data?.length || 0, 'formations');
+      // console.log('✅ useFormation - Réponse reçue,', response.data.data?.length || 0, 'formations');
       setFormations(response.data.data || []);
       setPagination(response.data.pagination || {});
       

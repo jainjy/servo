@@ -591,7 +591,7 @@ const RegisterPage = () => {
                       >
                         Les personnes qui utilisent notre service ont pu
                         importer vos coordonnées sur{" "}
-                        <span className="font-semibold">Servo</span>.{" "}
+                        <span className="font-semibold">OliPlus</span>.{" "}
                         <a
                           href="/en-savoir-plus"
                           className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"

@@ -224,7 +224,7 @@ export default function Terms() {
       content: `Pour toute question concernant ces conditions d'utilisation :
       
       Support général
-      Email : support@servo.mg
+      Email : support@oliplus.mg
       
       Questions RGPD / Données personnelles
       Email : dpo@oliplus.re
@@ -277,7 +277,7 @@ export default function Terms() {
         {/* Intro */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-12 shadow-sm">
           <p className="text-gray-800 dark:text-gray-200 text-lg leading-relaxed">
-            Bienvenue sur <strong className="text-blue-600 dark:text-blue-400">SERVO</strong>. En accédant à notre plateforme ou en créant un compte,
+            Bienvenue sur <strong className="text-blue-600 dark:text-blue-400">OLIPLUS</strong>. En accédant à notre plateforme ou en créant un compte,
             vous acceptez sans réserve les présentes conditions d'utilisation. Nous vous invitons à les lire attentivement
             et à les conserver pour référence.
           </p>

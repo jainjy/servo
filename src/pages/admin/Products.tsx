@@ -34,7 +34,7 @@ const ProductsPage = () => {
               </h1>
             </div>
             <p className="text-muted-foreground max-w-2xl">
-              Gérez les produits, catégories et commandes du marketplace SERVO
+              Gérez les produits, catégories et commandes du marketplace OliPlus.
             </p>
           </div>
           

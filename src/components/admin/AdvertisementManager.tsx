@@ -402,12 +402,12 @@ const AdvertisementManager = () => {
         formDataToSend.append('media', formData.image)
       }
 
-      console.log('FormData envoyé:', {
-        title: formData.title,
-        type: formData.type,
-        hasFile: !!(formData.video || formData.image),
-        fileType: formData.video ? 'video' : formData.image ? 'image' : 'none'
-      });
+      // console.log('FormData envoyé:', {
+      //   title: formData.title,
+      //   type: formData.type,
+      //   hasFile: !!(formData.video || formData.image),
+      //   fileType: formData.video ? 'video' : formData.image ? 'image' : 'none'
+      // });
 
       const response = await advertisementsAPI.createAdvertisement(formDataToSend)
 

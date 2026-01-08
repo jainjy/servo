@@ -262,7 +262,7 @@ useEffect(() => {
                               playsInline
                               onMouseEnter={(e) => {
                                 e.currentTarget.play().catch(e => {
-                                  console.log("Autoplay blocked:", e);
+                                 // console.log("Autoplay blocked:", e);
                                 });
                               }}
                               onMouseLeave={(e) => {

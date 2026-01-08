@@ -104,7 +104,7 @@ export default function MentionsLegales() {
                                         <div>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                                             <a href="mailto:contact@servo.mg" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                                contact@servo.mg
+                                                contact@oliplus.mg
                                             </a>
                                         </div>
                                     </div>

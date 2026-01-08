@@ -259,7 +259,7 @@ export default function AdminDashboard() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-[#8B4513]">Dashboard</h1>
-          <p className="text-muted-foreground">Vue d'ensemble de la plateforme SERVO</p>
+          <p className="text-muted-foreground">Vue d'ensemble de la plateforme Oliplus</p>
         </div>
         
         <Button 

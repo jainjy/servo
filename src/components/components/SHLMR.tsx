@@ -409,7 +409,7 @@ const LogementsSHLMR = () => {
             }
 
             const response = await api.get(url);
-            console.log("Réponse API Logements sociaux:", response.data);
+            // console.log("Réponse API Logements sociaux:", response.data);
 
             if (response.data.success) {
                 const transformedProperties = response.data.data.map((property) => ({

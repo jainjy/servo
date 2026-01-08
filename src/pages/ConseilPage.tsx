@@ -263,8 +263,7 @@ const ConseilPage = () => {
       setIsDataLoading(true);
       setDataError(null);
 
-      console.log("🔍 Début du chargement des données pour la page Conseil...");
-
+    
       // Charger toutes les données en parallèle
       const [
         typesResponse,
@@ -282,20 +281,13 @@ const ConseilPage = () => {
         conseilService.getAvantages(),
       ]);
 
-      console.log("📊 Réponses API reçues:", {
-        types: typesResponse.status,
-        experts: expertsResponse.status,
-        temoignages: temoignagesResponse.status,
-        stats: statsResponse.status,
-        etapes: etapesResponse.status,
-        avantages: avantagesResponse.status,
-      });
+    
 
       // Gestion des types de conseil
       if (typesResponse.status === "fulfilled") {
         const typesData = typesResponse.value?.data || [];
         if (typesResponse.value?.success && typesData.length > 0) {
-          console.log(`📋 Types de conseil reçus: ${typesData.length}`);
+       
           setConseilTypes(
             typesData.map((type: any) => ({
               ...type,

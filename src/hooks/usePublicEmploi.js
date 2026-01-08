@@ -32,13 +32,10 @@ export const usePublicEmploi = () => {
       if (filters.limit) params.append('limit', filters.limit);
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
-      
-      console.log('📡 Fetch emplois publics avec params:', Object.fromEntries(params));
-      
+   
       const response = await api.get(`/emploi/public?${params.toString()}`);
       
-      console.log('✅ Emplois publics reçus:', response.data.data?.length || 0);
-      
+  
       setEmplois(response.data.data || []);
       setPagination(response.data.pagination || {});
       

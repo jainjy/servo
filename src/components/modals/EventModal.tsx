@@ -744,10 +744,10 @@ const EventModal: React.FC<EventModalProps> = ({
 
     try {
       const finalData = await prepareFormData();
-      console.log("📤 Données pour l'API:", finalData);
+      // console.log("📤 Données pour l'API:", finalData);
       await onSubmit(finalData);
     } catch (error) {
-      console.error('Erreur lors de la soumission:', error);
+      // console.error('Erreur lors de la soumission:', error);
     }
   };
 

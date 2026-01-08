@@ -878,7 +878,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
       const response = await api.get(
         `/categories/name/${encodeURIComponent(cat)}/services`
       );
-      console.log("Réponse API pour", cat, ":", response.data);
+      // console.log("Réponse API pour", cat, ":", response.data);
       setServicesCategorie(response.data);
 
       const initialIndexes = {};

@@ -4,12 +4,12 @@ export default function Privacy() {
   return (
     <div className="max-w-4xl mt-14 mx-auto py-12 px-6 text-gray-800">
       <h1 className="text-3xl font-bold mb-6 text-center">
-        Politique de confidentialité de Servo
+        Politique de confidentialité de OliPlus
       </h1>
 
       <p className="mb-4">
         La présente politique de confidentialité explique comment{" "}
-        <strong>Servo</strong> collecte, utilise, conserve et protège vos
+        <strong>OliPlus</strong> collecte, utilise, conserve et protège vos
         informations personnelles lorsque vous utilisez notre plateforme.
       </p>
 
@@ -108,7 +108,7 @@ export default function Privacy() {
           href="mailto:contact@servo.mg"
           className="text-blue-600 hover:text-blue-700 font-medium"
         >
-          contact@servo.mg
+          contact@oliplus.mg
         </a>
       </p>
 
@@ -131,7 +131,7 @@ export default function Privacy() {
           href="mailto:privacy@servo.mg"
           className="text-blue-600 hover:text-blue-700 font-medium"
         >
-          privacy@servo.mg
+          privacy@oliplus.mg
         </a>
         .
       </p>

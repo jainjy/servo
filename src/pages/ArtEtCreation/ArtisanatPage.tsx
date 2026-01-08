@@ -140,7 +140,7 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
 
   // Fonction pour récupérer les artisans
   const fetchArtisans = useCallback(async () => {
-    console.log('📡 Fetching artisans...');
+    // console.log('📡 Fetching artisans...');
     setLoading(true);
     setError(null);
     
@@ -157,16 +157,10 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
       if (cityFilter) {
         params.location = cityFilter;
       }
-      
-      console.log('🌐 API params:', params);
+  
       const response = await api.get('/art-creation/artisanat/products', { params });
       
-      console.log('📦 API response:', {
-        success: response.data.success,
-        count: response.data.count,
-        dataLength: response.data.data?.length || 0
-      });
-      
+   
       if (response.data.success) {
         setArtisans(response.data.data || []);
       } else {
@@ -235,13 +229,12 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
 
   // Gestion du clic sur une catégorie
   const handleCategoryClick = useCallback((categorySlug: string) => {
-    console.log('🎯 Category clicked (in-place):', categorySlug);
 
     setSelectedCategory(categorySlug);
     setIsCategoryPage(true);
 
     if (artisans.length > 0) {
-      console.log(`🔍 Filtering ${artisans.length} artisans for category: ${categorySlug}`);
+      // console.log(`🔍 Filtering ${artisans.length} artisans for category: ${categorySlug}`);
     } else {
       fetchArtisans();
     }
@@ -249,7 +242,7 @@ const ArtisanatPage: React.FC<ArtisanatPageProps> = ({ onContactClick }) => {
 
   // Gestion du clic "Retour à tous les artisans"
   const handleViewAll = useCallback(() => {
-    console.log('🔙 Back to all artisans (in-place)');
+
     setSelectedCategory(null);
     setIsCategoryPage(false);
   }, []);
