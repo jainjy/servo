@@ -99,7 +99,7 @@ const SingleAdvertisement: React.FC<{
   useEffect(() => {
     if (visible && !currentAdIsVideo) {
       setTimeLeft(displayDuration * 60);
-      
+
       countdownRef.current = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
@@ -174,33 +174,33 @@ const SingleAdvertisement: React.FC<{
             stiffness: 250,
             duration: 0.6
           }}
-          className="relative w-full overflow-hidden min-h-[140px] max-w-7xl mx-auto rounded-2xl border border-slate-200 my-3 bg-white shadow-lg"
+          className="relative w-full overflow-hidden min-h-[180px] sm:min-h-[140px] max-w-7xl mx-auto rounded-xl sm:rounded-2xl border border-slate-200 my-2 sm:my-3 bg-white shadow-md sm:shadow-lg"
         >
           {/* Badge et contrôles */}
-          <div className="absolute right-3 top-3 z-10 flex items-center space-x-2">
+          <div className="absolute right-2 sm:right-3 top-2 sm:top-3 z-10 flex items-center space-x-1 sm:space-x-2">
             <div className="relative">
               <div className="absolute inset-0 animate-ping opacity-20">
-                <span className="rounded-full bg-secondary-text px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+                <span className="rounded-full bg-secondary-text px-2 py-0.5 text-[8px] sm:px-3 sm:py-1 sm:text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
                   Publicité
                 </span>
               </div>
-              <span className="relative rounded-full bg-secondary-text px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+              <span className="relative rounded-full bg-secondary-text px-2 py-0.5 text-[8px] sm:px-3 sm:py-1 sm:text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
                 Publicité
               </span>
             </div>
-            
+
             {!currentAdIsVideo && (
-              <div className="flex items-center bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-medium">
-                <svg 
-                  className="w-3 h-3 mr-1" 
-                  fill="none" 
-                  stroke="currentColor" 
+              <div className="flex items-center bg-gray-800 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">
+                <svg
+                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth="2" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
@@ -210,15 +210,15 @@ const SingleAdvertisement: React.FC<{
             <button
               title="Fermer la publicité"
               onClick={handleClose}
-              className="rounded-lg bg-red-600 py-0 px-3 text-gray-100 hover:text-gray-200 transition-colors z-20"
+              className="rounded-lg bg-red-600 py-0 px-2 sm:px-3 text-gray-100 hover:text-gray-200 transition-colors z-20 text-lg sm:text-xl"
             >
-              <span className="text-xl">&times;</span>
+              <span className="text-lg sm:text-xl">&times;</span>
             </button>
           </div>
 
-          <div className="flex flex-row">
+          <div className="flex flex-col sm:flex-row pt-10 sm:pt-0">
             {/* Media - Image/Vidéo */}
-            <div className="w-40 sm:w-56 md:w-64 h-32 sm:h-40 md:h-44 flex-shrink-0 bg-slate-100 relative group">
+            <div className="w-full h-32 sm:w-40 md:w-56 lg:w-64 sm:h-40 md:h-44 flex-shrink-0 bg-slate-100 relative group">
               {currentAdIsVideo ? (
                 <>
                   <video
@@ -235,12 +235,12 @@ const SingleAdvertisement: React.FC<{
                         e.stopPropagation();
                         handleVideoClick(e);
                       }}
-                      className="bg-white/90 text-black rounded-full p-3 hover:bg-white transition-all"
+                      className="bg-white/90 text-black rounded-full p-2 sm:p-3 hover:bg-white transition-all"
                     >
                       {isVideoPlaying ? (
-                        <Pause className="w-6 h-6" />
+                        <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
                       ) : (
-                        <Play className="w-6 h-6" />
+                        <Play className="w-5 h-5 sm:w-6 sm:h-6" />
                       )}
                     </button>
                   </div>
@@ -256,28 +256,28 @@ const SingleAdvertisement: React.FC<{
             </div>
 
             {/* Contenu texte */}
-            <div className="flex-1 p-4 sm:p-6 flex flex-col justify-center">
-              <h2 className="text-base font-extralight tracking-widest sm:text-lg md:text-xl text-slate-900 mb-1 sm:mb-2">
+            <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-center">
+              <h2 className="text-sm sm:text-base font-extralight tracking-widest md:text-lg lg:text-xl text-slate-900 mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2">
                 {ad.title}
               </h2>
-              <p className="text-xs sm:text-sm md:text-sm text-slate-600 leading-relaxed line-clamp-3">
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-3">
                 {ad.description}
               </p>
-              
-              <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
-                <div className="flex items-center text-xs text-gray-500">
+
+              <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
+                <div className="flex items-center text-[10px] sm:text-xs text-gray-500 w-full sm:w-auto">
                   <span>Visible pendant :</span>
-                  <span className="font-medium ml-2">{displayDuration} min</span>
+                  <span className="font-medium ml-1 sm:ml-2">{displayDuration} min</span>
                 </div>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleClick}
-                  className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-900 hover:text-slate-700 transition-colors"
+                  className="inline-flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-slate-900 hover:text-slate-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
                 >
                   Voir plus
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </motion.button>
               </div>
             </div>
@@ -288,8 +288,8 @@ const SingleAdvertisement: React.FC<{
   );
 };
 
-const AdvertisementPopup: React.FC<Props> = ({ 
-  refreshMinutes = 3, 
+const AdvertisementPopup: React.FC<Props> = ({
+  refreshMinutes = 3,
   displayDuration = 2,
   listThreshold = 2
 }) => {
@@ -306,7 +306,7 @@ const AdvertisementPopup: React.FC<Props> = ({
       if (data.advertisements && data.advertisements.length > 0) {
         setAdvertisements(data.advertisements);
         setUseListView(data.advertisements.length > listThreshold);
-        
+
         // Initialiser tous les ads comme visibles
         const allAdIds = new Set<string>(data.advertisements.map(ad => ad.id));
         setVisibleAds(allAdIds);
