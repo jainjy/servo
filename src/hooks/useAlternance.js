@@ -202,21 +202,15 @@ export const useAlternance = () => {
     // Vérifier l'authentification
     const token = getToken();
     if (!isAuthenticated || !token || !user?.id) {
-      console.log('⏳ Authentification non prête pour stats...', {
-        isAuthenticated,
-        hasToken: !!token,
-        userId: user?.id
-      });
+      
       return;
     }
 
     try {
-      console.log('📊 Fetching stats...');
       
       const config = getAxiosConfig();
       const response = await axios.get('/api/pro/alternance/stats/summary', config);
       
-      console.log('✅ Stats response:', response.data);
 
       if (response.data.success && response.data.data) {
         const data = response.data.data;
@@ -268,11 +262,6 @@ export const useAlternance = () => {
 
     setIsLoading(true);
     try {
-      console.log('📝 Creating alternance with data:', data);
-      console.log('🔐 Auth state:', { 
-        user: user?.id, 
-        token: token ? `${token.substring(0, 20)}...` : 'No token' 
-      });
       
       const config = getAxiosConfig();
       
@@ -283,12 +272,11 @@ export const useAlternance = () => {
         dateFin: data.dateFin ? new Date(data.dateFin).toISOString() : null
       };
       
-      console.log('📤 Sending API data:', apiData);
+     
       
       const response = await axios.post('/api/pro/alternance', apiData, config);
       
-      console.log('✅ Create response:', response.data);
-
+  
       if (response.data.success) {
         toast.success('Offre créée avec succès');
         // Rafraîchir les données
@@ -319,7 +307,7 @@ export const useAlternance = () => {
 
     setIsLoading(true);
     try {
-      console.log(`✏️ Updating alternance ${id}`);
+
       
       const config = getAxiosConfig();
       const response = await axios.put(`/api/pro/alternance/${id}`, data, config);
@@ -352,7 +340,7 @@ export const useAlternance = () => {
     }
 
     try {
-      console.log(`🗑️ Deleting alternance ${id}`);
+    
       
       const config = getAxiosConfig();
       const response = await axios.delete(`/api/pro/alternance/${id}`, config);
@@ -382,8 +370,7 @@ export const useAlternance = () => {
     }
 
     try {
-      console.log(`🔄 Updating status ${id} to ${status}`);
-      
+ 
       const config = getAxiosConfig();
       const response = await axios.patch(`/api/pro/alternance/${id}/status`, { status }, config);
       
@@ -407,17 +394,14 @@ export const useAlternance = () => {
 
 // ✅ Fonction exportCSV corrigée
   const exportCSV = async () => {
-    console.log('📥 Exporting CSV');
+
     
     try {
       setIsLoading(true); // <-- Utilise setIsLoading au lieu de setLoading
       
       // Log des infos d'authentification
       const config = await getAxiosConfig();
-      console.log('🔄 Axios config for export:', {
-        hasAuthHeaders: config.headers && config.headers.Authorization,
-        tokenLength: config.headers?.Authorization?.length || 0
-      });
+ 
       
       // Utiliser fetch pour télécharger le fichier
       const response = await fetch('/api/pro/alternance/export/csv', {
@@ -453,7 +437,7 @@ export const useAlternance = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       
-      console.log('✅ CSV exporté avec succès');
+    
       toast.success('CSV exporté avec succès');
       
     } catch (error) {

@@ -402,7 +402,7 @@ class AuthService {
       }
       return updatedUser;
     } catch (error) {
-      console.log(error);
+  
       throw this.handleError(error, "Erreur lors de la mise à jour du profil");
     }
   }

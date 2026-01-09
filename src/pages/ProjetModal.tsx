@@ -100,8 +100,7 @@ const ProjetModal: React.FC<ProjetModalProps> = ({
   // IMPORTANT : Initialiser le formulaire avec les données du projet en mode édition
   useEffect(() => {
     if (isEditMode && projet) {
-      console.log('Initialisation mode édition:', projet);
-      
+  
       // Formater la date pour l'input type="date"
       const dureeDate = new Date(projet.duree);
       const formattedDate = dureeDate.toISOString().split('T')[0];

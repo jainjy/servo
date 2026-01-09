@@ -308,8 +308,7 @@ const ConseilPage = () => {
       if (expertsResponse.status === "fulfilled") {
         const expertsData = expertsResponse.value?.data || [];
         if (expertsResponse.value?.success && expertsData.length > 0) {
-          console.log(`👨‍💼 Experts reçus: ${expertsData.length}`);
-
+     
           const formattedExperts = expertsData.map(
             (expert: any, index: number) => {
               // DÉTERMINER LE NOM
@@ -464,7 +463,7 @@ const ConseilPage = () => {
             }
           );
 
-          console.log("✅ Experts formatés:", formattedExperts);
+       
           setConseillers(formattedExperts);
         } else {
           setConseillers([]);
@@ -477,7 +476,7 @@ const ConseilPage = () => {
       if (temoignagesResponse.status === "fulfilled") {
         const temoignagesData = temoignagesResponse.value?.data || [];
         if (temoignagesResponse.value?.success && temoignagesData.length > 0) {
-          console.log(`💬 Témoignages reçus: ${temoignagesData.length}`);
+        
           setTemoignages(
             temoignagesData.map((temoignage: any) => ({
               id: temoignage.id || Date.now(),
@@ -504,7 +503,7 @@ const ConseilPage = () => {
       if (statsResponse.status === "fulfilled") {
         const statsData = statsResponse.value?.data;
         if (statsResponse.value?.success && statsData) {
-          console.log(`📈 Statistiques reçues:`, statsData);
+        
           if (Array.isArray(statsData) && statsData.length > 0) {
             setStats(statsData);
           } else {
@@ -521,7 +520,7 @@ const ConseilPage = () => {
       if (etapesResponse.status === "fulfilled") {
         const etapesData = etapesResponse.value?.data || [];
         if (etapesResponse.value?.success && etapesData.length > 0) {
-          console.log(`🔢 Étapes reçues: ${etapesData.length}`);
+          
           setProcessusConseil(
             etapesData.map((etape: any) => ({
               ...etape,
@@ -545,7 +544,7 @@ const ConseilPage = () => {
       if (avantagesResponse.status === "fulfilled") {
         const avantagesData = avantagesResponse.value?.data || [];
         if (avantagesResponse.value?.success && avantagesData.length > 0) {
-          console.log(`🎯 Avantages reçus: ${avantagesData.length}`);
+       
           setAvantages(avantagesData);
         } else {
           setAvantages([]);
@@ -569,7 +568,7 @@ const ConseilPage = () => {
       toast.error("Erreur lors du chargement des données");
     } finally {
       setIsDataLoading(false);
-      console.log("✅ Chargement des données terminé");
+     
     }
   };
 

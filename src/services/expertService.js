@@ -513,8 +513,7 @@ export const expertService = {
 
   // Obtenir des données de démonstration
   getDemoData: () => {
-    console.log("🎭 [expertService] Génération données de démonstration...");
-    
+   
     return {
       profile: {
         id: "b14f8e76-667b-4c13-9eb5-d24a0f012071",

@@ -51,16 +51,9 @@ const OeuvrePages: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        console.log('🔄 Fetching œuvres for professionalId:', professionalId);
-
+     
         const response = await api.get(`/art-creation/products/professional/${professionalId}`);
 
-        console.log('✅ Response data:', {
-          success: response.data.success,
-          count: response.data.count,
-          dataLength: response.data.data?.length,
-          data: response.data.data
-        });
 
         if (response.data?.success) {
           const oeuvresData = response.data.data || [];

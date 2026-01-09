@@ -243,13 +243,12 @@ const Soin = () => {
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      console.log('📡 [Soin] Début récupération services');
-      
+  
       // Test d'abord la route simple
       try {
-        console.log('🧪 Test route /test');
+       
         const testResponse = await api.get('/soins-bienetre/test');
-        console.log('✅ Route test OK:', testResponse.data);
+       
       } catch (testError) {
         console.warn('⚠️ Route test échouée, continuons...', testError.message);
       }
@@ -264,19 +263,14 @@ const Soin = () => {
         limit: 20
       };
 
-      console.log('📡 Envoi requête avec params:', params);
-      
+    
       const response = await api.get('/soins-bienetre', { params });
       
-      console.log('✅ Réponse reçue:', {
-        success: response.data.success,
-        count: response.data.services?.length,
-        hasServices: response.data.services && response.data.services.length > 0
-      });
+  
       
       if (response.data.success) {
         setServices(response.data.services);
-        console.log(`✅ ${response.data.services.length} services chargés`);
+        
       } else {
         console.error('❌ Erreur API:', response.data.message);
         // Fallback aux données simulées
@@ -307,11 +301,11 @@ const Soin = () => {
   // Récupérer les catégories
   const fetchCategories = async () => {
     try {
-      console.log('📡 Récupération catégories soins...');
+      // console.log('📡 Récupération catégories soins...');
       const response = await api.get('/soins-bienetre/categories');
       if (response.data.success) {
         setCategories(response.data.categories);
-        console.log('✅ Catégories soins chargées:', response.data.categories);
+        // console.log('✅ Catégories soins chargées:', response.data.categories);
       } else {
         console.warn('⚠️ Erreur chargement catégories, utilisation par défaut');
         setCategories(['Tous', 'Soins', 'Massages', 'Détente', 'Esthétique']);
@@ -325,11 +319,11 @@ const Soin = () => {
   // Récupérer les statistiques
   const fetchStats = async () => {
     try {
-      console.log('📡 Récupération statistiques soins...');
+      // console.log('📡 Récupération statistiques soins...');
       const response = await api.get('/soins-bienetre/stats');
       if (response.data.success) {
         setStats(response.data.stats);
-        console.log('✅ Statistiques soins mises à jour');
+        // console.log('✅ Statistiques soins mises à jour');
       }
     } catch (error) {
       console.error('❌ Erreur récupération statistiques soins:', error.message);
@@ -337,25 +331,25 @@ const Soin = () => {
   };
 
   useEffect(() => {
-    console.log('🔄 Soin component mounted, chargement initial...');
+    // console.log('🔄 Soin component mounted, chargement initial...');
     fetchServices();
     fetchCategories();
     fetchStats();
   }, []);
 
   useEffect(() => {
-    console.log('🔄 Déclenchement rechargement services:', { activeTab, searchTerm, priceRange, sortBy });
+    // console.log('🔄 Déclenchement rechargement services:', { activeTab, searchTerm, priceRange, sortBy });
     fetchServices();
   }, [activeTab, searchTerm, priceRange, sortBy]);
 
   const handleOpenModal = (service) => {
-    console.log('📋 Ouverture modal pour service:', service.libelle);
+    // console.log('📋 Ouverture modal pour service:', service.libelle);
     setSelectedService(service);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    console.log('❌ Fermeture modal');
+   
     setIsModalOpen(false);
     setSelectedService(null);
   };
@@ -367,7 +361,7 @@ const Soin = () => {
   };
 
   const handleClearFilters = () => {
-    console.log('🗑️ Réinitialisation des filtres');
+   
     setSearchTerm('');
     setPriceRange({ min: '', max: '' });
     setSortBy('pertinence');
@@ -912,7 +906,7 @@ const Soin = () => {
 
 // Fonction de fallback pour les données simulées
 function getSimulatedServices() {
-  console.log('🔄 Chargement des données simulées');
+ 
   return [
     {
       id: 1,

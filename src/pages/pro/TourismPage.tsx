@@ -410,13 +410,10 @@ const loadNaturePatrimoine = async () => {
   try {
     setNaturePatrimoineLoading(true);
     
-    console.log("Chargement des patrimoines...");
-    
+ 
     const response = await tourismeAPI.getNaturePatrimoine();
     
-    console.log("Réponse API complète:", response);
-    console.log("Données de réponse:", response.data);
-    
+  
     // Vérifier la structure de la réponse
     if (!response.data) {
       console.error("Aucune donnée dans la réponse");
@@ -427,10 +424,7 @@ const loadNaturePatrimoine = async () => {
     
     if (response.data.success) {
       const data = response.data.data;
-      console.log("Data reçue:", data);
-      console.log("Type de data:", typeof data);
-      console.log("Est-ce un array?", Array.isArray(data));
-      
+    
       // Vérifier si c'est un tableau
       if (Array.isArray(data)) {
         // Transformer les données
@@ -453,12 +447,11 @@ const loadNaturePatrimoine = async () => {
           // Ajouter d'autres champs si nécessaire
           ...item
         }));
-        
-        console.log("Données transformées:", patrimoineData);
+     
         setNaturePatrimoine(patrimoineData);
       } else {
         // Si ce n'est pas un tableau, créer un tableau avec l'objet unique
-        console.log("Data n'est pas un tableau, conversion en tableau");
+      
         const item = data;
         const patrimoineData = [{
           id: item.id || item._id || Date.now().toString(),

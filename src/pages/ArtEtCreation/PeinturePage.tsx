@@ -219,7 +219,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Gestion du clic sur une catégorie — afficher les pros en place
   const handleCategoryClick = useCallback((categorySlug: string) => {
-    console.log('🎯 Category clicked (in-place):', categorySlug);
+    // console.log('🎯 Category clicked (in-place):', categorySlug);
 
     // Définir la catégorie sélectionnée et afficher la vue catégorie
     setSelectedCategory(categorySlug);
@@ -227,7 +227,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
     // Si les peintres sont déjà chargés
     if (painters.length > 0) {
-      console.log(`🔍 Filtering ${painters.length} painters for category: ${categorySlug}`);
+      // console.log(`🔍 Filtering ${painters.length} painters for category: ${categorySlug}`);
     } else {
       fetchPainters();
     }
@@ -235,7 +235,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Gestion du clic "Retour à tous les peintres"
   const handleViewAll = useCallback(() => {
-    console.log('🔙 Back to all painters (in-place)');
+    // console.log('🔙 Back to all painters (in-place)');
     setSelectedCategory(null);
     setIsCategoryPage(false);
   }, []);
@@ -273,7 +273,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Appel initial
   useEffect(() => {
-    console.log('🚀 Initializing PeinturePage');
+    // console.log('🚀 Initializing PeinturePage');
     fetchPainters();
   }, [fetchPainters]);
 

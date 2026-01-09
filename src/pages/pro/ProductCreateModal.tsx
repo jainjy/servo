@@ -399,8 +399,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
           images: [...prev.images, uploadResult.url]
         }));
        
-        console.log(`✅ Image uploadée: ${uploadResult.url}`);
-       
+     
       } catch (error: any) {
         console.error('❌ Erreur upload:', error);
         setImageFiles(prev =>
@@ -442,7 +441,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
           method: 'DELETE',
           headers: token ? { 'Authorization': `Bearer ${token}` } : undefined,
         });
-        console.log(`🗑️ Image supprimée du serveur: ${image.uploadedFilename}`);
+ 
       } catch (error) {
         console.error('Erreur suppression image:', error);
       }
@@ -561,7 +560,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                    user?.email
       };
 
-      console.log('📤 Envoi création produit:', apiData);
+     
 
       const res = await fetch(`${apiBase}/api/art-creation/products/create`, {
         method: 'POST',
