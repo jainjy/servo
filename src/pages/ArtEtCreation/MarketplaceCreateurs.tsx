@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Search,  
   MapPin, 
@@ -105,155 +105,173 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
   ];
 
   const fetchAllOeuvres = useCallback(async () => {
-    console.log('📡 Fetching all published artworks...');
-    setLoading(true);
-    setError(null);
+  console.log('📡 Fetching all published artworks...');
+  setLoading(true);
+  setError(null);
+  
+  try {
+    const params: any = {
+      page,
+      limit: itemsPerPage,
+      status: 'published',
+      quantity: 1 // Minimum 1 en stock
+    };
+    
+    if (searchTerm) {
+      params.search = searchTerm;
+    }
+    
+    if (filters.location) {
+      params.location = filters.location;
+    }
+    
+    if (filters.type !== 'all') {
+      params.type = filters.type;
+    }
+    
+    if (filters.category !== 'all') {
+      params.category = filters.category;
+    }
+    
+    console.log('🌐 API params:', params);
+    
+    const response = await api.get('/art-creation/marketplace/all', { params });
+    
+    console.log('📦 API response:', {
+      success: response.data.success,
+      count: response.data.count,
+      total: response.data.total,
+      dataLength: response.data.data?.length || 0
+    });
+    
+    if (response.data?.success) {
+      const allOeuvres = response.data.data || [];
+      
+      // S'assurer que chaque œuvre a une quantité correcte
+      const formattedOeuvres = allOeuvres.map((oeuvre: any) => ({
+        ...oeuvre,
+        quantity: oeuvre.quantity || oeuvre.stock || 1, // Utiliser la quantité réelle ou par défaut
+        images: oeuvre.images || [oeuvre.image],
+        dimensions: {
+          ...oeuvre.dimensions,
+          isArtwork: true
+        }
+      }));
+      
+      // Filtrer pour ne garder que celles avec quantité > 0
+      const availableOeuvres = formattedOeuvres.filter(oeuvre => 
+        (oeuvre.quantity || 1) > 0
+      );
+      
+      setOeuvres(availableOeuvres);
+      setFilteredOeuvres(availableOeuvres);
+      setTotalCount(availableOeuvres.length);
+      setTotalPages(Math.ceil(availableOeuvres.length / itemsPerPage));
+    } else {
+      setError(response.data.error || 'Impossible de charger les œuvres');
+    }
+  } catch (err: any) {
+    console.error('❌ Error fetching marketplace artworks:', err);
     
     try {
-      const params: any = {
-        page,
-        limit: itemsPerPage
-      };
-      
-      if (searchTerm) {
-        params.search = searchTerm;
-      }
-      
-      if (filters.location) {
-        params.location = filters.location;
-      }
-      
-      if (filters.type !== 'all') {
-        params.type = filters.type;
-      }
-      
-      if (filters.category !== 'all') {
-        params.category = filters.category;
-      }
-      
-      console.log('🌐 API params:', params);
-      
-      const response = await api.get('/art-creation/marketplace/all', { params });
-      
-      console.log('📦 API response:', {
-        success: response.data.success,
-        count: response.data.count,
-        total: response.data.total,
-        dataLength: response.data.data?.length || 0
+      console.log('🔄 Trying alternative API call...');
+      const fallbackResponse = await api.get('/art-creation/products', {
+        params: {
+          status: 'published',
+          limit: itemsPerPage,
+          page: page,
+          quantity: 1 // Minimum 1 en stock pour l'API fallback
+        }
       });
       
-      if (response.data?.success) {
-        const allOeuvres = response.data.data || [];
-        
-        // S'assurer que chaque œuvre a une quantité par défaut
-        const formattedOeuvres = allOeuvres.map((oeuvre: any) => ({
-          ...oeuvre,
-          quantity: 1, // Par défaut en stock
-          images: oeuvre.images || [oeuvre.image],
+      if (fallbackResponse.data?.success) {
+        const data = fallbackResponse.data.data || [];
+        const formattedOeuvres = data.map((product: any) => ({
+          id: product.id,
+          title: product.title || product.name,
+          description: product.description,
+          image: product.images?.[0] || '',
+          images: product.images,
+          price: product.price,
+          quantity: product.quantity || product.stock || 1,
+          createdAt: product.createdAt,
+          publishedAt: product.publishedAt,
+          type: product.type || product.subcategory,
+          category: product.category,
+          userId: product.userId,
+          artist: product.user?.name || 
+                 `${product.user?.firstName} ${product.user?.lastName}`.trim(),
+          professional: {
+            id: product.userId,
+            name: product.user?.name || 
+                  `${product.user?.firstName} ${product.user?.lastName}`.trim(),
+            avatar: product.user?.avatar,
+            city: product.user?.city
+          },
+          status: product.status,
           dimensions: {
-            ...oeuvre.dimensions,
-            isArtwork: true
+            isArtwork: true,
+            type: product.type || product.subcategory,
+            category: product.category
           }
         }));
         
-        setOeuvres(formattedOeuvres);
-        setFilteredOeuvres(formattedOeuvres);
-        setTotalCount(response.data.total || 0);
-        setTotalPages(response.data.pagination?.totalPages || 1);
-      } else {
-        setError(response.data.error || 'Impossible de charger les œuvres');
-      }
-    } catch (err: any) {
-      console.error('❌ Error fetching marketplace artworks:', err);
-      
-      try {
-        console.log('🔄 Trying alternative API call...');
-        const fallbackResponse = await api.get('/art-creation/products', {
-          params: {
-            status: 'published',
-            limit: itemsPerPage,
-            page: page
-          }
-        });
+        // Filtrer pour ne garder que celles avec quantité > 0
+        const availableOeuvres = formattedOeuvres.filter(oeuvre => 
+          (oeuvre.quantity || 1) > 0
+        );
         
-        if (fallbackResponse.data?.success) {
-          const data = fallbackResponse.data.data || [];
-          const formattedOeuvres = data.map((product: any) => ({
-            id: product.id,
-            title: product.title || product.name,
-            description: product.description,
-            image: product.images?.[0] || '',
-            images: product.images,
-            price: product.price,
-            createdAt: product.createdAt,
-            publishedAt: product.publishedAt,
-            type: product.type || product.subcategory,
-            category: product.category,
-            userId: product.userId,
-            artist: product.user?.name || 
-                   `${product.user?.firstName} ${product.user?.lastName}`.trim(),
-            professional: {
-              id: product.userId,
-              name: product.user?.name || 
-                    `${product.user?.firstName} ${product.user?.lastName}`.trim(),
-              avatar: product.user?.avatar,
-              city: product.user?.city
-            },
-            status: product.status,
-            quantity: 1, // Stock par défaut
-            dimensions: {
-              isArtwork: true,
-              type: product.type || product.subcategory,
-              category: product.category
-            }
-          }));
-          
-          setOeuvres(formattedOeuvres);
-          setFilteredOeuvres(formattedOeuvres);
-          setTotalCount(fallbackResponse.data.total || formattedOeuvres.length);
-          setTotalPages(fallbackResponse.data.pagination?.totalPages || 1);
-        }
-      } catch (fallbackErr: any) {
-        console.error('❌ Fallback also failed:', fallbackErr);
-        setError('La galerie Marketplace est temporairement indisponible. Veuillez réessayer plus tard.');
+        setOeuvres(availableOeuvres);
+        setFilteredOeuvres(availableOeuvres);
+        setTotalCount(availableOeuvres.length);
+        setTotalPages(Math.ceil(availableOeuvres.length / itemsPerPage));
       }
-    } finally {
-      setLoading(false);
+    } catch (fallbackErr: any) {
+      console.error('❌ Fallback also failed:', fallbackErr);
+      setError('La galerie Marketplace est temporairement indisponible. Veuillez réessayer plus tard.');
     }
-  }, [page, searchTerm, filters]);
+  } finally {
+    setLoading(false);
+  }
+}, [page, searchTerm, filters]);
 
   const applyLocalFilters = useCallback(() => {
-    let filtered = [...oeuvres];
-    
+  // Déjà filtrées côté serveur et lors du fetch, mais filtrage local supplémentaire
+  let filtered = [...oeuvres];
+  
+  // Filtrage par prix
+  filtered = filtered.filter(oeuvre => 
+    oeuvre.price >= filters.minPrice && oeuvre.price <= filters.maxPrice
+  );
+  
+  // Filtrage par localisation
+  if (filters.location && !searchTerm.includes(filters.location)) {
     filtered = filtered.filter(oeuvre => 
-      oeuvre.price >= filters.minPrice && oeuvre.price <= filters.maxPrice
+      oeuvre.professional?.city?.toLowerCase().includes(filters.location.toLowerCase())
     );
-    
-    if (filters.location && !searchTerm.includes(filters.location)) {
-      filtered = filtered.filter(oeuvre => 
-        oeuvre.professional?.city?.toLowerCase().includes(filters.location.toLowerCase())
-      );
-    }
-    
-    switch (filters.sortBy) {
-      case 'price_asc':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price_desc':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'popular':
-        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
-        break;
-      case 'newest':
-      default:
-        filtered.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
-        break;
-    }
-    
-    setFilteredOeuvres(filtered);
-    setTotalPages(Math.ceil(filtered.length / itemsPerPage));
-  }, [oeuvres, filters, searchTerm]);
+  }
+  
+  // Tri
+  switch (filters.sortBy) {
+    case 'price_asc':
+      filtered.sort((a, b) => a.price - b.price);
+      break;
+    case 'price_desc':
+      filtered.sort((a, b) => b.price - a.price);
+      break;
+    case 'popular':
+      filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+      break;
+    case 'newest':
+    default:
+      filtered.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
+      break;
+  }
+  
+  setFilteredOeuvres(filtered);
+  setTotalPages(Math.ceil(filtered.length / itemsPerPage));
+  setTotalCount(filtered.length);
+}, [oeuvres, filters, searchTerm]);
 
   useEffect(() => {
     if (oeuvres.length > 0) {
@@ -309,8 +327,18 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
         quantity: 1
       });
       
-      if (!stockCheck.data.available) {
-        toast.error(`L'œuvre "${oeuvre.title}" n'est plus disponible.${stockCheck.data.message ? '\n' + stockCheck.data.message : ''}`);
+      if (!stockCheck.data.available || stockCheck.data.availableStock <= 0) {
+        toast.error(`"${oeuvre.title}" n'est plus disponible`);
+
+        // Mettre à jour l'état local pour refléter l'indisponibilité
+        setOeuvres(prev => 
+          prev.map(item => 
+            item.id === oeuvre.id 
+              ? { ...item, quantity: 0 } 
+              : item
+          )
+        );
+
         return;
       }
       
@@ -365,6 +393,15 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
       // Petit délai pour laisser le temps à l'état de se mettre à jour
       await new Promise(resolve => setTimeout(resolve, 100));
       
+      // Après l'ajout réussi, décrémenter la quantité locale
+      setOeuvres(prev => 
+        prev.map(item => 
+          item.id === oeuvre.id 
+            ? { ...item, quantity: (item.quantity || 1) - 1 } 
+            : item
+        )
+      );
+
       // Message de confirmation
       toast.success(`"${oeuvre.title}" ajoutée au panier !`, {
         description: `Prix: ${formatPrice(oeuvre.price)}`,
@@ -404,6 +441,44 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
     setPage(1);
   }, []);
 
+  // Fonction de synchronisation directe
+  const lastSyncRef = useRef<number>(Date.now());
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  const syncStocks = useCallback(async () => {
+    try {
+      if (oeuvres.length === 0 || isSyncing) return;
+      
+      setIsSyncing(true);
+      
+      const response = await api.post('/cart/sync-stock', {
+        productIds: oeuvres.map(oeuvre => oeuvre.id),
+        timestamp: lastSyncRef.current
+      });
+      
+      if (response.data?.success && response.data.updatedProducts) {
+        // Mettre à jour l'état local
+        setOeuvres(prev => 
+          prev.map(oeuvre => {
+            const updated = response.data.updatedProducts.find(
+              (p: any) => p.productId === oeuvre.id
+            );
+            return updated 
+              ? { ...oeuvre, quantity: updated.quantity } 
+              : oeuvre;
+          })
+        );
+        
+        // Mettre à jour la date de dernière synchronisation
+        lastSyncRef.current = Date.now();
+      }
+    } catch (error) {
+      console.error('Erreur synchronisation:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [oeuvres]);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
@@ -442,15 +517,15 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
   };
 
   const stats = {
-    total: totalCount,
-    photographie: oeuvres.filter(o => o.type === 'photographie').length,
-    sculpture: oeuvres.filter(o => o.type === 'sculpture').length,
-    peinture: oeuvres.filter(o => o.type === 'peinture').length,
-    artisanat: oeuvres.filter(o => o.type === 'artisanat').length,
-    averagePrice: oeuvres.length > 0 
-      ? Math.round(oeuvres.reduce((sum, o) => sum + o.price, 0) / oeuvres.length)
-      : 0
-  };
+  total: oeuvres.length, // Déjà filtrées pour quantité > 0
+  photographie: oeuvres.filter(o => o.type === 'photographie').length,
+  sculpture: oeuvres.filter(o => o.type === 'sculpture').length,
+  peinture: oeuvres.filter(o => o.type === 'peinture').length,
+  artisanat: oeuvres.filter(o => o.type === 'artisanat').length,
+  averagePrice: oeuvres.length > 0 
+    ? Math.round(oeuvres.reduce((sum, o) => sum + o.price, 0) / oeuvres.length)
+    : 0
+};
 
   useEffect(() => {
     fetchAllOeuvres();

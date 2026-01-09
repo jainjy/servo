@@ -299,6 +299,7 @@ const ArtCreationProduct: React.FC = () => {
 
   const handleEdit = (product: ArtProduct) => {
     const initial = {
+      id: product.id,
       name: product.name || product.title,
       description: product.description || '',
       type: product.type || '',
@@ -312,7 +313,6 @@ const ArtCreationProduct: React.FC = () => {
         materials: ''
       },
       userId: product.userId || currentUserId,
-      id: product.id
     };
     setEditingInitial(initial);
     setShowModal(true);

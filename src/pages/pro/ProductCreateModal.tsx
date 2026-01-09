@@ -1,4 +1,4 @@
-// ProductCreateModal.tsx - VERSION CORRIGÉE POUR MODÈLE PRISMA EXISTANT
+// ProductCreateModal.tsx - VERSION CORRIGÉE AVEC TOAST D'ERREUR
 
 import React, { useState, useCallback, useEffect } from 'react';
 import {
@@ -20,10 +20,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import {  X,Upload, Loader2, ChevronDown, Package, Palette, Camera, Scissors } from 'lucide-react';
+import { X, Upload, Loader2, ChevronDown, Package, Palette, Camera, Scissors, Plus, Minus, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
-import { useAuth } from '@/hooks/useAuth'; // Ajout de useAuth
+import { useAuth } from '@/hooks/useAuth';
 
 // Types compatibles avec votre modèle Prisma
 interface ArtMetadata {
@@ -39,21 +39,23 @@ interface ArtMetadata {
 }
 
 interface ProductFormData {
+  id?: string;
   name: string;
   description: string;
-  type: string; // Type principal: photographie, sculpture, peinture, artisanat
-  category: string; // Catégorie spécifique
+  type: string;
+  category: string;
   price: number;
+  quantity: number;
   status: 'published' | 'draft' | 'sold';
   images: string[];
   dimensions: ArtMetadata;
-  materials?: string; // Champ séparé pour compatibilité
-  creationDate?: string; // Champ séparé pour compatibilité
-  artistName?: string; // Champ séparé pour compatibilité
+  materials?: string;
+  creationDate?: string;
+  artistName?: string;
 }
 
 interface ImageFile {
-  file: File;
+  file?: File;
   preview: string;
   uploadProgress: number;
   uploadedUrl?: string;
@@ -133,12 +135,6 @@ const getTypeLabel = (type: string) => {
   return labels[type] || type;
 };
 
-const STATUS_OPTIONS = [
-  { value: 'published', label: 'Publié', color: 'bg-[#6B8E23]' },
-  { value: 'draft', label: 'Brouillon', color: 'bg-[#8B4513]' },
-  { value: 'sold', label: 'Vendu', color: 'bg-[#556B2F]' }
-] as const;
-
 const apiBase = 'http://localhost:3001';
 
 export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
@@ -149,10 +145,12 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
   onSuccess
 }) => {
   const { toast } = useToast();
-  const { user } = useAuth(); // Récupérer les infos utilisateur
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageFiles, setImageFiles] = useState<ImageFile[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [productId, setProductId] = useState<string>('');
 
   // Form state avec statut par défaut 'published'
   const [formData, setFormData] = useState<ProductFormData>({
@@ -161,7 +159,8 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
     type: '',
     category: '',
     price: 0,
-    status: 'published',
+    quantity: 1,
+    status: 'published', // Toujours publié par défaut
     images: [],
     dimensions: {},
     materials: '',
@@ -175,7 +174,6 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
   // Initialiser avec les données utilisateur
   useEffect(() => {
     if (user && !initialData) {
-      // Définir le nom d'artiste par défaut
       const defaultArtistName = user.companyName || 
                                `${user.firstName} ${user.lastName}`.trim() || 
                                user.email;
@@ -193,31 +191,59 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
 
   // Initialize avec initialData
   useEffect(() => {
-    if (initialData && open) {
-      const newFormData = {
-        ...formData,
-        ...initialData,
-        userId
-      };
-      
-      // Si initialData contient dimensions, extraire les champs spécifiques
-      if (initialData.dimensions) {
-        newFormData.materials = initialData.dimensions.materials || '';
-        newFormData.creationDate = initialData.dimensions.creationDate || '';
-        newFormData.artistName = initialData.dimensions.artistName || 
-                                user?.companyName || 
-                                `${user?.firstName} ${user?.lastName}`.trim() || 
-                                user?.email || '';
-      }
-      
-      setFormData(newFormData);
-      
-      // Si un type est fourni dans initialData, mettre à jour les catégories disponibles
-      if (initialData.type) {
-        setAvailableCategories(getCategoriesByType(initialData.type));
+    if (open) {
+      if (initialData) {
+        console.log('🔍 Initialisation avec données:', initialData);
+        
+        // Vérifier si on est en mode édition
+        setIsEditing(!!initialData.id);
+        setProductId(initialData.id || '');
+        
+        // Préparer les images existantes
+        const existingImages = initialData.images || [];
+        const imageFilesState: ImageFile[] = existingImages.map((url, index) => ({
+          file: undefined,
+          preview: url.startsWith('http') ? url : `${apiBase}${url}`,
+          uploadProgress: 100,
+          uploadedUrl: url,
+          uploadedFilename: `existing-${index}`
+        }));
+        
+        setImageFiles(imageFilesState);
+        
+        // Extraire les métadonnées
+        const metadata = initialData.dimensions || {};
+        const newFormData: ProductFormData = {
+          id: initialData.id,
+          name: initialData.name || '',
+          description: initialData.description || '',
+          type: initialData.type || '',
+          category: initialData.category || '',
+          price: initialData.price || 0,
+          quantity: initialData.quantity || 1,
+          status: initialData.status || 'published',
+          images: existingImages,
+          dimensions: metadata,
+          materials: metadata.materials || '',
+          creationDate: metadata.creationDate || '',
+          artistName: metadata.artistName || 
+                    user?.companyName || 
+                    `${user?.firstName} ${user?.lastName}`.trim() || 
+                    user?.email || ''
+        };
+        
+        setFormData(newFormData);
+        
+        // Mettre à jour les catégories disponibles si un type est défini
+        if (initialData.type) {
+          setAvailableCategories(getCategoriesByType(initialData.type));
+        }
+      } else {
+        // Mode création - réinitialiser
+        resetForm();
       }
     }
-  }, [initialData, userId, open, user]);
+  }, [initialData, open, user]);
 
   // Gestion des champs du formulaire
   const handleInputChange = (
@@ -241,8 +267,6 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
 
   // Gestion du changement de type
   const handleTypeChange = (value: string) => {
-    const TypeIcon = TYPE_ICONS[value as keyof typeof TYPE_ICONS] || Palette;
-    
     // Mettre à jour le type
     setFormData(prev => ({ 
       ...prev, 
@@ -294,6 +318,10 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
   const uploadImageToServer = async (file: File): Promise<{url: string, fullUrl: string, filename: string}> => {
     const token = localStorage.getItem('auth-token') || localStorage.getItem('token') || sessionStorage.getItem('token');
    
+    if (!token) {
+      throw new Error('Token d\'authentification manquant');
+    }
+
     const formData = new FormData();
     formData.append('image', file);
 
@@ -334,7 +362,8 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
         toast({
           title: 'Erreur',
           description: `Le fichier ${file.name} n'est pas une image`,
-          variant: 'destructive'
+          variant: 'destructive',
+          className: 'z-50'
         });
         continue;
       }
@@ -343,7 +372,8 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
         toast({
           title: 'Erreur',
           description: `L'image ${file.name} dépasse 10MB`,
-          variant: 'destructive'
+          variant: 'destructive',
+          className: 'z-50'
         });
         continue;
       }
@@ -377,7 +407,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
         );
        
         // UPLOAD RÉEL
-        const uploadResult = await uploadImageToServer(image.file);
+        const uploadResult = await uploadImageToServer(image.file!);
        
         // Mettre à jour avec la vraie URL
         setImageFiles(prev =>
@@ -417,8 +447,9 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
        
         toast({
           title: 'Erreur d\'upload',
-          description: `${image.file.name}: ${error.message}`,
-          variant: 'destructive'
+          description: `${image.file?.name}: ${error.message}`,
+          variant: 'destructive',
+          className: 'z-50'
         });
       }
     }
@@ -429,13 +460,13 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
   const removeImage = async (index: number) => {
     const image = imageFiles[index];
    
-    // Nettoyer la preview
-    if (image.preview) {
+    // Nettoyer la preview si c'est une nouvelle image
+    if (image.preview && image.file) {
       URL.revokeObjectURL(image.preview);
     }
    
     // Si l'image a été uploadée, la supprimer du serveur
-    if (image.uploadedFilename) {
+    if (image.uploadedFilename && image.file) {
       try {
         const token = localStorage.getItem('auth-token') || localStorage.getItem('token') || sessionStorage.getItem('token');
         await fetch(`${apiBase}/api/art-creation/products/delete/${image.uploadedFilename}`, {
@@ -459,51 +490,52 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
     }
   };
 
-  // Validation du formulaire
+  // Validation du formulaire - MODIFIÉE POUR TOAST
   const validateForm = (): string[] => {
     const errors: string[] = [];
-   
+
     if (!formData.name.trim()) errors.push('Le titre est requis');
     if (!formData.description.trim()) errors.push('La description est requise');
     if (!formData.type) errors.push('Le type est requis');
     if (!formData.category) errors.push('La catégorie est requise');
     if (formData.price < 0) errors.push('Le prix doit être positif');
     if (formData.price === 0) errors.push('Le prix doit être supérieur à 0');
-    if (formData.images.length === 0) errors.push('Au moins une image est requise');
-   
+    if (formData.quantity === undefined || formData.quantity < 1) errors.push('La quantité doit être au moins 1');
+
     return errors;
   };
 
-  const handleSubmit = async (submitStatus?: 'published' | 'draft') => {
-    const finalStatus = submitStatus || formData.status;
-   
+  const handleSubmit = async () => {
     // Validation
     const errors = validateForm();
     if (errors.length > 0) {
+      // Afficher toutes les erreurs dans UN seul toast formaté
       toast({
-        title: 'Erreur de validation',
-        description: errors.join(', '),
-        variant: 'destructive'
+        title: `Erreurs de validation (${errors.length})`,
+        description: (
+          <div>
+            <ul className="list-disc pl-4 space-y-0.5 mt-1">
+              {errors.map((error, index) => (
+                <li key={index} className="text-sm">{error}</li>
+              ))}
+            </ul>
+            <p className="text-xs mt-2 text-white/90">Corrigez ces erreurs avant de publier le produit.</p>
+          </div>
+        ),
+        variant: 'destructive',
+        className: 'z-[100] max-w-md'
       });
       return;
     }
    
-    // Vérifier uploads des images
-    const pendingUploads = imageFiles.filter(img => img.uploadProgress < 100);
+    // Vérifier uploads des images en cours
+    const pendingUploads = imageFiles.filter(img => img.file && img.uploadProgress < 100);
     if (pendingUploads.length > 0) {
       toast({
         title: 'Upload en cours',
         description: 'Veuillez attendre la fin du téléchargement des images',
-        variant: 'destructive'
-      });
-      return;
-    }
-   
-    if (formData.images.length === 0) {
-      toast({
-        title: 'Images manquantes',
-        description: 'Veuillez uploader au moins une image',
-        variant: 'destructive'
+        variant: 'destructive',
+        className: 'z-50'
       });
       return;
     }
@@ -511,7 +543,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
     setIsSubmitting(true);
    
     try {
-      // ✅ CORRECT: Récupérer le token d'authentification
+      // Récupérer le token d'authentification
       const token = localStorage.getItem('auth-token') ||
                     localStorage.getItem('token') ||
                     sessionStorage.getItem('token');
@@ -520,26 +552,26 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
         toast({
           title: 'Authentification requise',
           description: 'Veuillez vous connecter',
-          variant: 'destructive'
+          variant: 'destructive',
+          className: 'z-50'
         });
         setIsSubmitting(false);
         return;
       }
 
-      // ✅ CORRECT: Préparer les données pour le modèle Prisma existant
+      // Préparer les données pour le modèle Prisma
       const apiData = {
         name: formData.name,
         description: formData.description,
-        type: formData.type,           // → sera stocké dans subcategory
-        category: formData.category,   // → sera stocké dans category
+        type: formData.type,
+        category: formData.category,
         price: formData.price,
-        status: finalStatus,
+        quantity: formData.quantity,
+        status: formData.status, // Toujours 'published' par défaut
         images: formData.images,
         
-        // Toutes les métadonnées dans dimensions
         dimensions: {
           ...formData.dimensions,
-          // S'assurer que les champs clés sont présents
           type: formData.type,
           category: formData.category,
           isArtwork: true,
@@ -552,7 +584,6 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                      user?.email
         },
         
-        // Champs séparés pour compatibilité avec l'API
         materials: formData.materials || formData.dimensions.materials,
         creationDate: formData.creationDate || formData.dimensions.creationDate,
         artistName: formData.artistName || 
@@ -561,13 +592,29 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                    user?.email
       };
 
-      console.log('📤 Envoi création produit:', apiData);
+      console.log('📤 Envoi données:', {
+        isEditing,
+        productId,
+        data: apiData
+      });
 
-      const res = await fetch(`${apiBase}/api/art-creation/products/create`, {
-        method: 'POST',
+      // Choix de la méthode HTTP
+      let url: string;
+      let method: string;
+      
+      if (isEditing && productId) {
+        url = `${apiBase}/api/art-creation/products/${productId}`;
+        method = 'PUT';
+      } else {
+        url = `${apiBase}/api/art-creation/products/create`;
+        method = 'POST';
+      }
+
+      const res = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // ✅ L'utilisateur est identifié ici
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(apiData)
       });
@@ -580,8 +627,10 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
 
       toast({
         title: 'Succès',
-        description: result.message || 'produit créée avec succès',
-        className: 'bg-green-50 text-green-800 border-green-200'
+        description: isEditing 
+          ? 'Produit mis à jour avec succès'
+          : 'Produit créé avec succès',
+        className: 'bg-green-50 text-green-800 border-green-200 z-50'
       });
      
       resetForm();
@@ -589,11 +638,12 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
       if (onSuccess) onSuccess();
 
     } catch (err: any) {
-      console.error('❌ Erreur création produit:', err);
+      console.error('❌ Erreur:', err);
       toast({
         title: 'Erreur',
-        description: err?.message || 'Erreur lors de la création',
-        variant: 'destructive'
+        description: err?.message || `Erreur lors de ${isEditing ? 'la mise à jour' : 'la création'}`,
+        variant: 'destructive',
+        className: 'z-50'
       });
     } finally {
       setIsSubmitting(false);
@@ -601,7 +651,6 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
   };
 
   const resetForm = () => {
-    // Récupérer le nom d'artiste par défaut
     const defaultArtistName = user?.companyName || 
                              `${user?.firstName} ${user?.lastName}`.trim() || 
                              user?.email || '';
@@ -612,6 +661,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
       type: '',
       category: '',
       price: 0,
+      quantity: 1,
       status: 'published',
       images: [],
       dimensions: {
@@ -624,10 +674,12 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
     });
    
     setAvailableCategories([]);
+    setIsEditing(false);
+    setProductId('');
    
     // Nettoyer les URLs d'image
     imageFiles.forEach(image => {
-      if (image.preview) {
+      if (image.preview && image.file) {
         URL.revokeObjectURL(image.preview);
       }
     });
@@ -638,7 +690,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
   // Nettoyage à la fermeture
   useEffect(() => {
     if (!open) {
-      resetForm();
+      setTimeout(resetForm, 300);
     }
   }, [open]);
 
@@ -646,7 +698,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
   useEffect(() => {
     return () => {
       imageFiles.forEach(image => {
-        if (image.preview) {
+        if (image.preview && image.file) {
           URL.revokeObjectURL(image.preview);
         }
       });
@@ -658,8 +710,8 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[#D3D3D3] bg-white rounded-2xl shadow-2xl">
-        <DialogHeader className="pb-4 border-b border-[#D3D3D3]">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[#D3D3D3] bg-white rounded-2xl shadow-2xl z-50">
+        <DialogHeader className="pb-4 border-b border-[#D3D3D3] sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-[#6B8E23]/10">
@@ -667,18 +719,19 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
               </div>
               <div>
                 <DialogTitle className="text-2xl font-bold text-[#8B4513]">
-                  {initialData ? 'Modifier une produit' : 'Ajouter un nouveau produit'}
+                  {isEditing ? 'Modifier un produit' : 'Ajouter un nouveau produit'}
                 </DialogTitle>
                 <p className="text-sm text-[#6B8E23] mt-1">
-                  Complétez les informations de votre création artistique
+                  {isEditing 
+                    ? 'Modifiez les informations de votre création artistique' 
+                    : 'Complétez les informations de votre création artistique'}
                 </p>
               </div>
             </div>
-            
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 px-6">
           {/* Section 1: Informations principales */}
           <div className="space-y-6">
             <div className="flex items-center gap-2">
@@ -687,11 +740,12 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
             </div>
            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Colonne gauche */}
+              {/* Colonne gauche - Informations de base */}
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="font-medium text-[#556B2F] flex items-center gap-1">
-                    Titre du produit <span className="text-red-500">*</span>
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    Titre du produit *
                   </Label>
                   <Input
                     id="name"
@@ -700,20 +754,69 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                     placeholder="Ex: 'Soleil couchant sur la mer'"
                     className="border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3"
                   />
+                  <p className="text-xs text-gray-500">Nom de votre création</p>
                 </div>
-               
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="font-medium text-[#556B2F] flex items-center gap-1">
-                    Description <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    placeholder="Décrivez votre produit, son inspiration, sa technique, son histoire..."
-                    rows={5}
-                    className="border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3 min-h-[120px]"
-                  />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price" className="font-medium text-[#556B2F] flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                      Prix (€) *
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6B8E23]">€</span>
+                      <Input
+                        id="price"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={formData.price || ''}
+                        onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                        placeholder="0.00"
+                        className="pl-10 border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity" className="font-medium text-[#556B2F] flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                      Quantité *
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleInputChange('quantity', Math.max(1, formData.quantity - 1))}
+                        className="border-2 border-[#D3D3D3] h-10 w-10"
+                        disabled={isSubmitting || uploadingImages}
+                      >
+                        <Minus size={16} />
+                      </Button>
+                      
+                      <Input
+                        id="quantity"
+                        type="number"
+                        min="1"
+                        max="999"
+                        value={formData.quantity}
+                        onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 1)}
+                        className="text-center border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3"
+                      />
+                      
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleInputChange('quantity', formData.quantity + 1)}
+                        className="border-2 border-[#D3D3D3] h-10 w-10"
+                        disabled={isSubmitting || uploadingImages}
+                      >
+                        <Plus size={16} />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Informations de l'artiste */}
@@ -725,7 +828,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                     id="artistName"
                     value={formData.artistName}
                     onChange={(e) => handleInputChange('artistName', e.target.value)}
-                    placeholder="Nom sous lequel l'produit sera présentée"
+                    placeholder="Nom sous lequel le produit sera présenté"
                     className="border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3"
                   />
                   <p className="text-xs text-gray-500">
@@ -734,12 +837,13 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                 </div>
               </div>
              
-              {/* Colonne droite */}
+              {/* Colonne droite - Catégorisation */}
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="type" className="font-medium text-[#556B2F] flex items-center gap-1">
-                      Type du produit <span className="text-red-500">*</span>
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                      Type du produit *
                     </Label>
                     <Select
                       value={formData.type}
@@ -748,7 +852,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                       <SelectTrigger className="border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3 h-auto">
                         <SelectValue placeholder="Sélectionner un type" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-2 border-[#D3D3D3]">
+                      <SelectContent className="rounded-xl border-2 border-[#D3D3D3] z-50">
                         {TYPES.map((type) => {
                           const Icon = TYPE_ICONS[type];
                           return (
@@ -773,7 +877,8 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                  
                   <div className="space-y-2">
                     <Label htmlFor="category" className="font-medium text-[#556B2F] flex items-center gap-1">
-                      Catégorie/Métier <span className="text-red-500">*</span>
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                      Catégorie/Métier *
                     </Label>
                     <Select
                       value={formData.category}
@@ -787,7 +892,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                             : "Choisir d'abord un type"
                         } />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-2 border-[#D3D3D3] max-h-[200px]">
+                      <SelectContent className="rounded-xl border-2 border-[#D3D3D3] max-h-[200px] z-50">
                         {availableCategories.map((category) => (
                           <SelectItem key={category} value={category} className="py-2 focus:bg-[#6B8E23]/10">
                             <div className="flex items-center gap-2">
@@ -805,56 +910,10 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                     )}
                   </div>
                 </div>
-               
-                <div className="space-y-2">
-                  <Label htmlFor="price" className="font-medium text-[#556B2F] flex items-center gap-1">
-                    Prix (€) <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B8E23] font-bold">
-                      
-                    </span>
-                    <Input
-                      id="price"
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={formData.price || ''}
-                      onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-                      placeholder="0.00"
-                      className="pl-12 border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Prix de vente de votre produit
-                  </p>
-                </div>
-               
-                <div className="space-y-2">
-                  <Label htmlFor="status" className="font-medium text-[#556B2F]">
-                    Statut de publication
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {STATUS_OPTIONS.map((status) => (
-                      <button
-                        key={status.value}
-                        type="button"
-                        onClick={() => handleInputChange('status', status.value)}
-                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                          formData.status === status.value
-                            ? `${status.color} text-white border-2 border-transparent`
-                            : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-                        }`}
-                      >
-                        {status.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-               
-                {/* Informations supplémentaires */}
+
+                {/* Informations techniques */}
                 <div className="pt-4 border-t border-[#D3D3D3]">
-                  <h4 className="text-md font-semibold text-[#8B4513] mb-4">Informations techniques</h4>
+                  <h4 className="text-md font-semibold text-[#8B4513] mb-3">Informations techniques</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="creationDate" className="text-sm font-medium text-[#556B2F]">
@@ -898,15 +957,37 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Description */}
+            <div className="pt-4 border-t border-[#D3D3D3]">
+              <div className="space-y-2">
+                <Label htmlFor="description" className="font-medium text-[#556B2F] flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  Description *
+                </Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Décrivez votre produit, son inspiration, sa technique, son histoire..."
+                  rows={4}
+                  className="border-2 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20 rounded-xl px-4 py-3 min-h-[100px]"
+                />
+                <p className="text-xs text-gray-500">Une description détaillée aide les acheteurs à mieux comprendre votre création</p>
+              </div>
+            </div>
           </div>
          
-          {/* Section 2: Images */}
+          {/* Section 2: Images - OPTIONNELLE */}
           <div className="space-y-6 pt-6 border-t border-[#D3D3D3]">
             <div className="flex items-center gap-2">
               <div className="h-5 w-1 bg-[#6B8E23] rounded-full"></div>
               <h3 className="text-lg font-semibold text-[#8B4513]">
-                Galerie d'images <span className="text-red-500">*</span>
+                Galerie d'images
               </h3>
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                Optionnel
+              </Badge>
             </div>
            
             <div className="space-y-6">
@@ -980,7 +1061,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                  
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {imageFiles.map((image, index) => {
-                      const isUploading = image.uploadProgress > 0 && image.uploadProgress < 100;
+                      const isUploading = image.file && image.uploadProgress > 0 && image.uploadProgress < 100;
                       const isUploaded = image.uploadProgress === 100;
                       const hasError = !!image.error;
                       
@@ -1070,12 +1151,20 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                   </div>
                 </div>
               )}
+              
+              {/* Message si pas d'images */}
+              {imageFiles.length === 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                  <p className="text-sm text-amber-800">
+                    ℹ️ Aucune image sélectionnée. Vous pouvez publier votre produit sans image pour l'instant.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-
-        <DialogFooter className="gap-3 pt-6 border-t border-[#D3D3D3]">
+        <DialogFooter className="gap-3 pt-6 border-t border-[#D3D3D3] sticky bottom-0 bg-white">
           <Button
             type="button"
             variant="outline"
@@ -1086,17 +1175,16 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
             Annuler
           </Button>
         
-          {/* SUPPRIMÉ : Le bouton "Sauvegarder brouillon" et son conteneur flex */}
           <Button
             type="button"
-            onClick={() => handleSubmit('published')}
-            disabled={isSubmitting || uploadingImages || formData.images.length === 0}
+            onClick={handleSubmit}
+            disabled={isSubmitting || uploadingImages}
             className="min-w-[160px] bg-[#6B8E23] text-white hover:bg-[#556B2F] hover:shadow-lg rounded-xl px-8 py-2.5 font-medium"
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Publication...
+                {isEditing ? 'Mise à jour...' : 'Publication...'}
               </>
             ) : uploadingImages ? (
               <>
@@ -1104,7 +1192,7 @@ export const ProductCreateModal: React.FC<ProductCreateModalProps> = ({
                 Téléchargement...
               </>
             ) : (
-              'Publier le produit'
+              isEditing ? 'Mettre à jour' : 'Publier le produit'
             )}
           </Button>
         </DialogFooter>

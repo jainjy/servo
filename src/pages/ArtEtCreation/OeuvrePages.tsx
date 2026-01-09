@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useLocation, useNavigate,Link } from 'react-router-dom';
 import { ArrowLeft, ImageIcon, Calendar, ShoppingCart, Euro } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,6 +23,13 @@ interface Oeuvre {
   vendor?: {
     companyName?: string;
   };
+  // Ajouter ces champs si nécessaires
+  professional?: {
+    id?: string;
+    name?: string;
+    avatar?: string;
+    city?: string;
+  };
 }
 
 const OeuvrePages: React.FC = () => {
@@ -40,61 +47,131 @@ const OeuvrePages: React.FC = () => {
   const [addingOeuvreId, setAddingOeuvreId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!professionalId) {
-      setError('Identifiant du professionnel manquant');
-      setLoading(false);
-      return;
-    }
+  if (!professionalId) {
+    setError('Identifiant du professionnel manquant');
+    setLoading(false);
+    return;
+  }
 
-    const fetchOeuvres = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchOeuvres = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        console.log('🔄 Fetching œuvres for professionalId:', professionalId);
+      console.log('🔄 Fetching œuvres for professionalId:', professionalId);
 
-        const response = await api.get(`/art-creation/products/professional/${professionalId}`);
-
-        console.log('✅ Response data:', {
-          success: response.data.success,
-          count: response.data.count,
-          dataLength: response.data.data?.length,
-          data: response.data.data
-        });
-
-        if (response.data?.success) {
-          const oeuvresData = response.data.data || [];
-          
-          // S'assurer que chaque œuvre a une quantité par défaut si non définie
-          const oeuvresWithQuantity = oeuvresData.map((oeuvre: Oeuvre) => ({
-            ...oeuvre,
-            quantity: oeuvre.quantity || 1, // Par défaut en stock
-            name: oeuvre.title // Pour la compatibilité avec addToCart
-          }));
-          
-          setOeuvres(oeuvresWithQuantity);
-        } else {
-          setError(response.data.error || 'Impossible de charger les œuvres');
+      // Utiliser la nouvelle route
+      const response = await api.get(`/art-creation/products/professional/${professionalId}`, {
+        params: {
+          status: 'published',
+          quantity: 1
         }
-      } catch (err: any) {
-        console.error('❌ Erreur chargement œuvres :', err);
-        console.error('❌ Status:', err.response?.status);
-        console.error('❌ Response data:', err.response?.data);
+      });
 
-        if (err.response?.status === 404) {
-          setError('Aucune œuvre trouvée pour ce professionnel');
-        } else if (err.response?.status === 500) {
-          setError('Erreur serveur, veuillez réessayer plus tard');
-        } else {
-          setError('Erreur de connexion : ' + (err.message || 'Erreur inconnue'));
-        }
-      } finally {
-        setLoading(false);
+      console.log('✅ Response data:', {
+        success: response.data.success,
+        count: response.data.count,
+        dataLength: response.data.data?.length
+      });
+
+      if (response.data?.success) {
+        const oeuvresData = response.data.data || [];
+        
+        // Formater pour correspondre à l'interface Oeuvre
+        const formattedOeuvres = oeuvresData.map((oeuvre: any) => ({
+          id: oeuvre.id,
+          title: oeuvre.title || oeuvre.name,
+          description: oeuvre.description,
+          image: oeuvre.image,
+          images: oeuvre.images || [oeuvre.image],
+          price: oeuvre.price,
+          quantity: oeuvre.quantity || 1,
+          createdAt: oeuvre.createdAt,
+          type: oeuvre.type,
+          category: oeuvre.category,
+          userId: oeuvre.userId,
+          artist: oeuvre.artist,
+          vendor: {
+            companyName: oeuvre.professional?.name
+          }
+        }));
+        
+        setOeuvres(formattedOeuvres);
+      } else {
+        setError(response.data.error || 'Impossible de charger les œuvres');
       }
-    };
+    } catch (err: any) {
+      console.error('❌ Erreur chargement œuvres :', err);
+      
+      if (err.response?.status === 404) {
+        setError('Aucune œuvre trouvée pour ce professionnel');
+      } else if (err.response?.status === 500) {
+        setError('Erreur serveur, veuillez réessayer plus tard');
+      } else {
+        setError('Erreur de connexion : ' + (err.message || 'Erreur inconnue'));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchOeuvres();
-  }, [professionalId]);
+  fetchOeuvres();
+}, [professionalId]);
+
+  // Synchronisation des stocks
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const lastSyncRef = useRef<number>(Date.now());
+
+  const syncStocks = useCallback(async () => {
+    try {
+      if (oeuvres.length === 0 || isSyncing) return;
+      
+      setIsSyncing(true);
+      
+      const response = await api.post('/cart/sync-stock', {
+        productIds: oeuvres.map(oeuvre => oeuvre.id),
+        timestamp: lastSyncRef.current
+      });
+      
+      if (response.data?.success && response.data.updatedProducts) {
+        // Mettre à jour l'état local
+        setOeuvres(prev => 
+          prev.map(oeuvre => {
+            const updated = response.data.updatedProducts.find(
+              (p: any) => p.productId === oeuvre.id
+            );
+            return updated 
+              ? { ...oeuvre, quantity: updated.quantity } 
+              : oeuvre;
+          })
+        );
+        
+        lastSyncRef.current = Date.now();
+      }
+    } catch (error) {
+      console.error('Erreur synchronisation:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [oeuvres, isSyncing]);
+
+  // Synchroniser périodiquement
+  useEffect(() => {
+    const interval = setInterval(() => {
+      syncStocks();
+    }, 30000); // Toutes les 30 secondes
+
+    return () => clearInterval(interval);
+  }, [syncStocks]);
+
+  // Synchroniser au chargement
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      syncStocks();
+    }, 2000); // 2 secondes après le chargement
+
+    return () => clearTimeout(timeout);
+  }, [oeuvres]);
 
   // OeuvrePages.tsx - ADAPTER L'AJOUT AU PANIER
 
@@ -144,7 +221,16 @@ const OeuvrePages: React.FC = () => {
       };
 
       // Utiliser votre CartContext existant
-      addToCart(productToAdd);
+      await addToCart(productToAdd);
+
+      // Après l'achat réussi, mettre à jour la quantité localement
+      setOeuvres(prev => 
+        prev.map(item => 
+          item.id === oeuvre.id 
+            ? { ...item, quantity: (item.quantity || 1) - 1 } 
+            : item
+        )
+      );
 
       toast.success(`"${oeuvre.title}" ajoutée au panier !`);
       
@@ -172,14 +258,14 @@ const OeuvrePages: React.FC = () => {
 
         {/* Header */}
         <div className="flex items-center mb-8">
-          <Link
-            to={-1 as any} // Ou spécifiez un chemin précis
-            className="flex items-center text-[#556B2F] hover:underline font-medium"
-          >
-            <ArrowLeft size={20} className="mr-2" />
-            Retour
-          </Link>
-        </div>
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center text-[#556B2F] hover:underline font-medium"
+            >
+              <ArrowLeft size={20} className="mr-2" />
+              Retour
+            </button>
+          </div>
 
         <div className="mb-10">
           <div className="flex items-center mb-8">
