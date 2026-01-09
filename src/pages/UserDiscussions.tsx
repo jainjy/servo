@@ -100,7 +100,7 @@ export default function UserDiscussions() {
 
           if (response.data.artisans) {
             setArtisans(response.data.artisans);
-            console.log("Artisans chargés:", response.data.artisans);
+            // console.log("Artisans chargés:", response.data.artisans);
           }
         }
       } catch (error) {

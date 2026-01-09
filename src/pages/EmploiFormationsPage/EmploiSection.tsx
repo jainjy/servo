@@ -159,7 +159,7 @@ const EmploiSection = ({
           fetchStats()
         ]);
       } catch (error) {
-        console.log("Erreur capturée dans EmploiSection:", error);
+        // console.log("Erreur capturée dans EmploiSection:", error);
       } finally {
         setLoading(false);
       }

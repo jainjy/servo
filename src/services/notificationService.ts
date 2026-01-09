@@ -35,16 +35,16 @@ class NotificationService {
     });
 
     this.socket.on("connect", () => {
-      console.log("✅ WebSocket Authentifié");
+      // console.log("✅ WebSocket Authentifié");
     });
 
     this.socket.on("new_notification", (notification: Notification) => {
-      console.log("📩 Nouvelle notification reçue :", notification);
+      // console.log("📩 Nouvelle notification reçue :", notification);
       this.listeners.forEach((cb) => cb(notification));
     });
 
     this.socket.on("disconnect", () => {
-      console.log("❌ Déconnecté du WebSocket");
+      // console.log("❌ Déconnecté du WebSocket");
       this.socket = null;
     });
   }
@@ -55,7 +55,7 @@ class NotificationService {
     const url = `${backendUrl.replace(/\/$/, "")}/api/notificationadmin`;
 
     try {
-      console.log("🔎 fetchNotifications -> URL :", url, " token:", !!token);
+      // console.log("🔎 fetchNotifications -> URL :", url, " token:", !!token);
 
       const res = await fetch(url, {
         headers: {
@@ -149,7 +149,7 @@ class NotificationService {
         credentials: "include",
       });
 
-      console.log(`🔵 markAsRead - Status: ${res.status}, ID: ${id}`);
+      // console.log(`🔵 markAsRead - Status: ${res.status}, ID: ${id}`);
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -170,7 +170,7 @@ class NotificationService {
       }
 
       const result = await res.json();
-      console.log(`✅ markAsRead success:`, result);
+      // console.log(`✅ markAsRead success:`, result);
       return result.success === true;
     } catch (err) {
       console.error("❌ Erreur markAsRead:", err);

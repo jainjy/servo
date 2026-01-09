@@ -254,13 +254,12 @@ const Therapeute = () => {
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      console.log('📡 [Therapeute] Début récupération services');
-      
+    
       // Test d'abord la route simple
       try {
-        console.log('🧪 Test route /test');
+      
         const testResponse = await api.get('/therapeutes-bienetre/test');
-        console.log('✅ Route test OK:', testResponse.data);
+       
       } catch (testError) {
         console.warn('⚠️ Route test échouée, continuons...', testError.message);
       }
@@ -275,22 +274,18 @@ const Therapeute = () => {
         limit: 20
       };
 
-      console.log('📡 Envoi requête avec params:', params);
+      
       
       const response = await api.get('/therapeutes-bienetre', { params });
       
-      console.log('✅ Réponse reçue:', {
-        success: response.data.success,
-        count: response.data.services?.length,
-        hasServices: response.data.services && response.data.services.length > 0
-      });
+ 
       
       if (response.data.success) {
         setServices(response.data.services);
         if (response.data.stats) {
           setStats(response.data.stats);
         }
-        console.log(`✅ ${response.data.services.length} services chargés`);
+       
       } else {
         console.error('❌ Erreur API:', response.data.message);
         // Fallback aux données simulées
@@ -321,11 +316,11 @@ const Therapeute = () => {
   // Récupérer les catégories
   const fetchCategories = async () => {
     try {
-      console.log('📡 Récupération catégories thérapeutes...');
+    
       const response = await api.get('/therapeutes-bienetre/categories');
       if (response.data.success) {
         setCategories(response.data.categories);
-        console.log('✅ Catégories thérapeutes chargées:', response.data.categories);
+        // console.log('✅ Catégories thérapeutes chargées:', response.data.categories);
       } else {
         console.warn('⚠️ Erreur chargement catégories, utilisation par défaut');
         setCategories(['Tous', 'Thérapeute', 'Masseur', 'Psychologie', 'Massothérapie']);
@@ -339,11 +334,11 @@ const Therapeute = () => {
   // Récupérer les statistiques
   const fetchStats = async () => {
     try {
-      console.log('📡 Récupération statistiques thérapeutes...');
+      // console.log('📡 Récupération statistiques thérapeutes...');
       const response = await api.get('/therapeutes-bienetre/stats');
       if (response.data.success) {
         setStats(response.data.stats);
-        console.log('✅ Statistiques thérapeutes mises à jour');
+        // console.log('✅ Statistiques thérapeutes mises à jour');
       }
     } catch (error) {
       console.error('❌ Erreur récupération statistiques thérapeutes:', error.message);
@@ -351,25 +346,25 @@ const Therapeute = () => {
   };
 
   useEffect(() => {
-    console.log('🔄 Therapeute component mounted, chargement initial...');
+    // console.log('🔄 Therapeute component mounted, chargement initial...');
     fetchServices();
     fetchCategories();
     fetchStats();
   }, []);
 
   useEffect(() => {
-    console.log('🔄 Déclenchement rechargement services:', { activeTab, searchTerm, priceRange, sortBy });
+    // console.log('🔄 Déclenchement rechargement services:', { activeTab, searchTerm, priceRange, sortBy });
     fetchServices();
   }, [activeTab, searchTerm, priceRange, sortBy]);
 
   const handleOpenModal = (service) => {
-    console.log('📋 Ouverture modal pour service:', service.libelle);
+    // console.log('📋 Ouverture modal pour service:', service.libelle);
     setSelectedService(service);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    console.log('❌ Fermeture modal');
+    // console.log('❌ Fermeture modal');
     setIsModalOpen(false);
     setSelectedService(null);
   };
@@ -381,7 +376,7 @@ const Therapeute = () => {
   };
 
   const handleClearFilters = () => {
-    console.log('🗑️ Réinitialisation des filtres');
+    // console.log('🗑️ Réinitialisation des filtres');
     setSearchTerm('');
     setPriceRange({ min: '', max: '' });
     setSortBy('pertinence');
@@ -966,7 +961,7 @@ const Therapeute = () => {
 
 // Fonction de fallback pour les données simulées
 function getSimulatedServices() {
-  console.log('🔄 Chargement des données simulées');
+
   return [
     {
       id: 1,

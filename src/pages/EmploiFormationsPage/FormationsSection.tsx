@@ -150,8 +150,7 @@ const FormationsSection = ({
       formData.append('userId', user.id);
       formData.append('fileName', file.name);
 
-      console.log('📤 Upload CV vers base de données...');
-
+    
       // Essayez plusieurs endpoints
       const endpoints = [
         `${API_URL}/user/upload-cv`,
@@ -171,11 +170,11 @@ const FormationsSection = ({
           });
           
           if (response.data.success || response.data.url) {
-            console.log('✅ CV uploadé avec succès via:', endpoint);
+            // console.log('✅ CV uploadé avec succès via:', endpoint);
             break;
           }
         } catch (error) {
-          console.log(`❌ Échec avec ${endpoint}:`, error.message);
+          // console.log(`❌ Échec avec ${endpoint}:`, error.message);
           continue;
         }
       }
@@ -267,10 +266,10 @@ const FormationsSection = ({
 
       if (response.data.success && response.data.data?.cvUrl) {
         setUserCVUrl(response.data.data.cvUrl);
-        console.log('✅ CV existant chargé:', response.data.data.cvUrl);
+        // console.log('✅ CV existant chargé:', response.data.data.cvUrl);
       }
     } catch (error) {
-      console.log('ℹ️ Aucun CV existant trouvé ou erreur de chargement');
+      // console.log('ℹ️ Aucun CV existant trouvé ou erreur de chargement');
     }
   };
 
@@ -285,7 +284,7 @@ const FormationsSection = ({
           limit: 50
         });
       } catch (error) {
-        console.log("Erreur capturée dans FormationsSection:", error);
+        // console.log("Erreur capturée dans FormationsSection:", error);
       } finally {
         setLoading(false);
       }
@@ -409,11 +408,7 @@ const FormationsSection = ({
         telephoneCandidat: contactForm.phone || user.phone || null
       };
 
-      // Log pour debug
-      console.log('📤 Envoi candidature formation:', {
-        formationId: selectedFormation.id,
-        data: candidatureData
-      });
+ 
 
       const result = await postuler(
         selectedFormation.id,

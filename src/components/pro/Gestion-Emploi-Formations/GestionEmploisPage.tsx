@@ -140,8 +140,8 @@ const openCandidaturesModal = async (emploi) => {
                   localStorage.getItem('token') || 
                   localStorage.getItem('jwt-token');
     
-    console.log('🔑 Token pour candidatures emploi:', token ? 'Présent' : 'Absent');
-    console.log(`📤 Récupération candidatures pour emploi ID: ${emploi.id}`);
+    // console.log('🔑 Token pour candidatures emploi:', token ? 'Présent' : 'Absent');
+    // console.log(`📤 Récupération candidatures pour emploi ID: ${emploi.id}`);
     
     if (!token) {
       toast.error('Session expirée. Veuillez vous reconnecter.');
@@ -159,13 +159,11 @@ const openCandidaturesModal = async (emploi) => {
       }
     );
     
-    console.log('📊 Réponse candidatures emploi:', response.data);
-    
+ 
     if (response.data.success) {
       const apiCandidatures = response.data.data || [];
       
-      console.log(`📝 ${apiCandidatures.length} candidatures reçues`);
-      
+ 
       if (apiCandidatures.length === 0) {
         toast.info('Aucune candidature pour cette offre');
         setCandidatures([]);
@@ -216,7 +214,7 @@ const openCandidaturesModal = async (emploi) => {
         };
         setCandidatureStats(stats);
         
-        console.log('📈 Stats calculées:', stats);
+        // console.log('📈 Stats calculées:', stats);
       }
     }
   } catch (error) {
@@ -243,7 +241,7 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
     const isMockId = candidatureId === 100 || candidatureId === 101 || candidatureId === 999;
     
     if (isMockId) {
-      console.log('🔄 Mise à jour locale (ID mocké):', candidatureId, newStatus);
+      // console.log('🔄 Mise à jour locale (ID mocké):', candidatureId, newStatus);
       
       // Mettre à jour localement seulement pour les IDs mockés
       setCandidatures(prev => 
@@ -308,12 +306,12 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
     else if (newStatus === 'en_attente') statusToSend = 'en_attente';
     else if (newStatus === 'pending') statusToSend = 'en_attente';
     
-    console.log('📤 Mise à jour statut candidature:', {
-      candidatureId,
-      newStatus,
-      sending: statusToSend,
-      isMockId: false
-    });
+    // console.log('📤 Mise à jour statut candidature:', {
+    //   candidatureId,
+    //   newStatus,
+    //   sending: statusToSend,
+    //   isMockId: false
+    // });
     
     const response = await axios.patch(
       `${API_URL}/candidatures/${candidatureId}/status`,
@@ -370,7 +368,7 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
     
     // Si c'est une erreur 404, c'est probablement un ID mocké
     if (error.response?.status === 404) {
-      console.log('⚠️ ID probablement mocké, mise à jour locale');
+      // console.log('⚠️ ID probablement mocké, mise à jour locale');
       
       // Mettre à jour localement quand même
       setCandidatures(prev => 
@@ -448,7 +446,7 @@ const deleteCandidature = async (candidatureId) => {
 // Fonction pour télécharger un CV - VERSION CORRIGÉE
 const downloadCV = async (candidatureId, fileName, cvUrl) => {
   try {
-    console.log('📥 Téléchargement CV - URL originale:', cvUrl);
+    // console.log('📥 Téléchargement CV - URL originale:', cvUrl);
     
     if (!cvUrl) {
       toast.error('Aucun CV disponible pour ce candidat');
@@ -461,13 +459,13 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
     const isHttpUrl = cvUrl.startsWith('http://') || cvUrl.startsWith('https://');
     const isRelativeUrl = cvUrl.startsWith('/');
     
-    console.log('🔍 Type d\'URL détecté:', {
-      isBlobUrl,
-      isDataUrl,
-      isHttpUrl,
-      isRelativeUrl,
-      cvUrl
-    });
+    // console.log('🔍 Type d\'URL détecté:', {
+    //   isBlobUrl,
+    //   isDataUrl,
+    //   isHttpUrl,
+    //   isRelativeUrl,
+    //   cvUrl
+    // });
     
     let finalUrl = cvUrl;
     let shouldOpenInNewTab = false;
@@ -475,14 +473,14 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
     // Traitement selon le type d'URL
     if (isBlobUrl) {
       // URL Blob : utiliser directement
-      console.log('📄 Utilisation URL Blob');
+      // console.log('📄 Utilisation URL Blob');
       shouldOpenInNewTab = true;
       // Pour les URLs Blob, on ne peut pas ajouter de query params
       // On utilise l'URL telle quelle
     }
     else if (isDataUrl) {
       // URL Data (base64) : convertir en blob
-      console.log('📄 Utilisation URL Data (base64)');
+      // console.log('📄 Utilisation URL Data (base64)');
       try {
         // Extraire le contenu base64
         const base64Content = cvUrl.split(',')[1];
@@ -507,14 +505,14 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
     }
     else if (isHttpUrl) {
       // URL HTTP complète : ajouter timestamp pour éviter le cache
-      console.log('📄 Utilisation URL HTTP complète');
+      // console.log('📄 Utilisation URL HTTP complète');
       const separator = finalUrl.includes('?') ? '&' : '?';
       finalUrl = `${finalUrl}${separator}t=${Date.now()}`;
       shouldOpenInNewTab = true;
     }
     else if (isRelativeUrl) {
       // URL relative : ajouter la base du serveur
-      console.log('📄 Utilisation URL relative');
+      // console.log('📄 Utilisation URL relative');
       // Nettoyer le chemin (enlever le /api/ s'il est déjà présent)
       let cleanPath = cvUrl;
       if (cvUrl.startsWith('/api/')) {
@@ -524,11 +522,11 @@ const downloadCV = async (candidatureId, fileName, cvUrl) => {
     }
     else {
       // Autre cas : traiter comme un chemin de fichier
-      console.log('📄 Traitement comme chemin de fichier');
+      // console.log('📄 Traitement comme chemin de fichier');
       finalUrl = `${API_URL}/${cvUrl}?t=${Date.now()}`;
     }
     
-    console.log('🔗 URL finale pour téléchargement:', finalUrl);
+    // console.log('🔗 URL finale pour téléchargement:', finalUrl);
     
     // Créer un nom de fichier par défaut
     const finalFileName = fileName || 'cv_candidat.pdf';
@@ -1505,13 +1503,13 @@ const handleSubmit = async (e) => {
                 <TableBody>
                   {emplois.map((emploi) => {
 
-                     console.log('🔍 Emploi debug:', {
-      id: emploi.id,
-      title: emploi.title,
-      candidaturesCount: emploi.candidaturesCount,
-      candidatures_count: emploi.candidatures_count,
-      allProps: Object.keys(emploi)
-    });
+    //                  console.log('🔍 Emploi debug:', {
+    //   id: emploi.id,
+    //   title: emploi.title,
+    //   candidaturesCount: emploi.candidaturesCount,
+    //   candidatures_count: emploi.candidatures_count,
+    //   allProps: Object.keys(emploi)
+    // });
                     const status = statuses.find(s => s.value === emploi.status);
                     return (
                       <TableRow key={emploi.id}>

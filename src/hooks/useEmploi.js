@@ -36,11 +36,11 @@ export const useEmploi = () => {
       if (filters.limit) params.append('limit', filters.limit);
       
       const queryString = params.toString();
-      console.log('📡 Appel API emplois:', queryString);
+      // console.log('📡 Appel API emplois:', queryString);
       
       const response = await api.get(`/emploi${queryString ? `?${queryString}` : ''}`);
       
-      console.log('✅ Réponse API emplois:', response.data);
+      // console.log('✅ Réponse API emplois:', response.data);
       
         if (response.data.success) {
     // ✅ Pas de transformation, utilisez candidaturesCount directement
@@ -96,11 +96,11 @@ export const useEmploi = () => {
   // Charger les statistiques
   const fetchStats = useCallback(async () => {
     try {
-      console.log('📡 Appel API stats');
+      // console.log('📡 Appel API stats');
       
       const response = await api.get('/emploi/stats/summary');
       
-      console.log('✅ Réponse stats:', response.data);
+  
       
       if (response.data.success) {
         setStats({
@@ -138,12 +138,10 @@ export const useEmploi = () => {
   const createEmploi = useCallback(async (emploiData) => {
     setIsLoading(true);
     try {
-      console.log('📡 Création emploi:', emploiData);
+   
       
       const response = await api.post('/emploi', emploiData);
-      
-      console.log('✅ Réponse création:', response.data);
-      
+   
       if (response.data.success) {
         toast.success(response.data.message || 'Offre créée avec succès');
         // Recharger les données
@@ -165,8 +163,7 @@ export const useEmploi = () => {
   const updateEmploi = useCallback(async (id, emploiData) => {
     setIsLoading(true);
     try {
-      console.log(`📡 Mise à jour emploi ${id}:`, emploiData);
-      
+ 
       const response = await api.put(`/emploi/${id}`, emploiData);
       
       if (response.data.success) {
@@ -193,8 +190,7 @@ export const useEmploi = () => {
   // Supprimer un emploi
   const deleteEmploi = useCallback(async (id) => {
     try {
-      console.log(`📡 Suppression emploi ${id}`);
-      
+   
       const response = await api.delete(`/emploi/${id}`);
       
       if (response.data.success) {
@@ -216,8 +212,7 @@ export const useEmploi = () => {
   // Changer le statut
   const updateStatus = useCallback(async (id, status) => {
     try {
-      console.log(`📡 Changement statut ${id} -> ${status}`);
-      
+  
       const response = await api.patch(`/emploi/${id}/status`, { status });
       
       if (response.data.success) {
@@ -239,7 +234,7 @@ export const useEmploi = () => {
   // Exporter en CSV
   const exportCSV = useCallback(async () => {
     try {
-      console.log('📡 Export CSV');
+  
       
       const response = await api.get('/emploi/export/csv', {
         responseType: 'blob'

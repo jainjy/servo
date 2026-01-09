@@ -609,8 +609,7 @@ const PrestataireVehiculesPage = () => {
         user.id
       );
       setVehicules(vehiculesResponse.data.data || []);
-      console.log("Véhicules récupérés:", vehiculesResponse.data.data);
-
+   
       // Récupérer les réservations
       const reservationsResponse = await vehiculesApi.getMesReservations();
       const prestataireReservations = reservationsResponse.data.data.filter(
@@ -776,8 +775,7 @@ const PrestataireVehiculesPage = () => {
         formData.append("images", file);
       });
 
-      console.log("Données envoyées:", Object.fromEntries(formData.entries()));
-
+ 
       toast.loading("Ajout du véhicule en cours...", {
         id: "add-vehicule",
       });
@@ -888,8 +886,7 @@ const PrestataireVehiculesPage = () => {
         formData.append("images", file);
       });
 
-      console.log("Données de mise à jour:", Object.fromEntries(formData.entries()));
-
+ 
       toast.loading("Mise à jour du véhicule en cours...", {
         id: "update-vehicule",
       });

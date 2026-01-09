@@ -221,8 +221,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
 
   // Gestion du clic sur une catégorie — afficher les pros en place (pas de navigation)
   const handleCategoryClick = useCallback((categorySlug: string) => {
-    console.log('🎯 Category clicked (in-place):', categorySlug);
-
+ 
     // Définir la catégorie sélectionnée et afficher la vue catégorie
     setSelectedCategory(categorySlug);
     setIsCategoryPage(true);
@@ -231,7 +230,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
     if (photographers.length > 0) {
       const filtered = filterPhotographersByCategory(photographers, categorySlug);
       setFilteredPhotographers(filtered);
-      console.log(`🔍 Filtered ${filtered.length} photographers for category: ${categorySlug}`);
+      // console.log(`🔍 Filtered ${filtered.length} photographers for category: ${categorySlug}`);
     } else {
       fetchAllPhotographers();
     }
@@ -239,7 +238,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
 
   // Gestion du clic "Retour à tous les photographes" — réinitialiser l'affichage en place
   const handleViewAll = useCallback(() => {
-    console.log('🔙 Back to all photographers (in-place)');
+    // console.log('🔙 Back to all photographers (in-place)');
     setSelectedCategory('');
     setIsCategoryPage(false);
     setFilteredPhotographers(photographers);
@@ -247,14 +246,14 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
 
   // Fonction pour recharger les données
   const handleRetry = useCallback(() => {
-    console.log('🔄 Retry loading data');
+    
     setError(null);
     fetchAllPhotographers();
   }, [fetchAllPhotographers]);
 
   // Appels initiaux
   useEffect(() => {
-    console.log('🚀 Initializing PhotographiePage');
+    // console.log('🚀 Initializing PhotographiePage');
     fetchCategoriesWithCounts();
     fetchAllPhotographers();
   }, [fetchCategoriesWithCounts, fetchAllPhotographers]);
@@ -286,7 +285,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
 
   // Fonction pour voir le profil (clic sur la carte)
   const handleViewProfile = useCallback((professional: Professional) => {
-    console.log('👤 Viewing profile:', professional);
+    // console.log('👤 Viewing profile:', professional);
     
     navigate(`/professional/${professional.id}`, {
       state: {
@@ -303,10 +302,7 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
   }, [navigate]);
 
   const handleViewArtworks = useCallback((professional: Professional) => {
-    console.log('🎨 View artworks for professional:', {
-      id: professional.id,
-      name: professional.name
-    });
+
     
     navigate(`/oeuvres/${professional.id}`, {
       state: {

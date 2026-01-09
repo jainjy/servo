@@ -105,7 +105,7 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
   ];
 
   const fetchAllOeuvres = useCallback(async () => {
-    console.log('📡 Fetching all published artworks...');
+    // console.log('📡 Fetching all published artworks...');
     setLoading(true);
     setError(null);
     
@@ -131,16 +131,9 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
         params.category = filters.category;
       }
       
-      console.log('🌐 API params:', params);
-      
+  
       const response = await api.get('/art-creation/marketplace/all', { params });
       
-      console.log('📦 API response:', {
-        success: response.data.success,
-        count: response.data.count,
-        total: response.data.total,
-        dataLength: response.data.data?.length || 0
-      });
       
       if (response.data?.success) {
         const allOeuvres = response.data.data || [];
@@ -167,7 +160,7 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
       console.error('❌ Error fetching marketplace artworks:', err);
       
       try {
-        console.log('🔄 Trying alternative API call...');
+        // console.log('🔄 Trying alternative API call...');
         const fallbackResponse = await api.get('/art-creation/products', {
           params: {
             status: 'published',

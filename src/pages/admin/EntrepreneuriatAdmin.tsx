@@ -252,7 +252,7 @@ const EntrepreneuriatAdmin = () => {
       if (activeTab === "interviews") {
         const response = await EntrepreneuriatService.getInterviews({});
         setInterviews(response.data);
-        console.log(response.data);
+        // console.log(response.data);
       } else if (activeTab === "resources") {
         const response = await EntrepreneuriatService.getResources({});
         setResources(response.data);
