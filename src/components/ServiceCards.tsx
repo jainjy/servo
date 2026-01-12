@@ -26,7 +26,7 @@ const services = [
   },
   {
     icon: User2Icon,
-    title: "Vivre à la réunion",
+    title: "Explorer et vivre",
     description: "Une douceur de vie tropicale",
     color: "text-slate-900",
     href: "/tourisme"

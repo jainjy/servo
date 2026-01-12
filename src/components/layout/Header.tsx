@@ -651,7 +651,7 @@ const Header = () => {
             "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
         {
-          title: "Conseils & accompagnement",
+          title: "Entreprise et pro",
           description: "Support stratégique pour entrepreneurs",
           href: "/conseil",
           image:
