@@ -24,6 +24,158 @@ const colors = {
 // URL de l'image en dessin
 const sketchImageUrl = "/2em.png";
 
+// Composant AdCard local pour éviter le blocage
+const LocalAdCard = () => {
+  const [isVisible, setIsVisible] = useState<boolean | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(2 * 60);
+
+  useEffect(() => {
+    const savedState = sessionStorage.getItem("adCardState");
+    
+    if (savedState) {
+      try {
+        const { isVisible: savedIsVisible, timeRemaining: savedTime, startTime } = JSON.parse(savedState);
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        const newTimeRemaining = Math.max(0, savedTime - elapsedTime);
+        
+        setIsVisible(savedIsVisible);
+        setTimeRemaining(newTimeRemaining);
+      } catch (error) {
+        console.error("Erreur lors du chargement:", error);
+        setIsVisible(true);
+      }
+    } else {
+      setIsVisible(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isVisible === null) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        let newTime = prev - 1;
+        let newIsVisible = isVisible;
+
+        if (newTime <= 0) {
+          newIsVisible = !isVisible;
+          newTime = newIsVisible ? 2 * 60 : 8 * 60;
+          setIsVisible(newIsVisible);
+        }
+
+        sessionStorage.setItem("adCardState", JSON.stringify({
+          isVisible: newIsVisible,
+          timeRemaining: newTime,
+          startTime: Date.now()
+        }));
+
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isVisible]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  if (isVisible === null) {
+    return <div className="w-full min-h-[140px] bg-gray-100 rounded-2xl animate-pulse" />;
+  }
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <motion.article 
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+      className="relative w-full min-h-[120px] max-w-4xl mx-auto rounded-xl border border-white/30 bg-white/20 backdrop-blur-md shadow-xl overflow-hidden z-40 mb-6"
+      style={{
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+      }}
+    >
+      <div className="absolute right-3 top-3 z-10 flex items-center space-x-2">
+        <div className="relative">
+          <div className="absolute inset-0 animate-ping opacity-20">
+            <span className="rounded-full bg-white/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
+              Publicité
+            </span>
+          </div>
+          <span className="relative rounded-full bg-white/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
+            Publicité
+          </span>
+        </div>
+        
+        <div className="flex items-center bg-black/30 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+          <svg 
+            className="w-3 h-3 mr-1" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth="2" 
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{formatTime(timeRemaining)}</span>
+        </div>
+      </div>
+
+      <div className="flex flex-row p-3">
+        <div className="w-32 h-24 sm:w-40 sm:h-28 md:w-48 md:h-32 flex-shrink-0 rounded-lg overflow-hidden border border-white/20">
+          <img
+            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            alt="Publicité"
+            className="h-full w-full object-cover"
+            style={{ filter: 'brightness(1.1) contrast(1.1)' }}
+          />
+        </div>
+
+        <div className="flex-1 p-3 flex flex-col justify-center">
+          <h2 className="text-sm font-semibold tracking-wide sm:text-base md:text-lg text-white mb-1 sm:mb-2 drop-shadow-md">
+            Découvrez nos offres exclusives
+          </h2>
+          <p className="text-xs sm:text-sm text-white/90 leading-relaxed line-clamp-2 drop-shadow">
+            Profitez de réductions exceptionnelles sur nos services premium. Offre limitée dans le temps !
+          </p>
+          
+          <div className="mt-2 pt-2 border-t border-white/20">
+            <div className="flex items-center text-xs text-white/80">
+              <svg 
+                className="w-3 h-3 mr-1" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth="2" 
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>Visible pendant :</span>
+              <span className="font-medium ml-1">2 min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+};
+
 const Hero = () => {
   const [heroQuery, setHeroQuery] = useState("");
   const navigate = useNavigate();
@@ -76,40 +228,35 @@ const Hero = () => {
     const animate = () => {
       setWaveOffset((prev) => prev + 0.02);
 
-      // Animer le rayon de révélation seulement si revealing
       if (isRevealing || alwaysRevealing) {
         setRevealRadius((prev) => {
           if (prev < 100) {
-            // Réduit à 150px (au lieu de 220px)
-            return prev + (100 - prev) * 0.07; // Accélération douce
+            return prev + (100 - prev) * 0.07;
           }
           return prev;
         });
       } else if (revealRadius > 0) {
-        setRevealRadius((prev) => prev * 0.92); // Décroissance douce
+        setRevealRadius((prev) => prev * 0.92);
       }
 
-      // Mettre à jour les traces
       setMouseTrail((prev) =>
         prev
           .map((trail) => ({
             ...trail,
-            life: trail.life - 0.018, // Ralenti la disparition
-            size: trail.size * 0.985, // Ralenti la réduction
-            // Déplacement aléatoire pour effet réaliste
+            life: trail.life - 0.018,
+            size: trail.size * 0.985,
             x: trail.x + Math.sin(waveOffset + trail.id) * 0.5,
             y: trail.y + Math.cos(waveOffset + trail.id) * 0.3,
           }))
           .filter((trail) => trail.life > 0)
       );
 
-      // Mettre à jour les révélations aléatoires
       setRandomReveals((prev) =>
         prev
           .map((reveal) => ({
             ...reveal,
-            life: reveal.life - 0.009, // Ralenti la disparition
-            size: reveal.size * 1.008, // Légère expansion
+            life: reveal.life - 0.009,
+            size: reveal.size * 1.008,
           }))
           .filter((reveal) => reveal.life > 0)
       );
@@ -133,16 +280,15 @@ const Hero = () => {
     waveOffset,
   ]);
 
-  // Ajouter une trace au déplacement de la souris avec décalage aléatoire
+  // Ajouter une trace au déplacement de la souris
   const addTrailPoint = useCallback((x: number, y: number) => {
     const now = Date.now();
-    if (now - lastMouseMoveTime.current < 50) return; // Réduit à 50ms
+    if (now - lastMouseMoveTime.current < 50) return;
 
     lastMouseMoveTime.current = now;
 
     trailIdRef.current += 1;
     setMouseTrail((prev) => {
-      // Décalage aléatoire pour que les traces sortent du cercle
       const offsetX = (Math.random() - 0.5) * 60;
       const offsetY = (Math.random() - 0.5) * 60;
 
@@ -150,14 +296,13 @@ const Hero = () => {
         id: trailIdRef.current,
         x: x + offsetX,
         y: y + offsetY,
-        size: 90 + Math.random() * 70, // Augmenté la taille: 90-160px
+        size: 90 + Math.random() * 70,
         life: 1,
         timestamp: now,
         offsetX,
         offsetY,
       };
 
-      // Garder seulement les 15 dernières traces
       return [...prev.slice(-14), newTrail];
     });
   }, []);
@@ -170,30 +315,26 @@ const Hero = () => {
         id: randomIdRef.current,
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        size: 70 + Math.random() * 100, // Augmenté la taille: 70-170px
+        size: 70 + Math.random() * 100,
         life: 1,
         createdAt: Date.now(),
       };
 
-      // Garder seulement les 8 dernières révélations
       return [...prev.slice(-7), newReveal];
     });
   }, []);
 
-  // Générer des révélations aléatoires TOUJOURS (même sans bouger)
+  // Générer des révélations aléatoires
   useEffect(() => {
-    // Mode "toujours actif" après 3 secondes d'inactivité
     const alwaysActiveTimeout = setTimeout(() => {
       setAlwaysRevealing(true);
     }, 3000);
 
     const interval = setInterval(() => {
-      // Révélations aléatoires continues
       if (Math.random() > 0.4) {
-        // 60% de chance
         createRandomReveal();
       }
-    }, 800); // Intervalle réduit
+    }, 800);
 
     return () => {
       clearTimeout(alwaysActiveTimeout);
@@ -209,9 +350,8 @@ const Hero = () => {
 
       setIsRevealing(true);
       setMouseInactive(false);
-      setAlwaysRevealing(false); // Désactive le mode toujours actif quand on bouge
+      setAlwaysRevealing(false);
 
-      // Ajouter une trace
       addTrailPoint(x, y);
 
       if (mouseInactiveTimeoutRef.current) {
@@ -221,11 +361,10 @@ const Hero = () => {
       mouseInactiveTimeoutRef.current = setTimeout(() => {
         setMouseInactive(true);
         setIsRevealing(false);
-        // Après 2 secondes d'inactivité, on active le mode toujours actif
         setTimeout(() => {
           setAlwaysRevealing(true);
         }, 2000);
-      }, 1000); // Réduit à 1 seconde
+      }, 1000);
     },
     [addTrailPoint]
   );
@@ -236,7 +375,6 @@ const Hero = () => {
     if (mouseInactiveTimeoutRef.current) {
       clearTimeout(mouseInactiveTimeoutRef.current);
     }
-    // Active le mode toujours actif quand on quitte
     setTimeout(() => {
       setAlwaysRevealing(true);
     }, 500);
@@ -257,7 +395,7 @@ const Hero = () => {
 
   // Calcul de l'onde
   const getWaveDistortion = (x: number, y: number, time: number) => {
-    const amplitude = isRevealing || alwaysRevealing ? 12 : 0; // Augmenté l'amplitude
+    const amplitude = isRevealing || alwaysRevealing ? 12 : 0;
     const frequency = 0.007;
     return Math.sin(x * frequency + y * frequency + time) * amplitude;
   };
@@ -343,16 +481,6 @@ const Hero = () => {
           border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .trail-image {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          filter: grayscale(100%) brightness(1.7) contrast(1.4);
-          opacity: 1; // OPAQUE À 100%
-          mix-blend-mode: multiply;
-        }
-
         .random-reveal {
           position: absolute;
           border-radius: 50%;
@@ -370,15 +498,6 @@ const Hero = () => {
             0 0 30px rgba(255, 255, 255, 0.6),
             0 0 60px rgba(255, 255, 255, 0.4);
           border: 1.5px solid rgba(255, 255, 255, 0.4);
-        }
-
-        .reveal-content {
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          filter: grayscale(100%) brightness(1.7) contrast(1.4);
-          opacity: 1; // OPAQUE À 100%
-          mix-blend-mode: multiply;
         }
 
         .reveal-mask {
@@ -436,7 +555,7 @@ const Hero = () => {
             </filter>
           </defs>
         </svg>
-        {/* Conteneur principal */}
+        
         <div
           className="absolute inset-0 w-full h-full overflow-hidden"
           style={{
@@ -444,7 +563,6 @@ const Hero = () => {
             transition: "transform 0.2s ease-out",
           }}
         >
-          {/* Image principale (photo) */}
           <motion.img
             src={heroImage}
             alt="Background"
@@ -463,12 +581,11 @@ const Hero = () => {
             }}
           />
 
-          {/* Image de dessin avec effet principal et masque progressif */}
           <div
             className="absolute top-0 left-0 w-full h-full wave-distortion reveal-mask"
             style={
               {
-                opacity: isRevealing || alwaysRevealing ? 1 : 0, // OPAQUE À 100%
+                opacity: isRevealing || alwaysRevealing ? 1 : 0,
                 pointerEvents: "none",
                 transition: "opacity 0.4s ease-out",
                 "--mouse-x": `${mousePosition.x}px`,
@@ -482,7 +599,6 @@ const Hero = () => {
               alt="Dessin architectural"
               className="absolute top-0 left-0 w-full h-full object-cover"
               style={{
-                // filter: 'grayscale(100%) brightness(1.7) contrast(1.4)',
                 mixBlendMode: "multiply",
                 opacity: 1,
                 transform: `
@@ -501,7 +617,6 @@ const Hero = () => {
               }}
             />
 
-            {/* Overlay de lumière sur la zone révélée */}
             <div
               className="reveal-overlay"
               style={
@@ -514,11 +629,9 @@ const Hero = () => {
             />
           </div>
 
-          {/* Overlay gradient réduit */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/8 to-black/35" />
         </div>
 
-        {/* Effet de lumière interactive */}
         <div
           className="absolute top-0 left-0 w-full h-full pointer-events-none transition-all duration-300 z-10"
           style={{
@@ -540,7 +653,6 @@ const Hero = () => {
           }}
         />
 
-        {/* Points lumineux autour du curseur */}
         {(isRevealing || alwaysRevealing) && (
           <div className="absolute inset-0 pointer-events-none z-15">
             {[...Array(6)].map((_, i) => (
@@ -567,13 +679,17 @@ const Hero = () => {
           </div>
         )}
 
-        {/* Contenu principal */}
         <div className="container relative z-25 mx-auto px-1 lg:px-4 py-5 lg:py-20 text-center">
+          {/* Publicité en avant-plan, en haut */}
+          <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-full max-w-4xl z-50">
+            <LocalAdCard />
+          </div>
+
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="mb-2 lg:mb-6 text-2xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white"
+            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+            className="mb-2 lg:mb-6 text-2xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white mt-32"
           >
             <span className="block">La super-application</span>
             <span
@@ -637,4 +753,4 @@ const Hero = () => {
   );
 };
 
-export default Hero;
+export default Hero;  
