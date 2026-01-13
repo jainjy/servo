@@ -11,7 +11,7 @@ const cardData = [
   {
     id: 1,
     type: 'image',
-    src: "https://i.pinimg.com/1200x/ce/0c/29/ce0c29e8773ca7ce123f1d705677c8cd.jpg",
+    src:"https://i.pinimg.com/1200x/ce/0c/29/ce0c29e8773ca7ce123f1d705677c8cd.jpg",
     title: 'Plages paradisiaques',
     color: '#3A7CA5',
   },
@@ -84,44 +84,44 @@ const currentYear = new Date().getFullYear();
 
 // Données pour les partenaires - LOGOS PLUS GRANDS
 const partners = [
-  {
-    id: 1,
-    name: 'Olimmo',
+  { 
+    id: 1, 
+    name: 'Olimmo', 
     logo: 'olimmo.png',
   },
-  {
-    id: 2,
-    name: 'Partner 2',
+  { 
+    id: 2, 
+    name: 'Partner 2', 
     logo: 'https://i.pinimg.com/736x/cc/3c/db/cc3cdb8498f8d4135b87f8501f3faa31.jpg',
   },
-  {
-    id: 3,
-    name: 'Partner 3',
+  { 
+    id: 3, 
+    name: 'Partner 3', 
     logo: 'https://i.pinimg.com/1200x/9d/1b/af/9d1baf24622b6c568ed6f41f826c7105.jpg',
   },
-  {
-    id: 4,
-    name: 'Partner 4',
+  { 
+    id: 4, 
+    name: 'Partner 4', 
     logo: 'https://i.pinimg.com/1200x/4d/7a/ec/4d7aecb5e539968fec979b35f5618527.jpg',
   },
-  {
-    id: 5,
-    name: 'Partner 5',
+  { 
+    id: 5, 
+    name: 'Partner 5', 
     logo: 'https://i.pinimg.com/736x/f0/64/d7/f064d7192801ed944991351e99efdbf2.jpg',
   },
-  {
-    id: 6,
-    name: 'Partner 6',
+  { 
+    id: 6, 
+    name: 'Partner 6', 
     logo: 'https://i.pinimg.com/736x/bb/d6/2a/bbd62ab19fe388ef4dac11d2f21be3f7.jpg',
   },
-  {
-    id: 7,
-    name: 'Partner 7',
+  { 
+    id: 7, 
+    name: 'Partner 7', 
     logo: 'https://i.pinimg.com/1200x/83/5d/9d/835d9d7c0f06a49b079418cd59914762.jpg',
   },
-  {
-    id: 8,
-    name: 'Partner 8',
+  { 
+    id: 8, 
+    name: 'Partner 8', 
     logo: 'https://i.pinimg.com/736x/52/52/5c/52525c7b87e0600a27bf66a9ec1e04f2.jpg',
   },
 ];
@@ -144,15 +144,15 @@ const AUTO_EXIT_TIME = 10000; // 10 secondes
 // ServoLogo component simple
 const ServoLogo = () => (
   <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
-    <circle cx="50" cy="50" r="45" stroke="#6B8E23" strokeWidth="3" fill="none" opacity="0.3" />
-    <path d="M30 50 L50 30 L70 50 L50 70 Z" fill="#6B8E23" opacity="0.8" />
-    <circle cx="50" cy="50" r="8" fill="#fff" />
+    <circle cx="50" cy="50" r="45" stroke="#6B8E23" strokeWidth="3" fill="none" opacity="0.3"/>
+    <path d="M30 50 L50 30 L70 50 L50 70 Z" fill="#6B8E23" opacity="0.8"/>
+    <circle cx="50" cy="50" r="8" fill="#fff"/>
   </svg>
 );
 
 export default function LoadingScreen({
   onLoadingComplete,
-  minimumLoadingTime = 9000
+  minimumLoadingTime = 7500
 }: LoadingScreenProps) {
   // États de base
   const [isVisible, setIsVisible] = useState(true);
@@ -166,10 +166,10 @@ export default function LoadingScreen({
   const [showInitialLogo, setShowInitialLogo] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [videosLoaded, setVideosLoaded] = useState(new Set<number>());
-
+  
   // État pour le texte animé
   const [textIndex, setTextIndex] = useState(0);
-
+  
   // État pour le timer de sortie automatique
   const [timeLeft, setTimeLeft] = useState(AUTO_EXIT_TIME / 1000);
   const [autoExitTriggered, setAutoExitTriggered] = useState(false);
@@ -189,7 +189,6 @@ export default function LoadingScreen({
   const bigServoLogoRef = useRef<HTMLDivElement>(null);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const mainServoLogoRef = useRef<HTMLDivElement>(null);
-  const loadingScreenRef = useRef<HTMLDivElement>(null);
 
   // Référence pour la section d'équipe
   const teamSectionRef = useRef<HTMLDivElement>(null);
@@ -221,7 +220,7 @@ export default function LoadingScreen({
       const now = Date.now();
       const remaining = Math.max(0, endTime - now);
       const secondsLeft = Math.ceil(remaining / 1000);
-
+      
       if (componentMountedRef.current) {
         setTimeLeft(secondsLeft);
       }
@@ -246,11 +245,11 @@ export default function LoadingScreen({
   // Animation du texte qui change
   useEffect(() => {
     if (!initialLoadComplete || isExiting || hasAnimationPlayed) return;
-
+    
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % teamTexts.length);
     }, 3500);
-
+    
     return () => clearInterval(interval);
   }, [initialLoadComplete, isExiting, hasAnimationPlayed]);
 
@@ -274,7 +273,7 @@ export default function LoadingScreen({
     }
 
     const videoElements = videoRefs.current;
-
+    
     const handleCanPlayThrough = (index: number) => {
       setVideosLoaded(prev => new Set(prev).add(index));
     };
@@ -288,7 +287,7 @@ export default function LoadingScreen({
     return () => {
       videoElements.forEach((video) => {
         if (video) {
-          video.removeEventListener('canplaythrough', () => { });
+          video.removeEventListener('canplaythrough', () => {});
         }
       });
     };
@@ -393,12 +392,13 @@ export default function LoadingScreen({
       const elapsed = now - startTimeRef.current;
 
       const videosLoadedCount = videosLoaded.size;
-
+      const videosInCardData = cardData.filter(card => card.type === 'video').length;
+      
       let timeProgress = (elapsed / minimumLoadingTime) * 100;
-      let videoProgress = videosLoadedCount > 0
-        ? (videosLoadedCount / videosInCardData) * 50
+      let videoProgress = videosLoadedCount > 0 
+        ? (videosLoadedCount / videosInCardData) * 50 
         : 0;
-
+      
       let newProgress = Math.min(100, timeProgress * 0.5 + videoProgress);
 
       if (componentMountedRef.current) {
@@ -527,14 +527,12 @@ export default function LoadingScreen({
     <div
       className="fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
       style={{
-        backgroundImage: `
-          linear-gradient(rgba(255, 165, 0, 0.3) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 165, 0, 0.3) 1px, transparent 1px)
-        `,
-        backgroundSize: '60px 60px',
-        backgroundPosition: 'center center',
-        transform: 'translateZ(0px)',
-        animation: 'gridFloat 20s ease-in-out infinite'
+        opacity: fadeOutOpacity,
+        transform: `scale(${scaleEffect})`,
+        filter: `blur(${blurEffect}px)`,
+        transition: isExiting ? 'none' : 'opacity 0.3s ease-out',
+        pointerEvents: isExiting ? 'none' : 'auto',
+        willChange: 'opacity, transform, filter'
       }}
     >
       <style>{`
@@ -574,11 +572,11 @@ export default function LoadingScreen({
 
       {/* Effets de fond animés */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
+        <div 
           className="absolute top-0 left-0 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"
           style={{ animation: 'scaleIn 4s ease-in-out infinite alternate' }}
         />
-        <div
+        <div 
           className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
           style={{ animation: 'scaleIn 6s ease-in-out infinite alternate', animationDelay: '1s' }}
         />
@@ -603,7 +601,7 @@ export default function LoadingScreen({
       {initialLoadComplete && !showInitialLogo && (
         <div className="relative h-full flex flex-col">
           {/* Logo en haut à gauche */}
-          <div
+          <div 
             className="absolute top-8 left-8 z-20"
             style={{
               animation: 'fadeInDown 0.8s ease-out 0.2s both',
@@ -612,9 +610,9 @@ export default function LoadingScreen({
             }}
           >
             <div className="transform hover:scale-110 transition-transform duration-300">
-              <img
-                src="golo.png"
-                alt="Logo"
+              <img 
+                src="golo.png" 
+                alt="Logo" 
                 className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl shadow-2xl"
                 style={{ filter: 'drop-shadow(0 0 20px rgba(107, 142, 35, 0.3))' }}
               />
@@ -622,7 +620,7 @@ export default function LoadingScreen({
           </div>
 
           {/* Timer de sortie automatique - en haut à droite */}
-          <div
+          <div 
             className="absolute top-8 right-8 z-30"
             style={{
               animation: 'fadeInDown 0.8s ease-out 0.4s both',
@@ -666,7 +664,7 @@ export default function LoadingScreen({
 
           {/* Section centrale avec photo d'équipe en cercle et texte à droite */}
           <div className="flex-1 flex items-center justify-center px-6 py-12 md:py-20">
-            <div
+            <div 
               ref={teamSectionRef}
               className="relative max-w-6xl w-full flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16"
               style={{
@@ -677,23 +675,23 @@ export default function LoadingScreen({
             >
               {/* Photo en cercle */}
               <div className="relative group flex-shrink-0">
-                <div
+                <div 
                   className="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden border-8 border-white/10 shadow-2xl"
                   style={{
                     animation: 'float 6s ease-in-out infinite',
                   }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-tr from-green-500/20 to-blue-500/20 z-0" />
-
+                  
                   <div className="absolute inset-0 rounded-full border-4 border-white/5" />
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                  <img
-                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=1200&fit=crop&crop=face"
-                    alt="Notre équipe"
+                  
+                  <img 
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=1200&fit=crop&crop=face" 
+                    alt="Notre équipe" 
                     className="w-full h-full object-cover rounded-full transform group-hover:scale-110 transition-transform duration-700"
                   />
-
+                  
                   <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-green-500/30 to-blue-500/30 blur-xl opacity-50 group-hover:opacity-70 transition-opacity duration-500" />
                 </div>
 
@@ -708,12 +706,12 @@ export default function LoadingScreen({
                   <div className="absolute -top-8 -left-4 text-6xl md:text-7xl text-green-500/30 font-serif">
                     "
                   </div>
-
+                  
                   <div className="relative z-10">
                     <h2 className="text-white/80 text-sm uppercase tracking-widest mb-6 font-semibold">
                       Notre Philosophie
                     </h2>
-
+                    
                     <div className="relative h-48 md:h-56 flex items-center">
                       {teamTexts.map((text, index) => (
                         <div
@@ -725,7 +723,7 @@ export default function LoadingScreen({
                             transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
                           }}
                         >
-                          <p
+                          <p 
                             className="text-2xl md:text-3xl lg:text-4xl font-light text-white leading-relaxed"
                             style={{
                               animation: textIndex === index ? 'textGlow 2s ease-in-out infinite' : 'none',
@@ -779,7 +777,7 @@ export default function LoadingScreen({
           </div>
 
           {/* Section Partenaires - IMAGES QUI COUVRENT TOUT LE CARD */}
-          <div
+          <div 
             className="relative bg-black/30 backdrop-blur-md border-t border-white/10 py-5"
             style={{
               animation: 'fadeInUp 0.8s ease-out 0.6s both',
@@ -791,13 +789,13 @@ export default function LoadingScreen({
               <h3 className="text-center text-white/60 text-sm uppercase tracking-widest mb-8 font-semibold">
                 Nos Partenaires de Confiance
               </h3>
-
+              
               <div className="relative overflow-hidden">
                 <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-900 to-transparent z-10" />
                 <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-900 to-transparent z-10" />
-
+                
                 <div className="flex">
-                  <div
+                  <div 
                     className="flex gap-8 items-center"
                     style={{ animation: isExiting ? 'none' : 'scrollPartners 40s linear infinite' }}
                   >
@@ -805,7 +803,7 @@ export default function LoadingScreen({
                       <div
                         key={`${partner.id}-${index}`}
                         className="flex-shrink-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-2xl hover:from-white/20 hover:to-white/15 transition-all duration-500 group border border-white/10 hover:border-white/20 shadow-xl hover:shadow-2xl overflow-hidden relative"
-                        style={{
+                        style={{ 
                           width: '150px',
                           height: '100px',
                           animation: `pulse ${3 + index * 0.5}s ease-in-out infinite`
@@ -813,21 +811,21 @@ export default function LoadingScreen({
                       >
                         <div className="absolute inset-0">
                           {/* Effet de brillance */}
-                          <div
+                          <div 
                             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                             style={{ animation: 'shimmer 2s ease-in-out infinite' }}
                           />
-
+                          
                           {/* Image qui couvre tout le card */}
-                          <img
+                          <img 
                             src={partner.logo}
                             alt={partner.name}
                             className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500 filter grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100"
                           />
-
+                          
                           {/* Overlay pour améliorer la lisibilité */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+                          
                           {/* Nom du partenaire (optionnel) */}
                           <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                             <p className="text-white text-xs font-medium text-center truncate">
@@ -835,7 +833,7 @@ export default function LoadingScreen({
                             </p>
                           </div>
                         </div>
-
+                        
                         {/* Bordure animée */}
                         <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/30 transition-all duration-500" />
                       </div>
@@ -848,7 +846,7 @@ export default function LoadingScreen({
           </div>
 
           {/* Mentions légales */}
-          <div
+          <div 
             className="relative bg-black/40 backdrop-blur-sm border-t border-white/5 py-6"
             style={{
               animation: 'fadeInUp 0.8s ease-out 0.8s both',
@@ -861,7 +859,7 @@ export default function LoadingScreen({
                 <p className="text-center md:text-left">
                   &copy; {currentYear} OLIPLUS. Tous droits réservés.
                 </p>
-
+                
                 <div className="flex gap-6">
                   <button className="hover:text-white/80 transition-colors duration-300 hover:underline">
                     Mentions légales
