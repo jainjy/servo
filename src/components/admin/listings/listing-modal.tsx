@@ -895,7 +895,7 @@ export function ListingModal({
                     onChange={(e) =>
                       setFormData({ ...formData, city: e.target.value })
                     }
-                    placeholder="Ex: Paris"
+                    placeholder="Ex: Réunion"
                   />
                 </div>
               </div>

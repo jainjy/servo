@@ -433,7 +433,7 @@ const RegisterPage = () => {
                           Ville *
                         </label>
                         <Input
-                          placeholder="Paris"
+                          placeholder="Réunion"
                           className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                           value={formData.city}
                           onChange={(e) =>
