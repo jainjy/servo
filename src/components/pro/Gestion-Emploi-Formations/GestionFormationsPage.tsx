@@ -94,6 +94,8 @@ const candidatureStatuses = [
 export default function GestionFormationsPage() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+    const [pageLoading, setPageLoading] = useState(true);
   
   const {
     formations,
@@ -184,8 +186,7 @@ const getAuthHeaders = () => {
   const token = localStorage.getItem('auth-token') || 
                 localStorage.getItem('token') || 
                 localStorage.getItem('jwt-token');
-  
-  console.log('🔑 Token pour API:', token ? 'Présent' : 'Absent');
+
   
   if (!token) {
     console.error('Token non trouvé');
@@ -199,11 +200,7 @@ const getAuthHeaders = () => {
   };
 };
 
-// Ajoutez ce code pour voir quel token est stocké
-console.log('🔑 Token stocké dans localStorage:');
-console.log('- auth-token:', localStorage.getItem('auth-token'));
-console.log('- token:', localStorage.getItem('token'));
-console.log('- jwt-token:', localStorage.getItem('jwt-token'));
+
 
 // Testez quel token fonctionne
 const tokens = [
@@ -214,11 +211,11 @@ const tokens = [
 
 for (const token of tokens) {
   if (token) {
-    console.log(`\n🧪 Test avec token: ${token.substring(0, 20)}...`);
+    // console.log(`\n🧪 Test avec token: ${token.substring(0, 20)}...`);
     
     // Vérifiez le format
     if (token.startsWith('real-jwt-token-')) {
-      console.log('✅ Format correct!');
+      // console.log('✅ Format correct!');
     }
   }
 }
@@ -255,50 +252,69 @@ for (const token of tokens) {
   }, [searchTerm]);
 
   // Load data on mount and when filters change
+   // Load data on mount - UN SEUL CHARGEMENT
   useEffect(() => {
-    const loadDataAsync = async () => {
-      if (user && !authLoading && !dataLoaded) {
-        try {
-          const token = localStorage.getItem('auth-token') || 
-                localStorage.getItem('token') || 
-                localStorage.getItem('jwt-token');
-  
-          console.log('🔑 Token trouvé:', token);
-          if (!token) {
-            setApiError('Veuillez vous connecter');
-            navigate('/login');
-            return;
-          }
-          
-          // Charger les stats
-          await fetchStats();
-          
-          // Charger les formations
-          await fetchFormations({
+    const loadInitialData = async () => {
+      // Si pas encore connecté, attendre
+      if (authLoading) return;
+      
+      // Si pas d'utilisateur, rediriger
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      // Si pas le bon rôle, rediriger
+      if (user.role !== 'professional' && user.role !== 'admin') {
+        navigate('/unauthorized');
+        return;
+      }
+
+      try {
+        setPageLoading(true);
+        
+        // Vérifier le token
+        const token = localStorage.getItem('auth-token') || 
+                      localStorage.getItem('token') || 
+                      localStorage.getItem('jwt-token');
+        
+        if (!token) {
+          setApiError('Veuillez vous connecter');
+          navigate('/login');
+          return;
+        }
+        
+        // console.log('🚀 Début du chargement des données...');
+        
+        // Charger les stats ET les formations en parallèle
+        await Promise.all([
+          fetchStats(),
+          fetchFormations({
             search: debouncedSearch,
             status: statusFilter,
             category: categoryFilter,
             page: 1
-          });
-          
-          setDataLoaded(true);
-        } catch (err) {
-          console.error("Erreur initiale:", err);
-          setApiError(err.message || "Erreur lors du chargement des données");
-          
-          // Redirection si erreur d'authentification
-          if (err.message.includes('authentification') || err.message.includes('Session')) {
-            setTimeout(() => {
-              navigate('/login');
-            }, 2000);
-          }
+          })
+        ]);
+        
+        // console.log('✅ Données chargées avec succès');
+        setDataLoaded(true);
+        setApiError("");
+        
+      } catch (err) {
+        console.error("❌ Erreur lors du chargement:", err);
+        setApiError(err.message || "Erreur lors du chargement des données");
+        
+        if (err.message.includes('authentification') || err.message.includes('Session')) {
+          setTimeout(() => navigate('/login'), 1500);
         }
+      } finally {
+        setPageLoading(false);
       }
     };
 
-    loadDataAsync();
-  }, [user, authLoading, navigate, debouncedSearch, statusFilter, categoryFilter, fetchStats, fetchFormations]);
-
+    loadInitialData();
+  }, [authLoading, user, navigate]); // Seulement ces dépendances
   useEffect(() => {
     if (dataLoaded) {
       handleSearch();
@@ -371,9 +387,7 @@ const openCandidaturesModal = async (formation) => {
                   localStorage.getItem('token') || 
                   localStorage.getItem('jwt-token');
     
-    console.log('🔑 Token pour candidatures:', token ? 'Présent' : 'Absent');
-    console.log(`📤 Récupération candidatures pour formation ID: ${formation.id}`);
-    
+  
     if (!token) {
       toast.error('Session expirée. Veuillez vous reconnecter.');
       navigate('/login');
@@ -391,12 +405,12 @@ const openCandidaturesModal = async (formation) => {
       }
     );
     
-    console.log('📊 Réponse candidatures:', response.data);
+
     
     if (response.data.success) {
       const apiCandidatures = response.data.data || [];
       
-      console.log(`📝 ${apiCandidatures.length} candidatures reçues`);
+
       
       if (apiCandidatures.length === 0) {
         toast.info('Aucune candidature pour cette formation');
@@ -449,7 +463,7 @@ const openCandidaturesModal = async (formation) => {
         };
         setCandidatureStats(stats);
         
-        console.log('📈 Stats calculées:', stats);
+        // console.log('📈 Stats calculées:', stats);
       }
     }
   } catch (error) {
@@ -553,11 +567,7 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
     else if (newStatus === 'en_attente') statusToSend = 'en_attente';
     else if (newStatus === 'pending') statusToSend = 'en_attente';
     
-    console.log('📤 Mise à jour statut:', {
-      candidatureId,
-      newStatus,
-      sending: statusToSend
-    });
+ 
     
     const response = await axios.patch(
       `${API_URL}/candidatures/${candidatureId}/status`,
@@ -608,41 +618,172 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
   }
 };
 
-  // Fonction pour télécharger un CV
-const downloadCV = async (candidatureId, fileName, cvUrl) => {
-  try {
-    if (!cvUrl) {
-      toast.error('Aucun CV disponible pour ce candidat');
-      return;
-    }
-    
-    toast.info('Téléchargement du CV...');
-    
-    // Si le CV est une URL relative, construire l'URL complète
-    let downloadUrl = cvUrl;
-    if (!cvUrl.startsWith('http')) {
-      downloadUrl = `http://localhost:3001${cvUrl.startsWith('/') ? cvUrl : '/' + cvUrl}`;
-    }
-    
-    // Créer un lien temporaire pour le téléchargement
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', fileName || 'cv_candidat.pdf');
-    link.setAttribute('target', '_blank');
-    
-    // Ajouter un paramètre pour éviter le cache si nécessaire
-    link.href = `${downloadUrl}?t=${Date.now()}`;
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast.success('CV téléchargé');
-  } catch (error) {
-    console.error('Erreur téléchargement CV:', error);
-    toast.error('Erreur lors du téléchargement du CV');
-  }
-};
+ // Fonction pour télécharger un CV - VERSION CORRIGÉE
+ const downloadCV = async (candidatureId, fileName, cvUrl) => {
+   try {
+    //  console.log('📥 Téléchargement CV - URL originale:', cvUrl);
+     
+     if (!cvUrl) {
+       toast.error('Aucun CV disponible pour ce candidat');
+       return;
+     }
+     
+     // Détecter le type d'URL
+     const isBlobUrl = cvUrl.startsWith('blob:');
+     const isDataUrl = cvUrl.startsWith('data:');
+     const isHttpUrl = cvUrl.startsWith('http://') || cvUrl.startsWith('https://');
+     const isRelativeUrl = cvUrl.startsWith('/');
+     
+   
+     
+     let finalUrl = cvUrl;
+     let shouldOpenInNewTab = false;
+     
+     // Traitement selon le type d'URL
+     if (isBlobUrl) {
+       // URL Blob : utiliser directement
+      //  console.log('📄 Utilisation URL Blob');
+       shouldOpenInNewTab = true;
+       // Pour les URLs Blob, on ne peut pas ajouter de query params
+       // On utilise l'URL telle quelle
+     }
+     else if (isDataUrl) {
+       // URL Data (base64) : convertir en blob
+      //  console.log('📄 Utilisation URL Data (base64)');
+       try {
+         // Extraire le contenu base64
+         const base64Content = cvUrl.split(',')[1];
+         const mimeType = cvUrl.match(/data:(.*);base64/)?.[1] || 'application/pdf';
+         
+         // Convertir en blob
+         const byteCharacters = atob(base64Content);
+         const byteNumbers = new Array(byteCharacters.length);
+         for (let i = 0; i < byteCharacters.length; i++) {
+           byteNumbers[i] = byteCharacters.charCodeAt(i);
+         }
+         const byteArray = new Uint8Array(byteNumbers);
+         const blob = new Blob([byteArray], { type: mimeType });
+         
+         // Créer une URL Blob
+         finalUrl = URL.createObjectURL(blob);
+         shouldOpenInNewTab = true;
+       } catch (error) {
+         console.error('Erreur conversion base64:', error);
+         throw new Error('Format de données invalide');
+       }
+     }
+     else if (isHttpUrl) {
+       // URL HTTP complète : ajouter timestamp pour éviter le cache
+      //  console.log('📄 Utilisation URL HTTP complète');
+       const separator = finalUrl.includes('?') ? '&' : '?';
+       finalUrl = `${finalUrl}${separator}t=${Date.now()}`;
+       shouldOpenInNewTab = true;
+     }
+     else if (isRelativeUrl) {
+       // URL relative : ajouter la base du serveur
+      //  console.log('📄 Utilisation URL relative');
+       // Nettoyer le chemin (enlever le /api/ s'il est déjà présent)
+       let cleanPath = cvUrl;
+       if (cvUrl.startsWith('/api/')) {
+         cleanPath = cvUrl.substring(5); // Enlever '/api/'
+       }
+       finalUrl = `${API_URL}/${cleanPath}?t=${Date.now()}`;
+     }
+     else {
+       // Autre cas : traiter comme un chemin de fichier
+      //  console.log('📄 Traitement comme chemin de fichier');
+       finalUrl = `${API_URL}/${cvUrl}?t=${Date.now()}`;
+     }
+     
+    //  console.log('🔗 URL finale pour téléchargement:', finalUrl);
+     
+     // Créer un nom de fichier par défaut
+     const finalFileName = fileName || 'cv_candidat.pdf';
+     
+     // Créer un élément de lien
+     const link = document.createElement('a');
+     
+     if (isBlobUrl || isDataUrl) {
+       // Pour les URLs Blob/Data, on ne peut pas utiliser "download" facilement
+       // Ouvrir dans un nouvel onglet
+       link.href = finalUrl;
+       link.target = '_blank';
+       link.rel = 'noopener noreferrer';
+       
+       // Pour les PDF, ajouter un attribut pour l'ouverture
+       if (finalUrl.includes('.pdf') || finalFileName.endsWith('.pdf')) {
+         link.setAttribute('type', 'application/pdf');
+       }
+     } else {
+       // Pour les URLs normales, utiliser l'attribut download
+       link.href = finalUrl;
+       link.download = finalFileName;
+       link.target = '_blank';
+       link.rel = 'noopener noreferrer';
+     }
+     
+     // Ajouter des headers d'authentification si nécessaire (pour les URLs HTTP)
+     if (!isBlobUrl && !isDataUrl) {
+       const token = localStorage.getItem('auth-token');
+       if (token) {
+         // Note: Pour les liens simples, on ne peut pas ajouter des headers
+         // Mais on peut passer le token dans l'URL si le backend le supporte
+         const hasQuery = finalUrl.includes('?');
+         link.href = `${finalUrl}${hasQuery ? '&' : '?'}token=${encodeURIComponent(token)}`;
+       }
+     }
+     
+     // Style caché
+     link.style.display = 'none';
+     link.style.position = 'absolute';
+     link.style.left = '-9999px';
+     
+     // Ajouter au DOM
+     document.body.appendChild(link);
+     
+     // Déclencher le clic
+     link.click();
+     
+     // Nettoyer après un délai
+     setTimeout(() => {
+       if (link.parentNode) {
+         document.body.removeChild(link);
+       }
+       
+      
+     }, 100);
+     
+     toast.success('CV en cours de téléchargement...');
+     
+   } catch (error) {
+     console.error('❌ Erreur téléchargement CV:', error);
+     
+     // Messages d'erreur spécifiques
+     let errorMessage = 'Erreur lors du téléchargement du CV';
+     
+     if (error.message.includes('Network Error')) {
+       errorMessage = 'Erreur de réseau. Vérifiez votre connexion.';
+     } else if (error.message.includes('404')) {
+       errorMessage = 'Fichier non trouvé sur le serveur.';
+     } else if (error.message.includes('403')) {
+       errorMessage = 'Accès interdit. Vérifiez vos permissions.';
+     } else if (error.message.includes('Invalid')) {
+       errorMessage = 'Format de fichier invalide.';
+     }
+     
+     toast.error(errorMessage);
+     
+     // Fallback: ouvrir l'URL originale dans un nouvel onglet
+     if (cvUrl) {
+       try {
+         window.open(cvUrl, '_blank');
+         toast.info('Ouverture du CV dans un nouvel onglet...');
+       } catch (fallbackError) {
+         console.error('Fallback aussi échoué:', fallbackError);
+       }
+     }
+   }
+ };
 
   const handleDelete = async (id) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette formation ?")) {
@@ -701,7 +842,7 @@ const deleteCandidature = async (candidatureId) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('🔍 DEBUG - Données du formulaire:', formData);
+    // console.log('🔍 DEBUG - Données du formulaire:', formData);
     
     try {
       const apiData = {
@@ -736,14 +877,14 @@ const deleteCandidature = async (candidatureId) => {
         status: formData.status || "draft"
       };
       
-      console.log('📤 DEBUG - Données formatées pour API:', apiData);
+      // console.log('📤 DEBUG - Données formatées pour API:', apiData);
       
       if (editingFormation) {
-        console.log(`🔄 Mise à jour formation ${editingFormation.id}`);
+        // console.log(`🔄 Mise à jour formation ${editingFormation.id}`);
         await updateFormation(editingFormation.id, apiData);
         toast.success("Formation mise à jour avec succès");
       } else {
-        console.log('🆕 Création nouvelle formation');
+        // console.log('🆕 Création nouvelle formation');
         await createFormation(apiData);
         toast.success("Formation créée avec succès");
       }
@@ -1359,9 +1500,7 @@ const deleteCandidature = async (candidatureId) => {
                               <span>
                                 {formation.currentParticipants || 0}/{formation.maxParticipants}
                               </span>
-                              <span className="text-xs text-gray-500">
-                                ({formation.applications_count || 0} candidatures)
-                              </span>
+                              
                             </div>
                           </TableCell>
                           <TableCell>
@@ -1390,7 +1529,7 @@ const deleteCandidature = async (candidatureId) => {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => openCandidaturesModal(formation)}>
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Voir candidatures ({formation.applications_count || 0})
+                                  Voir candidatures 
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {formation.status !== 'active' ? (
@@ -1490,12 +1629,12 @@ const deleteCandidature = async (candidatureId) => {
           </div>
 
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid grid-cols-4 w-full">
+            {/* <TabsList className="grid grid-cols-4 w-full">
               <TabsTrigger value="all">Toutes ({candidatureStats.total})</TabsTrigger>
               <TabsTrigger value="pending">En attente ({candidatureStats.pending})</TabsTrigger>
               <TabsTrigger value="accepted">Acceptées ({candidatureStats.accepted})</TabsTrigger>
               <TabsTrigger value="rejected">Refusées ({candidatureStats.rejected})</TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
             {loadingCandidatures ? (
               <div className="text-center py-8">

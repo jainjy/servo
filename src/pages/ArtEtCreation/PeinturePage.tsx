@@ -25,7 +25,8 @@ import {
   RefreshCw,
   ChevronLeft,
   Briefcase,
-  ImageIcon
+  ImageIcon,
+  Store
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
@@ -127,7 +128,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Fonction pour récupérer les peintres
   const fetchPainters = useCallback(async () => {
-    console.log('📡 Fetching painters...');
+    // console.log('📡 Fetching painters...');
     setLoading(true);
     setError(null);
     
@@ -144,16 +145,11 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
       if (cityFilter) {
         params.location = cityFilter;
       }
-      
-      console.log('🌐 API params:', params);
+
+      // console.log('🌐 API params:', params);
       const response = await api.get('/art-creation/peinture/products', { params });
       
-      console.log('📦 API response:', {
-        success: response.data.success,
-        count: response.data.count,
-        dataLength: response.data.data?.length || 0
-      });
-      
+    
       if (response.data.success) {
         setPainters(response.data.data || []);
       } else {
@@ -216,14 +212,14 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Recharger les données
   const handleRetry = useCallback(() => {
-    console.log('🔄 Retry loading data');
+    // console.log('🔄 Retry loading data');
     setError(null);
     fetchPainters();
   }, [fetchPainters]);
 
   // Gestion du clic sur une catégorie — afficher les pros en place
   const handleCategoryClick = useCallback((categorySlug: string) => {
-    console.log('🎯 Category clicked (in-place):', categorySlug);
+    // console.log('🎯 Category clicked (in-place):', categorySlug);
 
     // Définir la catégorie sélectionnée et afficher la vue catégorie
     setSelectedCategory(categorySlug);
@@ -231,7 +227,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
     // Si les peintres sont déjà chargés
     if (painters.length > 0) {
-      console.log(`🔍 Filtering ${painters.length} painters for category: ${categorySlug}`);
+      // console.log(`🔍 Filtering ${painters.length} painters for category: ${categorySlug}`);
     } else {
       fetchPainters();
     }
@@ -239,7 +235,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Gestion du clic "Retour à tous les peintres"
   const handleViewAll = useCallback(() => {
-    console.log('🔙 Back to all painters (in-place)');
+    // console.log('🔙 Back to all painters (in-place)');
     setSelectedCategory(null);
     setIsCategoryPage(false);
   }, []);
@@ -277,7 +273,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
 
   // Appel initial
   useEffect(() => {
-    console.log('🚀 Initializing PeinturePage');
+    // console.log('🚀 Initializing PeinturePage');
     fetchPainters();
   }, [fetchPainters]);
 
@@ -335,14 +331,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
         {/* Styles et techniques - TOUJOURS affichés */}
         {!isCategoryPage && (
           <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Palette size={24} className="mr-2 text-[#8B4513]" />
-                <h2 className="text-2xl font-bold text-[#8B4513]">
-                  Styles et techniques
-                </h2>
-              </div>
-            </div>
+            
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {paintingStyles.map((style) => (
@@ -497,14 +486,7 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
                     {/* Overlay sur l'image au hover */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                     
-                    {/* Badge vérifié */}
-                    {painter.verified && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                          ✓ Vérifié
-                        </span>
-                      </div>
-                    )}
+                    
                   </div>
 
                   {/* Info */}
@@ -566,8 +548,8 @@ const PeinturePage: React.FC<PeinturePageProps> = ({ onContactClick }) => {
                         }}
                         className="w-full py-2.5 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center group/btn"
                       >
-                        <ImageIcon size={16} className="mr-2 group-hover/btn:animate-pulse" />
-                        Voir les œuvres
+                        <Store size={16} className="mr-2 group-hover/btn:animate-pulse" />
+                        Boutique
                       </button>
                     </div>
                   </div>

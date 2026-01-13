@@ -270,7 +270,7 @@ getCategories: async () => {
 getAdminStats: async () => {
   try {
     const response = await api.get("/conseils/admin/stats");
-    console.log('📊 Stats admin récupérées:', response.data);
+
     return response.data;
   } catch (error) {
     console.error('❌ Erreur récupération stats admin:', error);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Palette, Camera, Hammer, Brush, ShoppingBag, ArrowRight, RefreshCw } from 'lucide-react';
+import { Palette, Camera, Hammer, Brush, ShoppingBag, ArrowRight, RefreshCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import AuthService from '@/services/authService';
 
 interface ArtCard {
   id: string;
@@ -16,6 +17,7 @@ interface ArtCard {
 const ArtETCreationShowcase = () => {
   const navigate = useNavigate();
   const [displayedCards, setDisplayedCards] = useState<ArtCard[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const allCards: ArtCard[] = [
     {
@@ -77,6 +79,10 @@ const ArtETCreationShowcase = () => {
   const handleRefresh = () => setDisplayedCards(getRandomCards());
 
   const handleCardClick = (link: string) => {
+    if (!AuthService.isAuthenticated()) {
+      setShowAuthModal(true);
+      return;
+    }
     navigate('/art-et-creation', { state: { activeTab: link } });
   };
 
@@ -131,6 +137,43 @@ const ArtETCreationShowcase = () => {
           </div>
         ))}
       </div>
+
+      {/* Modal de connexion */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">Connexion requise</h2>
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Veuillez vous connecter pour explorer les catégories d'art et de création.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+              >
+                Fermer
+              </button>
+              <Button
+                className="flex-1 px-4 py-2 text-sm rounded-lg bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
+                onClick={() => {
+                  navigate('/login');
+                  setShowAuthModal(false);
+                }}
+              >
+                Se connecter
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

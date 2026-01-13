@@ -52,7 +52,7 @@ function PaymentRequestForm() {
       } else {
         event.complete("success");
         alert("✅ Paiement réussi !");
-        console.log(paymentIntent);
+       
       }
     });
   }, [stripe]);

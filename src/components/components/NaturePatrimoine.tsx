@@ -57,7 +57,7 @@ const NaturePatrimoine = () => {
 
       // CHOISIR LA ROUTE EN FONCTION DE L'AUTHENTIFICATION
       const endpoint = isAuthenticated ? '/patrimoine/test' : '/patrimoine/all';
-      console.log(`Utilisation de l'endpoint: ${endpoint} (authentifié: ${isAuthenticated})`);
+      // console.log(`Utilisation de l'endpoint: ${endpoint} (authentifié: ${isAuthenticated})`);
 
       // Appeler l'endpoint approprié
       const response = await api.get(endpoint, { params });
@@ -84,7 +84,7 @@ const NaturePatrimoine = () => {
       setError(err.response?.data?.message || 'Erreur de connexion au serveur');
 
       // Charger les données statiques en cas d'erreur
-      console.log('Chargement des données statiques de fallback');
+      // console.log('Chargement des données statiques de fallback');
 
     } finally {
       setLoading(false);

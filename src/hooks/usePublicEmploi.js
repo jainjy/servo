@@ -32,13 +32,10 @@ export const usePublicEmploi = () => {
       if (filters.limit) params.append('limit', filters.limit);
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
-      
-      console.log('📡 Fetch emplois publics avec params:', Object.fromEntries(params));
-      
+   
       const response = await api.get(`/emploi/public?${params.toString()}`);
       
-      console.log('✅ Emplois publics reçus:', response.data.data?.length || 0);
-      
+  
       setEmplois(response.data.data || []);
       setPagination(response.data.pagination || {});
       
@@ -57,11 +54,10 @@ export const usePublicEmploi = () => {
   // Récupérer les statistiques publiques
   const fetchStats = useCallback(async () => {
     try {
-      console.log('📡 Fetch stats publiques emploi...');
-      
+  
       const response = await api.get('/emploi/public/stats');
       
-      console.log('✅ Stats emploi reçues:', response.data.data);
+      // console.log('✅ Stats emploi reçues:', response.data.data);
       setStats(response.data.data || {});
       
       return response.data;
@@ -77,12 +73,10 @@ export const usePublicEmploi = () => {
   const fetchEmploiDetails = useCallback(async (id) => {
     setIsLoading(true);
     try {
-      console.log(`📡 Fetch détails emploi ${id}...`);
-      
+   
       const response = await api.get(`/emploi/public/${id}`);
       
-      console.log('✅ Détails emploi reçus:', response.data.data);
-      
+   
       return response.data.data;
     } catch (err) {
       console.error('❌ Erreur fetchEmploiDetails:', err);
@@ -102,12 +96,10 @@ export const usePublicEmploi = () => {
     }
 
     try {
-      console.log(`📡 Postulation à emploi ${emploiId}:`, applicationData);
-      
+    
       const response = await api.post(`/emploi/public/${emploiId}/apply`, applicationData);
       
-      console.log('✅ Postulation réussie:', response.data);
-      
+  
       toast.success(response.data.message || 'Candidature envoyée avec succès !');
       
       return response.data;
@@ -123,7 +115,7 @@ export const usePublicEmploi = () => {
   // Récupérer les secteurs disponibles
   const fetchSecteurs = useCallback(async () => {
     try {
-      console.log('📡 Fetch secteurs...');
+      // console.log('📡 Fetch secteurs...');
       
       const response = await api.get('/emploi/public/secteurs');
       
@@ -137,7 +129,7 @@ export const usePublicEmploi = () => {
   // Récupérer les types de contrat disponibles
   const fetchTypesContrat = useCallback(async () => {
     try {
-      console.log('📡 Fetch types contrat...');
+      // console.log('📡 Fetch types contrat...');
       
       const response = await api.get('/emploi/public/types-contrat');
       

@@ -152,7 +152,7 @@ const ServoLogo = () => (
 
 export default function LoadingScreen({
   onLoadingComplete,
-  minimumLoadingTime = 7500
+  minimumLoadingTime = 9000
 }: LoadingScreenProps) {
   // États de base
   const [isVisible, setIsVisible] = useState(true);
@@ -189,6 +189,7 @@ export default function LoadingScreen({
   const bigServoLogoRef = useRef<HTMLDivElement>(null);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const mainServoLogoRef = useRef<HTMLDivElement>(null);
+  const loadingScreenRef = useRef<HTMLDivElement>(null);
 
   // Référence pour la section d'équipe
   const teamSectionRef = useRef<HTMLDivElement>(null);
@@ -392,7 +393,6 @@ export default function LoadingScreen({
       const elapsed = now - startTimeRef.current;
 
       const videosLoadedCount = videosLoaded.size;
-      const videosInCardData = cardData.filter(card => card.type === 'video').length;
       
       let timeProgress = (elapsed / minimumLoadingTime) * 100;
       let videoProgress = videosLoadedCount > 0 
@@ -527,12 +527,14 @@ export default function LoadingScreen({
     <div
       className="fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
       style={{
-        opacity: fadeOutOpacity,
-        transform: `scale(${scaleEffect})`,
-        filter: `blur(${blurEffect}px)`,
-        transition: isExiting ? 'none' : 'opacity 0.3s ease-out',
-        pointerEvents: isExiting ? 'none' : 'auto',
-        willChange: 'opacity, transform, filter'
+        backgroundImage: `
+          linear-gradient(rgba(255, 165, 0, 0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 165, 0, 0.3) 1px, transparent 1px)
+        `,
+        backgroundSize: '60px 60px',
+        backgroundPosition: 'center center',
+        transform: 'translateZ(0px)',
+        animation: 'gridFloat 20s ease-in-out infinite'
       }}
     >
       <style>{`
@@ -875,7 +877,9 @@ export default function LoadingScreen({
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
+  )}
+</div>
   );
 }

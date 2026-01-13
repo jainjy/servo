@@ -22,6 +22,7 @@ import { useCart } from "@/hooks/useCart";
 import { default as ProductCard } from "@/components/ProductCard";
 import api from "@/lib/api";
 import { useProduitsTracking } from '@/hooks/useProduitsTracking';
+import AdvertisementPopup from '@/components/AdvertisementPopup';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -138,7 +139,7 @@ const Produits = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [contactModalType, setContactModalType] = useState("contact");
   const [products, setProducts] = useState<Product[]>([]);
-  
+
   // Intégration du hook de tracking
   const {
     trackProduitsView,
@@ -160,20 +161,20 @@ const Produits = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Tracking de la recherche
     trackProductSearch(searchQuery);
-    
+
     try {
       setIsLoading(true);
-      const params: FetchProductsParams = { 
+      const params: FetchProductsParams = {
         status: 'active',
         search: searchQuery
       };
-      
+
       const response = await api.get('/products', { params });
       setProducts(response.data.products);
-      
+
       // Track des vues de produits individuels
       response.data.products.forEach((product: Product) => {
         trackProductView(product.id.toString(), product.name, product.category || 'unknown');
@@ -206,12 +207,20 @@ const Produits = () => {
   return (
     <div className="min-h-screen relative pt-16 overflow-hidden bg-[#F6F8FA]">
       {/* Background Image avec overlay */}
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
+
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
-          backgroundAttachment: 'fixed'
+            backgroundAttachment: 'fixed'
           }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-50" />
@@ -302,16 +311,16 @@ const Produits = () => {
           )}
 
           {/* Sections avec props de tracking */}
-          <EquipementSection 
-            searchQuery={searchQuery} 
+          <EquipementSection
+            searchQuery={searchQuery}
             onCategoryClick={trackCategoryClick}
           />
-          <MateriauxSection 
-            searchQuery={searchQuery} 
+          <MateriauxSection
+            searchQuery={searchQuery}
             onCategoryClick={trackCategoryClick}
           />
-          <DesignSection 
-            searchQuery={searchQuery} 
+          <DesignSection
+            searchQuery={searchQuery}
             onCategoryClick={trackCategoryClick}
           />
 

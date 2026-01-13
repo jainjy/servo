@@ -868,7 +868,7 @@ const AlternanceSection = ({
                                   )}
                                 </div>
                               )}
-                              <div className="flex gap-2">
+                              <div className="grid md:grid-cols-4 grid-cols-2 gap-2">
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -1030,82 +1030,7 @@ const AlternanceSection = ({
             </TabsContent>
           </Tabs>
 
-          {/* Resources Section */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card className="border-[#556B2F]">
-              <CardHeader>
-                <CardTitle className="text-[#8B4513]">
-                  Ressources étudiants
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => handleDownloadGuide("Guide alternance")}
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <BookOpen className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Guide de l'alternance</h4>
-                      <p className="text-sm text-gray-500">
-                        Tout savoir sur les contrats et droits
-                      </p>
-                    </div>
-                  </div>
-                  <div
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => handleDownloadGuide("Calendrier 2024")}
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Calendrier 2024</h4>
-                      <p className="text-sm text-gray-500">
-                        Dates clés pour vos recherches
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#6B8E23] bg-gradient-to-br from-[#556B2F]/5 to-[#6B8E23]/5">
-              <CardHeader>
-                <CardTitle className="text-[#8B4513]">
-                  Événements à venir
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border-l-4 border-[#556B2F] pl-4 py-2">
-                    <div className="text-sm text-gray-500">15 Mars 2024</div>
-                    <h4 className="font-medium">Forum Alternance Paris</h4>
-                    <p className="text-sm text-gray-600">
-                      Rencontrez 50+ entreprises
-                    </p>
-                  </div>
-                  <div className="border-l-4 border-[#6B8E23] pl-4 py-2">
-                    <div className="text-sm text-gray-500">22 Mars 2024</div>
-                    <h4 className="font-medium">
-                      Webinar : CV étudiant parfait
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Conseils d'un recruteur
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  className="w-full mt-4 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
-                  onClick={handleOpenEvents}
-                >
-                  Voir tous les événements
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          
         </div>
       </div>
 
@@ -1188,52 +1113,7 @@ const AlternanceSection = ({
                   </div>
                 )}
               </div>
-              <div>
-                <Label className="font-semibold mb-2 block">
-                  Lettre de motivation (optionnelle) :
-                </Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 mb-2">
-                    Glissez-déposez votre lettre de motivation ou
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById("lettre-upload").click()}
-                  >
-                    Parcourir les fichiers
-                  </Button>
-                  <input
-                    id="lettre-upload"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="hidden"
-                    onChange={handleLettreFileChange}
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Formats acceptés : PDF, DOC, DOCX (max 5MB)
-                  </p>
-                </div>
-                {lettreFile && (
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg mt-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-green-600" />
-                      <span className="text-sm">
-                        {lettreFile.name}
-                      </span>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setLettreFile(null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
+             
             </div>
             <DialogFooter>
               <Button

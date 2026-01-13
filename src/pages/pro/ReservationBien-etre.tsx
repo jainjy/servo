@@ -87,7 +87,7 @@ const ReservationTable: React.FC = () => {
 
       if (response.data.success) {
         setUserServices(response.data.data);
-        console.log("📋 Services de l'utilisateur:", response.data.data);
+        // console.log("📋 Services de l'utilisateur:", response.data.data);
       } else {
         setError(response.data.message || "Erreur lors de la récupération des services");
       }
@@ -110,7 +110,7 @@ const ReservationTable: React.FC = () => {
       if (response.data.success) {
         setReservations(response.data.data);
         setFilteredReservations(response.data.data);
-        console.log("📋 Réservations récupérées:", response.data.data);
+        // console.log("📋 Réservations récupérées:", response.data.data);
       } else {
         setError(
           response.data.message ||

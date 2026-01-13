@@ -140,8 +140,8 @@ const openCandidaturesModal = async (emploi) => {
                   localStorage.getItem('token') || 
                   localStorage.getItem('jwt-token');
     
-    console.log('🔑 Token pour candidatures emploi:', token ? 'Présent' : 'Absent');
-    console.log(`📤 Récupération candidatures pour emploi ID: ${emploi.id}`);
+    // console.log('🔑 Token pour candidatures emploi:', token ? 'Présent' : 'Absent');
+    // console.log(`📤 Récupération candidatures pour emploi ID: ${emploi.id}`);
     
     if (!token) {
       toast.error('Session expirée. Veuillez vous reconnecter.');
@@ -159,13 +159,11 @@ const openCandidaturesModal = async (emploi) => {
       }
     );
     
-    console.log('📊 Réponse candidatures emploi:', response.data);
-    
+ 
     if (response.data.success) {
       const apiCandidatures = response.data.data || [];
       
-      console.log(`📝 ${apiCandidatures.length} candidatures reçues`);
-      
+ 
       if (apiCandidatures.length === 0) {
         toast.info('Aucune candidature pour cette offre');
         setCandidatures([]);
@@ -216,7 +214,7 @@ const openCandidaturesModal = async (emploi) => {
         };
         setCandidatureStats(stats);
         
-        console.log('📈 Stats calculées:', stats);
+        // console.log('📈 Stats calculées:', stats);
       }
     }
   } catch (error) {
@@ -243,7 +241,7 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
     const isMockId = candidatureId === 100 || candidatureId === 101 || candidatureId === 999;
     
     if (isMockId) {
-      console.log('🔄 Mise à jour locale (ID mocké):', candidatureId, newStatus);
+      // console.log('🔄 Mise à jour locale (ID mocké):', candidatureId, newStatus);
       
       // Mettre à jour localement seulement pour les IDs mockés
       setCandidatures(prev => 
@@ -259,6 +257,19 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
       );
       
       toast.success('Statut mis à jour (mode démo)');
+
+        // AJOUTEZ CES LIGNES :
+  // Recharger les stats globales
+  await fetchStats();
+  
+  // Recharger la liste des emplois
+  await fetchEmplois({
+    search: debouncedSearch,
+    status: statusFilter,
+    type: typeFilter,
+    secteur: secteurFilter,
+    page: pagination.page
+  });
       
       // Recalculer les stats
       const updatedCandidatures = candidatures.map(c => 
@@ -295,12 +306,12 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
     else if (newStatus === 'en_attente') statusToSend = 'en_attente';
     else if (newStatus === 'pending') statusToSend = 'en_attente';
     
-    console.log('📤 Mise à jour statut candidature:', {
-      candidatureId,
-      newStatus,
-      sending: statusToSend,
-      isMockId: false
-    });
+    // console.log('📤 Mise à jour statut candidature:', {
+    //   candidatureId,
+    //   newStatus,
+    //   sending: statusToSend,
+    //   isMockId: false
+    // });
     
     const response = await axios.patch(
       `${API_URL}/candidatures/${candidatureId}/status`,
@@ -357,7 +368,7 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
     
     // Si c'est une erreur 404, c'est probablement un ID mocké
     if (error.response?.status === 404) {
-      console.log('⚠️ ID probablement mocké, mise à jour locale');
+      // console.log('⚠️ ID probablement mocké, mise à jour locale');
       
       // Mettre à jour localement quand même
       setCandidatures(prev => 
@@ -379,43 +390,31 @@ const updateCandidatureStatus = async (candidatureId, newStatus) => {
   }
 };
 
-// Fonction pour télécharger un CV
-const downloadCV = async (candidatureId, fileName, cvUrl) => {
+// Ajoutez cette fonction dans votre composant
+const refreshAllData = async () => {
   try {
-    if (!cvUrl) {
-      toast.error('Aucun CV disponible pour ce candidat');
-      return;
+    // Recharge les stats
+    await fetchStats();
+    
+    // Recharge la liste des emplois (avec les counts mis à jour)
+    await fetchEmplois({
+      search: debouncedSearch,
+      status: statusFilter,
+      type: typeFilter,
+      secteur: secteurFilter,
+      page: pagination.page
+    });
+    
+    // Recharge les candidatures dans le modal si ouvert
+    if (selectedEmploi && candidaturesModalOpen) {
+      await openCandidaturesModal(selectedEmploi);
     }
-    
-    toast.info('Téléchargement du CV...');
-    
-    // Si le CV est une URL relative, construire l'URL complète
-    let downloadUrl = cvUrl;
-    if (!cvUrl.startsWith('http')) {
-      downloadUrl = `http://localhost:3001${cvUrl.startsWith('/') ? cvUrl : '/' + cvUrl}`;
-    }
-    
-    // Créer un lien temporaire pour le téléchargement
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', fileName || 'cv_candidat.pdf');
-    link.setAttribute('target', '_blank');
-    
-    // Ajouter un paramètre pour éviter le cache si nécessaire
-    link.href = `${downloadUrl}?t=${Date.now()}`;
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast.success('CV téléchargé');
   } catch (error) {
-    console.error('Erreur téléchargement CV:', error);
-    toast.error('Erreur lors du téléchargement du CV');
+    console.error('Erreur rafraîchissement données:', error);
   }
 };
 
-// Fonction pour supprimer une candidature
+// Puis appelez-la après chaque modification
 const deleteCandidature = async (candidatureId) => {
   if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette candidature ?')) {
     return;
@@ -436,17 +435,188 @@ const deleteCandidature = async (candidatureId) => {
 
     if (response.data.success) {
       toast.success('Candidature supprimée avec succès');
-      
-      // Recharger les candidatures
-      if (selectedEmploi) {
-        await openCandidaturesModal(selectedEmploi);
-      }
+      await refreshAllData(); // <-- Utilisez cette fonction
     }
   } catch (error) {
     console.error('❌ Erreur suppression candidature:', error);
     toast.error(error.response?.data?.error || 'Erreur lors de la suppression');
   }
 };
+
+// Fonction pour télécharger un CV - VERSION CORRIGÉE
+const downloadCV = async (candidatureId, fileName, cvUrl) => {
+  try {
+    // console.log('📥 Téléchargement CV - URL originale:', cvUrl);
+    
+    if (!cvUrl) {
+      toast.error('Aucun CV disponible pour ce candidat');
+      return;
+    }
+    
+    // Détecter le type d'URL
+    const isBlobUrl = cvUrl.startsWith('blob:');
+    const isDataUrl = cvUrl.startsWith('data:');
+    const isHttpUrl = cvUrl.startsWith('http://') || cvUrl.startsWith('https://');
+    const isRelativeUrl = cvUrl.startsWith('/');
+    
+    // console.log('🔍 Type d\'URL détecté:', {
+    //   isBlobUrl,
+    //   isDataUrl,
+    //   isHttpUrl,
+    //   isRelativeUrl,
+    //   cvUrl
+    // });
+    
+    let finalUrl = cvUrl;
+    let shouldOpenInNewTab = false;
+    
+    // Traitement selon le type d'URL
+    if (isBlobUrl) {
+      // URL Blob : utiliser directement
+      // console.log('📄 Utilisation URL Blob');
+      shouldOpenInNewTab = true;
+      // Pour les URLs Blob, on ne peut pas ajouter de query params
+      // On utilise l'URL telle quelle
+    }
+    else if (isDataUrl) {
+      // URL Data (base64) : convertir en blob
+      // console.log('📄 Utilisation URL Data (base64)');
+      try {
+        // Extraire le contenu base64
+        const base64Content = cvUrl.split(',')[1];
+        const mimeType = cvUrl.match(/data:(.*);base64/)?.[1] || 'application/pdf';
+        
+        // Convertir en blob
+        const byteCharacters = atob(base64Content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+        
+        // Créer une URL Blob
+        finalUrl = URL.createObjectURL(blob);
+        shouldOpenInNewTab = true;
+      } catch (error) {
+        console.error('Erreur conversion base64:', error);
+        throw new Error('Format de données invalide');
+      }
+    }
+    else if (isHttpUrl) {
+      // URL HTTP complète : ajouter timestamp pour éviter le cache
+      // console.log('📄 Utilisation URL HTTP complète');
+      const separator = finalUrl.includes('?') ? '&' : '?';
+      finalUrl = `${finalUrl}${separator}t=${Date.now()}`;
+      shouldOpenInNewTab = true;
+    }
+    else if (isRelativeUrl) {
+      // URL relative : ajouter la base du serveur
+      // console.log('📄 Utilisation URL relative');
+      // Nettoyer le chemin (enlever le /api/ s'il est déjà présent)
+      let cleanPath = cvUrl;
+      if (cvUrl.startsWith('/api/')) {
+        cleanPath = cvUrl.substring(5); // Enlever '/api/'
+      }
+      finalUrl = `${API_URL}/${cleanPath}?t=${Date.now()}`;
+    }
+    else {
+      // Autre cas : traiter comme un chemin de fichier
+      // console.log('📄 Traitement comme chemin de fichier');
+      finalUrl = `${API_URL}/${cvUrl}?t=${Date.now()}`;
+    }
+    
+    // console.log('🔗 URL finale pour téléchargement:', finalUrl);
+    
+    // Créer un nom de fichier par défaut
+    const finalFileName = fileName || 'cv_candidat.pdf';
+    
+    // Créer un élément de lien
+    const link = document.createElement('a');
+    
+    if (isBlobUrl || isDataUrl) {
+      // Pour les URLs Blob/Data, on ne peut pas utiliser "download" facilement
+      // Ouvrir dans un nouvel onglet
+      link.href = finalUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      
+      // Pour les PDF, ajouter un attribut pour l'ouverture
+      if (finalUrl.includes('.pdf') || finalFileName.endsWith('.pdf')) {
+        link.setAttribute('type', 'application/pdf');
+      }
+    } else {
+      // Pour les URLs normales, utiliser l'attribut download
+      link.href = finalUrl;
+      link.download = finalFileName;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }
+    
+    // Ajouter des headers d'authentification si nécessaire (pour les URLs HTTP)
+    if (!isBlobUrl && !isDataUrl) {
+      const token = localStorage.getItem('auth-token');
+      if (token) {
+        // Note: Pour les liens simples, on ne peut pas ajouter des headers
+        // Mais on peut passer le token dans l'URL si le backend le supporte
+        const hasQuery = finalUrl.includes('?');
+        link.href = `${finalUrl}${hasQuery ? '&' : '?'}token=${encodeURIComponent(token)}`;
+      }
+    }
+    
+    // Style caché
+    link.style.display = 'none';
+    link.style.position = 'absolute';
+    link.style.left = '-9999px';
+    
+    // Ajouter au DOM
+    document.body.appendChild(link);
+    
+    // Déclencher le clic
+    link.click();
+    
+    // Nettoyer après un délai
+    setTimeout(() => {
+      if (link.parentNode) {
+        document.body.removeChild(link);
+      }
+      
+     
+    }, 100);
+    
+    toast.success('CV en cours de téléchargement...');
+    
+  } catch (error) {
+    console.error('❌ Erreur téléchargement CV:', error);
+    
+    // Messages d'erreur spécifiques
+    let errorMessage = 'Erreur lors du téléchargement du CV';
+    
+    if (error.message.includes('Network Error')) {
+      errorMessage = 'Erreur de réseau. Vérifiez votre connexion.';
+    } else if (error.message.includes('404')) {
+      errorMessage = 'Fichier non trouvé sur le serveur.';
+    } else if (error.message.includes('403')) {
+      errorMessage = 'Accès interdit. Vérifiez vos permissions.';
+    } else if (error.message.includes('Invalid')) {
+      errorMessage = 'Format de fichier invalide.';
+    }
+    
+    toast.error(errorMessage);
+    
+    // Fallback: ouvrir l'URL originale dans un nouvel onglet
+    if (cvUrl) {
+      try {
+        window.open(cvUrl, '_blank');
+        toast.info('Ouverture du CV dans un nouvel onglet...');
+      } catch (fallbackError) {
+        console.error('Fallback aussi échoué:', fallbackError);
+      }
+    }
+  }
+};
+
+
 
 
 // Composant pour afficher le tableau des candidatures
@@ -1332,6 +1502,14 @@ const handleSubmit = async (e) => {
                 </TableHeader>
                 <TableBody>
                   {emplois.map((emploi) => {
+
+    //                  console.log('🔍 Emploi debug:', {
+    //   id: emploi.id,
+    //   title: emploi.title,
+    //   candidaturesCount: emploi.candidaturesCount,
+    //   candidatures_count: emploi.candidatures_count,
+    //   allProps: Object.keys(emploi)
+    // });
                     const status = statuses.find(s => s.value === emploi.status);
                     return (
                       <TableRow key={emploi.id}>
@@ -1371,13 +1549,14 @@ const handleSubmit = async (e) => {
                             {emploi.salaire}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-3 w-3" />
-                            <span>{emploi.candidatures_count || 0}</span>
-                            <span className="text-xs text-gray-500">({emploi.vues || 0} vues)</span>
-                          </div>
-                        </TableCell>
+                       <TableCell>
+          <div className="flex items-center gap-2">
+            <Users className="h-3 w-3" />
+            <span>
+              {emploi.candidaturesCount || 0} candidatures
+            </span>
+          </div>
+        </TableCell>
                         <TableCell>
                           <Badge className={status?.color}>
                             {status?.label}
@@ -1404,7 +1583,7 @@ const handleSubmit = async (e) => {
                               </DropdownMenuItem>
 <DropdownMenuItem onClick={() => openCandidaturesModal(emploi)}>
   <Users className="h-4 w-4 mr-2" />
-  Voir candidatures ({emploi.candidatures_count || 0})
+  Voir candidatures 
 </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
@@ -1495,12 +1674,7 @@ const handleSubmit = async (e) => {
     </div>
 
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="grid grid-cols-4 w-full">
-        <TabsTrigger value="all">Toutes ({candidatureStats.total})</TabsTrigger>
-        <TabsTrigger value="pending">En attente ({candidatureStats.pending})</TabsTrigger>
-        <TabsTrigger value="accepted">Acceptées ({candidatureStats.accepted})</TabsTrigger>
-        <TabsTrigger value="rejected">Refusées ({candidatureStats.rejected})</TabsTrigger>
-      </TabsList>
+     
 
       {loadingCandidatures ? (
         <div className="text-center py-8">

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/axios";
 import TourismNavigation from "../TourismNavigation";
+import AdvertisementPopup from "../AdvertisementPopup";
 
 interface ActivityCategory {
   id: number;
@@ -103,6 +104,14 @@ const ActivitesLoisirsFAQ: React.FC = () => {
     // Utilisation de la couleur de fond claire du thème
     <div className={`min-h-screen bg-[${lightBg}] text-gray-900`}>
       {/* Hero */}
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
+
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <div className="relative rounded-2xl overflow-hidden mb-8">
         <div
           className="relative pt-20 pb-8 bg-cover bg-center bg-no-repeat"

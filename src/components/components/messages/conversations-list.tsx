@@ -70,7 +70,7 @@ export function ConversationsList({
         id: "2",
         participants: [
           { id: "user1", name: "Marie Dubois", type: "user" },
-          { id: "admin1", name: "Support SERVO", type: "admin" }
+          { id: "admin1", name: "Support OLIPLUS", type: "admin" }
         ],
         lastMessage: {
           content: "Votre problème de paiement a été résolu",

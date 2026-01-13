@@ -44,6 +44,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import api from "@/lib/api";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 // Composant Skeleton Loading
 const SectionSkeleton = () => (
@@ -73,7 +74,7 @@ const SectionSkeleton = () => (
 // Composant Navigation Rapide
 const QuickNavigation = ({ sections, activeSection, onSectionClick }) => {
   if (!sections || sections.length === 0) return null;
-  
+
   return (
     <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-30 hidden lg:block">
       <Card className="p-3 bg-white/90 backdrop-blur-md shadow-xl border-0 rounded-2xl">
@@ -81,16 +82,15 @@ const QuickNavigation = ({ sections, activeSection, onSectionClick }) => {
           {sections.map((section) => {
             const IconComponent = section.icon;
             const isActive = activeSection === section.id;
-            
+
             return (
               <button
                 key={section.id}
                 onClick={() => onSectionClick(section.id)}
-                className={`relative p-2 rounded-xl transition-all duration-300 ${
-                  isActive 
-                    ? 'bg-[#556B2F] text-white' 
+                className={`relative p-2 rounded-xl transition-all duration-300 ${isActive
+                    ? 'bg-[#556B2F] text-white'
                     : 'hover:bg-[#556B2F]/10 text-[#556B2F]'
-                }`}
+                  }`}
                 title={section.title}
               >
                 <IconComponent className="h-5 w-5" />
@@ -100,9 +100,9 @@ const QuickNavigation = ({ sections, activeSection, onSectionClick }) => {
               </button>
             );
           })}
-          
+
           <div className="h-px w-8 bg-[#D3D3D3] my-1"></div>
-          
+
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="p-2 rounded-xl hover:bg-[#556B2F]/10 text-[#556B2F] transition-colors duration-300"
@@ -285,27 +285,27 @@ const Alimentation = () => {
 
   // Charger les données UNE SEULE FOIS au montage
   useEffect(() => {
-    console.log("useEffect de chargement des données exécuté");
+    //console.log("useEffect de chargement des données exécuté");
     let isMounted = true;
-    
+
     const loadData = async () => {
       try {
-        console.log("Début du chargement des données...");
-        
+        //console.log("Début du chargement des données...");
+
         // Charger les catégories
         const categoriesResponse = await api.get("/aliments/categories");
-        console.log("Catégories chargées:", categoriesResponse.data);
-        
+        //console.log("Catégories chargées:", categoriesResponse.data);
+
         // Charger les produits
-        const productsResponse = await api.get("/aliments", { 
-          params: { status: "active" } 
+        const productsResponse = await api.get("/aliments", {
+          params: { status: "active" }
         });
-        console.log("Produits chargés:", productsResponse.data);
-        
+        //console.log("Produits chargés:", productsResponse.data);
+
         if (isMounted) {
           // Mettre à jour les états
           setCategories(categoriesResponse.data || []);
-          
+
           // Calculer les comptes par catégorie
           const counts = {};
           if (categoriesResponse.data) {
@@ -314,26 +314,26 @@ const Alimentation = () => {
             });
           }
           setCategoryCounts(counts);
-          
+
           setProducts(productsResponse.data?.products || productsResponse.data || []);
           setIsInitialized(true);
           setIsCategoriesLoading(false);
-          console.log("Données initialisées avec succès");
+          //console.log("Données initialisées avec succès");
         }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
         if (isMounted) {
           setIsInitialized(true);
           setIsCategoriesLoading(false);
-          console.log("Initialisation malgré l'erreur");
+          //console.log("Initialisation malgré l'erreur");
         }
       }
     };
 
     loadData();
-    
+
     return () => {
-      console.log("Cleanup useEffect");
+      //console.log("Cleanup useEffect");
       isMounted = false;
     };
   }, []); // Dépendance vide = exécuté une seule fois
@@ -341,9 +341,9 @@ const Alimentation = () => {
   // Configuration de l'intersection observer (uniquement après initialisation)
   useEffect(() => {
     if (!isInitialized) return;
-    
-    console.log("Configuration de l'intersection observer");
-    
+
+    //console.log("Configuration de l'intersection observer");
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -365,7 +365,7 @@ const Alimentation = () => {
     });
 
     return () => {
-      console.log("Cleanup observer");
+      //("Cleanup observer");
       observer.disconnect();
     };
   }, [isInitialized]);
@@ -390,7 +390,7 @@ const Alimentation = () => {
   // Recherche en temps réel avec debounce
   useEffect(() => {
     if (!isInitialized) return;
-    
+
     const timeoutId = setTimeout(() => {
       if (searchQuery.length > 2) {
         performSearch(searchQuery);
@@ -403,15 +403,15 @@ const Alimentation = () => {
   }, [searchQuery, isInitialized]);
 
   const performSearch = async (query) => {
-    console.log("Recherche pour:", query);
+    //console.log("Recherche pour:", query);
     if (!query.trim()) {
       setSearchResults([]);
       return;
     }
-    
+
     try {
       setIsSearching(true);
-      
+
       const response = await api.get("/aliments", {
         params: {
           status: "active",
@@ -419,12 +419,12 @@ const Alimentation = () => {
           limit: 50
         }
       });
-      
+
       const data = response.data;
       const results = data.products || data || [];
-      console.log("Résultats de recherche:", results.length);
+      //console.log("Résultats de recherche:", results.length);
       setSearchResults(Array.isArray(results) ? results : []);
-      
+
     } catch (error) {
       console.error("Erreur lors de la recherche:", error);
       setSearchResults([]);
@@ -485,7 +485,7 @@ const Alimentation = () => {
 
   // Écran de chargement initial
   if (!isInitialized) {
-    console.log("Affichage de l'écran de chargement");
+    //console.log("Affichage de l'écran de chargement");
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF]">
         <div className="text-center">
@@ -495,12 +495,19 @@ const Alimentation = () => {
       </div>
     );
   }
-
-  console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
+//console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
 
   return (
     <div className="min-h-screen relative pt-16 bg-[#FFFFFF]">
       {/* Background Image avec overlay */}
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
+
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -515,7 +522,7 @@ const Alimentation = () => {
 
       {/* Navigation Rapide */}
       {filteredSections.length > 0 && (
-        <QuickNavigation 
+        <QuickNavigation
           sections={filteredSections}
           activeSection={activeSection}
           onSectionClick={handleSectionNavigation}
@@ -555,7 +562,7 @@ const Alimentation = () => {
             </div>
           </div>
 
-          
+
 
           {/* Sections */}
           {isCategoriesLoading ? (
@@ -580,7 +587,7 @@ const Alimentation = () => {
                 >
                   <div className="flex items-center justify-between gap-4 mb-8">
                     <div className="flex items-center gap-4">
-                      <div 
+                      <div
                         className="p-3 rounded-2xl shadow-lg"
                         style={{ backgroundColor: section.color }}
                       >
@@ -591,10 +598,10 @@ const Alimentation = () => {
                           <h2 className="text-xl lg:text-2xl font-bold text-black/70">
                             {section.title}
                           </h2>
-                          <Badge 
+                          <Badge
                             variant="outline"
                             className="text-xs"
-                            style={{ 
+                            style={{
                               color: section.color,
                               borderColor: section.color
                             }}
@@ -605,7 +612,7 @@ const Alimentation = () => {
                         <p className="text-xs text-[#8B4513] mt-2">
                           {section.description}
                         </p>
-                        
+
                         {/* Sous-liens de navigation */}
                         <div className="flex flex-wrap gap-3 mt-3">
                           {section.subcategories && section.subcategories.map((subcat) => (
@@ -655,7 +662,7 @@ const Alimentation = () => {
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                               <div className="flex justify-end absolute rounded-full text-white bottom-3 right-3">
-                                <Badge 
+                                <Badge
                                   className="text-white shadow-md"
                                   style={{ backgroundColor: section.color }}
                                 >
@@ -665,12 +672,12 @@ const Alimentation = () => {
                               </div>
                             </div>
                             <div className="flex items-center justify-center mb-3">
-                              <div 
+                              <div
                                 className="p-2 rounded-lg"
                                 style={{ backgroundColor: `${section.color}15` }}
                               >
-                                <CategoryIcon 
-                                  className="h-5 w-5" 
+                                <CategoryIcon
+                                  className="h-5 w-5"
                                   style={{ color: section.color }}
                                 />
                               </div>
@@ -683,7 +690,7 @@ const Alimentation = () => {
                             </p>
                             <Button
                               className="w-full text-white border-0 transition-all duration-300 shadow-md hover:shadow-lg mt-auto"
-                              style={{ 
+                              style={{
                                 backgroundColor: section.color,
                               }}
                               onClick={() => handleCategoryClick(category)}

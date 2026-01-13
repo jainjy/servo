@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Palette, 
   User,
@@ -6,8 +6,11 @@ import {
   Camera, 
   Hammer, 
   Brush, 
-  Search
+  Search,
+  X
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 // Import des composants
 import ArtisanatPage from './ArtEtCreation/ArtisanatPage';
@@ -20,10 +23,20 @@ import SculpturePage from './ArtEtCreation/SculpturePage';
 import ModalDemandeVisite from '@/components/ModalDemandeVisite';
 
 const ArtEtCreation = () => {
-  const [activeTab, setActiveTab] = useState('photographie');
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('marketplace');
   const [searchQuery, setSearchQuery] = useState('');
   const [showDemandeVisite, setShowDemandeVisite] = useState(false);
   const [selectedArtwork, setSelectedArtwork] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Afficher le modal automatiquement si l'utilisateur n'est pas connecté
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    }
+  }, [isAuthenticated]);
 
   const tabs = [
     { id: 'photographie', label: 'Photographie', icon: <Camera size={18} /> },
@@ -90,13 +103,13 @@ const ArtEtCreation = () => {
 
   // Fonction appelée après succès de la demande
   const handleDemandeSuccess = (artworkId: string) => {
-    console.log(`Demande envoyée pour l'œuvre ${artworkId}`);
+    //console.log(`Demande envoyée pour l'œuvre ${artworkId}`);
     
   };
 
   // Fonction de suivi du contact (optionnel)
   const handlePropertyContact = (property: any) => {
-    console.log('Contact tracké pour:', property);
+    //console.log('Contact tracké pour:', property);
     // Ici vous pouvez ajouter du tracking analytique
   };
 
@@ -220,6 +233,59 @@ const ArtEtCreation = () => {
           onSuccess={handleDemandeSuccess}
           onPropertyContact={handlePropertyContact}
         />
+      )}
+
+      {/* MODAL D'AUTHENTIFICATION */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all duration-300">
+          <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 animate-fade-in-up">
+            {/* Icon decorative */}
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <div className="w-12 h-12 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] rounded-full flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+            </div>
+            
+            <div className="mb-8 pt-4">
+              <h2 className="text-3xl font-bold text-gray-900 text-center mb-2 tracking-tight">
+                Connexion requise
+              </h2>
+              <div className="w-20 h-1 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] mx-auto rounded-full"></div>
+            </div>
+            
+            <div className="mb-10">
+              <p className="text-gray-600 text-base text-center leading-relaxed px-4">
+                Connectez-vous pour explorer nos créateurs et services d'art et de création.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => {
+                  navigate('/');
+                  setShowAuthModal(false);
+                }}
+                className="flex-1 px-6 py-4 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                annuler
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/login');
+                  setShowAuthModal(false);
+                }}
+                className="flex-1 px-6 py-4 text-sm font-semibold text-white bg-gradient-to-r from-[#556B2F] to-[#6B8E23] rounded-xl hover:from-[#6B8E23] hover:to-[#7aa028] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl transform"
+              >
+                Continuer
+              </button>
+            </div>
+            
+            {/* Decorative elements */}
+            <div className="absolute -z-10 -inset-0.5 bg-gradient-to-r from-[#556B2F]/20 to-[#6B8E23]/20 rounded-2xl blur opacity-30"></div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -11,7 +11,7 @@ export const useCart = (user) => {
       if (savedCart) {
         try {
           const parsedCart = JSON.parse(savedCart);
-          console.log('Cart loaded:', parsedCart);
+          // console.log('Cart loaded:', parsedCart);
           setCartItems(parsedCart);
         } catch (error) {
           console.error('Erreur parsing cart:', error);
@@ -28,13 +28,13 @@ export const useCart = (user) => {
   // Sauvegarder le panier dans le localStorage à chaque modification
   useEffect(() => {
     if (user) {
-      console.log('Saving cart:', cartItems);
+      // console.log('Saving cart:', cartItems);
       localStorage.setItem(`cart_${user.id}`, JSON.stringify(cartItems));
     }
   }, [cartItems, user]);
 
   const addToCart = (product) => {
-    console.log('Adding to cart:', product);
+    // console.log('Adding to cart:', product);
     
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
@@ -53,7 +53,7 @@ export const useCart = (user) => {
         }];
       }
       
-      console.log('New cart items:', newItems);
+      // console.log('New cart items:', newItems);
       return newItems;
     });
   };
@@ -68,7 +68,7 @@ export const useCart = (user) => {
 
   const getCartItemsCount = () => {
     const count = cartItems.reduce((total, item) => total + item.quantity, 0);
-    console.log('Cart count:', count);
+    // console.log('Cart count:', count);
     return count;
   };
 

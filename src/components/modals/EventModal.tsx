@@ -17,12 +17,10 @@ import {
   CreditCard,
   Percent,
   Timer,
-  Star,
   AlertTriangle,
-  Eye,
-  EyeOff,
   Target,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 
 // Interface pour les données de l'événement basée sur le modèle Prisma
@@ -43,8 +41,8 @@ export interface EventFormData {
   price: number;
   discountPrice?: number;
   currency: string;
-  image?: string;
-  images?: string[]; // JSON dans Prisma
+  image?: string; // URL Supabase
+  images?: string[]; // Tableau d'URLs Supabase
   featured: boolean;
   status: 'DRAFT' | 'ACTIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED' | 'ARCHIVED';
   organizer?: string;
@@ -71,14 +69,17 @@ export interface EventFormData {
 interface EventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: EventFormData) => void;
+  onSubmit: (data: EventFormData) => Promise<void> | void;
   initialData?: EventFormData;
   mode: 'create' | 'edit';
+  // Fonction pour uploader les images (optionnelle - si fournie, la modal gère l'upload avant le submit)
+  onUploadImages?: (files: File[]) => Promise<string[]>;
+  isSubmitting?: boolean;
 }
 
 // Catégories prédéfinies - simplifiées
 const CATEGORIES = [
-  'Cuisine', 'Nature', 'Musique', 'Artisanat', 'Culture', 
+  'Cuisine', 'Nature', 'Musique', 'Artisanat', 'Culture',
   'Sport', 'Art', 'Bien-être', 'Éducation', 'Technologie',
   'Business', 'Famille', 'Loisirs', 'Autre'
 ];
@@ -150,52 +151,24 @@ const FIELD_TO_TAB: Record<string, 'basic' | 'details' | 'media' | 'pricing' | '
   'featured': 'advanced'
 };
 
-// Fonction pour compresser une image
-const compressImage = (file: File, maxWidth = 800, quality = 0.7): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target?.result as string;
-      
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        
-        // Redimensionner si l'image est trop large
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        
-        // Convertir en JPEG avec qualité réduite
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(compressedDataUrl);
-      };
-      
-      img.onerror = () => {
-        reject(new Error('Erreur lors du chargement de l\'image'));
-      };
-    };
-    
-    reader.onerror = () => {
-      reject(new Error('Erreur lors de la lecture du fichier'));
-    };
-  });
-};
+// Types pour les fichiers temporaires
+interface TempImage {
+  file: File;
+  previewUrl: string;
+  isUploading?: boolean;
+  uploadedUrl?: string;
+}
 
-// Fonction pour vérifier si une URL est une data URL valide
-const isValidDataUrl = (url: string): boolean => {
-  return url.startsWith('data:image/') && url.includes('base64,');
+// Fonction pour créer un SVG placeholder
+const createPlaceholderSVG = (width: number = 300, height: number = 200, text: string = 'Image') => {
+  return `data:image/svg+xml;base64,${btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <rect width="${width}" height="${height}" fill="#f3f4f6"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#9ca3af" font-family="Arial, sans-serif" font-size="14">
+        ${text}
+      </text>
+    </svg>
+  `)}`;
 };
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -203,7 +176,9 @@ const EventModal: React.FC<EventModalProps> = ({
   onClose,
   onSubmit,
   initialData,
-  mode
+  mode,
+  onUploadImages,
+  isSubmitting = false
 }) => {
   // Données initiales par défaut basées sur le modèle Prisma
   const defaultFormData: EventFormData = {
@@ -230,8 +205,8 @@ const EventModal: React.FC<EventModalProps> = ({
 
   const [formData, setFormData] = useState<EventFormData>(defaultFormData);
   const [activeTab, setActiveTab] = useState<'basic' | 'details' | 'media' | 'pricing' | 'advanced'>('basic');
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [mainImage, setMainImage] = useState<TempImage | null>(null);
+  const [galleryImages, setGalleryImages] = useState<TempImage[]>([]);
   const [newTag, setNewTag] = useState('');
   const [newHighlight, setNewHighlight] = useState('');
   const [newInclude, setNewInclude] = useState('');
@@ -240,6 +215,7 @@ const EventModal: React.FC<EventModalProps> = ({
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showErrorList, setShowErrorList] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Références pour les champs de formulaire
   const titleRef = useRef<HTMLInputElement>(null);
@@ -263,23 +239,52 @@ const EventModal: React.FC<EventModalProps> = ({
         targetAudience: initialData.targetAudience || [],
         images: initialData.images || []
       };
-      
+
       setFormData(formattedData);
-      setImagePreview(initialData.image || '');
-      setAdditionalImages(initialData.images || []);
+
+      // Si l'image principale existe déjà (URL Supabase)
+      if (initialData.image) {
+        // Vérifier si c'est un placeholder et le remplacer par un SVG local
+        const isPlaceholder = initialData.image.includes('placeholder.com');
+        const imageUrl = isPlaceholder 
+          ? createPlaceholderSVG(300, 200, 'Event Image') 
+          : initialData.image;
+        
+        setMainImage({
+          previewUrl: imageUrl,
+          uploadedUrl: isPlaceholder ? undefined : initialData.image,
+          file: new File([], 'existing-image.jpg')
+        });
+      }
+
+      // Si des images de galerie existent déjà
+      if (initialData.images && initialData.images.length > 0) {
+        const existingGalleryImages = initialData.images
+          .map(img => {
+            const isPlaceholder = img.includes('placeholder.com');
+            return {
+              previewUrl: isPlaceholder ? createPlaceholderSVG(300, 200, 'Gallery Image') : img,
+              uploadedUrl: isPlaceholder ? undefined : img,
+              file: new File([], 'existing-gallery-image.jpg')
+            };
+          });
+        setGalleryImages(existingGalleryImages);
+      }
     } else {
       setFormData(defaultFormData);
-      setImagePreview('');
-      setAdditionalImages([]);
+      setMainImage(null);
+      setGalleryImages([]);
     }
     setFormErrors({});
     setShowErrorList(false);
+    setIsUploading(false);
+    setUploadProgress(0);
   }, [mode, initialData, isOpen]);
 
   // Valider les champs requis selon le modèle Prisma
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
-    
+
     // Champs requis dans le modèle Prisma
     if (!formData.title.trim()) errors.title = 'Le titre est requis';
     if (!formData.date) errors.date = 'La date est requise';
@@ -287,7 +292,7 @@ const EventModal: React.FC<EventModalProps> = ({
     if (!formData.category) errors.category = 'La catégorie est requise';
     if (formData.capacity <= 0) errors.capacity = 'La capacité doit être supérieure à 0';
     if (formData.price < 0) errors.price = 'Le prix ne peut pas être négatif';
-    
+
     // Validation des heures (optionnelles mais doivent être valides si fournies)
     if (formData.startTime && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(formData.startTime)) {
       errors.startTime = "Format d'heure invalide (HH:MM)";
@@ -295,30 +300,14 @@ const EventModal: React.FC<EventModalProps> = ({
     if (formData.endTime && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(formData.endTime)) {
       errors.endTime = "Format d'heure invalide (HH:MM)";
     }
-    
+
     // Validation de l'email - soit valide, soit undefined
     if (formData.contactEmail && formData.contactEmail.trim() !== "") {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)) {
         errors.contactEmail = 'Email invalide';
       }
     }
-    
-    // Validation de l'URL de l'image - accepter les data URLs
-    if (formData.image && formData.image.trim() !== "") {
-      try {
-        // Si c'est une URL normale, la valider
-        if (!formData.image.startsWith('data:')) {
-          new URL(formData.image);
-        }
-        // Si c'est une data URL, vérifier qu'elle est valide
-        else if (!isValidDataUrl(formData.image)) {
-          errors.image = 'Format d\'image invalide';
-        }
-      } catch {
-        errors.image = 'URL d\'image invalide';
-      }
-    }
-    
+
     // Validation du site web
     if (formData.website && formData.website.trim() !== "") {
       try {
@@ -327,7 +316,7 @@ const EventModal: React.FC<EventModalProps> = ({
         errors.website = 'URL invalide';
       }
     }
-    
+
     setFormErrors(errors);
     setShowErrorList(Object.keys(errors).length > 0);
     return Object.keys(errors).length === 0;
@@ -336,30 +325,30 @@ const EventModal: React.FC<EventModalProps> = ({
   // Gestion des changements de formulaire
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'checkbox') {
       const checkbox = e.target as HTMLInputElement;
       setFormData(prev => ({ ...prev, [name]: checkbox.checked }));
     } else if (type === 'number') {
-      setFormData(prev => ({ 
-        ...prev, 
-        [name]: value === '' ? 0 : parseFloat(value) 
+      setFormData(prev => ({
+        ...prev,
+        [name]: value === '' ? 0 : parseFloat(value)
       }));
     } else {
       // Pour les champs optionnels, convertir les chaînes vides en undefined
-      const optionalFields = ['contactEmail', 'contactPhone', 'website', 'image', 'address', 
-                             'city', 'postalCode', 'subCategory', 'requirements', 'duration',
-                             'cancellationPolicy', 'refundPolicy', 'organizer',
-                             'startTime', 'endTime', 'discountPrice', 'earlyBirdPrice',
-                             'registrationDeadline', 'earlyBirdDeadline'];
-      
+      const optionalFields = ['contactEmail', 'contactPhone', 'website', 'image', 'address',
+        'city', 'postalCode', 'subCategory', 'requirements', 'duration',
+        'cancellationPolicy', 'refundPolicy', 'organizer',
+        'startTime', 'endTime', 'discountPrice', 'earlyBirdPrice',
+        'registrationDeadline', 'earlyBirdDeadline'];
+
       if (optionalFields.includes(name) && value.trim() === '') {
         setFormData(prev => ({ ...prev, [name]: undefined }));
       } else {
         setFormData(prev => ({ ...prev, [name]: value }));
       }
     }
-    
+
     // Effacer l'erreur quand l'utilisateur corrige
     if (formErrors[name]) {
       setFormErrors(prev => {
@@ -375,8 +364,7 @@ const EventModal: React.FC<EventModalProps> = ({
     const tab = FIELD_TO_TAB[fieldName];
     if (tab) {
       setActiveTab(tab);
-      
-      // Attendre un peu pour que l'onglet soit changé avant de focus
+
       setTimeout(() => {
         const element = document.querySelector(`[name="${fieldName}"]`) as HTMLElement;
         if (element) {
@@ -387,136 +375,181 @@ const EventModal: React.FC<EventModalProps> = ({
     }
   };
 
-  // Gestion des images - version corrigée
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Gestion de l'upload de l'image principale
+  const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     // Réinitialiser l'input file
     e.target.value = '';
-    
+
     // Vérifications de base
     if (file.size > 5 * 1024 * 1024) {
-      setFormErrors(prev => ({ 
-        ...prev, 
-        image: 'L\'image ne doit pas dépasser 5MB' 
+      setFormErrors(prev => ({
+        ...prev,
+        image: 'L\'image ne doit pas dépasser 5MB'
       }));
       return;
     }
-    
+
     if (!file.type.startsWith('image/')) {
-      setFormErrors(prev => ({ 
-        ...prev, 
-        image: 'Veuillez uploader une image valide (PNG, JPG, JPEG, WEBP)' 
+      setFormErrors(prev => ({
+        ...prev,
+        image: 'Veuillez uploader une image valide (PNG, JPG, JPEG, WEBP)'
       }));
       return;
     }
-    
-    setIsUploading(true);
-    
-    try {
-      // Compresser l'image avant de la convertir en base64
-      const compressedImage = await compressImage(file, 1200, 0.7);
-      
-      // Vérifier la taille de l'image compressée
-      const base64Size = compressedImage.length * 0.75; // Estimation taille en bytes
-      if (base64Size > 2 * 1024 * 1024) { // Limite à 2MB après compression
-        setFormErrors(prev => ({ 
-          ...prev, 
-          image: 'L\'image compressée est trop grande. Veuillez choisir une image plus petite.' 
-        }));
-        setIsUploading(false);
-        return;
-      }
-      
-      console.log('📏 Taille image compressée:', Math.round(base64Size / 1024), 'KB');
-      
-      setFormData(prev => ({ ...prev, image: compressedImage }));
-      setImagePreview(compressedImage);
-      
-      if (formErrors.image) {
-        setFormErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.image;
-          return newErrors;
-        });
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'upload de l\'image:', error);
-      setFormErrors(prev => ({ 
-        ...prev, 
-        image: 'Erreur lors du traitement de l\'image' 
-      }));
-    } finally {
-      setIsUploading(false);
+
+    // Créer un object URL pour la prévisualisation
+    const previewUrl = URL.createObjectURL(file);
+
+    setMainImage({
+      file,
+      previewUrl,
+      isUploading: false
+    });
+
+    // Effacer les erreurs
+    if (formErrors.image) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.image;
+        return newErrors;
+      });
     }
   };
 
-  const handleAddAdditionalImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    
+  // Gestion de l'upload des images de galerie
+  const handleGalleryImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
     // Réinitialiser l'input file
     e.target.value = '';
-    
-    setIsUploading(true);
-    const newImages: string[] = [];
-    let hasError = false;
-    
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
-      if (file.size > 5 * 1024 * 1024) {
-        setFormErrors(prev => ({ 
-          ...prev, 
-          images: 'Certaines images dépassent la taille maximale de 5MB' 
-        }));
-        hasError = true;
-        continue;
-      }
-      
-      if (!file.type.startsWith('image/')) {
-        setFormErrors(prev => ({ 
-          ...prev, 
-          images: 'Certains fichiers ne sont pas des images valides' 
-        }));
-        hasError = true;
-        continue;
-      }
-      
-      try {
-        // Compresser l'image
-        const compressedImage = await compressImage(file, 800, 0.6);
-        newImages.push(compressedImage);
-        
-        console.log(`📏 Image ${i+1} compressée:`, Math.round(compressedImage.length * 0.75 / 1024), 'KB');
-      } catch (error) {
-        console.error(`Erreur avec l'image ${i+1}:`, error);
-        hasError = true;
-      }
-    }
-    
-    if (!hasError && newImages.length > 0) {
-      setAdditionalImages(prev => [...prev, ...newImages]);
-      setFormData(prev => ({ 
-        ...prev, 
-        images: [...(prev.images || []), ...newImages] 
-      }));
-    }
-    
-    setIsUploading(false);
-  };
 
-  const removeAdditionalImage = (index: number) => {
-    const newImages = additionalImages.filter((_, i) => i !== index);
-    setAdditionalImages(newImages);
-    setFormData(prev => ({ ...prev, images: newImages }));
+    const newTempImages: TempImage[] = [];
+
+    files.forEach(file => {
+      // Vérifications de base
+      if (file.size > 5 * 1024 * 1024) {
+        setFormErrors(prev => ({
+          ...prev,
+          images: 'Certaines images dépassent la taille maximale de 5MB'
+        }));
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        setFormErrors(prev => ({
+          ...prev,
+          images: 'Certains fichiers ne sont pas des images valides'
+        }));
+        return;
+      }
+
+      // Créer un object URL pour la prévisualisation
+      const previewUrl = URL.createObjectURL(file);
+
+      newTempImages.push({
+        file,
+        previewUrl,
+        isUploading: false
+      });
+    });
+
+    if (newTempImages.length > 0) {
+      setGalleryImages(prev => [...prev, ...newTempImages]);
+    }
   };
 
   // Supprimer l'image principale
   const removeMainImage = () => {
-    setImagePreview('');
+    if (mainImage?.previewUrl && mainImage.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(mainImage.previewUrl);
+    }
+    setMainImage(null);
     setFormData(prev => ({ ...prev, image: undefined }));
+  };
+
+  // Supprimer une image de la galerie
+  const removeGalleryImage = (index: number) => {
+    const imageToRemove = galleryImages[index];
+    if (imageToRemove.previewUrl && imageToRemove.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(imageToRemove.previewUrl);
+    }
+
+    setGalleryImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Fonction pour uploader toutes les images vers Supabase
+  const uploadAllImages = async (): Promise<{ mainImageUrl?: string; galleryImageUrls: string[] }> => {
+    const filesToUpload: File[] = [];
+
+    // Récupérer les fichiers de l'image principale
+    if (mainImage && !mainImage.uploadedUrl && mainImage.file.size > 0) {
+      filesToUpload.push(mainImage.file);
+    }
+
+    // Récupérer les fichiers de la galerie
+    const newGalleryImages = galleryImages.filter(img => !img.uploadedUrl && img.file.size > 0);
+    newGalleryImages.forEach(img => filesToUpload.push(img.file));
+
+    if (filesToUpload.length === 0) {
+      // Aucune nouvelle image à uploader
+      return {
+        mainImageUrl: mainImage?.uploadedUrl,
+        galleryImageUrls: galleryImages.map(img => img.uploadedUrl).filter(Boolean) as string[]
+      };
+    }
+
+    setIsUploading(true);
+    setUploadProgress(10);
+
+    try {
+      if (!onUploadImages) {
+        throw new Error('Aucune fonction d\'upload configurée');
+      }
+
+      // Uploader toutes les images en une fois
+      setUploadProgress(30);
+      const uploadedUrls = await onUploadImages(filesToUpload);
+      setUploadProgress(70);
+
+      // Mapper les URLs aux images
+      let urlIndex = 0;
+      const galleryUrls: string[] = [];
+
+      // Traiter l'image principale
+      let mainImageUrl = mainImage?.uploadedUrl;
+      if (mainImage && !mainImage.uploadedUrl && mainImage.file.size > 0) {
+        mainImageUrl = uploadedUrls[urlIndex];
+        urlIndex++;
+      }
+
+      // Traiter les images de galerie
+      galleryImages.forEach(img => {
+        if (img.uploadedUrl) {
+          galleryUrls.push(img.uploadedUrl);
+        } else if (img.file.size > 0) {
+          galleryUrls.push(uploadedUrls[urlIndex]);
+          urlIndex++;
+        }
+      });
+
+      setUploadProgress(100);
+
+      return {
+        mainImageUrl,
+        galleryImageUrls: galleryUrls
+      };
+
+    } catch (error) {
+      console.error('Erreur lors de l\'upload des images:', error);
+      throw error;
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   // Gestion des tags
@@ -610,90 +643,150 @@ const EventModal: React.FC<EventModalProps> = ({
   };
 
   // Nettoyer les données avant envoi
-  const cleanFormData = (data: EventFormData): EventFormData => {
-    const cleaned = { ...data };
-    
-    // Liste des champs qui doivent être undefined si vides
-    const optionalFields: (keyof EventFormData)[] = [
-      'contactEmail', 'contactPhone', 'website', 'image',
-      'address', 'city', 'postalCode', 'subCategory',
-      'requirements', 'duration', 'cancellationPolicy', 
-      'refundPolicy', 'organizer', 'startTime', 'endTime',
-      'discountPrice', 'earlyBirdPrice', 'registrationDeadline',
-      'earlyBirdDeadline', 'difficulty'
-    ];
-    
-    optionalFields.forEach(field => {
-      if (cleaned[field] === '' || cleaned[field] === null) {
-        (cleaned[field] as any) = undefined;
+  const prepareFormData = async (): Promise<EventFormData> => {
+    const finalData = { ...formData };
+
+    // Si on a des images à uploader et une fonction d'upload
+    if ((mainImage || galleryImages.length > 0) && onUploadImages) {
+      try {
+        const { mainImageUrl, galleryImageUrls } = await uploadAllImages();
+
+        // Mettre à jour l'image principale
+        if (mainImageUrl) {
+          finalData.image = mainImageUrl;
+        } else {
+          finalData.image = undefined;
+        }
+
+        // Mettre à jour les images de galerie
+        if (galleryImageUrls.length > 0) {
+          finalData.images = galleryImageUrls;
+        } else {
+          finalData.images = [];
+        }
+      } catch (error) {
+        console.error('Erreur lors de la préparation des images:', error);
+        throw new Error('Échec de l\'upload des images');
       }
-    });
-    
-    // Pour l'image, utiliser un placeholder valide si undefined
-    if (!cleaned.image) {
-      cleaned.image = 'https://via.placeholder.com/300x200?text=Event+Image';
-    }
-    
-    // S'assurer que les tableaux JSON sont des tableaux
-    const arrayFields: (keyof EventFormData)[] = [
-      'tags', 'highlights', 'includes', 'notIncludes', 
-      'targetAudience', 'images'
-    ];
-    
-    arrayFields.forEach(field => {
-      if (!cleaned[field]) {
-        (cleaned[field] as any) = [];
+    } else {
+      // Utiliser les URLs existantes (sans les placeholders)
+      if (mainImage?.uploadedUrl && !mainImage.uploadedUrl.includes('data:image/svg+xml')) {
+        finalData.image = mainImage.uploadedUrl;
+      } else {
+        finalData.image = undefined;
       }
-    });
-    
-    // Convertir les nombres
-    cleaned.capacity = Number(cleaned.capacity);
-    cleaned.price = Number(cleaned.price);
-    if (cleaned.discountPrice !== undefined) cleaned.discountPrice = Number(cleaned.discountPrice);
-    if (cleaned.earlyBirdPrice !== undefined) cleaned.earlyBirdPrice = Number(cleaned.earlyBirdPrice);
-    
-    // Formater les dates pour l'API
-    if (cleaned.registrationDeadline) {
-      cleaned.registrationDeadline = new Date(cleaned.registrationDeadline).toISOString();
+
+      const existingGalleryUrls = galleryImages
+        .map(img => img.uploadedUrl)
+        .filter((url): url is string => 
+          Boolean(url) && !url!.includes('data:image/svg+xml')
+        );
+
+      if (existingGalleryUrls.length > 0) {
+        finalData.images = existingGalleryUrls;
+      } else {
+        finalData.images = [];
+      }
     }
-    if (cleaned.earlyBirdDeadline) {
-      cleaned.earlyBirdDeadline = new Date(cleaned.earlyBirdDeadline).toISOString();
+
+    // Formater les dates (comme dans votre hook)
+    if (finalData.registrationDeadline) {
+      try {
+        const date = new Date(finalData.registrationDeadline);
+        if (!isNaN(date.getTime())) {
+          finalData.registrationDeadline = date.toISOString().split('T')[0];
+        } else {
+          finalData.registrationDeadline = undefined;
+        }
+      } catch {
+        finalData.registrationDeadline = undefined;
+      }
     }
-    cleaned.date = new Date(cleaned.date).toISOString();
-    
-    return cleaned;
+
+    if (finalData.earlyBirdDeadline) {
+      try {
+        const date = new Date(finalData.earlyBirdDeadline);
+        if (!isNaN(date.getTime())) {
+          finalData.earlyBirdDeadline = date.toISOString().split('T')[0];
+        } else {
+          finalData.earlyBirdDeadline = undefined;
+        }
+      } catch {
+        finalData.earlyBirdDeadline = undefined;
+      }
+    }
+
+    if (finalData.date) {
+      try {
+        const date = new Date(finalData.date);
+        if (!isNaN(date.getTime())) {
+          finalData.date = date.toISOString().split('T')[0]; // Format YYYY-MM-DD pour l'API
+        }
+      } catch (error) {
+        console.error('Erreur format date:', error);
+      }
+    }
+
+    return finalData;
   };
 
   // Soumission du formulaire
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
-      // Naviguer vers le premier champ avec erreur
       const firstErrorField = Object.keys(formErrors)[0];
       if (firstErrorField) {
         navigateToError(firstErrorField);
       }
       return;
     }
-    
-    const cleanedData = cleanFormData(formData);
-    console.log("📤 Données nettoyées pour l'API:", {
-      ...cleanedData,
-      image: cleanedData.image?.substring(0, 100) + '...', // Log partiel pour éviter l'overflow
-      images: cleanedData.images?.map(img => img.substring(0, 50) + '...')
-    });
-    onSubmit(cleanedData);
+
+    try {
+      const finalData = await prepareFormData();
+      // console.log("📤 Données pour l'API:", finalData);
+      await onSubmit(finalData);
+    } catch (error) {
+      // console.error('Erreur lors de la soumission:', error);
+    }
   };
 
   // Réinitialiser le formulaire
   const handleReset = () => {
+    // Révoquer les URLs locales
+    if (mainImage?.previewUrl && mainImage.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(mainImage.previewUrl);
+    }
+
+    galleryImages.forEach(img => {
+      if (img.previewUrl && img.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(img.previewUrl);
+      }
+    });
+
     setFormData(defaultFormData);
-    setImagePreview('');
-    setAdditionalImages([]);
+    setMainImage(null);
+    setGalleryImages([]);
     setFormErrors({});
     setShowErrorList(false);
     setIsUploading(false);
+    setUploadProgress(0);
+  };
+
+  // Nettoyer les URLs locales lors de la fermeture
+  const handleClose = () => {
+    // Révoquer les URLs locales (blob: seulement)
+    if (mainImage?.previewUrl && mainImage.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(mainImage.previewUrl);
+    }
+
+    galleryImages.forEach(img => {
+      if (img.previewUrl && img.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(img.previewUrl);
+      }
+    });
+
+    onClose();
   };
 
   // Obtenir le label du champ pour l'affichage des erreurs
@@ -711,7 +804,7 @@ const EventModal: React.FC<EventModalProps> = ({
       'website': 'Site web',
       'image': 'Image principale'
     };
-    
+
     return labels[fieldName] || fieldName;
   };
 
@@ -727,9 +820,9 @@ const EventModal: React.FC<EventModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div 
-          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" 
-          onClick={onClose}
+        <div
+          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+          onClick={handleClose}
         />
 
         <div className="inline-block w-full max-w-6xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
@@ -748,7 +841,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 </div>
               </div>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="p-2 rounded-full hover:bg-white/20 transition-colors"
               >
                 <X className="h-5 w-5" />
@@ -771,11 +864,10 @@ const EventModal: React.FC<EventModalProps> = ({
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-6 py-3 whitespace-nowrap font-medium border-b-2 transition-colors ${
-                      activeTab === tab.id
+                    className={`flex items-center gap-2 px-6 py-3 whitespace-nowrap font-medium border-b-2 transition-colors ${activeTab === tab.id
                         ? 'border-[#6B8E23] text-[#6B8E23] bg-white'
                         : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     {tab.label}
@@ -824,54 +916,74 @@ const EventModal: React.FC<EventModalProps> = ({
                 </div>
               )}
 
+              {/* Progress bar pour l'upload */}
+              {isUploading && (
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                    <div className="flex-1">
+                      <div className="flex justify-between text-sm text-blue-700 mb-1">
+                        <span>Upload des images vers Supabase...</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full bg-blue-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Onglet: Médias - CORRIGÉ */}
               {activeTab === 'media' && (
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image principale *
+                      Image principale
                     </label>
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="flex-1">
                         <div className="mb-4">
-                          <p className="text-sm text-gray-600 mb-2">URL de l'image :</p>
+                          <p className="text-sm text-gray-600 mb-2">URL de l'image existante :</p>
                           <input
                             type="text"
                             name="image"
-                            value={formData.image && !formData.image.startsWith('data:') ? formData.image : ''}
+                            value={formData.image || ''}
                             onChange={handleChange}
-                            placeholder="https://example.com/image.jpg"
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                              formErrors.image ? 'border-red-300' : 'border-gray-300'
-                            }`}
+                            placeholder="URL de l'image sur Supabase"
+                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.image ? 'border-red-300' : 'border-gray-300'
+                              }`}
+                            disabled={!!mainImage?.file.size}
                           />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Laissez vide pour uploader une nouvelle image
+                          </p>
                         </div>
                         {formErrors.image && <ErrorMessage error={formErrors.image} />}
-                        
+
                         <div className="mt-4">
-                          <p className="text-sm text-gray-600 mb-2">Ou uploader une image :</p>
-                          <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
-                            isUploading 
-                              ? 'border-blue-300 bg-blue-50' 
+                          <p className="text-sm text-gray-600 mb-2">Uploader une nouvelle image :</p>
+                          <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${isUploading || isSubmitting
+                              ? 'border-blue-300 bg-blue-50'
                               : 'border-gray-300 hover:border-[#6B8E23]'
-                          }`}>
+                            }`}>
                             <input
                               type="file"
                               id="imageUpload"
                               accept="image/*"
-                              onChange={handleImageUpload}
+                              onChange={handleMainImageUpload}
                               className="hidden"
-                              disabled={isUploading}
+                              disabled={isUploading || isSubmitting}
                             />
-                            <label htmlFor="imageUpload" className={`cursor-pointer ${isUploading ? 'opacity-70' : ''}`}>
+                            <label htmlFor="imageUpload" className={`cursor-pointer ${isUploading || isSubmitting ? 'opacity-70' : ''}`}>
                               {isUploading ? (
                                 <div className="flex flex-col items-center">
-                                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6B8E23] mb-3"></div>
+                                  <Loader2 className="mx-auto text-blue-600 mb-3 h-8 w-8 animate-spin" />
                                   <p className="text-gray-700 font-medium">
-                                    Compression en cours...
-                                  </p>
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    Veuillez patienter
+                                    Upload en cours...
                                   </p>
                                 </div>
                               ) : (
@@ -881,7 +993,7 @@ const EventModal: React.FC<EventModalProps> = ({
                                     Cliquez pour uploader
                                   </p>
                                   <p className="text-sm text-gray-500 mt-1">
-                                    PNG, JPG, WEBP (max 5MB) - L'image sera automatiquement compressée
+                                    PNG, JPG, WEBP (max 5MB) - Stocké sur Supabase
                                   </p>
                                 </>
                               )}
@@ -889,22 +1001,27 @@ const EventModal: React.FC<EventModalProps> = ({
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Aperçu de l'image */}
                       <div className="w-64">
                         <p className="text-sm text-gray-600 mb-2">Aperçu :</p>
                         <div className="relative rounded-lg overflow-hidden border border-gray-200 min-h-[200px] bg-gray-50 flex items-center justify-center">
-                          {imagePreview ? (
+                          {mainImage ? (
                             <>
                               <img
-                                src={imagePreview}
+                                src={mainImage.previewUrl}
                                 alt="Preview"
                                 className="w-full h-auto max-h-64 object-cover"
                                 onError={() => {
-                                  setFormErrors(prev => ({ 
-                                    ...prev, 
-                                    image: 'Erreur de chargement de l\'image' 
-                                  }));
+                                  // Si l'image échoue, utiliser un placeholder SVG
+                                  const placeholder = createPlaceholderSVG(300, 200, 'Image');
+                                  if (mainImage.previewUrl.startsWith('blob:')) {
+                                    URL.revokeObjectURL(mainImage.previewUrl);
+                                  }
+                                  setMainImage(prev => prev ? {
+                                    ...prev,
+                                    previewUrl: placeholder
+                                  } : null);
                                 }}
                               />
                               <button
@@ -914,23 +1031,28 @@ const EventModal: React.FC<EventModalProps> = ({
                               >
                                 <X className="h-4 w-4" />
                               </button>
+                              {mainImage.uploadedUrl && !mainImage.uploadedUrl.includes('data:image/svg+xml') && (
+                                <div className="absolute bottom-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
+                                  ✓ Sur Supabase
+                                </div>
+                              )}
                             </>
                           ) : (
                             <div className="text-center p-4">
                               <ImageIcon className="mx-auto text-gray-300 h-12 w-12 mb-2" />
                               <p className="text-sm text-gray-500">Aucune image sélectionnée</p>
                               <p className="text-xs text-gray-400 mt-1">
-                                Utilisera l'image par défaut
+                                L'image sera uploadée vers Supabase
                               </p>
                             </div>
                           )}
                         </div>
-                        {imagePreview && (
+                        {mainImage && (
                           <div className="mt-2 text-xs text-gray-500">
                             <div className="flex items-center justify-between">
-                              <span>Taille: {Math.round((imagePreview.length * 0.75) / 1024)} KB</span>
-                              <span className="text-green-600">
-                                ✓ Image compressée
+                              <span className="truncate">{mainImage.file.name || 'Image existante'}</span>
+                              <span className={mainImage.uploadedUrl && !mainImage.uploadedUrl.includes('data:image/svg+xml') ? 'text-green-600' : 'text-orange-600'}>
+                                {mainImage.uploadedUrl && !mainImage.uploadedUrl.includes('data:image/svg+xml') ? '✓ Uploadé' : '⚠️ À uploader'}
                               </span>
                             </div>
                           </div>
@@ -943,29 +1065,25 @@ const EventModal: React.FC<EventModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Galerie d'images supplémentaires
                     </label>
-                    <div className={`border-2 border-dashed rounded-xl p-6 text-center mb-4 transition-colors ${
-                      isUploading 
-                        ? 'border-blue-300 bg-blue-50' 
+                    <div className={`border-2 border-dashed rounded-xl p-6 text-center mb-4 transition-colors ${isUploading || isSubmitting
+                        ? 'border-blue-300 bg-blue-50'
                         : 'border-gray-300 hover:border-[#6B8E23]'
-                    }`}>
+                      }`}>
                       <input
                         type="file"
                         id="additionalImages"
                         accept="image/*"
-                        onChange={handleAddAdditionalImage}
+                        onChange={handleGalleryImageUpload}
                         className="hidden"
                         multiple
-                        disabled={isUploading}
+                        disabled={isUploading || isSubmitting}
                       />
-                      <label htmlFor="additionalImages" className={`cursor-pointer ${isUploading ? 'opacity-70' : ''}`}>
+                      <label htmlFor="additionalImages" className={`cursor-pointer ${isUploading || isSubmitting ? 'opacity-70' : ''}`}>
                         {isUploading ? (
                           <div className="flex flex-col items-center">
-                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6B8E23] mb-3"></div>
+                            <Loader2 className="mx-auto text-blue-600 mb-3 h-8 w-8 animate-spin" />
                             <p className="text-gray-700 font-medium">
-                              Compression en cours...
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              Veuillez patienter
+                              Upload en cours...
                             </p>
                           </div>
                         ) : (
@@ -975,43 +1093,55 @@ const EventModal: React.FC<EventModalProps> = ({
                               Ajouter des images supplémentaires
                             </p>
                             <p className="text-sm text-gray-500 mt-1">
-                              Maximum 10 images, 5MB par image - Compression automatique
+                              Maximum 10 images, 5MB par image - Stocké sur Supabase
                             </p>
                           </>
                         )}
                       </label>
                     </div>
 
-                    {additionalImages.length > 0 && (
+                    {galleryImages.length > 0 && (
                       <>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                          {additionalImages.map((img, index) => (
+                          {galleryImages.map((img, index) => (
                             <div key={index} className="relative group">
                               <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                                 <img
-                                  src={img}
+                                  src={img.previewUrl}
                                   alt={`Gallery ${index + 1}`}
                                   className="w-full h-full object-cover"
                                   onError={() => {
-                                    console.error(`Erreur de chargement de l'image ${index + 1}`);
+                                    // Si l'image échoue, utiliser un placeholder SVG
+                                    const placeholder = createPlaceholderSVG(300, 200, `Image ${index + 1}`);
+                                    if (img.previewUrl.startsWith('blob:')) {
+                                      URL.revokeObjectURL(img.previewUrl);
+                                    }
+                                    const newGalleryImages = [...galleryImages];
+                                    newGalleryImages[index] = { ...img, previewUrl: placeholder };
+                                    setGalleryImages(newGalleryImages);
                                   }}
                                 />
                               </div>
                               <button
                                 type="button"
-                                onClick={() => removeAdditionalImage(index)}
+                                onClick={() => removeGalleryImage(index)}
                                 className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                               >
                                 <X className="h-3 w-3" />
                               </button>
                               <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                                {Math.round((img.length * 0.75) / 1024)} KB
+                                {img.uploadedUrl && !img.uploadedUrl.includes('data:image/svg+xml') ? '✓' : 'Nouveau'}
                               </div>
                             </div>
                           ))}
                         </div>
                         <div className="text-xs text-gray-500 text-center">
-                          {additionalImages.length} image{additionalImages.length > 1 ? 's' : ''} dans la galerie
+                          {galleryImages.length} image{galleryImages.length > 1 ? 's' : ''} dans la galerie
+                          {galleryImages.some(img => !img.uploadedUrl || img.uploadedUrl.includes('data:image/svg+xml')) && (
+                            <span className="text-orange-600 ml-2">
+                              ({galleryImages.filter(img => !img.uploadedUrl || img.uploadedUrl.includes('data:image/svg+xml')).length} nouvelle(s))
+                            </span>
+                          )}
                         </div>
                       </>
                     )}
@@ -1019,7 +1149,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 </div>
               )}
 
-             {/* Onglet: Informations de base */}
+              {/* Onglet: Informations de base */}
               {activeTab === 'basic' && (
                 <div className="space-y-6">
                   <div>
@@ -1032,9 +1162,8 @@ const EventModal: React.FC<EventModalProps> = ({
                       name="title"
                       value={formData.title}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                        formErrors.title ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.title ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="ex: Atelier Culinaire Premium"
                       required
                     />
@@ -1068,9 +1197,8 @@ const EventModal: React.FC<EventModalProps> = ({
                           name="date"
                           value={formData.date}
                           onChange={handleChange}
-                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                            formErrors.date ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.date ? 'border-red-300' : 'border-gray-300'
+                            }`}
                           required
                         />
                       </div>
@@ -1089,9 +1217,8 @@ const EventModal: React.FC<EventModalProps> = ({
                             name="startTime"
                             value={formData.startTime || ''}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                              formErrors.startTime ? 'border-red-300' : 'border-gray-300'
-                            }`}
+                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.startTime ? 'border-red-300' : 'border-gray-300'
+                              }`}
                           />
                         </div>
                         {formErrors.startTime && <ErrorMessage error={formErrors.startTime} />}
@@ -1107,9 +1234,8 @@ const EventModal: React.FC<EventModalProps> = ({
                             name="endTime"
                             value={formData.endTime || ''}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                              formErrors.endTime ? 'border-red-300' : 'border-gray-300'
-                            }`}
+                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.endTime ? 'border-red-300' : 'border-gray-300'
+                              }`}
                           />
                         </div>
                         {formErrors.endTime && <ErrorMessage error={formErrors.endTime} />}
@@ -1127,9 +1253,8 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                          formErrors.category ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.category ? 'border-red-300' : 'border-gray-300'
+                          }`}
                         required
                       >
                         <option value="">Sélectionnez une catégorie</option>
@@ -1213,9 +1338,8 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="location"
                         value={formData.location}
                         onChange={handleChange}
-                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                          formErrors.location ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.location ? 'border-red-300' : 'border-gray-300'
+                          }`}
                         placeholder="ex: Centre Ville, Restaurant La Villa"
                         required
                       />
@@ -1282,9 +1406,8 @@ const EventModal: React.FC<EventModalProps> = ({
                           value={formData.capacity}
                           onChange={handleChange}
                           min="1"
-                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                            formErrors.capacity ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.capacity ? 'border-red-300' : 'border-gray-300'
+                            }`}
                           required
                         />
                       </div>
@@ -1399,11 +1522,10 @@ const EventModal: React.FC<EventModalProps> = ({
                             key={level.value}
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, difficulty: level.value as any }))}
-                            className={`flex-1 px-4 py-2 rounded-lg border ${
-                              formData.difficulty === level.value
+                            className={`flex-1 px-4 py-2 rounded-lg border ${formData.difficulty === level.value
                                 ? `${level.color} border-transparent font-medium`
                                 : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
+                              }`}
                           >
                             {level.label}
                           </button>
@@ -1446,9 +1568,8 @@ const EventModal: React.FC<EventModalProps> = ({
                           onChange={handleChange}
                           min="0"
                           step="0.01"
-                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                            formErrors.price ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.price ? 'border-red-300' : 'border-gray-300'
+                            }`}
                           required
                         />
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -1677,9 +1798,8 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="contactEmail"
                         value={formData.contactEmail || ''}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                          formErrors.contactEmail ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.contactEmail ? 'border-red-300' : 'border-gray-300'
+                          }`}
                         placeholder="email@exemple.com"
                       />
                       {formErrors.contactEmail && <ErrorMessage error={formErrors.contactEmail} />}
@@ -1710,9 +1830,8 @@ const EventModal: React.FC<EventModalProps> = ({
                         name="website"
                         value={formData.website || ''}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${
-                          formErrors.website ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent ${formErrors.website ? 'border-red-300' : 'border-gray-300'
+                          }`}
                         placeholder="https://"
                       />
                       {formErrors.website && <ErrorMessage error={formErrors.website} />}
@@ -1772,6 +1891,7 @@ const EventModal: React.FC<EventModalProps> = ({
                   </div>
                 </div>
               )}
+
             </div>
 
             {/* Pied de page */}
@@ -1780,32 +1900,33 @@ const EventModal: React.FC<EventModalProps> = ({
                 <AlertCircle className="h-4 w-4" />
                 <span>* Champs obligatoires</span>
               </div>
-              
+
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  disabled={isSubmitting || isUploading}
+                  className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Réinitialiser
                 </button>
                 <button
                   type="button"
-                  onClick={onClose}
-                  className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={handleClose}
+                  disabled={isSubmitting || isUploading}
+                  className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className={`px-6 py-2.5 font-semibold rounded-lg transition-all ${
-                    Object.keys(formErrors).length > 0
-                      ? 'bg-gradient-to-r from-[#6B8E23] to-[#556B2F] text-white hover:opacity-90 opacity-80'
+                  disabled={isSubmitting || isUploading}
+                  className={`px-6 py-2.5 font-semibold rounded-lg transition-all ${isSubmitting || isUploading || Object.keys(formErrors).length > 0
+                      ? 'bg-gradient-to-r from-[#6B8E23] to-[#556B2F] text-white opacity-80'
                       : 'bg-gradient-to-r from-[#6B8E23] to-[#556B2F] text-white hover:opacity-90'
-                  }`}
-                  disabled={isUploading}
+                    }`}
                 >
-                  {isUploading ? 'Traitement...' : mode === 'create' ? 'Créer l\'événement' : 'Mettre à jour'}
+                  {isSubmitting ? 'Traitement...' : mode === 'create' ? 'Créer l\'événement' : 'Mettre à jour'}
                 </button>
               </div>
             </div>

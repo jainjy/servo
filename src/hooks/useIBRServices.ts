@@ -33,15 +33,12 @@ export function useIBRServices() {
 
       // Récupérer les services IBR
       const servicesResponse = await api.get("/services-ibr");
-      console.log("✅ Services IBR chargés:", servicesResponse.data.length);
+      // console.log("✅ Services IBR chargés:", servicesResponse.data.length);
       setServices(servicesResponse.data);
 
       // Récupérer les catégories IBR
       const categoriesResponse = await api.get("/services-ibr/categories");
-      console.log(
-        "✅ Catégories IBR chargées:",
-        categoriesResponse.data.length
-      );
+  
       setCategories(categoriesResponse.data);
     } catch (err) {
       const errorMessage =

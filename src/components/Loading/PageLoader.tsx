@@ -42,7 +42,7 @@ export default function PageLoader({
       case 'logo':
         return <LogoLoader />;
       default:
-        return <LoadingSpinner fullScreen text="Chargement de SERVO..." />;
+        return <LoadingSpinner fullScreen text="Chargement de OLIPLUS..." />;
     }
   };
 

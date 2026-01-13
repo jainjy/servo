@@ -642,6 +642,6 @@ function CopyIcon({ className }: { className?: string }) {
 const toast = {
   success: (message: string) => {
     // Implémentation réelle de votre système de notifications
-    console.log('Success:', message);
+    // console.log('Success:', message);
   },
 };

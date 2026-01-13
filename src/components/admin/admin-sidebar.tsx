@@ -29,9 +29,11 @@ import {
   Video,
   Image,
   Lightbulb,
+  Briefcase,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from "../../assets/logo.png";
+import ServoLogo from "../components/ServoLogo";
 
 const navigation = [
   // === DASHBOARD & ADMINISTRATION ===
@@ -46,13 +48,14 @@ const navigation = [
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Annonces", href: "/admin/listings", icon: Building2 },
   { name: "Services", href: "/admin/services", icon: Wrench },
-  
+
   {
     name: "categorie de services",
     href: "/admin/service-categories",
     icon: Tag,
   },
   { name: "Métiers", href: "/admin/metiers", icon: Ruler },
+  { name: "Entrepreneuriat", href: "/admin/entrepreneuriat", icon: Briefcase },
 
   // === GESTION DES RÉSERVATIONS & PRODUITS ===
   { name: "Réservations", href: "/admin/bookings", icon: Calendar },
@@ -124,7 +127,7 @@ export function AdminSidebar() {
       }
       // Annonces & Services
       else if (
-        ["Annonces", "Services", "categorie de services", "Métiers"].includes(
+        ["Annonces", "Services", "categorie de services", "Métiers", "Entrepreneuriat"].includes(
           item.name
         )
       ) {
@@ -199,19 +202,8 @@ export function AdminSidebar() {
       {/* Sidebar desktop */}
       <aside className="hidden md:flex w-64 flex-col border-r border-[#D3D3D3] bg-[#FFFFFF]">
         <div className="flex h-16 items-center gap-2 border-b border-[#D3D3D3] px-6">
-          <Link to="/admin" className="flex items-center gap-2">
-            <div className="p-1 rounded-full bg-[#FFFFFF] border-black border-2">
-              {/* Remplacement de <Image> par <img> */}
-              <img
-                src={logo}
-                alt="OLIPLUSLogo"
-                className="w-10 h-10 rounded-full"
-              />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">SERVO</h1>
-              <p className="text-xs text-[#8B4513]">Administration</p>
-            </div>
+          <Link to="/" className="flex items-center gap-2">
+            <ServoLogo />
           </Link>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">

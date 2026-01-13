@@ -5,6 +5,7 @@ import { BookOpen, Briefcase, GraduationCap } from "lucide-react";
 import FormationsSection from "./FormationsSection";
 import EmploiSection from "./EmploiSection";
 import AlternanceSection from "./AlternanceSection";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 const EmploiFormationsPage = () => {
   const [activeSection, setActiveSection] = useState("formations");
@@ -96,9 +97,8 @@ const EmploiFormationsPage = () => {
 
   // Partage
   const handleShare = (item, section) => {
-    const shareText = `Découvrez cette ${
-      section === "formations" ? "formation" : "offre"
-    } : ${item.title} - ${item.entreprise || item.organisme}`;
+    const shareText = `Découvrez cette ${section === "formations" ? "formation" : "offre"
+      } : ${item.title} - ${item.entreprise || item.organisme}`;
 
     if (navigator.share) {
       navigator.share({
@@ -115,6 +115,13 @@ const EmploiFormationsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F5F5F5] to-white mt-16">
       {/* Hero Section */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
+
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <div
         className="relative text-white py-16 px-4 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: heroData[activeSection].bgImage }}
@@ -145,7 +152,7 @@ const EmploiFormationsPage = () => {
               onValueChange={setActiveSection}
               className="w-full max-w-4xl"
             >
-              <TabsList className="grid grid-cols-3 bg-white/20 backdrop-blur-sm">
+              <TabsList className="grid md:grid-cols-3 grid-cols-1 h-auto bg-white/20 backdrop-blur-sm">
                 <TabsTrigger
                   value="formations"
                   className="data-[state=active]:bg-[#8B4513] data-[state=active]:text-white"

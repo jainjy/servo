@@ -95,7 +95,7 @@ const RoleSelectionPage = () => {
   };
   const [redirecting, setRedirecting] = useState(false);
   const handleBack = () => {
-    navigate("/login");
+    navigate("/");
   };
 
   return (

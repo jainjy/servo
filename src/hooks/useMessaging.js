@@ -144,7 +144,7 @@ export const useMessaging = (demandeId) => {
           `/conversations/${demandeId}/messages`,
           messageData
         );
-        console.log("Message envoyé avec succès", messageData);
+        // console.log("Message envoyé avec succès", messageData);
       } catch (error) {
         // Si la conversation n'existe pas (404), on essaie de créer un message système d'abord
         if (error.response?.status === 404) {

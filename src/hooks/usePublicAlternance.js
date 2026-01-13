@@ -33,11 +33,11 @@ export const usePublicAlternance = () => {
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
       
-      console.log('📡 Fetch alternances publiques avec params:', Object.fromEntries(params));
+      // console.log('📡 Fetch alternances publiques avec params:', Object.fromEntries(params));
       
       const response = await api.get(`/alternance/public?${params.toString()}`);
       
-      console.log('✅ Alternances publiques reçues:', response.data.data?.length || 0);
+      // console.log('✅ Alternances publiques reçues:', response.data.data?.length || 0);
       
       setOffres(response.data.data || []);
       setPagination(response.data.pagination || {});
@@ -57,11 +57,11 @@ export const usePublicAlternance = () => {
   // Récupérer les statistiques publiques
   const fetchStats = useCallback(async () => {
     try {
-      console.log('📡 Fetch stats publiques alternance...');
+      // console.log('📡 Fetch stats publiques alternance...');
       
       const response = await api.get('/alternance/public/stats');
       
-      console.log('✅ Stats alternance reçues:', response.data.data);
+      // console.log('✅ Stats alternance reçues:', response.data.data);
       setStats(response.data.data || {});
       
       return response.data;
@@ -77,11 +77,11 @@ export const usePublicAlternance = () => {
   const fetchOffreDetails = useCallback(async (id) => {
     setIsLoading(true);
     try {
-      console.log(`📡 Fetch détails alternance ${id}...`);
+      // console.log(`📡 Fetch détails alternance ${id}...`);
       
       const response = await api.get(`/alternance/public/${id}`);
       
-      console.log('✅ Détails alternance reçus:', response.data.data);
+      // console.log('✅ Détails alternance reçus:', response.data.data);
       
       return response.data.data;
     } catch (err) {
@@ -107,12 +107,10 @@ export const usePublicAlternance = () => {
     }
 
     try {
-      console.log(`📡 Postulation à alternance ${offreId}:`, applicationData);
-      
+     
       const response = await api.post(`/alternance/public/${offreId}/apply`, applicationData);
       
-      console.log('✅ Postulation réussie:', response.data);
-      
+   
       toast.success(response.data.message || 'Candidature envoyée avec succès !');
       
       return response.data;
@@ -128,8 +126,7 @@ export const usePublicAlternance = () => {
   // Récupérer les types disponibles
   const fetchTypes = useCallback(async () => {
     try {
-      console.log('📡 Fetch types alternance...');
-      
+     
       const response = await api.get('/alternance/public/types');
       
       return response.data.data || [];
@@ -142,8 +139,7 @@ export const usePublicAlternance = () => {
   // Récupérer les niveaux disponibles
   const fetchNiveaux = useCallback(async () => {
     try {
-      console.log('📡 Fetch niveaux alternance...');
-      
+     
       const response = await api.get('/alternance/public/niveaux');
       
       return response.data.data || [];
@@ -165,8 +161,7 @@ export const usePublicAlternance = () => {
   // Uploader un fichier (CV ou lettre de motivation)
   const uploadFile = useCallback(async (file, type = 'cv') => {
     try {
-      console.log(`📤 Upload ${type}...`);
-      
+   
       const formData = new FormData();
       formData.append('file', file);
       formData.append('type', type);
@@ -177,7 +172,7 @@ export const usePublicAlternance = () => {
         }
       });
       
-      console.log(`✅ ${type} uploadé:`, response.data.url);
+      // console.log(`✅ ${type} uploadé:`, response.data.url);
       return response.data;
     } catch (err) {
       console.error(`❌ Erreur upload ${type}:`, err);

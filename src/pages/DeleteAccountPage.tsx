@@ -105,7 +105,7 @@ const DeleteAccountPage = () => {
   const handleDeleteAccount = async () => {
     try {
       setIsLoading(true);
-      console.log("bollean", allStepsCompleted());
+     // console.log("bollean", allStepsCompleted());
       const response = await api.delete("/users/delete-account", {
         data: {
           password,
@@ -778,10 +778,10 @@ const DeleteAccountPage = () => {
             Pour toute question concernant la protection de vos données,
             contactez notre DPO à :{" "}
             <a
-              href="mailto:dpo@servo.fr"
+              href="mailto:dpo@oliplus.re"
               className="text-blue-600 hover:underline font-medium"
             >
-              dpo@servo.fr
+              dpo@oliplus.re
             </a>
             {isProfessional && (
               <span>
@@ -791,7 +791,7 @@ const DeleteAccountPage = () => {
                   href="mailto:pro@servo.fr"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  pro@servo.fr
+                  pro@oliplus.fr
                 </a>
               </span>
             )}

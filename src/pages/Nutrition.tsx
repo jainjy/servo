@@ -239,13 +239,13 @@ const Nutrition = () => {
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      console.log('📡 [Nutrition] Début récupération services');
+      // console.log('📡 [Nutrition] Début récupération services');
       
       // Test d'abord la route simple
       try {
-        console.log('🧪 Test route /test');
+        // console.log('🧪 Test route /test');
         const testResponse = await api.get('/nutrition-bienetre/test');
-        console.log('✅ Route test OK:', testResponse.data);
+        // console.log('✅ Route test OK:', testResponse.data);
       } catch (testError) {
         console.warn('⚠️ Route test échouée, continuons...', testError.message);
       }
@@ -260,23 +260,18 @@ const Nutrition = () => {
         limit: 20
       };
 
-      console.log('📡 Envoi requête avec params:', params);
-      
+    
       const response = await api.get('/nutrition-bienetre', { params });
       
-      console.log('✅ Réponse reçue:', {
-        success: response.data.success,
-        count: response.data.services?.length,
-        hasServices: response.data.services && response.data.services.length > 0
-      });
+   
       
       if (response.data.success) {
         setServices(response.data.services);
-        console.log(`✅ ${response.data.services.length} services chargés`);
+        // console.log(`✅ ${response.data.services.length} services chargés`);
       } else {
         console.error('❌ Erreur API:', response.data.message);
         // Fallback aux données simulées
-        console.log('🔄 Fallback aux données simulées');
+        // console.log('🔄 Fallback aux données simulées');
         setServices(getSimulatedServices().filter(service => 
           activeTab === 'Tous' || 
           (service.category && service.category.name === activeTab)
@@ -292,7 +287,7 @@ const Nutrition = () => {
       });
       
       // Fallback aux données simulées
-      console.log('🔄 Fallback aux données simulées suite à erreur');
+     
       setServices(getSimulatedServices().filter(service => 
         activeTab === 'Tous' || 
         (service.category && service.category.name === activeTab)
@@ -305,11 +300,11 @@ const Nutrition = () => {
   // Récupérer les catégories
   const fetchCategories = async () => {
     try {
-      console.log('📡 Récupération catégories...');
+ 
       const response = await api.get('/nutrition-bienetre/categories');
       if (response.data.success) {
         setCategories(response.data.categories);
-        console.log('✅ Catégories chargées:', response.data.categories);
+     
       } else {
         console.warn('⚠️ Erreur chargement catégories, utilisation par défaut');
         setCategories(['Tous', 'Consultation', 'Programme', 'Suivi', 'Atelier']);
@@ -323,7 +318,7 @@ const Nutrition = () => {
   // Récupérer les statistiques
   const fetchStats = async () => {
     try {
-      console.log('📡 Récupération statistiques...');
+     
       const response = await api.get('/nutrition-bienetre/stats');
       if (response.data.success) {
         setStats(prev => ({
@@ -338,7 +333,7 @@ const Nutrition = () => {
           avgRating: response.data.stats.avgRating || prev.avgRating,
           consultationsPerMonth: response.data.stats.consultationsPerMonth || prev.consultationsPerMonth
         }));
-        console.log('✅ Statistiques mises à jour');
+        
       }
     } catch (error) {
       console.error('❌ Erreur récupération statistiques:', error.message);
@@ -346,25 +341,25 @@ const Nutrition = () => {
   };
 
   useEffect(() => {
-    console.log('🔄 Nutrition component mounted, chargement initial...');
+    // console.log('🔄 Nutrition component mounted, chargement initial...');
     fetchServices();
     fetchCategories();
     fetchStats();
   }, []);
 
   useEffect(() => {
-    console.log('🔄 Déclenchement rechargement services:', { activeTab, searchTerm, priceRange, sortBy });
+    // console.log('🔄 Déclenchement rechargement services:', { activeTab, searchTerm, priceRange, sortBy });
     fetchServices();
   }, [activeTab, searchTerm, priceRange, sortBy]);
 
   const handleOpenModal = (service) => {
-    console.log('📋 Ouverture modal pour service:', service.libelle);
+    // console.log('📋 Ouverture modal pour service:', service.libelle);
     setSelectedService(service);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    console.log('❌ Fermeture modal');
+   
     setIsModalOpen(false);
     setSelectedService(null);
   };

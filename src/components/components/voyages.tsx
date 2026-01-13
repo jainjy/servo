@@ -17,6 +17,7 @@ import {
 import { flightsAPI } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import TourismNavigation from "../TourismNavigation";
+import AdvertisementPopup from "../AdvertisementPopup";
 
 // Interfaces (inchangées)
 interface Prestataire {
@@ -285,8 +286,8 @@ const VoyagesAeriens: React.FC = () => {
     } catch (error: any) {
       setReservationError(
         error.response?.data?.message ||
-          error.message ||
-          "Erreur lors de la réservation."
+        error.message ||
+        "Erreur lors de la réservation."
       );
     } finally {
       setReservationLoading(false);
@@ -433,7 +434,14 @@ const VoyagesAeriens: React.FC = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       {/* Navigation */}
+      {/* Advertisement Popup - Absolute Position */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
 
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden mb-8">
         <div
@@ -614,11 +622,9 @@ const VoyagesAeriens: React.FC = () => {
                   onChange={(e) => setFiltrePrixMax(parseInt(e.target.value))}
                   className="w-full h-2 rounded-lg appearance-none cursor-pointer"
                   style={{
-                    background: `linear-gradient(to right, ${colors.logo} 0%, ${
-                      colors.logo
-                    } ${((filtrePrixMax - 50) / 1950) * 100}%, #e5e7eb ${
-                      ((filtrePrixMax - 50) / 1950) * 100
-                    }%, #e5e7eb 100%)`,
+                    background: `linear-gradient(to right, ${colors.logo} 0%, ${colors.logo
+                      } ${((filtrePrixMax - 50) / 1950) * 100}%, #e5e7eb ${((filtrePrixMax - 50) / 1950) * 100
+                      }%, #e5e7eb 100%)`,
                   }}
                 />
               </div>
@@ -972,8 +978,8 @@ const VoyagesAeriens: React.FC = () => {
                   {reservationLoading
                     ? "Traitement..."
                     : reservationSuccess
-                    ? "Réservé"
-                    : "Confirmer"}
+                      ? "Réservé"
+                      : "Confirmer"}
                 </button>
               </div>
             </div>

@@ -46,7 +46,7 @@ export function NewConversationModal({ open, onOpenChange, onConversationStart }
     },
     {
       id: "admin1", 
-      name: "Support SERVO",
+      name: "Support OLIPLUS",
       type: "admin"
     }
   ]

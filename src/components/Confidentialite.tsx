@@ -174,7 +174,7 @@ const PrivacyPolicyWidget = () => {
                                 href="https://holines.xyz/"
                                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
                             >
-                                Servo
+                                Oliplus
                                 <ExternalLink className="w-3 h-3" />
                             </a>
                         </div>

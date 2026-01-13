@@ -4,9 +4,9 @@ export const demandeDevisAPI = {
   // Créer une nouvelle demande de devis
   creerDemande: async (data) => {
     try {
-      console.log('Données envoyées:', data);
+  
       const response = await api.post('/demande-devis', data);
-      console.log('Réponse reçue:', response.data);
+    
       return response.data;
     } catch (error) {
       console.error('Erreur de la requête:', error.response?.data || error.message);

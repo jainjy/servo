@@ -14,7 +14,8 @@ import {
   Briefcase,
   Search,
   ImageIcon,
-  ChevronRight
+  ChevronRight,
+  Store
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '@/lib/api';
@@ -56,7 +57,11 @@ interface Category {
   slug: string;
 }
 
-const PhotographiePage: React.FC = () => {
+interface PhotographiePageProps {
+  onContactClick: (subject: string, recipientName?: string) => void;
+}
+
+const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) => {
   const [loading, setLoading] = useState(true);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [photographers, setPhotographers] = useState<Professional[]>([]);
@@ -90,7 +95,7 @@ const PhotographiePage: React.FC = () => {
     if (categoryFromPath) {
       setIsCategoryPage(true);
       setSelectedCategory(categoryFromPath.slug);
-      console.log(`📌 On category page: ${categoryFromPath.slug}`);
+      // console.log(`📌 On category page: ${categoryFromPath.slug}`);
     } else {
       setIsCategoryPage(false);
       setSelectedCategory('');
@@ -137,7 +142,7 @@ const PhotographiePage: React.FC = () => {
 
   // Récupérer TOUS les photographes (toutes catégories)
   const fetchAllPhotographers = useCallback(async () => {
-    console.log('📡 Fetching ALL photographers');
+    // console.log('📡 Fetching ALL photographers');
     setLoading(true);
     setError(null);
     
@@ -155,14 +160,10 @@ const PhotographiePage: React.FC = () => {
       // Récupérer TOUS les photographes (sans filtre de catégorie)
       params.limit = 50; // Augmenter la limite pour avoir plus de résultats
       
-      console.log('🌐 Fetching all photographers with params:', params);
+
       const response = await api.get('/art-creation/photographers', { params });
       
-      console.log('📦 All photographers response:', {
-        success: response.data.success,
-        count: response.data.count,
-        dataLength: response.data.data?.length || 0
-      });
+    
       
       if (response.data.success) {
         const allPhotographers = response.data.data || [];
@@ -172,7 +173,7 @@ const PhotographiePage: React.FC = () => {
         if (selectedCategory) {
           const filtered = filterPhotographersByCategory(allPhotographers, selectedCategory);
           setFilteredPhotographers(filtered);
-          console.log(`🔍 Filtered ${filtered.length} photographers for category: ${selectedCategory}`);
+          // console.log(`🔍 Filtered ${filtered.length} photographers for category: ${selectedCategory}`);
         } else {
           setFilteredPhotographers(allPhotographers);
         }
@@ -208,7 +209,7 @@ const PhotographiePage: React.FC = () => {
         });
         
         // Mettre à jour les catégories avec les counts
-        console.log('📊 Category counts:', categoryCounts);
+        // console.log('📊 Category counts:', categoryCounts);
         
       }
     } catch (err) {
@@ -220,8 +221,7 @@ const PhotographiePage: React.FC = () => {
 
   // Gestion du clic sur une catégorie — afficher les pros en place (pas de navigation)
   const handleCategoryClick = useCallback((categorySlug: string) => {
-    console.log('🎯 Category clicked (in-place):', categorySlug);
-
+ 
     // Définir la catégorie sélectionnée et afficher la vue catégorie
     setSelectedCategory(categorySlug);
     setIsCategoryPage(true);
@@ -230,7 +230,7 @@ const PhotographiePage: React.FC = () => {
     if (photographers.length > 0) {
       const filtered = filterPhotographersByCategory(photographers, categorySlug);
       setFilteredPhotographers(filtered);
-      console.log(`🔍 Filtered ${filtered.length} photographers for category: ${categorySlug}`);
+      // console.log(`🔍 Filtered ${filtered.length} photographers for category: ${categorySlug}`);
     } else {
       fetchAllPhotographers();
     }
@@ -238,7 +238,7 @@ const PhotographiePage: React.FC = () => {
 
   // Gestion du clic "Retour à tous les photographes" — réinitialiser l'affichage en place
   const handleViewAll = useCallback(() => {
-    console.log('🔙 Back to all photographers (in-place)');
+    // console.log('🔙 Back to all photographers (in-place)');
     setSelectedCategory('');
     setIsCategoryPage(false);
     setFilteredPhotographers(photographers);
@@ -246,14 +246,14 @@ const PhotographiePage: React.FC = () => {
 
   // Fonction pour recharger les données
   const handleRetry = useCallback(() => {
-    console.log('🔄 Retry loading data');
+    
     setError(null);
     fetchAllPhotographers();
   }, [fetchAllPhotographers]);
 
   // Appels initiaux
   useEffect(() => {
-    console.log('🚀 Initializing PhotographiePage');
+    // console.log('🚀 Initializing PhotographiePage');
     fetchCategoriesWithCounts();
     fetchAllPhotographers();
   }, [fetchCategoriesWithCounts, fetchAllPhotographers]);
@@ -285,7 +285,7 @@ const PhotographiePage: React.FC = () => {
 
   // Fonction pour voir le profil (clic sur la carte)
   const handleViewProfile = useCallback((professional: Professional) => {
-    console.log('👤 Viewing profile:', professional);
+    // console.log('👤 Viewing profile:', professional);
     
     navigate(`/professional/${professional.id}`, {
       state: {
@@ -302,10 +302,7 @@ const PhotographiePage: React.FC = () => {
   }, [navigate]);
 
   const handleViewArtworks = useCallback((professional: Professional) => {
-    console.log('🎨 View artworks for professional:', {
-      id: professional.id,
-      name: professional.name
-    });
+
     
     navigate(`/oeuvres/${professional.id}`, {
       state: {
@@ -363,15 +360,7 @@ const PhotographiePage: React.FC = () => {
         {/* Catégories - TOUJOURS affichées */}
         {!isCategoryPage && (
           <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Camera size={24} className="mr-2 text-[#8B4513]" />
-                <h2 className="text-2xl font-bold text-[#8B4513]">
-                  Catégories de photographes
-                </h2>
-              </div>
-            </div>
-            
+                        
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {categories.map((category, index) => (
                 <div
@@ -588,8 +577,8 @@ const PhotographiePage: React.FC = () => {
                         }}
                         className="w-full py-2.5 rounded-md font-medium text-center bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors flex items-center justify-center group/btn"
                       >
-                        <ImageIcon size={16} className="mr-2 group-hover/btn:animate-pulse" />
-                        Voir les œuvres
+                        <Store size={16} className="mr-2 group-hover/btn:animate-pulse" />
+                        Boutique
                       </button>
                     </div>
                   </div>

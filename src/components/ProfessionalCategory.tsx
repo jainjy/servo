@@ -375,7 +375,11 @@ const ProfessionalCard: React.FC<{
             </div>
             {/* Badge de vérification */}
             <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white p-1 sm:p-1.5 rounded-full">
-              <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path
                   fillRule="evenodd"
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -417,7 +421,10 @@ const ProfessionalCard: React.FC<{
 
             {/* Métier */}
             <div className="flex items-start gap-2 mb-2 sm:mb-3">
-              <Briefcase size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+              <Briefcase
+                size={14}
+                className="text-gray-400 flex-shrink-0 mt-0.5"
+              />
               <span className="text-xs sm:text-sm text-gray-600 line-clamp-2 break-words">
                 {professional.metiers?.[0]?.metier.libelle ||
                   "Métier non spécifié"}
@@ -427,7 +434,10 @@ const ProfessionalCard: React.FC<{
             {/* Localisation */}
             {professional.city && (
               <div className="flex items-start gap-2 mb-2 sm:mb-4">
-                <MapPin size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                <MapPin
+                  size={14}
+                  className="text-gray-400 flex-shrink-0 mt-0.5"
+                />
                 <span className="text-xs sm:text-sm text-gray-600 break-words">
                   {professional.city}
                 </span>
@@ -437,7 +447,9 @@ const ProfessionalCard: React.FC<{
             {/* Date d'inscription */}
             <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
               <Calendar size={14} className="flex-shrink-0" />
-              <span className="line-clamp-1">{formatDate(professional.createdAt)}</span>
+              <span className="line-clamp-1">
+                {formatDate(professional.createdAt)}
+              </span>
             </div>
           </div>
         </div>

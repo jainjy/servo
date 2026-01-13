@@ -116,7 +116,7 @@ const ApkDownloadModal: React.FC<ApkDownloadModalProps> = ({ isOpen, onClose }) 
                     className='lg:w-16 lg:h-16 h-8 w-8'
                   />
                 </div>
-                <h2 className="text-lg lg:text-2xl font-bold text-white mb-2">Télécharger Servo</h2>
+                <h2 className="text-lg lg:text-2xl font-bold text-white mb-2">Télécharger Oliplus</h2>
                 <p className="text-gray-400 text-sm lg:text-lg">Application immobilière mobile</p>
               </div>
 
@@ -197,7 +197,7 @@ const ApkDownloadModal: React.FC<ApkDownloadModalProps> = ({ isOpen, onClose }) 
                 <ol className="text-xs text-gray-400 space-y-1 ml-3">
                   <li><span className="text-green-400 font-bold">1.</span> Téléchargement dans un nouvel onglet</li>
                   <li><span className="text-green-400 font-bold">2.</span> Ouvrez "Téléchargements"</li>
-                  <li><span className="text-green-400 font-bold">3.</span> Appuyez sur "Servo.apk"</li>
+                  <li><span className="text-green-400 font-bold">3.</span> Appuyez sur "Oliplus.apk"</li>
                   <li><span className="text-green-400 font-bold">4.</span> Confirmez l'installation</li>
                 </ol>
                 

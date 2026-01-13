@@ -15,9 +15,7 @@ export const useFormation = () => {
     const token = localStorage.getItem('auth-token');
     
     // Debug
-    console.log('🔑 useFormation - Token récupéré (auth-token):', token ? '✓ Présent' : '✗ Absent');
-    console.log('👤 useFormation - User ID extrait:', token ? token.replace('real-jwt-token-', '') : 'Aucun');
-    
+   
     if (!token) {
       console.error('❌ useFormation - ERREUR: Pas de token trouvé avec la clé "auth-token"');
       console.error('   Keys disponibles:', Object.keys(localStorage));
@@ -78,20 +76,19 @@ export const useFormation = () => {
       if (params.page) queryParams.append('page', params.page);
       if (params.limit) queryParams.append('limit', params.limit || 10);
       
-      console.log('📡 useFormation - Fetch formations avec params:', Object.fromEntries(queryParams));
-      
+    
       const response = await axios.get(
         `${API_URL}/pro/formations?${queryParams.toString()}`,
         getAuthHeaders()
       );
       
-      console.log('✅ useFormation - Réponse reçue,', response.data.data?.length || 0, 'formations');
+      // console.log('✅ useFormation - Réponse reçue,', response.data.data?.length || 0, 'formations');
       setFormations(response.data.data || []);
       setPagination(response.data.pagination || {});
       
       return response.data;
     } catch (error) {
-      console.error('❌ useFormation - Erreur fetchFormations:', error);
+      // console.error('❌ useFormation - Erreur fetchFormations:', error);
       const errorMessage = handleApiError(error);
       setError(errorMessage);
       throw errorMessage;
@@ -103,14 +100,13 @@ export const useFormation = () => {
   // Récupérer les statistiques
   const fetchStats = useCallback(async () => {
     try {
-      console.log('📡 useFormation - Fetch stats...');
-      
+     
       const response = await axios.get(
         `${API_URL}/pro/formations/stats`,
         getAuthHeaders()
       );
       
-      console.log('✅ useFormation - Stats reçues:', response.data.data);
+      // console.log('✅ useFormation - Stats reçues:', response.data.data);
       setStats(response.data.data || {});
       
       return response.data;
@@ -130,7 +126,7 @@ export const useFormation = () => {
     
     try {
       const headers = getAuthHeaders();
-      console.log('📡 Envoi requête POST /pro/formations:', formationData);
+      // console.log('📡 Envoi requête POST /pro/formations:', formationData);
       
       const response = await axios.post(
         `${API_URL}/pro/formations`,
@@ -138,8 +134,7 @@ export const useFormation = () => {
         headers
       );
       
-      console.log('✅ Formation créée:', response.data);
-      
+
       // Rafraîchir la liste
       await fetchFormations();
       await fetchStats();
@@ -162,16 +157,14 @@ export const useFormation = () => {
     
     try {
       const headers = getAuthHeaders();
-      console.log(`📡 Envoi requête PUT /pro/formations/${id}:`, formationData);
-      
+  
       const response = await axios.put(
         `${API_URL}/pro/formations/${id}`,
         formationData,
         headers
       );
       
-      console.log('✅ Formation mise à jour:', response.data);
-      
+    
       // Mettre à jour la liste localement
       setFormations(prev => 
         prev.map(formation => 
@@ -194,16 +187,14 @@ export const useFormation = () => {
   const updateStatus = async (id, status) => {
     try {
       const headers = getAuthHeaders();
-      console.log(`📡 Envoi requête PATCH /pro/formations/${id}/status:`, { status });
-      
+
       const response = await axios.patch(
         `${API_URL}/pro/formations/${id}/status`,
         { status },
         headers
       );
       
-      console.log('✅ Statut mis à jour:', response.data);
-      
+ 
       // Mettre à jour localement
       setFormations(prev => 
         prev.map(formation => 
@@ -227,15 +218,12 @@ export const useFormation = () => {
   const deleteFormation = async (id) => {
     try {
       const headers = getAuthHeaders();
-      console.log(`📡 Envoi requête DELETE /pro/formations/${id}`);
-      
+    
       await axios.delete(
         `${API_URL}/pro/formations/${id}`,
         headers
       );
-      
-      console.log('✅ Formation supprimée:', id);
-      
+ 
       // Mettre à jour localement
       setFormations(prev => prev.filter(formation => formation.id !== id));
       
@@ -255,8 +243,7 @@ export const useFormation = () => {
   const exportCSV = async () => {
     try {
       const headers = getAuthHeaders();
-      console.log('📡 Envoi requête GET /pro/formations/export/csv');
-      
+     
       const response = await axios.get(
         `${API_URL}/pro/formations/export/csv`,
         {
@@ -264,9 +251,7 @@ export const useFormation = () => {
           responseType: 'blob'
         }
       );
-      
-      console.log('✅ CSV reçu, taille:', response.data.size, 'bytes');
-      
+   
       // Créer un lien de téléchargement
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');

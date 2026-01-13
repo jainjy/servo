@@ -215,7 +215,7 @@ export default function Terms() {
       
       RGPD et autorités :
       • Conformément au RGPD, vous pouvez saisir votre autorité locale de protection des données
-      • Contact DPO : dpo@servo.mg`,
+      • Contact DPO : dpo@oliplus.re`,
     },
     {
       id: 12,
@@ -224,10 +224,10 @@ export default function Terms() {
       content: `Pour toute question concernant ces conditions d'utilisation :
       
       Support général
-      Email : support@servo.mg
+      Email : support@oliplus.mg
       
       Questions RGPD / Données personnelles
-      Email : dpo@servo.mg
+      Email : dpo@oliplus.re
       
       Mentions légales
       Consultez nos mentions légales pour plus d'informations
@@ -277,7 +277,7 @@ export default function Terms() {
         {/* Intro */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-12 shadow-sm">
           <p className="text-gray-800 dark:text-gray-200 text-lg leading-relaxed">
-            Bienvenue sur <strong className="text-blue-600 dark:text-blue-400">SERVO</strong>. En accédant à notre plateforme ou en créant un compte,
+            Bienvenue sur <strong className="text-blue-600 dark:text-blue-400">OLIPLUS</strong>. En accédant à notre plateforme ou en créant un compte,
             vous acceptez sans réserve les présentes conditions d'utilisation. Nous vous invitons à les lire attentivement
             et à les conserver pour référence.
           </p>
@@ -417,7 +417,7 @@ export default function Terms() {
         {/* Footer Note */}
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 text-center">
           <p className="text-gray-600 dark:text-gray-400 text-sm">
-            En utilisant SERVO, vous confirmez avoir lu, compris et accepté l'ensemble des conditions ci-dessus.
+            En utilisant OLIPLUS, vous confirmez avoir lu, compris et accepté l'ensemble des conditions ci-dessus.
           </p>
         </div>
       </div>

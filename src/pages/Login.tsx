@@ -41,7 +41,7 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       const { user } = await login(email, password);
-      console.log("Login successful:", user);
+      //console.log("Login successful:", user);
       // Redirection intelligente
       if (redirectPath) {
         navigate(redirectPath);
@@ -94,7 +94,7 @@ const LoginPage = () => {
       <div className="w-[80vw] lg:w-[60vw] h-[80vh] m-auto rounded-3xl shadow-xl flex flex-col lg:flex-row overflow-hidden bg-white/0">
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/login")}
             className="flex items-center gap-2 bg-gray-700 w-28 py-3 px-4 rounded-full text-gray-100 hover:text-gray-100 mb-4 mx-2 transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -160,7 +160,7 @@ const LoginPage = () => {
                   </div>
                 </div>
                 <CardTitle className="text-2xl font-bold text-center text-gray-900">
-                  Connexion SERVO
+                  Connexion OLIPLUS
                 </CardTitle>
                 <CardDescription className="text-center text-gray-600">
                   Accédez à votre espace personnel

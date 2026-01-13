@@ -87,7 +87,7 @@ const TousLesPartenaires = () => {
         }
 
         const res = await api.get(endpoint);
-        console.log("Réponse API professionnels:", res.data);
+        // console.log("Réponse API professionnels:", res.data);
         if (res.data.success) {
           // Simuler des données de rating pour la démo
           const professionalsWithRating = res.data.data.map(

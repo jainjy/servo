@@ -81,7 +81,7 @@ const EventsDiscoveriesPro: React.FC = () => {
   };
 
   const handleSubmitEvent = (data: EventFormData) => {
-    console.log("📥 Données reçues du modal Event:", data);
+    // console.log("📥 Données reçues du modal Event:", data);
     
     // Formatter les données pour correspondre à votre structure EventItem
     const formattedData: EventItem = {
@@ -127,10 +127,10 @@ const EventsDiscoveriesPro: React.FC = () => {
     };
 
     if (eventModalMode === "create") {
-      console.log("➕ Création d'un nouvel événement:", formattedData);
+      // console.log("➕ Création d'un nouvel événement:", formattedData);
       handleAddEvent(formattedData);
     } else if (selectedEvent) {
-      console.log("✏️ Mise à jour de l'événement:", formattedData);
+      // console.log("✏️ Mise à jour de l'événement:", formattedData);
       handleUpdateEvent(formattedData);
     }
 
@@ -241,7 +241,7 @@ const EventsDiscoveriesPro: React.FC = () => {
   };
 
   const handleSubmitDiscovery = async (data: DiscoveryFormData) => {
-    console.log("📥 Données reçues du modal Discovery:", data);
+    // console.log("📥 Données reçues du modal Discovery:", data);
     
     try {
       // Convertir les données du modal vers DiscoveryItem
@@ -323,13 +323,13 @@ const EventsDiscoveriesPro: React.FC = () => {
         userId: ''
       };
       
-      console.log("📤 Données formatées pour l'API:", discoveryData);
+      // console.log("📤 Données formatées pour l'API:", discoveryData);
 
       if (discoveryModalMode === "create") {
-        console.log("➕ Création d'une nouvelle découverte");
+        // console.log("➕ Création d'une nouvelle découverte");
         await handleAddDiscovery(discoveryData);
       } else if (selectedDiscovery) {
-        console.log("✏️ Mise à jour de la découverte");
+        // console.log("✏️ Mise à jour de la découverte");
         await handleUpdateDiscovery({
           ...discoveryData,
           id: selectedDiscovery.id,

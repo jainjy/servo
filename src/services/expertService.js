@@ -4,30 +4,21 @@ export const expertService = {
   // Récupérer TOUTES les demandes (conseil + accompagnement)
   getToutesDemandesExpert: async () => {
     try {
-      console.log("🔄 [expertService] Tentative récupération toutes demandes...");
-      
+   
       // Essayer d'abord l'endpoint unifié
       const response = await api.get("/expert/demandes-toutes");
       
       if (response.data?.success) {
-        console.log("✅ [expertService] Endpoint /expert/demandes-toutes trouvé");
-        console.log(`📊 [expertService] ${response.data.data?.length || 0} demandes reçues`);
-        return response.data;
+       return response.data;
       }
       
       // Fallback 1: Récupérer séparément
-      console.log("🔄 [expertService] Fallback: récupération séparée...");
-      return await expertService.getDemandesSeparees();
+    return await expertService.getDemandesSeparees();
       
     } catch (error) {
       console.error("❌ [expertService] Erreur endpoint unifié:", error.message);
-      console.log("📋 [expertService] Détails erreur:", {
-        status: error.response?.status,
-        message: error.response?.data?.error || error.message
-      });
-      
-      // Fallback 2: Données de test basées sur vos données réelles
-      console.log("🔄 [expertService] Utilisation données de test...");
+  
+
       return expertService.getTestData();
     }
   },
@@ -35,8 +26,7 @@ export const expertService = {
   // Récupérer séparément et fusionner
   getDemandesSeparees: async () => {
     try {
-      console.log("🔄 [expertService] Récupération séparée conseil + accompagnement...");
-      
+    
       // Récupérer les deux types séparément avec gestion d'erreur
       const [conseilResponse, accompagnementResponse] = await Promise.allSettled([
         api.get("/expert/demandes-conseil"),
@@ -53,11 +43,8 @@ export const expertService = {
           origine: d.origine || 'page_conseil'
         }));
         toutesDemandes = [...toutesDemandes, ...conseils];
-        console.log("📊 [expertService] Demandes conseil trouvées:", conseils.length);
-      } else {
-        console.log("⚠️ [expertService] Erreur récupération conseils:", 
-          conseilResponse.reason?.message || "Inconnue");
-      }
+        // console.log("📊 [expertService] Demandes conseil trouvées:", conseils.length);
+      } 
       
       // Accompagnements
       if (accompagnementResponse.status === 'fulfilled' && accompagnementResponse.value.data?.success) {
@@ -67,19 +54,14 @@ export const expertService = {
           origine: d.origine || 'page_accompagnement'
         }));
         toutesDemandes = [...toutesDemandes, ...accompagnements];
-        console.log("📊 [expertService] Demandes accompagnement trouvées:", accompagnements.length);
-      } else {
-        console.log("⚠️ [expertService] Erreur récupération accompagnements:", 
-          accompagnementResponse.reason?.message || "Inconnue");
-      }
-      
+        // console.log("📊 [expertService] Demandes accompagnement trouvées:", accompagnements.length);
+      } 
       // Trier par date
       toutesDemandes.sort((a, b) => 
         new Date(b.createdAt || b.created_at || b.date) - new Date(a.createdAt || a.created_at || a.date)
       );
       
-      console.log("✅ [expertService] Total demandes fusionnées:", toutesDemandes.length);
-      
+    
       return {
         success: true,
         data: toutesDemandes,
@@ -99,8 +81,7 @@ export const expertService = {
 
   // Données de test basées sur vos données réelles
   getTestData: () => {
-    console.log("📝 [expertService] Utilisation données de test...");
-    
+   
     // Données basées sur votre BD (exemple pour expertId: 2ef705e0-f60b-4c31-8cfe-87bdf31cffbc)
     const testDemandes = [
       {
@@ -177,18 +158,17 @@ export const expertService = {
   // Récupérer les statistiques de l'expert
   getStatsExpert: async () => {
     try {
-      console.log("📈 [expertService] Récupération stats expert...");
-      
+    
       // Essayer d'abord /expert/stats
       try {
         const response = await api.get("/expert/stats");
         
         if (response.data?.success) {
-          console.log("✅ [expertService] Stats récupérées via /expert/stats:", response.data.data);
+          // console.log("✅ [expertService] Stats récupérées via /expert/stats:", response.data.data);
           return response.data;
         }
       } catch (error) {
-        console.log("🔄 [expertService] Erreur /expert/stats, essai /orders/pro/stats...");
+        // console.log("🔄 [expertService] Erreur /expert/stats, essai /orders/pro/stats...");
       }
       
       // Fallback: essayer /orders/pro/stats
@@ -196,15 +176,15 @@ export const expertService = {
         const response = await api.get("/orders/pro/stats");
         
         if (response.data?.success) {
-          console.log("✅ [expertService] Stats récupérées via /orders/pro/stats:", response.data.data);
+          // console.log("✅ [expertService] Stats récupérées via /orders/pro/stats:", response.data.data);
           return response.data;
         }
       } catch (orderError) {
-        console.log("⚠️ [expertService] Erreur /orders/pro/stats:", orderError.message);
+        // console.log("⚠️ [expertService] Erreur /orders/pro/stats:", orderError.message);
       }
       
       // Fallback: calculer à partir des demandes
-      console.log("🔄 [expertService] Fallback: calcul stats depuis demandes");
+      // console.log("🔄 [expertService] Fallback: calcul stats depuis demandes");
       const demandesResponse = await expertService.getToutesDemandesExpert();
       const demandes = demandesResponse.success ? demandesResponse.data : [];
       
@@ -290,16 +270,15 @@ export const expertService = {
   // Récupérer le profil expert
   getProfile: async () => {
     try {
-      console.log("👤 [expertService] Récupération profil expert...");
+     
       const response = await api.get("/expert/profile");
       
       if (response.data?.success) {
-        console.log("✅ [expertService] Profil récupéré:", response.data.data?.name);
+      
         return response.data;
       }
       
-      // Fallback: données par défaut
-      console.log("🔄 [expertService] Fallback: données profil par défaut");
+    
       return expertService.getDefaultProfile();
       
     } catch (error) {
@@ -343,11 +322,11 @@ export const expertService = {
   // Mettre à jour le statut d'une demande
   updateDemandeStatus: async (demandeId, statut) => {
     try {
-      console.log("🔄 [expertService] Mise à jour statut:", { demandeId, statut });
+    
       const response = await api.put(`/expert/demande/${demandeId}/status`, { statut });
       
       if (response.data?.success) {
-        console.log("✅ [expertService] Statut mis à jour");
+
         return response.data;
       }
       
@@ -369,11 +348,11 @@ export const expertService = {
   // Ajouter un suivi
   addSuivi: async (demandeId, suiviData) => {
     try {
-      console.log("📝 [expertService] Ajout suivi:", { demandeId, suiviData });
+     
       const response = await api.post(`/expert/demande/${demandeId}/suivi`, suiviData);
       
       if (response.data?.success) {
-        console.log("✅ [expertService] Suivi ajouté");
+       
         return response.data;
       }
       
@@ -395,7 +374,7 @@ export const expertService = {
   // Tester la connexion API
   testAPI: async () => {
     try {
-      console.log("🔍 [expertService] Test API expert...");
+    
       
       const endpoints = [
         { name: 'debug', endpoint: '/expert/debug' },
@@ -450,23 +429,18 @@ export const expertService = {
   // Déboguer l'authentification
   debugAuth: async () => {
     try {
-      console.log("🔍 [expertService] Débogage authentification...");
+      
       
       // Vérifier le token
       const token = localStorage.getItem('auth-token');
-      console.log("🔑 [expertService] Token présent:", !!token);
+     
       
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
-          console.log("🔑 [expertService] Payload token:", {
-            id: payload.id,
-            email: payload.email,
-            role: payload.role,
-            userType: payload.userType
-          });
+        
         } catch (e) {
-          console.log("⚠️ [expertService] Token non décodable:", e.message);
+          // console.log("⚠️ [expertService] Token non décodable:", e.message);
         }
       }
       
@@ -474,7 +448,7 @@ export const expertService = {
       const response = await api.get("/expert/debug");
       
       if (response.data?.success) {
-        console.log("✅ [expertService] Debug auth réussi");
+        // console.log("✅ [expertService] Debug auth réussi");
         return response.data.debug;
       }
       
@@ -489,17 +463,13 @@ export const expertService = {
   // Vérifier les permissions utilisateur
   checkUserPermissions: async () => {
     try {
-      console.log("🔍 [expertService] Vérification permissions utilisateur...");
-      
+    
       const debugInfo = await expertService.debugAuth();
       
       if (debugInfo) {
         const canAccessExpert = debugInfo.permissions?.canAccessExpertRoutes || false;
         
-        console.log("🔐 [expertService] Permissions:", {
-          canAccessExpert,
-          user: debugInfo.user
-        });
+      
         
         return {
           canAccessExpert,
@@ -518,11 +488,11 @@ export const expertService = {
   // Mettre à jour la disponibilité
   updateAvailability: async (availability) => {
     try {
-      console.log("📅 [expertService] Mise à jour disponibilité:", availability);
+     
       const response = await api.put("/expert/availability", { availability });
       
       if (response.data?.success) {
-        console.log("✅ [expertService] Disponibilité mise à jour");
+       
         return response.data;
       }
       
@@ -543,8 +513,7 @@ export const expertService = {
 
   // Obtenir des données de démonstration
   getDemoData: () => {
-    console.log("🎭 [expertService] Génération données de démonstration...");
-    
+   
     return {
       profile: {
         id: "b14f8e76-667b-4c13-9eb5-d24a0f012071",
