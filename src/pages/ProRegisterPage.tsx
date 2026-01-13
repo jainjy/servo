@@ -102,6 +102,7 @@ const ProRegisterPage = () => {
     // Informations entreprise (si professionnel)
     companyName: "",
     commercialName: "",
+    siren: "",
     siret: "",
     // Adresse
     address: "",
@@ -320,7 +321,7 @@ const ProRegisterPage = () => {
     },
   ];
   const handleBack = () => {
-    navigate("/register/professional/subscription");
+    navigate(-1); 
   };
   const [redirecting, setRedirecting] = useState(false);
   return (
@@ -498,20 +499,29 @@ const ProRegisterPage = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
-                            Téléphone *
+                            Téléphone (Réunion) *
                           </label>
                           <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
+                              <span className="text-gray-600 text-sm font-medium">+262</span>
+                            </div>
                             <Input
-                              placeholder="+261 34 12 345 67"
-                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              placeholder="692 12 34 56"
+                              className="pl-16 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.phone}
-                              onChange={(e) =>
-                                handleInputChange("phone", e.target.value)
-                              }
+                              onChange={(e) => {
+                                // Nettoyer l'entrée : garder uniquement les chiffres
+                                const cleanedValue = e.target.value.replace(/\D/g, '');
+                                // Limiter à 9 chiffres (format Réunion : 692 12 34 56)
+                                const limitedValue = cleanedValue.slice(0, 9);
+                                handleInputChange("phone", limitedValue);
+                              }}
                               required
                             />
                           </div>
+                          <p className="text-xs text-gray-500">
+                            Format : 9 chiffres (ex: 692123456)
+                          </p>
                         </div>
                       </div>
                       {/* Informations entreprise (si professionnel) */}
@@ -556,7 +566,7 @@ const ProRegisterPage = () => {
                               />
                             </div>
                           </div>
-                          <div className="space-y-2">
+                          {/* <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Numéro SIRET
                             </label>
@@ -570,6 +580,87 @@ const ProRegisterPage = () => {
                                   handleInputChange("siret", e.target.value)
                                 }
                               />
+                            </div>
+                          </div> */}
+                          {/* Numéros SIREN et SIRET */}
+                          <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+                            {/* SIREN */}
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-gray-700">
+                                Numéro SIREN *
+                              </label>
+                              <div className="relative">
+                                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Input
+                                  placeholder="123 456 789"
+                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                  value={formData.siren}
+                                  onChange={(e) => {
+                                    // Nettoyer et limiter à 9 chiffres
+                                    const cleaned = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+                                    const limited = cleaned.slice(0, 9);
+
+                                    // Formater avec espaces : 123 456 789
+                                    let formatted = '';
+                                    for (let i = 0; i < limited.length; i++) {
+                                      if (i === 3 || i === 6) formatted += ' ';
+                                      formatted += limited[i];
+                                    }
+
+                                    handleInputChange("siren", formatted);
+
+                                    // Si SIRET commence par ce SIREN, le mettre à jour automatiquement
+                                    if (formData.siret && formData.siret.startsWith(limited)) {
+                                      const newSiret = limited + formData.siret.slice(9);
+                                      handleInputChange("siret", newSiret);
+                                    }
+                                  }}
+                                  required
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500">9 chiffres</p>
+                            </div>
+
+                            {/* SIRET */}
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-gray-700">
+                                Numéro SIRET *
+                              </label>
+                              <div className="relative">
+                                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Input
+                                  placeholder="123 456 789 00012"
+                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                  value={formData.siret}
+                                  onChange={(e) => {
+                                    // Nettoyer et limiter à 14 chiffres
+                                    const cleaned = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+                                    const limited = cleaned.slice(0, 14);
+
+                                    // Formater avec espaces : 123 456 789 00012
+                                    let formatted = '';
+                                    for (let i = 0; i < limited.length; i++) {
+                                      if (i === 3 || i === 6 || i === 9) formatted += ' ';
+                                      formatted += limited[i];
+                                    }
+
+                                    handleInputChange("siret", formatted);
+
+                                    // Extraire automatiquement le SIREN (9 premiers chiffres)
+                                    if (limited.length >= 9) {
+                                      const siren = limited.slice(0, 9);
+                                      let sirenFormatted = '';
+                                      for (let i = 0; i < siren.length; i++) {
+                                        if (i === 3 || i === 6) sirenFormatted += ' ';
+                                        sirenFormatted += siren[i];
+                                      }
+                                      handleInputChange("siren", sirenFormatted);
+                                    }
+                                  }}
+                                  required
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500">14 chiffres (SIREN + NIC)</p>
                             </div>
                           </div>
                         </>

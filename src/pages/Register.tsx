@@ -350,20 +350,29 @@ const RegisterPage = () => {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">
-                        Téléphone *
+                        Téléphone (Réunion) *
                       </label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
+                          <span className="text-gray-600 text-sm font-medium">+262</span>
+                        </div>
                         <Input
-                          placeholder="+261 34 12 345 67"
-                          className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                          placeholder="692 12 34 56"
+                          className="pl-16 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                           value={formData.phone}
-                          onChange={(e) =>
-                            handleInputChange("phone", e.target.value)
-                          }
+                          onChange={(e) => {
+                            // Nettoyer l'entrée : garder uniquement les chiffres
+                            const cleanedValue = e.target.value.replace(/\D/g, '');
+                            // Limiter à 9 chiffres (format Réunion : 692 12 34 56)
+                            const limitedValue = cleanedValue.slice(0, 9);
+                            handleInputChange("phone", limitedValue);
+                          }}
                           required
                         />
                       </div>
+                      <p className="text-xs text-gray-500">
+                        Format : 9 chiffres (ex: 692123456)
+                      </p>
                     </div>
                   </div>
                   {/* Adresse */}

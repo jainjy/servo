@@ -241,7 +241,7 @@ const ProfessionalSubscriptionPage = () => {
     }
   };
   const handleBack = () => {
-    navigate("/register");
+    navigate(-1);
   };
   if (loading) {
     return (

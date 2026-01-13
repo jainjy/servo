@@ -262,7 +262,7 @@ const LoginPage = () => {
                   <div className="text-center text-sm text-gray-600">
                     Pas encore de compte ?{" "}
                     <a
-                      href="/register"
+                      href="/register/professional/subscription"
                       className="text-[#556B2F] w-full cursor-pointer hover:text-[#556B2F]/90 font-medium"
                     >
                       Créer un compte

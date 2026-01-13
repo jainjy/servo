@@ -737,7 +737,7 @@ const App = () => {
                     path="/login/particular"
                     element={<ParticularLogin />}
                   />
-                  <Route path="/register" element={<RoleSelectionPage />} />
+                  {/* <Route path="/register" element={<RoleSelectionPage />} /> */}
                   <Route
                     path="/register/professional/subscription"
                     element={<ProfessionalSubscriptionPage />}
