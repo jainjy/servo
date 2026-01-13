@@ -681,7 +681,7 @@ const Hero = () => {
 
         <div className="container relative z-25 mx-auto px-1 lg:px-4 py-5 lg:py-20 text-center">
           {/* Publicité en avant-plan, en haut */}
-          <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-full max-w-4xl z-50">
+          <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-full max-w-4xl z-10">
             <LocalAdCard />
           </div>
 
