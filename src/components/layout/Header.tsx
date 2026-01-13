@@ -1023,7 +1023,7 @@ const Header = () => {
         {
           title: "Séjourner & Voyager",
           description:
-            "Organisez vos déplacements et vos séjours facilement, qu’ils soient courts, longs ou insolites.",
+            "Organisez vos déplacements et vos séjours facilement, qu'ils soient courts, longs ou insolites.",
           href: "/voyages",
           image:
             "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
@@ -1054,7 +1054,7 @@ const Header = () => {
         {
           title: "Maison & Quotidien",
           description:
-            "Tout ce qu’il faut pour améliorer, entretenir et faciliter la vie à la maison.",
+            "Tout ce qu'il faut pour améliorer, entretenir et faciliter la vie à la maison.",
           href: "/produits#equipement",
           image:
             "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
@@ -1070,13 +1070,14 @@ const Header = () => {
         {
           title: "Inspirer  & Éveiller ",
           description:
-            "Un espace pour apprendre, s’inspirer et découvrir autrement.",
+            "Un espace pour apprendre, s'inspirer et découvrir autrement.",
           href: "/podcasts/reunion",
           image:
             "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
+        
     /*** Nos partenaire*/
     {
       title: "NOS PARTENAIRES",
@@ -1124,6 +1125,11 @@ const Header = () => {
             "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
+    },
+    {
+      title: "BLOG",
+          href: "/blog",
+ 
     },
     // {
     //   title: "TRAVAUX & MATÉRIAUX",
@@ -1212,7 +1218,7 @@ const Header = () => {
     //         "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
     //     },
     //     {
-    //       title: "Marketplace d’occasion",
+    //       title: "Marketplace d'occasion",
     //       description: "Achetez et vendez des articles d'occasion",
     //       href: "/produits#design",
     //       image:
@@ -1405,7 +1411,7 @@ const Header = () => {
     //         "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
     //     },
     //     {
-    //       title: "Offres d’emploi",
+    //       title: "Offres d'emploi",
     //       description: "Trouvez des opportunités de carrière",
     //       href: "/emploi",
     //       image:
@@ -1482,23 +1488,23 @@ const Header = () => {
     role === "admin"
       ? "/admin"
       : role === "professional"
-      ? "/pro"
-      : "/mon-compte/profil";
+        ? "/pro"
+        : "/mon-compte/profil";
   const initials = user
     ? (() => {
-        let base = "";
-        if (user.firstName && user.firstName.trim().length > 0) {
-          base = user.firstName.trim();
-        } else if (user.email) {
-          base = user.email.split("@")[0];
-        }
-        base = base.replace(/[^A-Za-z0-9]/g, "");
-        const two = base.slice(0, 2).toUpperCase();
-        if (two && two.length === 2) return two;
-        if (!two && user.lastName)
-          return user.lastName.slice(0, 2).toUpperCase();
-        return two || "US";
-      })()
+      let base = "";
+      if (user.firstName && user.firstName.trim().length > 0) {
+        base = user.firstName.trim();
+      } else if (user.email) {
+        base = user.email.split("@")[0];
+      }
+      base = base.replace(/[^A-Za-z0-9]/g, "");
+      const two = base.slice(0, 2).toUpperCase();
+      if (two && two.length === 2) return two;
+      if (!two && user.lastName)
+        return user.lastName.slice(0, 2).toUpperCase();
+      return two || "US";
+    })()
     : "";
   const MobileMenu = () => (
     <div className="flex flex-col h-full">
@@ -1527,9 +1533,8 @@ const Header = () => {
                   >
                     {section.title}
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        openSubmenu === section.title ? "rotate-180" : ""
-                      }`}
+                      className={`h-4 w-4 transition-transform ${openSubmenu === section.title ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                   {openSubmenu === section.title && (
@@ -1603,9 +1608,8 @@ const Header = () => {
                 </div>
               </div>
               <ChevronDown
-                className={`h-4 w-4 text-gray-600 transition-transform flex-shrink-0 ${
-                  isUserMenuOpen ? "rotate-180" : ""
-                }`}
+                className={`h-4 w-4 text-gray-600 transition-transform flex-shrink-0 ${isUserMenuOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
             {/* Menu utilisateur pour mobile */}
@@ -1740,8 +1744,8 @@ const Header = () => {
     role === "admin"
       ? "/admin"
       : role === "professional"
-      ? "/pro"
-      : "/mon-compte/profil";
+        ? "/pro"
+        : "/mon-compte/profil";
   return (
     <>
       <header
@@ -1755,7 +1759,8 @@ const Header = () => {
           {/* Menu desktop */}
           <nav className="hidden md:hidden lg:flex items-center gap-2">
             <ul className="flex items-center">
-              {menuSections.slice(0, 4).map((section, index) => (
+              {/* CHANGEMENT ICI : slice(0, 5) au lieu de slice(0, 4) */}
+              {menuSections.slice(0, 5).map((section, index) => (
                 <li key={index} className="group relative">
                   {section.items ? (
                     <>
@@ -1882,11 +1887,10 @@ const Header = () => {
                                 onFocus={() =>
                                   hasItems && setHoveredSection(section.title)
                                 }
-                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
-                                  isActive
+                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive
                                     ? "bg-[#FFFFFF]/10"
                                     : "hover:bg-[#FFFFFF]/5"
-                                }`}
+                                  }`}
                               >
                                 {hasItems ? (
                                   <button className="scramble w-full text-left text-xs font-semibold text-white">
@@ -2066,10 +2070,9 @@ const Header = () => {
                   size="icon"
                   className={`
                     h-9 w-9 rounded-lg border transition-all duration-200 ml-2
-                    ${
-                      isSearchOpen
-                        ? "bg-[#556B2F] text-[#FFFFFF] border-[#6B8E23]"
-                        : "bg-[#556B2F] text-[#FFFFFF] border-[#556B2F] hover:bg-[#6B8E23]"
+                    ${isSearchOpen
+                      ? "bg-[#556B2F] text-[#FFFFFF] border-[#6B8E23]"
+                      : "bg-[#556B2F] text-[#FFFFFF] border-[#556B2F] hover:bg-[#6B8E23]"
                     }
                   `}
                   onClick={openRecherchePage}
@@ -2176,11 +2179,10 @@ const Header = () => {
                           {notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`p-3 rounded-lg border transition-colors ${
-                                notification.isRead
+                              className={`p-3 rounded-lg border transition-colors ${notification.isRead
                                   ? "bg-gray-50"
                                   : "bg-[#FFFFFF] border-[#556B2F] shadow-sm"
-                              }`}
+                                }`}
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex-1 min-w-0">
@@ -2201,24 +2203,22 @@ const Header = () => {
                                   <div className="flex items-center gap-2 flex-wrap">
                                     {notification.statut && (
                                       <span
-                                        className={`px-2 py-1 rounded-full text-xs ${
-                                          notification.statut === "validée" ||
-                                          notification.statut === "validee"
+                                        className={`px-2 py-1 rounded-full text-xs ${notification.statut === "validée" ||
+                                            notification.statut === "validee"
                                             ? "bg-green-100 text-green-800"
                                             : notification.statut === "refusée"
-                                            ? "bg-red-100 text-red-800"
-                                            : "bg-gray-100 text-gray-800"
-                                        }`}
+                                              ? "bg-red-100 text-red-800"
+                                              : "bg-gray-100 text-gray-800"
+                                          }`}
                                       >
                                         {notification.statut}
                                       </span>
                                     )}
                                     <span
-                                      className={`px-2 py-1 rounded-full text-xs ${
-                                        notification.source === "demande"
+                                      className={`px-2 py-1 rounded-full text-xs ${notification.source === "demande"
                                           ? "bg-[#556B2F] text-[#FFFFFF]"
                                           : "bg-[#8B4513] text-[#FFFFFF]"
-                                      }`}
+                                        }`}
                                     >
                                       {notification.source === "demande"
                                         ? "Demande"
@@ -2254,12 +2254,12 @@ const Header = () => {
                                 <div className="text-xs text-gray-400">
                                   {notification.createdAt
                                     ? new Date(
-                                        notification.createdAt
-                                      ).toLocaleDateString("fr-FR", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                      })
+                                      notification.createdAt
+                                    ).toLocaleDateString("fr-FR", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
                                     : ""}
                                 </div>
                                 <div className="flex items-center gap-2">

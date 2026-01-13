@@ -1063,7 +1063,7 @@ const App = () => {
                   />
                 </Routes>
 
-                {/* Pop-up publicité globale */}
+                {/* Pop-up Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité. Nous allions expertise, innovation et passion pour vous offrir un service d'exception.globale */}
                 {user && user.role !== "admin" && (
                   <AdvertisementPopup refreshMinutes={3} />
                 )}
