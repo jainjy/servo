@@ -670,29 +670,46 @@ const Cart = ({ isOpen, onClose }) => {
     try {
       // 1. Préparer les données pour la NOUVELLE API avec livraison
       const orderData = {
-        items: localCartItems.map(item => ({
-          productId: item.id,
-          quantity: item.quantity || 1
-        })),
-        shippingAddress: {
-          address: finalAddress,
-          city: extractCityFromAddress(finalAddress),
-          postalCode: extractPostalCodeFromAddress(finalAddress),
-          country: "France"
+      items: localCartItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity || 1
+      })),
+      shippingAddress: {
+        address: finalAddress,
+        city: extractCityFromAddress(finalAddress),
+        postalCode: extractPostalCodeFromAddress(finalAddress),
+        country: "France"
+      },
+      deliveryAddress: finalAddress, // Adresse texte complète
+      latitude: coordinates.lat,     // Coordonnées GPS
+      longitude: coordinates.lng,    // Coordonnées GPS
+      paymentMethod: "card",
+      
+      // NOUVEAUX CHAMPS POUR LA SYNCHRONISATION
+      deliveryInfo: {
+        geocoded: true, // Puisque vous avez géocodé l'adresse
+        coordinates: {
+          lat: coordinates.lat,
+          lng: coordinates.lng
         },
-        deliveryAddress: finalAddress,
-        latitude: coordinates.lat,
-        longitude: coordinates.lng,
-        paymentMethod: "card",
-        // Informations client pour la livraison
-        customerInfo: {
-          name: `${user?.firstName} ${user?.lastName}`,
-          phone: user?.phone || "",
-          email: user?.email || ""
+        // Ces champs seront remplis par le backend
+        syncStatus: "pending", // À envoyer pour être clair
+        estimatedDelivery: null,
+        metadata: {
+          source: "web",
+          device: navigator.userAgent,
+          timestamp: new Date().toISOString()
         }
-      };
+      }
+    };
 
       // console.log("📤 Envoi de la commande avec livraison...", orderData);
+
+      console.log("📤 Envoi de la commande avec données de livraison...", {
+        address: finalAddress,
+        coordinates: coordinates,
+        itemsCount: localCartItems.length
+      });
 
       // 2. Appeler l'API avec deliveryAPI (nouvelle fonction)
       const response = await deliveryAPI.createOrderWithDelivery(orderData);

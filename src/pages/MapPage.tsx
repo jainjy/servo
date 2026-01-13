@@ -7,6 +7,7 @@ import { MapService } from "../services/mapService";
 import { useNavigate } from "react-router-dom";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
 
+
 const MapPage: React.FC = () => {
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [filteredPoints, setFilteredPoints] = useState<MapPoint[]>([]);
