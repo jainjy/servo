@@ -8,7 +8,7 @@ import "../styles/font.css";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
 import Recherche from "@/pages/Recherche";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 gsap.registerPlugin(SplitText);
 
@@ -24,12 +24,30 @@ const colors = {
 // URL de l'image en dessin
 const sketchImageUrl = "/2em.png";
 
-// Composant AdCard local pour éviter le blocage
+// Composant AdCard local
 const LocalAdCard = () => {
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(2 * 60);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
+    if (isMobile) {
+      setIsVisible(false);
+      return;
+    }
+
     const savedState = sessionStorage.getItem("adCardState");
     
     if (savedState) {
@@ -47,10 +65,10 @@ const LocalAdCard = () => {
     } else {
       setIsVisible(true);
     }
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
-    if (isVisible === null) return;
+    if (isVisible === null || isMobile) return;
 
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
@@ -74,7 +92,7 @@ const LocalAdCard = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isVisible]);
+  }, [isVisible, isMobile]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -86,89 +104,80 @@ const LocalAdCard = () => {
     return <div className="w-full min-h-[140px] bg-gray-100 rounded-2xl animate-pulse" />;
   }
 
-  if (!isVisible) {
+  if (!isVisible || isMobile) {
     return null;
   }
 
   return (
-    <motion.article 
-      initial={{ opacity: 0, y: -20 }}
+    <motion.article
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3 }}
-      className="relative w-full min-h-[120px] max-w-4xl mx-auto rounded-xl border border-white/30 bg-white/20 backdrop-blur-md shadow-xl overflow-hidden z-40 mb-6"
-      style={{
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-      }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.25 }}
+      className="
+        hidden sm:block
+        relative w-full max-w-2xl mx-auto
+        rounded-xl border border-white/20
+        bg-gradient-to-br from-white/12 to-white/6
+        backdrop-blur-lg shadow-lg overflow-hidden z-40 mb-4
+      "
     >
-      <div className="absolute right-3 top-3 z-10 flex items-center space-x-2">
-        <div className="relative">
-          <div className="absolute inset-0 animate-ping opacity-20">
-            <span className="rounded-full bg-white/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
-              Publicité
-            </span>
-          </div>
-          <span className="relative rounded-full bg-white/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
-            Publicité
-          </span>
-        </div>
-        
-        <div className="flex items-center bg-black/30 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-          <svg 
-            className="w-3 h-3 mr-1" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="2" 
+      {/* Header */}
+      <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 text-xs">
+        <span className="px-2.5 py-1 rounded-full bg-white/25 text-white font-semibold backdrop-blur-sm">
+          Pub
+        </span>
+
+        <div className="flex items-center bg-black/35 px-2.5 py-1 rounded-full text-white backdrop-blur-sm">
+          <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <span>{formatTime(timeRemaining)}</span>
+          {formatTime(timeRemaining)}
         </div>
+
+        <button
+          onClick={() => setIsVisible(false)}
+          className="p-1.5 rounded-full bg-black/35 hover:bg-black/50 text-white/75 hover:text-white transition-colors"
+          aria-label="Fermer la publicité"
+        >
+          ✕
+        </button>
       </div>
 
-      <div className="flex flex-row p-3">
-        <div className="w-32 h-24 sm:w-40 sm:h-28 md:w-48 md:h-32 flex-shrink-0 rounded-lg overflow-hidden border border-white/20">
+      {/* Contenu */}
+      <div className="flex p-4 gap-4">
+        {/* Image */}
+        <div className="w-36 h-28 rounded-lg overflow-hidden border border-white/20 flex-shrink-0">
           <img
-            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-            alt="Publicité"
-            className="h-full w-full object-cover"
-            style={{ filter: 'brightness(1.1) contrast(1.1)' }}
+            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            alt="Offre spéciale"
+            className="w-full h-full object-cover"
           />
         </div>
 
-        <div className="flex-1 p-3 flex flex-col justify-center">
-          <h2 className="text-sm font-semibold tracking-wide sm:text-base md:text-lg text-white mb-1 sm:mb-2 drop-shadow-md">
-            Découvrez nos offres exclusives
+        {/* Texte */}
+        <div className="flex-1">
+          <h2 className="text-base font-semibold text-white mb-1.5">
+            Offres spéciales
           </h2>
-          <p className="text-xs sm:text-sm text-white/90 leading-relaxed line-clamp-2 drop-shadow">
-            Profitez de réductions exceptionnelles sur nos services premium. Offre limitée dans le temps !
+
+          <p className="text-sm text-white/80 leading-relaxed mb-3">
+            Bénéficiez de réductions exclusives sur nos meilleurs services.
           </p>
-          
-          <div className="mt-2 pt-2 border-t border-white/20">
-            <div className="flex items-center text-xs text-white/80">
-              <svg 
-                className="w-3 h-3 mr-1" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth="2" 
+
+          <div className="flex items-center justify-between pt-3 border-t border-white/15">
+            <div className="flex items-center text-xs text-white/65">
+              <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span>Visible pendant :</span>
-              <span className="font-medium ml-1">2 min</span>
+              <span>Visible : <span className="font-medium text-white">2 minutes</span></span>
             </div>
+
+        
           </div>
         </div>
       </div>
@@ -225,7 +234,11 @@ const Hero = () => {
 
   // Animation de l'onde, des traces et du rayon de révélation
   useEffect(() => {
+    let mounted = true;
+
     const animate = () => {
+      if (!mounted) return;
+
       setWaveOffset((prev) => prev + 0.02);
 
       if (isRevealing || alwaysRevealing) {
@@ -267,6 +280,7 @@ const Hero = () => {
     animationRef.current = requestAnimationFrame(animate);
 
     return () => {
+      mounted = false;
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -374,6 +388,7 @@ const Hero = () => {
     setMouseInactive(false);
     if (mouseInactiveTimeoutRef.current) {
       clearTimeout(mouseInactiveTimeoutRef.current);
+      mouseInactiveTimeoutRef.current = null;
     }
     setTimeout(() => {
       setAlwaysRevealing(true);
@@ -399,6 +414,26 @@ const Hero = () => {
     const frequency = 0.007;
     return Math.sin(x * frequency + y * frequency + time) * amplitude;
   };
+
+  // Effet GSAP pour éviter l'erreur
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const timer = setTimeout(() => {
+        const loadingText = document.querySelector(".loading-text");
+        if (loadingText) {
+          gsap.to(loadingText, {
+            duration: 1,
+            opacity: 0.3,
+            yoyo: true,
+            repeat: -1,
+            ease: "power1.inOut"
+          });
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   return (
     <>
@@ -753,4 +788,4 @@ const Hero = () => {
   );
 };
 
-export default Hero;  
+export default Hero;

@@ -1,4 +1,3 @@
-// src/pages/auth/AcheteurAuth.tsx
 import React, { useState, useEffect } from "react";
 import {
   Eye,
@@ -28,7 +27,9 @@ import { useRedirectPath } from "@/hooks/useRedirectPath";
 import { toast } from "sonner";
 import ServoLogo from "@/components/components/ServoLogo";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
-const ParticularLogin = () => {
+import { motion } from "framer-motion";
+
+const LoginPage = () => {
   const navigate = useNavigate();
   const redirectPath = useRedirectPath();
   const [showPassword, setShowPassword] = useState(false);
@@ -36,8 +37,52 @@ const ParticularLogin = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // État pour la publicité personnalisée
+  const [isAdVisible, setIsAdVisible] = useState(true);
+  const [adTimeRemaining, setAdTimeRemaining] = useState(120); // 2 minutes en secondes
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Timer pour la publicité
+  useEffect(() => {
+    if (!isAdVisible || isMobile) return;
+
+    const timer = setInterval(() => {
+      setAdTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsAdVisible(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isAdVisible, isMobile]);
+
+  // Formater le temps en minutes:secondes
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const { login } = useAuth();
-  const handleSubmit = async (e) => {
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
@@ -61,6 +106,12 @@ const ParticularLogin = () => {
       setIsLoading(false);
     }
   };
+
+  // Fonction pour la pub
+  const handleAdClick = () => {
+    navigate('/register/professional/subscription');
+  };
+
   return (
     <div className="min-h-screen flex overflow-hidden relative">
       <div className="absolute inset-0 -z-10">
@@ -92,10 +143,76 @@ const ParticularLogin = () => {
         <AdvertisementPopup />
       </div>
 
+      {/* Publicité personnalisée pour la page de login - Desktop seulement */}
+      {!isMobile && isAdVisible && (
+        <motion.article
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25 }}
+          className="
+            hidden sm:block
+            absolute top-20 right-4 z-40
+            w-full max-w-xs
+            rounded-xl border border-white/20
+            bg-gradient-to-br from-white/12 to-white/6
+            backdrop-blur-lg shadow-lg overflow-hidden
+          "
+        >
+          {/* Header */}
+          <div className="absolute right-2 top-2 flex items-center gap-1 text-xs">
+            <span className="px-2 py-0.5 rounded-full bg-white/25 text-white font-semibold backdrop-blur-sm">
+              Pub
+            </span>
+
+            <div className="flex items-center bg-black/35 px-2 py-0.5 rounded-full text-white backdrop-blur-sm">
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {formatTime(adTimeRemaining)}
+            </div>
+
+            <button
+              onClick={() => setIsAdVisible(false)}
+              className="p-1 rounded-full bg-black/35 hover:bg-black/50 text-white/75 hover:text-white transition-colors"
+              aria-label="Fermer la publicité"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Contenu */}
+          <div className="pt-10 pb-4 px-4">
+            <h2 className="text-sm font-semibold text-white mb-1.5">
+              Devenez Professionnel OLIPLUS
+            </h2>
+
+            <p className="text-xs text-white/80 leading-relaxed mb-3">
+              Rejoignez notre réseau de professionnels et développez votre activité.
+            </p>
+
+            <div className="flex items-center justify-between pt-3 border-t border-white/15">
+              <div className="flex items-center text-[10px] text-white/65">
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>Visible : <span className="font-medium text-white">2 min</span></span>
+              </div>
+
+              
+            </div>
+          </div>
+        </motion.article>
+      )}
+
       <div className="w-[80vw] lg:w-[60vw] h-[80vh] m-auto rounded-3xl shadow-xl flex flex-col lg:flex-row overflow-hidden bg-white/0">
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/login")}
             className="flex items-center gap-2 bg-gray-700 w-28 py-3 px-4 rounded-full text-gray-100 hover:text-gray-100 mb-4 mx-2 transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -151,7 +268,7 @@ const ParticularLogin = () => {
             </div>
           </div>
         </div>
-        <div className=" flex items-center justify-center bg-[#FFFFFF] overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
+        <div className="flex items-center justify-center bg-[#FFFFFF] overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
           <div className="w-full max-w-md">
             <Card className="border-0 shadow-none px-0 lg:px-5 py-4 lg:py-0 bg-[#FFFFFF]">
               <CardHeader className="space-y-0">
@@ -263,7 +380,7 @@ const ParticularLogin = () => {
                   <div className="text-center text-sm text-gray-600">
                     Pas encore de compte ?{" "}
                     <a
-                      href="/register/particular"
+                      href="/register/professional/subscription"
                       className="text-[#556B2F] w-full cursor-pointer hover:text-[#556B2F]/90 font-medium"
                     >
                       Créer un compte
@@ -288,4 +405,5 @@ const ParticularLogin = () => {
     </div>
   );
 };
-export default ParticularLogin;
+
+export default LoginPage;
