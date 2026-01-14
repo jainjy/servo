@@ -238,6 +238,30 @@ const ProRegisterPage = () => {
     formData.metiers = formData.metiers || [];
     try {
       const response = await signupPro(formData, subscriptionData.truePlanId);
+
+      // ENVOYER L'EMAIL DE BIENVENUE APRES L'INSCRIPTION RÉUSSIE
+      // Dans votre handleSubmit, remplacez la partie email par :
+      try {
+        console.log("Tentative d'envoi d'email à:", formData.email);
+        const response = await api.post("/oliplus-email/send-user-welcome", {
+          email: formData.email,
+          userName: formData.firstName + " " + formData.lastName
+        });
+        console.log("Réponse email:", response.data);
+        console.log("Email de bienvenue envoyé avec succès");
+      } catch (emailError: any) {
+        console.error("ÉCHEC COMPLET de l'envoi de l'email de bienvenue:");
+        console.error("URL appelée:", emailError.config?.url);
+        console.error("Méthode:", emailError.config?.method);
+        console.error("Données envoyées:", emailError.config?.data);
+        console.error("Statut:", emailError.response?.status);
+        console.error("Réponse serveur:", emailError.response?.data);
+        console.error("Message:", emailError.message);
+
+        // Avertissement non bloquant
+        toast.warning("Compte créé mais l'email de bienvenue n'a pas pu être envoyé. L'équipe vous contactera.");
+      }
+
       toast.success("Inscription réussie ! Essai gratuit de 2 mois activé.");
       // Redirection vers la page de succès
       navigate("/register/success", {
@@ -321,7 +345,7 @@ const ProRegisterPage = () => {
     },
   ];
   const handleBack = () => {
-    navigate(-1); 
+    navigate(-1);
   };
   const [redirecting, setRedirecting] = useState(false);
   return (
