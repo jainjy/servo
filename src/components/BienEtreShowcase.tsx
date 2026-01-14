@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Apple, Heart, Users, Leaf, Sprout, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 interface BienEtreCard {
   id: string;
@@ -34,6 +35,48 @@ const BienEtreShowcase = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Nutrition');
   const [displayedCards, setDisplayedCards] = useState<BienEtreCard[]>([]);
+  
+  // État pour la publicité
+  const [isAdVisible, setIsAdVisible] = useState(true);
+  const [adTimeRemaining, setAdTimeRemaining] = useState(120); // 2 minutes en secondes
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Timer pour la publicité
+  useEffect(() => {
+    if (!isAdVisible || isMobile) return;
+
+    const timer = setInterval(() => {
+      setAdTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsAdVisible(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isAdVisible, isMobile]);
+
+  // Formater le temps en minutes:secondes
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const tabsData: TabData[] = [
     {
@@ -218,8 +261,90 @@ const BienEtreShowcase = () => {
     navigate('/bien-etre', { state: { activeTab: link } });
   };
 
+  // Fonction pour ouvrir le lien de la pub
+  const handleAdClick = () => {
+    navigate('/bien-etre');
+  };
+
   return (
-    <div className="py-8 px-4 bg-gradient-to-b from-white to-gray-50">
+    <div className="py-8 px-4 bg-gradient-to-b from-white to-gray-50 relative">
+      {/* Publicité - seulement sur desktop */}
+      {!isMobile && isAdVisible && (
+        <motion.article
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25 }}
+          className="
+            hidden sm:block
+            relative w-full max-w-2xl mx-auto mb-8
+            rounded-xl border border-white/20
+            bg-gradient-to-br from-white/12 to-white/6
+            backdrop-blur-lg shadow-lg overflow-hidden
+          "
+        >
+          {/* Header */}
+          <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 text-xs">
+            <span className="px-2.5 py-1 rounded-full bg-white/25 text-black font-semibold backdrop-blur-sm">
+              Pub
+            </span>
+
+            <div className="flex items-center bg-black/35 px-2.5 py-1 rounded-full text-white backdrop-blur-sm">
+              <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {formatTime(adTimeRemaining)}
+            </div>
+
+            <button
+              onClick={() => setIsAdVisible(false)}
+              className="p-1.5 rounded-full bg-black/35 hover:bg-black/50 text-white/75 hover:text-white transition-colors"
+              aria-label="Fermer la publicité"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Contenu */}
+          <div className="flex p-4 gap-4">
+            {/* Image */}
+            <div className="w-36 h-28 rounded-lg overflow-hidden border border-white/20 flex-shrink-0">
+              <img
+                src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=500&q=80"
+                alt="Santé & Bien-Être"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Texte */}
+            <div className="flex-1">
+              <h2 className="text-base font-semibold text-black mb-1.5">
+                Prenez soin de votre santé
+              </h2>
+
+              <p className="text-sm text-black/80 leading-relaxed mb-3">
+                Découvrez nos services de bien-être pour une vie plus équilibrée et sereine.
+              </p>
+
+              <div className="flex items-center justify-between pt-3 border-t border-white/15">
+                <div className="flex items-center text-xs text-white/65">
+                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className='text-black'>Visible : <span className="font-medium text-black">2 minutes</span></span>
+                </div>
+
+              
+              </div>
+            </div>
+          </div>
+        </motion.article>
+      )}
+
       <div className="max-w-7xl mx-auto">
         {/* En-tête compact */}
         <div className="text-center mb-6">
