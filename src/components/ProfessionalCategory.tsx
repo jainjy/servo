@@ -337,8 +337,11 @@ const ProfessionalCard: React.FC<{
   return (
     <div
       onClick={handleClick}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col"
+      className=" relative rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col"
     >
+      <div className="absolute z-10 top-0 left-0 w-full h-full " style={{
+        background: 'url(https://i.pinimg.com/736x/06/e3/25/06e325c6150c10163b4e7b6d2a8261b9.jpg)'
+      }}></div>
       {/* En-tête avec avatar et note */}
       <div className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -459,7 +462,7 @@ const ProfessionalCard: React.FC<{
       <div className="border-t border-gray-100"></div>
 
       {/* Pied de carte - Contact */}
-      <div className="p-3 sm:p-4 bg-gray-50 mt-auto">
+      <div className="p-3 sm:p-4 mt-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4">
           {/* Téléphone */}
           {professional.phone && (
