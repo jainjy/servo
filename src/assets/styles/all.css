@@ -21,3 +21,66 @@
 .animate-shine {
   animation: shine 3s ease-in-out infinite;
 }
+/* Animation pour la case à cocher */
+@keyframes pulse-checkbox {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-checkbox {
+  animation: pulse-checkbox 2s infinite;
+}
+
+/* Animation shine pour le badge */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
+}
+
+.animate-shine {
+  animation: shine 3s infinite;
+}
+
+/* Animation lente pour le badge populaire */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Styles pour le Checkbox */
+[role="checkbox"] {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+input[type="checkbox"],
+[data-state] {
+  cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+/* Ensure checkbox is visible */
+.flex-shrink-0 {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
