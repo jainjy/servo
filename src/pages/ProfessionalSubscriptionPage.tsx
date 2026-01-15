@@ -286,7 +286,7 @@ const ProfessionalSubscriptionPage = () => {
           <CardDescription className="text-md font-extralight text-gray-400 max-w-2xl mx-auto">
             Sélectionnez l'offre qui correspond le mieux à votre activité
             professionnelle. Tous nos abonnements incluent un essai gratuit de
-            14 jours.
+            60 jours.
           </CardDescription>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
