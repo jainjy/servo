@@ -2,8 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";
-import { Badge } from "@/components/ui/badge";
-import { Video, Play, Pause, Volume2, VolumeX, Minimize2, ArrowRight, Grid, List } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, ArrowRight } from 'lucide-react';
 
 interface Advertisement {
   id: string;
@@ -157,134 +156,147 @@ const SingleAdvertisement: React.FC<{
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+    }
     setVisible(false);
     onClose(ad.id);
   };
 
+  // Si l'ad n'est plus visible, ne rien rendre
+  if (!visible) return null;
+
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{
-            type: "spring",
-            damping: 30,
-            stiffness: 250,
-            duration: 0.6
-          }}
-          className="relative w-full overflow-hidden min-h-[180px] sm:min-h-[140px] max-w-7xl mx-auto rounded-xl sm:rounded-2xl border border-slate-200 my-2 sm:my-3 bg-white shadow-md sm:shadow-lg"
-        >
-          {/* Badge et contrôles */}
-          <div className="absolute right-2 sm:right-3 top-2 sm:top-3 z-10 flex items-center space-x-1 sm:space-x-2">
-            <div className="relative">
-              <div className="absolute inset-0 animate-ping opacity-20">
-                <span className="rounded-full bg-secondary-text px-2 py-0.5 text-[8px] sm:px-3 sm:py-1 sm:text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
-                  Publicité
-                </span>
-              </div>
-              <span className="relative rounded-full bg-secondary-text px-2 py-0.5 text-[8px] sm:px-3 sm:py-1 sm:text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
-                Publicité
-              </span>
-            </div>
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{
+        type: "spring",
+        damping: 30,
+        stiffness: 250,
+        duration: 0.6
+      }}
+      className="relative w-full overflow-hidden min-h-[180px] sm:min-h-[140px] max-w-7xl mx-auto rounded-xl sm:rounded-2xl border border-slate-200 my-2 sm:my-3 bg-white shadow-md sm:shadow-lg"
+    >
+      {/* Badge et contrôles */}
+      <div className="absolute right-2 sm:right-3 top-2 sm:top-3 z-10 flex items-center space-x-1 sm:space-x-2">
+        <div className="relative">
+          <div className="absolute inset-0 animate-ping opacity-20">
+            <span className="rounded-full bg-secondary-text px-2 py-0.5 text-[8px] sm:px-3 sm:py-1 sm:text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+              Publicité
+            </span>
+          </div>
+          <span className="relative rounded-full bg-secondary-text px-2 py-0.5 text-[8px] sm:px-3 sm:py-1 sm:text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+            Publicité
+          </span>
+        </div>
 
-            {!currentAdIsVideo && (
-              <div className="flex items-center bg-gray-800 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">
-                <svg
-                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>{formatTimeLeft(timeLeft)}</span>
-              </div>
-            )}
-            <button
-              title="Fermer la publicité"
-              onClick={handleClose}
-              className="rounded-lg bg-red-600 py-0 px-2 sm:px-3 text-gray-100 hover:text-gray-200 transition-colors z-20 text-lg sm:text-xl"
+        {!currentAdIsVideo && (
+          <div className="flex items-center bg-gray-800 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">
+            <svg
+              className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <span className="text-lg sm:text-xl">&times;</span>
-            </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>{formatTimeLeft(timeLeft)}</span>
           </div>
+        )}
+        <button
+          title="Fermer la publicité"
+          onClick={handleClose}
+          className="rounded-lg bg-red-600 py-0 px-2 sm:px-3 text-gray-100 hover:text-gray-200 transition-colors z-20 text-lg sm:text-xl"
+        >
+          <span className="text-lg sm:text-xl">&times;</span>
+        </button>
+      </div>
 
-          <div className="flex flex-col sm:flex-row pt-10 sm:pt-0">
-            {/* Media - Image/Vidéo */}
-            <div className="w-full h-32 sm:w-40 md:w-56 lg:w-64 sm:h-40 md:h-44 flex-shrink-0 bg-slate-100 relative group">
-              {currentAdIsVideo ? (
-                <>
-                  <video
-                    ref={videoRef}
-                    src={ad.imageUrl}
-                    className="h-full w-full object-cover"
-                    muted={isMuted}
-                    playsInline
-                    loop={false}
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleVideoClick(e);
-                      }}
-                      className="bg-white/90 text-black rounded-full p-2 sm:p-3 hover:bg-white transition-all"
-                    >
-                      {isVideoPlaying ? (
-                        <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
-                      ) : (
-                        <Play className="w-5 h-5 sm:w-6 sm:h-6" />
-                      )}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <img
-                  src={ad.imageUrl}
-                  alt={ad.title}
-                  className="h-full w-full object-cover cursor-pointer hover:brightness-110 transition-all"
-                  onClick={handleClick}
-                />
-              )}
-            </div>
-
-            {/* Contenu texte */}
-            <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-center">
-              <h2 className="text-sm sm:text-base font-extralight tracking-widest md:text-lg lg:text-xl text-slate-900 mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2">
-                {ad.title}
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-3">
-                {ad.description}
-              </p>
-
-              <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
-                <div className="flex items-center text-[10px] sm:text-xs text-gray-500 w-full sm:w-auto">
-                  <span>Visible pendant :</span>
-                  <span className="font-medium ml-1 sm:ml-2">{displayDuration} min</span>
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleClick}
-                  className="inline-flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-slate-900 hover:text-slate-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+      <div className="flex flex-col sm:flex-row pt-10 sm:pt-0">
+        {/* Media - Image/Vidéo */}
+        <div className="w-full h-32 sm:w-40 md:w-56 lg:w-64 sm:h-40 md:h-44 flex-shrink-0 bg-slate-100 relative group">
+          {currentAdIsVideo ? (
+            <>
+              <video
+                ref={videoRef}
+                src={ad.imageUrl}
+                className="h-full w-full object-cover"
+                muted={isMuted}
+                playsInline
+                loop={false}
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleVideoClick(e);
+                  }}
+                  className="bg-white/90 text-black rounded-full p-2 sm:p-3 hover:bg-white transition-all"
                 >
-                  Voir plus
-                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </motion.button>
+                  {isVideoPlaying ? (
+                    <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
+                  ) : (
+                    <Play className="w-5 h-5 sm:w-6 sm:h-6" />
+                  )}
+                </button>
               </div>
+              {/* Contrôles audio */}
+              <button
+                onClick={toggleMute}
+                className="absolute bottom-2 right-2 bg-black/70 text-white rounded-full p-1.5 hover:bg-black/90 transition-all"
+              >
+                {isMuted ? (
+                  <VolumeX className="w-4 h-4" />
+                ) : (
+                  <Volume2 className="w-4 h-4" />
+                )}
+              </button>
+            </>
+          ) : (
+            <img
+              src={ad.imageUrl}
+              alt={ad.title}
+              className="h-full w-full object-cover cursor-pointer hover:brightness-110 transition-all"
+              onClick={handleClick}
+            />
+          )}
+        </div>
+
+        {/* Contenu texte */}
+        <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-center">
+          <h2 className="text-sm sm:text-base font-extralight tracking-widest md:text-lg lg:text-xl text-slate-900 mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2">
+            {ad.title}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-3">
+            {ad.description}
+          </p>
+
+          <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
+            <div className="flex items-center text-[10px] sm:text-xs text-gray-500 w-full sm:w-auto">
+              <span>Visible pendant :</span>
+              <span className="font-medium ml-1 sm:ml-2">{displayDuration} min</span>
             </div>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleClick}
+              className="inline-flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-slate-900 hover:text-slate-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+            >
+              Voir plus
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </motion.button>
           </div>
-        </motion.article>
-      )}
-    </AnimatePresence>
+        </div>
+      </div>
+    </motion.article>
   );
 };
 
@@ -341,40 +353,43 @@ const AdvertisementPopup: React.FC<Props> = ({
     });
   };
 
+  // Filtrer les publicités qui sont encore visibles
+  const visibleAdvertisements = advertisements.filter(ad => visibleAds.has(ad.id));
+
+  if (!visible || visibleAdvertisements.length === 0) {
+    return null;
+  }
+
   return (
-    <AnimatePresence>
-      {visible && (
-        <>
-          {useListView ? (
-            // Mode liste : afficher tous les AdvertisementPopup
-            <div className="w-full">
-              {advertisements.map((ad, index) => (
-                <SingleAdvertisement
-                  key={ad.id}
-                  ad={ad}
-                  displayDuration={displayDuration}
-                  index={index}
-                  onClose={handleAdClose}
-                />
-              ))}
-            </div>
-          ) : (
-            // Mode popup classique : afficher chaque publicité individuellement
-            <div className="w-full">
-              {advertisements.map((ad, index) => (
-                <SingleAdvertisement
-                  key={ad.id}
-                  ad={ad}
-                  displayDuration={displayDuration}
-                  index={index}
-                  onClose={handleAdClose}
-                />
-              ))}
-            </div>
-          )}
-        </>
+    <div className="w-full">
+      {useListView ? (
+        // Mode liste : afficher toutes les publicités en une colonne
+        <div className="space-y-2 sm:space-y-3">
+          {visibleAdvertisements.map((ad, index) => (
+            <SingleAdvertisement
+              key={ad.id}
+              ad={ad}
+              displayDuration={displayDuration}
+              index={index}
+              onClose={handleAdClose}
+            />
+          ))}
+        </div>
+      ) : (
+        // Mode popup classique : afficher chaque publicité individuellement
+        <div className="space-y-2 sm:space-y-3">
+          {visibleAdvertisements.map((ad, index) => (
+            <SingleAdvertisement
+              key={ad.id}
+              ad={ad}
+              displayDuration={displayDuration}
+              index={index}
+              onClose={handleAdClose}
+            />
+          ))}
+        </div>
       )}
-    </AnimatePresence>
+    </div>
   );
 };
 

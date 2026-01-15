@@ -3,6 +3,7 @@ import { Palette, Camera, Hammer, Brush, ShoppingBag, ArrowRight, RefreshCw, X }
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '@/services/authService';
+import { motion } from 'framer-motion';
 
 interface ArtCard {
   id: string;
@@ -18,6 +19,48 @@ const ArtETCreationShowcase = () => {
   const navigate = useNavigate();
   const [displayedCards, setDisplayedCards] = useState<ArtCard[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  
+  // État pour la publicité
+  const [isAdVisible, setIsAdVisible] = useState(true);
+  const [adTimeRemaining, setAdTimeRemaining] = useState(120); // 2 minutes en secondes
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Timer pour la publicité
+  useEffect(() => {
+    if (!isAdVisible || isMobile) return;
+
+    const timer = setInterval(() => {
+      setAdTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsAdVisible(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isAdVisible, isMobile]);
+
+  // Formater le temps en minutes:secondes
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const allCards: ArtCard[] = [
     {
@@ -50,7 +93,7 @@ const ArtETCreationShowcase = () => {
     {
       id: 'artisanat',
       title: 'Artisanat',
-      description: 'L’art du fait main, élégant et durable.',
+      description: 'L\'art du fait main, élégant et durable.',
       icon: <Brush size={22} />,
       gradient: 'from-rose-100 via-pink-50 to-red-100',
       category: 'artisanat',
@@ -59,7 +102,7 @@ const ArtETCreationShowcase = () => {
     {
       id: 'marketplace',
       title: 'Marketplace',
-      description: 'Explorez un univers d’objets uniques et authentiques.',
+      description: 'Explorez un univers d\'objets uniques et authentiques.',
       icon: <ShoppingBag size={22} />,
       gradient: 'from-emerald-100 via-green-50 to-lime-100',
       category: 'marketplace',
@@ -86,8 +129,94 @@ const ArtETCreationShowcase = () => {
     navigate('/art-et-creation', { state: { activeTab: link } });
   };
 
+  // Fonction pour ouvrir le lien de la pub
+  const handleAdClick = () => {
+    if (AuthService.isAuthenticated()) {
+      navigate('/art-et-creation');
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
   return (
-    <section className="py-16 bg-gradient-to-b from-gray-50 via-white to-gray-100">
+    <section className="py-16 bg-gradient-to-b from-gray-50 via-white to-gray-100 relative">
+      {/* Publicité - seulement sur desktop */}
+      {!isMobile && isAdVisible && (
+        <motion.article
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25 }}
+          className="
+            hidden sm:block
+            relative w-full max-w-2xl mx-auto mb-8
+            rounded-xl border border-white/20
+            bg-gradient-to-br from-white/12 to-white/6
+            backdrop-blur-lg shadow-lg overflow-hidden
+          "
+        >
+          {/* Header */}
+          <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 text-xs">
+            <span className="px-2.5 py-1 rounded-full bg-white/25 text-black font-semibold backdrop-blur-sm">
+              Pub
+            </span>
+
+            <div className="flex items-center bg-black/35 px-2.5 py-1 rounded-full text-white backdrop-blur-sm">
+              <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {formatTime(adTimeRemaining)}
+            </div>
+
+            <button
+              onClick={() => setIsAdVisible(false)}
+              className="p-1.5 rounded-full bg-black/35 hover:bg-black/50 text-white/75 hover:text-white transition-colors"
+              aria-label="Fermer la publicité"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Contenu */}
+          <div className="flex p-4 gap-4">
+            {/* Image */}
+            <div className="w-36 h-28 rounded-lg overflow-hidden border border-black/20 flex-shrink-0">
+              <img
+                src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=500&q=80"
+                alt="Œuvres d'art exclusives"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Texte */}
+            <div className="flex-1">
+              <h2 className="text-base font-semibold text-black mb-1.5">
+                Découvrez des artistes exclusifs
+              </h2>
+
+              <p className="text-sm text-black/80 leading-relaxed mb-3">
+                Accédez à des œuvres uniques et rencontrez des créateurs talentueux.
+              </p>
+
+              <div className="flex items-center justify-between pt-3 border-t border-white/15">
+                <div className="flex items-center text-xs text-black/65">
+                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Visible : <span className="font-medium text-black">2 minutes</span></span>
+                </div>
+
+              
+              </div>
+            </div>
+          </div>
+        </motion.article>
+      )}
+
       <div className="max-w-4xl mx-auto text-center mb-12">
         <h2 className="text-3xl font-semibold text-gray-800 mb-3 tracking-tight">
           Art & Création

@@ -251,6 +251,7 @@ import EventsDiscoveriesPro from "./components/pro/Evenement&Decouverte/EventsDi
 import ExperienceDetail from "./components/components/ExperienceDetail";
 import ExperienceBooking from "./components/components/ExperienceBooking";
 import EntrepreneuriatAdmin from "./pages/admin/EntrepreneuriatAdmin";
+import ChatBot from "./components/chatbot";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -1069,6 +1070,7 @@ const App = () => {
                 )}
                 <CookieConsent />
               </Layout>
+                 <ChatBot />
             </BrowserRouter>
           </CartProvider>
         </SocketProvider>
