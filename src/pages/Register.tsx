@@ -30,6 +30,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ServoLogo from "@/components/components/ServoLogo";
+import { api } from "@/lib/axios";
 
 // Fonction de validation des mots de passe
 const validatePassword = (password: string) => {
@@ -124,7 +125,9 @@ const RegisterPage = () => {
       toast.error("Les mots de passe ne correspondent pas");
       return;
     }
+
     setIsLoading(true);
+
     try {
       const registerData = {
         firstName: formData.firstName,
@@ -139,8 +142,34 @@ const RegisterPage = () => {
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
         longitude: formData.longitude ? parseFloat(formData.longitude) : null,
       };
+
       const { user, token, route } = await register(registerData);
+
+      // ENVOYER L'EMAIL DE BIENVENUE APRES L'INSCRIPTION RÉUSSIE
+      // Dans votre handleSubmit, remplacez la partie email par :
+      try {
+        console.log("Tentative d'envoi d'email à:", formData.email);
+        const response = await api.post("/oliplus-email/send-user-welcome", {
+          email: formData.email,
+          userName: formData.firstName + " " + formData.lastName
+        });
+        console.log("Réponse email:", response.data);
+        console.log("Email de bienvenue envoyé avec succès");
+      } catch (emailError: any) {
+        console.error("ÉCHEC COMPLET de l'envoi de l'email de bienvenue:");
+        console.error("URL appelée:", emailError.config?.url);
+        console.error("Méthode:", emailError.config?.method);
+        console.error("Données envoyées:", emailError.config?.data);
+        console.error("Statut:", emailError.response?.status);
+        console.error("Réponse serveur:", emailError.response?.data);
+        console.error("Message:", emailError.message);
+
+        // Avertissement non bloquant
+        toast.warning("Compte créé mais l'email de bienvenue n'a pas pu être envoyé. L'équipe vous contactera.");
+      }
+
       navigate(route);
+
     } catch (error: any) {
       console.error("Registration failed:", error);
       toast.error(
@@ -150,6 +179,7 @@ const RegisterPage = () => {
       setIsLoading(false);
     }
   };
+
   const handleInputChange = (
     field: string,
     value: string | boolean | number[]

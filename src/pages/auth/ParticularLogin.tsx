@@ -105,6 +105,7 @@ const LoginPage = () => {
     } finally {
       setIsLoading(false);
     }
+    
   };
 
   // Fonction pour la pub
