@@ -50,7 +50,7 @@ const navigation = [
   { name: "Services", href: "/admin/services", icon: Wrench },
 
   {
-    name: "categorie de services",
+    name: "Categorie de services",
     href: "/admin/service-categories",
     icon: Tag,
   },
@@ -66,7 +66,7 @@ const navigation = [
   { name: "Demandes de services", href: "/admin/demandes", icon: FileCheck },
   { name: "Demandes de Conseil", href: "/admin/conseil", icon: UserCog },
   {
-    name: "demandes de Financements",
+    name: "Demandes de Financements",
     href: "/admin/financement-demandes",
     icon: FileText,
   },
@@ -87,7 +87,7 @@ const navigation = [
 
   // === MARKETING & COMMUNICATION ===
   { name: "Publicité", href: "/admin/publicite", icon: MessageCircle },
-  { name: "blog", href: "/admin/blog", icon: Newspaper },
+  { name: "Blog", href: "/admin/blog", icon: Newspaper },
   { name: "Portraits", href: "/admin/portraits", icon: Image },
   { name: "Gestion des Médias", href: "/admin/media", icon: Video },
   { name: "Bon Plans & Conseils", href: "/admin/conseils", icon: Lightbulb },
