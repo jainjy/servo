@@ -1,31 +1,62 @@
 @font-face {
-  font-family: 'MaPolice';
+  font-family: 'Azonix';
   src: url('/fonts/Azonix.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 .azonix {
-  font-family: 'MaPolice', sans-serif;
+  font-family: 'Azonix', sans-serif;
 }
 @font-face {
-  font-family: 'MaPolice';
+  font-family: 'Redhawk';
   src: url('/fonts/Redhawk.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 .redhawk {
-  font-family: 'MaPolice', sans-serif;
+  font-family: 'Redhawk', sans-serif;
 }
 
 @font-face {
-  font-family: 'MaPolice';
+  font-family: 'Space';
   src: url('/fonts/space.ttf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 .space {
-  font-family: 'MaPolice', sans-serif;
+  font-family: 'Space', sans-serif;
+}
+
+@font-face {
+  font-family: 'SpaceGrotesk';
+  src: url('/fonts/SpaceGrotesk.ttf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+.spaceGrotest {
+  font-family: 'SpaceGrotesk', sans-serif;
+}
+@font-face {
+  font-family: 'Bebas';
+  src: url('/fonts/Bebas.ttf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+.bebas {
+  font-family: 'Bebas', sans-serif;
+}
+@font-face {
+  font-family: 'Engagement';
+  src: url('/fonts/Engagement.ttf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+.engagment {
+  font-family: 'Engagement', sans-serif;
 }
