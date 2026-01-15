@@ -1,7 +1,36 @@
-  @keyframes servoZoom {
+@keyframes gridFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-10px) translateX(10px);
+  }
+  50% {
+    transform: translateY(5px) translateX(-5px);
+  }
+  75% {
+    transform: translateY(10px) translateX(-10px);
+  }
+}
+
+/* Variantes pour les différentes couches */
+@keyframes gridFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  33% {
+    transform: translateY(-15px) translateX(10px);
+  }
+  66% {
+    transform: translateY(10px) translateX(-15px);
+  }
+}
+
+@keyframes servoZoom {
     0% {
       transform: scale(0.8) translateZ(0);
       opacity: 0;
+      will-change: transform, opacity;
     }
 
     15% {
@@ -17,6 +46,7 @@
     100% {
       transform: scale(35) translateZ(0);
       opacity: 0;
+      will-change: auto;
     }
   }
 
@@ -66,6 +96,10 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
   }
 
   @keyframes pulse {

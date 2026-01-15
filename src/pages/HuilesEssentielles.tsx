@@ -313,22 +313,22 @@ const HuilesEssentielles = () => {
     const fetchHuilesEssentielles = async () => {
       try {
         setIsLoading(true);
-        console.log("🔍 Chargement des huiles essentielles...");
+        // console.log("🔍 Chargement des huiles essentielles...");
         
         // OPTION 2: Utiliser un endpoint spécifique pour les huiles essentielles si disponible
         try {
           const response = await api.get('/products/essential-oils');
-          console.log("📦 Réponse API spécifique huiles:", response.data);
+          // console.log("📦 Réponse API spécifique huiles:", response.data);
           
           if (response.data && Array.isArray(response.data)) {
-            console.log(`✅ ${response.data.length} huiles essentielles trouvées`);
+            // console.log(`✅ ${response.data.length} huiles essentielles trouvées`);
             setHuiles(response.data);
           } else if (response.data && response.data.products) {
-            console.log(`✅ ${response.data.products.length} huiles essentielles trouvées`);
+            // console.log(`✅ ${response.data.products.length} huiles essentielles trouvées`);
             setHuiles(response.data.products);
           }
         } catch (error) {
-          console.log("⚠️ Endpoint spécifique non disponible, utilisation de l'endpoint général");
+          // console.log("⚠️ Endpoint spécifique non disponible, utilisation de l'endpoint général");
           
           // OPTION 1: Récupérer TOUS les produits puis filtrer côté client
           const response = await api.get('/products', {
@@ -338,7 +338,7 @@ const HuilesEssentielles = () => {
             }
           });
           
-          console.log("📦 Réponse API générale:", response.data);
+          // console.log("📦 Réponse API générale:", response.data);
           
           if (response.data && response.data.products) {
             // Filtrer pour ne garder que les huiles essentielles avec une logique plus large
@@ -356,11 +356,11 @@ const HuilesEssentielles = () => {
                product.description?.toLowerCase().includes("aromatherapie"))
             );
             
-            console.log(`✅ ${huilesFiltered.length} huiles essentielles trouvées après filtrage`);
+            // console.log(`✅ ${huilesFiltered.length} huiles essentielles trouvées après filtrage`);
             
             // Si pas assez de résultats, élargir encore plus la recherche
             if (huilesFiltered.length < 5) {
-              console.log("🔄 Recherche élargie...");
+              // console.log("🔄 Recherche élargie...");
               // Ajouter une recherche plus large
               const broaderFilter = response.data.products.filter((product: any) => 
                 product.category?.toLowerCase().includes("bien-être") ||
@@ -376,7 +376,7 @@ const HuilesEssentielles = () => {
                 index === self.findIndex(p => p.id === product.id)
               );
               
-              console.log(`✅ ${uniqueResults.length} produits trouvés après recherche élargie`);
+              // console.log(`✅ ${uniqueResults.length} produits trouvés après recherche élargie`);
               setHuiles(uniqueResults);
             } else {
               setHuiles(huilesFiltered);
@@ -387,7 +387,7 @@ const HuilesEssentielles = () => {
         console.error("❌ Erreur lors du chargement des huiles essentielles:", error);
         
         // En cas d'erreur, utiliser des données mock pour le développement
-        console.log("🔄 Utilisation de données mock pour le développement");
+        // console.log("🔄 Utilisation de données mock pour le développement");
         setHuiles(getMockHuilesEssentielles());
       } finally {
         setIsLoading(false);
@@ -530,7 +530,7 @@ const HuilesEssentielles = () => {
      huile.origin?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  console.log(`📊 Total huiles: ${huiles.length}, Filtre: ${filteredHuiles.length}, Catégorie active: ${activeCategory}`);
+  // console.log(`📊 Total huiles: ${huiles.length}, Filtre: ${filteredHuiles.length}, Catégorie active: ${activeCategory}`);
 
   const handleAddToCart = async (product: HuileEssentielle) => {
     if (!user) {

@@ -232,13 +232,13 @@ const ExpertDashboardPage: React.FC = () => {
   try {
     setLoadingDemandes(true);
     
-    console.log("🔄 Chargement des demandes via expertService...");
+   // console.log("🔄 Chargement des demandes via expertService...");
     
     // Utiliser directement le service expert
     const response = await expertService.getToutesDemandesExpert();
     
     if (response.success) {
-      console.log(`✅ ${response.data.length} demandes chargées`);
+      //console.log(`✅ ${response.data.length} demandes chargées`);
       
       // Compter les types
       const counts = response.counts || {
@@ -285,7 +285,7 @@ const ExpertDashboardPage: React.FC = () => {
 
   const loadDemandesFallback = async () => {
     try {
-      console.log("🔄 Utilisation fallback...");
+      //("🔄 Utilisation fallback...");
       
       // Récupérer l'ID de l'expert
       const userInfo = await expertService.getUserInfo();
@@ -332,7 +332,7 @@ const ExpertDashboardPage: React.FC = () => {
       
       // Si aucune donnée, utiliser les données de test
       if (toutesDemandes.length === 0) {
-        console.log("📝 Utilisation données de test...");
+        
         toutesDemandes = getTestData(expertId);
       }
       
@@ -340,7 +340,7 @@ const ExpertDashboardPage: React.FC = () => {
       const stats = calculateStatistics(toutesDemandes);
       setStatistiques(stats);
       
-      console.log(`📊 Fallback - ${toutesDemandes.length} demandes chargées`);
+      //console.log(`📊 Fallback - ${toutesDemandes.length} demandes chargées`);
       
     } catch (error) {
       console.error("❌ Erreur fallback:", error);
@@ -759,20 +759,20 @@ const ExpertDashboardPage: React.FC = () => {
 
   // Test API
   const testAPI = async () => {
-    console.log("🔍 Test API en cours...");
+    //console.log("🔍 Test API en cours...");
     
     try {
       // Test 1: Récupération info expert
       const profile = await expertService.getProfile();
-      console.log("👤 Profile:", profile.success ? "OK" : "ERROR", profile.data?.id);
+      //console.log("👤 Profile:", profile.success ? "OK" : "ERROR", profile.data?.id);
       
       // Test 2: Récupération demandes expert
       const demandes = await expertService.getToutesDemandesExpert();
-      console.log("📊 Demandes:", demandes.success ? "OK" : "ERROR", demandes.data?.length);
+      // console.log("📊 Demandes:", demandes.success ? "OK" : "ERROR", demandes.data?.length);
       
       // Test 3: Vérification token
       const token = localStorage.getItem('auth-token');
-      console.log("🔑 Token:", token ? "présent" : "absent");
+      // console.log("🔑 Token:", token ? "présent" : "absent");
       
       toast.success("Tests API terminés - Voir console");
       

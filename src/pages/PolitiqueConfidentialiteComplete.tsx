@@ -128,7 +128,7 @@ Les données archivées pour conformité légale sont inaccessibles mais conserv
 • Droit à la limitation : arrêter temporairement un traitement
 • Droit à la non-décision automatisée : refuser profilage automatique
 
-Pour exercer ces droits, contactez notre DPO : dpo@servo.mg ou accédez à votre section "Gestion des droits RGPD".`,
+Pour exercer ces droits, contactez notre DPO : dpo@oliplus.re ou accédez à votre section "Gestion des droits RGPD".`,
     },
     {
       id: "securite",
@@ -154,11 +154,11 @@ Malgré ces mesures, aucune transmission internet n'est 100% sécurisée.`,
       content: `Pour toute question concernant cette politique :
 
 Délégué à la Protection des Données (DPO)
-Email : dpo@servo.mg
+Email : dpo@oliplus.re
 Téléphone : +261 XX XX XX XX
 
 Responsable Traitement
-Email : legal@servo.mg
+Email : legal@oliplus.re
 Adresse : Madagascar
 
 Autorité de Protection des Données

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { MediaService } from "../lib/api";
 import LoadingSpinner from "./Loading/LoadingSpinner";
+import AdvertisementPopup from "./AdvertisementPopup";
 
 interface VideoEpisode {
   id: string;
@@ -420,6 +421,13 @@ const PodcastsEntreprise: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section avec Image de Background */}
+      <div className="absolute top-12 left-4 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
+
+      <div className="fixed w-1/2 bottom-0 right-4 z-50">
+        <AdvertisementPopup />
+      </div>
       <div
         className="relative py-20 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}

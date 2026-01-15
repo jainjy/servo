@@ -7,11 +7,10 @@ import {
   Hammer, 
   Brush, 
   Search,
-  X,
-  Send,
-  Mail,
-  Phone
+  X
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 // Import des composants
 import ArtisanatPage from './ArtEtCreation/ArtisanatPage';
@@ -19,21 +18,25 @@ import MarketplaceCreateurs from './ArtEtCreation/MarketplaceCreateurs';
 import PeinturePage from './ArtEtCreation/PeinturePage';
 import PhotographiePage from './ArtEtCreation/PhotographiePage';
 import SculpturePage from './ArtEtCreation/SculpturePage';
-import { toast } from 'sonner'; // Ajoutez cette importation si vous utilisez sonner
 
-// Hook useAuth (à adapter selon votre implémentation)
-import { useAuth } from '@/hooks/useAuth'; // Ou créez votre propre hook
+// Import du modal existant
+import ModalDemandeVisite from '@/components/ModalDemandeVisite';
 
 const ArtEtCreation = () => {
-  const [activeTab, setActiveTab] = useState('photographie');
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('marketplace');
   const [searchQuery, setSearchQuery] = useState('');
-  const [showContactForm, setShowContactForm] = useState(false);
-  const [contactData, setContactData] = useState({
-    subject: '',
-    recipientName: ''
-  });
+  const [showDemandeVisite, setShowDemandeVisite] = useState(false);
+  const [selectedArtwork, setSelectedArtwork] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  const { user, isAuthenticated } = useAuth(); // Utilisation du hook d'authentification
+  // Afficher le modal automatiquement si l'utilisateur n'est pas connecté
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    }
+  }, [isAuthenticated]);
 
   const tabs = [
     { id: 'photographie', label: 'Photographie', icon: <Camera size={18} /> },
@@ -92,31 +95,28 @@ const ArtEtCreation = () => {
     sculpture: 'Rechercher un sculpteur...',
   };
 
-  const handleContactClick = (subject = '', recipientName = '') => {
-    if (!isAuthenticated) {
-      toast.error('Veuillez vous connecter pour contacter un créateur.');
-      return;
-    }
-    
-    setContactData({
-      subject,
-      recipientName
-    });
-    setShowContactForm(true);
+  // Fonction pour ouvrir le modal de demande de visite
+  const handleOpenDemandeVisite = (artwork: any) => {
+    setSelectedArtwork(artwork);
+    setShowDemandeVisite(true);
   };
 
-  const handleCloseContactForm = () => {
-    setShowContactForm(false);
-    setContactData({
-      subject: '',
-      recipientName: ''
-    });
+  // Fonction appelée après succès de la demande
+  const handleDemandeSuccess = (artworkId: string) => {
+    //console.log(`Demande envoyée pour l'œuvre ${artworkId}`);
+    
+  };
+
+  // Fonction de suivi du contact (optionnel)
+  const handlePropertyContact = (property: any) => {
+    //console.log('Contact tracké pour:', property);
+    // Ici vous pouvez ajouter du tracking analytique
   };
 
   const getActiveComponent = () => {
     const commonProps = {
       searchQuery,
-      onContactClick: handleContactClick
+      onContactClick: handleOpenDemandeVisite // Utiliser le nouveau handler
     };
 
     switch (activeTab) {
@@ -131,7 +131,7 @@ const ArtEtCreation = () => {
       case 'marketplace':
         return <MarketplaceCreateurs {...commonProps} />;
       default:
-              return <PhotographiePage {...commonProps} />;
+        return <MarketplaceCreateurs {...commonProps} />;
     }
   };
 
@@ -221,296 +221,72 @@ const ArtEtCreation = () => {
         {getActiveComponent()}
       </div>
 
-      {/* MODAL DE CONTACT - Intégré directement */}
-      {showContactForm && (
-        <ContactFormModal
-          contactData={contactData}
-          onClose={handleCloseContactForm}
-          user={user}
-          isAuthenticated={isAuthenticated}
+      {/* MODAL DE DEMANDE DE VISITE */}
+      {selectedArtwork && (
+        <ModalDemandeVisite
+          open={showDemandeVisite}
+          onClose={() => {
+            setShowDemandeVisite(false);
+            setSelectedArtwork(null);
+          }}
+          property={selectedArtwork}
+          onSuccess={handleDemandeSuccess}
+          onPropertyContact={handlePropertyContact}
         />
       )}
-    </div>
-  );
-};
 
-// Composant modal intégré avec pré-remplissage automatique
-const ContactFormModal = ({ contactData, onClose, user, isAuthenticated }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    prenom: '',
-    email: '',
-    phone: '',
-    message: ''
-  });
-
-  // Pré-remplir automatiquement avec les données de l'utilisateur connecté
-  useEffect(() => {
-    if (user && isAuthenticated) {
-      // Séparer le nom complet si nécessaire
-      let firstName = user.firstName || '';
-      let lastName = user.lastName || '';
-      
-      // Si vous avez un champ fullName, vous pouvez le diviser
-      if (!firstName && !lastName && user.fullName) {
-        const nameParts = user.fullName.trim().split(' ');
-        firstName = nameParts[0] || '';
-        lastName = nameParts.slice(1).join(' ') || '';
-      }
-
-      setFormData(prev => ({
-        ...prev,
-        name: lastName,
-        prenom: firstName,
-        email: user.email || '',
-        phone: user.phone || user.telephone || user.mobile || ''
-      }));
-    } else {
-      // Réinitialiser si l'utilisateur n'est pas connecté
-      setFormData({
-        name: '',
-        prenom: '',
-        email: '',
-        phone: '',
-        message: ''
-      });
-    }
-  }, [user, isAuthenticated]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!isAuthenticated) {
-      toast.error('Veuillez vous connecter pour envoyer un message.');
-      return;
-    }
-
-    // Ajouter les infos de contact au message
-    const completeData = {
-      ...formData,
-      contactSubject: contactData.subject || 'Demande de contact',
-      contactRecipient: contactData.recipientName || 'Équipe Art & Création'
-    };
-    
-    console.log('Form submitted:', completeData);
-    // Ici vous pouvez ajouter la logique d'envoi vers votre API
-    // Exemple: api.post('/messages/contact', completeData);
-    
-    toast.success('Message envoyé avec succès!');
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden max-h-[90vh] my-auto">
-        {/* Header */}
-        <div className="p-6 border-b flex justify-between items-center"
-       style={{ borderColor: '#D3D3D3', backgroundColor: '#556B2F' }}>
-          <div>
-            <h2 className="text-xl font-bold text-white">
-              Contacter {contactData.recipientName || 'le créateur'}
-            </h2>
-            <p className="text-white/80 text-sm mt-1">
-              {contactData.subject || 'Demande de contact'}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-white/20 transition-colors"
-          >
-            <X size={24} className="text-white" />
-          </button>
-        </div>
-
-        {/* Form */}
-         <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
-           <form onSubmit={handleSubmit} className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Nom */}
-            <div>
-              <label htmlFor="name" className="block mb-2 font-medium text-[#8B4513]">
-                Nom
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
-                  style={{ 
-                    borderColor: '#D3D3D3',
-                    backgroundColor: isAuthenticated ? '#F9FAFB' : '#FFFFFF'
-                  }}
-                  placeholder="Votre nom"
-                  disabled={isAuthenticated && user?.lastName}
-                />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                  <User size={18} style={{ color: '#8B4513' }} />
-                </div>
+      {/* MODAL D'AUTHENTIFICATION */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all duration-300">
+          <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 animate-fade-in-up">
+            {/* Icon decorative */}
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <div className="w-12 h-12 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] rounded-full flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
               </div>
-              {isAuthenticated && user?.lastName && (
-                <p className="text-xs text-gray-500 mt-1">Pré-rempli depuis votre profil</p>
-              )}
             </div>
-
-            {/* Prénom */}
-            <div>
-              <label htmlFor="prenom" className="block mb-2 font-medium text-[#8B4513]">
-                Prénom
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="prenom"
-                  name="prenom"
-                  value={formData.prenom}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
-                  style={{ 
-                    borderColor: '#D3D3D3',
-                    backgroundColor: isAuthenticated ? '#F9FAFB' : '#FFFFFF'
-                  }}  
-                  placeholder="Votre prénom"
-                  disabled={isAuthenticated && user?.firstName}
-                />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                  <User size={18} style={{ color: '#8B4513' }} />
-                </div>
-              </div>
-              {isAuthenticated && user?.firstName && (
-                <p className="text-xs text-gray-500 mt-1">Pré-rempli depuis votre profil</p>
-              )}
+            
+            <div className="mb-8 pt-4">
+              <h2 className="text-3xl font-bold text-gray-900 text-center mb-2 tracking-tight">
+                Connexion requise
+              </h2>
+              <div className="w-20 h-1 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] mx-auto rounded-full"></div>
             </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block mb-2 font-medium text-[#8B4513]">
-                Email
-              </label>
-              <div className="relative">
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
-                  style={{ 
-                    borderColor: '#D3D3D3',
-                    backgroundColor: isAuthenticated ? '#F9FAFB' : '#FFFFFF'
-                  }}
-                  placeholder="votre@email.com"
-                  disabled={isAuthenticated && user?.email}
-                />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                  <Mail size={18} style={{ color: '#8B4513' }} />
-                </div>
-              </div>
-              {isAuthenticated && user?.email && (
-                <p className="text-xs text-gray-500 mt-1">Pré-rempli depuis votre profil</p>
-              )}
-            </div>
-
-            {/* Téléphone */}
-            <div>
-              <label htmlFor="phone" className="block mb-2 font-medium text-[#8B4513]">
-                Téléphone
-              </label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
-                  style={{ 
-                    borderColor: '#D3D3D3',
-                    backgroundColor: isAuthenticated ? '#F9FAFB' : '#FFFFFF'
-                  }}
-                  placeholder="0260023020"
-                  disabled={isAuthenticated && (user?.phone || user?.telephone || user?.mobile)}
-                />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                  <Phone size={18} style={{ color: '#8B4513' }} />
-                </div>
-              </div>
-              {isAuthenticated && (user?.phone || user?.telephone || user?.mobile) && (
-                <p className="text-xs text-gray-500 mt-1">Pré-rempli depuis votre profil</p>
-              )}
-            </div>
-          </div>
-
-          {/* Message */}
-          <div className="mb-6">
-            <label htmlFor="message" className="block mb-2 font-medium text-[#8B4513]">
-              Message
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              required
-              rows={4}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
-              style={{ 
-                borderColor: '#D3D3D3',
-                backgroundColor: '#FFFFFF'
-              }}
-              placeholder={`Votre message à ${contactData.recipientName || 'notre équipe'}...`}
-            />
-          </div>
-
-          {/* Info connexion */}
-          {!isAuthenticated && (
-            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-yellow-800 text-sm">
-                💡 <strong>Astuce :</strong> Connectez-vous pour pré-remplir automatiquement vos informations de contact.
+            
+            <div className="mb-10">
+              <p className="text-gray-600 text-base text-center leading-relaxed px-4">
+                Connectez-vous pour explorer nos créateurs et services d'art et de création.
               </p>
             </div>
-          )}
 
-          {/* Buttons */}
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-3 border rounded-lg font-medium hover:bg-gray-50 transition-colors"
-              style={{ 
-                borderColor: '#556B2F',
-                color: '#556B2F'
-              }}
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-3 rounded-lg text-white font-medium flex items-center hover:bg-[#5A7A1F] transition-colors disabled:opacity-50"
-              style={{ backgroundColor: '#6B8E23' }}
-              disabled={!isAuthenticated}
-            >
-              <Send size={18} className="mr-2" />
-              {isAuthenticated ? 'Envoyer le message' : 'Connectez-vous pour envoyer'}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => {
+                  navigate('/');
+                  setShowAuthModal(false);
+                }}
+                className="flex-1 px-6 py-4 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                annuler
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/login');
+                  setShowAuthModal(false);
+                }}
+                className="flex-1 px-6 py-4 text-sm font-semibold text-white bg-gradient-to-r from-[#556B2F] to-[#6B8E23] rounded-xl hover:from-[#6B8E23] hover:to-[#7aa028] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl transform"
+              >
+                Continuer
+              </button>
+            </div>
+            
+            {/* Decorative elements */}
+            <div className="absolute -z-10 -inset-0.5 bg-gradient-to-r from-[#556B2F]/20 to-[#6B8E23]/20 rounded-2xl blur opacity-30"></div>
           </div>
-        </form>
-       </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 };

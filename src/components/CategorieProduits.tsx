@@ -32,7 +32,7 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useCart } from "@/hooks/useCart";
+import { useCart } from "../components/contexts/CartContext";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
@@ -118,47 +118,44 @@ const CategorieProduits = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
+      <div className="min-h-screen pt-16 bg-[#FFFFFF0] flex items-center justify-center">
         <div className=" py-12 flex flex-col justify-center items-center">
           <img src="/loading.gif" alt="" className='w-24 h-24' />
-          <p className="text-gray-500 mt-4">Chargement des produits...</p>
+          <p className="text-[#8B4513] mt-4">Chargement des produits...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-16 bg-[#F6F8FA]">
+    <div className="min-h-screen pt-16 bg-[#FFFFFF0]">
       <div className="container mx-auto px-4 py-8">
         {/* En-tête de la catégorie */}
         <div className="mb-8">
-
-
-          <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
+          <div className="bg-white rounded-3xl p-6 border-b border-[#D3D3D3]">
             <div className="flex justify-between items-center">
               <div className="flex items-center justify-center gap-3">
                 {category?.iconName && (
-                  <div className="p-2 rounded-xl bg-[#0052FF]/10">
+                  <div className="p-2 rounded-xl bg-[#556B2F]/10">
                     {(() => {
                       const IconComponent = getIconByName(category.iconName);
-                      return <IconComponent className="h-6 w-6 text-[#0052FF]" />;
+                      return <IconComponent className="h-6 w-6 text-[#556B2F]" />;
                     })()}
                   </div>
                 )}
                 <Button
                   variant="ghost"
                   onClick={() => navigate(-1)}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                  className="flex items-center gap-2 text-[#8B4513] hover:text-[#556B2F] hover:bg-[#6B8E23]/10"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Retour
                 </Button>
                 <div>
-
-                  <h2 className="text-2xl font-bold text-[#0A0A0A]">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     {category?.name || decodeURIComponent(categoryName)}
                   </h2>
-                  <p className="text-[#5A6470] text-xs">
+                  <p className="text-[#8B4513] text-xs">
                     {category?.description || "Découvrez tous nos produits dans cette catégorie"}
                   </p>
                 </div>
@@ -168,41 +165,50 @@ const CategorieProduits = () => {
         </div>
 
         {/* Produits de la catégorie */}
-        <div className="bg-white rounded-3xl p-6">
+        <div className="bg-white rounded-3xl p-6 border border-[#D3D3D3]">
           {products && products.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
-                <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm">
+                <Card 
+                  key={product.id} 
+                  className="p-4 hover:shadow-lg transition-shadow group border border-[#D3D3D3] shadow-sm hover:border-[#6B8E23]/30"
+                >
                   {product.images && product.images.length > 0 ? (
                     <div
                       className="w-full h-48 bg-cover bg-center rounded-lg mb-4"
                       style={{ backgroundImage: `url(${product.images[0]})` }}
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg mb-4 flex items-center justify-center">
-                      <Package className="h-12 w-12 text-primary/40" />
+                    <div className="w-full h-48 bg-gradient-to-br from-[#6B8E23]/20 to-[#556B2F]/10 rounded-lg mb-4 flex items-center justify-center">
+                      <Package className="h-12 w-12 text-[#556B2F]/40" />
                     </div>
                   )}
 
-                  <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-[#0052FF] transition-colors">
+                  <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-[#556B2F] transition-colors">
                     {product.name}
                   </h3>
 
-                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {product.description}
                   </p>
 
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-2xl font-bold text-[#0052FF]">
+                    <span className="text-2xl font-bold text-[#556B2F]">
                       €{product.price}
                     </span>
-                    <Badge variant={product.quantity > 0 ? "default" : "destructive"}>
+                    <Badge 
+                      className={
+                        product.quantity > 0 
+                          ? "bg-[#6B8E23]/10 text-[#556B2F] border border-[#6B8E23]/30" 
+                          : "bg-red-100 text-red-800 border border-red-300"
+                      }
+                    >
                       {product.quantity > 0 ? "En stock" : "Rupture"}
                     </Badge>
                   </div>
 
                   {product.vendor?.companyName && (
-                    <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 mb-4 text-sm text-[#8B4513]">
                       <ShoppingCart className="h-4 w-4" />
                       <span>{product.vendor.companyName}</span>
                     </div>
@@ -210,7 +216,7 @@ const CategorieProduits = () => {
 
                   {/* Bouton Ajouter au panier */}
                   <Button
-                    className="w-full bg-slate-900 hover:bg-slate-700 text-white transition-all duration-300 group-hover:scale-105 shadow-md"
+                    className="w-full bg-[#556B2F] hover:bg-[#6B8E23] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
                     onClick={() => handleAddToCart(product)}
                     disabled={product.quantity === 0 || addingProductId === product.id}
                   >
@@ -231,14 +237,13 @@ const CategorieProduits = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucun produit trouvé</h3>
-              <p className="text-muted-foreground">
+              <Package className="h-16 w-16 text-[#8B4513] mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Aucun produit trouvé</h3>
+              <p className="text-[#8B4513]">
                 Aucun produit disponible dans cette catégorie pour le moment.
               </p>
             </div>
           )}
-
         </div>
       </div>
     </div>

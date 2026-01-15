@@ -1,63 +1,278 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Home, TrendingUp, Package, User2Icon, ArrowUpRight } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-house.jpg";
 import "../styles/font.css";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
 import Recherche from "@/pages/Recherche";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 gsap.registerPlugin(SplitText);
 
 // Définition des couleurs
 const colors = {
-  logoAccent: '#556B2F',
-  sruvol: '#6B8E23',
-  pageBg: '#FFFFFF',
-  separators: '#D3D3D3',
-  premium: '#884513',
+  logoAccent: "#556B2F",
+  sruvol: "#6B8E23",
+  pageBg: "#FFFFFF",
+  separators: "#D3D3D3",
+  premium: "#884513",
 };
 
 // URL de l'image en dessin
 const sketchImageUrl = "/2em.png";
 
+// Composant AdCard local
+const LocalAdCard = () => {
+  const [isVisible, setIsVisible] = useState<boolean | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(2 * 60);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      setIsVisible(false);
+      return;
+    }
+
+    const savedState = sessionStorage.getItem("adCardState");
+    
+    if (savedState) {
+      try {
+        const { isVisible: savedIsVisible, timeRemaining: savedTime, startTime } = JSON.parse(savedState);
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        const newTimeRemaining = Math.max(0, savedTime - elapsedTime);
+        
+        setIsVisible(savedIsVisible);
+        setTimeRemaining(newTimeRemaining);
+      } catch (error) {
+        console.error("Erreur lors du chargement:", error);
+        setIsVisible(true);
+      }
+    } else {
+      setIsVisible(true);
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isVisible === null || isMobile) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        let newTime = prev - 1;
+        let newIsVisible = isVisible;
+
+        if (newTime <= 0) {
+          newIsVisible = !isVisible;
+          newTime = newIsVisible ? 2 * 60 : 8 * 60;
+          setIsVisible(newIsVisible);
+        }
+
+        sessionStorage.setItem("adCardState", JSON.stringify({
+          isVisible: newIsVisible,
+          timeRemaining: newTime,
+          startTime: Date.now()
+        }));
+
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isVisible, isMobile]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  if (isVisible === null) {
+    return <div className="w-full min-h-[140px] bg-gray-100 rounded-2xl animate-pulse" />;
+  }
+
+  if (!isVisible || isMobile) {
+    return null;
+  }
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.25 }}
+      className="
+        hidden sm:block
+        relative w-full max-w-2xl mx-auto
+        rounded-xl border border-white/20
+        bg-gradient-to-br from-white/12 to-white/6
+        backdrop-blur-lg shadow-lg overflow-hidden z-40 mb-4
+      "
+    >
+      {/* Header */}
+      <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 text-xs">
+        <span className="px-2.5 py-1 rounded-full bg-white/25 text-white font-semibold backdrop-blur-sm">
+          Pub
+        </span>
+
+        <div className="flex items-center bg-black/35 px-2.5 py-1 rounded-full text-white backdrop-blur-sm">
+          <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          {formatTime(timeRemaining)}
+        </div>
+
+        <button
+          onClick={() => setIsVisible(false)}
+          className="p-1.5 rounded-full bg-black/35 hover:bg-black/50 text-white/75 hover:text-white transition-colors"
+          aria-label="Fermer la publicité"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Contenu */}
+      <div className="flex p-4 gap-4">
+        {/* Image */}
+        <div className="w-36 h-28 rounded-lg overflow-hidden border border-white/20 flex-shrink-0">
+          <img
+            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            alt="Offre spéciale"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Texte */}
+        <div className="flex-1">
+          <h2 className="text-base font-semibold text-white mb-1.5">
+            Offres spéciales
+          </h2>
+
+          <p className="text-sm text-white/80 leading-relaxed mb-3">
+            Bénéficiez de réductions exclusives sur nos meilleurs services.
+          </p>
+
+          <div className="flex items-center justify-between pt-3 border-t border-white/15">
+            <div className="flex items-center text-xs text-white/65">
+              <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>Visible : <span className="font-medium text-white">2 minutes</span></span>
+            </div>
+
+        
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+};
+
 const Hero = () => {
+  const [heroQuery, setHeroQuery] = useState("");
   const navigate = useNavigate();
+
+  const [isRevealing, setIsRevealing] = useState(false);
+  const [mouseInactive, setMouseInactive] = useState(false);
+  const mouseInactiveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const heroRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [heroQuery, setHeroQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [revealRadius, setRevealRadius] = useState(0);
-  const [isRevealing, setIsRevealing] = useState(false);
-  const [alwaysRevealing, setAlwaysRevealing] = useState(false);
   const [waveOffset, setWaveOffset] = useState(0);
+  const [revealRadius, setRevealRadius] = useState(0);
   const animationRef = useRef<number | null>(null);
-  const mouseInactiveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [mouseTrail, setMouseTrail] = useState<
+    Array<{
+      id: number;
+      x: number;
+      y: number;
+      size: number;
+      life: number;
+      timestamp: number;
+      offsetX: number;
+      offsetY: number;
+    }>
+  >([]);
+  const [randomReveals, setRandomReveals] = useState<
+    Array<{
+      id: number;
+      x: number;
+      y: number;
+      size: number;
+      life: number;
+      createdAt: number;
+    }>
+  >([]);
+
+  const trailIdRef = useRef(0);
+  const randomIdRef = useRef(0);
+  const lastMouseMoveTime = useRef(Date.now());
+  const [alwaysRevealing, setAlwaysRevealing] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Animation de l'onde et du rayon de révélation
+  // Animation de l'onde, des traces et du rayon de révélation
   useEffect(() => {
+    let mounted = true;
+
     const animate = () => {
-      setWaveOffset(prev => prev + 0.02);
+      if (!mounted) return;
+
+      setWaveOffset((prev) => prev + 0.02);
 
       if (isRevealing || alwaysRevealing) {
-        setRevealRadius(prev => {
+        setRevealRadius((prev) => {
           if (prev < 100) {
             return prev + (100 - prev) * 0.07;
           }
           return prev;
         });
       } else if (revealRadius > 0) {
-        setRevealRadius(prev => prev * 0.92);
+        setRevealRadius((prev) => prev * 0.92);
       }
+
+      setMouseTrail((prev) =>
+        prev
+          .map((trail) => ({
+            ...trail,
+            life: trail.life - 0.018,
+            size: trail.size * 0.985,
+            x: trail.x + Math.sin(waveOffset + trail.id) * 0.5,
+            y: trail.y + Math.cos(waveOffset + trail.id) * 0.3,
+          }))
+          .filter((trail) => trail.life > 0)
+      );
+
+      setRandomReveals((prev) =>
+        prev
+          .map((reveal) => ({
+            ...reveal,
+            life: reveal.life - 0.009,
+            size: reveal.size * 1.008,
+          }))
+          .filter((reveal) => reveal.life > 0)
+      );
 
       animationRef.current = requestAnimationFrame(animate);
     };
@@ -65,11 +280,63 @@ const Hero = () => {
     animationRef.current = requestAnimationFrame(animate);
 
     return () => {
+      mounted = false;
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isRevealing, revealRadius, alwaysRevealing, waveOffset]);
+  }, [
+    isRevealing,
+    mouseTrail.length,
+    randomReveals.length,
+    revealRadius,
+    alwaysRevealing,
+    waveOffset,
+  ]);
+
+  // Ajouter une trace au déplacement de la souris
+  const addTrailPoint = useCallback((x: number, y: number) => {
+    const now = Date.now();
+    if (now - lastMouseMoveTime.current < 50) return;
+
+    lastMouseMoveTime.current = now;
+
+    trailIdRef.current += 1;
+    setMouseTrail((prev) => {
+      const offsetX = (Math.random() - 0.5) * 60;
+      const offsetY = (Math.random() - 0.5) * 60;
+
+      const newTrail = {
+        id: trailIdRef.current,
+        x: x + offsetX,
+        y: y + offsetY,
+        size: 90 + Math.random() * 70,
+        life: 1,
+        timestamp: now,
+        offsetX,
+        offsetY,
+      };
+
+      return [...prev.slice(-14), newTrail];
+    });
+  }, []);
+
+  // Créer une révélation aléatoire
+  const createRandomReveal = useCallback(() => {
+    randomIdRef.current += 1;
+    setRandomReveals((prev) => {
+      const newReveal = {
+        id: randomIdRef.current,
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        size: 70 + Math.random() * 100,
+        life: 1,
+        createdAt: Date.now(),
+      };
+
+      return [...prev.slice(-7), newReveal];
+    });
+  }, []);
 
   // Générer des révélations aléatoires
   useEffect(() => {
@@ -77,35 +344,51 @@ const Hero = () => {
       setAlwaysRevealing(true);
     }, 3000);
 
+    const interval = setInterval(() => {
+      if (Math.random() > 0.4) {
+        createRandomReveal();
+      }
+    }, 800);
+
     return () => {
       clearTimeout(alwaysActiveTimeout);
+      clearInterval(interval);
     };
-  }, []);
+  }, [createRandomReveal]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const x = e.clientX;
-    const y = e.clientY;
-    setMousePosition({ x, y });
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      setMousePosition({ x, y });
 
-    setIsRevealing(true);
-    setAlwaysRevealing(false);
+      setIsRevealing(true);
+      setMouseInactive(false);
+      setAlwaysRevealing(false);
 
-    if (mouseInactiveTimeoutRef.current) {
-      clearTimeout(mouseInactiveTimeoutRef.current);
-    }
+      addTrailPoint(x, y);
 
-    mouseInactiveTimeoutRef.current = setTimeout(() => {
-      setIsRevealing(false);
-      setTimeout(() => {
-        setAlwaysRevealing(true);
-      }, 2000);
-    }, 1000);
-  }, []);
+      if (mouseInactiveTimeoutRef.current) {
+        clearTimeout(mouseInactiveTimeoutRef.current);
+      }
+
+      mouseInactiveTimeoutRef.current = setTimeout(() => {
+        setMouseInactive(true);
+        setIsRevealing(false);
+        setTimeout(() => {
+          setAlwaysRevealing(true);
+        }, 2000);
+      }, 1000);
+    },
+    [addTrailPoint]
+  );
 
   const handleMouseLeave = useCallback(() => {
     setIsRevealing(false);
+    setMouseInactive(false);
     if (mouseInactiveTimeoutRef.current) {
       clearTimeout(mouseInactiveTimeoutRef.current);
+      mouseInactiveTimeoutRef.current = null;
     }
     setTimeout(() => {
       setAlwaysRevealing(true);
@@ -121,317 +404,381 @@ const Hero = () => {
       setScrollProgress(progress);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Calcul de l'onde
+  const getWaveDistortion = (x: number, y: number, time: number) => {
+    const amplitude = isRevealing || alwaysRevealing ? 12 : 0;
+    const frequency = 0.007;
+    return Math.sin(x * frequency + y * frequency + time) * amplitude;
+  };
+
+  // Effet GSAP pour éviter l'erreur
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const timer = setTimeout(() => {
+        const loadingText = document.querySelector(".loading-text");
+        if (loadingText) {
+          gsap.to(loadingText, {
+            duration: 1,
+            opacity: 0.3,
+            yoyo: true,
+            repeat: -1,
+            ease: "power1.inOut"
+          });
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   return (
     <>
       <style>{`
-        @keyframes slideInLeft {
-          from {
+        @keyframes wave-pulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.7;
+          }
+          50% {
+            transform: scale(1.05);
+            opacity: 0.9;
+          }
+        }
+
+        @keyframes trail-fade {
+          0% {
+            opacity: 0.95;
+            transform: scale(1) rotate(0deg);
+          }
+          100% {
             opacity: 0;
-            transform: translateX(-60px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
+            transform: scale(1.25) rotate(5deg);
           }
         }
 
-        @keyframes slideInRight {
-          from {
+        @keyframes random-reveal {
+          0% {
             opacity: 0;
-            transform: translateX(60px);
+            transform: scale(0.4) rotate(0deg);
           }
-          to {
-            opacity: 1;
-            transform: translateX(0);
+          15% {
+            opacity: 0.9;
+            transform: scale(1) rotate(180deg);
           }
-        }
-
-        @keyframes fadeInUp {
-          from {
+          85% {
+            opacity: 0.9;
+            transform: scale(1) rotate(180deg);
+          }
+          100% {
             opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
+            transform: scale(1.4) rotate(360deg);
           }
         }
 
-        .hero-title {
-          animation: slideInLeft 0.8s ease-out;
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-5px) rotate(1deg);
+          }
         }
 
-        .hero-subtitle {
-          animation: slideInLeft 0.8s ease-out 0.2s both;
+        .wave-distortion {
+          filter: url(#wave-filter);
+          transition: filter 0.3s ease-out;
         }
 
-        .hero-description {
-          animation: fadeInUp 0.8s ease-out 0.4s both;
+        .trail-point {
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+          animation: trail-fade linear forwards, float 3s ease-in-out infinite;
+          mix-blend-mode: multiply;
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 255, 255, 0.75) 20%,
+            rgba(255, 255, 255, 0.5) 50%,
+            transparent 80%
+          );
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          overflow: hidden;
+          box-shadow: 
+            0 0 25px rgba(255, 255, 255, 0.5),
+            0 0 50px rgba(255, 255, 255, 0.3),
+            inset 0 0 30px rgba(255, 255, 255, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .hero-cta {
-          animation: fadeInUp 0.8s ease-out 0.6s both;
+        .random-reveal {
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+          animation: random-reveal linear forwards, float 4s ease-in-out infinite;
+          mix-blend-mode: multiply;
+          overflow: hidden;
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.9) 0%,
+            rgba(255, 255, 255, 0.6) 40%,
+            transparent 80%
+          );
+          box-shadow: 
+            0 0 30px rgba(255, 255, 255, 0.6),
+            0 0 60px rgba(255, 255, 255, 0.4);
+          border: 1.5px solid rgba(255, 255, 255, 0.4);
         }
 
-        .hero-card {
-          animation: slideInRight 0.8s ease-out 0.3s both;
+        .reveal-mask {
+          clip-path: circle(var(--reveal-radius, 0px) at var(--mouse-x, 50%) var(--mouse-y, 50%));
+          transition: clip-path 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .grayscale-image {
-          filter: grayscale(100%) brightness(0.9) contrast(1.1);
+        .reveal-overlay {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(
+            circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+            rgba(255, 255, 255, 0.4) 0%,
+            rgba(255, 255, 255, 0.2) 40%,
+            transparent 80%
+          );
+          mix-blend-mode: overlay;
+          opacity: var(--reveal-opacity, 0);
+          transition: opacity 0.3s ease-out;
         }
       `}</style>
 
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-screen h-96 w-full overflow-hidden bg-gradient-to-b from-gray-900 via-gray-800 to-black"
+        className="relative h-[500px] lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Background Image with Grayscale Effect */}
-        <div className="absolute inset-0 w-full h-full">
-          <img
+        {/* Filtre SVG pour l'effet d'onde */}
+        <svg style={{ display: "none" }}>
+          <defs>
+            <filter
+              id="wave-filter"
+              x="-20%"
+              y="-20%"
+              width="140%"
+              height="140%"
+            >
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.007 0.007"
+                numOctaves="3"
+                seed={Math.floor(waveOffset * 10)}
+                result="noise"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="noise"
+                scale={isRevealing || alwaysRevealing ? 7 : 0}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+              <feGaussianBlur stdDeviation="0.5" />
+            </filter>
+          </defs>
+        </svg>
+        
+        <div
+          className="absolute inset-0 w-full h-full overflow-hidden"
+          style={{
+            transform: `translateY(${scrollProgress * 20}px)`,
+            transition: "transform 0.2s ease-out",
+          }}
+        >
+          <motion.img
             src={heroImage}
             alt="Background"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              transform: `translateY(${scrollProgress * 30}px)`,
-            }}
-          />
-          {/* Dark Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
-        </div>
-
-        {/* Content Container */}
-        <div className="relative z-20 h-full min-h-screen flex items-start pt-32 lg:items-center lg:pt-0">
-          <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
-              {/* Left Content */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8 }}
-                className="space-y-4  lg:space-y-6"
-              >
-
-                {/* Main Title */}
-                <div className="space-y-4">
-                  <motion.h1
-                    initial={{ opacity: 0, x: -40 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.1 }}
-                    className="hero-title space text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white leading-tight"
-                  >
-                    Votre plateforme
-                    <br />
-                    <span className="text-gray-500">
-                      du quotidien
-                    </span>
-                  </motion.h1>
-                </div>
-
-                {/* Search Input Overlay */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
-                  className="mx-auto max-w-2xl w-full px-4 pointer-events-auto mt-4"
-                  onClick={openModal}
-                >
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-lg rounded-full p-2 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-300">
-                    <div className="flex-1 flex items-center">
-                      <Search className="ml-4 h-5 w-5 text-white/70 flex-shrink-0" />
-                      <Input
-                        value={heroQuery}
-                        onChange={(e) => setHeroQuery(e.target.value)}
-                        placeholder="Recherche avancée..."
-                        className="pl-3 pr-4 h-12 bg-transparent border-0 text-white placeholder:text-white/60 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
-                      />
-                    </div>
-
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Button
-                        className="h-12 px-6 rounded-full font-medium flex items-center gap-2 hover:shadow-lg transition-all duration-300"
-                        style={{
-                          backgroundColor: colors.sruvol,
-                          color: 'white',
-                          boxShadow: '0 4px 15px rgba(104, 142, 35, 0.4)'
-                        }}
-                      >
-                        <span>Rechercher</span>
-                        <ArrowUpRight className="h-5 w-5 transform rotate-30" />
-                      </Button>
-                    </motion.div>
-                  </div>
-                </motion.div>
-
-              </motion.div>
-
-              {/* Right Card - Service Cards */}
-              <motion.div
-                initial={{ opacity: 0, x: 60 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="hero-card hidden lg:block w-3/4 py-5"
-              >
-                <div className="grid grid-cols-2 grid-rows-4 mt-5">
-                  {[
-                    {
-                      icon: Home,
-                      title: "Annonces Immobilières",
-                      description: "Trouver votre futur logement",
-                      href: "/immobilier"
-                    },
-                    {
-                      icon: TrendingUp,
-                      title: "Services professionnels",
-                      description: "Trouver un professionnel",
-                      href: "/service"
-                    },
-                    {
-                      icon: Package,
-                      title: "Décoration & Mobilier",
-                      description: "Tous les produits pour la maison",
-                      href: "/produits"
-                    },
-                    {
-                      icon: User2Icon,
-                      title: "Vivre à la réunion",
-                      description: "Une douceur de vie tropicale",
-                      href: "/tourisme"
-                    },
-                  ].map((service, index) => {
-                    const colStart = index % 2 === 0 ? 'col-start-1' : 'col-start-2';
-                    const rowStart = index === 0 ? 'row-start-1' : index === 1 ? 'row-start-2' : index === 2 ? 'row-start-3' : 'row-start-4';
-                    
-                    return (
-                      <Link to={service.href} key={service.title} className={`no-underline ${colStart} ${rowStart}`}>
-                        <Card
-                          className="
-                            p-2 lg:p-3
-                            text-center flex flex-col items-center justify-center
-                            hover:shadow-2xl shadow-lg transition-all duration-500
-                            cursor-pointer
-                            bg-transparent hover:bg-white/10
-                            group relative overflow-hidden border-b-0 border-r-0
-                            h-full min-h-[110px]
-                          "
-                        >
-                          {/* Effet de fond animé */}
-                          <div className="absolute inset-0 backdrop-blur-xl bg-gradient-to-tr from-black via-transparent to-white"></div>
-
-                          {/* Icône */}
-                          <div className="relative mb-2 z-10">
-                            <div className="
-                              rounded-2xl bg-gradient-to-br from-white/20 to-white/10
-                              flex items-center justify-center
-                              transition-all duration-500 group-hover:from-white/30 group-hover:to-white/15
-                              group-hover:scale-110 group-hover:rotate-3
-                              w-12 h-12
-                              border border-white/30
-                            ">
-                              <service.icon className="
-                                transition-transform duration-500
-                                h-6 w-6
-                                text-white
-                                group-hover:scale-110
-                              " />
-                            </div>
-                          </div>
-
-                          {/* Contenu */}
-                          <div className="relative z-10 flex-1 w-full">
-                            <h3 className="
-                              font-bold text-white text-center group-hover:text-white
-                              transition-colors duration-300
-                              text-xs lg:text-sm
-                              mb-1
-                              line-clamp-2
-                            ">
-                              {service.title}
-                            </h3>
-
-                            <p className="
-                              text-white/70 leading-tight text-center
-                              text-xs
-                              line-clamp-2
-                              opacity-80 group-hover:opacity-100
-                              transition-opacity duration-300
-                            ">
-                              {service.description}
-                            </p>
-                          </div>
-
-                          {/* Indicateur hover */}
-                          <div className="
-                            absolute bottom-0 left-1/2 transform -translate-x-1/2
-                            w-0 h-0.5 bg-white
-                            group-hover:w-4/5 transition-all duration-500
-                          "></div>
-                        </Card>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </div>
-
-        {/* Reveal Bulb with Image - Behind all content */}
-        <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none z-0"
-          style={{
-            clipPath: `circle(${revealRadius}px at ${mousePosition.x}px ${mousePosition.y}px)`,
-            opacity: (isRevealing || alwaysRevealing) ? 1 : 0,
-            transition: 'opacity 0.4s ease-out',
-          }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-        >
-          <img
-            src={sketchImageUrl}
-            alt="Dessin architectural"
             className="absolute top-0 left-0 w-full h-full object-cover"
             style={{
-              filter: 'grayscale(70%)',
-              mixBlendMode: 'multiply',
-              opacity: 1,
+              filter: "brightness(0.8) contrast(1.1) saturate(1.1)",
+            }}
+            animate={{
+              x: (mousePosition.x - window.innerWidth / 2) * 0.003,
+              y: (mousePosition.y - window.innerHeight / 2) * 0.003,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 250,
+              damping: 40,
             }}
           />
+
+          <div
+            className="absolute top-0 left-0 w-full h-full wave-distortion reveal-mask"
+            style={
+              {
+                opacity: isRevealing || alwaysRevealing ? 1 : 0,
+                pointerEvents: "none",
+                transition: "opacity 0.4s ease-out",
+                "--mouse-x": `${mousePosition.x}px`,
+                "--mouse-y": `${mousePosition.y}px`,
+                "--reveal-radius": `${revealRadius}px`,
+              } as React.CSSProperties
+            }
+          >
+            <img
+              src={sketchImageUrl}
+              alt="Dessin architectural"
+              className="absolute top-0 left-0 w-full h-full object-cover"
+              style={{
+                mixBlendMode: "multiply",
+                opacity: 1,
+                transform: `
+                  translateX(${getWaveDistortion(
+                    mousePosition.x,
+                    mousePosition.y,
+                    waveOffset
+                  )}px)
+                  translateY(${getWaveDistortion(
+                    mousePosition.y,
+                    mousePosition.x,
+                    waveOffset + 1
+                  )}px)
+                `,
+                transition: "transform 0.1s linear",
+              }}
+            />
+
+            <div
+              className="reveal-overlay"
+              style={
+                {
+                  "--mouse-x": `${mousePosition.x}px`,
+                  "--mouse-y": `${mousePosition.y}px`,
+                  "--reveal-opacity": isRevealing || alwaysRevealing ? 1 : 0,
+                } as React.CSSProperties
+              }
+            />
+          </div>
+
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/8 to-black/35" />
         </div>
 
-        {/* Reveal Bulb Effect Layer */}
         <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none z-1"
+          className="absolute top-0 left-0 w-full h-full pointer-events-none transition-all duration-300 z-10"
           style={{
             background: `
               radial-gradient(
                 circle at ${mousePosition.x}px ${mousePosition.y}px,
-                rgba(255, 255, 255, ${(isRevealing || alwaysRevealing) ? 0.18 : 0}) 0%,
-                transparent ${(isRevealing || alwaysRevealing) ? Math.min(280, revealRadius * 1.6) + 'px' : '0px'}
+                rgba(255, 255, 255, ${
+                  isRevealing || alwaysRevealing ? 0.18 : 0
+                }) 0%,
+                transparent ${
+                  isRevealing || alwaysRevealing
+                    ? Math.min(280, revealRadius * 1.6) + "px"
+                    : "0px"
+                }
               )
             `,
             mixBlendMode: "overlay",
-            opacity: (isRevealing || alwaysRevealing) ? 1 : 0,
+            opacity: isRevealing || alwaysRevealing ? 1 : 0,
           }}
         />
 
+        {(isRevealing || alwaysRevealing) && (
+          <div className="absolute inset-0 pointer-events-none z-15">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-2.5 h-2.5 rounded-full bg-white/40"
+                style={{
+                  left:
+                    mousePosition.x +
+                    Math.sin(waveOffset + i * 1) * (revealRadius * 0.9),
+                  top:
+                    mousePosition.y +
+                    Math.cos(waveOffset + i * 1) * (revealRadius * 0.9),
+                  opacity: 0.6 + Math.sin(waveOffset + i * 2) * 0.3,
+                  transform: `scale(${
+                    0.7 + Math.sin(waveOffset + i * 1.5) * 0.7
+                  })`,
+                  filter: "blur(2px)",
+                  boxShadow: "0 0 15px rgba(255, 255, 255, 0.9)",
+                  animation: `float ${3 + i}s ease-in-out infinite`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="container relative z-25 mx-auto px-1 lg:px-4 py-5 lg:py-20 text-center">
+          {/* Publicité en avant-plan, en haut */}
+          <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-full max-w-4xl z-10">
+            <LocalAdCard />
+          </div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+            className="mb-2 lg:mb-6 text-2xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white mt-32"
+          >
+            <span className="block">La super-application</span>
+            <span
+              className="block mt-1 lg:mt-4"
+              style={{
+                color: colors.sruvol,
+                textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+              }}
+            >
+              du quotidien
+            </span>
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="mx-auto max-w-3xl"
+            onClick={openModal}
+          >
+            <div
+              className="flex flex-col md:flex-row gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-2xl cursor-text hover:bg-white/15 transition-all duration-300"
+              style={{ backdropFilter: "blur(10px)" }}
+            >
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70" />
+                <Input
+                  value={heroQuery}
+                  onChange={(e) => setHeroQuery(e.target.value)}
+                  placeholder="Cliquez pour lancer une recherche avancée"
+                  className="pl-12 h-14 lg:h-16 bg-transparent border-0 text-white placeholder:text-white/60 text-lg focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-lg"
+                />
+              </div>
+              <Button
+                size="lg"
+                className="md:w-auto h-14 lg:h-16 px-8 text-lg font-medium rounded-xl hover:scale-105 transition-transform duration-200"
+                style={{
+                  backgroundColor: colors.sruvol,
+                  color: "white",
+                  boxShadow: "0 4px 20px rgba(104, 142, 35, 0.3)",
+                }}
+              >
+                Rechercher
+              </Button>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeModal} />
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={closeModal}
+          />
           <div className="relative h-full w-full">
             <Recherche onClick={closeModal} />
           </div>

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { usePublicAlternance } from '@/hooks/usePublicAlternance';
+import { useAuth } from '@/hooks/useAuth'; // Ajoutez cet import
 import {
   Search,
   Filter,
@@ -20,7 +22,10 @@ import {
   Users,
   DollarSign,
   Eye,
-  Check
+  Check,
+  Upload,
+  FileText,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,8 +37,24 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { useAlternance } from "@/hooks/useAlternance";// En haut du fichier, avec les autres imports
-import { useCandidatures } from '@/hooks/useCandidatures';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const AlternanceSection = ({
   loading,
@@ -47,7 +68,10 @@ const AlternanceSection = ({
   researchProgress,
   setResearchProgress,
 }) => {
-  // Utiliser le hook useAlternance pour récupérer les données
+  // Ajoutez ce hook au début du composant
+  const { isAuthenticated, user } = useAuth();
+  
+  // Utiliser le hook usePublicAlternance pour récupérer les données
   const { 
     offres, 
     isLoading, 
@@ -55,14 +79,23 @@ const AlternanceSection = ({
     stats, 
     fetchOffres, 
     fetchStats,
-    checkAuthStatus 
-  } = useAlternance();
+    applyToAlternance,
+    fetchOffreDetails
+  } = usePublicAlternance();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("tous");
   const [selectedNiveau, setSelectedNiveau] = useState("tous");
   const [activeTab, setActiveTab] = useState("alternance");
   const [localOffres, setLocalOffres] = useState([]);
+  
+  // États pour le modal de candidature
+  const [selectedOffreForApply, setSelectedOffreForApply] = useState(null);
+  const [isApplicationDialogOpen, setIsApplicationDialogOpen] = useState(false);
+  const [motivationLetter, setMotivationLetter] = useState("");
+  const [cvFile, setCvFile] = useState(null);
+  const [lettreFile, setLettreFile] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);
 
   // Types d'offres
   const types = [
@@ -139,7 +172,8 @@ const AlternanceSection = ({
       candidatures_count: offre.candidatures_count || 0,
       ecolePartenaire: offre.ecolePartenaire || "",
       rythmeAlternance: offre.rythmeAlternance || "",
-      pourcentageTemps: offre.pourcentageTemps || ""
+      pourcentageTemps: offre.pourcentageTemps || "",
+      dateLimite: offre.dateLimite
     };
   };
 
@@ -244,55 +278,129 @@ const AlternanceSection = ({
     toast.info("Ouverture du calendrier des événements...");
   };
 
-  // Statistiques dynamiques
-  const statsData = [
-    { 
-      label: "Offres actives", 
-      value: stats?.total || "0", 
-      icon: Briefcase 
-    },
-    { 
-      label: "Alternances", 
-      value: stats?.alternance || "0", 
-      icon: GraduationCap 
-    },
-    { 
-      label: "Stages", 
-      value: stats?.stage || "0", 
-      icon: BookOpen 
-    },
-    { 
-      label: "Total candidatures", 
-      value: stats?.candidatures || "0", 
-      icon: Users 
-    },
-  ];
+  // Gestion du fichier CV
+  const handleCvFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Vérifier la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Le fichier ne doit pas dépasser 5MB");
+        return;
+      }
+      
+      // Vérifier l'extension
+      const validExtensions = ['.pdf', '.doc', '.docx'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      
+      if (!validExtensions.includes(fileExtension)) {
+        toast.error("Format de fichier non supporté. Utilisez PDF, DOC ou DOCX");
+        return;
+      }
+      
+      setCvFile({
+        name: file.name,
+        size: file.size,
+        url: URL.createObjectURL(file)
+      });
+      toast.success("CV téléchargé avec succès");
+    }
+  };
 
-  // Gérer l'application à une offre
-  const { postuler } = useCandidatures();
+  // Gestion du fichier lettre de motivation
+  const handleLettreFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Vérifier la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Le fichier ne doit pas dépasser 5MB");
+        return;
+      }
+      
+      // Vérifier l'extension
+      const validExtensions = ['.pdf', '.doc', '.docx'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      
+      if (!validExtensions.includes(fileExtension)) {
+        toast.error("Format de fichier non supporté. Utilisez PDF, DOC ou DOCX");
+        return;
+      }
+      
+      setLettreFile({
+        name: file.name,
+        size: file.size,
+        url: URL.createObjectURL(file)
+      });
+      toast.success("Lettre de motivation téléchargée avec succès");
+    }
+  };
 
- const handleApplyToOffre = async (offreId, offreTitle) => {
+  // Soumettre la candidature
+  const handleSubmitApplication = async (e) => {
+    e.preventDefault();
+    
+    if (!selectedOffreForApply) return;
+    
+    // Vérifier que l'utilisateur est connecté
+    if (!isAuthenticated) {
+      toast.error("Veuillez vous connecter pour postuler");
+      return;
+    }
+    
+    // Validation
+    if (!motivationLetter.trim() && !cvFile && !lettreFile) {
+      toast.error("Veuillez fournir au moins un CV ou un message de motivation");
+      return;
+    }
+
     try {
-      const result = await postuler(
-        offreId,
-        'alternance',
-        offreTitle,
-        {
-          messageMotivation: "Je suis intéressé par cette offre d'alternance",
-          nomCandidat: user?.name,
-          emailCandidat: user?.email
-        }
+      // Préparer les données de candidature
+      const applicationData = {
+        motivation: motivationLetter,
+        cvUrl: cvFile?.url || null,
+        lettreMotivationUrl: lettreFile?.url || null,
+        nomCandidat: user?.firstName + ' ' + user?.lastName || user?.name || 'Candidat',
+        emailCandidat: user?.email || '',
+        telephoneCandidat: user?.phone || ''
+      };
+
+      const result = await applyToAlternance(
+        selectedOffreForApply.id,
+        applicationData
       );
 
       if (result.success) {
-        toast.success(`Vous avez postulé à "${offreTitle}"`);
-        handleApply(offreId, "alternance", offreTitle);
+        toast.success("Candidature envoyée avec succès !");
+        
+        // Réinitialiser le formulaire
+        setMotivationLetter("");
+        setCvFile(null);
+        setLettreFile(null);
+        setIsApplicationDialogOpen(false);
+        setSelectedOffreForApply(null);
+        
+        // Mettre à jour la liste des candidatures
+        if (handleApply) {
+          handleApply(selectedOffreForApply.id, "alternance", selectedOffreForApply.title);
+        }
+        
+        // Recharger les données pour mettre à jour les compteurs
+        await fetchOffres({ status: "active" });
+        await fetchStats();
       }
-      
     } catch (error) {
-      console.error("Erreur lors de la postulation:", error);
-      toast.error(error.message || "Erreur lors de la postulation");
+      toast.error(error.message || "Erreur lors de l'envoi de la candidature");
     }
+  };
+
+  // Ouvrir le modal de candidature
+  const handleOpenApplicationDialog = (offre) => {
+    if (!isAuthenticated) {
+      toast.error("Veuillez vous connecter pour postuler");
+      return;
+    }
+    
+    setSelectedOffreForApply(offre);
+    setIsApplicationDialogOpen(true);
   };
 
   // Gérer le partage d'une offre
@@ -328,6 +436,30 @@ const AlternanceSection = ({
       </Badge>
     );
   };
+
+  // Statistiques dynamiques
+  const statsData = [
+    { 
+      label: "Offres actives", 
+      value: stats?.total || "0", 
+      icon: Briefcase 
+    },
+    { 
+      label: "Alternances", 
+      value: stats?.alternance || "0", 
+      icon: GraduationCap 
+    },
+    { 
+      label: "Stages", 
+      value: stats?.stage || "0", 
+      icon: BookOpen 
+    },
+    { 
+      label: "Total candidatures", 
+      value: stats?.candidatures || "0", 
+      icon: Users 
+    },
+  ];
 
   return (
     <>
@@ -736,7 +868,7 @@ const AlternanceSection = ({
                                   )}
                                 </div>
                               )}
-                              <div className="flex gap-2">
+                              <div className="grid md:grid-cols-4 grid-cols-2 gap-2">
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -765,6 +897,93 @@ const AlternanceSection = ({
                                   <Share2 className="h-4 w-4 mr-1" />
                                   Partager
                                 </Button>
+                                <Sheet>
+                                  <SheetTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-[#556B2F] text-[#556B2F]"
+                                      onClick={() => setSelectedJob(offre)}
+                                    >
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      Voir
+                                    </Button>
+                                  </SheetTrigger>
+                                  <SheetContent className="sm:max-w-xl overflow-y-auto">
+                                    {selectedJob && (
+                                      <>
+                                        <SheetHeader>
+                                          <SheetTitle>
+                                            {selectedJob.title}
+                                          </SheetTitle>
+                                          <SheetDescription>
+                                            {selectedJob.entreprise} •{" "}
+                                            {selectedJob.location}
+                                          </SheetDescription>
+                                        </SheetHeader>
+                                        <div className="mt-6 space-y-6">
+                                          <div>
+                                            <h4 className="font-semibold text-[#8B4513] mb-2">
+                                              Description de l'offre
+                                            </h4>
+                                            <p className="text-gray-700">
+                                              {selectedJob.description}
+                                            </p>
+                                          </div>
+                                          {selectedJob.missions && selectedJob.missions.length > 0 && (
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Missions principales
+                                              </h4>
+                                              <ul className="list-disc list-inside space-y-1 text-gray-700">
+                                                {selectedJob.missions.map(
+                                                  (mission, idx) => (
+                                                    <li key={idx}>{mission}</li>
+                                                  )
+                                                )}
+                                              </ul>
+                                            </div>
+                                          )}
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Rémunération
+                                              </h4>
+                                              <p className="text-lg font-bold">{selectedJob.remuneration}</p>
+                                            </div>
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Durée
+                                              </h4>
+                                              <p>{selectedJob.duree}</p>
+                                            </div>
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Niveau d'étude
+                                              </h4>
+                                              <p>{selectedJob.niveau}</p>
+                                            </div>
+                                            <div>
+                                              <h4 className="font-semibold text-[#8B4513] mb-2">
+                                                Date limite
+                                              </h4>
+                                              <p>{selectedJob.dateLimite ? new Date(selectedJob.dateLimite).toLocaleDateString() : "Non spécifiée"}</p>
+                                            </div>
+                                          </div>
+                                          <Button
+                                            className="w-full bg-[#8B4513] hover:bg-[#6B3410]"
+                                            onClick={() => handleOpenApplicationDialog(selectedJob)}
+                                            disabled={appliedItems.includes(`alternance-${selectedJob.id}`)}
+                                          >
+                                            {appliedItems.includes(`alternance-${selectedJob.id}`) 
+                                              ? "✓ Déjà postulé" 
+                                              : "Postuler maintenant"}
+                                          </Button>
+                                        </div>
+                                      </>
+                                    )}
+                                  </SheetContent>
+                                </Sheet>
                                 <Button
                                   size="sm"
                                   className={`${
@@ -772,7 +991,8 @@ const AlternanceSection = ({
                                       ? "bg-green-600 hover:bg-green-700"
                                       : "bg-[#8B4513] hover:bg-[#6B3410]"
                                   } text-white`}
-                                  onClick={() => handleApplyToOffre(offre.id, offre.title)}
+                                  onClick={() => handleOpenApplicationDialog(offre)}
+                                  disabled={isApplied}
                                 >
                                   {isApplied ? (
                                     <>
@@ -810,84 +1030,116 @@ const AlternanceSection = ({
             </TabsContent>
           </Tabs>
 
-          {/* Resources Section */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Card className="border-[#556B2F]">
-              <CardHeader>
-                <CardTitle className="text-[#8B4513]">
-                  Ressources étudiants
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => handleDownloadGuide("Guide alternance")}
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <BookOpen className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Guide de l'alternance</h4>
-                      <p className="text-sm text-gray-500">
-                        Tout savoir sur les contrats et droits
-                      </p>
-                    </div>
-                  </div>
-                  <div
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => handleDownloadGuide("Calendrier 2024")}
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Calendrier 2024</h4>
-                      <p className="text-sm text-gray-500">
-                        Dates clés pour vos recherches
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#6B8E23] bg-gradient-to-br from-[#556B2F]/5 to-[#6B8E23]/5">
-              <CardHeader>
-                <CardTitle className="text-[#8B4513]">
-                  Événements à venir
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border-l-4 border-[#556B2F] pl-4 py-2">
-                    <div className="text-sm text-gray-500">15 Mars 2024</div>
-                    <h4 className="font-medium">Forum Alternance Paris</h4>
-                    <p className="text-sm text-gray-600">
-                      Rencontrez 50+ entreprises
-                    </p>
-                  </div>
-                  <div className="border-l-4 border-[#6B8E23] pl-4 py-2">
-                    <div className="text-sm text-gray-500">22 Mars 2024</div>
-                    <h4 className="font-medium">
-                      Webinar : CV étudiant parfait
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Conseils d'un recruteur
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  className="w-full mt-4 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
-                  onClick={handleOpenEvents}
-                >
-                  Voir tous les événements
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          
         </div>
       </div>
+
+      {/* Dialog de candidature */}
+      <Dialog open={isApplicationDialogOpen} onOpenChange={setIsApplicationDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedOffreForApply
+                ? `Postuler à : ${selectedOffreForApply.title}`
+                : "Postuler"}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedOffreForApply
+                ? `Postulez à cette offre en remplissant le formulaire ci-dessous.`
+                : "Remplissez le formulaire de candidature."}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitApplication}>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label
+                  htmlFor="motivation"
+                  className="font-semibold mb-2 block"
+                >
+                  Votre message de motivation :
+                </Label>
+                <Textarea
+                  id="motivation"
+                  placeholder="Expliquez pourquoi vous êtes intéressé par cette alternance/stage, vos motivations et vos aspirations..."
+                  className="min-h-[150px]"
+                  value={motivationLetter}
+                  onChange={(e) => setMotivationLetter(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label className="font-semibold mb-2 block">
+                  CV (obligatoire) :
+                </Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600 mb-2">
+                    Glissez-déposez votre CV ou
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById("cv-upload").click()}
+                  >
+                    Parcourir les fichiers
+                  </Button>
+                  <input
+                    id="cv-upload"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={handleCvFileChange}
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Formats acceptés : PDF, DOC, DOCX (max 5MB)
+                  </p>
+                </div>
+                {cvFile && (
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg mt-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">
+                        {cvFile.name}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setCvFile(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+             
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsApplicationDialogOpen(false);
+                  setSelectedOffreForApply(null);
+                  setMotivationLetter("");
+                  setCvFile(null);
+                  setLettreFile(null);
+                }}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                className="bg-[#556B2F] hover:bg-[#6B8E23]"
+                disabled={!cvFile && !motivationLetter.trim()}
+              >
+                Envoyer la candidature
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

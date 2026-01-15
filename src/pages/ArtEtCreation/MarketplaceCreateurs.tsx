@@ -1,1003 +1,938 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Store, 
-  Filter, 
-  Heart, 
-  ShoppingBag, 
-  TrendingUp, 
-  X,
-  ChevronDown,
-  Info,
-  Share2,
-  Mail,
-  Phone,
-  MapPin,
-  Star,
-  ChevronRight,
-  Check,
-  ExternalLink,
+  Search,  
+  MapPin, 
+  Eye,
+  Calendar, 
   ShoppingCart,
-  Users,
-  Tag,
-  Calendar,
+  RefreshCw,
   Award,
-  Package,
-  Truck,
-  Shield,
-  DollarSign,
-  Printer,
+  Palette,
+  Camera,
+  Hammer,
   Target,
-  ShieldCheck,
-  CheckCircle
-
+  ChevronDown,
+  Grid,
+  List,
+  ChevronLeft,
+  ChevronRight,
+  ImageIcon,
+  AlertCircle,
+  Loader2,
+  Star
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '@/lib/api';
+import { useCart } from '@/components/contexts/CartContext'; // Import du contexte panier
+import { toast } from 'sonner'; // Pour les notifications
 
-interface MarketplaceCreateursProps {
-  searchQuery?: string;
-  onContactClick?: (subject: string, recipientName?: string) => void;
+interface Oeuvre {
+  id: string;
+  title: string;
+  description?: string;
+  image: string;
+  images?: string[];
+  price: number;
+  createdAt?: string;
+  publishedAt?: string;
+  artist?: string;
+  category?: string;
+  type: string;
+  userId: string;
+  professional?: {
+    id: string;
+    name: string;
+    avatar?: string;
+    city?: string;
+  };
+  dimensions?: {
+    creationDate?: string;
+    dimensions?: string;
+    materials?: string;
+    isArtwork?: boolean;
+  };
+  views?: number;
+  likes?: number;
+  status: 'published' | 'draft' | 'sold';
+  quantity?: number; // Pour le stock
 }
 
-const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ searchQuery, onContactClick }) => {
-  const [activeFilter, setActiveFilter] = useState('tous');
-  const [showCreatorDetail, setShowCreatorDetail] = useState(false);
-  const [selectedCreator, setSelectedCreator] = useState(null);
-  const [showProductDetail, setShowProductDetail] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showAllProducts, setShowAllProducts] = useState(false);
-  const [likedItems, setLikedItems] = useState([]);
-  const [following, setFollowing] = useState([]);
-  const [showMoreFilters, setShowMoreFilters] = useState(false);
+interface FilterOptions {
+  type: string;
+  minPrice: number;
+  maxPrice: number;
+  location: string;
+  category: string;
+  sortBy: 'newest' | 'price_asc' | 'price_desc' | 'popular';
+}
 
-  // Fonctions handlers
-  const handleViewCreatorDetail = (creator) => {
-    setSelectedCreator(creator);
-    setShowCreatorDetail(true);
-  };
+interface MarketplaceCreateursProps {
+  onContactClick: (subject: string, recipientName?: string) => void;
+}
 
-  const handleViewProductDetail = (product) => {
-    setSelectedProduct(product);
-    setShowProductDetail(true);
-  };
+const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactClick }) => {
+  const [loading, setLoading] = useState(true);
+  const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
+  const [filteredOeuvres, setFilteredOeuvres] = useState<Oeuvre[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [likedOeuvres, setLikedOeuvres] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [addingOeuvreId, setAddingOeuvreId] = useState<string | null>(null); // Pour le bouton loading
 
-  const handleLikeItem = (itemId) => {
-    if (likedItems.includes(itemId)) {
-      setLikedItems(likedItems.filter(id => id !== itemId));
-    } else {
-      setLikedItems([...likedItems, itemId]);
-    }
-  };
+  const itemsPerPage = 12;
+  const navigate = useNavigate();
+  const { addToCart, cartItems, isLoading: cartLoading } = useCart(); // Utilisation du contexte panier
 
-  const handleFollowCreator = (creatorId) => {
-    if (following.includes(creatorId)) {
-      setFollowing(following.filter(id => id !== creatorId));
-    } else {
-      setFollowing([...following, creatorId]);
-    }
-  };
-
-  const handleShareCreator = (creator) => {
-    if (navigator.share) {
-      navigator.share({
-        title: creator.name,
-        text: creator.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Lien copié dans le presse-papier !');
-    }
-  };
-
-  const filters = [
-    { id: 'tous', label: 'Tous les créateurs' },
-    { id: 'tendances', label: 'En tendance' },
-    { id: 'nouveaux', label: 'Nouveaux arrivages' },
-    { id: 'local', label: 'Artisans locaux' },
-    { id: 'eco', label: 'Éco-responsable' },
-  ];
-
-  const moreFilters = [
-    { id: 'bestseller', label: 'Best-sellers' },
-    { id: 'promo', label: 'En promotion' },
-    { id: 'personnalise', label: 'Personnalisable' },
-    { id: 'livraison-rapide', label: 'Livraison rapide' },
-  ];
-
-  const creators = [
-    {
-      id: 1,
-      name: 'L\'Atelier des Lys',
-      category: 'Décoration textile',
-      products: 42,
-      location: 'Lyon',
-      rating: 4.9,
-      followers: '2.4k',
-      description: 'Tapis et coussins tissés main',
-      image: 'https://picsum.photos/id/28/300/200',
-      featured: true,
-      bio: 'Atelier spécialisé dans le textile d\'art depuis 15 ans. Techniques de tissage traditionnelles revisitées.',
-      joinDate: 'Membre depuis 2020',
-      materials: ['Laine naturelle', 'Coton bio', 'Teintures végétales'],
-      certifications: ['Artisan d\'Art', 'Éco-responsable'],
-      contact: {
-        email: 'contact@atelier-des-lys.fr',
-        phone: '04 78 12 34 56',
-        website: 'www.atelier-des-lys.fr'
-      },
-      shopStats: {
-        sales: 856,
-        satisfaction: 98,
-        deliveryTime: '2-5 jours'
-      }
-    },
-    {
-      id: 2,
-      name: 'Terre & Forme',
-      category: 'Céramique artisanale',
-      products: 28,
-      location: 'Bordeaux',
-      rating: 5.0,
-      followers: '1.8k',
-      description: 'Vaisselle unique en grès naturel',
-      image: 'https://picsum.photos/id/29/300/200',
-      featured: true,
-      bio: 'Céramiste passionnée par les formes organiques et les émaux naturels.',
-      joinDate: 'Membre depuis 2019',
-      materials: ['Grès', 'Porcelaine', 'Émaux minéraux'],
-      certifications: ['Maître Artisan', 'Fait main France'],
-      contact: {
-        email: 'terre-forme@contact.fr',
-        phone: '05 56 78 90 12',
-        website: 'www.terre-forme.fr'
-      },
-      shopStats: {
-        sales: 723,
-        satisfaction: 99,
-        deliveryTime: '3-7 jours'
-      }
-    },
-    {
-      id: 3,
-      name: 'Bois & Lignes',
-      category: 'Mobilier design',
-      products: 15,
-      location: 'Normandie',
-      rating: 4.8,
-      followers: '1.2k',
-      description: 'Meubles minimalistes en chêne',
-      image: 'https://picsum.photos/id/30/300/200',
-      featured: false,
-      bio: 'Ébéniste spécialisé dans le mobilier contemporain en bois locaux.',
-      joinDate: 'Membre depuis 2021',
-      materials: ['Chêne français', 'Hêtre', 'Finitions naturelles'],
-      certifications: ['Bois certifié PEFC'],
-      contact: {
-        email: 'bois.lignes@pro.fr',
-        phone: '02 35 12 34 56',
-        website: 'www.bois-lignes.fr'
-      },
-      shopStats: {
-        sales: 342,
-        satisfaction: 97,
-        deliveryTime: 'Sur devis'
-      }
-    },
-    {
-      id: 4,
-      name: 'Cuir & Tradition',
-      category: 'Maroquinerie',
-      products: 36,
-      location: 'Toulouse',
-      rating: 4.7,
-      followers: '3.1k',
-      description: 'Accessoires en cuir végétal tanné',
-      image: 'https://picsum.photos/id/31/300/200',
-      featured: true,
-      bio: 'Maroquinier traditionnel spécialisé dans le cuir végétal et les finitions à l\'ancienne.',
-      joinDate: 'Membre depuis 2018',
-      materials: ['Cuir végétal', 'Laiton', 'Fils de lin'],
-      certifications: ['Slow Fashion', 'Artisan d\'Art'],
-      contact: {
-        email: 'info@cuir-tradition.com',
-        phone: '05 61 23 45 67',
-        website: 'www.cuir-tradition.com'
-      },
-      shopStats: {
-        sales: 1254,
-        satisfaction: 96,
-        deliveryTime: '5-10 jours'
-      }
-    },
-    {
-      id: 5,
-      name: 'Verre d\'Art',
-      category: 'Verre soufflé',
-      products: 23,
-      location: 'Alsace',
-      rating: 4.9,
-      followers: '900',
-      description: 'Pièces uniques soufflées à la bouche',
-      image: 'https://picsum.photos/id/32/300/200',
-      featured: false,
-      bio: 'Maître verrier perpétuant l\'art du verre soufflé dans la tradition alsacienne.',
-      joinDate: 'Membre depuis 2022',
-      materials: ['Verre borosilicate', 'Oxydes métalliques'],
-      certifications: ['Entreprise du Patrimoine Vivant'],
-      contact: {
-        email: 'verre.art@contact.fr',
-        phone: '03 88 12 34 56',
-        website: 'www.verre-d-art.fr'
-      },
-      shopStats: {
-        sales: 189,
-        satisfaction: 100,
-        deliveryTime: '7-14 jours'
-      }
-    },
-    {
-      id: 6,
-      name: 'Fils & Couleurs',
-      category: 'Bijoux textile',
-      products: 51,
-      location: 'Paris',
-      rating: 4.6,
-      followers: '4.2k',
-      description: 'Bijoux brodés et tissés',
-      image: 'https://picsum.photos/id/33/300/200',
-      featured: false,
-      bio: 'Créatrice de bijoux textiles contemporains inspirés des techniques traditionnelles.',
-      joinDate: 'Membre depuis 2020',
-      materials: ['Soie', 'Linen', 'Perles de verre'],
-      certifications: ['Fait main', 'Upcycling'],
-      contact: {
-        email: 'fils.couleurs@email.com',
-        phone: '01 40 12 34 56',
-        website: 'www.fils-couleurs.com'
-      },
-      shopStats: {
-        sales: 2103,
-        satisfaction: 95,
-        deliveryTime: '2-4 jours'
-      }
-    },
-  ];
-
-  const trendingProducts = [
-    { 
-      id: 1,
-      name: 'Vase sculptural', 
-      creator: 'Terre & Forme', 
-      creatorId: 2,
-      price: '120€',
-      originalPrice: '150€',
-      orders: 42,
-      description: 'Vase en grès aux formes organiques, émaillé à la main',
-      image: 'https://picsum.photos/id/228/400/300',
-      category: 'Céramique',
-      materials: 'Grès, émail naturel',
-      dimensions: '25x15 cm',
-      delivery: 'Livraison gratuite',
-      inStock: true,
-      rating: 4.9
-    },
-    { 
-      id: 2,
-      name: 'Sac cabas cuir', 
-      creator: 'Cuir & Tradition', 
-      creatorId: 4,
-      price: '85€',
-      orders: 38,
-      description: 'Cabas en cuir végétal tanné, doublure coton',
-      image: 'https://picsum.photos/id/231/400/300',
-      category: 'Maroquinerie',
-      materials: 'Cuir végétal, coton bio',
-      dimensions: '35x25x15 cm',
-      delivery: 'Sous 10 jours',
-      inStock: true,
-      rating: 4.8
-    },
-    { 
-      id: 3,
-      name: 'Set de bols', 
-      creator: 'L\'Atelier des Lys', 
-      creatorId: 1,
-      price: '65€',
-      orders: 29,
-      description: 'Set de 4 bols en céramique émaillée',
-      image: 'https://picsum.photos/id/229/400/300',
-      category: 'Céramique',
-      materials: 'Porcelaine, émail',
-      dimensions: '10x10 cm chacun',
-      delivery: 'Sous 7 jours',
-      inStock: true,
-      rating: 5.0
-    },
-  ];
-
-  const allProducts = [
-    ...trendingProducts,
-    { 
-      id: 4,
-      name: 'Table basse chêne', 
-      creator: 'Bois & Lignes', 
-      creatorId: 3,
-      price: '450€',
-      orders: 12,
-      image: 'https://picsum.photos/id/234/400/300'
-    },
-    { 
-      id: 5,
-      name: 'Pendentif verre', 
-      creator: 'Verre d\'Art', 
-      creatorId: 5,
-      price: '75€',
-      orders: 24,
-      image: 'https://picsum.photos/id/232/400/300'
-    },
-    { 
-      id: 6,
-      name: 'Collier brodé', 
-      creator: 'Fils & Couleurs', 
-      creatorId: 6,
-      price: '55€',
-      orders: 41,
-      image: 'https://picsum.photos/id/233/400/300'
-    },
-  ];
-
-  const displayedProducts = showAllProducts ? allProducts : trendingProducts;
-  const displayedCreators = creators.filter(creator => {
-    if (activeFilter === 'tous') return true;
-    if (activeFilter === 'tendances') return creator.featured;
-    if (activeFilter === 'nouveaux') return creator.id > 4;
-    if (activeFilter === 'local') return ['Lyon', 'Bordeaux', 'Normandie'].includes(creator.location);
-    if (activeFilter === 'eco') return creator.certifications?.some(cert => cert.includes('Éco'));
-    return true;
+  const [filters, setFilters] = useState<FilterOptions>({
+    type: 'all',
+    minPrice: 0,
+    maxPrice: 10000,
+    location: '',
+    category: 'all',
+    sortBy: 'newest'
   });
 
+  const oeuvreTypes = [
+    { id: 'all', name: 'Toutes les œuvres', icon: <Grid size={20} />, color: '#8B4513' },
+    { id: 'photographie', name: 'Photographie', icon: <Camera size={20} />, color: '#3B82F6' },
+    { id: 'sculpture', name: 'Sculpture', icon: <Hammer size={20} />, color: '#F59E0B' },
+    { id: 'peinture', name: 'Peinture', icon: <Palette size={20} />, color: '#EF4444' },
+    { id: 'artisanat', name: 'Artisanat', icon: <Target size={20} />, color: '#10B981' }
+  ];
+
+  const fetchAllOeuvres = useCallback(async () => {
+    // console.log('📡 Fetching all published artworks...');
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const params: any = {
+        page,
+        limit: itemsPerPage
+      };
+      
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+      
+      if (filters.location) {
+        params.location = filters.location;
+      }
+      
+      if (filters.type !== 'all') {
+        params.type = filters.type;
+      }
+      
+      if (filters.category !== 'all') {
+        params.category = filters.category;
+      }
+      
+  
+      const response = await api.get('/art-creation/marketplace/all', { params });
+      
+      
+      if (response.data?.success) {
+        const allOeuvres = response.data.data || [];
+        
+        // S'assurer que chaque œuvre a une quantité par défaut
+        const formattedOeuvres = allOeuvres.map((oeuvre: any) => ({
+          ...oeuvre,
+          quantity: 1, // Par défaut en stock
+          images: oeuvre.images || [oeuvre.image],
+          dimensions: {
+            ...oeuvre.dimensions,
+            isArtwork: true
+          }
+        }));
+        
+        setOeuvres(formattedOeuvres);
+        setFilteredOeuvres(formattedOeuvres);
+        setTotalCount(response.data.total || 0);
+        setTotalPages(response.data.pagination?.totalPages || 1);
+      } else {
+        setError(response.data.error || 'Impossible de charger les œuvres');
+      }
+    } catch (err: any) {
+      console.error('❌ Error fetching marketplace artworks:', err);
+      
+      try {
+        // console.log('🔄 Trying alternative API call...');
+        const fallbackResponse = await api.get('/art-creation/products', {
+          params: {
+            status: 'published',
+            limit: itemsPerPage,
+            page: page
+          }
+        });
+        
+        if (fallbackResponse.data?.success) {
+          const data = fallbackResponse.data.data || [];
+          const formattedOeuvres = data.map((product: any) => ({
+            id: product.id,
+            title: product.title || product.name,
+            description: product.description,
+            image: product.images?.[0] || '',
+            images: product.images,
+            price: product.price,
+            createdAt: product.createdAt,
+            publishedAt: product.publishedAt,
+            type: product.type || product.subcategory,
+            category: product.category,
+            userId: product.userId,
+            artist: product.user?.name || 
+                   `${product.user?.firstName} ${product.user?.lastName}`.trim(),
+            professional: {
+              id: product.userId,
+              name: product.user?.name || 
+                    `${product.user?.firstName} ${product.user?.lastName}`.trim(),
+              avatar: product.user?.avatar,
+              city: product.user?.city
+            },
+            status: product.status,
+            quantity: 1, // Stock par défaut
+            dimensions: {
+              isArtwork: true,
+              type: product.type || product.subcategory,
+              category: product.category
+            }
+          }));
+          
+          setOeuvres(formattedOeuvres);
+          setFilteredOeuvres(formattedOeuvres);
+          setTotalCount(fallbackResponse.data.total || formattedOeuvres.length);
+          setTotalPages(fallbackResponse.data.pagination?.totalPages || 1);
+        }
+      } catch (fallbackErr: any) {
+        console.error('❌ Fallback also failed:', fallbackErr);
+        setError('La galerie Marketplace est temporairement indisponible. Veuillez réessayer plus tard.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [page, searchTerm, filters]);
+
+  const applyLocalFilters = useCallback(() => {
+    let filtered = [...oeuvres];
+    
+    filtered = filtered.filter(oeuvre => 
+      oeuvre.price >= filters.minPrice && oeuvre.price <= filters.maxPrice
+    );
+    
+    if (filters.location && !searchTerm.includes(filters.location)) {
+      filtered = filtered.filter(oeuvre => 
+        oeuvre.professional?.city?.toLowerCase().includes(filters.location.toLowerCase())
+      );
+    }
+    
+    switch (filters.sortBy) {
+      case 'price_asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price_desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'popular':
+        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+        break;
+      case 'newest':
+      default:
+        filtered.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
+        break;
+    }
+    
+    setFilteredOeuvres(filtered);
+    setTotalPages(Math.ceil(filtered.length / itemsPerPage));
+  }, [oeuvres, filters, searchTerm]);
+
+  useEffect(() => {
+    if (oeuvres.length > 0) {
+      applyLocalFilters();
+    }
+  }, [filters, applyLocalFilters, oeuvres]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setPage(1);
+      fetchAllOeuvres();
+    }, 500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, filters.location, filters.type, filters.category, fetchAllOeuvres]);
+
+  const handleLikeOeuvre = useCallback((oeuvreId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLikedOeuvres(prev => 
+      prev.includes(oeuvreId) 
+        ? prev.filter(id => id !== oeuvreId)
+        : [...prev, oeuvreId]
+    );
+  }, []);
+
+  const handleViewDetails = useCallback((oeuvre: Oeuvre) => {
+    navigate(`/oeuvre/${oeuvre.id}`, {
+      state: {
+        oeuvre,
+        professionalId: oeuvre.userId,
+        professionalName: oeuvre.professional?.name
+      }
+    });
+  }, [navigate]);
+
+  const handleViewProfessional = useCallback((professionalId: string, professionalName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/professional/${professionalId}`, {
+      state: {
+        professionalName: professionalName
+      }
+    });
+  }, [navigate]);
+
+  const handleBuyOeuvre = useCallback(async (oeuvre: Oeuvre, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAddingOeuvreId(oeuvre.id);
+    
+    try {
+      // Vérifier la disponibilité de l'œuvre
+      const stockCheck = await api.post('/cart/check-artwork', {
+        productId: oeuvre.id,
+        quantity: 1
+      });
+      
+      if (!stockCheck.data.available) {
+        toast.error(`L'œuvre "${oeuvre.title}" n'est plus disponible.${stockCheck.data.message ? '\n' + stockCheck.data.message : ''}`);
+        return;
+      }
+      
+      // Vérifier si l'œuvre est déjà dans le panier
+      const alreadyInCart = cartItems.some(item => item.id === oeuvre.id);
+      if (alreadyInCart) {
+        toast.warning(`"${oeuvre.title}" est déjà dans votre panier`);
+        return;
+      }
+      
+      // Préparer l'objet pour le panier (identique à votre système produit)
+      const productToAdd = {
+        id: oeuvre.id,
+        name: oeuvre.title,
+        description: oeuvre.description,
+        price: oeuvre.price,
+        image: oeuvre.image,
+        images: oeuvre.images || [oeuvre.image],
+        quantity: 1,
+        
+        // Propriétés spécifiques pour les œuvres d'art
+        itemType: 'product',
+        productType: 'artwork',
+        trackQuantity: true,
+        sellerId: oeuvre.userId,
+        
+        // Informations artistiques
+        dimensions: {
+          isArtwork: true,
+          type: oeuvre.type,
+          category: oeuvre.category,
+          creationDate: oeuvre.dimensions?.creationDate,
+          materials: oeuvre.dimensions?.materials,
+          artistName: oeuvre.artist
+        },
+        
+        // Informations du vendeur
+        vendor: {
+          id: oeuvre.userId,
+          companyName: oeuvre.professional?.name || oeuvre.artist,
+          city: oeuvre.professional?.city
+        },
+        
+        // Pour la validation du panier
+        status: 'published',
+        available: true
+      };
+      
+      // Ajouter au panier
+      await addToCart(productToAdd);
+      
+      // Petit délai pour laisser le temps à l'état de se mettre à jour
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Message de confirmation
+      toast.success(`"${oeuvre.title}" ajoutée au panier !`, {
+        description: `Prix: ${formatPrice(oeuvre.price)}`,
+        action: {
+          label: 'Voir le panier',
+          onClick: () => navigate('/panier')
+        }
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Erreur ajout au panier:', error);
+      toast.error(error?.message || "Erreur lors de l'ajout au panier");
+    } finally {
+      setAddingOeuvreId(null);
+    }
+  }, [addToCart, cartItems, navigate]);
+
+  const handleViewArtworks = useCallback((professionalId: string, professionalName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/oeuvres/${professionalId}`, {
+      state: {
+        professionalName: professionalName
+      }
+    });
+  }, [navigate]);
+
+  const handleResetFilters = useCallback(() => {
+    setFilters({
+      type: 'all',
+      minPrice: 0,
+      maxPrice: 10000,
+      location: '',
+      category: 'all',
+      sortBy: 'newest'
+    });
+    setSearchTerm('');
+    setPage(1);
+  }, []);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0
+    }).format(price);
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'photographie': return <Camera size={16} />;
+      case 'sculpture': return <Hammer size={16} />;
+      case 'peinture': return <Palette size={16} />;
+      case 'artisanat': return <Target size={16} />;
+      default: return <ImageIcon size={16} />;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'photographie': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'sculpture': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'peinture': return 'bg-red-100 text-red-700 border-red-200';
+      case 'artisanat': return 'bg-green-100 text-green-700 border-green-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const stats = {
+    total: totalCount,
+    photographie: oeuvres.filter(o => o.type === 'photographie').length,
+    sculpture: oeuvres.filter(o => o.type === 'sculpture').length,
+    peinture: oeuvres.filter(o => o.type === 'peinture').length,
+    artisanat: oeuvres.filter(o => o.type === 'artisanat').length,
+    averagePrice: oeuvres.length > 0 
+      ? Math.round(oeuvres.reduce((sum, o) => sum + o.price, 0) / oeuvres.length)
+      : 0
+  };
+
+  useEffect(() => {
+    fetchAllOeuvres();
+  }, [page, fetchAllOeuvres]);
+
   return (
-    <div>
-      {/* Filters - TOUS LES BOUTONS FONCTIONNELS */}
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-center gap-4">
-          {/* Dropdown pour les filtres principaux */}
-          <div className="relative w-full md:w-auto">
-            <div 
-              onClick={() => setShowMoreFilters(!showMoreFilters)}
-              className="flex items-center justify-between px-4 py-2 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors group"
-              style={{ 
-                borderColor: '#D3D3D3',
-                backgroundColor: 'white'
-              }}
-            >
-              <div className="flex items-center">
-                <Filter size={18} className="mr-2" style={{ color: '#8B4513' }} />
-                <span className="font-medium">
-                  {activeFilter === 'tous' ? 'Tous les créateurs' : 
-                  filters.find(f => f.id === activeFilter)?.label || 'Filtrer par'}
-                </span>
-              </div>
-              <ChevronDown 
-                size={18} 
-                className={`transform transition-transform duration-200 ${showMoreFilters ? 'rotate-180' : ''}`}
-                style={{ color: '#8B4513' }}
-              />
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        
+        <div className="mb-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-[#8B4513] mb-2">
+                Marketplace des produits d'art
+              </h1>
+              <p className="text-gray-600">
+                Découvrez et achetez des produits uniques d'artistes talentueux
+              </p>
             </div>
             
-            {showMoreFilters && (
-              <div 
-                className="absolute top-full left-0 mt-1 w-full md:w-64 bg-white border rounded-lg shadow-lg z-10 overflow-hidden"
-                style={{ borderColor: '#D3D3D3' }}
-              >
-                <div className="p-2">
-                  <div className="flex justify-between items-center mb-2 px-2">
-                    <span className="text-sm font-medium" style={{ color: '#8B4513' }}>Catégories</span>
-                    <button 
-                      onClick={() => setShowMoreFilters(false)}
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                  
-                  {filters.map((filter) => (
-                    <div
-                      key={filter.id}
-                      onClick={() => {
-                        setActiveFilter(filter.id);
-                        setShowMoreFilters(false);
-                      }}
-                      className={`px-3 py-2 rounded-md cursor-pointer hover:bg-[#F5F5DC] transition-colors flex items-center justify-between ${
-                        activeFilter === filter.id ? 'bg-[#F5F5DC]' : ''
-                      }`}
-                      style={{ 
-                        color: activeFilter === filter.id ? '#8B4513' : '#556B2F'
-                      }}
-                    >
-                      <span className="text-sm">{filter.label}</span>
-                      {activeFilter === filter.id && (
-                        <Check size={16} style={{ color: '#8B4513' }} />
-                      )}
-                    </div>
-                  ))}
-                  
-                  <div className="border-t my-2" style={{ borderColor: '#D3D3D3' }}></div>
-                  
-                  
-                </div>
-              </div>
-            )}
+            
           </div>
           
-          {/* Badge du filtre actif */}
-          {activeFilter !== 'tous' && (
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Filtre actif :</span>
-              <div className="flex items-center px-3 py-1 rounded-full bg-[#F5F5DC]">
-                <span className="text-sm font-medium" style={{ color: '#8B4513' }}>
-                  {filters.find(f => f.id === activeFilter)?.label}
-                </span>
-                <button 
-                  onClick={() => setActiveFilter('tous')}
-                  className="ml-2 hover:text-[#8B4513]"
-                >
-                  <X size={14} />
-                </button>
+          <div className="h-1 w-20 bg-[#8B4513] rounded-full"></div>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 rounded-lg border border-red-300 bg-red-50">
+            <div className="flex items-center">
+              <AlertCircle className="mr-2 text-red-600" />
+              <div className="flex-1">
+                <p className="text-red-600 font-medium">{error}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  Vérifiez votre connexion ou réessayez plus tard.
+                </p>
               </div>
+              <button 
+                onClick={() => {
+                  setError(null);
+                  fetchAllOeuvres();
+                }}
+                className="ml-4 flex items-center px-3 py-2 rounded-md text-sm bg-[#8B4513] text-white hover:bg-[#7a3b0f] transition-colors"
+              >
+                <RefreshCw size={14} className="mr-1" />
+                Réessayer
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && oeuvres.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            {[
+              { label: 'Photographie', count: stats.photographie, color: '#3B82F6', icon: Camera },
+              { label: 'Sculpture', count: stats.sculpture, color: '#F59E0B', icon: Hammer },
+              { label: 'Peinture', count: stats.peinture, color: '#EF4444', icon: Palette },
+              { label: 'Artisanat', count: stats.artisanat, color: '#10B981', icon: Target },
+            ].map((stat, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-3"
+                         style={{ backgroundColor: `${stat.color}15` }}>
+                      <stat.icon size={20} style={{ color: stat.color }} />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold">{stat.count}</div>
+                      <div className="text-sm text-gray-600">{stat.label}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Rechercher une œuvre, un artiste, un style..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#8B4513] focus:ring-2 focus:ring-[#8B4513]/20 transition-all bg-white"
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Dropdown pour le filtre de type */}
+              <div className="relative">
+                <select
+                  value={filters.type}
+                  onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
+                  className="w-full md:w-auto pl-4 pr-10 py-3 rounded-xl border-2 border-gray-200 focus:border-[#8B4513] focus:ring-2 focus:ring-[#8B4513]/20 appearance-none bg-white"
+                >
+                  {oeuvreTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-12">
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="text-center">
+                <Loader2 className="h-12 w-12 animate-spin text-[#8B4513] mx-auto mb-4" />
+                <p className="text-gray-600">Chargement des œuvres...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16 border-2 border-dashed border-gray-300 rounded-2xl bg-white/50">
+              <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Impossible de charger les œuvres
+              </h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                {error}
+              </p>
+              <button
+                onClick={fetchAllOeuvres}
+                className="px-6 py-3 rounded-xl bg-[#8B4513] text-white font-medium hover:bg-[#7a3b0f] transition-colors inline-flex items-center"
+              >
+                <RefreshCw size={18} className="mr-2" />
+                Réessayer
+              </button>
+            </div>
+          ) : filteredOeuvres.length > 0 ? (
+            <>
+              <div className="flex justify-between items-center mb-6">
+                <div className="text-sm text-gray-600">
+                  {totalCount} œuvre{totalCount > 1 ? 's' : ''} trouvée{totalCount > 1 ? 's' : ''}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-[#8B4513] text-white' : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    <Grid size={20} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-[#8B4513] text-white' : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    <List size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredOeuvres.map((oeuvre) => (
+                    <div
+                      key={oeuvre.id}
+                      className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                      onClick={() => handleViewDetails(oeuvre)}
+                    >
+                      <div className="relative h-56 bg-gray-100 overflow-hidden">
+                        <img
+                          src={oeuvre.image || 'https://via.placeholder.com/400x300?text=Image+indisponible'}
+                          alt={oeuvre.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Image+indisponible';
+                          }}
+                        />
+                        
+                        <div className="absolute top-3 left-3">
+                          <div className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/90 flex items-center gap-1.5 ${getTypeColor(oeuvre.type)}`}>
+                            {getTypeIcon(oeuvre.type)}
+                            <span className="capitalize">{oeuvre.type}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Badge prix */}
+                        <div className="absolute bottom-3 right-3">
+                          <div className="px-3 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm">
+                            <span className="font-bold text-lg text-[#8B4513]">
+                              {formatPrice(oeuvre.price)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Badge vendu si quantity = 0 */}
+                        {oeuvre.quantity === 0 && (
+                          <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                            Vendu
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-4">
+                        <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1">
+                          {oeuvre.title}
+                        </h3>
+                        
+                        {oeuvre.description && (
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {oeuvre.description}
+                          </p>
+                        )}
+                        
+                        {oeuvre.professional && (
+                          <div 
+                            className="flex items-center mb-3 group/artist"
+                            onClick={(e) => handleViewProfessional(oeuvre.professional!.id, oeuvre.professional!.name, e)}
+                          >
+                            {oeuvre.professional.avatar && (
+                              <img
+                                src={oeuvre.professional.avatar}
+                                alt={oeuvre.professional.name}
+                                className="w-8 h-8 rounded-full mr-2 border border-gray-200"
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 group-hover/artist:text-[#8B4513] transition-colors truncate">
+                                {oeuvre.professional.name}
+                              </div>
+                              {oeuvre.professional.city && (
+                                <div className="text-xs text-gray-500 flex items-center">
+                                  <MapPin size={12} className="mr-1" />
+                                  <span className="truncate">{oeuvre.professional.city}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                          <div className="flex items-center">
+                            <Calendar size={14} className="mr-1" />
+                            {formatDate(oeuvre.createdAt)}
+                          </div>
+                          {oeuvre.category && (
+                            <div className="px-2 py-1 rounded bg-gray-100 text-xs text-gray-700 truncate max-w-[120px]">
+                              {oeuvre.category}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Augmentez la largeur de la carte parente si nécessaire */}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (oeuvre.professional) {
+                                handleViewArtworks(oeuvre.professional.id, oeuvre.professional.name, e);
+                              }
+                            }}
+                            className="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors flex items-center justify-center text-sm"
+                          >
+                            <Eye size={14} className="mr-1" />
+                            Plus
+                          </button>
+                          <button
+                            onClick={(e) => handleBuyOeuvre(oeuvre, e)}
+                            disabled={cartLoading || addingOeuvreId === oeuvre.id || oeuvre.quantity === 0}
+                            className={`flex-1 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center text-sm ${
+                              addingOeuvreId === oeuvre.id
+                                ? 'bg-[#6B8E23] text-white cursor-wait'
+                                : oeuvre.quantity === 0
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-[#8B4513] text-white hover:bg-[#7a3b0f]'
+                            }`}
+                          >
+                            {addingOeuvreId === oeuvre.id ? (
+                              <>
+                                <Loader2 size={14} className="mr-1 animate-spin" />
+                                Ajout...
+                              </>
+                            ) : oeuvre.quantity === 0 ? (
+                              <>
+                                <ShoppingCart size={14} className="mr-1" />
+                                Vendu
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingCart size={14} className="mr-1" />
+                                Acheter {/* ← Texte raccourci */}
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredOeuvres.map((oeuvre) => (
+                    <div
+                      key={oeuvre.id}
+                      className="group bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                      onClick={() => handleViewDetails(oeuvre)}
+                    >
+                      <div className="flex flex-col md:flex-row">
+                        <div className="md:w-48 relative h-48 md:h-auto overflow-hidden">
+                          <img
+                            src={oeuvre.image || 'https://via.placeholder.com/400x300?text=Image+indisponible'}
+                            alt={oeuvre.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute top-3 left-3">
+                            <div className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm bg-white/90 flex items-center gap-1.5 ${getTypeColor(oeuvre.type)}`}>
+                              {getTypeIcon(oeuvre.type)}
+                              <span className="capitalize">{oeuvre.type}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 p-6">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                {oeuvre.title}
+                              </h3>
+                              {oeuvre.description && (
+                                <p className="text-gray-600 mb-3 line-clamp-2">
+                                  {oeuvre.description}
+                                </p>
+                              )}
+                              
+                              {oeuvre.professional && (
+                                <div className="flex items-center mb-2">
+                                  {oeuvre.professional.avatar && (
+                                    <img
+                                      src={oeuvre.professional.avatar}
+                                      alt={oeuvre.professional.name}
+                                      className="w-8 h-8 rounded-full mr-2 border border-gray-200"
+                                    />
+                                  )}
+                                  <div>
+                                    <div 
+                                      className="font-medium text-gray-900 hover:text-[#8B4513] transition-colors cursor-pointer"
+                                      onClick={(e) => handleViewProfessional(oeuvre.professional!.id, oeuvre.professional!.name, e)}
+                                    >
+                                      {oeuvre.professional.name}
+                                    </div>
+                                    {oeuvre.professional.city && (
+                                      <div className="text-sm text-gray-500 flex items-center">
+                                        <MapPin size={14} className="mr-1" />
+                                        {oeuvre.professional.city}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-2xl font-bold text-[#8B4513] ml-4">
+                              {formatPrice(oeuvre.price)}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center">
+                                <Calendar size={14} className="mr-1" />
+                                {formatDate(oeuvre.createdAt)}
+                              </div>
+                              {oeuvre.category && (
+                                <div className="px-3 py-1 rounded-full bg-gray-100 text-gray-700">
+                                  {oeuvre.category}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-3">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (oeuvre.professional) {
+                                  handleViewArtworks(oeuvre.professional.id, oeuvre.professional.name, e);
+                                }
+                              }}
+                              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              Voir toutes les œuvres
+                            </button>
+                            <button
+                              onClick={(e) => handleBuyOeuvre(oeuvre, e)}
+                              disabled={cartLoading || addingOeuvreId === oeuvre.id || oeuvre.quantity === 0}
+                              className={`px-6 py-2 rounded-lg font-medium transition-colors flex items-center ${
+                                addingOeuvreId === oeuvre.id
+                                  ? 'bg-[#6B8E23] text-white cursor-wait'
+                                  : oeuvre.quantity === 0
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : 'bg-[#8B4513] text-white hover:bg-[#7a3b0f]'
+                              }`}
+                            >
+                              {addingOeuvreId === oeuvre.id ? (
+                                <>
+                                  <Loader2 size={18} className="mr-2 animate-spin" />
+                                  Ajout...
+                                </>
+                              ) : oeuvre.quantity === 0 ? (
+                                <>
+                                  <ShoppingCart size={18} className="mr-2" />
+                                  Vendu
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingCart size={18} className="mr-2" />
+                                  Ajouter au panier
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {totalPages > 1 && (
+                <div className="mt-12 flex justify-center items-center gap-4">
+                  <button
+                    onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                    disabled={page === 1}
+                    className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
+                      if (pageNum > totalPages) return null;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className={`w-10 h-10 rounded-lg font-medium ${
+                            page === pageNum
+                              ? 'bg-[#8B4513] text-white'
+                              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <button
+                    onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={page === totalPages}
+                    className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-16 border-2 border-dashed border-gray-300 rounded-2xl bg-white/50">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                <Search size={48} className="text-gray-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Aucune œuvre trouvée
+              </h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                Aucune œuvre ne correspond à vos critères de recherche.
+                Essayez de modifier vos filtres ou votre recherche.
+              </p>
+              <button
+                onClick={handleResetFilters}
+                className="px-6 py-3 rounded-xl bg-[#8B4513] text-white font-medium hover:bg-[#7a3b0f] transition-colors inline-flex items-center"
+              >
+                <RefreshCw size={18} className="mr-2" />
+                Réinitialiser les filtres
+              </button>
             </div>
           )}
         </div>
       </div>
-
-      {/* Creators Grid - TOUS LES BOUTONS FONCTIONNELS */}
-      <div className="mb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedCreators.map((creator) => (
-            <div
-              key={creator.id}
-              className="rounded-lg border hover:shadow-xl transition-shadow group"
-              style={{ borderColor: '#D3D3D3' }}
-            >
-              {/* Creator Header */}
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={creator.image}
-                  alt={creator.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {creator.featured && (
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold text-white"
-                          style={{ backgroundColor: '#8B4513' }}>
-                      EN VEDETTE
-                    </span>
-                  </div>
-                )}
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <button 
-                    onClick={() => handleLikeItem(`creator-${creator.id}`)}
-                    className="p-2 rounded-full bg-white/90 hover:bg-white transition-colors"
-                  >
-                    <Heart 
-                      size={20} 
-                      className={likedItems.includes(`creator-${creator.id}`) ? 'fill-red-500 text-red-500' : 'text-gray-600'}
-                    />
-                  </button>
-                </div>
-                <button 
-                  onClick={() => handleViewCreatorDetail(creator)}
-                  className="absolute bottom-4 left-4 px-3 py-1 rounded text-sm font-medium text-white bg-black/60 hover:bg-black/80 transition-colors"
-                >
-                  Voir la boutique
-                </button>
-              </div>
-
-              {/* Creator Info */}
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 
-                      className="font-bold text-xl mb-1 hover:text-[#8B4513] transition-colors cursor-pointer"
-                      onClick={() => handleViewCreatorDetail(creator)}
-                    >
-                      {creator.name}
-                    </h3>
-                    <p className="text-gray-600">{creator.category}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center mb-1" style={{ color: '#8B4513' }}>
-                      <span className="font-bold mr-1">{creator.rating}</span>
-                      <Star size={14} className="fill-current" />
-                    </div>
-                    <div className="text-sm text-gray-500">{creator.followers} abonnés</div>
-                  </div>
-                </div>
-
-                <p className="text-gray-600 mb-4">{creator.description}</p>
-
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
-                  <div className="flex items-center">
-                    <span className="font-medium mr-2">{creator.products} produits</span>
-                    <span>•</span>
-                    <span className="ml-2 flex items-center">
-                      <MapPin size={12} className="mr-1" />
-                      {creator.location}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => handleShareCreator(creator)}
-                    className="p-1 hover:text-[#556B2F] transition-colors"
-                    title="Partager"
-                  >
-                    <Share2 size={16} />
-                  </button>
-                </div>
-
-                <div className="flex space-x-2">
-                  <button 
-                    onClick={() => handleFollowCreator(creator.id)}
-                    className={`flex-1 py-2 rounded-md border text-center font-medium flex items-center justify-center transition-colors ${
-                      following.includes(creator.id) 
-                        ? 'bg-[#8B4513] text-white border-[#8B4513]' 
-                        : 'hover:bg-[#556B2F] hover:text-white'
-                    }`}
-                    style={{ borderColor: '#556B2F', color: following.includes(creator.id) ? 'white' : '#556B2F' }}
-                  >
-                    <Heart 
-                      size={18} 
-                      className="mr-2" 
-                      fill={following.includes(creator.id) ? 'white' : 'none'}
-                    />
-                    {following.includes(creator.id) ? 'Suivi' : 'Suivre'}
-                  </button>
-                  <button 
-                    onClick={() => handleViewCreatorDetail(creator)}
-                    className="flex-1 py-2 rounded-md text-white font-medium flex items-center justify-center hover:bg-[#485826] transition-colors"
-                    style={{ backgroundColor: '#556B2F' }}
-                  >
-                    <ShoppingBag size={18} className="mr-2" />
-                    Boutique
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Trending Products - TOUS LES BOUTONS FONCTIONNELS */}
-      <div className="mb-12">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center">
-            <TrendingUp size={24} className="mr-2" style={{ color: '#8B4513' }} />
-            <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-              Produits tendance
-            </h2>
-          </div>
-          <button 
-            onClick={() => setShowAllProducts(!showAllProducts)}
-            className="flex items-center text-sm font-medium hover:underline"
-            style={{ color: '#556B2F' }}
-          >
-            {showAllProducts ? 'Voir moins' : 'Voir tous les produits'}
-            <ChevronRight size={16} className="ml-1" />
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {displayedProducts.map((product) => (
-            <div
-              key={product.id}
-              className="p-6 rounded-lg border hover:shadow-lg transition-shadow cursor-pointer group"
-              style={{ borderColor: '#D3D3D3', backgroundColor: '#F9F9F9' }}
-              onClick={() => handleViewProductDetail(product)}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-bold text-lg mb-1">{product.name}</h3>
-                  <p 
-                    className="text-gray-600 text-sm hover:text-[#8B4513] transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const creator = creators.find(c => c.id === product.creatorId);
-                      if (creator) handleViewCreatorDetail(creator);
-                    }}
-                  >
-                    par {product.creator}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-xl mb-1" style={{ color: '#8B4513' }}>
-                    {product.price}
-                  </div>
-                  <div className="text-sm text-gray-500">{product.orders} commandes</div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleViewProductDetail(product);
-                  }}
-                  className="text-sm font-medium hover:underline"
-                  style={{ color: '#556B2F' }}
-                >
-                  Voir le produit
-                </button>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onContactClick && onContactClick(`Achat: ${product.name}`, product.creator);
-                  }}
-                  className="px-4 py-2 rounded-md text-sm font-medium text-white hover:bg-[#485826] transition-colors"
-                  style={{ backgroundColor: '#6B8E23' }}
-                >
-                  Acheter
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-
-      {/* Modal Détail Créateur - COMPLET ET FONCTIONNEL */}
-      {showCreatorDetail && selectedCreator && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="p-6 border-b flex justify-between items-center"
-              style={{ borderColor: '#D3D3D3', backgroundColor: '#556B2F' }}>
-              <div className="flex items-center">
-                <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-white">
-                  <img 
-                    src={selectedCreator.image} 
-                    alt={selectedCreator.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">{selectedCreator.name}</h2>
-                  <div className="flex items-center text-white/80 text-sm mt-1">
-                    <Store size={14} className="mr-1" />
-                    {selectedCreator.category}
-                    <span className="mx-2">•</span>
-                    <MapPin size={14} className="mr-1" />
-                    {selectedCreator.location}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button 
-                  onClick={() => handleShareCreator(selectedCreator)}
-                  className="p-2 rounded-full hover:bg-white/20 transition-colors"
-                  title="Partager"
-                >
-                  <Share2 size={20} className="text-white" />
-                </button>
-                <button 
-                  onClick={() => window.print()}
-                  className="p-2 rounded-full hover:bg-white/20 transition-colors"
-                  title="Imprimer"
-                >
-                  <Printer size={20} className="text-white" />
-                </button>
-                <button 
-                  onClick={() => setShowCreatorDetail(false)}
-                  className="p-2 rounded-full hover:bg-white/20 transition-colors"
-                >
-                  <X size={24} className="text-white" />
-                </button>
-              </div>
-            </div>
-
-            {/* Contenu */}
-            <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
-              <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Colonne gauche - Informations */}
-                  <div className="lg:col-span-2">
-                    {/* Bio */}
-                    <div className="mb-8">
-                      <h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: '#8B4513' }}>
-                        <Info size={20} className="mr-2" />
-                        À propos du créateur
-                      </h3>
-                      <p className="text-gray-700 mb-4">{selectedCreator.bio}</p>
-                      
-                      {/* Stats */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div className="p-3 rounded-lg text-center" style={{ backgroundColor: '#F5F5DC' }}>
-                          <p className="font-medium text-sm" style={{ color: '#556B2F' }}>Produits</p>
-                          <p className="text-2xl font-bold">{selectedCreator.products}</p>
-                        </div>
-                        <div className="p-3 rounded-lg text-center" style={{ backgroundColor: '#F5F5DC' }}>
-                          <p className="font-medium text-sm" style={{ color: '#556B2F' }}>Note</p>
-                          <p className="text-2xl font-bold">{selectedCreator.rating}/5</p>
-                        </div>
-                        <div className="p-3 rounded-lg text-center" style={{ backgroundColor: '#F5F5DC' }}>
-                          <p className="font-medium text-sm" style={{ color: '#556B2F' }}>Ventes</p>
-                          <p className="text-2xl font-bold">{selectedCreator.shopStats?.sales || 0}</p>
-                        </div>
-                        <div className="p-3 rounded-lg text-center" style={{ backgroundColor: '#F5F5DC' }}>
-                          <p className="font-medium text-sm" style={{ color: '#556B2F' }}>Satisfaction</p>
-                          <p className="text-2xl font-bold">{selectedCreator.shopStats?.satisfaction || 0}%</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Matériaux */}
-                    {selectedCreator.materials && (
-                      <div className="mb-8">
-                        <h3 className="text-lg font-bold mb-4" style={{ color: '#8B4513' }}>Matériaux utilisés</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedCreator.materials.map((material, index) => (
-                            <span 
-                              key={index}
-                              className="px-3 py-1 rounded-full text-sm"
-                              style={{ 
-                                backgroundColor: '#F0EAD6',
-                                color: '#556B2F',
-                                border: '1px solid #D3D3D3'
-                              }}
-                            >
-                              {material}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Certifications */}
-                    {selectedCreator.certifications && (
-                      <div className="mb-8">
-                        <h3 className="text-lg font-bold mb-4" style={{ color: '#8B4513' }}>Certifications</h3>
-                        <div className="space-y-2">
-                          {selectedCreator.certifications.map((cert, index) => (
-                            <div key={index} className="flex items-center p-3 rounded-lg" style={{ backgroundColor: '#F5F5DC' }}>
-                              <Award size={18} className="mr-2" style={{ color: '#556B2F' }} />
-                              <span className="font-medium">{cert}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Colonne droite - Contact et actions */}
-                  <div>
-                    {/* Informations boutique */}
-                    <div className="mb-6 p-4 rounded-lg border" style={{ borderColor: '#D3D3D3' }}>
-                      <h3 className="font-bold mb-3" style={{ color: '#8B4513' }}>Informations boutique</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center">
-                          <Calendar size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                          <span className="text-sm">{selectedCreator.joinDate}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Truck size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                          <span className="text-sm">Livraison: {selectedCreator.shopStats?.deliveryTime || 'Sous 7 jours'}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Shield size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                          <span className="text-sm">Paiement 100% sécurisé</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Contact */}
-                    {selectedCreator.contact && (
-                      <div className="mb-6 p-4 rounded-lg border" style={{ borderColor: '#D3D3D3' }}>
-                        <h3 className="font-bold mb-3" style={{ color: '#8B4513' }}>Contact</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Mail size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                            <span className="text-sm">{selectedCreator.contact.email}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Phone size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                            <span className="text-sm">{selectedCreator.contact.phone}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <ExternalLink size={16} className="mr-2" style={{ color: '#8B4513' }} />
-                            <a href={`https://${selectedCreator.contact.website}`} className="text-sm hover:underline" style={{ color: '#556B2F' }}>
-                              {selectedCreator.contact.website}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Actions */}
-                    <div className="space-y-3">
-                      
-                      <button 
-                        onClick={() => onContactClick && onContactClick(`Commande sur mesure: ${selectedCreator.name}`, selectedCreator.name)}
-                        className="w-full py-3 rounded-lg text-white font-bold hover:bg-[#485826] transition-colors"
-                        style={{ backgroundColor: '#6B8E23' }}
-                      >
-                        <ShoppingCart size={20} className="inline mr-2" />
-                        Commander un produit
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Détail Produit - COMPLET ET FONCTIONNEL */}
-      {showProductDetail && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="p-6 border-b flex justify-between items-center"
-              style={{ borderColor: '#D3D3D3', backgroundColor: '#556B2F' }}>
-              <div>
-                <h2 className="text-xl font-bold text-white">{selectedProduct.name}</h2>
-                <p className="text-white/80 text-sm mt-1">par {selectedProduct.creator}</p>
-              </div>
-              <button 
-                onClick={() => setShowProductDetail(false)}
-                className="p-2 rounded-full hover:bg-white/20 transition-colors"
-              >
-                <X size={24} className="text-white" />
-              </button>
-            </div>
-
-            {/* Contenu */}
-            <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Image */}
-                  <div>
-                    <div className="h-80 overflow-hidden rounded-lg mb-4">
-                      <img 
-                        src={selectedProduct.image} 
-                        alt={selectedProduct.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Informations */}
-                  <div>
-                    <div className="mb-6">
-                      <h3 className="text-2xl font-bold mb-2" style={{ color: '#556B2F' }}>
-                        {selectedProduct.name}
-                      </h3>
-                      <p className="text-gray-600 mb-4">{selectedProduct.description}</p>
-                      
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center">
-                          <Tag size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                          <div>
-                            <p className="font-medium">Catégorie</p>
-                            <p className="text-gray-700">{selectedProduct.category}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <Package size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                          <div>
-                            <p className="font-medium">Matériaux</p>
-                            <p className="text-gray-700">{selectedProduct.materials}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <Ruler size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                          <div>
-                            <p className="font-medium">Dimensions</p>
-                            <p className="text-gray-700">{selectedProduct.dimensions}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <Truck size={18} className="mr-3" style={{ color: '#8B4513' }} />
-                          <div>
-                            <p className="font-medium">Livraison</p>
-                            <p className="text-gray-700">{selectedProduct.delivery}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Prix et stock */}
-                      <div className="p-4 rounded-lg mb-6" style={{ backgroundColor: '#F5F5DC' }}>
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium" style={{ color: '#8B4513' }}>Prix</p>
-                            <div className="flex items-center">
-                              <p className="text-3xl font-bold mr-2" style={{ color: '#556B2F' }}>
-                                {selectedProduct.price}
-                              </p>
-                              {selectedProduct.originalPrice && (
-                                <p className="text-lg line-through text-gray-500">
-                                  {selectedProduct.originalPrice}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div>
-                            <p className="font-medium" style={{ color: '#8B4513' }}>Disponibilité</p>
-                            <p className={`text-lg font-bold ${selectedProduct.inStock ? 'text-green-600' : 'text-red-600'}`}>
-                              {selectedProduct.inStock ? 'En stock' : 'Rupture'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="space-y-3">
-                        <button 
-                          onClick={() => onContactClick && onContactClick(`Achat: ${selectedProduct.name}`, selectedProduct.creator)}
-                          className="w-full py-4 rounded-lg text-white font-bold text-lg hover:bg-[#485826] transition-colors"
-                          style={{ backgroundColor: '#6B8E23' }}
-                        >
-                          <ShoppingCart size={20} className="inline mr-2" />
-                          Acheter maintenant
-                        </button>
-                        <div className="flex space-x-3">
-                          <button 
-                            onClick={() => handleLikeItem(`product-${selectedProduct.id}`)}
-                            className={`flex-1 py-3 rounded-lg border font-medium flex items-center justify-center ${
-                              likedItems.includes(`product-${selectedProduct.id}`) 
-                                ? 'bg-[#8B4513] text-white border-[#8B4513]' 
-                                : 'hover:bg-[#556B2F] hover:text-white'
-                            }`}
-                            style={{ borderColor: '#556B2F', color: likedItems.includes(`product-${selectedProduct.id}`) ? 'white' : '#556B2F' }}
-                          >
-                            <Heart 
-                              size={20} 
-                              className="mr-2" 
-                              fill={likedItems.includes(`product-${selectedProduct.id}`) ? 'white' : 'none'}
-                            />
-                            {likedItems.includes(`product-${selectedProduct.id}`) ? 'Favori' : 'Ajouter aux favoris'}
-                          </button>
-                          <button 
-                            onClick={() => onContactClick && onContactClick(`Question produit: ${selectedProduct.name}`, selectedProduct.creator)}
-                            className="flex-1 py-3 rounded-lg border font-medium hover:bg-gray-50 transition-colors"
-                            style={{ borderColor: '#556B2F', color: '#556B2F' }}
-                          >
-                            <Info size={20} className="inline mr-2" />
-                            Question
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
-
-// Composant Ruler (manquant dans lucide-react)
-const Ruler = ({ size, className, style }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    className={className}
-    style={style}
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor"
-  >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      strokeWidth={2} 
-      d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" 
-    />
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      strokeWidth={2} 
-      d="M9 22V12h6v10" 
-    />
-  </svg>
-);
 
 export default MarketplaceCreateurs;

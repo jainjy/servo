@@ -41,7 +41,7 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       const { user } = await login(email, password);
-      console.log("Login successful:", user);
+      //console.log("Login successful:", user);
       // Redirection intelligente
       if (redirectPath) {
         navigate(redirectPath);
@@ -51,7 +51,11 @@ const LoginPage = () => {
       }
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("Identifiants invalides. Veuillez réessayer.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Une erreur est survenue lors de la connexion."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +94,7 @@ const LoginPage = () => {
       <div className="w-[80vw] lg:w-[60vw] h-[80vh] m-auto rounded-3xl shadow-xl flex flex-col lg:flex-row overflow-hidden bg-white/0">
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/login")}
             className="flex items-center gap-2 bg-gray-700 w-28 py-3 px-4 rounded-full text-gray-100 hover:text-gray-100 mb-4 mx-2 transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -149,7 +153,6 @@ const LoginPage = () => {
         <div className=" flex items-center justify-center bg-[#FFFFFF] overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
           <div className="w-full max-w-md">
             <Card className="border-0 shadow-none px-0 lg:px-5 py-4 lg:py-0 bg-[#FFFFFF]">
-
               <CardHeader className="space-y-0">
                 <div className="flex justify-center mb-4 lg:hidden">
                   <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
@@ -157,7 +160,7 @@ const LoginPage = () => {
                   </div>
                 </div>
                 <CardTitle className="text-2xl font-bold text-center text-gray-900">
-                  Connexion SERVO
+                  Connexion OLIPLUS
                 </CardTitle>
                 <CardDescription className="text-center text-gray-600">
                   Accédez à votre espace personnel
@@ -259,7 +262,7 @@ const LoginPage = () => {
                   <div className="text-center text-sm text-gray-600">
                     Pas encore de compte ?{" "}
                     <a
-                      href="/register"
+                      href="/register/professional/subscription"
                       className="text-[#556B2F] w-full cursor-pointer hover:text-[#556B2F]/90 font-medium"
                     >
                       Créer un compte

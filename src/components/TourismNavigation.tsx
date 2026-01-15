@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface TourismButton {
   id: number;
@@ -15,6 +15,7 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
   page = "decouvrir",
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const DecouvrirButtons: TourismButton[] = [
     { id: 1, title: "Activités & loisirs", path: "/activiteLoisirs" },
@@ -63,6 +64,7 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
     // { id: 25, title: "Vidéos", path: "/videos-inspirer-eveiller" },
     { id: 26, title: "Portraits locaux", path: "/portraits-locaux" },
     { id: 27, title: "Bons plans & conseils", path: "/bon-plan-conseil" },
+    { id: 28, title: "entrepreneuriat", path: "/entrepreneuriat" },
   ];
 
   // Déterminer quelles sections afficher basé sur 'page'
@@ -80,24 +82,27 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
   const renderSection = (buttons: TourismButton[]) => (
     <div className="mb-6">
       <div className="flex flex-wrap gap-3">
-        {filterButtons(buttons).map((btn) => (
-          <button
-            key={btn.id}
-            onClick={() => navigate(btn.path)}
-            className={`
-              px-6 py-2 
-              rounded-full 
-              bg-logo
-              text-sm font-medium text-white
-              transition
-              hover:border-[#556B2F]/50    
-              hover:text-white
-              hover:bg-logo/50   
-            `}
-          >
-            {btn.title}
-          </button>
-        ))}
+        {filterButtons(buttons).map((btn) => {
+          const isActive = location.pathname === btn.path;
+          return (
+            <button
+              key={btn.id}
+              onClick={() => navigate(btn.path)}
+              className={`
+                px-6 py-2 
+                rounded-full 
+                text-sm font-medium
+                transition
+                ${isActive 
+                  ? 'bg-[#479c0f] text-white border-2 border-[#62e50a] shadow-lg' 
+                  : 'bg-logo text-white hover:border-[#556B2F]/50 hover:bg-logo/50'
+                }
+              `}
+            >
+              {btn.title}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

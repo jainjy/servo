@@ -1,0 +1,238 @@
+// services/entrepreneuriatService.js
+import api from "@/lib/api";
+
+class EntrepreneuriatService {
+  // Interviews
+  static async getInterviews(params = {}) {
+    try {
+      const response = await api.get("/entrepreneuriat/interviews", { params });
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur récupération interviews:", error);
+      throw error;
+    }
+  }
+
+  static async getInterviewById(id) {
+    try {
+      const response = await api.get(`/entrepreneuriat/interviews/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur récupération interview:", error);
+      throw error;
+    }
+  }
+
+  static async createInterview(data) {
+    try {
+      const response = await api.post("/entrepreneuriat/interviews", data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur création interview:", error);
+      throw error;
+    }
+  }
+
+  static async updateInterview(id, data) {
+    try {
+      const response = await api.put(`/entrepreneuriat/interviews/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur mise à jour interview:", error);
+      throw error;
+    }
+  }
+
+  static async deleteInterview(id) {
+    try {
+      const response = await api.delete(`/entrepreneuriat/interviews/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur suppression interview:", error);
+      throw error;
+    }
+  }
+
+  static async trackInteraction(interviewId, action, duration = null) {
+    try {
+      const response = await api.post(
+        `/entrepreneuriat/interviews/${interviewId}/interact`,
+        { action, duration }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur enregistrement interaction:", error);
+      throw error;
+    }
+  }
+
+  // Ressources
+  static async getResources(params = {}) {
+    try {
+      const response = await api.get("/entrepreneuriat/resources", { params });
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur récupération ressources:", error);
+      throw error;
+    }
+  }
+
+  // DELETE - Supprimer une ressource
+  static async deleteResource(id) {
+    try {
+      const response = await api.delete(`/entrepreneuriat/resources/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur suppression ressource:", error);
+      throw error;
+    }
+  }
+
+  // POST - Créer une ressource
+  static async createResource(data) {
+    try {
+      const response = await api.post("/entrepreneuriat/resources", data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur création ressource:", error);
+      throw error;
+    }
+  }
+
+  // PUT - Mettre à jour une ressource
+  static async updateResource(id, data) {
+    try {
+      const response = await api.put(`/entrepreneuriat/resources/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur mise à jour ressource:", error);
+      throw error;
+    }
+  }
+
+  static async downloadResource(id) {
+    try {
+      const response = await api.get(
+        `/entrepreneuriat/resources/${id}/download`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur téléchargement ressource:", error);
+      throw error;
+    }
+  }
+
+  // Événements
+  static async getEvents(params = {}) {
+    try {
+      const response = await api.get("/entrepreneuriat/events", { params });
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur récupération événements:", error);
+      throw error;
+    }
+  }
+
+  // POST - Créer un événement
+  static async createEvent(data) {
+    try {
+      const response = await api.post("/entrepreneuriat/events", data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur création événement:", error);
+      throw error;
+    }
+  }
+
+  // PUT - Mettre à jour un événement
+  static async updateEvent(id, data) {
+    try {
+      const response = await api.put(`/entrepreneuriat/events/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur mise à jour événement:", error);
+      throw error;
+    }
+  }
+
+  // DELETE - Supprimer un événement
+  static async deleteEvent(id) {
+    try {
+      const response = await api.delete(`/entrepreneuriat/events/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur suppression événement:", error);
+      throw error;
+    }
+  }
+
+  // POST - S'inscrire à un événement
+  static async registerToEvent(id) {
+    try {
+      const response = await api.post(`/entrepreneuriat/events/${id}/register`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur inscription événement:", error);
+      throw error;
+    }
+  }
+
+  // Statistiques
+  static async getStats() {
+    try {
+      const response = await api.get("/entrepreneuriat/admin/stats");
+      // Retourner directement data.data si c'est la structure
+      return {
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      console.error("❌ Erreur récupération stats:", error);
+      // Retourner les stats par défaut
+      return {
+        data: {
+          totalInterviews: 0,
+          totalResources: 0,
+          totalEvents: 0,
+          totalDownloads: 0,
+          recentInteractions: [],
+        },
+      };
+    }
+  }
+
+  static async getCategories() {
+    try {
+      const response = await api.get("/entrepreneuriat/categories");
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur récupération catégories:", error);
+      throw error;
+    }
+  }
+
+  // Suggestions
+  static async getSuggestions(userId) {
+    try {
+      const response = await api.get(`/entrepreneuriat/suggestions/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur récupération suggestions:", error);
+      throw error;
+    }
+  }
+
+  // Recherche globale
+  static async search(query, filters = {}) {
+    try {
+      const response = await api.get("/entrepreneuriat/search", {
+        params: { q: query, ...filters },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur recherche:", error);
+      throw error;
+    }
+  }
+}
+
+export default EntrepreneuriatService;

@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Entrepreneuriat from "./pages/Entrepreneuriat";
 import {
   BrowserRouter,
   Routes,
@@ -212,7 +213,6 @@ import Soin from "./pages/Soin";
 import Therapeute from "./pages/Therapeute";
 import HuilesEssentielles from "./pages/HuilesEssentielles";
 import Nutrition from "./pages/Nutrition";
-import path from "path";
 import EmploiFormationsPage from "./pages/EmploiFormationsPage/EmploiFormationsPage";
 import ArtETCreation from "./pages/ArtETCreation";
 import ArtCreationProduct from "./pages/pro/ArtCreationProduct";
@@ -221,7 +221,6 @@ import PrestataireVehiculesPage from "./pages/pro/PrestataireVehiculesPage";
 
 // Ajoutez cette ligne avec les autres imports
 import MesCandidatures from "@/pages/EmploiFormationsPage/MesCandidatures";
-         
 
 import ProjetsPage from "./pages/ProjetsPage";
 import LocationSaisonniere from "./pages/LocationSaisonniere";
@@ -243,8 +242,16 @@ import PodcastsComponent from "./components/components/PodcastsInspirer";
 import VideosComponent from "./components/components/VideosInspirer";
 import PortraitsLocaux from "./components/components/PortraitLocaux";
 import BonsPlansConseils from "./components/components/BonPlanConseils";
+import OeuvrePages from "./pages/ArtEtCreation/OeuvrePages";
+import ConseilsAdminPage from "./pages/ConseilsAdminPanel";
+
 import PortraitsAdmin from "./pages/admin/PortraitsAdmin";
 import EventsDiscoveriesPro from "./components/pro/Evenement&Decouverte/EventsDiscoveriesPro";
+// 🔥 NOUVEAUX IMPORTS POUR LES EXPÉRIENCES 🔥
+import ExperienceDetail from "./components/components/ExperienceDetail";
+import ExperienceBooking from "./components/components/ExperienceBooking";
+import EntrepreneuriatAdmin from "./pages/admin/EntrepreneuriatAdmin";
+import ChatBot from "./components/chatbot";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -377,7 +384,29 @@ const App = () => {
                   <Route path="/achat" element={<PropertyBuy />} />
                   <Route path="/location" element={<PropertyRent />} />
                   <Route path="/rachat" element={<RachatServiceCard />} />
-
+                  {/* 🔥 ROUTES DES EXPÉRIENCES - CORRIGÉES 🔥 */}
+                  <Route
+                    path="/sejour-experience"
+                    element={<SejoursExperiences />}
+                  />
+                  <Route
+                    path="/sejour-experience/:id"
+                    element={<ExperienceDetail />}
+                  />
+                  <Route
+                    path="/sejour-experience/:id/book"
+                    element={<ExperienceBooking />}
+                  />
+                  {/* Routes alternatives (optionnel) */}
+                  <Route path="/experiences" element={<SejoursExperiences />} />
+                  <Route
+                    path="/experiences/:id"
+                    element={<ExperienceDetail />}
+                  />
+                  <Route
+                    path="/experiences/:id/book"
+                    element={<ExperienceBooking />}
+                  />
                   <Route path="/explorer-vivre" element={<ExplorerVivre />} />
                   <Route
                     path="/evenement-decouverte"
@@ -431,7 +460,6 @@ const App = () => {
                     path="/bon-plan-conseil"
                     element={<BonsPlansConseils />}
                   />
-
                   <Route
                     path="/location-Saisonniere"
                     element={<LocationSaisonniere />}
@@ -690,6 +718,11 @@ const App = () => {
                     path="/service"
                     element={<Navigate to="/services-partners" replace />}
                   />
+
+                  <Route
+                    path="/entrepreneuriat"
+                    element={<Entrepreneuriat />}
+                  />
                   <Route
                     path="/services-partners"
                     element={<ServicesPartnersPage />}
@@ -705,7 +738,7 @@ const App = () => {
                     path="/login/particular"
                     element={<ParticularLogin />}
                   />
-                  <Route path="/register" element={<RoleSelectionPage />} />
+                  {/* <Route path="/register" element={<RoleSelectionPage />} /> */}
                   <Route
                     path="/register/professional/subscription"
                     element={<ProfessionalSubscriptionPage />}
@@ -868,12 +901,14 @@ const App = () => {
                       element={<GestionFormationsPage />}
                     />
                     <Route
-  path="gestion-formations"
-  element={<GestionFormationsPage />}
-  
-/>
+                      path="gestion-formations"
+                      element={<GestionFormationsPage />}
+                    />
 
-<Route path="gestion-emplois" element={<GestionEmploisPage />} />
+                    <Route
+                      path="gestion-emplois"
+                      element={<GestionEmploisPage />}
+                    />
                     <Route
                       path="gestion-alternance"
                       element={<GestionAlternancePage />}
@@ -883,9 +918,9 @@ const App = () => {
                       element={<DeleteAccountPage />}
                     />
                     <Route
-                    path="events-discoveries"
-                    element={<EventsDiscoveriesPro />}
-                  />
+                      path="events-discoveries"
+                      element={<EventsDiscoveriesPro />}
+                    />
                   </Route>
                   {/* Section Mon Compte Routes */}
                   <Route
@@ -904,8 +939,8 @@ const App = () => {
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
                     <Route path="conseil" element={<UserConseilPage />} />
- {/* AJOUTEZ CETTE ROUTE */}
-  <Route path="candidatures" element={<MesCandidatures />} />
+                    {/* AJOUTEZ CETTE ROUTE */}
+                    <Route path="candidatures" element={<MesCandidatures />} />
 
                     <Route
                       path="locationSaisonniere"
@@ -937,6 +972,7 @@ const App = () => {
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="blog" element={<Blog />} />
+                    <Route path="entrepreneuriat" element={<EntrepreneuriatAdmin />} />
                     <Route path="portraits" element={<PortraitsAdmin />} />
                     <Route path="bookings" element={<Bookings />} />
                     <Route path="listings" element={<Listings />} />
@@ -945,6 +981,7 @@ const App = () => {
                     <Route path="conseil" element={<AdminConseilPage />} />
                     <Route path="rendezvous" element={<RendezVous />} />
                     <Route path="media" element={<AdminMedia />} />
+                    <Route path="conseils" element={<ConseilsAdminPage />} />
                     <Route
                       path="demandeDroitFamille"
                       element={<DemandeDroitFamille />}
@@ -1004,16 +1041,18 @@ const App = () => {
                     element={<GestionDroitsRGPD />}
                   />
                   <Route path="/contact-dpo" element={<ContactDPO />} />
-
                   {/* Onglets Arts et Creations */}
                   <Route path="/art-et-creation" element={<ArtETCreation />} />
-
                   <Route path="/photographie" element={<PhotographiePage />} />
                   <Route
                     path="/sculpture"
                     element={<SculpturePage onContactClick={undefined} />}
                   />
                   <Route path="/peinture" element={<PeinturePage />} />
+                  <Route
+                    path="/oeuvres/:professionalId"
+                    element={<OeuvrePages />}
+                  />
                   {/* <Route path="/artisanat" element={<ArtisanatPage />} />*/}
                   <Route
                     path="/marketplace-createurs"
@@ -1025,12 +1064,13 @@ const App = () => {
                   />
                 </Routes>
 
-                {/* Pop-up publicité globale */}
+                {/* Pop-up Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité. Nous allions expertise, innovation et passion pour vous offrir un service d'exception.globale */}
                 {user && user.role !== "admin" && (
                   <AdvertisementPopup refreshMinutes={3} />
                 )}
                 <CookieConsent />
               </Layout>
+                 <ChatBot />
             </BrowserRouter>
           </CartProvider>
         </SocketProvider>

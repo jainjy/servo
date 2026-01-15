@@ -1,18 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import '../styles/load.css';
-import HomeImage from '../../public/fam.jfif';
-import vid1 from '../../public/video/vid1.mp4';
-import vid2 from '../../public/video/vid2.mp4';
-import vid3 from '../../public/video/vid3.mp4';
-import ServoLogo from './components/ServoLogo';
 
 interface LoadingScreenProps {
   onLoadingComplete?: () => void;
   minimumLoadingTime?: number;
 }
 
-// Données pour les cartes
+// Données pour les cartes (VOTRE CODE ORIGINAL)
 const cardData = [
   {
     id: 1,
@@ -31,7 +25,7 @@ const cardData = [
   {
     id: 3,
     type: 'video',
-    src: vid1,
+    src: 'vid1.mp4',
     title: 'Océan Indien',
     color: '#0B5563',
   },
@@ -45,7 +39,7 @@ const cardData = [
   {
     id: 5,
     type: 'video',
-    src: vid2,
+    src: 'vid2.mp4',
     title: 'Couchers de soleil',
     color: '#E28413',
   },
@@ -66,7 +60,7 @@ const cardData = [
   {
     id: 8,
     type: 'video',
-    src: vid3,
+    src: 'vid3.mp4',
     title: 'Océan Indien',
     color: '#0B5563',
   },
@@ -86,8 +80,75 @@ const cardData = [
   },
 ];
 
+const currentYear = new Date().getFullYear();
+
+// Données pour les partenaires - LOGOS PLUS GRANDS
+const partners = [
+  { 
+    id: 1, 
+    name: 'Olimmo', 
+    logo: 'olimmo.png',
+  },
+  { 
+    id: 2, 
+    name: 'Partner 2', 
+    logo: 'https://i.pinimg.com/736x/cc/3c/db/cc3cdb8498f8d4135b87f8501f3faa31.jpg',
+  },
+  { 
+    id: 3, 
+    name: 'Partner 3', 
+    logo: 'https://i.pinimg.com/1200x/9d/1b/af/9d1baf24622b6c568ed6f41f826c7105.jpg',
+  },
+  { 
+    id: 4, 
+    name: 'Partner 4', 
+    logo: 'https://i.pinimg.com/1200x/4d/7a/ec/4d7aecb5e539968fec979b35f5618527.jpg',
+  },
+  { 
+    id: 5, 
+    name: 'Partner 5', 
+    logo: 'https://i.pinimg.com/736x/f0/64/d7/f064d7192801ed944991351e99efdbf2.jpg',
+  },
+  { 
+    id: 6, 
+    name: 'Partner 6', 
+    logo: 'https://i.pinimg.com/736x/bb/d6/2a/bbd62ab19fe388ef4dac11d2f21be3f7.jpg',
+  },
+  { 
+    id: 7, 
+    name: 'Partner 7', 
+    logo: 'https://i.pinimg.com/1200x/83/5d/9d/835d9d7c0f06a49b079418cd59914762.jpg',
+  },
+  { 
+    id: 8, 
+    name: 'Partner 8', 
+    logo: 'https://i.pinimg.com/736x/52/52/5c/52525c7b87e0600a27bf66a9ec1e04f2.jpg',
+  },
+];
+
+// Textes avec guillemets
+const teamTexts = [
+  "« L'innovation naît de la collaboration et de la passion partagée. »",
+  "« Chaque projet est une nouvelle aventure, chaque succès une victoire collective. »",
+  "« Notre force réside dans notre diversité et notre unité d'action. »",
+  "« Ensemble, nous transformons les défis en opportunités extraordinaires. »",
+  "« La confiance de nos clients est notre plus grande récompense. »"
+];
+
 // Variable globale pour empêcher le remontage
 let globalExitInitiated = false;
+
+// Timer pour le passage automatique (10 secondes)
+const AUTO_EXIT_TIME = 10000; // 10 secondes
+
+// ServoLogo component simple
+const ServoLogo = () => (
+  <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+    <circle cx="50" cy="50" r="45" stroke="#6B8E23" strokeWidth="3" fill="none" opacity="0.3"/>
+    <path d="M30 50 L50 30 L70 50 L50 70 Z" fill="#6B8E23" opacity="0.8"/>
+    <circle cx="50" cy="50" r="8" fill="#fff"/>
+  </svg>
+);
 
 export default function LoadingScreen({
   onLoadingComplete,
@@ -97,7 +158,6 @@ export default function LoadingScreen({
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [showButton, setShowButton] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [fadeOutOpacity, setFadeOutOpacity] = useState(1);
   const [scaleEffect, setScaleEffect] = useState(1);
@@ -106,6 +166,13 @@ export default function LoadingScreen({
   const [showInitialLogo, setShowInitialLogo] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [videosLoaded, setVideosLoaded] = useState(new Set<number>());
+  
+  // État pour le texte animé
+  const [textIndex, setTextIndex] = useState(0);
+  
+  // État pour le timer de sortie automatique
+  const [timeLeft, setTimeLeft] = useState(AUTO_EXIT_TIME / 1000);
+  const [autoExitTriggered, setAutoExitTriggered] = useState(false);
 
   // Références
   const exitInitiatedRef = useRef(false);
@@ -115,6 +182,7 @@ export default function LoadingScreen({
   const componentMountedRef = useRef(true);
   const hasStartedExitProcessRef = useRef(false);
   const animationRef = useRef<number>();
+  const autoExitTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Références GSAP
   const bigLogoContainerRef = useRef<HTMLDivElement>(null);
@@ -122,7 +190,10 @@ export default function LoadingScreen({
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const mainServoLogoRef = useRef<HTMLDivElement>(null);
 
-  // Gestion du SessionStorage - lecture SEULEMENT au montage
+  // Référence pour la section d'équipe
+  const teamSectionRef = useRef<HTMLDivElement>(null);
+
+  // Gestion du SessionStorage
   const [hasAnimationPlayed, setHasAnimationPlayed] = useState(() => {
     if (typeof window !== 'undefined') {
       const played = sessionStorage.getItem('VisitAnimation') === 'true' || globalExitInitiated;
@@ -131,15 +202,56 @@ export default function LoadingScreen({
     return false;
   });
 
-  // Palette de couleurs
-  const colors = {
-    logoAccent: '#556B2F',
-    sruvol: '#6B8E23',
-    pageBg: '#FFFFFF',
-    separators: '#D3D3D3',
-    premium: '#884513',
-    darkBg: '#1A1F15',
-  };
+  // Timer de sortie automatique (10 secondes)
+  useEffect(() => {
+    if (hasAnimationPlayed || globalExitInitiated || !initialLoadComplete || showInitialLogo) {
+      return;
+    }
+
+    // Démarrer le compte à rebours
+    const startTime = Date.now();
+    const endTime = startTime + AUTO_EXIT_TIME;
+
+    const updateTimer = () => {
+      if (!componentMountedRef.current || hasAnimationPlayed || globalExitInitiated) {
+        return;
+      }
+
+      const now = Date.now();
+      const remaining = Math.max(0, endTime - now);
+      const secondsLeft = Math.ceil(remaining / 1000);
+      
+      if (componentMountedRef.current) {
+        setTimeLeft(secondsLeft);
+      }
+
+      if (remaining <= 0 && !autoExitTriggered) {
+        setAutoExitTriggered(true);
+        handleExit(); // Déclencher la sortie automatique
+      } else if (remaining > 0 && !autoExitTriggered) {
+        autoExitTimerRef.current = setTimeout(updateTimer, 100);
+      }
+    };
+
+    autoExitTimerRef.current = setTimeout(updateTimer, 100);
+
+    return () => {
+      if (autoExitTimerRef.current) {
+        clearTimeout(autoExitTimerRef.current);
+      }
+    };
+  }, [initialLoadComplete, showInitialLogo, hasAnimationPlayed, autoExitTriggered]);
+
+  // Animation du texte qui change
+  useEffect(() => {
+    if (!initialLoadComplete || isExiting || hasAnimationPlayed) return;
+    
+    const interval = setInterval(() => {
+      setTextIndex((prev) => (prev + 1) % teamTexts.length);
+    }, 3500);
+    
+    return () => clearInterval(interval);
+  }, [initialLoadComplete, isExiting, hasAnimationPlayed]);
 
   // Nettoyage au démontage
   useEffect(() => {
@@ -148,10 +260,13 @@ export default function LoadingScreen({
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      if (autoExitTimerRef.current) {
+        clearTimeout(autoExitTimerRef.current);
+      }
     };
   }, []);
 
-  // SUIVI DU CHARGEMENT DES VIDÉOS - pour une vraie progression
+  // SUIVI DU CHARGEMENT DES VIDÉOS
   useEffect(() => {
     if (hasAnimationPlayed || globalExitInitiated || !initialLoadComplete) {
       return;
@@ -163,7 +278,6 @@ export default function LoadingScreen({
       setVideosLoaded(prev => new Set(prev).add(index));
     };
 
-    // Ajouter les listeners à toutes les vidéos
     videoElements.forEach((video, index) => {
       if (video && cardData[index]?.type === 'video') {
         video.addEventListener('canplaythrough', () => handleCanPlayThrough(index));
@@ -188,142 +302,80 @@ export default function LoadingScreen({
     return () => clearInterval(interval);
   }, []);
 
-  // ANIMATION INITIALE GSAP - exécutée une seule fois
+  // ANIMATION INITIALE GSAP
   useEffect(() => {
-    // Si déjà joué ou exit global, passer directement
     if (hasAnimationPlayed || globalExitInitiated) {
       setShowInitialLogo(false);
       setInitialLoadComplete(true);
       return;
     }
 
-    // Animation du logo grand au centre
     const tl = gsap.timeline({
       onComplete: () => {
-        // Quand l'animation initiale est terminée, passer au contenu principal
         setShowInitialLogo(false);
         setInitialLoadComplete(true);
       }
     });
 
-    // Étape 1: Animation d'entrée du logo (grand)
     tl.fromTo(bigLogoContainerRef.current,
-      {
-        scale: 0,
-        opacity: 0,
-        
-      },
-      {
-        scale: 1.2, // Plus grand pour l'effet initial
-        opacity: 1,
-        rotation: 0,
-        duration: 1.5,
-        ease: "back.out(1.7)"
-      }
+      { scale: 0, opacity: 0 },
+      { scale: 1.2, opacity: 1, rotation: 0, duration: 1.5, ease: "back.out(1.7)" }
     );
 
-    // Étape 2: Animation du ServoLogo (rotation et effet de pulsing)
     if (bigServoLogoRef.current) {
       tl.fromTo(bigServoLogoRef.current,
-        {
-          scale: 0.5,
-          opacity: 0,
-          
-        },
-        {
-          scale: 1.3, // Taille agrandie pour l'animation initiale
-          opacity: 1,
-          rotation: 0,
-          duration: 1.2,
-          ease: "power3.out"
-        },
+        { scale: 0.5, opacity: 0 },
+        { scale: 1.3, opacity: 1, rotation: 0, duration: 1.2, ease: "power3.out" },
         "-=0.5"
       );
 
-      // Animation de pulse sur le logo
       tl.to(bigServoLogoRef.current,
-        {
-          scale: 1.4,
-          duration: 0.3,
-          ease: "power2.inOut",
-          repeat: 2,
-          yoyo: true
-        },
+        { scale: 1.4, duration: 0.3, ease: "power2.inOut", repeat: 2, yoyo: true },
         "-=0.3"
       );
     }
 
-    // Étape 3: Animation de chargement (texte)
     tl.to(".loading-text",
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power2.out"
-      },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
       "-=0.5"
     );
 
-    // Étape 4: Réduction du logo vers sa taille normale et position
     tl.to(bigLogoContainerRef.current,
-      {
-        scale: 0.8, // Réduction progressive
-        y: -30,
-        duration: 0.8,
-        ease: "power2.inOut"
-      }
+      { scale: 0.8, y: -30, duration: 0.8, ease: "power2.inOut" }
     );
 
-    // Étape 5: Disparition progressive
     tl.to(bigLogoContainerRef.current,
-      {
-        opacity: 0,
-        scale: 0.6,
-        duration: 0.5,
-        ease: "power2.in"
-      }
+      { opacity: 0, scale: 0.6, duration: 0.5, ease: "power2.in" }
     );
 
-    // Nettoyer l'animation si le composant est démonté
     return () => {
       tl.kill();
     };
   }, [hasAnimationPlayed]);
 
-  // AFFICHAGE DU BOUTON - dès que l'animation GSAP se termine
+  // Animation d'entrée de la section équipe
   useEffect(() => {
-    if (!initialLoadComplete || showButton || hasAnimationPlayed || globalExitInitiated) {
-      return;
-    }
+    if (!initialLoadComplete || showInitialLogo || hasAnimationPlayed || !teamSectionRef.current) return;
 
-    // Afficher le bouton immédiatement et l'animer
-    setShowButton(true);
-
-    // Animation d'entrée du bouton avec GSAP
-    if (mainContainerRef.current) {
-      const button = mainContainerRef.current.querySelector('button');
-      if (button) {
-        gsap.fromTo(button,
-          {
-            opacity: 0,
-            y: 20,
-            scale: 0.9
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.6,
-            ease: "back.out(1.3)"
-          }
-        );
+    gsap.fromTo(teamSectionRef.current,
+      {
+        opacity: 0,
+        y: 50,
+        scale: 0.95
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1.2,
+        ease: "power3.out",
+        delay: 0.3
       }
-    }
-  }, [initialLoadComplete, showButton, hasAnimationPlayed]);
+    );
+  }, [initialLoadComplete, showInitialLogo, hasAnimationPlayed]);
 
-  // LOGIQUE DE CHARGEMENT - exécutée après l'animation initiale
+  // LOGIQUE DE CHARGEMENT
   useEffect(() => {
-    // Si déjà joué ou exit global, sortir immédiatement
     if (hasAnimationPlayed || globalExitInitiated || !initialLoadComplete) {
       return;
     }
@@ -339,14 +391,10 @@ export default function LoadingScreen({
       const now = Date.now();
       const elapsed = now - startTimeRef.current;
 
-      // Compter le nombre de vidéos chargées
       const videosLoadedCount = videosLoaded.size;
       const videosInCardData = cardData.filter(card => card.type === 'video').length;
       
-      // Progresser jusqu'à 100% pendant minimumLoadingTime
       let timeProgress = (elapsed / minimumLoadingTime) * 100;
-      
-      // Facteur basé sur le nombre de vidéos chargées (50% de la progression)
       let videoProgress = videosLoadedCount > 0 
         ? (videosLoadedCount / videosInCardData) * 50 
         : 0;
@@ -357,7 +405,6 @@ export default function LoadingScreen({
         setProgress(newProgress);
       }
 
-      // Continuer l'animation
       if (newProgress < 100 && isAnimationActive && componentMountedRef.current) {
         animationFrameId = requestAnimationFrame(updateProgress);
       }
@@ -378,39 +425,30 @@ export default function LoadingScreen({
     if (!isExiting || !componentMountedRef.current) return;
 
     let startTime: number;
-    const duration = 1200; // 1.2 secondes pour une animation plus fluide
+    const duration = 1200;
 
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Courbe d'easing personnalisée pour un effet plus smooth
       const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-      const easeInOutQuad = progress < 0.5
-        ? 2 * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
-      // Animation de l'opacité
       const opacity = 1 - easeOutCubic;
       setFadeOutOpacity(opacity);
 
-      // Animation du scale (léger zoom out)
-      const scale = 1 - (easeOutCubic * 0.1); // Réduction de 10%
+      const scale = 1 - (easeOutCubic * 0.1);
       setScaleEffect(scale);
 
-      // Animation du flou (augmentation progressive)
-      const blur = easeOutCubic * 20; // Jusqu'à 20px de flou
+      const blur = easeOutCubic * 20;
       setBlurEffect(blur);
 
-      // Animation de la luminosité (assombrissement)
-      const brightness = 1 - (easeOutCubic * 0.7); // Réduction de 70%
+      const brightness = 1 - (easeOutCubic * 0.7);
       setBrightnessEffect(brightness);
 
       if (progress < 1 && componentMountedRef.current) {
         animationRef.current = requestAnimationFrame(animate);
       } else if (componentMountedRef.current) {
-        // Petit délai avant de masquer complètement
         setTimeout(() => {
           if (componentMountedRef.current) {
             setIsVisible(false);
@@ -428,9 +466,8 @@ export default function LoadingScreen({
     };
   }, [isExiting]);
 
-  // Fonction de sortie - PROTECTION MAXIMALE
+  // Fonction de sortie
   const handleExit = () => {
-    // PROTECTION MULTIPLE COUCHES
     if (
       exitInitiatedRef.current ||
       globalExitInitiated ||
@@ -441,7 +478,7 @@ export default function LoadingScreen({
     ) {
       return;
     }
-    // MARQUER COMME DÉBUTÉ À TOUS LES NIVEAUX
+
     exitInitiatedRef.current = true;
     globalExitInitiated = true;
     hasStartedExitProcessRef.current = true;
@@ -450,16 +487,13 @@ export default function LoadingScreen({
       setIsExiting(true);
     }
 
-    // 1. Sauvegarder dans sessionStorage IMMÉDIATEMENT
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('VisitAnimation', 'true');
-      // Mettre à jour l'état local
       if (componentMountedRef.current) {
         setHasAnimationPlayed(true);
       }
     }
 
-    // 2. Arrêter toutes les vidéos
     videoRefs.current.forEach(video => {
       if (video) {
         video.pause();
@@ -467,19 +501,17 @@ export default function LoadingScreen({
       }
     });
 
-    // 3. Arrêter l'animation des cartes
     const cardsContainer = document.getElementById('cardsContainer');
     if (cardsContainer) {
       cardsContainer.style.animationPlayState = 'paused';
     }
 
-    // 4. Appeler le callback pour rediriger après l'animation
     setTimeout(() => {
       if (!hasCalledCompleteRef.current && componentMountedRef.current) {
         hasCalledCompleteRef.current = true;
         onLoadingComplete?.();
       }
-    }, 800); // Délai correspondant à l'animation
+    }, 800);
   };
 
   // SI DÉJÀ JOUÉ OU EXIT GLOBAL, NE RIEN AFFICHER
@@ -487,15 +519,13 @@ export default function LoadingScreen({
     return null;
   }
 
-  // SI PAS VISIBLE, NE RIEN AFFICHER
   if (!isVisible) {
     return null;
   }
 
-  // Rendu du composant
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-black/50 backdrop-blur-xl"
+      className="fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
       style={{
         opacity: fadeOutOpacity,
         transform: `scale(${scaleEffect})`,
@@ -505,57 +535,50 @@ export default function LoadingScreen({
         willChange: 'opacity, transform, filter'
       }}
     >
-      {/* Background avec média */}
-      <div className="absolute inset-0 overflow-hidden">
-        {cardData[currentCardIndex]?.type === 'video' ? (
-          <video
-            key={`video-${currentCardIndex}`}
-            ref={el => {
-              if (el) videoRefs.current[currentCardIndex] = el;
-            }}
-            autoPlay
-            muted
-            loop
-            className="absolute inset-0 w-full h-full object-cover"
-            src={cardData[currentCardIndex].src}
-            style={{
-              filter: `brightness(${brightnessEffect})`,
-              transition: isExiting ? 'none' : 'filter 0.3s ease-out'
-            }}
-          />
-        ) : (
-          <div
-            className="absolute inset-0 w-full h-full"
-            style={{
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${cardData[currentCardIndex]?.src})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: `brightness(${brightnessEffect})`,
-              transition: isExiting ? 'none' : 'filter 0.3s ease-out'
-            }}
-          />
-        )}
+      <style>{`
+        @keyframes fadeInDown {
+          from { opacity: 0; transform: translateY(-30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scrollPartners {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        @keyframes textGlow {
+          0%, 100% { text-shadow: 0 0 20px rgba(107, 142, 35, 0.5); }
+          50% { text-shadow: 0 0 30px rgba(107, 142, 35, 0.8); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
 
-        {/* Overlay et effets visuels */}
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"
-          style={{
-            opacity: isExiting ? 0.5 : 1,
-            transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-          }}
+      {/* Effets de fond animés */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute top-0 left-0 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"
+          style={{ animation: 'scaleIn 4s ease-in-out infinite alternate' }}
         />
-        <div
-          className="absolute inset-0"
-          style={{
-            opacity: isExiting ? 0.2 : 0.3,
-            backgroundImage: `
-              linear-gradient(0deg, transparent 24%, rgba(107, 142, 35, 0.06) 25%, rgba(107, 142, 35, 0.06) 26%, transparent 27%, transparent 74%, rgba(107, 142, 35, 0.06) 75%, rgba(107, 142, 35, 0.06) 76%, transparent 77%, transparent),
-              linear-gradient(90deg, transparent 24%, rgba(107, 142, 35, 0.06) 25%, rgba(107, 142, 35, 0.06) 26%, transparent 27%, transparent 74%, rgba(107, 142, 35, 0.06) 75%, rgba(107, 142, 35, 0.06) 76%, transparent 77%, transparent)
-            `,
-            backgroundSize: '200px 200px',
-            transform: 'perspective(800px) rotateX(65deg)',
-            transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-          }}
+        <div 
+          className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
+          style={{ animation: 'scaleIn 6s ease-in-out infinite alternate', animationDelay: '1s' }}
         />
       </div>
 
@@ -566,200 +589,290 @@ export default function LoadingScreen({
             ref={bigLogoContainerRef}
             className="flex flex-col items-center justify-center"
           >
-            {/* ServoLogo agrandi pour l'animation initiale */}
             <div ref={bigServoLogoRef} className="transform scale-150">
               <ServoLogo />
             </div>
-
             <div className="loader"></div>
           </div>
         </div>
       )}
 
-      {/* Contenu principal (apparaît après l'animation initiale) */}
+      {/* Contenu principal */}
       {initialLoadComplete && !showInitialLogo && (
-        <div className="relative w-full max-w-xl px-6 md:px-12 pb-16 flex flex-col h-full justify-center">
-          {/* Carte glassmorphism */}
-          <div
-            ref={mainContainerRef}
-            className="glass-panel rounded-2xl p-8 md:p-12 relative overflow-hidden border"
+        <div className="relative h-full flex flex-col">
+          {/* Logo en haut à gauche */}
+          <div 
+            className="absolute top-8 left-8 z-20"
             style={{
-              backgroundColor: isExiting ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.3)',
-              borderColor: isExiting ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)',
-              opacity: isExiting ? 0.7 : 1,
-              transform: isExiting ? `scale(${0.95 + (1 - scaleEffect)})` : 'scale(1)',
-              backdropFilter: `blur(${isExiting ? Math.min(blurEffect / 2, 10) : 20}px)`,
-              transition: isExiting ? 'none' : 'all 0.3s ease-out'
+              animation: 'fadeInDown 0.8s ease-out 0.2s both',
+              opacity: isExiting ? 0 : 1,
+              transition: 'opacity 0.5s ease-out'
             }}
           >
-            {/* Indicateurs décoratifs */}
-            <div
-              className="absolute top-6 left-6 w-8 h-[1px]"
-              style={{
-                background: colors.sruvol,
-                opacity: isExiting ? 0.3 : 1,
-                transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-              }}
-            />
-            <div
-              className="absolute top-6 left-6 h-8 w-[1px]"
-              style={{
-                background: colors.sruvol,
-                opacity: isExiting ? 0.3 : 1,
-                transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-              }}
-            />
-
-            {/* Contenu avec logo et bouton */}
-            <div className="flex flex-col justify-between items-center gap-8">
-              {/* ServoLogo normal */}
-              <div ref={mainServoLogoRef} className="transform scale-90">
-                <ServoLogo />
-              </div>
-
-              {/* Bouton */}
-              <div className="flex flex-col gap-2">
-                {showButton && (
-                  <button
-                    onClick={handleExit}
-                    disabled={exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed}
-                    className="px-8 py-3 rounded-lg font-mono text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_25px_rgba(107,142,35,0.6)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
-                    style={{
-                      backgroundColor: exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed ? '#888' : colors.sruvol,
-                      border: `1px solid ${exitInitiatedRef.current || globalExitInitiated || isExiting || hasAnimationPlayed ? '#888' : colors.sruvol}`,
-                      boxShadow: isExiting
-                        ? '0 0 10px rgba(136, 136, 136, 0.3)'
-                        : exitInitiatedRef.current || globalExitInitiated || hasAnimationPlayed
-                          ? '0 0 5px rgba(136, 136, 136, 0.2)'
-                          : '0 0 15px rgba(107,142,35,0.4)',
-                      opacity: isExiting ? 0.7 : 1,
-                      transform: isExiting ? 'scale(0.97)' : 'scale(1)',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}
-                  >
-                    {/* Effet de brillance sur hover */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-
-                    <span className="relative z-10">
-                      {exitInitiatedRef.current || globalExitInitiated || isExiting ? 'REDIRECTION EN COURS...' : 'ACCÉDER A L\'APPLICATION'}
-                    </span>
-
-                    {/* Indicateur de statut */}
-                    {(exitInitiatedRef.current || globalExitInitiated) && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse z-20">
-                        !
-                      </span>
-                    )}
-                  </button>
-                )}
-              </div>
+            <div className="transform hover:scale-110 transition-transform duration-300">
+              <img 
+                src="golo.png" 
+                alt="Logo" 
+                className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl shadow-2xl"
+                style={{ filter: 'drop-shadow(0 0 20px rgba(107, 142, 35, 0.3))' }}
+              />
             </div>
           </div>
 
-          {/* Cartes défilantes */}
-          <div className="fixed bottom-2 right-6 z-[9998]">
-            <style>{`
-              @keyframes scroll-cards {
-                0% { transform: translateX(0); }
-                100% { transform: translateX(-${cardData.length * 96}px); }
-              }
-              @keyframes spin-slow {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-              }
-              @keyframes spin-reverse-slow {
-                from { transform: rotate(360deg); }
-                to { transform: rotate(0deg); }
-              }
-              .animate-spin-slow {
-                animation: spin-slow 3s linear infinite;
-              }
-              .animate-spin-reverse-slow {
-                animation: spin-reverse-slow 4s linear infinite;
-              }
-            `}</style>
-            <div
-              className="p-4 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]"
+          {/* Timer de sortie automatique - en haut à droite */}
+          <div 
+            className="absolute top-8 right-8 z-30"
+            style={{
+              animation: 'fadeInDown 0.8s ease-out 0.4s both',
+              opacity: isExiting ? 0 : 1,
+              transition: 'opacity 0.5s ease-out'
+            }}
+          >
+            <div className="flex items-center gap-3 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
+              <div className="relative w-8 h-8">
+                <svg className="w-full h-full" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="#6B8E23"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray="283"
+                    strokeDashoffset={283 - (283 * (timeLeft / (AUTO_EXIT_TIME / 1000)))}
+                    transform="rotate(-90 50 50)"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="rgba(107, 142, 35, 0.2)"
+                    strokeWidth="8"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">{timeLeft}</span>
+                </div>
+              </div>
+              <span className="text-white/70 text-sm font-medium">
+                Auto-skip in {timeLeft}s
+              </span>
+            </div>
+          </div>
+
+          {/* Section centrale avec photo d'équipe en cercle et texte à droite */}
+          <div className="flex-1 flex items-center justify-center px-6 py-12 md:py-20">
+            <div 
+              ref={teamSectionRef}
+              className="relative max-w-6xl w-full flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16"
               style={{
-                width: '380px',
-                maxWidth: '90vw',
-                overflow: 'hidden',
-                borderRadius: '8px',
-                backgroundColor: isExiting ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.2)',
-                opacity: isExiting ? 0.2 : 1,
-                transform: isExiting ? 'translateY(30px) scale(0.95)' : 'translateY(0) scale(1)',
-                backdropFilter: `blur(${isExiting ? Math.min(blurEffect / 3, 8) : 12}px)`,
-                transition: isExiting ? 'none' : 'all 0.3s ease-out'
+                opacity: isExiting ? 0 : 1,
+                transform: isExiting ? 'scale(0.95) translateY(20px)' : 'scale(1) translateY(0)',
+                transition: 'all 0.8s ease-out'
               }}
             >
-              <div
-                id="cardsContainer"
-                className="flex gap-4"
-                style={{
-                  animation: isExiting ? 'none' : 'scroll-cards 80s linear infinite',
-                }}
-              >
-                {[...cardData, ...cardData].map((card, index) => (
-                  <div
-                    key={`${card.id}-${index}`}
-                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-pointer relative ${index % cardData.length === currentCardIndex
-                      ? 'ring-1 ring-white scale-110 shadow-xl'
-                      : 'hover:opacity-75'
-                      }`}
-                    onClick={() => !isExiting && setCurrentCardIndex(index % cardData.length)}
-                    style={{
-                      opacity: isExiting ? 0.3 : 1,
-                      transform: isExiting ? 'scale(0.85)' :
-                        (index % cardData.length === currentCardIndex ? 'scale(1.1)' : 'scale(1)'),
-                      transition: isExiting ? 'none' : 'all 0.3s ease-out'
-                    }}
-                  >
-                    {card.type === 'video' ? (
-                      <video
-                        className="absolute inset-0 w-full h-full object-cover"
-                        src={card.src}
-                        style={{
-                          filter: isExiting ? 'brightness(0.2)' : 'brightness(0.5)',
-                          transition: isExiting ? 'none' : 'filter 0.3s ease-out'
-                        }}
-                      />
-                    ) : (
-                      <div
-                        className="absolute inset-0 w-full h-full"
-                        style={{
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${card.src})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        }}
-                      />
-                    )}
-                    {card.type === 'video' && !isExiting && (
-                      <div className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 z-10">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </div>
-                    )}
-                    {index % cardData.length === currentCardIndex && !isExiting && (
-                      <div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-white z-10" />
-                    )}
+              {/* Photo en cercle */}
+              <div className="relative group flex-shrink-0">
+                <div 
+                  className="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden border-8 border-white/10 shadow-2xl"
+                  style={{
+                    animation: 'float 6s ease-in-out infinite',
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-tr from-green-500/20 to-blue-500/20 z-0" />
+                  
+                  <div className="absolute inset-0 rounded-full border-4 border-white/5" />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  
+                  <img 
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=1200&fit=crop&crop=face" 
+                    alt="Notre équipe" 
+                    className="w-full h-full object-cover rounded-full transform group-hover:scale-110 transition-transform duration-700"
+                  />
+                  
+                  <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-green-500/30 to-blue-500/30 blur-xl opacity-50 group-hover:opacity-70 transition-opacity duration-500" />
+                </div>
+
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500/30 rounded-full blur-sm" />
+                <div className="absolute -bottom-2 -left-2 w-12 h-12 bg-blue-500/30 rounded-full blur-sm" />
+                <div className="absolute top-1/2 -right-4 w-6 h-6 bg-yellow-500/20 rounded-full blur-sm" />
+              </div>
+
+              {/* Section texte avec guillemets */}
+              <div className="flex-1 max-w-2xl">
+                <div className="relative">
+                  <div className="absolute -top-8 -left-4 text-6xl md:text-7xl text-green-500/30 font-serif">
+                    "
                   </div>
-                ))}
+                  
+                  <div className="relative z-10">
+                    <h2 className="text-white/80 text-sm uppercase tracking-widest mb-6 font-semibold">
+                      Notre Philosophie
+                    </h2>
+                    
+                    <div className="relative h-48 md:h-56 flex items-center">
+                      {teamTexts.map((text, index) => (
+                        <div
+                          key={index}
+                          className="absolute inset-0 flex items-center"
+                          style={{
+                            opacity: textIndex === index ? 1 : 0,
+                            transform: textIndex === index ? 'translateX(0)' : 'translateX(30px)',
+                            transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                          }}
+                        >
+                          <p 
+                            className="text-2xl md:text-3xl lg:text-4xl font-light text-white leading-relaxed"
+                            style={{
+                              animation: textIndex === index ? 'textGlow 2s ease-in-out infinite' : 'none',
+                            }}
+                          >
+                            {text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 pl-8 border-l-4 border-green-500/50">
+                      <p className="text-green-400/80 text-lg font-medium">
+                        L'Équipe OLIPLUS
+                      </p>
+                      <p className="text-white/50 text-sm mt-1">
+                        Directrice Générale
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="absolute -bottom-8 -right-4 text-6xl md:text-7xl text-green-500/30 font-serif">
+                    "
+                  </div>
+                </div>
+
+                <div className="flex justify-start gap-3 mt-12">
+                  {teamTexts.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setTextIndex(index)}
+                      className="relative group"
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full transition-all duration-300"
+                        style={{
+                          backgroundColor: textIndex === index ? '#6B8E23' : 'rgba(255, 255, 255, 0.2)',
+                          transform: textIndex === index ? 'scale(1.2)' : 'scale(1)',
+                        }}
+                      />
+                      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                          Citation {index + 1}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Copyright */}
-          <div className="mt-6 text-center">
-            <p
-              className="text-[10px] azonix uppercase tracking-[0.3em] text-white font-light"
-              style={{
-                opacity: isExiting ? 0.05 : 0.3,
-                transition: isExiting ? 'none' : 'opacity 0.3s ease-out'
-              }}
-            >
-              © 2025 OLIPLUS
-            </p>
+          {/* Section Partenaires - IMAGES QUI COUVRENT TOUT LE CARD */}
+          <div 
+            className="relative bg-black/30 backdrop-blur-md border-t border-white/10 py-5"
+            style={{
+              animation: 'fadeInUp 0.8s ease-out 0.6s both',
+              opacity: isExiting ? 0 : 1,
+              transition: 'opacity 0.5s ease-out'
+            }}
+          >
+            <div className="container mx-auto px-6">
+              <h3 className="text-center text-white/60 text-sm uppercase tracking-widest mb-8 font-semibold">
+                Nos Partenaires de Confiance
+              </h3>
+              
+              <div className="relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-900 to-transparent z-10" />
+                <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-900 to-transparent z-10" />
+                
+                <div className="flex">
+                  <div 
+                    className="flex gap-8 items-center"
+                    style={{ animation: isExiting ? 'none' : 'scrollPartners 40s linear infinite' }}
+                  >
+                    {[...partners, ...partners].map((partner, index) => (
+                      <div
+                        key={`${partner.id}-${index}`}
+                        className="flex-shrink-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-2xl hover:from-white/20 hover:to-white/15 transition-all duration-500 group border border-white/10 hover:border-white/20 shadow-xl hover:shadow-2xl overflow-hidden relative"
+                        style={{ 
+                          width: '150px',
+                          height: '100px',
+                          animation: `pulse ${3 + index * 0.5}s ease-in-out infinite`
+                        }}
+                      >
+                        <div className="absolute inset-0">
+                          {/* Effet de brillance */}
+                          <div 
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                            style={{ animation: 'shimmer 2s ease-in-out infinite' }}
+                          />
+                          
+                          {/* Image qui couvre tout le card */}
+                          <img 
+                            src={partner.logo}
+                            alt={partner.name}
+                            className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500 filter grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100"
+                          />
+                          
+                          {/* Overlay pour améliorer la lisibilité */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          
+                          {/* Nom du partenaire (optionnel) */}
+                          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <p className="text-white text-xs font-medium text-center truncate">
+                              {partner.name}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Bordure animée */}
+                        <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/30 transition-all duration-500" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Mentions légales */}
+          <div 
+            className="relative bg-black/40 backdrop-blur-sm border-t border-white/5 py-6"
+            style={{
+              animation: 'fadeInUp 0.8s ease-out 0.8s both',
+              opacity: isExiting ? 0 : 1,
+              transition: 'opacity 0.5s ease-out'
+            }}
+          >
+            <div className="container mx-auto px-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-white/40 text-xs">
+                <p className="text-center md:text-left">
+                  &copy; {currentYear} OLIPLUS. Tous droits réservés.
+                </p>
+                
+                <div className="flex gap-6">
+                  <button className="hover:text-white/80 transition-colors duration-300 hover:underline">
+                    Mentions légales
+                  </button>
+                  <button className="hover:text-white/80 transition-colors duration-300 hover:underline">
+                    Politique de confidentialité
+                  </button>
+                  <button className="hover:text-white/80 transition-colors duration-300 hover:underline">
+                    CGU
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

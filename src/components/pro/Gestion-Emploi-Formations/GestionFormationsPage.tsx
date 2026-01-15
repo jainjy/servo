@@ -81,16 +81,21 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3001/api';
 
-// Définir candidatureStatuses à l'extérieur du composant pour qu'il soit accessible partout
+// Mettez à jour candidatureStatuses pour correspondre à votre BD
 const candidatureStatuses = [
+  { value: "en_attente", label: "En attente", color: "bg-yellow-100 text-yellow-800" },
   { value: "pending", label: "En attente", color: "bg-yellow-100 text-yellow-800" },
+  { value: "acceptée", label: "Acceptée", color: "bg-green-100 text-green-800" },
   { value: "accepted", label: "Acceptée", color: "bg-green-100 text-green-800" },
+  { value: "refusée", label: "Refusée", color: "bg-red-100 text-red-800" },
   { value: "rejected", label: "Refusée", color: "bg-red-100 text-red-800" },
 ];
 
 export default function GestionFormationsPage() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+    const [pageLoading, setPageLoading] = useState(true);
   
   const {
     formations,
@@ -176,22 +181,44 @@ export default function GestionFormationsPage() {
   ];
 
   // Fonction pour récupérer les headers d'authentification
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('auth-token') || 
-                  localStorage.getItem('token') || 
-                  localStorage.getItem('jwt-token');
-    
-    if (!token) {
-      throw new Error('Session expirée. Veuillez vous reconnecter.');
-    }
-    
-    return {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    };
+ // Dans GestionFormationsPage.js ou useFormation.js
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('auth-token') || 
+                localStorage.getItem('token') || 
+                localStorage.getItem('jwt-token');
+
+  
+  if (!token) {
+    console.error('Token non trouvé');
+    throw new Error('Session expirée. Veuillez vous reconnecter.');
+  }
+  
+  // Retourner un objet avec les headers corrects
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json'
   };
+};
+
+
+
+// Testez quel token fonctionne
+const tokens = [
+  localStorage.getItem('auth-token'),
+  localStorage.getItem('token'),
+  localStorage.getItem('jwt-token')
+];
+
+for (const token of tokens) {
+  if (token) {
+    // console.log(`\n🧪 Test avec token: ${token.substring(0, 20)}...`);
+    
+    // Vérifiez le format
+    if (token.startsWith('real-jwt-token-')) {
+      // console.log('✅ Format correct!');
+    }
+  }
+}
 
   // Vérification d'authentification
   if (authLoading) {
@@ -225,50 +252,69 @@ export default function GestionFormationsPage() {
   }, [searchTerm]);
 
   // Load data on mount and when filters change
+   // Load data on mount - UN SEUL CHARGEMENT
   useEffect(() => {
-    const loadDataAsync = async () => {
-      if (user && !authLoading && !dataLoaded) {
-        try {
-          const token = localStorage.getItem('auth-token') || 
-                localStorage.getItem('token') || 
-                localStorage.getItem('jwt-token');
-  
-          console.log('🔑 Token trouvé:', token);
-          if (!token) {
-            setApiError('Veuillez vous connecter');
-            navigate('/login');
-            return;
-          }
-          
-          // Charger les stats
-          await fetchStats();
-          
-          // Charger les formations
-          await fetchFormations({
+    const loadInitialData = async () => {
+      // Si pas encore connecté, attendre
+      if (authLoading) return;
+      
+      // Si pas d'utilisateur, rediriger
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      // Si pas le bon rôle, rediriger
+      if (user.role !== 'professional' && user.role !== 'admin') {
+        navigate('/unauthorized');
+        return;
+      }
+
+      try {
+        setPageLoading(true);
+        
+        // Vérifier le token
+        const token = localStorage.getItem('auth-token') || 
+                      localStorage.getItem('token') || 
+                      localStorage.getItem('jwt-token');
+        
+        if (!token) {
+          setApiError('Veuillez vous connecter');
+          navigate('/login');
+          return;
+        }
+        
+        // console.log('🚀 Début du chargement des données...');
+        
+        // Charger les stats ET les formations en parallèle
+        await Promise.all([
+          fetchStats(),
+          fetchFormations({
             search: debouncedSearch,
             status: statusFilter,
             category: categoryFilter,
             page: 1
-          });
-          
-          setDataLoaded(true);
-        } catch (err) {
-          console.error("Erreur initiale:", err);
-          setApiError(err.message || "Erreur lors du chargement des données");
-          
-          // Redirection si erreur d'authentification
-          if (err.message.includes('authentification') || err.message.includes('Session')) {
-            setTimeout(() => {
-              navigate('/login');
-            }, 2000);
-          }
+          })
+        ]);
+        
+        // console.log('✅ Données chargées avec succès');
+        setDataLoaded(true);
+        setApiError("");
+        
+      } catch (err) {
+        console.error("❌ Erreur lors du chargement:", err);
+        setApiError(err.message || "Erreur lors du chargement des données");
+        
+        if (err.message.includes('authentification') || err.message.includes('Session')) {
+          setTimeout(() => navigate('/login'), 1500);
         }
+      } finally {
+        setPageLoading(false);
       }
     };
 
-    loadDataAsync();
-  }, [user, authLoading, navigate, debouncedSearch, statusFilter, categoryFilter, fetchStats, fetchFormations]);
-
+    loadInitialData();
+  }, [authLoading, user, navigate]); // Seulement ces dépendances
   useEffect(() => {
     if (dataLoaded) {
       handleSearch();
@@ -329,11 +375,118 @@ export default function GestionFormationsPage() {
   };
 
   // Fonction pour ouvrir le modal des candidatures
-  const openCandidaturesModal = async (formation) => {
-    setSelectedFormation(formation);
-    setCandidaturesModalOpen(true);
-    await fetchCandidatures(formation.id);
-  };
+// Fonction pour ouvrir le modal des candidatures
+// Fonction pour ouvrir le modal des candidatures
+const openCandidaturesModal = async (formation) => {
+  setSelectedFormation(formation);
+  setCandidaturesModalOpen(true);
+  setLoadingCandidatures(true);
+  
+  try {
+    const token = localStorage.getItem('auth-token') || 
+                  localStorage.getItem('token') || 
+                  localStorage.getItem('jwt-token');
+    
+  
+    if (!token) {
+      toast.error('Session expirée. Veuillez vous reconnecter.');
+      navigate('/login');
+      return;
+    }
+    
+    // Utiliser l'API réelle pour récupérer les candidatures
+    const response = await axios.get(
+      `${API_URL}/candidatures/formations/${formation.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+
+    
+    if (response.data.success) {
+      const apiCandidatures = response.data.data || [];
+      
+
+      
+      if (apiCandidatures.length === 0) {
+        toast.info('Aucune candidature pour cette formation');
+        setCandidatures([]);
+      } else {
+        // Transformer les données de l'API en format utilisable par votre interface
+        const formattedCandidatures = apiCandidatures.map(candidature => {
+          // Extraire nom et prénom
+          let nom = '';
+          let prenom = '';
+          const nomComplet = candidature.nomCandidat || '';
+          
+          if (nomComplet) {
+            const nameParts = nomComplet.trim().split(' ');
+            if (nameParts.length > 1) {
+              nom = nameParts[nameParts.length - 1];
+              prenom = nameParts.slice(0, -1).join(' ');
+            } else {
+              prenom = nameParts[0];
+            }
+          }
+          
+          return {
+            id: candidature.id,
+            nom: nom,
+            prenom: prenom,
+            nomComplet: nomComplet,
+            email: candidature.emailCandidat || '',
+            telephone: candidature.telephoneCandidat || '',
+            motivation: candidature.messageMotivation || '',
+            cvPath: candidature.cvUrl || null,
+            lettreMotivationUrl: candidature.lettreMotivationUrl || null,
+            status: candidature.statut || 'en_attente', // Note: votre BD utilise 'statut' avec un 't'
+            createdAt: candidature.appliedAt || candidature.createdAt,
+            dateNaissance: null,
+            // Autres champs possibles
+            offreType: candidature.offreType,
+            titreOffre: candidature.titreOffre
+          };
+        });
+        
+        setCandidatures(formattedCandidatures);
+        
+        // Calculer les statistiques
+        const stats = {
+          total: formattedCandidatures.length,
+          pending: formattedCandidatures.filter(c => c.status === 'en_attente' || c.status === 'pending').length,
+          accepted: formattedCandidatures.filter(c => c.status === 'accepted' || c.status === 'acceptée').length,
+          rejected: formattedCandidatures.filter(c => c.status === 'rejected' || c.status === 'refusée').length
+        };
+        setCandidatureStats(stats);
+        
+        // console.log('📈 Stats calculées:', stats);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Erreur chargement candidatures:', error);
+    console.error('❌ Détails erreur:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    
+    if (error.response?.status === 404) {
+      toast.info('Aucune candidature trouvée pour cette formation');
+      setCandidatures([]);
+    } else if (error.response?.status === 401) {
+      toast.error('Session expirée. Veuillez vous reconnecter.');
+      navigate('/login');
+    } else {
+      toast.error(`Erreur ${error.response?.status || ''}: ${error.response?.data?.error || 'Erreur serveur'}`);
+    }
+  } finally {
+    setLoadingCandidatures(false);
+  }
+};
 
   // Fonction pour récupérer les candidatures
   const fetchCandidatures = async (formationId) => {
@@ -398,67 +551,239 @@ export default function GestionFormationsPage() {
     }
   };
 
-  // Fonction pour mettre à jour le statut d'une candidature
-  const updateCandidatureStatus = async (candidatureId, newStatus) => {
-    try {
-      // Simulation d'appel API - Remplacez par votre endpoint réel
-      console.log(`Mise à jour candidature ${candidatureId} -> ${newStatus}`);
-      
+ // Fonction pour mettre à jour le statut d'une candidature
+const updateCandidatureStatus = async (candidatureId, newStatus) => {
+  try {
+    const token = localStorage.getItem('auth-token');
+    
+    // Assurez-vous d'envoyer le bon format de statut
+    let statusToSend = newStatus;
+    
+    // Convertir si nécessaire
+    if (newStatus === 'acceptée') statusToSend = 'acceptée';
+    else if (newStatus === 'accepted') statusToSend = 'acceptée';
+    else if (newStatus === 'refusée') statusToSend = 'refusée';
+    else if (newStatus === 'rejected') statusToSend = 'refusée';
+    else if (newStatus === 'en_attente') statusToSend = 'en_attente';
+    else if (newStatus === 'pending') statusToSend = 'en_attente';
+    
+ 
+    
+    const response = await axios.patch(
+      `${API_URL}/candidatures/${candidatureId}/status`,
+      { status: statusToSend },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    if (response.data.success) {
       // Mettre à jour localement
       setCandidatures(prev => 
         prev.map(candidature => 
           candidature.id === candidatureId 
-            ? { ...candidature, status: newStatus }
+            ? { ...candidature, status: statusToSend }
             : candidature
         )
       );
       
+      toast.success('Statut mis à jour avec succès');
+      
       // Recalculer les stats
       const updatedCandidatures = candidatures.map(c => 
-        c.id === candidatureId ? { ...c, status: newStatus } : c
+        c.id === candidatureId ? { ...c, status: statusToSend } : c
       );
       
       const stats = {
         total: updatedCandidatures.length,
-        pending: updatedCandidatures.filter(c => c.status === 'pending').length,
-        accepted: updatedCandidatures.filter(c => c.status === 'accepted').length,
-        rejected: updatedCandidatures.filter(c => c.status === 'rejected').length
+        pending: updatedCandidatures.filter(c => 
+          c.status === 'en_attente' || c.status === 'pending'
+        ).length,
+        accepted: updatedCandidatures.filter(c => 
+          c.status === 'acceptée' || c.status === 'accepted'
+        ).length,
+        rejected: updatedCandidatures.filter(c => 
+          c.status === 'refusée' || c.status === 'rejected'
+        ).length
       };
       setCandidatureStats(stats);
-      
-      toast.success('Statut mis à jour');
-      
-    } catch (error) {
-      console.error('Erreur mise à jour statut:', error);
-      toast.error('Erreur lors de la mise à jour');
     }
-  };
+  } catch (error) {
+    console.error('❌ Erreur mise à jour statut:', error);
+    console.error('Détails:', error.response?.data);
+    toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour');
+  }
+};
 
-  // Fonction pour télécharger un CV
-  const downloadCV = async (candidatureId, fileName) => {
-    try {
-      toast.info('Téléchargement du CV...');
-      // Simulation - Dans la réalité, vous feriez un appel API pour récupérer le fichier
-      console.log(`Téléchargement CV pour candidature ${candidatureId}`);
+ // Fonction pour télécharger un CV - VERSION CORRIGÉE
+ const downloadCV = async (candidatureId, fileName, cvUrl) => {
+   try {
+    //  console.log('📥 Téléchargement CV - URL originale:', cvUrl);
+     
+     if (!cvUrl) {
+       toast.error('Aucun CV disponible pour ce candidat');
+       return;
+     }
+     
+     // Détecter le type d'URL
+     const isBlobUrl = cvUrl.startsWith('blob:');
+     const isDataUrl = cvUrl.startsWith('data:');
+     const isHttpUrl = cvUrl.startsWith('http://') || cvUrl.startsWith('https://');
+     const isRelativeUrl = cvUrl.startsWith('/');
+     
+   
+     
+     let finalUrl = cvUrl;
+     let shouldOpenInNewTab = false;
+     
+     // Traitement selon le type d'URL
+     if (isBlobUrl) {
+       // URL Blob : utiliser directement
+      //  console.log('📄 Utilisation URL Blob');
+       shouldOpenInNewTab = true;
+       // Pour les URLs Blob, on ne peut pas ajouter de query params
+       // On utilise l'URL telle quelle
+     }
+     else if (isDataUrl) {
+       // URL Data (base64) : convertir en blob
+      //  console.log('📄 Utilisation URL Data (base64)');
+       try {
+         // Extraire le contenu base64
+         const base64Content = cvUrl.split(',')[1];
+         const mimeType = cvUrl.match(/data:(.*);base64/)?.[1] || 'application/pdf';
+         
+         // Convertir en blob
+         const byteCharacters = atob(base64Content);
+         const byteNumbers = new Array(byteCharacters.length);
+         for (let i = 0; i < byteCharacters.length; i++) {
+           byteNumbers[i] = byteCharacters.charCodeAt(i);
+         }
+         const byteArray = new Uint8Array(byteNumbers);
+         const blob = new Blob([byteArray], { type: mimeType });
+         
+         // Créer une URL Blob
+         finalUrl = URL.createObjectURL(blob);
+         shouldOpenInNewTab = true;
+       } catch (error) {
+         console.error('Erreur conversion base64:', error);
+         throw new Error('Format de données invalide');
+       }
+     }
+     else if (isHttpUrl) {
+       // URL HTTP complète : ajouter timestamp pour éviter le cache
+      //  console.log('📄 Utilisation URL HTTP complète');
+       const separator = finalUrl.includes('?') ? '&' : '?';
+       finalUrl = `${finalUrl}${separator}t=${Date.now()}`;
+       shouldOpenInNewTab = true;
+     }
+     else if (isRelativeUrl) {
+       // URL relative : ajouter la base du serveur
+      //  console.log('📄 Utilisation URL relative');
+       // Nettoyer le chemin (enlever le /api/ s'il est déjà présent)
+       let cleanPath = cvUrl;
+       if (cvUrl.startsWith('/api/')) {
+         cleanPath = cvUrl.substring(5); // Enlever '/api/'
+       }
+       finalUrl = `${API_URL}/${cleanPath}?t=${Date.now()}`;
+     }
+     else {
+       // Autre cas : traiter comme un chemin de fichier
+      //  console.log('📄 Traitement comme chemin de fichier');
+       finalUrl = `${API_URL}/${cvUrl}?t=${Date.now()}`;
+     }
+     
+    //  console.log('🔗 URL finale pour téléchargement:', finalUrl);
+     
+     // Créer un nom de fichier par défaut
+     const finalFileName = fileName || 'cv_candidat.pdf';
+     
+     // Créer un élément de lien
+     const link = document.createElement('a');
+     
+     if (isBlobUrl || isDataUrl) {
+       // Pour les URLs Blob/Data, on ne peut pas utiliser "download" facilement
+       // Ouvrir dans un nouvel onglet
+       link.href = finalUrl;
+       link.target = '_blank';
+       link.rel = 'noopener noreferrer';
+       
+       // Pour les PDF, ajouter un attribut pour l'ouverture
+       if (finalUrl.includes('.pdf') || finalFileName.endsWith('.pdf')) {
+         link.setAttribute('type', 'application/pdf');
+       }
+     } else {
+       // Pour les URLs normales, utiliser l'attribut download
+       link.href = finalUrl;
+       link.download = finalFileName;
+       link.target = '_blank';
+       link.rel = 'noopener noreferrer';
+     }
+     
+     // Ajouter des headers d'authentification si nécessaire (pour les URLs HTTP)
+     if (!isBlobUrl && !isDataUrl) {
+       const token = localStorage.getItem('auth-token');
+       if (token) {
+         // Note: Pour les liens simples, on ne peut pas ajouter des headers
+         // Mais on peut passer le token dans l'URL si le backend le supporte
+         const hasQuery = finalUrl.includes('?');
+         link.href = `${finalUrl}${hasQuery ? '&' : '?'}token=${encodeURIComponent(token)}`;
+       }
+     }
+     
+     // Style caché
+     link.style.display = 'none';
+     link.style.position = 'absolute';
+     link.style.left = '-9999px';
+     
+     // Ajouter au DOM
+     document.body.appendChild(link);
+     
+     // Déclencher le clic
+     link.click();
+     
+     // Nettoyer après un délai
+     setTimeout(() => {
+       if (link.parentNode) {
+         document.body.removeChild(link);
+       }
+       
       
-      // Créer un fichier PDF factice pour la démonstration
-      const fakePDFContent = "Ceci est un CV factice pour démonstration";
-      const blob = new Blob([fakePDFContent], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', fileName || 'cv_candidat.pdf');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      
-      toast.success('CV téléchargé');
-    } catch (error) {
-      console.error('Erreur téléchargement CV:', error);
-      toast.error('Erreur lors du téléchargement');
-    }
-  };
+     }, 100);
+     
+     toast.success('CV en cours de téléchargement...');
+     
+   } catch (error) {
+     console.error('❌ Erreur téléchargement CV:', error);
+     
+     // Messages d'erreur spécifiques
+     let errorMessage = 'Erreur lors du téléchargement du CV';
+     
+     if (error.message.includes('Network Error')) {
+       errorMessage = 'Erreur de réseau. Vérifiez votre connexion.';
+     } else if (error.message.includes('404')) {
+       errorMessage = 'Fichier non trouvé sur le serveur.';
+     } else if (error.message.includes('403')) {
+       errorMessage = 'Accès interdit. Vérifiez vos permissions.';
+     } else if (error.message.includes('Invalid')) {
+       errorMessage = 'Format de fichier invalide.';
+     }
+     
+     toast.error(errorMessage);
+     
+     // Fallback: ouvrir l'URL originale dans un nouvel onglet
+     if (cvUrl) {
+       try {
+         window.open(cvUrl, '_blank');
+         toast.info('Ouverture du CV dans un nouvel onglet...');
+       } catch (fallbackError) {
+         console.error('Fallback aussi échoué:', fallbackError);
+       }
+     }
+   }
+ };
 
   const handleDelete = async (id) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette formation ?")) {
@@ -470,6 +795,40 @@ export default function GestionFormationsPage() {
       }
     }
   };
+
+  // Fonction pour supprimer une candidature
+// Fonction pour supprimer une candidature
+const deleteCandidature = async (candidatureId) => {
+  if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette candidature ?')) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('auth-token');
+    
+    const response = await axios.delete(
+      `${API_URL}/candidatures/${candidatureId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.data.success) {
+      toast.success('Candidature supprimée avec succès');
+      
+      // Recharger les candidatures
+      if (selectedFormation) {
+        await openCandidaturesModal(selectedFormation); // CHANGEZ CETTE LIGNE
+      }
+    }
+  } catch (error) {
+    console.error('❌ Erreur suppression candidature:', error);
+    toast.error(error.response?.data?.error || 'Erreur lors de la suppression');
+  }
+};
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -483,7 +842,7 @@ export default function GestionFormationsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('🔍 DEBUG - Données du formulaire:', formData);
+    // console.log('🔍 DEBUG - Données du formulaire:', formData);
     
     try {
       const apiData = {
@@ -518,14 +877,14 @@ export default function GestionFormationsPage() {
         status: formData.status || "draft"
       };
       
-      console.log('📤 DEBUG - Données formatées pour API:', apiData);
+      // console.log('📤 DEBUG - Données formatées pour API:', apiData);
       
       if (editingFormation) {
-        console.log(`🔄 Mise à jour formation ${editingFormation.id}`);
+        // console.log(`🔄 Mise à jour formation ${editingFormation.id}`);
         await updateFormation(editingFormation.id, apiData);
         toast.success("Formation mise à jour avec succès");
       } else {
-        console.log('🆕 Création nouvelle formation');
+        // console.log('🆕 Création nouvelle formation');
         await createFormation(apiData);
         toast.success("Formation créée avec succès");
       }
@@ -1141,9 +1500,7 @@ export default function GestionFormationsPage() {
                               <span>
                                 {formation.currentParticipants || 0}/{formation.maxParticipants}
                               </span>
-                              <span className="text-xs text-gray-500">
-                                ({formation.applications_count || 0} candidatures)
-                              </span>
+                              
                             </div>
                           </TableCell>
                           <TableCell>
@@ -1172,7 +1529,7 @@ export default function GestionFormationsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => openCandidaturesModal(formation)}>
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Voir candidatures ({formation.applications_count || 0})
+                                  Voir candidatures 
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {formation.status !== 'active' ? (
@@ -1272,12 +1629,12 @@ export default function GestionFormationsPage() {
           </div>
 
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid grid-cols-4 w-full">
+            {/* <TabsList className="grid grid-cols-4 w-full">
               <TabsTrigger value="all">Toutes ({candidatureStats.total})</TabsTrigger>
               <TabsTrigger value="pending">En attente ({candidatureStats.pending})</TabsTrigger>
               <TabsTrigger value="accepted">Acceptées ({candidatureStats.accepted})</TabsTrigger>
               <TabsTrigger value="rejected">Refusées ({candidatureStats.rejected})</TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
             {loadingCandidatures ? (
               <div className="text-center py-8">
@@ -1291,6 +1648,7 @@ export default function GestionFormationsPage() {
                     candidatures={candidatures}
                     onUpdateStatus={updateCandidatureStatus}
                     onDownloadCV={downloadCV}
+                    onDelete={deleteCandidature}
                   />
                 </TabsContent>
                 
@@ -1299,6 +1657,7 @@ export default function GestionFormationsPage() {
                     candidatures={candidatures.filter(c => c.status === 'pending')}
                     onUpdateStatus={updateCandidatureStatus}
                     onDownloadCV={downloadCV}
+                    onDelete={deleteCandidature}
                   />
                 </TabsContent>
                 
@@ -1307,6 +1666,7 @@ export default function GestionFormationsPage() {
                     candidatures={candidatures.filter(c => c.status === 'accepted')}
                     onUpdateStatus={updateCandidatureStatus}
                     onDownloadCV={downloadCV}
+                    onDelete={deleteCandidature}
                   />
                 </TabsContent>
                 
@@ -1315,6 +1675,7 @@ export default function GestionFormationsPage() {
                     candidatures={candidatures.filter(c => c.status === 'rejected')}
                     onUpdateStatus={updateCandidatureStatus}
                     onDownloadCV={downloadCV}
+                    onDelete={deleteCandidature}
                   />
                 </TabsContent>
               </>
@@ -1327,12 +1688,165 @@ export default function GestionFormationsPage() {
 }
 
 // Composant pour afficher le tableau des candidatures
-function CandidaturesTable({ candidatures, onUpdateStatus, onDownloadCV }) {
+// Composant pour afficher le tableau des candidatures
+function CandidaturesTable({ 
+  candidatures, 
+  onUpdateStatus, 
+  onDownloadCV, 
+  onDelete, 
+  onViewDetail,
+  showDetail,
+  selectedCandidature,
+  onBackToList 
+}) {
   if (candidatures.length === 0) {
     return (
       <div className="text-center py-8">
         <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
         <p className="text-gray-500">Aucune candidature trouvée</p>
+      </div>
+    );
+  }
+
+  if (showDetail && selectedCandidature) {
+    return (
+      <div className="space-y-6">
+        <Button
+          variant="ghost"
+          onClick={onBackToList}
+          className="mb-2"
+        >
+          <ChevronUp className="h-4 w-4 mr-2" />
+          Retour à la liste
+        </Button>
+        
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-2xl">{selectedCandidature.nomComplet}</CardTitle>
+                <CardDescription className="flex items-center gap-2 mt-2">
+                  <Mail className="h-4 w-4" />
+                  {selectedCandidature.email}
+                  {selectedCandidature.telephone && (
+                    <>
+                      <span className="mx-2">•</span>
+                      <Phone className="h-4 w-4" />
+                      {selectedCandidature.telephone}
+                    </>
+                  )}
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Select
+                  value={selectedCandidature.status}
+                  onValueChange={(value) => onUpdateStatus(selectedCandidature.id, value)}
+                >
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {candidatureStatuses.map((statut) => (
+                      <SelectItem key={statut.value} value={statut.value}>
+                        {statut.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDelete(selectedCandidature.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Informations du candidat</h4>
+                  <div className="space-y-2 text-sm">
+                    {selectedCandidature.niveauEtude && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Niveau d'étude :</span>
+                        <span className="font-medium">{selectedCandidature.niveauEtude}</span>
+                      </div>
+                    )}
+                    {selectedCandidature.ecole && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Établissement :</span>
+                        <span className="font-medium">{selectedCandidature.ecole}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Date de candidature :</span>
+                      <span className="font-medium">
+                        {selectedCandidature.createdAt ? new Date(selectedCandidature.createdAt).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : '-'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Documents</h4>
+                  <div className="space-y-2">
+                    {selectedCandidature.cvPath ? (
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => onDownloadCV(selectedCandidature.id, `CV_${selectedCandidature.nom}_${selectedCandidature.prenom}.pdf`, selectedCandidature.cvPath)}
+                      >
+                        <File className="h-4 w-4 mr-2" />
+                        Télécharger le CV
+                      </Button>
+                    ) : (
+                      <p className="text-gray-500 text-sm">Aucun CV disponible</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-2">Lettre de motivation</h4>
+                <div className="bg-gray-50 p-4 rounded-lg max-h-60 overflow-y-auto">
+                  <p className="text-sm whitespace-pre-line">
+                    {selectedCandidature.motivation || "Aucune lettre de motivation fournie."}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => window.open(`mailto:${selectedCandidature.email}`, '_blank')}
+                className="flex-1"
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Contacter par email
+              </Button>
+              {selectedCandidature.telephone && (
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(`tel:${selectedCandidature.telephone}`)}
+                  className="flex-1"
+                >
+                  <Phone className="h-4 w-4 mr-2" />
+                  Appeler
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -1354,9 +1868,6 @@ function CandidaturesTable({ candidatures, onUpdateStatus, onDownloadCV }) {
         <TableBody>
           {candidatures.map((candidature) => {
             const status = candidatureStatuses.find(s => s.value === candidature.status);
-            const age = candidature.dateNaissance 
-              ? new Date().getFullYear() - new Date(candidature.dateNaissance).getFullYear()
-              : null;
             
             return (
               <TableRow key={candidature.id}>
@@ -1364,10 +1875,10 @@ function CandidaturesTable({ candidatures, onUpdateStatus, onDownloadCV }) {
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-gray-400" />
                     <div>
-                      <div>{candidature.prenom} {candidature.nom}</div>
-                      {age && (
+                      <div>{candidature.nomComplet}</div>
+                      {candidature.niveauEtude && (
                         <div className="text-xs text-gray-500">
-                          {age} ans
+                          {candidature.niveauEtude}
                         </div>
                       )}
                     </div>
@@ -1391,7 +1902,7 @@ function CandidaturesTable({ candidatures, onUpdateStatus, onDownloadCV }) {
                   <div className="flex items-center gap-1">
                     <CalendarDays className="h-3 w-3" />
                     <span className="text-sm">
-                      {new Date(candidature.createdAt).toLocaleDateString('fr-FR')}
+                      {candidature.createdAt ? new Date(candidature.createdAt).toLocaleDateString('fr-FR') : '-'}
                     </span>
                   </div>
                 </TableCell>
@@ -1416,7 +1927,7 @@ function CandidaturesTable({ candidatures, onUpdateStatus, onDownloadCV }) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onDownloadCV(candidature.id, `CV_${candidature.nom}_${candidature.prenom}.pdf`)}
+                      onClick={() => onDownloadCV(candidature.id, `CV_${candidature.nom}_${candidature.prenom}.pdf`, candidature.cvPath)}
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       Télécharger
@@ -1438,31 +1949,53 @@ function CandidaturesTable({ candidatures, onUpdateStatus, onDownloadCV }) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Changer le statut</DropdownMenuLabel>
-                      {candidature.status !== 'accepted' && (
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      
+                      <DropdownMenuItem onClick={() => onViewDetail(candidature)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Voir détails
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuSeparator />
+                      
+                      {/* Boutons pour changer le statut */}
+                      {candidature.status !== 'acceptée' && candidature.status !== 'accepted' && (
                         <DropdownMenuItem 
-                          onClick={() => onUpdateStatus(candidature.id, 'accepted')}
+                          onClick={() => onUpdateStatus(candidature.id, 'acceptée')}
                         >
                           <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
                           Accepter
                         </DropdownMenuItem>
                       )}
-                      {candidature.status !== 'rejected' && (
+                      
+                      {candidature.status !== 'refusée' && candidature.status !== 'rejected' && (
                         <DropdownMenuItem 
-                          onClick={() => onUpdateStatus(candidature.id, 'rejected')}
+                          onClick={() => onUpdateStatus(candidature.id, 'refusée')}
                         >
                           <XCircle className="h-4 w-4 mr-2 text-red-600" />
                           Refuser
                         </DropdownMenuItem>
                       )}
-                      {candidature.status !== 'pending' && (
+                      
+                      {candidature.status !== 'en_attente' && candidature.status !== 'pending' && (
                         <DropdownMenuItem 
-                          onClick={() => onUpdateStatus(candidature.id, 'pending')}
+                          onClick={() => onUpdateStatus(candidature.id, 'en_attente')}
                         >
                           <Clock className="h-4 w-4 mr-2 text-yellow-600" />
                           Remettre en attente
                         </DropdownMenuItem>
                       )}
+                      
+                      <DropdownMenuSeparator />
+                      
+                      {/* Bouton Supprimer */}
+                      <DropdownMenuItem 
+                        onClick={() => onDelete(candidature.id)}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Supprimer
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

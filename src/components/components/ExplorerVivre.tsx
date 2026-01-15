@@ -44,7 +44,7 @@ const ExplorerVivre = () => {
     setSelectedZone(zone);
     
     // Ici, vous redirigeriez normalement vers la bonne plateforme
-    console.log(`Redirection vers: https://oliplus.com${zone.path}`);
+    // console.log(`Redirection vers: https://oliplus.com${zone.path}`);
     // window.location.href = `https://oliplus.com${zone.path}`;
   };
 

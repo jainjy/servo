@@ -12,7 +12,7 @@ export const useOrderNotifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      console.log('🔄 Chargement des notifications...');
+      // console.log('🔄 Chargement des notifications...');
       
       // Récupérer les commandes en attente
       const ordersResponse = await api.get('/orders/pro/stats');
@@ -33,11 +33,7 @@ export const useOrderNotifications = () => {
         reservations: 5 // Valeur mockée pour l'exemple
       });
 
-      console.log('✅ Notifications chargées:', {
-        pendingOrders,
-        messages: 3,
-        reservations: 5
-      });
+    
 
     } catch (error) {
       console.error('❌ Erreur chargement notifications:', error);

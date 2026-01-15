@@ -18,9 +18,9 @@ const transporter = nodemailer.createTransport({
 // Vérifier la connexion au service email
 transporter.verify(function(error, success) {
   if (error) {
-    console.log('❌ Erreur configuration email:', error.message);
+    // console.log('❌ Erreur configuration email:', error.message);
   } else {
-    console.log('✅ Serveur email prêt à envoyer des messages');
+    // console.log('✅ Serveur email prêt à envoyer des messages');
   }
 });
 
@@ -29,11 +29,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
   try {
     // En mode développement, on affiche juste le contenu
     if (process.env.NODE_ENV === 'development') {
-      console.log('📧 Email (DEV MODE):');
-      console.log('To:', to);
-      console.log('Subject:', subject);
-      console.log('HTML:', html);
-      console.log('Text:', text);
+
       return { success: true, message: 'Email simulé en mode dev' };
     }
 
@@ -47,7 +43,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email envoyé:', info.messageId);
+
     return { success: true, messageId: info.messageId };
     
   } catch (error) {

@@ -50,13 +50,7 @@ export const useAlternance = () => {
   const isAuthReady = useCallback(() => {
     const token = getToken();
     const ready = isAuthenticated && token && user?.id;
-    console.log('🔍 isAuthReady check:', { 
-      ready, 
-      isAuthenticated, 
-      hasToken: !!token,
-      tokenLength: token?.length,
-      userId: user?.id 
-    });
+    
     return ready;
   }, [isAuthenticated, user, getToken]);
 
@@ -66,11 +60,7 @@ export const useAlternance = () => {
       const authHeaders = getAuthHeaders();
       const token = getToken();
       
-      console.log('🔄 Getting axios config:', {
-        hasAuthHeaders: !!authHeaders.Authorization,
-        tokenLength: token?.length,
-        user: user?.id
-      });
+      
       
       return {
         baseURL: 'http://localhost:3001',
@@ -93,16 +83,10 @@ export const useAlternance = () => {
   useEffect(() => {
     const loadDataIfAuthenticated = async () => {
       const token = getToken();
-      console.log('🔄 useAlternance: Auth state changed', {
-        isAuthenticated,
-        token: token ? 'Present' : 'Missing',
-        tokenLength: token?.length,
-        user: user?.id,
-        hasLoaded
-      });
+     
 
       if (isAuthReady() && !hasLoaded && !fetchRef.current.pending) {
-        console.log('🚀 Loading alternance data on auth change');
+        // console.log('🚀 Loading alternance data on auth change');
         try {
           await Promise.all([
             fetchOffres(),
@@ -121,18 +105,14 @@ export const useAlternance = () => {
   const fetchOffres = useCallback(async (params = {}) => {
     // Éviter les appels en double
     if (fetchRef.current.pending) {
-      console.log('⏳ Fetch déjà en cours, annulation...');
+      // console.log('⏳ Fetch déjà en cours, annulation...');
       return;
     }
 
     // Vérifier l'authentification
     const token = getToken();
     if (!isAuthenticated || !token || !user?.id) {
-      console.log('⏳ Authentification non prête, report du fetch...', {
-        isAuthenticated,
-        hasToken: !!token,
-        userId: user?.id
-      });
+     
       return;
     }
 
@@ -141,8 +121,6 @@ export const useAlternance = () => {
     setError(null);
     
     try {
-      console.log('🔍 Fetching alternances avec params:', params);
-      console.log('📤 Token used:', token ? `${token.substring(0, 20)}...` : 'No token');
       
       const config = getAxiosConfig({
         params: {
@@ -157,11 +135,7 @@ export const useAlternance = () => {
 
       const response = await axios.get('/api/pro/alternance', config);
 
-      console.log('✅ Alternances response received:', {
-        success: response.data.success,
-        count: response.data.alternances?.length,
-        pagination: response.data.pagination
-      });
+    
 
       if (response.data.success) {
         setOffres(response.data.alternances || []);
@@ -228,21 +202,15 @@ export const useAlternance = () => {
     // Vérifier l'authentification
     const token = getToken();
     if (!isAuthenticated || !token || !user?.id) {
-      console.log('⏳ Authentification non prête pour stats...', {
-        isAuthenticated,
-        hasToken: !!token,
-        userId: user?.id
-      });
+      
       return;
     }
 
     try {
-      console.log('📊 Fetching stats...');
       
       const config = getAxiosConfig();
       const response = await axios.get('/api/pro/alternance/stats/summary', config);
       
-      console.log('✅ Stats response:', response.data);
 
       if (response.data.success && response.data.data) {
         const data = response.data.data;
@@ -294,11 +262,6 @@ export const useAlternance = () => {
 
     setIsLoading(true);
     try {
-      console.log('📝 Creating alternance with data:', data);
-      console.log('🔐 Auth state:', { 
-        user: user?.id, 
-        token: token ? `${token.substring(0, 20)}...` : 'No token' 
-      });
       
       const config = getAxiosConfig();
       
@@ -309,12 +272,11 @@ export const useAlternance = () => {
         dateFin: data.dateFin ? new Date(data.dateFin).toISOString() : null
       };
       
-      console.log('📤 Sending API data:', apiData);
+     
       
       const response = await axios.post('/api/pro/alternance', apiData, config);
       
-      console.log('✅ Create response:', response.data);
-
+  
       if (response.data.success) {
         toast.success('Offre créée avec succès');
         // Rafraîchir les données
@@ -345,7 +307,7 @@ export const useAlternance = () => {
 
     setIsLoading(true);
     try {
-      console.log(`✏️ Updating alternance ${id}`);
+
       
       const config = getAxiosConfig();
       const response = await axios.put(`/api/pro/alternance/${id}`, data, config);
@@ -378,7 +340,7 @@ export const useAlternance = () => {
     }
 
     try {
-      console.log(`🗑️ Deleting alternance ${id}`);
+    
       
       const config = getAxiosConfig();
       const response = await axios.delete(`/api/pro/alternance/${id}`, config);
@@ -408,8 +370,7 @@ export const useAlternance = () => {
     }
 
     try {
-      console.log(`🔄 Updating status ${id} to ${status}`);
-      
+ 
       const config = getAxiosConfig();
       const response = await axios.patch(`/api/pro/alternance/${id}/status`, { status }, config);
       
@@ -431,39 +392,79 @@ export const useAlternance = () => {
     }
   };
 
+// ✅ Fonction exportCSV corrigée
   const exportCSV = async () => {
-    const token = getToken();
-    if (!isAuthenticated || !token || !user?.id) {
-      toast.error('Veuillez vous connecter pour exporter');
-      throw new Error('Non authentifié');
-    }
 
+    
     try {
-      console.log('📥 Exporting CSV');
-      toast.info("Export CSV en cours...");
+      setIsLoading(true); // <-- Utilise setIsLoading au lieu de setLoading
       
-      const config = getAxiosConfig({ responseType: 'blob' });
-      const response = await axios.get('/api/pro/alternance/export/csv', config);
-
-      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      // Log des infos d'authentification
+      const config = await getAxiosConfig();
+ 
+      
+      // Utiliser fetch pour télécharger le fichier
+      const response = await fetch('/api/pro/alternance/export/csv', {
+        method: 'GET',
+        headers: {
+          'Authorization': config.headers.Authorization,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erreur HTTP ${response.status}`);
+      }
+      
+      // Récupérer le blob
+      const blob = await response.blob();
+      
+      // Créer un URL pour le blob
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `offres-alternance-${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
       
-      toast.success("Export CSV terminé");
-      return true;
-    } catch (err) {
-      console.error('❌ Error exporting CSV:', err);
-      const errorMsg = err.response?.data?.message || 'Erreur lors de l\'export CSV';
-      toast.error(errorMsg);
-      throw new Error(errorMsg);
+      // Créer un lien pour le téléchargement
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `offres-alternance-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      // Déclencher le téléchargement
+      document.body.appendChild(a);
+      a.click();
+      
+      // Nettoyer
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+    
+      toast.success('CSV exporté avec succès');
+      
+    } catch (error) {
+      console.error('❌ Error exporting CSV:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
+      let errorMessage = 'Erreur lors de l\'export CSV';
+      
+      if (error.message.includes('401')) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+      } else if (error.message.includes('500')) {
+        errorMessage = 'Erreur serveur lors de l\'export. Veuillez réessayer.';
+      } else if (error.message.includes('Network Error')) {
+        errorMessage = 'Erreur réseau. Vérifiez votre connexion.';
+      }
+      
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false); // <-- Utilise setIsLoading ici aussi
     }
   };
+
 
   const changePage = async (page) => {
     const token = getToken();

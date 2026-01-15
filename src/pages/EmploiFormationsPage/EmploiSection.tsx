@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";// En haut du fichier, avec les autres imports
-import { useCandidatures } from '@/hooks/useCandidatures';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   Filter,
@@ -57,7 +58,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { useEmploi } from "@/hooks/useEmploi";
+import { usePublicEmploi } from "@/hooks/usePublicEmploi";
 
 const EmploiSection = ({
   loading,
@@ -66,7 +67,8 @@ const EmploiSection = ({
   toggleSavedItem,
   handleApply,
   handleShare,
-  handleFileUpload,
+  // Supprimer handleFileUpload des props puisqu'il n'est pas fourni
+  // handleFileUpload,
   cvFile,
   setCvFile,
   setLoading,
@@ -75,13 +77,19 @@ const EmploiSection = ({
   alertSettings,
   setAlertSettings,
 }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Utiliser le hook pour les emplois publics
   const { 
     emplois, 
-    isLoading, 
+    isLoading: apiLoading, 
     stats, 
-    fetchEmplois, 
-    fetchStats 
-  } = useEmploi();
+    fetchEmplois,
+    fetchStats,
+    applyToEmploi,
+    fetchEmploiDetails
+  } = usePublicEmploi();
 
   const [offres, setOffres] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -95,34 +103,9 @@ const EmploiSection = ({
   const [sortBy, setSortBy] = useState("pertinence");
   const [selectedJob, setSelectedJob] = useState(null);
   const [isApplicationDialogOpen, setIsApplicationDialogOpen] = useState(false);
+  const [selectedOffreForApply, setSelectedOffreForApply] = useState(null);
 
-  const secteurs = [
-    {
-      id: "Informatique & Tech",
-      label: "Informatique & Tech",
-      count: stats?.parSecteur?.["Informatique & Tech"] || 0,
-      icon: Code,
-    },
-    {
-      id: "Bâtiment & Construction",
-      label: "Bâtiment & Construction",
-      count: stats?.parSecteur?.["Bâtiment & Construction"] || 0,
-      icon: Hammer,
-    },
-    {
-      id: "Commerce & Vente",
-      label: "Commerce & Vente",
-      count: stats?.parSecteur?.["Commerce & Vente"] || 0,
-      icon: TrendingUp,
-    },
-    {
-      id: "Santé & Social",
-      label: "Santé & Social",
-      count: stats?.parSecteur?.["Santé & Social"] || 0,
-      icon: Activity,
-    },
-  ];
-
+  // ✅ CORRECTION : Définition de typesContrat (doit être avant son utilisation)
   const typesContrat = [
     { id: "CDI", label: "CDI", color: "bg-green-100 text-green-800" },
     { id: "CDD", label: "CDD", color: "bg-blue-100 text-blue-800" },
@@ -132,6 +115,35 @@ const EmploiSection = ({
     { id: "Stage", label: "Stage", color: "bg-pink-100 text-pink-800" },
   ];
 
+  // CORRECTION : Ajouter la même fonction de gestion de fichier que dans AlternanceSection
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Vérifier la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Le fichier ne doit pas dépasser 5MB");
+        return;
+      }
+      
+      // Vérifier l'extension
+      const validExtensions = ['.pdf', '.doc', '.docx'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      
+      if (!validExtensions.includes(fileExtension)) {
+        toast.error("Format de fichier non supporté. Utilisez PDF, DOC ou DOCX");
+        return;
+      }
+      
+      setCvFile({
+        name: file.name,
+        size: file.size,
+        url: URL.createObjectURL(file) // Crée une URL locale pour le fichier
+      });
+      toast.success("CV téléchargé avec succès");
+    }
+  };
+
+  // Charger les données au montage
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -147,7 +159,7 @@ const EmploiSection = ({
           fetchStats()
         ]);
       } catch (error) {
-        toast.error("Erreur lors du chargement des offres");
+        // console.log("Erreur capturée dans EmploiSection:", error);
       } finally {
         setLoading(false);
       }
@@ -155,6 +167,7 @@ const EmploiSection = ({
     loadData();
   }, []);
 
+  // Formater les offres à partir des données API
   useEffect(() => {
     if (emplois && Array.isArray(emplois)) {
       const formattedOffres = emplois
@@ -178,14 +191,51 @@ const EmploiSection = ({
           competences: Array.isArray(emploi.competences) ? emploi.competences : [],
           avantages: Array.isArray(emploi.avantages) ? emploi.avantages : [],
           icon: getIconBySecteur(emploi.secteur),
-          candidatures_count: emploi.candidatures_count || 0,
+          candidatures_count: emploi.candidaturesCount || 0,
           vues: emploi.vues || 0,
           dateLimite: emploi.dateLimite,
           nombrePostes: emploi.nombrePostes || 1,
+          status: emploi.status,
+          organisme: emploi.organisme || emploi.entreprise
         }));
       setOffres(formattedOffres);
     }
   }, [emplois]);
+
+  // Vérifier les actions en attente après connexion
+  useEffect(() => {
+    const checkForPendingAction = () => {
+      const pendingAction = sessionStorage.getItem('pendingEmploiAction');
+      const emploiId = sessionStorage.getItem('selectedEmploiId');
+      
+      if (pendingAction === 'apply' && emploiId && isAuthenticated) {
+        const emploiToOpen = emplois?.find(e => e.id.toString() === emploiId);
+        if (emploiToOpen) {
+          setSelectedOffreForApply(emploiToOpen);
+          setIsApplicationDialogOpen(true);
+          toast.success("Bienvenue ! Vous pouvez maintenant postuler à l'offre.");
+        }
+        
+        sessionStorage.removeItem('pendingEmploiAction');
+        sessionStorage.removeItem('selectedEmploiId');
+        sessionStorage.removeItem('emploiTitle');
+      }
+    };
+
+    checkForPendingAction();
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'pendingEmploiAction' || e.key === 'selectedEmploiId') {
+        checkForPendingAction();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [isAuthenticated, emplois]);
 
   const calculateDaysAgo = (dateString) => {
     if (!dateString) return "quelques jours";
@@ -290,10 +340,20 @@ const EmploiSection = ({
     toast.success("Filtres réinitialisés");
   };
 
-  const { postuler } = useCandidatures();
-
- const handleSubmitApplication = async (e, offre) => {
+  const handleSubmitApplication = async (e) => {
     e.preventDefault();
+    
+    if (!selectedOffreForApply) return;
+    
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pendingEmploiAction', 'apply');
+      sessionStorage.setItem('selectedEmploiId', selectedOffreForApply.id.toString());
+      sessionStorage.setItem('emploiTitle', selectedOffreForApply.title);
+      sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+      
+      navigate("/login");
+      return;
+    }
     
     if (!cvFile && !motivationLetter.trim()) {
       toast.error("Veuillez ajouter au moins un CV ou un message de motivation");
@@ -301,31 +361,49 @@ const EmploiSection = ({
     }
 
     try {
-      const result = await postuler(
-        offre.id,
-        'emploi',
-        offre.title,
-        {
-          messageMotivation: motivationLetter,
-          cvUrl: cvFile?.url,
-          nomCandidat: user?.name,
-          emailCandidat: user?.email,
-          telephoneCandidat: user?.phone
-        }
-      );
+      const result = await applyToEmploi(selectedOffreForApply.id, {
+        motivation: motivationLetter,
+        cvUrl: cvFile?.url,
+        nomCandidat: user?.name || user?.firstName + ' ' + user?.lastName,
+        emailCandidat: user?.email,
+        telephoneCandidat: user?.phone
+      });
 
       if (result.success) {
         toast.success("Candidature envoyée avec succès !");
         setMotivationLetter("");
         setCvFile(null);
         setIsApplicationDialogOpen(false);
+        setSelectedOffreForApply(null);
         
-        // Mettre à jour la liste
-        handleApply(offre.id, "emploi", offre.title);
+        // Mettre à jour la liste des candidatures
+        if (handleApply) {
+          handleApply(selectedOffreForApply.id, "emploi", selectedOffreForApply.title);
+        }
+        
+        // Recharger les données pour mettre à jour les compteurs
+        await fetchEmplois({ status: "active" });
+        await fetchStats();
       }
     } catch (error) {
       toast.error(error.message || "Erreur lors de l'envoi de la candidature");
     }
+  };
+
+  const handleInscription = (offre) => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pendingEmploiAction', 'apply');
+      sessionStorage.setItem('selectedEmploiId', offre.id.toString());
+      sessionStorage.setItem('emploiTitle', offre.title);
+      sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+      
+      navigate("/login");
+      return;
+    }
+
+    // Si l'utilisateur est connecté, ouvrir le formulaire de candidature
+    setSelectedOffreForApply(offre);
+    setIsApplicationDialogOpen(true);
   };
 
   const toggleJobAlerts = () => {
@@ -341,7 +419,7 @@ const EmploiSection = ({
   const statsData = [
     { 
       label: "Offres actives", 
-      value: stats?.active || "0", 
+      value: stats?.total || "0", 
       icon: Briefcase 
     },
     { 
@@ -359,6 +437,43 @@ const EmploiSection = ({
       value: stats?.urgent || "0", 
       icon: Zap 
     },
+  ];
+
+  // Dynamiser les secteurs à partir des statistiques
+  const secteurs = [
+    {
+      id: "Informatique & Tech",
+      label: "Informatique & Tech",
+      count: stats?.parSecteur?.["Informatique & Tech"] || 0,
+      icon: Code,
+    },
+    {
+      id: "Bâtiment & Construction",
+      label: "Bâtiment & Construction",
+      count: stats?.parSecteur?.["Bâtiment & Construction"] || 0,
+      icon: Hammer,
+    },
+    {
+      id: "Commerce & Vente",
+      label: "Commerce & Vente",
+      count: stats?.parSecteur?.["Commerce & Vente"] || 0,
+      icon: TrendingUp,
+    },
+    {
+      id: "Santé & Social",
+      label: "Santé & Social",
+      count: stats?.parSecteur?.["Santé & Social"] || 0,
+      icon: Activity,
+    },
+    // Ajouter d'autres secteurs dynamiquement si présents dans les stats
+    ...Object.entries(stats?.parSecteur || {})
+      .filter(([key]) => !["Informatique & Tech", "Bâtiment & Construction", "Commerce & Vente", "Santé & Social"].includes(key))
+      .map(([key, count]) => ({
+        id: key,
+        label: key,
+        count: count,
+        icon: Briefcase,
+      }))
   ];
 
   return (
@@ -388,9 +503,9 @@ const EmploiSection = ({
             <Button
               className="bg-[#8B4513] hover:bg-[#6B3410] text-white px-8"
               onClick={handleSearch}
-              disabled={isLoading}
+              disabled={apiLoading}
             >
-              {isLoading ? "Recherche..." : "Rechercher"}
+              {apiLoading ? "Recherche..." : "Rechercher"}
             </Button>
           </div>
         </div>
@@ -490,7 +605,7 @@ const EmploiSection = ({
                 variant="outline"
                 className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F] hover:text-white transition-colors"
                 onClick={handleResetFilters}
-                disabled={isLoading}
+                disabled={apiLoading}
               >
                 Réinitialiser les filtres
               </Button>
@@ -530,8 +645,7 @@ const EmploiSection = ({
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
                       <p className="text-sm text-gray-600">
-                        Déposez votre CV pour être visible par nos recruteurs
-                        partenaires
+                        Déposez votre CV pour être visible par nos recruteurs partenaires
                       </p>
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                         <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -551,6 +665,7 @@ const EmploiSection = ({
                           type="file"
                           accept=".pdf,.doc,.docx"
                           className="hidden"
+                          // CORRECTION: Utiliser handleFileUpload défini localement
                           onChange={handleFileUpload}
                         />
                         <p className="text-xs text-gray-500 mt-2">
@@ -641,7 +756,7 @@ const EmploiSection = ({
             </TabsList>
 
             <TabsContent value={activeTab} className="space-y-4">
-              {isLoading ? (
+              {apiLoading || loading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <Card key={i} className="border-[#D3D3D3] animate-pulse">
                     <CardContent className="pt-6">
@@ -885,142 +1000,30 @@ const EmploiSection = ({
                                           </div>
                                           <Button
                                             className="w-full bg-[#8B4513] hover:bg-[#6B3410]"
-                                            onClick={() => {
-                                              handleApply(
-                                                selectedJob.id,
-                                                "emploi",
-                                                selectedJob.title
-                                              );
-                                              setSelectedJob(null);
-                                            }}
+                                            onClick={() => handleInscription(selectedJob)}
+                                            disabled={appliedItems.includes(`emploi-${selectedJob.id}`)}
                                           >
-                                            Postuler maintenant
+                                            {appliedItems.includes(`emploi-${selectedJob.id}`) 
+                                              ? "✓ Déjà postulé" 
+                                              : "Postuler maintenant"}
                                           </Button>
                                         </div>
                                       </>
                                     )}
                                   </SheetContent>
                                 </Sheet>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      className={`${
-                                        isApplied
-                                          ? "bg-green-600 hover:bg-green-700"
-                                          : "bg-[#8B4513] hover:bg-[#6B3410]"
-                                      } text-white`}
-                                      onClick={() => setSelectedJob(offre)}
-                                    >
-                                      {isApplied ? "✓ Postulé" : "Postuler"}
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-2xl">
-                                    <DialogHeader>
-                                      <DialogTitle>
-                                        Postuler à : {selectedJob?.title}
-                                      </DialogTitle>
-                                    </DialogHeader>
-                                    <form onSubmit={handleSubmitApplication}>
-                                      <div className="space-y-4 py-4">
-                                        <div>
-                                          <Label
-                                            htmlFor="motivation"
-                                            className="font-semibold mb-2 block"
-                                          >
-                                            Votre message de motivation :
-                                          </Label>
-                                          <Textarea
-                                            id="motivation"
-                                            placeholder="Expliquez pourquoi vous êtes le candidat idéal pour ce poste..."
-                                            className="min-h-[150px]"
-                                            value={motivationLetter}
-                                            onChange={(e) =>
-                                              setMotivationLetter(e.target.value)
-                                            }
-                                          />
-                                        </div>
-                                        <div>
-                                          <Label className="font-semibold mb-2 block">
-                                            CV et documents :
-                                          </Label>
-                                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                                            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                                            <p className="text-gray-600 mb-2">
-                                              Glissez-déposez votre CV ou
-                                            </p>
-                                            <Button
-                                              type="button"
-                                              variant="outline"
-                                              onClick={() =>
-                                                document
-                                                  .getElementById(
-                                                    "job-cv-upload"
-                                                  )
-                                                  .click()
-                                              }
-                                            >
-                                              Parcourir les fichiers
-                                            </Button>
-                                            <input
-                                              id="job-cv-upload"
-                                              type="file"
-                                              accept=".pdf,.doc,.docx"
-                                              className="hidden"
-                                              onChange={handleFileUpload}
-                                            />
-                                            <p className="text-xs text-gray-500 mt-2">
-                                              Formats acceptés : PDF, DOC, DOCX
-                                              (max 5MB)
-                                            </p>
-                                          </div>
-                                          {cvFile && (
-                                            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg mt-2">
-                                              <div className="flex items-center gap-2">
-                                                <FileText className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">
-                                                  {cvFile.name}
-                                                </span>
-                                              </div>
-                                              <Button
-                                                type="button"
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => setCvFile(null)}
-                                              >
-                                                <X className="h-4 w-4" />
-                                              </Button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <DialogFooter>
-                                        <Button
-                                          type="button"
-                                          variant="outline"
-                                          onClick={() =>
-                                            setIsApplicationDialogOpen(false)
-                                          }
-                                        >
-                                          Annuler
-                                        </Button>
-                                        <Button
-                                          type="submit"
-                                          className="bg-[#556B2F] hover:bg-[#6B8E23]"
-                                          onClick={() =>
-                                            handleApply(
-                                              offre.id,
-                                              "emploi",
-                                              offre.title
-                                            )
-                                          }
-                                        >
-                                          Envoyer la candidature
-                                        </Button>
-                                      </DialogFooter>
-                                    </form>
-                                  </DialogContent>
-                                </Dialog>
+                                <Button
+                                  size="sm"
+                                  className={`${
+                                    isApplied
+                                      ? "bg-green-600 hover:bg-green-700"
+                                      : "bg-[#8B4513] hover:bg-[#6B3410]"
+                                  } text-white`}
+                                  onClick={() => handleInscription(offre)}
+                                  disabled={isApplied}
+                                >
+                                  {isApplied ? "✓ Postulé" : "Postuler"}
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -1050,6 +1053,116 @@ const EmploiSection = ({
           </Tabs>
         </div>
       </div>
+
+      {/* Dialog de candidature */}
+      <Dialog open={isApplicationDialogOpen} onOpenChange={setIsApplicationDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedOffreForApply
+                ? `Postuler à : ${selectedOffreForApply.title}`
+                : "Postuler"}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedOffreForApply
+                ? `Postulez à cette offre en remplissant le formulaire ci-dessous.`
+                : "Remplissez le formulaire de candidature."}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitApplication}>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label
+                  htmlFor="motivation"
+                  className="font-semibold mb-2 block"
+                >
+                  Votre message de motivation :
+                </Label>
+                <Textarea
+                  id="motivation"
+                  placeholder="Expliquez pourquoi vous êtes le candidat idéal pour ce poste..."
+                  className="min-h-[150px]"
+                  value={motivationLetter}
+                  onChange={(e) =>
+                    setMotivationLetter(e.target.value)
+                  }
+                />
+              </div>
+              <div>
+                <Label className="font-semibold mb-2 block">
+                  CV et documents :
+                </Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600 mb-2">
+                    Glissez-déposez votre CV ou
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      document
+                        .getElementById(
+                          "job-cv-upload"
+                        )
+                        .click()
+                    }
+                  >
+                    Parcourir les fichiers
+                  </Button>
+                  <input
+                    id="job-cv-upload"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    // CORRECTION: Utiliser handleFileUpload défini localement
+                    onChange={handleFileUpload}
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Formats acceptés : PDF, DOC, DOCX (max 5MB)
+                  </p>
+                </div>
+                {cvFile && (
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg mt-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">
+                        {cvFile.name}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setCvFile(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsApplicationDialogOpen(false);
+                  setSelectedOffreForApply(null);
+                }}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                className="bg-[#556B2F] hover:bg-[#6B8E23]"
+              >
+                Envoyer la candidature
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -2,6 +2,7 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { useLocation } from "react-router-dom";
+import { ScrollProvider } from "@/contexts/ScrollContext";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -33,11 +34,13 @@ function Layout({ children }) {
   // console.log(location.pathname.includes(aCacher));
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {!hideFooter && <Header />}
-      <main className="flex-1">{children}</main>
-      {(!hideFooter && !hideOther) && <Footer />}
-    </div>
+    <ScrollProvider>
+      <div className="min-h-screen flex flex-col">
+        {!hideFooter && <Header />}
+        <main className="flex-1">{children}</main>
+        {(!hideFooter && !hideOther) && <Footer />}
+      </div>
+    </ScrollProvider>
   );
 }
 

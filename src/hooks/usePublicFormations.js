@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export const usePublicFormations = () => {
   const [formations, setFormations] = useState([]);
@@ -20,8 +20,7 @@ export const usePublicFormations = () => {
     setError(null);
     
     try {
-      console.log('📡 usePublicFormations - Fetch formations publiques:', params);
-      
+    
       const queryParams = new URLSearchParams();
       
       // Paramètres de filtrage
@@ -42,8 +41,7 @@ export const usePublicFormations = () => {
       // 🌟 CORRECTION IMPORTANTE : Utilisez l'URL correcte
       // Essayez d'abord sans /public
       let url = `${API_URL}/formations?${queryParams.toString()}`;
-      console.log('🌐 Fetch URL:', url);
-      
+     
       const response = await axios.get(url, {
         timeout: 10000,
         // Ajoutez des headers pour éviter les problèmes CORS
@@ -53,10 +51,7 @@ export const usePublicFormations = () => {
         }
       });
       
-      console.log('✅ usePublicFormations - Réponse reçue:', {
-        count: response.data.data?.length || 0,
-        success: response.data.success
-      });
+     
       
       if (response.data.success) {
         setFormations(response.data.data || []);
@@ -84,13 +79,11 @@ export const usePublicFormations = () => {
       if (error.response) {
         // Si erreur 400, essayez avec /public
         if (error.response.status === 400 || error.response.status === 404) {
-          console.log('🔄 Tentative avec route alternative...');
-          
+         
           try {
             // Essayez avec l'URL alternative
             const altUrl = `${API_URL}/formations/public?${queryParams.toString()}`;
-            console.log('🔄 Tentative avec URL:', altUrl);
-            
+          
             const altResponse = await axios.get(altUrl, {
               timeout: 5000,
               headers: {
@@ -100,7 +93,7 @@ export const usePublicFormations = () => {
             });
             
             if (altResponse.data.success) {
-              console.log('✅ Route alternative fonctionne!');
+             
               setFormations(altResponse.data.data || []);
               setPagination(altResponse.data.pagination || {
                 page: params.page || 1,
@@ -111,7 +104,7 @@ export const usePublicFormations = () => {
               return altResponse.data;
             }
           } catch (altError) {
-            console.log('❌ Route alternative échouée aussi');
+            // console.log('❌ Route alternative échouée aussi');
           }
         }
         
@@ -126,8 +119,7 @@ export const usePublicFormations = () => {
       
       // En mode développement, utiliser des données fictives
       if (process.env.NODE_ENV === 'development') {
-        console.log('⚠️ usePublicFormations - Utilisation de données fictives pour le développement');
-        
+    
         const mockFormations = [
           {
             id: 1,
@@ -244,8 +236,7 @@ export const usePublicFormations = () => {
   // Postuler à une formation
   const applyToFormation = useCallback(async (formationId, applicationData) => {
     try {
-      console.log('📡 usePublicFormations - Postulation formation:', formationId);
-      
+  
       // Récupérer le token
       const token = localStorage.getItem('auth-token');
       
@@ -267,7 +258,7 @@ export const usePublicFormations = () => {
         { headers }
       );
       
-      console.log('✅ usePublicFormations - Postulation réussie:', response.data);
+      // console.log('✅ usePublicFormations - Postulation réussie:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ usePublicFormations - Erreur postulation:', error.response?.data || error.message);

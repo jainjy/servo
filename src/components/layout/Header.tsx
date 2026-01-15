@@ -651,7 +651,7 @@ const Header = () => {
             "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
         {
-          title: "Conseils & accompagnement",
+          title: "Entreprise et pro",
           description: "Support stratégique pour entrepreneurs",
           href: "/conseil",
           image:
@@ -1023,7 +1023,7 @@ const Header = () => {
         {
           title: "Séjourner & Voyager",
           description:
-            "Organisez vos déplacements et vos séjours facilement, qu’ils soient courts, longs ou insolites.",
+            "Organisez vos déplacements et vos séjours facilement, qu'ils soient courts, longs ou insolites.",
           href: "/voyages",
           image:
             "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
@@ -1054,7 +1054,7 @@ const Header = () => {
         {
           title: "Maison & Quotidien",
           description:
-            "Tout ce qu’il faut pour améliorer, entretenir et faciliter la vie à la maison.",
+            "Tout ce qu'il faut pour améliorer, entretenir et faciliter la vie à la maison.",
           href: "/produits#equipement",
           image:
             "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
@@ -1070,13 +1070,14 @@ const Header = () => {
         {
           title: "Inspirer  & Éveiller ",
           description:
-            "Un espace pour apprendre, s’inspirer et découvrir autrement.",
+            "Un espace pour apprendre, s'inspirer et découvrir autrement.",
           href: "/podcasts/reunion",
           image:
             "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
+        
     /*** Nos partenaire*/
     {
       title: "NOS PARTENAIRES",
@@ -1124,6 +1125,11 @@ const Header = () => {
             "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
+    },
+    {
+      title: "BLOG",
+          href: "/blog",
+ 
     },
     // {
     //   title: "TRAVAUX & MATÉRIAUX",
@@ -1212,7 +1218,7 @@ const Header = () => {
     //         "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
     //     },
     //     {
-    //       title: "Marketplace d’occasion",
+    //       title: "Marketplace d'occasion",
     //       description: "Achetez et vendez des articles d'occasion",
     //       href: "/produits#design",
     //       image:
@@ -1405,7 +1411,7 @@ const Header = () => {
     //         "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
     //     },
     //     {
-    //       title: "Offres d’emploi",
+    //       title: "Offres d'emploi",
     //       description: "Trouvez des opportunités de carrière",
     //       href: "/emploi",
     //       image:
@@ -1482,23 +1488,23 @@ const Header = () => {
     role === "admin"
       ? "/admin"
       : role === "professional"
-      ? "/pro"
-      : "/mon-compte/profil";
+        ? "/pro"
+        : "/mon-compte/profil";
   const initials = user
     ? (() => {
-        let base = "";
-        if (user.firstName && user.firstName.trim().length > 0) {
-          base = user.firstName.trim();
-        } else if (user.email) {
-          base = user.email.split("@")[0];
-        }
-        base = base.replace(/[^A-Za-z0-9]/g, "");
-        const two = base.slice(0, 2).toUpperCase();
-        if (two && two.length === 2) return two;
-        if (!two && user.lastName)
-          return user.lastName.slice(0, 2).toUpperCase();
-        return two || "US";
-      })()
+      let base = "";
+      if (user.firstName && user.firstName.trim().length > 0) {
+        base = user.firstName.trim();
+      } else if (user.email) {
+        base = user.email.split("@")[0];
+      }
+      base = base.replace(/[^A-Za-z0-9]/g, "");
+      const two = base.slice(0, 2).toUpperCase();
+      if (two && two.length === 2) return two;
+      if (!two && user.lastName)
+        return user.lastName.slice(0, 2).toUpperCase();
+      return two || "US";
+    })()
     : "";
   const MobileMenu = () => (
     <div className="flex flex-col h-full">
@@ -1527,9 +1533,8 @@ const Header = () => {
                   >
                     {section.title}
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        openSubmenu === section.title ? "rotate-180" : ""
-                      }`}
+                      className={`h-4 w-4 transition-transform ${openSubmenu === section.title ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                   {openSubmenu === section.title && (
@@ -1548,9 +1553,13 @@ const Header = () => {
                   )}
                 </div>
               ) : (
-                <span className="block text-sm font-semibold text-gray-900 py-2">
+                <Link
+                  to={section.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-sm font-semibold text-gray-900 hover:text-gray-700 py-2"
+                >
                   {section.title}
-                </span>
+                </Link>
               )}
             </div>
           ))}
@@ -1577,9 +1586,17 @@ const Header = () => {
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-[#556B2F] text-white text-xs">
-                    {initials}
-                  </AvatarFallback>
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={`${user?.firstName} ${user?.lastName}`}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <AvatarFallback className="bg-[#556B2F] text-white text-xs">
+                      {initials}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div className="text-left min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
@@ -1591,9 +1608,8 @@ const Header = () => {
                 </div>
               </div>
               <ChevronDown
-                className={`h-4 w-4 text-gray-600 transition-transform flex-shrink-0 ${
-                  isUserMenuOpen ? "rotate-180" : ""
-                }`}
+                className={`h-4 w-4 text-gray-600 transition-transform flex-shrink-0 ${isUserMenuOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
             {/* Menu utilisateur pour mobile */}
@@ -1679,7 +1695,7 @@ const Header = () => {
                   <Building2Icon className="h-4 w-4" />
                   <span>Gestion des locations saisonnieres</span>
                 </button>
-                <button
+                {/* <button
                   onClick={() => {
                     navigate("/mon-compte/payement");
                     setIsMobileMenuOpen(false);
@@ -1688,7 +1704,7 @@ const Header = () => {
                 >
                   <CreditCard className="h-4 w-4" />
                   <span>Paiements</span>
-                </button>
+                </button> */}
                 <button
                   onClick={() => {
                     navigate("/mon-compte/documents");
@@ -1724,103 +1740,326 @@ const Header = () => {
       </div>
     </div>
   );
+  const profilePathDesktop =
+    role === "admin"
+      ? "/admin"
+      : role === "professional"
+        ? "/pro"
+        : "/mon-compte/profil";
   return (
     <>
       <header
         id="head"
-        className="fixed w-screen top-0 z-50  bg-white rounded-full mt-4 backdrop-blur-md shadow-lg"
+        className="fixed w-screen top-0 z-50 bg-[#FFFFFF] backdrop-blur-md border shadow-lg"
       >
-        <div className="w-full flex h-16 items-center justify-between px-6">
-          {/* Left Navigation - 2 links */}
-          <nav className="hidden lg:flex items-center justify-end gap-8 flex-1">
-            <ul className="flex items-center gap-8">
-              {menuSections.slice(0, 2).map((section, index) => (
+        <div className="container flex h-16 items-center justify-between px-6">
+          <Link to={"/"}>
+            <ServoLogo />
+          </Link>
+          {/* Menu desktop */}
+          <nav className="hidden md:hidden lg:flex items-center gap-2">
+            <ul className="flex items-center">
+              {/* CHANGEMENT ICI : slice(0, 5) au lieu de slice(0, 4) */}
+              {menuSections.slice(0, 5).map((section, index) => (
                 <li key={index} className="group relative">
                   {section.items ? (
                     <>
                       <Button
                         variant="ghost"
-                        className="flex items-center gap-1 text-[12px] font-bold text-gray-800 hover:text-gray-900 transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]"
+                        className="flex items-center gap-1 text-[11px] font-bold text-gray-700 hover:text-gray-900 transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]"
                       >
                         {section.title}
                         <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
                       </Button>
                       <div className="absolute left-0 top-full w-[320px] p-2 rounded-lg border bg-[#FFFFFF] shadow-xl opacity-0 translate-y-1 scale-95 pointer-events-none transition ease-out duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto z-[1050]">
                         {section.items.map((item, itemIndex) => (
-                          <Link
+                          <div
                             key={itemIndex}
-                            to={item.href}
-                            className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
+                            className="relative group/item"
+                            onMouseEnter={() =>
+                              item.submenu && setHoveredItem(item.title)
+                            }
+                            onMouseLeave={() =>
+                              item.submenu && setHoveredItem(null)
+                            }
                           >
-                            <div>
-                              <div className="font-semibold">
-                                {item.title}
+                            <Link
+                              to={item.href}
+                              className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-semibold">
+                                    {item.title}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {item.description}
+                                  </div>
+                                </div>
+                                {item.submenu && (
+                                  <ChevronRight className="h-4 w-4 text-gray-600 transition-opacity" />
+                                )}
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {item.description}
+                            </Link>
+                            {/* Submenu for main menu items */}
+                            {item.submenu && hoveredItem === item.title && (
+                              <div className="absolute left-full top-0 ml-0 w-56 bg-white rounded-lg border border-[#D3D3D3] shadow-lg overflow-hidden z-[1100]">
+                                <div className="p-3">
+                                  <div className="space-y-1">
+                                    {item.submenu.map((subitem, subidx) => (
+                                      <Link
+                                        key={subidx}
+                                        to={subitem.href}
+                                        className="block p-2 rounded-lg hover:bg-gray-100 transition-colors text-xs text-gray-700 hover:text-gray-900"
+                                      >
+                                        <div className="font-medium">
+                                          {subitem.title}
+                                        </div>
+                                        {subitem.description && (
+                                          <div className="text-[11px] text-gray-500 mt-0.5">
+                                            {subitem.description}
+                                          </div>
+                                        )}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </Link>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </>
                   ) : (
-                    <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700 px-3 py-2">{section.title}</span>
+                    <Link
+                      to={section.href}
+                      className="flex items-center gap-1 text-[11px] font-bold bg-transparent hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-all duration-200 px-4 py-2 rounded-lg border border-transparent hover:border-[#D3D3D3] group"
+                    >
+                      {section.title}
+                    </Link>
                   )}
                 </li>
               ))}
             </ul>
-          </nav>
-
-          {/* Center Logo */}
-          <div className="flex-1 flex justify-center">
-            <Link to={"/"}>
-              <ServoLogo />
-            </Link>
-          </div>
-
-          {/* Right Navigation - 2 links */}
-          <nav className="hidden lg:flex items-center gap-2 flex-1 justify-start">
-            <ul className="flex items-center gap-8">
-              {menuSections.slice(2, 4).map((section, index) => (
-                <li key={index} className="group relative">
-                  {section.items ? (
-                    <>
-                      <Button
-                        variant="ghost"
-                        className="flex items-center gap-1 text-[12px] font-bold text-gray-800 hover:text-gray-900 transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]"
-                      >
-                        {section.title}
-                        <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
-                      </Button>
-                      <div className="absolute left-0 top-full w-[320px] p-2 rounded-lg border bg-[#FFFFFF] shadow-xl opacity-0 translate-y-1 scale-95 pointer-events-none transition ease-out duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:pointer-events-auto z-[1050]">
-                        {section.items.map((item, itemIndex) => (
-                          <Link
-                            key={itemIndex}
-                            to={item.href}
-                            className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
-                          >
-                            <div>
-                              <div className="font-semibold">
-                                {item.title}
+            {/* Desktop hamburger: Popover avec animation GSAP */}
+            <div className="hidden lg:block">
+              <Popover
+                open={isPopoverOpen}
+                onOpenChange={handlePopoverOpenChange}
+              >
+                <PopoverTrigger asChild>
+                  {/* <Button className="h-9 hover:bg-logo/80 bg-logo">
+                    <Menu className="text-white" />
+                  </Button> */}
+                </PopoverTrigger>
+                <PopoverContent
+                  side="bottom"
+                  align="center"
+                  className="relative -mt-16 w-screen max-w-full p-0 overflow-hidden z-50 rounded-none shadow-lg bg-black text-white border-none"
+                >
+                  <button
+                    className="absolute z-50 text-white text-5xl font-extralight right-10 top-4"
+                    onClick={() => setIsPopoverOpen(false)}
+                    aria-label="Close popover"
+                  >
+                    &times;
+                  </button>
+                  <div className="w-full h-screen overflow-auto">
+                    <div className="flex flex-col lg:flex-row h-full w-full">
+                      {/* Left: Titles column */}
+                      <div className="w-full lg:w-64 border-[#D3D3D3]/40 border-b lg:border-b-0 lg:border-r p-4 lg:sticky lg:top-4 lg:h-[500px]">
+                        <Link to="/" onClick={() => setIsPopoverOpen(false)}>
+                          <div className="flex items-center gap-2 mb-4">
+                            <ServoLogo />
+                          </div>
+                        </Link>
+                        <nav className="space-y-1 overflow-y-auto">
+                          {menuSections.map((section, si) => {
+                            const hasItems =
+                              !!section.items && section.items.length > 0;
+                            const isActive = hoveredSection === section.title;
+                            return (
+                              <div
+                                key={si}
+                                onMouseEnter={() =>
+                                  hasItems && setHoveredSection(section.title)
+                                }
+                                onFocus={() =>
+                                  hasItems && setHoveredSection(section.title)
+                                }
+                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive
+                                    ? "bg-[#FFFFFF]/10"
+                                    : "hover:bg-[#FFFFFF]/5"
+                                  }`}
+                              >
+                                {hasItems ? (
+                                  <button className="scramble w-full text-left text-xs font-semibold text-white">
+                                    {section.title}
+                                  </button>
+                                ) : (
+                                  <Link
+                                    to={section.href || "/"}
+                                    onClick={() => setIsPopoverOpen(false)}
+                                    className="w-full text-left text-xs font-semibold text-white hover:underline"
+                                  >
+                                    {section.title}
+                                  </Link>
+                                )}
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {item.description}
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
+                            );
+                          })}
+                          <div className=" absolute -bottom-36 left-8 w-auto flex items-start justify-start z-50 gap-5 h-20">
+                            {!isAuthenticated ? (
+                              <Link
+                                to="/login"
+                                className="group relative bg-[#FFFFFF] text-[#556B2F] py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
+                              >
+                                <span className="relative z-10 group-hover:text-[#FFFFFF]">
+                                  Se connecter
+                                </span>
+                                <span className="absolute inset-0 bg-[#556B2F] border-[#556B2F] scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
+                              </Link>
+                            ) : (
+                              <Link
+                                to="/"
+                                onClick={handleLogout}
+                                className="group relative border-2 border-red-600 text-red-600 py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
+                              >
+                                <span className="relative z-10 group-hover:text-[#FFFFFF]">
+                                  Déconnexion
+                                </span>
+                                <span className="absolute inset-0 bg-red-700 border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
+                              </Link>
+                            )}
+                          </div>
+                        </nav>
                       </div>
-                    </>
-                  ) : (
-                    <span className="flex items-center gap-1 text-[13px] font-bold text-gray-700 px-3 py-2">{section.title}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
+                      {/* Right: Detail/content for hovered title */}
+                      <div className="flex-1 p-6 relative">
+                        {hoveredSection ? (
+                          (() => {
+                            const current = menuSections.find(
+                              (s) => s.title === hoveredSection
+                            );
+                            if (!current) return null;
+                            if (!current.items || current.items.length === 0) {
+                              return (
+                                <div className="relative z-10 text-[#FFFFFF]">
+                                  <div className="p-6">
+                                    <Link
+                                      to={current.href || "/"}
+                                      onClick={() => setIsPopoverOpen(false)}
+                                      className="text-lg font-semibold hover:underline"
+                                    >
+                                      {current.title}
+                                    </Link>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div className="relative">
+                                <div className="relative z-10 grid grid-cols-3 gap-6 p-6 mt-5">
+                                  {current.items.map((item, idx) => (
+                                    <div
+                                      key={idx}
+                                      onMouseEnter={() =>
+                                        item.submenu &&
+                                        setHoveredItem(item.title)
+                                      }
+                                      onMouseLeave={() => setHoveredItem(null)}
+                                      className="relative group"
+                                    >
+                                      <Link
+                                        to={item.href}
+                                        onClick={() => setIsPopoverOpen(false)}
+                                        className="block rounded-lg overflow-hidden hover:ring-2 hover:ring-[#FFFFFF]/20 transition-all"
+                                      >
+                                        <div className="relative aspect-video">
+                                          {item.image && (
+                                            <img
+                                              src={item.image}
+                                              alt={item.title}
+                                              className="w-full h-full object-cover opacity-40"
+                                            />
+                                          )}
+                                          <div className="absolute inset-0 bg-gradient-to-t from-black to-[#556B2F]/20 p-4 flex flex-col justify-end">
+                                            <div className="flex items-center justify-between">
+                                              <div>
+                                                <div className="text-[#FFFFFF] font-semibold group-hover:translate-x-2 transition-transform">
+                                                  {item.title}
+                                                </div>
+                                                {item.description && (
+                                                  <div className="text-sm text-[#D3D3D3] mt-1 group-hover:translate-x-2 transition-transform">
+                                                    {item.description}
+                                                  </div>
+                                                )}
+                                              </div>
+                                              {item.submenu && (
+                                                <ChevronLeft className="text-[#FFFFFF] h-5 w-5 transition-opacity" />
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </Link>
+                                      {/* Submenu */}
+                                      {item.submenu &&
+                                        hoveredItem === item.title && (
+                                          <div
+                                            className="absolute left-full top-0 ml-2 w-64 bg-black rounded-lg border border-[#FFFFFF]/20 shadow-xl overflow-hidden z-[1100]"
+                                            onMouseLeave={() =>
+                                              setHoveredItem(null)
+                                            }
+                                          >
+                                            <div className="p-4">
+                                              <h3 className="text-[#FFFFFF] font-semibold mb-3 flex items-center gap-2">
+                                                <ChevronLeft className="h-4 w-4" />
+                                                {item.title}
+                                              </h3>
+                                              <div className="space-y-2">
+                                                {item.submenu.map(
+                                                  (subitem, subidx) => (
+                                                    <Link
+                                                      key={subidx}
+                                                      to={subitem.href}
+                                                      onClick={() =>
+                                                        setIsPopoverOpen(false)
+                                                      }
+                                                      className="block p-2 rounded-lg hover:bg-[#FFFFFF]/10 transition-colors text-sm text-[#D3D3D3] hover:text-[#FFFFFF]"
+                                                    >
+                                                      <div className="font-medium">
+                                                        {subitem.title}
+                                                      </div>
+                                                      {subitem.description && (
+                                                        <div className="text-xs text-[#999999] mt-1">
+                                                          {subitem.description}
+                                                        </div>
+                                                      )}
+                                                    </Link>
+                                                  )
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <div className="text-[#D3D3D3] p-6">
+                            Survolez un titre à gauche pour voir les détails
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </nav>
-
-          {/* Right section - Icons and actions */}
           <div className="flex items-center gap-1">
             <div className="relative flex items-center">
               {/* Bouton de recherche */}
@@ -1831,10 +2070,9 @@ const Header = () => {
                   size="icon"
                   className={`
                     h-9 w-9 rounded-lg border transition-all duration-200 ml-2
-                    ${
-                      isSearchOpen
-                        ? "bg-[#556B2F] text-[#FFFFFF] border-[#6B8E23]"
-                        : "bg-[#556B2F] text-[#FFFFFF] border-[#556B2F] hover:bg-[#6B8E23]"
+                    ${isSearchOpen
+                      ? "bg-[#556B2F] text-[#FFFFFF] border-[#6B8E23]"
+                      : "bg-[#556B2F] text-[#FFFFFF] border-[#556B2F] hover:bg-[#6B8E23]"
                     }
                   `}
                   onClick={openRecherchePage}
@@ -1941,11 +2179,10 @@ const Header = () => {
                           {notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`p-3 rounded-lg border transition-colors ${
-                                notification.isRead
+                              className={`p-3 rounded-lg border transition-colors ${notification.isRead
                                   ? "bg-gray-50"
                                   : "bg-[#FFFFFF] border-[#556B2F] shadow-sm"
-                              }`}
+                                }`}
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex-1 min-w-0">
@@ -1966,24 +2203,22 @@ const Header = () => {
                                   <div className="flex items-center gap-2 flex-wrap">
                                     {notification.statut && (
                                       <span
-                                        className={`px-2 py-1 rounded-full text-xs ${
-                                          notification.statut === "validée" ||
-                                          notification.statut === "validee"
+                                        className={`px-2 py-1 rounded-full text-xs ${notification.statut === "validée" ||
+                                            notification.statut === "validee"
                                             ? "bg-green-100 text-green-800"
                                             : notification.statut === "refusée"
-                                            ? "bg-red-100 text-red-800"
-                                            : "bg-gray-100 text-gray-800"
-                                        }`}
+                                              ? "bg-red-100 text-red-800"
+                                              : "bg-gray-100 text-gray-800"
+                                          }`}
                                       >
                                         {notification.statut}
                                       </span>
                                     )}
                                     <span
-                                      className={`px-2 py-1 rounded-full text-xs ${
-                                        notification.source === "demande"
+                                      className={`px-2 py-1 rounded-full text-xs ${notification.source === "demande"
                                           ? "bg-[#556B2F] text-[#FFFFFF]"
                                           : "bg-[#8B4513] text-[#FFFFFF]"
-                                      }`}
+                                        }`}
                                     >
                                       {notification.source === "demande"
                                         ? "Demande"
@@ -2019,12 +2254,12 @@ const Header = () => {
                                 <div className="text-xs text-gray-400">
                                   {notification.createdAt
                                     ? new Date(
-                                        notification.createdAt
-                                      ).toLocaleDateString("fr-FR", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                      })
+                                      notification.createdAt
+                                    ).toLocaleDateString("fr-FR", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
                                     : ""}
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -2083,9 +2318,17 @@ const Header = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger className="hidden lg:flex p-0 w-10 h-10 rounded-full border border-[#D3D3D3] hover:bg-gray-50 items-center justify-center z-50 relative">
                   <Avatar className="w-10 h-10">
-                    <AvatarFallback className="bg-[#556B2F] text-[#FFFFFF] text-sm font-semibold">
-                      {initials}
-                    </AvatarFallback>
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={`${user?.firstName} ${user?.lastName}`}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <AvatarFallback className="bg-[#556B2F] text-[#FFFFFF] text-sm font-semibold ">
+                        {initials}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -2170,12 +2413,12 @@ const Header = () => {
                         <Calendar className="mr-2 h-4 w-4" />
                         Réservations tourisme et bien etre
                       </DropdownMenuItem>
-                      <DropdownMenuItem
+                      {/* <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/payement")}
                       >
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/documents")}
                       >
@@ -2224,7 +2467,7 @@ const Header = () => {
       {/* Logout Confirmation Dialog */}
       {isLogoutDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */} 
+          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={handleCancelLogout}

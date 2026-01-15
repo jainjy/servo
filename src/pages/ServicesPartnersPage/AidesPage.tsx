@@ -7,8 +7,7 @@ const AidesPage = () => {
   const [message, setMessage] = useState('');
 
   const handleSendMessage = () => {
-    console.log("Email:", email);
-    console.log("Message:", message);
+
     setShowMessageCard(false);
     setEmail('');
     setMessage('');

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
-    platformName: "SERVO",
+    platformName: "OLIPLUS",
     supportEmail: "support@servo.mg",
     defaultLanguage: "fr",
     timezone: "Indian/Antananarivo",

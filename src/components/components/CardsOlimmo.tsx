@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 // Interface pour les propriétés depuis Supabase
 interface Property {
@@ -70,6 +72,13 @@ const AnnonceCard = ({ property }: { property: Property }) => {
 
   const isAvailable = property.status === "available";
 
+  const { user } = useAuth();
+  const isLoggedIn = Boolean(user);
+
+  const callError = () => {
+    toast.info("Vous devez être connecté pour voir plus de détails !");
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
       {/* Image avec overlay */}
@@ -88,11 +97,10 @@ const AnnonceCard = ({ property }: { property: Property }) => {
 
         {/* Badge type */}
         <div
-          className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-sm font-semibold ${
-            property.type === "location"
-              ? "bg-[#6B8E23] text-white" /* primary-dark */
-              : "bg-[#8B4513] text-white" /* secondary-text */
-          }`}
+          className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-sm font-semibold ${property.type === "location"
+            ? "bg-[#6B8E23] text-white" /* primary-dark */
+            : "bg-[#8B4513] text-white" /* secondary-text */
+            }`}
           style={{
             backgroundColor:
               property.type === "location"
@@ -197,36 +205,70 @@ const AnnonceCard = ({ property }: { property: Property }) => {
         </div>
 
         {/* Bouton de contact */}
-        <a
-          href={`https://www.olimmoreunion.re/biens/${property.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center"
-        >
-          <button
-            disabled={!isAvailable}
-            className={`w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center group/btn ${
-              isAvailable
+        {isLoggedIn ? (
+          <a
+            href={`https://www.olimmoreunion.re/biens/${property.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center"
+          >
+            <button
+              disabled={!isAvailable}
+              className={`w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center group/btn ${isAvailable
                 ? "text-white hover:bg-[#7BA05B]" /* hover-primary */
                 : "bg-gray-200 text-gray-500 cursor-not-allowed"
-            }`}
-            style={
-              isAvailable
-                ? {
+                }`}
+              style={
+                isAvailable
+                  ? {
                     backgroundColor: colors["primary-dark"],
                   }
-                : {}
-            }
+                  : {}
+              }
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              {isAvailable ? "Afficher details" : "Non disponible"}
+              {isAvailable && (
+                <div className="ml-2 opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all duration-200">
+                  →
+                </div>
+              )}
+            </button>
+          </a>
+        ) : (
+          <a
+            href='#'
+            rel="noopener noreferrer"
+            className="flex items-center"
+            onClick={(e) => {
+              e.preventDefault();
+              callError();
+            }}
           >
-            <Eye className="w-4 h-4 mr-2" />
-            {isAvailable ? "Afficher details" : "Non disponible"}
-            {isAvailable && (
-              <div className="ml-2 opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all duration-200">
-                →
-              </div>
-            )}
-          </button>
-        </a>
+            <button
+              disabled={!isAvailable}
+              className={`w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center group/btn ${isAvailable
+                ? "text-white hover:bg-[#7BA05B]" /* hover-primary */
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                }`}
+              style={
+                isAvailable
+                  ? {
+                    backgroundColor: colors["primary-dark"],
+                  }
+                  : {}
+              }
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              {isAvailable ? "Afficher details" : "Non disponible"}
+              {isAvailable && (
+                <div className="ml-2 opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all duration-200">
+                  →
+                </div>
+              )}
+            </button>
+          </a>
+        )}
       </div>
     </div>
   );

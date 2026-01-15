@@ -105,7 +105,7 @@ const PropertyCard = ({
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.5, delay: index * 0.05 }}
             whileHover={{ y: -8, transition: { duration: 0.2 } }}
-            className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
+            className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer h-full"
             style={{ borderColor: COLORS.separator }}
         >
             {/* Image avec badges */}
@@ -165,7 +165,7 @@ const PropertyCard = ({
             </div>
 
             {/* Contenu de la carte */}
-            <div className="p-4">
+            <div className="p-4 flex flex-col h-[calc(100%-13rem)]">
                 <h3 className="font-semibold text-sm line-clamp-2 leading-tight mb-2"
                     style={{ color: COLORS["secondary-text"] }}>
                     {logement.titre}
@@ -178,18 +178,18 @@ const PropertyCard = ({
                     {logement.lieu}
                 </div>
 
-                <p className="text-sm mb-4 line-clamp-2"
+                <p className="text-sm mb-4 line-clamp-2 flex-grow"
                     style={{ color: COLORS["secondary-text"] }}>
                     {logement.description}
                 </p>
 
                 {/* Caractéristiques */}
-                <div className="flex items-center gap-4 text-xs mb-3"
+                <div className="grid grid-cols-3 gap-2 text-xs mb-3"
                     style={{ color: COLORS["secondary-text"] }}>
                     {logement.surface && (
                         <div className="flex items-center gap-2">
                             <Ruler className="h-3 w-3" style={{ color: COLORS.logo }} />
-                            <span className="font-medium">{logement.surface} m²</span>
+                            <span className="font-medium truncate">{logement.surface} m²</span>
                         </div>
                     )}
                     {logement.bedrooms && (
@@ -207,10 +207,10 @@ const PropertyCard = ({
                 </div>
 
                 {/* Features */}
-                <div className="flex flex-wrap gap-1 mb-3">
+                <div className="grid grid-cols-2 gap-1 mb-3">
                     {/* Badge Achat/Location */}
                     {logement.type && (
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${logement.type === "location"
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs truncate ${logement.type === "location"
                             ? "bg-green-50 text-green-700"
                             : "bg-blue-50 text-blue-700"
                             }`}>
@@ -222,7 +222,7 @@ const PropertyCard = ({
                         </span>
                     )}
                     {logement.categorie && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs truncate"
                             style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
                             <div className="w-1 h-1 rounded-full" style={{ backgroundColor: COLORS.logo }} />
                             {logement.categorie}
@@ -230,7 +230,7 @@ const PropertyCard = ({
                     )}
                     {/* Badge social type */}
                     {logement.socialType && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs truncate col-span-2"
                             style={{ backgroundColor: `${COLORS.logo}10`, color: COLORS.logo }}>
                             <Building className="w-3 h-3" />
                             {logement.socialType}
@@ -239,20 +239,20 @@ const PropertyCard = ({
                 </div>
 
                 {/* Informations supplémentaires */}
-                <div className="flex justify-between items-center pt-4 text-sm"
+                <div className="grid grid-cols-2 gap-2 pt-4 text-sm"
                     style={{ color: COLORS["secondary-text"] }}>
                     <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" style={{ color: COLORS.logo }} />
-                        <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
+                        <span className="truncate">Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 justify-end">
                         <Eye className="w-4 h-4" style={{ color: COLORS.logo }} />
                         <span>{logement.vues} vues</span>
                     </div>
                 </div>
 
                 {/* Boutons d'action */}
-                <div className="flex gap-2 mt-4">
+                <div className="grid grid-cols-[1fr_auto] gap-2 mt-4">
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -261,7 +261,7 @@ const PropertyCard = ({
                             handlePostuler(logement);
                         }}
                         disabled={isDejaPostule}
-                        className="flex-1 text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60"
+                        className="text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60 truncate"
                         style={{
                             backgroundColor: isDejaPostule ? `${COLORS.logo}60` : COLORS.logo,
                             borderColor: COLORS.logo
@@ -273,7 +273,7 @@ const PropertyCard = ({
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={(e) => handleVoirDetails(logement, e)}
-                        className="p-2 rounded-md transition"
+                        className="p-2 rounded-md transition w-10 h-10 flex items-center justify-center"
                         style={{
                             border: `1px solid ${COLORS.separator}`,
                             color: COLORS.logo
@@ -287,7 +287,7 @@ const PropertyCard = ({
     );
 };
 
-const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
+const LogementsSHLMR = () => {
     const [activeTab, setActiveTab] = useState('logements');
     const [favoris, setFavoris] = useState<number[]>([]);
     const [sentRequests, setSentRequests] = useState<Record<string, boolean>>({});
@@ -409,7 +409,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
             }
 
             const response = await api.get(url);
-            console.log("Réponse API Logements sociaux:", response.data);
+            // console.log("Réponse API Logements sociaux:", response.data);
 
             if (response.data.success) {
                 const transformedProperties = response.data.data.map((property) => ({
@@ -771,7 +771,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                 </div>
 
                 {/* Contenu */}
-                <div className="container mx-auto px-4 relative z-10 py-20 ">
+                <div className="container mx-auto px-4 relative z-10 py-20">
                     <div className="max-w-4xl mx-auto text-center">
                         <motion.h1
                             initial={{ opacity: 0, y: -20 }}
@@ -808,7 +808,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
             {/* Navigation par onglets */}
             <section className="py-8 -mt-10 relative z-20">
                 <div className="container mx-auto px-4">
-                    <div className="flex flex-wrap justify-center gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 max-w-2xl mx-auto">
                         <div className="relative">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -819,7 +819,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                         setDropdownOpen(!dropdownOpen);
                                     }
                                 }}
-                                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${activeTab === 'logements'
+                                className={`w-full px-4 py-3 rounded-lg font-semibold transition-all duration-300 grid grid-cols-[auto_1fr_auto] items-center gap-2 ${activeTab === 'logements'
                                         ? 'text-white shadow-lg'
                                         : 'text-gray-700 hover:bg-opacity-10 bg-white/80 backdrop-blur-sm'
                                     }`}
@@ -836,7 +836,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                 }
                             >
                                 <Home className="w-4 h-4" />
-                                Logements
+                                <span className="text-left truncate">Logements</span>
                                 <ChevronDown className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                             </motion.button>
 
@@ -848,22 +848,22 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute top-full left-0 mt-2 w-64  rounded-lg shadow-xl border z-50"
+                                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border z-50"
                                         style={{ borderColor: COLORS.separator }}
                                     >
                                         {socialTypes.map((type) => (
                                             <button
                                                 key={type.id}
                                                 onClick={() => handleSocialTypeSelect(type.id)}
-                                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3 ${selectedSocialType === type.id ? 'bg-gray-50' : ''
+                                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors grid grid-cols-[auto_1fr_auto] items-center gap-3 ${selectedSocialType === type.id ? 'bg-gray-50' : ''
                                                     }`}
                                                 style={{ color: COLORS["secondary-text"] }}
                                             >
                                                 {type.icon}
-                                                <div className="flex-1">
-                                                    <div className="font-medium">{type.label}</div>
+                                                <div>
+                                                    <div className="font-medium truncate">{type.label}</div>
                                                     {type.description && (
-                                                        <div className="text-xs text-gray-500 mt-1">{type.description}</div>
+                                                        <div className="text-xs text-gray-500 mt-1 truncate">{type.description}</div>
                                                     )}
                                                 </div>
                                                 {selectedSocialType === type.id && (
@@ -885,7 +885,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${activeTab === tab.id
+                                className={`px-4 py-3 rounded-lg font-semibold transition-all duration-300 grid grid-cols-[auto_1fr] items-center gap-2 ${activeTab === tab.id
                                         ? 'text-white shadow-lg'
                                         : 'text-gray-700 hover:bg-opacity-10 bg-white/80 backdrop-blur-sm'
                                     }`}
@@ -902,7 +902,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                 }
                             >
                                 {tab.icon}
-                                {tab.label}
+                                <span className="truncate">{tab.label}</span>
                             </motion.button>
                         ))}
                     </div>
@@ -914,13 +914,13 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                             animate={{ opacity: 1, y: 0 }}
                             className="mt-4 text-center"
                         >
-                            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm"
+                            <span className="inline-grid grid-cols-[auto_1fr_auto] items-center gap-2 px-4 py-2 rounded-full text-sm"
                                 style={{ backgroundColor: `${COLORS.logo}15`, color: COLORS.logo }}>
                                 <Building className="w-4 h-4" />
-                                Filtre actif : {getSelectedTypeLabel()}
+                                <span className="truncate">Filtre : {getSelectedTypeLabel()}</span>
                                 <button
                                     onClick={() => handleSocialTypeSelect('all')}
-                                    className="ml-2 hover:opacity-70"
+                                    className="hover:opacity-70"
                                 >
                                     ×
                                 </button>
@@ -957,7 +957,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.15, duration: 0.7 }}
                                         whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                                        className="p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border"
+                                        className="p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border h-full"
                                         style={{
                                             backgroundColor: COLORS["light-bg"],
                                             borderColor: COLORS.separator
@@ -987,15 +987,15 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8 }}
-                                className="rounded-2xl p-12 text-white"
+                                className="rounded-2xl p-8 lg:p-12 text-white"
                                 style={{
                                     backgroundImage: 'linear-gradient(135deg, #556B2F 0%, #6B8E23 100%)'
                                 }}
                             >
-                                <h3 className="text-3xl font-bold text-center mb-12">
+                                <h3 className="text-2xl lg:text-3xl font-bold text-center mb-8 lg:mb-12">
                                     Chiffres clés du logement social
                                 </h3>
-                                <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                                <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                                     {stats.map((stat, index) => (
                                         <motion.div
                                             key={index}
@@ -1006,14 +1006,14 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                             whileHover={{ scale: 1.05 }}
                                             className="text-center"
                                         >
-                                            <div className="text-4xl font-bold mb-2"
+                                            <div className="text-2xl lg:text-4xl font-bold mb-2"
                                                 style={{ color: '#FFFFFF' }}>
                                                 {stat.valeur}
                                             </div>
-                                            <div className="text-lg font-semibold mb-2">
+                                            <div className="text-sm lg:text-lg font-semibold mb-2">
                                                 {stat.label}
                                             </div>
-                                            <div className="text-sm opacity-90">
+                                            <div className="text-xs lg:text-sm opacity-90">
                                                 {stat.description}
                                             </div>
                                         </motion.div>
@@ -1039,12 +1039,12 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                         style={{ backgroundColor: `${COLORS.logo}05` }}
                     >
                         <div className="container mx-auto px-4">
-                            <h2 className="text-4xl font-bold text-center mb-16"
+                            <h2 className="text-2xl lg:text-4xl font-bold text-center mb-12 lg:mb-16"
                                 style={{ color: COLORS["secondary-text"] }}>
                                 Les dispositifs de logement social
                             </h2>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12 lg:mb-16">
                                 {dispositifs.map((dispositif, index) => (
                                     <motion.div
                                         key={index}
@@ -1053,45 +1053,45 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.1, duration: 0.6 }}
                                         whileHover={{ scale: 1.02, y: -5 }}
-                                        className="rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border"
+                                        className="rounded-2xl shadow-lg p-4 lg:p-6 hover:shadow-xl transition-all duration-300 border h-full"
                                         style={{
                                             backgroundColor: COLORS["light-bg"],
                                             borderColor: COLORS.separator
                                         }}
                                     >
-                                        <div className="flex items-start gap-4 mb-4">
+                                        <div className="grid grid-cols-[auto_1fr] gap-4 mb-4">
                                             <div className="p-3 rounded-lg"
                                                 style={{ backgroundColor: `${COLORS.logo}15` }}>
                                                 {React.cloneElement(dispositif.icon, {
                                                     style: { color: COLORS.logo }
                                                 })}
                                             </div>
-                                            <div className="flex-1">
-                                                <h3 className="text-xl font-bold"
+                                            <div>
+                                                <h3 className="text-lg lg:text-xl font-bold"
                                                     style={{ color: COLORS["secondary-text"] }}>
                                                     {dispositif.nom}
                                                 </h3>
-                                                <p className="text-sm mt-1" style={{ color: COLORS["secondary-text"] }}>
+                                                <p className="text-xs lg:text-sm mt-1" style={{ color: COLORS["secondary-text"] }}>
                                                     {dispositif.description}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-3 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="font-semibold"
+                                        <div className="space-y-2 lg:space-y-3 text-xs lg:text-sm">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <span className="font-semibold truncate"
                                                     style={{ color: COLORS["secondary-text"] }}>Loyer max:</span>
-                                                <span style={{ color: COLORS["secondary-text"] }}>{dispositif.loyerMax}</span>
+                                                <span className="text-right truncate" style={{ color: COLORS["secondary-text"] }}>{dispositif.loyerMax}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="font-semibold"
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <span className="font-semibold truncate"
                                                     style={{ color: COLORS["secondary-text"] }}>Public:</span>
-                                                <span style={{ color: COLORS["secondary-text"] }}>{dispositif.public}</span>
+                                                <span className="text-right truncate" style={{ color: COLORS["secondary-text"] }}>{dispositif.public}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="font-semibold"
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <span className="font-semibold truncate"
                                                     style={{ color: COLORS["secondary-text"] }}>Financement:</span>
-                                                <span style={{ color: COLORS["secondary-text"] }}>{dispositif.financement}</span>
+                                                <span className="text-right truncate" style={{ color: COLORS["secondary-text"] }}>{dispositif.financement}</span>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -1099,17 +1099,17 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                             </div>
 
                             {/* Conditions d'éligibilité */}
-                            <div className="rounded-2xl shadow-lg p-8 border"
+                            <div className="rounded-2xl shadow-lg p-6 lg:p-8 border"
                                 style={{
                                     backgroundColor: COLORS["light-bg"],
                                     borderColor: COLORS.separator
                                 }}>
-                                <h3 className="text-2xl font-bold mb-8 flex items-center"
+                                <h3 className="text-xl lg:text-2xl font-bold mb-6 lg:mb-8 grid grid-cols-[auto_1fr] items-center gap-3"
                                     style={{ color: COLORS["secondary-text"] }}>
-                                    <CheckCircle2 className="w-6 h-6 mr-3" style={{ color: COLORS.logo }} />
+                                    <CheckCircle2 className="w-6 h-6" style={{ color: COLORS.logo }} />
                                     Conditions d'éligibilité principales
                                 </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                                     {conditionsEligibilite.map((condition, index) => (
                                         <motion.div
                                             key={index}
@@ -1117,7 +1117,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                             whileInView={{ opacity: 1, x: 0 }}
                                             viewport={{ once: true }}
                                             transition={{ delay: index * 0.1 }}
-                                            className="flex items-start gap-4 p-4 rounded-lg"
+                                            className="grid grid-cols-[auto_1fr] gap-4 p-4 rounded-lg items-start"
                                             style={{ backgroundColor: `${COLORS.logo}10` }}
                                         >
                                             <div className="p-2 rounded-full mt-1"
@@ -1129,7 +1129,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                                     style={{ color: COLORS["secondary-text"] }}>
                                                     {condition.critere}
                                                 </h4>
-                                                <p className="text-sm"
+                                                <p className="text-xs lg:text-sm"
                                                     style={{ color: COLORS["secondary-text"] }}>
                                                     {condition.details}
                                                 </p>
@@ -1157,9 +1157,9 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                         style={{ backgroundColor: COLORS["light-bg"] }}
                     >
                         <div className="container mx-auto px-4">
-                            <div className="flex justify-between items-center mb-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                                 <div>
-                                    <h2 className="text-2xl font-bold"
+                                    <h2 className="text-xl lg:text-2xl font-bold"
                                         style={{ color: COLORS["secondary-text"] }}>
                                         {selectedSocialType === 'all' 
                                             ? 'Tous les logements sociaux' 
@@ -1169,19 +1169,19 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                         {filteredLogements.length} logement{filteredLogements.length > 1 ? 's' : ''} disponible{filteredLogements.length > 1 ? 's' : ''}
                                     </p>
                                     {selectedSocialType !== 'all' && (
-                                        <p className="text-sm text-gray-500 mt-1">
+                                        <p className="text-sm text-gray-500 mt-1 truncate">
                                             {getTypeDescription(selectedSocialType)}
                                         </p>
                                     )}
                                 </div>
                                 
                                 {/* Bouton de filtrage rapide */}
-                                <div className="flex gap-2 overflow-x-auto pb-2">
+                                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                     {socialTypes.slice(1).map((type) => (
                                         <button
                                             key={type.id}
                                             onClick={() => handleSocialTypeSelect(type.id)}
-                                            className={`px-3 py-1 rounded-full text-sm whitespace-nowrap transition-colors ${selectedSocialType === type.id
+                                            className={`px-2 py-1 rounded-full text-xs whitespace-nowrap transition-colors truncate ${selectedSocialType === type.id
                                                     ? 'text-white'
                                                     : 'hover:bg-gray-100'
                                                 }`}
@@ -1214,7 +1214,7 @@ const LogementsSHLMR = () => {  // <-- NOM D'EXPORT CONSERVÉ
                                 </motion.div>
                             )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 bg-white lg:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {filteredLogements.map((logement, index) => (
                                     <PropertyCard
                                         key={logement.id}

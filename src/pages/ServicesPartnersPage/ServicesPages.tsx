@@ -1,5 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronDown, Search, X, Home, Send, Star, FileText, Loader2, Building, Filter } from "lucide-react";
+import {
+  ChevronDown,
+  Search,
+  X,
+  Home,
+  Send,
+  Star,
+  FileText,
+  Loader2,
+  Building,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -36,7 +49,30 @@ interface ServiceCategory {
   label: string;
 }
 
-const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, setShowFilters, sortBy, setSortBy }: any) => {
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+interface ServicesPageProps {
+  filters?: any;
+  setFilters?: (filters: any) => void;
+  showFilters?: boolean;
+  setShowFilters?: (show: boolean) => void;
+  sortBy?: string;
+  setSortBy?: (sort: string) => void;
+}
+
+const ServicesPage = ({
+  filters,
+  setFilters,
+  showFilters,
+  setShowFilters,
+  sortBy,
+  setSortBy,
+}: ServicesPageProps) => {
   // États principaux
   const [showStatuses, setShowStatuses] = useState(false);
   const [services, setServices] = useState<ServiceType[]>([]);
@@ -44,24 +80,35 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const isLoggedIn = Boolean(user);
-  
+
   // États de recherche et filtres
   const [servicesSearchQuery, setServicesSearchQuery] = useState("");
   const [propertyType, setPropertyType] = useState("");
-  const [serviceCategory, setServiceCategory] = useState("");  
+  const [serviceCategory, setServiceCategory] = useState("");
+
   // États d'interface
   const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [dropdownResults, setDropdownResults] = useState<ServiceType[]>([]);
-  
+
   // États modaux
   const [isDevisModalOpen, setIsDevisModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentService, setCurrentService] = useState<ServiceType | null>(null);
+  const [currentService, setCurrentService] = useState<ServiceType | null>(
+    null
+  );
   const [showMessageCard, setShowMessageCard] = useState(false);
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+  // États pour la pagination backend
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -70,132 +117,162 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
     { value: "maison", label: "Maison/Villa", icon: Home },
     { value: "appartement", label: "Appartement", icon: Building },
     { value: "terrain", label: "Terrain", icon: Home },
-    { value: "hotel", label: "Hôtel/Gîte", icon: Building }
+    { value: "hotel", label: "Hôtel/Gîte", icon: Building },
   ];
 
   // Catégories extraites des services réels
-  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([
-    { value: "", label: "Toutes les catégories" }
-  ]);
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
+    [{ value: "", label: "Toutes les catégories" }]
+  );
 
-  // Récupérer les services depuis l'API
-  const fetchServices = async () => {
+  // Récupérer les services depuis l'API avec pagination
+  const fetchServices = async (
+    page: number = 1,
+    limit: number = 10,
+    filters?: any
+  ) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get("/services");
-      
+
+      // Construire les paramètres de requête
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      // Ajouter les filtres s'ils existent
+      if (servicesSearchQuery) {
+        params.append("search", servicesSearchQuery);
+      }
+      if (propertyType) {
+        params.append("propertyType", propertyType);
+      }
+      if (serviceCategory) {
+        params.append("category", serviceCategory);
+      }
+
+      const response = await api.get(`/services?${params.toString()}`);
+
       if (response.status === 200) {
         const data = response.data;
-        
-        const parseApiData = (data: any): ServiceType[] => {
-          if (!data) return [];
-          if (Array.isArray(data)) return data;
-          if (data.services && Array.isArray(data.services)) return data.services;
-          if (data.data && Array.isArray(data.data)) return data.data;
-          if (data.items && Array.isArray(data.items)) return data.items;
-          if (data.results && Array.isArray(data.results)) return data.results;
-          return [data];
-        };
 
-        const parsedServices = parseApiData(data);
-        // console.log('Services chargés:', parsedServices.length);
-        setServices(parsedServices);
-
-        // Extraire les catégories uniques des services
-        const uniqueCategories = [...new Set(parsedServices
-          .map(service => service.category)
-          .filter(Boolean)
-        )].map(category => ({
-            value: category as string,
-            label: (category as string).charAt(0).toUpperCase() + (category as string).slice(1).toLowerCase()
+        // Vérifier si la réponse contient la structure de pagination
+        if (data.success && data.data && data.pagination) {
+          // Structure avec pagination
+          const parsedServices = data.data.map((service: any) => ({
+            id: service.id,
+            name: service.name || service.libelle || "",
+            description: service.description || "",
+            category: service.category || service.category?.name || "",
+            price: service.price || 0,
+            duration: service.duration || 0,
+            images: service.images || [],
+            metiers: service.metiers || [],
+            rating: service.rating || 0,
           }));
-        
-        setServiceCategories(prev => [
-          { value: "", label: "Toutes les catégories" },
-          ...uniqueCategories
-        ]);
+
+          setServices(parsedServices);
+          setPagination(data.pagination);
+
+          // Extraire les catégories uniques des services
+          const uniqueCategories = [
+            ...new Set(
+              parsedServices.map((service) => service.category).filter(Boolean)
+            ),
+          ].map((category) => ({
+            value: category as string,
+            label:
+              (category as string).charAt(0).toUpperCase() +
+              (category as string).slice(1).toLowerCase(),
+          }));
+
+          setServiceCategories((prev) => [
+            { value: "", label: "Toutes les catégories" },
+            ...uniqueCategories,
+          ]);
+        } else if (Array.isArray(data)) {
+          // Structure simple (array) - fallback à l'ancienne pagination frontend
+          const parsedServices = data.map((service: any) => ({
+            id: service.id,
+            name: service.name || service.libelle || "",
+            description: service.description || "",
+            category: service.category || service.category?.name || "",
+            price: service.price || 0,
+            duration: service.duration || 0,
+            images: service.images || [],
+            metiers: service.metiers || [],
+            rating: service.rating || 0,
+          }));
+
+          setServices(parsedServices);
+
+          // Calculer la pagination frontend
+          setPagination({
+            page: 1,
+            limit: limit,
+            total: parsedServices.length,
+            totalPages: Math.ceil(parsedServices.length / limit),
+          });
+
+          // Extraire les catégories uniques
+          const uniqueCategories = [
+            ...new Set(
+              parsedServices.map((service) => service.category).filter(Boolean)
+            ),
+          ].map((category) => ({
+            value: category as string,
+            label:
+              (category as string).charAt(0).toUpperCase() +
+              (category as string).slice(1).toLowerCase(),
+          }));
+
+          setServiceCategories((prev) => [
+            { value: "", label: "Toutes les catégories" },
+            ...uniqueCategories,
+          ]);
+        } else {
+          throw new Error("Format de réponse inattendu");
+        }
       } else {
         throw new Error(`Statut de réponse: ${response.status}`);
       }
     } catch (err: any) {
       setError(err.message);
-      console.error('Erreur lors du chargement des services:', err);
+      console.error("Erreur lors du chargement des services:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Charger les services au démarrage
   useEffect(() => {
     fetchServices();
   }, []);
 
-  // Filtrage des résultats pour l'autocomplétion
+  // Recharger les services quand les filtres changent
   useEffect(() => {
-    if (!servicesSearchQuery.trim()) {
-      setDropdownResults([]);
-      return;
-    }
+    const timeoutId = setTimeout(() => {
+      fetchServices(1, pagination.limit);
+    }, 300); // Debounce de 300ms
 
-    const results = services
-      .filter((service) =>
-        service.name?.toLowerCase().includes(servicesSearchQuery.toLowerCase()) ||
-        service.description?.toLowerCase().includes(servicesSearchQuery.toLowerCase()) ||
-        service.category?.toLowerCase().includes(servicesSearchQuery.toLowerCase())
-      )
-      .slice(0, 6);
-    
-    setDropdownResults(results);
-  }, [servicesSearchQuery, services]);
-
-  // Filtrage principal des services
-  const getFilteredServices = useCallback(() => {
-    let filtered = services;
-
-    // Filtre par recherche texte
-    if (servicesSearchQuery.trim()) {
-      const query = servicesSearchQuery.toLowerCase();
-      filtered = filtered.filter(service => 
-        service.name?.toLowerCase().includes(query) ||
-        service.description?.toLowerCase().includes(query) ||
-        service.category?.toLowerCase().includes(query) ||
-        (service.metiers && service.metiers.some(metier => 
-          metier.libelle?.toLowerCase().includes(query) || 
-          metier.name?.toLowerCase().includes(query)
-        ))
-      );
-    }
-
-    // Filtre par type de propriété
-    if (propertyType) {
-      const typeToCategoryMap: Record<string, string[]> = {
-        'maison': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'CONSTRUCTION', 'RENOVATION', 'SECURITE', 'ENTRETIEN'],
-        'appartement': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'RENOVATION', 'SECURITE', 'ENTRETIEN'],
-        'terrain': ['ESTIMATION', 'FINANCEMENT', 'JURIDIQUE', 'CONSTRUCTION'],
-        'hotel': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'JURIDIQUE', 'CONSTRUCTION', 'RENOVATION', 'ENTRETIEN']
-      };
-      
-      filtered = filtered.filter(service => {
-        const serviceCategory = service.category || service.type || 'OTHER';
-        return typeToCategoryMap[propertyType]?.includes(serviceCategory);
-      });
-    }
-
-    // Filtre par catégorie de service
-    if (serviceCategory) {
-      filtered = filtered.filter(service => 
-        service.category === serviceCategory
-      );
-    }
-
-    return filtered;
-  }, [services, servicesSearchQuery, propertyType, serviceCategory]);
+    return () => clearTimeout(timeoutId);
+  }, [servicesSearchQuery, propertyType, serviceCategory]);
 
   // Gestionnaires d'événements
   const handleResetFilters = () => {
     setServicesSearchQuery("");
     setPropertyType("");
     setServiceCategory("");
+    fetchServices(1, pagination.limit);
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchServices(page, pagination.limit);
+  };
+
+  const handleLimitChange = (limit: number) => {
+    fetchServices(1, limit);
   };
 
   const handleSendMessage = () => {
@@ -203,18 +280,21 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
       toast.error("Veuillez remplir tous les champs");
       return;
     }
-    
-    // console.log("Email:", email);
-    // console.log("Message:", message);
+
     setShowMessageCard(false);
-    setEmail('');
-    setMessage('');
+    setEmail("");
+    setMessage("");
     toast.success("Message envoyé avec succès!");
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, fallbackText: string) => {
+  const handleImageError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>,
+    fallbackText: string
+  ) => {
     const target = e.target as HTMLImageElement;
-    target.src = `https://via.placeholder.com/300x200/#D3D3D3/#556B2F?text=${encodeURIComponent(fallbackText)}`;
+    target.src = `https://via.placeholder.com/300x200/#D3D3D3/#556B2F?text=${encodeURIComponent(
+      fallbackText
+    )}`;
   };
 
   const handleDevisClick = (service: ServiceType) => {
@@ -241,10 +321,12 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
         contactEmail: data.email as string,
         contactTel: data.telephone as string,
         lieuAdresse: data.adresse as string,
-        lieuAdresseCp: data.codePostal as string || "75000",
-        lieuAdresseVille: data.ville as string || "Paris",
+        lieuAdresseCp: (data.codePostal as string) || "75000",
+        lieuAdresseVille: (data.ville as string) || "Paris",
         optionAssurance: false,
-        description: data.message as string || `Demande de devis pour: ${currentService?.name}`,
+        description:
+          (data.message as string) ||
+          `Demande de devis pour: ${currentService?.name}`,
         devis: `Budget: ${data.budget}, Date souhaitée: ${data.dateSouhaitee}`,
         serviceId: currentService?.id,
         serviceName: currentService?.name,
@@ -252,7 +334,7 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
         createdById: user?.id || "user-anonymous",
         status: "pending",
         type: "devis",
-        source: "services-page"
+        source: "services-page",
       };
 
       const response = await api.post("/demandes/immobilier", demandeData);
@@ -265,42 +347,115 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
         throw new Error(`Statut inattendu: ${response.status}`);
       }
     } catch (error: any) {
-      console.error('Erreur détaillée:', error);
-      toast.error(error.response?.data?.message || "Erreur lors de la création de la demande");
+      console.error("Erreur détaillée:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Erreur lors de la création de la demande"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Gestion du focus simplifiée
-  const handleInputFocus = () => {
-    setIsFocused(true);
+  // Composant de pagination
+  const PaginationComponent = () => {
+    if (pagination.totalPages <= 1) return null;
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-gray-200">
+        {/* Info sur les résultats */}
+        <div className="text-sm text-gray-600">
+          Affichage de {Math.min(pagination.limit, services.length)} sur{" "}
+          {pagination.total} services
+        </div>
+
+        {/* Sélecteur d'items par page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">Afficher :</span>
+          <select
+            value={pagination.limit}
+            onChange={(e) => handleLimitChange(Number(e.target.value))}
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+
+        {/* Contrôles de pagination */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handlePageChange(pagination.page - 1)}
+            disabled={pagination.page === 1}
+            className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          {/* Numéros de page */}
+          <div className="flex items-center gap-1">
+            {Array.from(
+              { length: Math.min(5, pagination.totalPages) },
+              (_, i) => {
+                let pageNum;
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (pagination.page <= 3) {
+                  pageNum = i + 1;
+                } else if (pagination.page >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i;
+                } else {
+                  pageNum = pagination.page - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`w-8 h-8 rounded-lg text-sm font-medium ${
+                      pagination.page === pageNum
+                        ? "bg-[#556B2F] text-white"
+                        : "border border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              }
+            )}
+
+            {pagination.totalPages > 5 &&
+              pagination.page < pagination.totalPages - 2 && (
+                <>
+                  <span className="mx-1">...</span>
+                  <button
+                    onClick={() => handlePageChange(pagination.totalPages)}
+                    className="w-8 h-8 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
+                  >
+                    {pagination.totalPages}
+                  </button>
+                </>
+              )}
+          </div>
+
+          <button
+            onClick={() => handlePageChange(pagination.page + 1)}
+            disabled={pagination.page === pagination.totalPages}
+            className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
   };
-
-  const handleInputBlur = () => {
-    setTimeout(() => setIsFocused(false), 150);
-  };
-
-  // Fermer les dropdowns quand on clique ailleurs
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.filter-dropdown') && 
-          !target.closest('.category-dropdown')) {
-        setShowPropertyDropdown(false);
-        setShowCategoryDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Composant de section des services
   const ServicesSection = () => {
-    const filteredServices = getFilteredServices();
-    const displayedServices = filteredServices;
-    const hasActiveFilters = servicesSearchQuery || propertyType || serviceCategory;
+    const hasActiveFilters =
+      servicesSearchQuery || propertyType || serviceCategory;
 
     if (loading) {
       return (
@@ -320,7 +475,7 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
             Erreur lors du chargement des services
           </div>
           <button
-            onClick={fetchServices}
+            onClick={() => fetchServices()}
             className="bg-[#556B2F] text-white px-6 py-3 rounded-lg hover:bg-[#6B8E23] transition-colors font-medium"
           >
             Réessayer
@@ -332,14 +487,16 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
     return (
       <>
         {/* Résultats */}
-        {filteredServices.length === 0 ? (
+        {services.length === 0 ? (
           <div className="text-center py-16 animate-fade-in bg-[#FFFFF0] rounded-2xl mx-4">
             <div className="text-[#556B2F] mb-4">
               <Search className="w-16 h-16 mx-auto" />
             </div>
-            <p className="text-gray-600 text-lg mb-4">Aucun service trouvé avec ces critères.</p>
+            <p className="text-gray-600 text-lg mb-4">
+              Aucun service trouvé avec ces critères.
+            </p>
             {hasActiveFilters && (
-              <button 
+              <button
                 onClick={handleResetFilters}
                 className="bg-[#556B2F] text-white px-6 py-3 rounded-lg hover:bg-[#6B8E23] transition-colors font-medium"
               >
@@ -351,44 +508,45 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
           <>
             {/* Compteur de résultats */}
             <div className="flex justify-between items-center mb-6 px-4">
-              <p className="text-[#556B2F] text-sm">
-                {filteredServices.length} service{filteredServices.length > 1 ? 's' : ''} trouvé{filteredServices.length > 1 ? 's' : ''}
-                {hasActiveFilters && " avec les filtres actuels"}
+              <p className="text-white bg-[#556B2F] py-1 px-5 rounded-full text-xs font-bold">
+                {pagination.total} service{pagination.total > 1 ? "s" : ""} au
+                total
               </p>
             </div>
 
             {/* Grille des services */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8 animate-fade-in px-4">
-              {displayedServices.map((service, index) => (
+              {services.map((service, index) => (
                 <div
                   key={service.id || index}
                   className="bg-[#FFFFF0] rounded-2xl overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-[#D3D3D3] group"
                 >
                   {/* Image du service */}
                   <div className="relative overflow-hidden">
-                    <img 
-                      src={service.images?.[0] || `https://via.placeholder.com/300x200/#D3D3D3/#556B2F?text=${encodeURIComponent(service.name || 'Service')}`} 
+                    <img
+                      src={
+                        service.images?.[0] ||
+                        `https://via.placeholder.com/300x200/#D3D3D3/#556B2F?text=${encodeURIComponent(
+                          service.name || "Service"
+                        )}`
+                      }
                       alt={service.name}
                       className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                      onError={(e) => handleImageError(e, service.name || 'Service')}
+                      onError={(e) =>
+                        handleImageError(e, service.name || "Service")
+                      }
                     />
-                    
+
                     {/* Badges */}
                     <div className="absolute top-3 left-3 bg-[#556B2F] text-white px-3 py-1 rounded-full text-xs font-medium">
-                      {service.images?.length || 1} photo{service.images?.length > 1 ? 's' : ''}
+                      {service.images?.length || 1} photo
+                      {service.images?.length > 1 ? "s" : ""}
                     </div>
-                    
+
                     {/* Catégorie */}
                     {service.category && (
                       <div className="absolute top-3 right-3 bg-[#FFFFF0] bg-opacity-90 text-[#556B2F] px-3 py-1 rounded-full text-xs font-medium">
                         {service.category}
-                      </div>
-                    )}
-                    
-                    {service.rating && (
-                      <div className="absolute bottom-3 left-3 bg-[#FFFFF0] bg-opacity-90 text-[#556B2F] px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                        {service.rating}
                       </div>
                     )}
                   </div>
@@ -397,17 +555,17 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <div className="p-5 flex-1 flex flex-col">
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-900 mb-2 leading-tight text-base">
-                        {service.name || 'Service sans nom'}
+                        {service.name || "Service sans nom"}
                       </h3>
-                      
+
                       <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
-                        {service.description || 'Description non disponible'}
+                        {service.description || "Description non disponible"}
                       </p>
-                      
+
                       {/* Métiers */}
                       <div className="flex flex-wrap gap-2 mb-4">
                         {service.metiers?.slice(0, 3).map((metier, idx) => (
-                          <span 
+                          <span
                             key={metier.id || idx}
                             className="inline-block px-2 py-1 bg-[#556B2F]/10 text-[#556B2F] rounded-full text-xs font-medium"
                           >
@@ -415,36 +573,25 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                           </span>
                         ))}
                       </div>
-                      
-                      {/* Prix et durée */}
-                      <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
-                        {service.price && (
-                          <span className="font-semibold text-[#8B4513] text-base">
-                            {typeof service.price === 'number' ? service.price.toLocaleString() : service.price} €
-                          </span>
-                        )}
-                        {service.duration && (
-                          <span className="bg-[#D3D3D3] px-2 py-1 rounded text-xs text-gray-700">
-                            ⏱ {service.duration}min
-                          </span>
-                        )}
-                      </div>
                     </div>
-                    
+
                     {/* Bouton devis */}
                     <div className="mt-4 pt-4 border-t border-[#D3D3D3]">
                       <Button
                         className="text-white font-medium bg-[#556B2F] rounded-lg text-xs hover:bg-[#6B8E23] transition-colors duration-200 flex-1"
                         onClick={() => handleDevisClick(service)}
                       >
-                       <FileText className="h-3 w-3 mr-1" />
+                        <FileText className="h-3 w-3 mr-1" />
                         DEVIS
-                      </Button>           
+                      </Button>
                     </div>
                   </div>
                 </div>
               ))}
             </section>
+
+            {/* Pagination */}
+            <PaginationComponent />
           </>
         )}
       </>
@@ -453,10 +600,141 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
 
   return (
     <>
-      {AdvancedSearchBar && <AdvancedSearchBar />}
-      {/* Section principale des services */}
-      {!showStatuses && <ServicesSection />}
+      {/* Barre de recherche et filtres */}
+      <div className="mb-8 px-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Barre de recherche */}
+          <div className="flex-1 relative">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                value={servicesSearchQuery}
+                onChange={(e) => setServicesSearchQuery(e.target.value)}
+                placeholder="Rechercher un service..."
+                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] outline-none"
+              />
+              {servicesSearchQuery && (
+                <button
+                  onClick={() => setServicesSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </div>
 
+          {/* Filtre type de propriété */}
+          <div className="relative filter-dropdown">
+            <button
+              onClick={() => setShowPropertyDropdown(!showPropertyDropdown)}
+              className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 w-full md:w-auto"
+            >
+              <Filter className="w-4 h-4" />
+              {propertyType ? (
+                <span className="flex items-center gap-2">
+                  {propertyTypes.find((t) => t.value === propertyType)?.label}
+                </span>
+              ) : (
+                <span>Type de bien</span>
+              )}
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  showPropertyDropdown ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {showPropertyDropdown && (
+              <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                {propertyTypes.map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => {
+                      setPropertyType(
+                        type.value === propertyType ? "" : type.value
+                      );
+                      setShowPropertyDropdown(false);
+                    }}
+                    className={`flex items-center gap-2 w-full px-4 py-3 text-left hover:bg-gray-50 ${
+                      propertyType === type.value
+                        ? "bg-[#556B2F]/10 text-[#556B2F]"
+                        : ""
+                    }`}
+                  >
+                    <type.icon className="w-4 h-4" />
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Filtre catégorie */}
+          <div className="relative category-dropdown">
+            <button
+              onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+              className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 w-full md:w-auto"
+            >
+              <Filter className="w-4 h-4" />
+              {serviceCategory ? (
+                <span>
+                  {
+                    serviceCategories.find((c) => c.value === serviceCategory)
+                      ?.label
+                  }
+                </span>
+              ) : (
+                <span>Catégorie</span>
+              )}
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  showCategoryDropdown ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {showCategoryDropdown && (
+              <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                {serviceCategories.map((category) => (
+                  <button
+                    key={category.value}
+                    onClick={() => {
+                      setServiceCategory(
+                        category.value === serviceCategory ? "" : category.value
+                      );
+                      setShowCategoryDropdown(false);
+                    }}
+                    className={`flex items-center gap-2 w-full px-4 py-3 text-left hover:bg-gray-50 ${
+                      serviceCategory === category.value
+                        ? "bg-[#556B2F]/10 text-[#556B2F]"
+                        : ""
+                    }`}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Bouton réinitialiser */}
+          {(servicesSearchQuery || propertyType || serviceCategory) && (
+            <button
+              onClick={handleResetFilters}
+              className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 w-full md:w-auto"
+            >
+              Réinitialiser
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Section principale des services */}
+      <ServicesSection />
+
+      {/* Modal de devis (inchangé) */}
       {/* Modal de devis */}
       {isDevisModalOpen && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -490,10 +768,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nom *
                   </label>
-                  <input 
-                    name="nom" 
-                    placeholder="Votre nom" 
-                    required 
+                  <input
+                    name="nom"
+                    placeholder="Votre nom"
+                    required
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
                   />
@@ -502,10 +780,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Prénom *
                   </label>
-                  <input 
-                    name="prenom" 
-                    placeholder="Votre prénom" 
-                    required 
+                  <input
+                    name="prenom"
+                    placeholder="Votre prénom"
+                    required
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
                   />
@@ -517,11 +795,11 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email *
                   </label>
-                  <input 
-                    name="email" 
-                    type="email" 
-                    placeholder="votre@email.com" 
-                    required 
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="votre@email.com"
+                    required
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
                   />
@@ -530,10 +808,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Téléphone *
                   </label>
-                  <input 
-                    name="telephone" 
-                    placeholder="06 12 34 56 78" 
-                    required 
+                  <input
+                    name="telephone"
+                    placeholder="06 12 34 56 78"
+                    required
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
                   />
@@ -544,9 +822,9 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Adresse du projet
                 </label>
-                <input 
-                  name="adresse" 
-                  placeholder="Adresse complète du projet" 
+                <input
+                  name="adresse"
+                  placeholder="Adresse complète du projet"
                   className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                   disabled={isSubmitting}
                 />
@@ -557,9 +835,9 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Date souhaitée
                   </label>
-                  <input 
-                    name="dateSouhaitee" 
-                    type="date" 
+                  <input
+                    name="dateSouhaitee"
+                    type="date"
                     min={new Date().toISOString().split("T")[0]}
                     className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                     disabled={isSubmitting}
@@ -588,10 +866,10 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Message supplémentaire
                 </label>
-                <textarea 
-                  name="message" 
-                  placeholder="Décrivez votre projet en détail..." 
-                  rows={4} 
+                <textarea
+                  name="message"
+                  placeholder="Décrivez votre projet en détail..."
+                  rows={4}
                   className="w-full border border-[#D3D3D3] p-3 rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] bg-white"
                   disabled={isSubmitting}
                 />
@@ -603,7 +881,9 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
                 </h3>
                 <p className="text-[#556B2F] text-sm">{currentService?.name}</p>
                 {currentService?.description && (
-                  <p className="text-[#556B2F]/80 text-xs mt-1">{currentService?.description}</p>
+                  <p className="text-[#556B2F]/80 text-xs mt-1">
+                    {currentService?.description}
+                  </p>
                 )}
               </div>
 
@@ -638,7 +918,6 @@ const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
           </div>
         </div>
       )}
-
     </>
   );
 };

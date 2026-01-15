@@ -8,29 +8,95 @@ import {
   ShieldCheck,
   SignalHigh,
   Star,
+  Users,
+  Home,
+  MapPin,
 } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { divIcon } from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { MapService } from "../../services/mapService";
+import { MapPoint } from "../../types/map";
 
 // Thème de couleurs
 const colors = {
-  logo: "#556B2F" /* logo / accent - Olive green */,
-  "primary-dark": "#6B8E23" /* Sruvol / fonds légers - Yellow-green */,
-  "light-bg": "#FFFFFF" /* fond de page / bloc texte - White */,
-  separator: "#D3D3D3" /* séparateurs / bordures, UI - Light gray */,
-  "secondary-text":
-    "#8B4513" /* touche premium / titres secondaires - Saddle brown */,
-  // Couleurs complémentaires ajoutées
-  "accent-light": "#98FB98" /* accent clair - Pale green */,
-  "accent-warm": "#DEB887" /* accent chaud - Burlywood */,
-  "neutral-dark": "#2F4F4F" /* texte foncé / titres - Dark slate gray */,
-  "hover-primary": "#7BA05B" /* état hover primary - Medium olive green */,
-  "hover-secondary": "#A0522D" /* état hover secondary - Sienna */,
-  "neutral-light": "#F5F5F5" /* fonds légers - Light gray */,
-  success: "#556B2F" /* succès - Olive green */,
-  warning: "#8B4513" /* avertissement - Saddle brown */,
+  logo: "#556B2F",
+  "primary-dark": "#6B8E23",
+  "light-bg": "#FFFFFF",
+  separator: "#D3D3D3",
+  "secondary-text": "#8B4513",
+  "accent-light": "#98FB98",
+  "accent-warm": "#DEB887",
+  "neutral-dark": "#2F4F4F",
+  "hover-primary": "#7BA05B",
+  "hover-secondary": "#A0522D",
+  "neutral-light": "#F5F5F5",
+  success: "#556B2F",
+  warning: "#8B4513",
+  "partner-marker": "#FF0000", // Rouge pour partenaires
+  "property-marker": "#0000FF", // Bleu pour propriétés
+};
+
+// Création d'icônes avec MapPin de Lucide React
+const createMapPinIcon = (color: string, size: number = 30) => {
+  return divIcon({
+    html: `
+      <div style="position: relative;">
+        <svg width="${size}" height="${size * 1.33}" viewBox="0 0 24 32" fill="${color}" stroke="white" stroke-width="1.5">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [size, size * 1.33],
+    iconAnchor: [size / 2, size * 1.33],
+    popupAnchor: [0, -size * 1.33 + 10],
+    className: 'custom-map-pin'
+  });
 };
 
 const CardCarte: React.FC = () => {
+  const [points, setPoints] = useState<MapPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [center] = useState<[number, number]>([-21.1351, 55.2471]); // Centre Réunion
+  const [zoom] = useState<number>(10);
+  const [isMapReady, setIsMapReady] = useState(false);
+
+  useEffect(() => {
+    setIsMapReady(true);
+  }, []);
+
+  useEffect(() => {
+    const loadMapData = async () => {
+      try {
+        setLoading(true);
+        const allPoints = await MapService.getAllMapPoints();
+        setPoints(allPoints);
+      } catch (err) {
+        console.error("Erreur chargement carte CardCarte:", err);
+        setPoints([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMapData();
+  }, []);
+
+  const partnerPoints = points.filter(p => p.type === "user");
+  const propertyPoints = points.filter(p => p.type === "property");
+
+  if (loading) {
+    return (
+      <div className="w-full px-3 lg:px-12 py-8 flex items-center justify-center h-96">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#556B2F]"></div>
+          <p className="mt-4 text-[#556B2F]">Chargement de la carte...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="w-full px-3 lg:px-12 py-8"
@@ -88,7 +154,7 @@ const CardCarte: React.FC = () => {
                 className="w-3 h-3"
                 style={{ color: colors["accent-warm"] }}
               />
-              Réseau premium vérifié
+              {points.length} points actifs
             </p>
           </div>
 
@@ -103,8 +169,8 @@ const CardCarte: React.FC = () => {
                 style={{ color: colors["accent-warm"] }}
               />
               <span>
-                Visualisez instantanément l'implantation de vos partenaires et
-                de vos propriétés sur une carte unifiée, pensée pour les
+                Visualisez instantanément l'implantation de vos {partnerPoints.length} partenaires et
+                de vos {propertyPoints.length} propriétés sur une carte unifiée, pensée pour les
                 décisions rapides et la collaboration entre équipes.
               </span>
             </p>
@@ -147,7 +213,7 @@ const CardCarte: React.FC = () => {
                 className="text-xs"
                 style={{ color: colors["secondary-text"] }}
               >
-                Validation systématique des acteurs de votre réseau.
+                {partnerPoints.length} professionnels validés dans votre réseau.
               </p>
             </div>
             <div className="space-y-1">
@@ -159,13 +225,13 @@ const CardCarte: React.FC = () => {
                   className="w-4 h-4"
                   style={{ color: colors["accent-warm"] }}
                 />
-                Expertise sectorielle
+                Propriétés disponibles
               </p>
               <p
                 className="text-xs"
                 style={{ color: colors["secondary-text"] }}
               >
-                Segmentation par typologie de biens et de services.
+                {propertyPoints.length} biens immobiliers à disposition.
               </p>
             </div>
             <div className="space-y-1">
@@ -195,13 +261,13 @@ const CardCarte: React.FC = () => {
                   className="w-4 h-4"
                   style={{ color: colors["primary-dark"] }}
                 />
-                Vision internationale
+                Vision territoriale
               </p>
               <p
                 className="text-xs"
                 style={{ color: colors["secondary-text"] }}
               >
-                Cartographie multi-pays avec filtres avancés.
+                Répartition géographique sur toute l'île de la Réunion.
               </p>
             </div>
           </div>
@@ -222,7 +288,7 @@ const CardCarte: React.FC = () => {
                 e.currentTarget.style.backgroundColor = colors["primary-dark"];
               }}
             >
-              Explorer la carte
+              Explorer la carte complète
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -240,78 +306,190 @@ const CardCarte: React.FC = () => {
           </div>
         </div>
 
-        {/* Colonne droite – visuel carte */}
+        {/* Colonne droite – Carte interactive */}
         <div
-          className="relative rounded-3xl overflow-hidden"
+          className="relative rounded-3xl overflow-hidden h-[600px]"
           style={{ backgroundColor: colors["neutral-dark"] }}
         >
-          {/* Fond image / vidéo */}
-          <div className="absolute inset-0">
-            <img
-              src="https://i.pinimg.com/1200x/62/e8/06/62e806f8470cf0341f9360e6d2e67bfd.jpg"
-              alt="Carte des partenaires"
-              className="w-full h-full object-cover opacity-80"
-            />
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(to top right, ${colors["neutral-dark"]} 0%, ${colors["neutral-dark"]}80 50%, ${colors["neutral-dark"]}30 100%)`,
-              }}
-            />
-          </div>
+          {isMapReady && points.length > 0 ? (
+            <MapContainer
+              center={center}
+              zoom={zoom}
+              className="h-full w-full rounded-3xl"
+              style={{ background: colors["neutral-dark"] }}
+              scrollWheelZoom={true}
+            >
+              {/* Tuile de la carte */}
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
 
-          {/* Radar LED renforcé */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="relative">
-              {/* disque principal */}
-              <div
-                className="h-64 w-64 rounded-full blur-3xl animate-pulse"
-                style={{ backgroundColor: `${colors["primary-dark"]}30` }}
-              />
-              {/* anneaux ping multipliés */}
-              <div
-                className="absolute inset-10 rounded-full border animate-[ping_3s_ease-out_infinite]"
-                style={{ borderColor: `${colors["primary-dark"]}60` }}
-              />
-              <div
-                className="absolute inset-4 rounded-full border animate-[ping_4.5s_ease-out_infinite]"
-                style={{ borderColor: `${colors["accent-light"]}40` }}
-              />
-              {/* balayage radar */}
-              <div
-                className="absolute inset-0 rounded-full animate-[spin_5s_linear_infinite]"
-                style={{
-                  background: `conic-gradient(from 0deg, transparent 0deg, ${colors["primary-dark"]}40 60deg, transparent 120deg)`,
-                }}
-              />
+              {/* Pins rouges pour les partenaires */}
+              {partnerPoints.map((point) => (
+                <Marker
+                  key={`partner-${point.id}`}
+                  position={[point.latitude, point.longitude]}
+                  icon={createMapPinIcon(colors["partner-marker"], 28)}
+                >
+                  <Popup>
+                    <div className="p-2 max-w-xs">
+                      <h3 className="font-bold text-red-600 flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        {point.name}
+                      </h3>
+                      <p className="text-sm mt-1 text-gray-600">
+                        {point.city} {point.address ? `- ${point.address}` : ''}
+                      </p>
+                      {point.metiers && point.metiers.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          <span className="font-medium">Métiers:</span> {point.metiers.join(", ")}
+                        </p>
+                      )}
+                      {point.description && (
+                        <p className="text-xs text-gray-600 mt-1">
+                          {point.description}
+                        </p>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+
+              {/* Pins bleus pour les propriétés */}
+              {propertyPoints.map((point) => (
+                <Marker
+                  key={`property-${point.id}`}
+                  position={[point.latitude, point.longitude]}
+                  icon={createMapPinIcon(colors["property-marker"], 28)}
+                >
+                  <Popup>
+                    <div className="p-2 max-w-xs">
+                      <h3 className="font-bold text-blue-600 flex items-center gap-2">
+                        <Home className="w-4 h-4" />
+                        {point.name}
+                      </h3>
+                      <p className="text-sm mt-1 text-gray-600">
+                        {point.city} {point.address ? `- ${point.address}` : ''}
+                      </p>
+                      {point.typeProperty && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          <span className="font-medium">Type:</span> {point.typeProperty}
+                        </p>
+                      )}
+                      {point.price && (
+                        <p className="text-xs font-medium text-green-600 mt-1">
+                          {point.price} €
+                        </p>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-gray-100 rounded-3xl">
+              <div className="text-center p-8">
+                <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">Aucune donnée disponible</p>
+                {!loading && (
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-4 py-2 bg-[#556B2F] text-white rounded hover:bg-[#6B8E23] transition-colors"
+                  >
+                    Réessayer
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Légende */}
+          <div className="absolute bottom-4 left-4 z-[1000]">
+            <div
+              className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border"
+              style={{
+                borderColor: colors["separator"],
+                backgroundColor: `${colors["light-bg"]}E6`,
+              }}
+            >
+              <h4 className="font-bold text-sm mb-2 flex items-center gap-2" style={{ color: colors["neutral-dark"] }}>
+                <MapPin className="w-4 h-4" style={{ color: colors["primary-dark"] }} />
+                Légende
+              </h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <MapPin 
+                      size={24} 
+                      fill={colors["partner-marker"]} 
+                      color="white" 
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs font-medium" style={{ color: colors["neutral-dark"] }}>
+                      Partenaires ({partnerPoints.length})
+                    </span>
+                    <p className="text-xs text-gray-500 mt-1">Professionnels du réseau</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <MapPin 
+                      size={24} 
+                      fill={colors["property-marker"]} 
+                      color="white" 
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs font-medium" style={{ color: colors["neutral-dark"] }}>
+                      Propriétés ({propertyPoints.length})
+                    </span>
+                    <p className="text-xs text-gray-500 mt-1">Biens immobiliers</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Petits points aléatoires animés en arrière-plan */}
-          <div className="pointer-events-none absolute inset-0">
-            <span
-              className="block absolute top-10 left-8 h-1.5 w-1.5 rounded-full animate-[ping_3.5s_linear_infinite]"
-              style={{ backgroundColor: colors["primary-dark"] }}
-            />
-            <span
-              className="block absolute top-20 right-10 h-1 w-1 rounded-full animate-[ping_4.2s_linear_infinite]"
-              style={{ backgroundColor: colors["accent-light"] }}
-            />
-            <span
-              className="block absolute bottom-10 left-16 h-1 w-1 rounded-full animate-[ping_2.8s_linear_infinite]"
-              style={{ backgroundColor: colors["accent-warm"] }}
-            />
-            <span
-              className="block absolute bottom-16 right-20 h-1.5 w-1.5 rounded-full animate-[ping_5s_linear_infinite]"
-              style={{ backgroundColor: colors["primary-dark"] }}
-            />
+          {/* Statistiques en haut à droite */}
+          <div className="absolute top-4 right-4 z-[1000]">
+            <div
+              className="bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-lg border"
+              style={{
+                borderColor: colors["separator"],
+                backgroundColor: `${colors["light-bg"]}E6`,
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <MapPin size={14} fill={colors["partner-marker"]} color="white" />
+                    <span className="text-xs font-bold" style={{ color: colors["partner-marker"] }}>
+                      {partnerPoints.length}
+                    </span>
+                  </div>
+                  <p className="text-xs" style={{ color: colors["neutral-dark"] }}>Partenaires</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <MapPin size={14} fill={colors["property-marker"]} color="white" />
+                    <span className="text-xs font-bold" style={{ color: colors["property-marker"] }}>
+                      {propertyPoints.length}
+                    </span>
+                  </div>
+                  <p className="text-xs" style={{ color: colors["neutral-dark"] }}>Propriétés</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Overlay contenu */}
-          <div className="relative h-full flex flex-col justify-between p-6 lg:p-8">
-            {/* Badges en haut */}
-            <div className="flex items-center justify-between gap-3 mb-6">
-              <div className="flex items-center gap-2">
+          {/* Badge en bas à droite */}
+          <div className="absolute bottom-4 right-4 z-[1000]">
+            <div className="relative">
+              <div className="relative flex items-center gap-2 bg-black/70 backdrop-blur-sm rounded-full px-3 py-2">
                 <span className="relative flex h-2.5 w-2.5">
                   <span
                     className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping"
@@ -323,234 +501,15 @@ const CardCarte: React.FC = () => {
                   />
                 </span>
                 <span
-                  className="text-[10px] lg:text-xs font-medium flex items-center gap-1.5"
+                  className="text-xs font-medium"
                   style={{ color: colors["light-bg"] }}
                 >
                   <SignalHigh
-                    className="w-3.5 h-3.5"
+                    className="w-3.5 h-3.5 inline mr-1"
                     style={{ color: colors["primary-dark"] }}
                   />
-                  Vue carte en temps réel
+                  {points.length} points actifs
                 </span>
-              </div>
-              <span
-                className="inline-flex items-center gap-1 text-[11px] border px-2 py-1 rounded-full"
-                style={{
-                  color: colors["light-bg"],
-                  borderColor: colors["separator"],
-                  backgroundColor: `${colors["neutral-dark"]}99`,
-                }}
-              >
-                <Map
-                  className="w-3.5 h-3.5"
-                  style={{ color: colors["primary-dark"] }}
-                />
-                Propriétés & partenaires
-              </span>
-            </div>
-
-            {/* Bloc « mini carte » */}
-            <div className="mt-auto">
-              <div
-                className="relative border rounded-2xl p-5 backdrop-blur-md overflow-hidden"
-                style={{
-                  backgroundColor: `${colors["neutral-dark"]}CC`,
-                  borderColor: colors["separator"],
-                }}
-              >
-                <div
-                  className="relative rounded-[14px] border p-4 space-y-4"
-                  style={{
-                    backgroundColor: `${colors["neutral-dark"]}CC`,
-                    borderColor: colors["separator"],
-                  }}
-                >
-                  {/* Bar du haut */}
-                  <div
-                    className="flex items-center justify-between text-[11px]"
-                    style={{ color: colors["light-bg"] }}
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <Radar
-                        className="w-3.5 h-3.5"
-                        style={{ color: colors["primary-dark"] }}
-                      />
-                      <span className="font-medium">Carte interactive</span>
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <span
-                        className="h-1.5 w-1.5 rounded-full animate-pulse"
-                        style={{ backgroundColor: colors["primary-dark"] }}
-                      />
-                      En ligne
-                    </span>
-                  </div>
-
-                  {/* Lignes + points + icônes = réseau LED */}
-                  <div className="relative h-40">
-                    {/* Cadres */}
-                    <div
-                      className="absolute inset-6 rounded-xl border"
-                      style={{ borderColor: `${colors["separator"]}99` }}
-                    />
-                    <div
-                      className="absolute inset-10 rounded-xl border"
-                      style={{ borderColor: `${colors["separator"]}66` }}
-                    />
-
-                    {/* Trajets lumineux */}
-                    <div
-                      className="absolute top-7 left-5 right-12 h-px animate-pulse"
-                      style={{
-                        background: `linear-gradient(to right, ${colors["primary-dark"]}00, ${colors["primary-dark"]}B3, ${colors["primary-dark"]}00)`,
-                      }}
-                    />
-                    <div
-                      className="absolute bottom-6 left-10 right-8 h-px animate-[pulse_2.2s_ease-in-out_infinite]"
-                      style={{
-                        background: `linear-gradient(to right, ${colors["accent-light"]}00, ${colors["accent-light"]}B3, ${colors["accent-light"]}00)`,
-                      }}
-                    />
-                    <div
-                      className="absolute top-1/2 left-1/4 right-6 h-px -rotate-6"
-                      style={{ backgroundColor: `${colors["separator"]}50` }}
-                    />
-
-                    {/* Points / nœuds LED */}
-                    <div className="absolute top-6 left-10 flex flex-col items-start gap-1">
-                      <div className="relative">
-                        <span
-                          className="absolute inline-flex h-4 w-4 rounded-full blur-sm"
-                          style={{
-                            backgroundColor: `${colors["primary-dark"]}50`,
-                          }}
-                        />
-                        <span
-                          className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full"
-                          style={{ backgroundColor: colors["primary-dark"] }}
-                        >
-                          <Globe2
-                            className="w-2.5 h-2.5"
-                            style={{ color: colors["neutral-dark"] }}
-                          />
-                        </span>
-                      </div>
-                      <span
-                        className="text-[10px]"
-                        style={{ color: colors["light-bg"] }}
-                      >
-                        Hub partenaires
-                      </span>
-                    </div>
-
-                    <div className="absolute bottom-7 right-10 flex flex-col items-end gap-1">
-                      <div className="relative">
-                        <span
-                          className="absolute inline-flex h-4 w-4 rounded-full blur-sm"
-                          style={{
-                            backgroundColor: `${colors["accent-light"]}50`,
-                          }}
-                        />
-                        <span
-                          className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full"
-                          style={{ backgroundColor: colors["accent-light"] }}
-                        >
-                          <Route
-                            className="w-2.5 h-2.5"
-                            style={{ color: colors["neutral-dark"] }}
-                          />
-                        </span>
-                      </div>
-                      <span
-                        className="text-[10px]"
-                        style={{ color: colors["light-bg"] }}
-                      >
-                        Propriétés actives
-                      </span>
-                    </div>
-
-                    <div className="absolute top-1/2 right-1/4 flex flex-col items-center gap-1">
-                      <div className="relative">
-                        <span
-                          className="absolute inline-flex h-4 w-4 rounded-full blur-sm animate-ping"
-                          style={{
-                            backgroundColor: `${colors["accent-warm"]}66`,
-                          }}
-                        />
-                        <span
-                          className="relative flex h-3 w-3 items-center justify-center rounded-full"
-                          style={{ backgroundColor: colors["accent-warm"] }}
-                        >
-                          <SignalHigh
-                            className="w-2 h-2"
-                            style={{ color: colors["neutral-dark"] }}
-                          />
-                        </span>
-                      </div>
-                      <span
-                        className="text-[9px]"
-                        style={{ color: colors["light-bg"] }}
-                      >
-                        Nouveau point
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Légende / chiffres */}
-                  <div className="grid grid-cols-3 gap-3 text-[11px]">
-                    <div>
-                      <p style={{ color: colors["separator"] }}>Partenaires</p>
-                      <p
-                        className="font-semibold"
-                        style={{ color: colors["light-bg"] }}
-                      >
-                        +120
-                      </p>
-                    </div>
-                    <div>
-                      <p style={{ color: colors["separator"] }}>Propriétés</p>
-                      <p
-                        className="font-semibold"
-                        style={{ color: colors["light-bg"] }}
-                      >
-                        3 500
-                      </p>
-                    </div>
-                    <div>
-                      <p style={{ color: colors["separator"] }}>Pays</p>
-                      <p
-                        className="font-semibold"
-                        style={{ color: colors["light-bg"] }}
-                      >
-                        18
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Lien secondaire sous la mini carte */}
-              <div
-                className="mt-4 grid gap-4 lg:flex items-center justify-between text-[11px]"
-                style={{ color: colors["light-bg"] }}
-              >
-                <p>
-                  Zoom, filtres et détails disponibles dans l'interface
-                  complète.
-                </p>
-                <button
-                  onClick={() => (window.location.href = "/carte")}
-                  className="font-medium underline underline-offset-4"
-                  style={{ color: colors["light-bg"] }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = colors["accent-light"];
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = colors["light-bg"];
-                  }}
-                >
-                  Ouvrir la carte
-                </button>
               </div>
             </div>
           </div>

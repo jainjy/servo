@@ -71,6 +71,184 @@ import {
   Target,
   Loader2,
 } from "lucide-react";
+// Ajoutez ces imports en plus des existants
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Mail,
+  Phone,
+  User,
+  CalendarDays,
+} from "lucide-react";
+import axios from 'axios';
+
+const API_URL = 'http://localhost:3001/api';
+
+// Ajoutez après vos statuts existants
+const candidatureStatuses = [
+  { value: "en_attente", label: "En attente", color: "bg-yellow-100 text-yellow-800" },
+  { value: "pending", label: "En attente", color: "bg-yellow-100 text-yellow-800" },
+  { value: "acceptée", label: "Acceptée", color: "bg-green-100 text-green-800" },
+  { value: "accepted", label: "Acceptée", color: "bg-green-100 text-green-800" },
+  { value: "refusée", label: "Refusée", color: "bg-red-100 text-red-800" },
+  { value: "rejected", label: "Refusée", color: "bg-red-100 text-red-800" },
+];
+
+// Composant pour afficher le tableau des candidatures
+function CandidaturesTable({ candidatures, onUpdateStatus, onDownloadCV, onDelete }) {
+  if (candidatures.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+        <p className="text-gray-500">Aucune candidature trouvée</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Candidat</TableHead>
+            <TableHead>Contact</TableHead>
+            <TableHead>Date candidature</TableHead>
+            <TableHead>Motivation</TableHead>
+            <TableHead>CV</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {candidatures.map((candidature) => {
+            const status = candidatureStatuses.find(s => s.value === candidature.status);
+            
+            return (
+              <TableRow key={candidature.id}>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-400" />
+                    <div>
+                      <div>{candidature.prenom} {candidature.nom}</div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      <span className="text-sm">{candidature.email}</span>
+                    </div>
+                    {candidature.telephone && (
+                      <div className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        <span className="text-sm">{candidature.telephone}</span>
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <CalendarDays className="h-3 w-3" />
+                    <span className="text-sm">
+                      {new Date(candidature.createdAt).toLocaleDateString('fr-FR')}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="max-w-xs">
+                    {candidature.motivation ? (
+                      <div 
+                        className="text-sm truncate cursor-help" 
+                        title={candidature.motivation}
+                      >
+                        {candidature.motivation.length > 50 
+                          ? `${candidature.motivation.substring(0, 50)}...` 
+                          : candidature.motivation}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">Aucune motivation</span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {candidature.cvPath ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDownloadCV(candidature.id, `CV_${candidature.nom}_${candidature.prenom}.pdf`, candidature.cvPath)}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Télécharger
+                    </Button>
+                  ) : (
+                    <span className="text-gray-400 text-sm">Aucun CV</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Badge className={status?.color || 'bg-gray-100 text-gray-800'}>
+                    {status?.label || candidature.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      
+                      {/* Boutons pour changer le statut */}
+                      {candidature.status !== 'acceptée' && candidature.status !== 'accepted' && (
+                        <DropdownMenuItem 
+                          onClick={() => onUpdateStatus(candidature.id, 'acceptée')}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                          Accepter
+                        </DropdownMenuItem>
+                      )}
+                      
+                      {candidature.status !== 'refusée' && candidature.status !== 'rejected' && (
+                        <DropdownMenuItem 
+                          onClick={() => onUpdateStatus(candidature.id, 'refusée')}
+                        >
+                          <XCircle className="h-4 w-4 mr-2 text-red-600" />
+                          Refuser
+                        </DropdownMenuItem>
+                      )}
+                      
+                      {candidature.status !== 'en_attente' && candidature.status !== 'pending' && (
+                        <DropdownMenuItem 
+                          onClick={() => onUpdateStatus(candidature.id, 'en_attente')}
+                        >
+                          <Clock className="h-4 w-4 mr-2 text-yellow-600" />
+                          Remettre en attente
+                        </DropdownMenuItem>
+                      )}
+                      
+                      <DropdownMenuSeparator />
+                      
+                      {/* Bouton Supprimer */}
+                      <DropdownMenuItem 
+                        onClick={() => onDelete(candidature.id)}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Supprimer
+                      </DropdownMenuItem>
+                      
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
 
 export default function GestionAlternancePage() {
   const {
@@ -142,6 +320,18 @@ export default function GestionAlternancePage() {
     { value: "archived", label: "Archivée", color: "bg-yellow-100 text-yellow-800" },
     { value: "filled", label: "Pourvu", color: "bg-blue-100 text-blue-800" },
   ];
+
+  // Après vos autres états
+const [candidaturesModalOpen, setCandidaturesModalOpen] = useState(false);
+const [selectedOffre, setSelectedOffre] = useState(null);
+const [candidatures, setCandidatures] = useState([]);
+const [loadingCandidatures, setLoadingCandidatures] = useState(false);
+const [candidatureStats, setCandidatureStats] = useState({
+  total: 0,
+  pending: 0,
+  accepted: 0,
+  rejected: 0
+});
 
   // Initialiser les données au chargement
   useEffect(() => {
@@ -255,17 +445,464 @@ export default function GestionAlternancePage() {
     }
   };
 
+  // Fonction pour ouvrir le modal des candidatures
+const openCandidaturesModal = async (offre) => {
+  setSelectedOffre(offre);
+  setCandidaturesModalOpen(true);
+  setLoadingCandidatures(true);
+  
+  try {
+    const token = localStorage.getItem('auth-token') || 
+                  localStorage.getItem('token') || 
+                  localStorage.getItem('jwt-token');
+    
+    // console.log('🔑 Token pour candidatures alternance:', token ? 'Présent' : 'Absent');
+    // console.log(`📤 Tentative pour offre ID: ${offre.id}`);
+    
+    if (!token) {
+      toast.error('Session expirée. Veuillez vous reconnecter.');
+      setLoadingCandidatures(false);
+      return;
+    }
+    
+    // console.log('🔄 Appel API vers:', `${API_URL}/alternance/${offre.id}/candidatures`);
+    
+    // Utilisez la route qui fonctionne
+    const response = await axios.get(
+      `${API_URL}/alternance/${offre.id}/candidatures`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    // console.log('✅ Réponse API:', response.data);
+    // console.log('Structure de la réponse:', {
+    //   keys: Object.keys(response.data),
+    //   hasData: 'data' in response.data,
+    //   dataType: typeof response.data.data,
+    //   isArray: Array.isArray(response.data.data)
+    // });
+    
+    // GESTION DES DIFFÉRENTS FORMATS DE RÉPONSE
+    let apiCandidatures = [];
+    
+    if (response.data.success) {
+      // Format 1: response.data.data (le plus courant)
+      if (response.data.data && Array.isArray(response.data.data)) {
+        apiCandidatures = response.data.data;
+      }
+      // Format 2: response.data.candidatures
+      else if (response.data.candidatures && Array.isArray(response.data.candidatures)) {
+        apiCandidatures = response.data.candidatures;
+      }
+      // Format 3: response.data (directement un tableau)
+      else if (Array.isArray(response.data)) {
+        apiCandidatures = response.data;
+      }
+      // Format 4: response.data est un objet avec propriétés
+      else if (response.data.data && typeof response.data.data === 'object') {
+        // Essayons d'extraire les candidatures d'un objet
+        const dataObj = response.data.data;
+        if (dataObj.candidatures && Array.isArray(dataObj.candidatures)) {
+          apiCandidatures = dataObj.candidatures;
+        } else {
+          // Convertir l'objet en tableau si nécessaire
+          apiCandidatures = Object.values(dataObj).filter(item => 
+            item && typeof item === 'object' && (item.nomCandidat || item.email)
+          );
+        }
+      }
+    } else {
+      // Si success: false mais qu'il y a des données
+      console.warn('API retourne success: false mais continue le traitement');
+      if (Array.isArray(response.data)) {
+        apiCandidatures = response.data;
+      }
+    }
+    
+    // console.log(`📝 ${apiCandidatures.length} candidatures extraites`);
+    
+    // Afficher un échantillon pour debugging
+    if (apiCandidatures.length > 0) {
+      // console.log('Échantillon de candidatures:', apiCandidatures.slice(0, 2));
+    } else {
+      // console.log('Structure complète de la réponse:', JSON.stringify(response.data, null, 2));
+    }
+    
+    if (apiCandidatures.length === 0) {
+      toast.info('Aucune candidature pour cette offre d\'alternance/stage');
+      setCandidatures([]);
+    } else {
+      // Transformer les données de l'API
+      const formattedCandidatures = apiCandidatures.map((candidature, index) => {
+        // Debug: Afficher la structure de chaque candidature
+        // console.log(`Candidature ${index}:`, candidature);
+        
+        // Extraire nom et prénom
+        let nom = '';
+        let prenom = '';
+        const nomComplet = candidature.nomCandidat || 
+                          candidature.nom || 
+                          (candidature.user ? `${candidature.user.prenom || ''} ${candidature.user.nom || ''}`.trim() : '');
+        
+        if (nomComplet && nomComplet.trim() !== '') {
+          const nameParts = nomComplet.trim().split(' ');
+          if (nameParts.length > 1) {
+            nom = nameParts[nameParts.length - 1];
+            prenom = nameParts.slice(0, -1).join(' ');
+          } else {
+            prenom = nameParts[0];
+          }
+        }
+        
+        // Extraire email
+        const email = candidature.emailCandidat || 
+                     candidature.email || 
+                     (candidature.user ? candidature.user.email : '');
+        
+        // Extraire téléphone
+        const telephone = candidature.telCandidat || 
+                         candidature.telephone || 
+                         (candidature.user ? candidature.user.phone : '');
+        
+        return {
+          id: candidature.id || index,
+          nom: nom,
+          prenom: prenom,
+          nomComplet: nomComplet,
+          email: email,
+          telephone: telephone,
+          motivation: candidature.messageMotivation || candidature.motivation || '',
+          cvPath: candidature.cvUrl || candidature.cvPath || null,
+          lettreMotivationUrl: candidature.lettreMotivationUrl || null,
+          status: candidature.statut || candidature.status || 'en_attente',
+          createdAt: candidature.appliedAt || candidature.createdAt || new Date(),
+          updatedAt: candidature.updatedAt || new Date(),
+          offreId: candidature.alternanceStageId || candidature.offreId || offre.id,
+          offreType: candidature.offreType || 'ALTERNANCE',
+          niveauEtude: candidature.niveauEtude || '',
+          ecole: candidature.ecole || ''
+        };
+      });
+      
+      // console.log(`✅ ${formattedCandidatures.length} candidatures formatées`);
+      
+      setCandidatures(formattedCandidatures);
+      
+      // Calculer les statistiques
+      const stats = {
+        total: formattedCandidatures.length,
+        pending: formattedCandidatures.filter(c => 
+          c.status === 'en_attente' || c.status === 'pending'
+        ).length,
+        accepted: formattedCandidatures.filter(c => 
+          c.status === 'acceptée' || c.status === 'accepted'
+        ).length,
+        rejected: formattedCandidatures.filter(c => 
+          c.status === 'refusée' || c.status === 'rejected'
+        ).length
+      };
+      setCandidatureStats(stats);
+      
+      // console.log('📊 Statistiques calculées:', stats);
+    }
+    
+  } catch (error) {
+    console.error('❌ Erreur chargement candidatures alternance:', error);
+    
+    // Afficher des informations détaillées
+    console.error('🔍 Détails erreur:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method,
+      message: error.message
+    });
+    
+    if (error.response?.status === 404) {
+      toast.info('Aucune candidature trouvée pour cette offre');
+      setCandidatures([]);
+    } else {
+      toast.error(`Erreur ${error.response?.status || ''}: ${error.response?.data?.error || 'Erreur serveur'}`);
+    }
+  } finally {
+    setLoadingCandidatures(false);
+  }
+};
+
+// Fonction pour mettre à jour le statut d'une candidature
+const updateCandidatureStatus = async (candidatureId, newStatus) => {
+  try {
+    const token = localStorage.getItem('auth-token');
+    
+    let statusToSend = newStatus;
+    if (newStatus === 'acceptée') statusToSend = 'acceptée';
+    else if (newStatus === 'accepted') statusToSend = 'acceptée';
+    else if (newStatus === 'refusée') statusToSend = 'refusée';
+    else if (newStatus === 'rejected') statusToSend = 'refusée';
+    else if (newStatus === 'en_attente') statusToSend = 'en_attente';
+    else if (newStatus === 'pending') statusToSend = 'en_attente';
+    
+    const response = await axios.patch(
+      `${API_URL}/candidatures/${candidatureId}/status`,
+      { status: statusToSend },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    if (response.data.success) {
+      setCandidatures(prev => 
+        prev.map(candidature => 
+          candidature.id === candidatureId 
+            ? { ...candidature, status: statusToSend }
+            : candidature
+        )
+      );
+      
+      toast.success('Statut mis à jour avec succès');
+      
+      // Recalculer les stats
+      const updatedCandidatures = candidatures.map(c => 
+        c.id === candidatureId ? { ...c, status: statusToSend } : c
+      );
+      
+      const stats = {
+        total: updatedCandidatures.length,
+        pending: updatedCandidatures.filter(c => c.status === 'en_attente' || c.status === 'pending').length,
+        accepted: updatedCandidatures.filter(c => c.status === 'acceptée' || c.status === 'accepted').length,
+        rejected: updatedCandidatures.filter(c => c.status === 'refusée' || c.status === 'rejected').length
+      };
+      setCandidatureStats(stats);
+    }
+  } catch (error) {
+    console.error('❌ Erreur mise à jour statut:', error);
+    toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour');
+  }
+};
+
+// Fonction pour télécharger un CV - VERSION CORRIGÉE
+const downloadCV = async (candidatureId, fileName, cvUrl) => {
+  try {
+    // console.log('📥 Téléchargement CV - URL originale:', cvUrl);
+    
+    if (!cvUrl) {
+      toast.error('Aucun CV disponible pour ce candidat');
+      return;
+    }
+    
+    // Détecter le type d'URL
+    const isBlobUrl = cvUrl.startsWith('blob:');
+    const isDataUrl = cvUrl.startsWith('data:');
+    const isHttpUrl = cvUrl.startsWith('http://') || cvUrl.startsWith('https://');
+    const isRelativeUrl = cvUrl.startsWith('/');
+    
+    // console.log('🔍 Type d\'URL détecté:', {
+    //   isBlobUrl,
+    //   isDataUrl,
+    //   isHttpUrl,
+    //   isRelativeUrl,
+    //   cvUrl
+    // });
+    
+    let finalUrl = cvUrl;
+    let shouldOpenInNewTab = false;
+    
+    // Traitement selon le type d'URL
+    if (isBlobUrl) {
+      // URL Blob : utiliser directement
+      // console.log('📄 Utilisation URL Blob');
+      shouldOpenInNewTab = true;
+      // Pour les URLs Blob, on ne peut pas ajouter de query params
+      // On utilise l'URL telle quelle
+    }
+    else if (isDataUrl) {
+      // URL Data (base64) : convertir en blob
+      // console.log('📄 Utilisation URL Data (base64)');
+      try {
+        // Extraire le contenu base64
+        const base64Content = cvUrl.split(',')[1];
+        const mimeType = cvUrl.match(/data:(.*);base64/)?.[1] || 'application/pdf';
+        
+        // Convertir en blob
+        const byteCharacters = atob(base64Content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+        
+        // Créer une URL Blob
+        finalUrl = URL.createObjectURL(blob);
+        shouldOpenInNewTab = true;
+      } catch (error) {
+        console.error('Erreur conversion base64:', error);
+        throw new Error('Format de données invalide');
+      }
+    }
+    else if (isHttpUrl) {
+      // URL HTTP complète : ajouter timestamp pour éviter le cache
+      // console.log('📄 Utilisation URL HTTP complète');
+      const separator = finalUrl.includes('?') ? '&' : '?';
+      finalUrl = `${finalUrl}${separator}t=${Date.now()}`;
+      shouldOpenInNewTab = true;
+    }
+    else if (isRelativeUrl) {
+      // URL relative : ajouter la base du serveur
+      // console.log('📄 Utilisation URL relative');
+      // Nettoyer le chemin (enlever le /api/ s'il est déjà présent)
+      let cleanPath = cvUrl;
+      if (cvUrl.startsWith('/api/')) {
+        cleanPath = cvUrl.substring(5); // Enlever '/api/'
+      }
+      finalUrl = `${API_URL}/${cleanPath}?t=${Date.now()}`;
+    }
+    else {
+      // Autre cas : traiter comme un chemin de fichier
+      // console.log('📄 Traitement comme chemin de fichier');
+      finalUrl = `${API_URL}/${cvUrl}?t=${Date.now()}`;
+    }
+    
+    // console.log('🔗 URL finale pour téléchargement:', finalUrl);
+    
+    // Créer un nom de fichier par défaut
+    const finalFileName = fileName || 'cv_candidat.pdf';
+    
+    // Créer un élément de lien
+    const link = document.createElement('a');
+    
+    if (isBlobUrl || isDataUrl) {
+      // Pour les URLs Blob/Data, on ne peut pas utiliser "download" facilement
+      // Ouvrir dans un nouvel onglet
+      link.href = finalUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      
+      // Pour les PDF, ajouter un attribut pour l'ouverture
+      if (finalUrl.includes('.pdf') || finalFileName.endsWith('.pdf')) {
+        link.setAttribute('type', 'application/pdf');
+      }
+    } else {
+      // Pour les URLs normales, utiliser l'attribut download
+      link.href = finalUrl;
+      link.download = finalFileName;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }
+    
+    // Ajouter des headers d'authentification si nécessaire (pour les URLs HTTP)
+    if (!isBlobUrl && !isDataUrl) {
+      const token = localStorage.getItem('auth-token');
+      if (token) {
+        // Note: Pour les liens simples, on ne peut pas ajouter des headers
+        // Mais on peut passer le token dans l'URL si le backend le supporte
+        const hasQuery = finalUrl.includes('?');
+        link.href = `${finalUrl}${hasQuery ? '&' : '?'}token=${encodeURIComponent(token)}`;
+      }
+    }
+    
+    // Style caché
+    link.style.display = 'none';
+    link.style.position = 'absolute';
+    link.style.left = '-9999px';
+    
+    // Ajouter au DOM
+    document.body.appendChild(link);
+    
+    // Déclencher le clic
+    link.click();
+    
+    // Nettoyer après un délai
+    setTimeout(() => {
+      if (link.parentNode) {
+        document.body.removeChild(link);
+      }
+    }, 100);
+    
+    toast.success('CV en cours de téléchargement...');
+    
+  } catch (error) {
+    console.error('❌ Erreur téléchargement CV:', error);
+    
+    // Messages d'erreur spécifiques
+    let errorMessage = 'Erreur lors du téléchargement du CV';
+    
+    if (error.message.includes('Network Error')) {
+      errorMessage = 'Erreur de réseau. Vérifiez votre connexion.';
+    } else if (error.message.includes('404')) {
+      errorMessage = 'Fichier non trouvé sur le serveur.';
+    } else if (error.message.includes('403')) {
+      errorMessage = 'Accès interdit. Vérifiez vos permissions.';
+    } else if (error.message.includes('Invalid')) {
+      errorMessage = 'Format de fichier invalide.';
+    }
+    
+    toast.error(errorMessage);
+    
+    // Fallback: ouvrir l'URL originale dans un nouvel onglet
+    if (cvUrl) {
+      try {
+        window.open(cvUrl, '_blank');
+        toast.info('Ouverture du CV dans un nouvel onglet...');
+      } catch (fallbackError) {
+        console.error('Fallback aussi échoué:', fallbackError);
+      }
+    }
+  }
+};
+
+// Fonction pour supprimer une candidature
+const deleteCandidature = async (candidatureId) => {
+  if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette candidature ?')) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('auth-token');
+    
+    const response = await axios.delete(
+      `${API_URL}/candidatures/${candidatureId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.data.success) {
+      toast.success('Candidature supprimée avec succès');
+      
+      // Recharger les candidatures
+      if (selectedOffre) {
+        await openCandidaturesModal(selectedOffre);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Erreur suppression candidature:', error);
+    toast.error(error.response?.data?.error || 'Erreur lors de la suppression');
+  }
+};
+
   // Ensuite, modifiez votre handleSubmit :
 const handleSubmit = async (e) => {
   e.preventDefault();
   
   // Vérifier l'authentification avant de soumettre
-  console.log('🔐 Auth status before submit:', {
-    checkAuthStatus: checkAuthStatus ? 'Function exists' : 'Function missing',
-    isAuthenticated,
-    user: user?.id,
-    authLoading
-  });
+  // console.log('🔐 Auth status before submit:', {
+  //   checkAuthStatus: checkAuthStatus ? 'Function exists' : 'Function missing',
+  //   isAuthenticated,
+  //   user: user?.id,
+  //   authLoading
+  // });
 
   // Utilisez checkAuthStatus si disponible, sinon vérifiez manuellement
   const authStatus = checkAuthStatus ? checkAuthStatus() : {
@@ -276,11 +913,9 @@ const handleSubmit = async (e) => {
     isReady: isAuthenticated && !authLoading
   };
   
-  console.log('📋 Auth details:', authStatus);
+  // console.log('📋 Auth details:', authStatus);
 
     // Vérifier l'authentification
-  
-  console.log('🔐 Auth status in handleSubmit:', authStatus);
   
   
   if (!authStatus.isReady) {
@@ -324,11 +959,11 @@ const handleSubmit = async (e) => {
       urgent: formData.urgent || false,
     };
 
-    console.log('📤 Submitting data with auth:', {
-      user: user?.id,
-      tokenPresent: !!user?.token,
-      data: apiData
-    });
+    // console.log('📤 Submitting data with auth:', {
+    //   user: user?.id,
+    //   tokenPresent: !!user?.token,
+    //   data: apiData
+    // });
 
     if (editingOffre) {
       await updateOffre(editingOffre.id, apiData);
@@ -384,10 +1019,22 @@ const handleExportCSV = async () => {
   try {
     toast.info("Export CSV en cours...");
     await exportCSV();
-    toast.success("Export CSV terminé");
+    // Le toast de succès est géré dans la fonction exportCSV
   } catch (error) {
     console.error('Export CSV error:', error);
-    toast.error(error.message || "Erreur lors de l'export CSV");
+    
+    // Afficher un message d'erreur plus spécifique
+    let errorMessage = "Erreur lors de l'export CSV";
+    
+    if (error.message.includes('Session expirée')) {
+      errorMessage = 'Votre session a expiré. Veuillez vous reconnecter.';
+      // Optionnel: rediriger vers la page de login
+      // router.push('/login');
+    } else if (error.message.includes('Erreur réseau')) {
+      errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet.';
+    }
+    
+    toast.error(errorMessage);
   }
 };
 
@@ -929,13 +1576,19 @@ const handleExportCSV = async () => {
                             {offre.remuneration}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-3 w-3" />
-                            <span>{offre.candidatures_count || 0}</span>
-                            <span className="text-xs text-gray-500">({offre.vues || 0} vues)</span>
-                          </div>
-                        </TableCell>
+<TableCell>
+  <div className="flex items-center gap-2">
+    <Users className="h-3 w-3" />
+    <Button
+      variant="link"
+      className="h-6 px-2 text-blue-600 hover:text-blue-800"
+      onClick={() => openCandidaturesModal(offre)}
+    >
+      {offre.candidatures_count || 0}
+    </Button>
+    <span className="text-xs text-gray-500">({offre.vues || 0} vues)</span>
+  </div>
+</TableCell>
                         <TableCell>
                           <Badge className={status?.color}>
                             {status?.label}
@@ -960,6 +1613,10 @@ const handleExportCSV = async () => {
                                 <Edit className="h-4 w-4 mr-2" />
                                 Modifier
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openCandidaturesModal(offre)}>
+  <Users className="h-4 w-4 mr-2" />
+  Voir candidatures ({offre.candidatures_count || 0})
+</DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
                                 onClick={() => handleStatusChange(offre.id, offre.status === 'active' ? 'archived' : 'active')}
@@ -977,6 +1634,7 @@ const handleExportCSV = async () => {
                                 )}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
+
                               <DropdownMenuItem 
                                 onClick={() => handleDelete(offre.id)}
                                 className="text-red-600"
@@ -999,6 +1657,105 @@ const handleExportCSV = async () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal des candidatures */}
+<Dialog open={candidaturesModalOpen} onOpenChange={setCandidaturesModalOpen}>
+  <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>
+        Candidatures pour : {selectedOffre?.title}
+      </DialogTitle>
+      <DialogDescription>
+        {selectedOffre?.type} • {selectedOffre?.niveauEtude} • {candidatureStats.total} candidature{candidatureStats.total !== 1 ? 's' : ''}
+      </DialogDescription>
+    </DialogHeader>
+
+    {/* Statistiques */}
+    <div className="grid grid-cols-4 gap-4 mb-6">
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="text-sm text-gray-600">Total</p>
+            <p className="text-2xl font-bold text-[#556B2F]">{candidatureStats.total}</p>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="text-sm text-gray-600">En attente</p>
+            <p className="text-2xl font-bold text-yellow-600">{candidatureStats.pending}</p>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="text-sm text-gray-600">Acceptées</p>
+            <p className="text-2xl font-bold text-green-600">{candidatureStats.accepted}</p>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="text-sm text-gray-600">Refusées</p>
+            <p className="text-2xl font-bold text-red-600">{candidatureStats.rejected}</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <Tabs defaultValue="all" className="w-full">
+     
+
+      {loadingCandidatures ? (
+        <div className="text-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Chargement des candidatures...</p>
+        </div>
+      ) : (
+        <>
+          <TabsContent value="all" className="mt-4">
+            <CandidaturesTable 
+              candidatures={candidatures}
+              onUpdateStatus={updateCandidatureStatus}
+              onDownloadCV={downloadCV}
+              onDelete={deleteCandidature}
+            />
+          </TabsContent>
+          
+          <TabsContent value="pending" className="mt-4">
+            <CandidaturesTable 
+              candidatures={candidatures.filter(c => c.status === 'en_attente' || c.status === 'pending')}
+              onUpdateStatus={updateCandidatureStatus}
+              onDownloadCV={downloadCV}
+              onDelete={deleteCandidature}
+            />
+          </TabsContent>
+          
+          <TabsContent value="accepted" className="mt-4">
+            <CandidaturesTable 
+              candidatures={candidatures.filter(c => c.status === 'acceptée' || c.status === 'accepted')}
+              onUpdateStatus={updateCandidatureStatus}
+              onDownloadCV={downloadCV}
+              onDelete={deleteCandidature}
+            />
+          </TabsContent>
+          
+          <TabsContent value="rejected" className="mt-4">
+            <CandidaturesTable 
+              candidatures={candidatures.filter(c => c.status === 'refusée' || c.status === 'rejected')}
+              onUpdateStatus={updateCandidatureStatus}
+              onDownloadCV={downloadCV}
+              onDelete={deleteCandidature}
+            />
+          </TabsContent>
+        </>
+      )}
+    </Tabs>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

@@ -94,7 +94,7 @@ export default function LogoLoader() {
         >
           <img src="/loading.gif" alt="" className='w-24 h-24' />
 
-          <p className="text-sm font-medium text-gray-700">Chargement de SERVO…</p>
+          <p className="text-sm font-medium text-gray-700">Chargement de OLIPLUS...</p>
         </motion.div>
       </div>
     </div>

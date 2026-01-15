@@ -3,6 +3,9 @@ import { toast } from 'sonner';
 
 export const useCandidatures = () => {
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Base URL depuis les variables d'environnement
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
   // Postuler à une offre
   const postuler = useCallback(async (
@@ -21,9 +24,9 @@ export const useCandidatures = () => {
   ) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token'); // Ou votre token d'auth
+      const token = localStorage.getItem('auth-token'); // Ou votre token d'auth
       
-      const response = await fetch('http://localhost:3000/api/candidatures', {
+      const response = await fetch(`${API_BASE_URL}/candidatures`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,12 +64,12 @@ export const useCandidatures = () => {
   ) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth-token');
       const params = new URLSearchParams();
       if (filters?.type) params.append('type', filters.type);
       if (filters?.statut) params.append('statut', filters.statut);
 
-      const response = await fetch(`http://localhost:3000/api/candidatures?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/candidatures?${params.toString()}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

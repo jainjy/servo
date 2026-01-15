@@ -1,3 +1,4 @@
+// frontend/src/components/admin/listings/listing-modal.jsx
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,14 @@ import {
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
+
+// Import des constantes des types sociaux
+import {
+  SOCIAL_TYPE_FEATURES,
+  DEDICATED_SOCIAL_TYPES,
+  SOCIAL_TYPE_LABELS
+} from "@/constants/socialTypes";
+
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
   pending: { label: "Brouillon", color: "bg-yellow-100 text-yellow-800" },
@@ -31,6 +40,7 @@ const STATUT_ANNONCE = {
   rented: { label: "Loué", color: "bg-gray-100 text-gray-800" },
   both: { label: "Vente et Location", color: "bg-blue-100 text-blue-800" },
 };
+
 const TYPE_BIEN = {
   house: "Maison / Villa",
   apartment: "Appartement",
@@ -55,15 +65,18 @@ const TYPE_BIEN = {
   cellier: "Cellier",
   cave: "Cave",
 };
+
 const LISTING_TYPE = {
   sale: "Vente",
   rent: "Location",
   both: "Vente et Location",
 };
+
 const TYPE_LOCATION = {
   longue_duree: "Longue durée",
   saisonniere: "Saisonnière",
 };
+
 interface ListingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -89,6 +102,8 @@ interface ListingModalProps {
     latitude: number | null;
     socialLoan?: boolean;
     isSHLMR?: boolean;
+    socialType?: string;
+    socialTypeLabel?: string;
   };
   mode: "create" | "edit";
   onSuccess?: () => void;
@@ -100,12 +115,14 @@ interface ListingModalProps {
     role?: "user" | "admin" | "professional";
   };
 }
+
 // Interface pour les images temporaires
 interface TemporaryImage {
   file: File;
   previewUrl: string;
   id: string;
 }
+
 // Composant Modal
 const Modal = ({
   isOpen,
@@ -121,12 +138,14 @@ const Modal = ({
   size?: "sm" | "md" | "lg" | "xl";
 }) => {
   if (!isOpen) return null;
+
   const sizeClasses = {
     sm: "max-w-md",
     md: "max-w-2xl",
     lg: "max-w-4xl",
     xl: "max-w-6xl",
   };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fadeIn">
       <div
@@ -148,6 +167,7 @@ const Modal = ({
     </div>
   );
 };
+
 export function ListingModal({
   open,
   onOpenChange,
@@ -163,9 +183,11 @@ export function ListingModal({
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
+  
   // Vérifier si l'utilisateur est un pro certifié
   const isProfessional =
     currentUser?.role === "professional" || currentUser?.role === "admin";
+
   const [formData, setFormData] = useState({
     // Étape 1 - Informations générales
     title: "",
@@ -189,10 +211,11 @@ export function ListingModal({
     status: "pending",
     latitude: null as number | null,
     longitude: null as number | null,
-    // Nouveau champ
+    // Types sociaux
     socialLoan: false,
     isSHLMR: false,
   });
+
   const etapes = [
     { numero: 1, titre: "Type et prix" },
     { numero: 2, titre: "Caractéristiques" },
@@ -200,8 +223,23 @@ export function ListingModal({
     { numero: 4, titre: "Médias" },
     { numero: 5, titre: "Publication" },
   ];
+
   useEffect(() => {
     if (open && listing) {
+      // Déterminer si PSLA ou SHLMR sont activés
+      const isPSLA = listing.socialLoan || listing.socialLoan || false;
+      const isSHLMR = listing.isSHLMR || false;
+      
+      // Extraire les types sociaux des features
+      const socialFeatures = (listing.features || []).filter(f => 
+        SOCIAL_TYPE_FEATURES.includes(f.toUpperCase())
+      );
+      
+      // Combiner les features existantes (sans les types sociaux)
+      const otherFeatures = (listing.features || []).filter(f => 
+        !SOCIAL_TYPE_FEATURES.includes(f.toUpperCase())
+      );
+
       setFormData({
         title: listing.title || "",
         type: listing.type || "apartment",
@@ -215,14 +253,15 @@ export function ListingModal({
         city: listing.city || "",
         listingType: listing.listingType || "sale",
         rentType: listing.rentType || "longue_duree",
-        features: listing.features || [],
+        features: [...otherFeatures, ...socialFeatures],
         images: listing.images || [],
         status: listing.status || "pending",
         latitude: listing.latitude ?? null,
         longitude: listing.longitude ?? null,
-        socialLoan: listing.socialLoan || false,
-        isSHLMR: listing.isSHLMR || false,
+        socialLoan: isPSLA,
+        isSHLMR: isSHLMR,
       });
+      
       setExistingImages(listing.images || []);
       setTemporaryImages([]);
       setImagesToDelete([]);
@@ -255,6 +294,7 @@ export function ListingModal({
       setEtape(1);
     }
   }, [open, listing]);
+
   // Mise à jour automatique du status si listingType change et que le status n'est pas pending
   useEffect(() => {
     if (formData.status !== "pending") {
@@ -277,6 +317,7 @@ export function ListingModal({
       }
     }
   }, [formData.listingType, formData.status]);
+
   // Nettoyer les URLs temporaires
   useEffect(() => {
     return () => {
@@ -285,6 +326,7 @@ export function ListingModal({
       });
     };
   }, [temporaryImages]);
+
   const handleImageUpload = async (files: File[]): Promise<string[]> => {
     const uploadedUrls: string[] = [];
     for (const file of files) {
@@ -310,6 +352,7 @@ export function ListingModal({
     }
     return uploadedUrls;
   };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
@@ -322,6 +365,7 @@ export function ListingModal({
       e.target.value = "";
     }
   };
+
   const removeTemporaryImage = (id: string) => {
     const imageToRemove = temporaryImages.find((img) => img.id === id);
     if (imageToRemove) {
@@ -329,10 +373,12 @@ export function ListingModal({
     }
     setTemporaryImages((prev) => prev.filter((img) => img.id !== id));
   };
+
   const removeExistingImage = (imageUrl: string) => {
     setExistingImages((prev) => prev.filter((img) => img !== imageUrl));
     setImagesToDelete((prev) => [...prev, imageUrl]);
   };
+
   const uploadAllImages = async (): Promise<string[]> => {
     if (temporaryImages.length === 0) return [];
     setUploadingImages(true);
@@ -344,8 +390,10 @@ export function ListingModal({
       setUploadingImages(false);
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     // Validation des champs requis avant soumission
     if (!formData.title.trim()) {
       toast.error("Veuillez entrer un titre pour l'annonce");
@@ -375,15 +423,19 @@ export function ListingModal({
       toast.error("Veuillez ajouter au moins une image");
       return;
     }
+
     setLoading(true);
     try {
       // Uploader toutes les nouvelles images
       const newImageUrls = await uploadAllImages();
+      
       // Combiner les images existantes (sans celles supprimées) avec les nouvelles
       const finalImages = [
         ...existingImages.filter((img) => !imagesToDelete.includes(img)),
         ...newImageUrls,
       ];
+
+      // Préparer le payload selon le schéma du backend
       const payload = {
         title: formData.title,
         type: formData.type,
@@ -397,16 +449,18 @@ export function ListingModal({
         city: formData.city,
         listingType: formData.listingType,
         rentType: formData.rentType,
-        features: formData.features,
+        features: formData.features, // Inclut les types sociaux SHUR, SIDR, etc.
         images: finalImages,
         status: formData.status,
         latitude: formData.latitude,
         longitude: formData.longitude,
-        socialLoan: formData.socialLoan,
-        isSHLMR: formData.isSHLMR,
+        socialLoan: formData.socialLoan, // PSLA
+        isSHLMR: formData.isSHLMR, // SHLMR
         ownerId: listing?.ownerId || currentUser?.id || "default-owner-id",
       };
-      console.log("Payload envoyé:", payload); // Pour debug
+
+      console.log("Payload envoyé:", payload);
+
       if (mode === "create") {
         await api.post("/properties", payload);
         toast.success("Annonce créée avec succès");
@@ -414,6 +468,7 @@ export function ListingModal({
         await api.put(`/properties/${listing?.id}`, payload);
         toast.success("Annonce modifiée avec succès");
       }
+      
       onOpenChange(false);
       if (onSuccess) {
         onSuccess();
@@ -429,6 +484,7 @@ export function ListingModal({
       setLoading(false);
     }
   };
+
   const etapeSuivante = () => {
     // Validation avant de passer à l'étape suivante
     if (etape === 1) {
@@ -473,9 +529,11 @@ export function ListingModal({
     }
     if (etape < 5) setEtape(etape + 1);
   };
+
   const etapePrecedente = () => {
     if (etape > 1) setEtape(etape - 1);
   };
+
   const equipementsDisponibles = [
     "pool",
     "garden",
@@ -487,6 +545,7 @@ export function ListingModal({
     "air_conditioning",
     "fiber_optic",
   ];
+
   const allImages = [
     ...existingImages.map((url) => ({
       type: "existing" as const,
@@ -499,6 +558,7 @@ export function ListingModal({
       id: img.id,
     })),
   ];
+
   const handleLocationChange = (lat: number, lng: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -506,6 +566,84 @@ export function ListingModal({
       longitude: lng,
     }));
   };
+
+  // Fonction pour gérer le changement de type social
+  const handleSocialTypeChange = (type: string, isChecked: boolean) => {
+    setFormData(prev => {
+      let newFeatures = [...prev.features];
+      
+      if (SOCIAL_TYPE_FEATURES.includes(type)) {
+        // Pour SHUR, SIDR, etc. (stockés dans features)
+        if (isChecked) {
+          // Ajouter le type et décocher PSLA/SHLMR
+          if (!newFeatures.some(f => f.toUpperCase() === type)) {
+            newFeatures.push(type);
+          }
+          return {
+            ...prev,
+            socialLoan: false,
+            isSHLMR: false,
+            features: newFeatures
+          };
+        } else {
+          // Retirer le type
+          newFeatures = newFeatures.filter(f => f.toUpperCase() !== type);
+          return { ...prev, features: newFeatures };
+        }
+      }
+      
+      return prev;
+    });
+  };
+
+  // Fonction pour gérer PSLA/SHLMR (mutuellement exclusifs)
+  const handleDedicatedSocialTypeChange = (type: "PSLA" | "SHLMR" | "none") => {
+    setFormData(prev => {
+      let newFeatures = [...prev.features];
+      
+      // Retirer tous les types sociaux des features
+      newFeatures = newFeatures.filter(f => 
+        !SOCIAL_TYPE_FEATURES.includes(f.toUpperCase())
+      );
+      
+      if (type === "PSLA") {
+        return {
+          ...prev,
+          socialLoan: true,
+          isSHLMR: false,
+          features: newFeatures
+        };
+      } else if (type === "SHLMR") {
+        return {
+          ...prev,
+          isSHLMR: true,
+          socialLoan: false,
+          features: newFeatures
+        };
+      } else {
+        // Aucun type social
+        return {
+          ...prev,
+          socialLoan: false,
+          isSHLMR: false,
+          features: newFeatures
+        };
+      }
+    });
+  };
+
+  // Vérifier si un type social spécifique est sélectionné
+  const isSocialTypeSelected = (type: string) => {
+    if (SOCIAL_TYPE_FEATURES.includes(type)) {
+      return formData.features.some(f => f.toUpperCase() === type);
+    } else if (type === "PSLA") {
+      return formData.socialLoan;
+    } else if (type === "SHLMR") {
+      return formData.isSHLMR;
+    }
+    return false;
+  };
+
   return (
     <>
       {/* Modal de sélection de position */}
@@ -516,6 +654,7 @@ export function ListingModal({
         longitude={formData.longitude}
         onLocationChange={handleLocationChange}
       />
+      
       <Modal
         isOpen={open}
         onClose={() => onOpenChange(false)}
@@ -554,13 +693,11 @@ export function ListingModal({
                 </div>
               ))}
             </div>
-            <div
-              className="text-center font-medium"
-              style={{ color: "#556B2F" }}
-            >
+            <div className="text-center font-medium" style={{ color: "#556B2F" }}>
               {etapes.find((s) => s.numero === etape)?.titre}
             </div>
           </div>
+
           {/* Étape 1 - Type et prix */}
           {etape === 1 && (
             <div className="space-y-6 animate-fadeIn">
@@ -581,9 +718,9 @@ export function ListingModal({
                   ))}
                 </select>
               </div>
+              
               {/* Ajouter le champ rentType si le type est location */}
-              {(formData.listingType === "rent" ||
-                formData.listingType === "both") && (
+              {(formData.listingType === "rent" || formData.listingType === "both") && (
                 <div className="mt-4">
                   <Label className="block mb-2">Type de location *</Label>
                   <select
@@ -602,6 +739,7 @@ export function ListingModal({
                   </select>
                 </div>
               )}
+
               <div>
                 <Label className="block mb-2">Type de bien *</Label>
                 <select
@@ -619,6 +757,7 @@ export function ListingModal({
                   ))}
                 </select>
               </div>
+
               <div>
                 <Label className="block mb-2">Prix *</Label>
                 <div className="relative">
@@ -638,6 +777,7 @@ export function ListingModal({
                   />
                 </div>
               </div>
+
               <div>
                 <Label className="block mb-2">Titre de l'annonce *</Label>
                 <Input
@@ -649,6 +789,7 @@ export function ListingModal({
                   placeholder="Ex: Superbe appartement vue panoramique..."
                 />
               </div>
+
               <div>
                 <Label className="block mb-2">Description *</Label>
                 <Textarea
@@ -663,6 +804,7 @@ export function ListingModal({
               </div>
             </div>
           )}
+
           {/* Étape 2 - Caractéristiques */}
           {etape === 2 && (
             <div className="space-y-6 animate-fadeIn">
@@ -711,6 +853,7 @@ export function ListingModal({
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label className="block mb-2">Salles de bain</Label>
@@ -724,6 +867,7 @@ export function ListingModal({
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-1 gap-6">
                 <div>
                   <Label className="block mb-2">Adresse complète *</Label>
@@ -751,10 +895,11 @@ export function ListingModal({
                     onChange={(e) =>
                       setFormData({ ...formData, city: e.target.value })
                     }
-                    placeholder="Ex: Paris"
+                    placeholder="Ex: Réunion"
                   />
                 </div>
               </div>
+
               {/* Sélection de la position */}
               <div>
                 <Label className="block mb-2">Position sur la carte</Label>
@@ -779,61 +924,86 @@ export function ListingModal({
                   Permet d'afficher le bien sur la carte.
                 </div>
               </div>
-              {/* Groupe d'options spéciales mutuellement exclusives - Seulement pour les pros */}
+
+              {/* Groupe d'options spéciales - Types sociaux (Seulement pour les pros) */}
               {isProfessional && (
                 <div className="mt-6 p-4 border rounded-lg">
+                  <h3 className="font-medium mb-3" style={{ color: "#556B2F" }}>
+                    Type de logement social
+                  </h3>
+                  
                   <div className="space-y-3">
-                    {/* Option 2 : Prêt Social Location Accession - COMPORTEMENT TOGGLE */}
+                    {/* Option 1 : Aucun type social */}
                     <div className="flex items-center space-x-2">
                       <input
-                        type="checkbox"
-                        id="socialLoan"
-                        checked={formData.socialLoan}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          setFormData((prev) => ({
-                            ...prev,
-                            socialLoan: isChecked,
-                            // Si on coche Prêt Social, on décoche SHLMR
-                            isSHLMR: isChecked ? false : prev.isSHLMR,
-                          }));
-                        }}
+                        type="radio"
+                        id="social-none"
+                        name="socialOptions"
+                        checked={!formData.socialLoan && !formData.isSHLMR && 
+                          !formData.features.some(f => 
+                            SOCIAL_TYPE_FEATURES.includes(f.toUpperCase())
+                          )}
+                        onChange={() => handleDedicatedSocialTypeChange("none")}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <Label
-                        htmlFor="socialLoan"
-                        className="text-sm font-medium"
-                      >
+                      <Label htmlFor="social-none" className="text-sm font-medium">
+                        Aucun type social
+                      </Label>
+                    </div>
+
+                    {/* Option 2 : PSLA */}
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="social-psla"
+                        name="socialOptions"
+                        checked={formData.socialLoan}
+                        onChange={() => handleDedicatedSocialTypeChange("PSLA")}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <Label htmlFor="social-psla" className="text-sm font-medium">
                         Prêt Social Location Accession (PSLA)
                       </Label>
                     </div>
 
-                    {/* Option 3 : SHLMR - COMPORTEMENT TOGGLE */}
+                    {/* Option 3 : SHLMR */}
                     <div className="flex items-center space-x-2">
                       <input
-                        type="checkbox"
-                        id="isSHLMR"
+                        type="radio"
+                        id="social-shlmr"
+                        name="socialOptions"
                         checked={formData.isSHLMR}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          setFormData((prev) => ({
-                            ...prev,
-                            isSHLMR: isChecked,
-                            // Si on coche SHLMR, on décoche Prêt Social
-                            socialLoan: isChecked ? false : prev.socialLoan,
-                          }));
-                        }}
+                        onChange={() => handleDedicatedSocialTypeChange("SHLMR")}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <Label htmlFor="isSHLMR" className="text-sm font-medium">
-                        SHLMR (Logement Social)
+                      <Label htmlFor="social-shlmr" className="text-sm font-medium">
+                        SHLMR (Société Immobilière)
                       </Label>
+                    </div>
+
+                    {/* Autres types (SHUR, SIDR, SODIAC, SEDRE, SEMAC) */}
+                    <div className="grid grid-cols-2 gap-2 mt-2 pl-4">
+                      {SOCIAL_TYPE_FEATURES.map((type) => (
+                        <div key={type} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`social-${type}`}
+                            checked={isSocialTypeSelected(type)}
+                            onChange={(e) => handleSocialTypeChange(type, e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <Label htmlFor={`social-${type}`} className="text-sm font-medium">
+                            {type}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               )}
             </div>
           )}
+
           {/* Étape 3 - Équipements */}
           {etape === 3 && (
             <div className="space-y-6 animate-fadeIn">
@@ -841,10 +1011,7 @@ export function ListingModal({
                 <Label className="block mb-4">Équipements et commodités</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {equipementsDisponibles.map((equipement) => (
-                    <div
-                      key={equipement}
-                      className="flex items-center space-x-2"
-                    >
+                    <div key={equipement} className="flex items-center space-x-2">
                       <input
                         type="checkbox"
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
@@ -874,6 +1041,7 @@ export function ListingModal({
               </div>
             </div>
           )}
+
           {/* Étape 4 - Médias */}
           {etape === 4 && (
             <div className="space-y-6 animate-fadeIn">
@@ -885,13 +1053,8 @@ export function ListingModal({
                   }`}
                 >
                   <Upload className="mx-auto mb-3 text-gray-400" size={48} />
-                  <div
-                    className="text-lg font-semibold mb-2"
-                    style={{ color: "#0A0A0A" }}
-                  >
-                    {uploadingImages
-                      ? "Upload en cours..."
-                      : "Ajouter des photos"}
+                  <div className="text-lg font-semibold mb-2" style={{ color: "#0A0A0A" }}>
+                    {uploadingImages ? "Upload en cours..." : "Ajouter des photos"}
                   </div>
                   <div className="text-sm mb-4" style={{ color: "#5A6470" }}>
                     Glissez-déposez vos photos ou cliquez pour parcourir
@@ -926,6 +1089,7 @@ export function ListingModal({
                   </Label>
                 </div>
               </div>
+
               {allImages.length > 0 && (
                 <div>
                   <div className="flex justify-between items-center mb-2">
@@ -972,18 +1136,19 @@ export function ListingModal({
                   </div>
                 </div>
               )}
+
               {allImages.length === 0 && !uploadingImages && (
                 <div className="text-center py-8 text-gray-500">
                   <Home className="mx-auto mb-3 text-gray-300" size={48} />
                   <p>Aucune image sélectionnée</p>
                   <p className="text-sm">
-                    Ajoutez au moins une photo pour rendre votre annonce plus
-                    attractive
+                    Ajoutez au moins une photo pour rendre votre annonce plus attractive
                   </p>
                 </div>
               )}
             </div>
           )}
+
           {/* Étape 5 - Publication */}
           {etape === 5 && (
             <div className="space-y-6 animate-fadeIn">
@@ -1055,6 +1220,7 @@ export function ListingModal({
                   </div>
                 </div>
               </div>
+
               <Card
                 className="p-6 border-2"
                 style={{ backgroundColor: "#F5F5DC", borderColor: "#6B8E23" }}
@@ -1097,44 +1263,31 @@ export function ListingModal({
                       {LISTING_TYPE[formData.listingType]}
                     </span>
                   </div>
-                  {(formData.listingType === "rent" ||
-                    formData.listingType === "both") && (
+                  {(formData.listingType === "rent" || formData.listingType === "both") && (
                     <div className="flex justify-between">
-                      <span style={{ color: "#8B4513" }}>
-                        Type de location:
-                      </span>
-                      <span
-                        className="font-medium"
-                        style={{ color: "#556B2F" }}
-                      >
+                      <span style={{ color: "#8B4513" }}>Type de location:</span>
+                      <span className="font-medium" style={{ color: "#556B2F" }}>
                         {TYPE_LOCATION[formData.rentType]}
                       </span>
                     </div>
                   )}
+                  
+                  {/* Informations sur le type social */}
                   {isProfessional && (
                     <>
                       <div className="flex justify-between">
-                        <span style={{ color: "#8B4513" }}>
-                          Prêt Social (PSLA):
-                        </span>
-                        <span
-                          className="font-medium"
-                          style={{ color: "#556B2F" }}
-                        >
-                          {formData.socialLoan ? "Oui" : "Non"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span style={{ color: "#8B4513" }}>SHLMR:</span>
-                        <span
-                          className="font-medium"
-                          style={{ color: "#556B2F" }}
-                        >
-                          {formData.isSHLMR ? "Oui" : "Non"}
+                        <span style={{ color: "#8B4513" }}>Type social:</span>
+                        <span className="font-medium" style={{ color: "#556B2F" }}>
+                          {formData.socialLoan ? "PSLA (Prêt Social Location Accession)" :
+                           formData.isSHLMR ? "SHLMR (Société Immobilière)" :
+                           formData.features.some(f => SOCIAL_TYPE_FEATURES.includes(f.toUpperCase())) ? 
+                           formData.features.filter(f => SOCIAL_TYPE_FEATURES.includes(f.toUpperCase())).join(", ") :
+                           "Aucun"}
                         </span>
                       </div>
                     </>
                   )}
+
                   <div className="flex justify-between">
                     <span style={{ color: "#8B4513" }}>Images:</span>
                     <span className="font-medium" style={{ color: "#556B2F" }}>
@@ -1162,6 +1315,7 @@ export function ListingModal({
               </Card>
             </div>
           )}
+
           {/* Navigation entre étapes */}
           <div
             className="flex justify-between pt-6 mt-6"
@@ -1227,6 +1381,7 @@ export function ListingModal({
           </div>
         </form>
       </Modal>
+
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
