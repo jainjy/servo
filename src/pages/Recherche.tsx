@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home, MapPin, Users, Loader, TreePalm, X, Mail, Phone, DollarSign, Ruler, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -70,11 +70,19 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   // en haut du composant Recherche (juste après les useState)
   const defaultCenter = useMemo(() => [-21.1351, 55.2471] as [number, number], []);
 
-  // Fonction de fermeture simplifiée qui redirige toujours vers la page d'accueil
+  // Fonction de fermeture qui ferme d'abord les modales puis redirige
   const handleClose = () => {
+    // Fermer toutes les modales ouvertes
+    setHistoryOpen(false);
+    setDevisModal({ isOpen: false, prestation: null });
+    setVisiteModal({ isOpen: false, property: null });
+    setShowMapModal(false);
+    setShowNearbyModal(false);
+    
     if (typeof onClick === 'function') {
       onClick();
     }
+    
     // Rediriger vers la page d'accueil
     navigate('/');
   };
@@ -1005,7 +1013,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
               {item.type}
             </span>
           </div>
-         
+
         </div>
       );
     }
@@ -1043,8 +1051,9 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
           {/* Barre de recherche normale (non fixe) */}
           <div className="mb-6">
             <div className="p-4 flex items-center gap-3">
-              <div className="p-1 lg:block hidden">
-                <ServoLogo />
+              <div className=" relative lg:block hidden cursor-pointer" onClick={handleClose}>
+                  <ServoLogo />
+                  <div className="absolute inset-0"></div>
               </div>
 
               <div className="relative bg-white rounded-lg flex-1" onClick={() => setShowMapModal(false)}>
