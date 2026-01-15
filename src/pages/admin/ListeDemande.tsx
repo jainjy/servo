@@ -125,7 +125,7 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
       {/* Effet de bordure élégant */}
-      <div 
+      <div
         className="absolute left-0 top-0 bottom-0 w-1"
         style={{ backgroundColor: colorTheme.primaryDark }}
       ></div>
@@ -136,7 +136,7 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
           <div className={`p-2.5 rounded-lg ${statusColors.icon} transition-transform group-hover:scale-110`}>
             {getMetierIcon(demande.metierLabel)}
           </div>
-          
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-semibold text-gray-900 group-hover:text-[#6B8E23] transition-colors duration-200 truncate">
@@ -149,13 +149,13 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
                 </span>
               )}
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-2">
               <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${urgencyColors}`}>
                 {demande.urgence === "Urgent" && <AlertCircle className="w-3 h-3" />}
                 {demande.urgence}
               </span>
-              
+
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                 <MapPin className="w-3 h-3" />
                 {demande.lieu}
@@ -163,7 +163,7 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex flex-col items-end gap-2">
           <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${statusColors.bg} ${statusColors.text} ${statusColors.border} border`}>
             {demande.statut}
@@ -184,7 +184,7 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+      <div className="flex flex-col md:flex-row items-center justify-between pt-4 border-t border-gray-100">
         <div className="flex items-center gap-4 text-sm text-gray-500">
           <span className="flex items-center gap-1.5">
             <User className="w-4 h-4" />
@@ -192,14 +192,14 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
               {demande.client}
             </span>
           </span>
-          
+
           <span className="flex items-center gap-1.5">
             <div className="p-1 rounded bg-gray-100">
               {getMetierIcon(demande.metierLabel)}
             </div>
             <span>{demande.metierLabel}</span>
           </span>
-          
+
           {demande.budget && (
             <span className="flex items-center gap-1.5 font-medium" style={{ color: colorTheme.secondaryText }}>
               <DollarSign className="w-4 h-4" />
@@ -207,7 +207,7 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
             </span>
           )}
         </div>
-        
+
         <Link
           to={`/admin/messages/${demande.id}`}
           state={{ demande }}
@@ -237,19 +237,19 @@ const StatsCardAdmin = ({
   loading,
 }) => {
   const colorClasses = {
-    green: { 
+    green: {
       bg: "bg-gradient-to-br from-emerald-500 to-emerald-600",
       text: "text-emerald-600"
     },
-    orange: { 
+    orange: {
       bg: "bg-gradient-to-br from-amber-500 to-amber-600",
       text: "text-amber-600"
     },
-    red: { 
+    red: {
       bg: "bg-gradient-to-br from-red-500 to-red-600",
       text: "text-red-600"
     },
-    blue: { 
+    blue: {
       bg: "bg-gradient-to-br from-blue-500 to-blue-600",
       text: "text-blue-600"
     },
@@ -278,7 +278,7 @@ const StatsCardAdmin = ({
             {number}
           </div>
           <div className="text-gray-600 text-sm">{label}</div>
-          
+
           {trend && (
             <div className={`inline-flex items-center gap-1 mt-2 px-2 py-1 rounded-full text-xs ${trend > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
               <TrendingUp className={`w-3 h-3 ${trend > 0 ? '' : 'rotate-180'}`} />
@@ -286,12 +286,12 @@ const StatsCardAdmin = ({
             </div>
           )}
         </div>
-        
+
         <div className={`p-3 rounded-xl ${colors.bg} text-white transition-transform group-hover:scale-110`}>
           <IconComponent className="w-5 h-5" />
         </div>
       </div>
-      
+
       {badge && (
         <div className="mt-3 pt-3 border-t border-gray-100">
           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${badge.color}`}>
@@ -309,18 +309,16 @@ const FilterButton = ({ label, count, active, onClick, icon }) => {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 border ${
-        active
-          ? `text-white border-[#6B8E23] shadow-sm`
-          : "text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-      }`}
+      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 border ${active
+        ? `text-white border-[#6B8E23] shadow-sm`
+        : "text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+        }`}
       style={active ? { backgroundColor: colorTheme.logo } : {}}
     >
       {icon && <icon className="w-4 h-4" />}
       <span>{label}</span>
-      <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-        active ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
-      }`}>
+      <span className={`text-xs px-1.5 py-0.5 rounded-full ${active ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+        }`}>
         {count}
       </span>
     </button>
@@ -490,27 +488,27 @@ const AdminDemandesPage = () => {
       count: filterCounts["En attente"],
       icon: Clock,
     },
-    { 
-      key: "En cours", 
-      label: "En cours", 
+    {
+      key: "En cours",
+      label: "En cours",
       count: filterCounts["En cours"],
       icon: Target,
     },
-    { 
-      key: "Validée", 
-      label: "Validées", 
+    {
+      key: "Validée",
+      label: "Validées",
       count: filterCounts["Validée"],
       icon: CheckCircle,
     },
-    { 
-      key: "Terminée", 
-      label: "Terminées", 
+    {
+      key: "Terminée",
+      label: "Terminées",
       count: filterCounts["Terminée"],
       icon: ShieldCheck,
     },
-    { 
-      key: "Refusée", 
-      label: "Refusées", 
+    {
+      key: "Refusée",
+      label: "Refusées",
       count: filterCounts["Refusée"],
       icon: AlertCircle,
     },
@@ -546,36 +544,28 @@ const AdminDemandesPage = () => {
         {/* Header élégant */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <div 
-                  className="p-2 rounded-lg"
-                  style={{ backgroundColor: colorTheme.logo + '20' }}
-                >
-                  <BarChart3 
-                    className="w-5 h-5" 
-                    style={{ color: colorTheme.logo }}
-                  />
-                </div>
-                <h1 
-                  className="text-2xl font-bold"
-                  style={{ color: colorTheme.secondaryText }}
-                >
-                  Tableau de bord des demandes
-                </h1>
+            <div className="flex flex-col md:flex-row items-center gap-3">
+              <div className="flex flex-col md:flex-row items-center gap-2 mb-1">
+                  <div>
+                    <h1
+                      className="text-2xl font-bold"
+                      style={{ color: colorTheme.secondaryText }}
+                    >
+                      Tableau de bord des demandes
+                    </h1>
+                    <p className="text-gray-600">
+                      Gérez et suivez toutes les demandes de services
+                    </p>
+                  </div>
+                  <button className="inline-flex items-center md:ml-96  gap-2 px-4 py-2.5 ml-2  rounded-lg font-medium border border-gray-200 hover:border-gray-300 transition-colors duration-200">
+                    <Download className="w-4 h-4" />
+                    <span>Exporter</span>
+                  </button>
               </div>
-              <p className="text-gray-600">
-                Gérez et suivez toutes les demandes de services
-              </p>
             </div>
-            
-            <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium border border-gray-200 hover:border-gray-300 transition-colors duration-200">
-              <Download className="w-4 h-4" />
-              <span>Exporter</span>
-            </button>
           </div>
-          
-          <div 
+
+          <div
             className="h-1 w-20 rounded-full mt-2"
             style={{ backgroundColor: colorTheme.primaryDark }}
           ></div>
@@ -607,7 +597,7 @@ const AdminDemandesPage = () => {
                   type="text"
                   placeholder="Rechercher par titre, client, ville..."
                   className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
-                  style={{ 
+                  style={{
                     focusRingColor: colorTheme.logo,
                     borderColor: colorTheme.separator
                   }}
@@ -624,7 +614,7 @@ const AdminDemandesPage = () => {
               </div>
               <select
                 className="flex-1 lg:flex-none bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
-                style={{ 
+                style={{
                   focusRingColor: colorTheme.logo,
                   borderColor: colorTheme.separator
                 }}
@@ -666,7 +656,7 @@ const AdminDemandesPage = () => {
               {filteredDemandes.length > 0 ? "s" : ""}
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
             <Filter className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600">
@@ -715,11 +705,11 @@ const AdminDemandesPage = () => {
             ))
           ) : (
             <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
-              <div 
+              <div
                 className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: colorTheme.logo + '10' }}
               >
-                <Search 
+                <Search
                   className="w-10 h-10"
                   style={{ color: colorTheme.logo }}
                 />

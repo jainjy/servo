@@ -159,8 +159,8 @@ export default function ServiceCategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row items-center justify-between">
+        <div className="flex flex-col md:flex-row items-center gap-4">
           <Link
             to="/admin/services"
             className="flex items-center gap-2 text-sm hover:text-[#6B8E23] transition-colors"
@@ -182,7 +182,7 @@ export default function ServiceCategoriesPage() {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-col md:flex-row">
           <Button
             onClick={() => setIsAssignModalOpen(true)}
             variant="outline"
