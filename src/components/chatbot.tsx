@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaRobot, FaTimes, FaPaperPlane, FaUser } from 'react-icons/fa';
-import './ChatBot.css';
+import './chatbot.css';
 
 const ChatBot = () => {
   const [messages, setMessages] = useState([

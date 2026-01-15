@@ -9,25 +9,25 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const navigate = useNavigate();
   const [isApkModalOpen, setIsApkModalOpen] = useState(false);
-  
+
   const partners = [
-    { 
-      name: "Olimmo Réunion", 
+    {
+      name: "Olimmo Réunion",
       url: "/professional/89220134-7f2f-4a82-9660-1e422cad9b0d",
       logo: "/olimmo.png"
     },
-    { 
-      name: "Agence Partenaire", 
+    {
+      name: "Agence Partenaire",
       url: "#",
-      logo: "/agence.png" 
+      logo: "/agence.png"
     },
-    { 
-      name: "Expert Immobilier", 
+    {
+      name: "Expert Immobilier",
       url: "#",
       logo: "/expert.jpg"
     },
-    { 
-      name: "Banque Partenaire", 
+    {
+      name: "Banque Partenaire",
       url: "#",
       logo: "/banque.png"
     },
@@ -105,14 +105,15 @@ const Footer: React.FC = () => {
               <div className="flex items-start gap-1.5">
                 <MapPin className="w-3 h-3 text-white/70 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-white text-xs">123 Rue de l'Immobilier</p>
-                  <p className="text-white/60 text-xs">75000 Paris</p>
+                  <p className="text-white text-xs">45 rue monseigneur de Beaumont</p>
+                  <p className="text-white/60 text-xs">Saint Denis</p>
                 </div>
               </div>
 
-              <a href="tel:+33123456789" className="flex items-center gap-1.5 group">
+              <a href="tel:+33 6 92 66 77 55" className="flex items-center gap-1.5 group">
                 <Phone className="w-3 h-3 text-white/70 flex-shrink-0" />
-                <span className="text-white/80 text-xs group-hover:text-white transition-colors">+33 1 23 45 67 89</span>
+                <span className="text-white/80 text-xs group-hover:text-white transition-colors">+33 6 92 66 77 55
+                </span>
               </a>
 
               <a href="mailto:contact@oliplus.fr" className="flex items-center gap-1.5 group">
@@ -157,7 +158,7 @@ const Footer: React.FC = () => {
           <h3 className="text-xs font-semibold text-white/90 mb-1.5 text-center">
             Partenaires officiels
           </h3>
-          
+
           <div className="grid grid-cols-4 gap-1 max-w-md mx-auto">
             {partners.map((partner, index) => (
               <a
@@ -167,8 +168,8 @@ const Footer: React.FC = () => {
                 className="p-1 bg-white/5 rounded border border-white/10 hover:border-[#8B4513]/30 transition-all duration-150 flex flex-col items-center"
               >
                 <div className="w-6 h-6 mb-0.5 flex items-center justify-center bg-white/5 rounded border border-white/10 overflow-hidden">
-                  <img 
-                    src={partner.logo} 
+                  <img
+                    src={partner.logo}
                     alt={partner.name}
                     className="w-full h-full object-contain p-0.5"
                     onError={(e) => {
@@ -177,8 +178,7 @@ const Footer: React.FC = () => {
                       const parent = target.parentElement;
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="text-[10px] font-bold ${
-                            partner.name === "Olimmo Réunion" ? 'text-[#8B4513]' : 'text-white/60'
+                          <div class="text-[10px] font-bold ${partner.name === "Olimmo Réunion" ? 'text-[#8B4513]' : 'text-white/60'
                           }">
                             ${partner.name.split(' ')[0].charAt(0)}
                           </div>
