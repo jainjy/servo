@@ -391,8 +391,8 @@ const PortraitsAdmin = () => {
         {/* Barre d'outils */}
         <div className="bg-white rounded-lg shadow mb-6 p-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex-1">
-              <form onSubmit={handleSearch} className="flex gap-2">
+            <div className="flex-1 ">
+              <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <input
                   type="text"
                   value={searchTerm}

@@ -333,7 +333,7 @@ const FinancementDemandes: React.FC = () => {
       }}>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Barre de recherche */}
-          <div style={{ flex: '1', minWidth: '300px' }}>
+          <div style={{ flex: '1', minWidth: '50px' }}>
             <input
               type="text"
               placeholder="Rechercher par nom, email ou téléphone..."

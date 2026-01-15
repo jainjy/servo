@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaRobot, FaTimes, FaPaperPlane, FaUser } from 'react-icons/fa';
-import './ChatBot.css';
+import './chatbot.css';
 
 const ChatBot = () => {
   const [messages, setMessages] = useState([
@@ -87,12 +87,18 @@ const ChatBot = () => {
     return "Merci pour votre message ! Pour une réponse personnalisée, contactez OLIPLUS.RE :\n📞 06 92 66 77 55\n📧 contact@oliplus.re\n🌐 www.oliplus.re\n\nJe reste à votre disposition pour d'autres questions sur l'immobilier à La Réunion.";
   };
 
-  const sendMessage = () => {
-    if (!input.trim() || isLoading) return;
+  const sendMessage = (text = null) => {
+    const messageToSend = text || input;
+    
+    if (!messageToSend.trim() || isLoading) return;
 
-    const userMessage = { role: "user", content: input };
+    const userMessage = { role: "user", content: messageToSend };
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    
+    if (!text) {
+      setInput("");
+    }
+    
     setIsLoading(true);
 
     // Réponse instantanée
@@ -187,13 +193,14 @@ const ChatBot = () => {
               </div>
             ))}
             
+            {/* Indicateur "bot en train d'écrire" */}
             {isLoading && (
               <div className="message bot">
                 <div className="message-avatar">
                   <FaRobot />
                 </div>
-                <div className="message-content">
-                  <div className="typing">
+                <div className="message-content typing-indicator-message">
+                  <div className="three-dots-typing">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -210,7 +217,7 @@ const ChatBot = () => {
             {quickQuestions.map((question, index) => (
               <button
                 key={index}
-                onClick={() => setInput(question)}
+                onClick={() => sendMessage(question)}
                 className="question-btn"
               >
                 {question}
@@ -226,10 +233,9 @@ const ChatBot = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Votre message..."
-                
               />
               <button
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 disabled={!input.trim() || isLoading}
                 className="send-btn"
               >

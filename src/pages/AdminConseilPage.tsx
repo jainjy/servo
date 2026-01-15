@@ -653,14 +653,14 @@ const AdminConseilPage = () => {
     <div className="container mx-auto p-6 bg-[#FFFFFF]">
       {/* En-tête */}
       <div className="mb-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-[#8B4513]">Gestion des Demandes</h1>
             <p className="text-[#000000] mt-2 opacity-80">
               Gérez et suivez toutes les demandes de conseil et d'accompagnement
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <Button
               variant="outline"
               onClick={() => setShowStatsModal(true)}
@@ -757,7 +757,7 @@ const AdminConseilPage = () => {
 
       {/* Onglets */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList className="bg-[#F5F5F5] border border-[#D3D3D3]">
+        <TabsList className="bg-[#F5F5F5] border border-[#D3D3D3] h-auto grid grid-cols-1 md:grid-cols-2">
           <TabsTrigger 
             value="conseil" 
             className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white"

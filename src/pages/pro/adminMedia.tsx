@@ -1086,7 +1086,7 @@ const AdminMedia: React.FC = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate(-1)}
-                className="text-white p-3 rounded-xl transition-all duration-200 font-medium shadow-lg border group"
+                className="text-white p-3 rounded-xl transition-all hidden md:block duration-200 font-medium shadow-lg border group"
                 style={{ 
                   backgroundColor: theme.secondaryText,
                   borderColor: theme.secondaryText 
@@ -1100,7 +1100,7 @@ const AdminMedia: React.FC = () => {
                   e.currentTarget.style.borderColor = theme.secondaryText;
                 }}
               >
-                <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                <ArrowLeft size={20} className="group-hover:-translate-x-1  transition-transform" />
               </button>
               <div>
                 <h1 className="text-lg lg:text-3xl font-bold" style={{ color: theme.logo }}>Administration Podcasts Vidéo</h1>

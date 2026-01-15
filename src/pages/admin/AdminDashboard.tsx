@@ -256,7 +256,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-[#8B4513]">Dashboard</h1>
           <p className="text-muted-foreground">Vue d'ensemble de la plateforme Oliplus</p>

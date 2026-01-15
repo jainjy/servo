@@ -40,6 +40,7 @@ import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
 import Lottie from "lottie-react";
 import successAnimation from "@/assets/Meeting Time.json";
+import { api } from "@/lib/axios";
 
 // Fonction de validation des mots de passe
 const validatePassword = (password: string) => {
@@ -183,6 +184,22 @@ export default function MonComptePage() {
       confirmPassword: "",
     });
   };
+
+
+  const handleSend = async (e: React.FormEvent) => {
+    if(!user) return;
+    
+      try {
+        const response = await api.post("/oliplus-email/send-rgpd-confirmation", {
+          email: user.email
+        });
+        console.log("Email de bienvenue envoyé avec succès");
+      } catch (emailError: any) {
+        console.error("ÉCHEC COMPLET de l'envoi de l'email de bienvenue:");
+      }
+
+  };
+
   const handleSave = async () => {
     if (!user) return;
     try {
@@ -605,12 +622,25 @@ export default function MonComptePage() {
                     </Button>
                   </div>
                 </div>
+
                 {/* Infos compte */}
                 <div className="bg-[#FFFFFF] rounded-lg shadow-md p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-[#556B2F]" />
-                    Compte
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-[#556B2F]" />
+                      Compte
+                    </h3>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-[#556B2F] border-[#556B2F] hover:bg-[#556B2F] hover:text-white gap-2"
+                      onClick={handleSend}
+                    >
+                      Exporter vos données
+                    </Button>
+                  </div>
+
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Type</span>
@@ -636,6 +666,8 @@ export default function MonComptePage() {
                         </div>
                       </>
                     )}
+
+
                     <Separator className="bg-[#D3D3D3]" />
                     <div className="pt-2 mt-4">
                       <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg">
@@ -658,6 +690,9 @@ export default function MonComptePage() {
                       </div>
                     </div>
                   </div>
+
+
+
                 </div>
               </div>
               {/* COLONNE DROITE - Formulaires d'édition */}

@@ -744,12 +744,6 @@ const EntrepreneuriatAdmin = () => {
                 Gérez les interviews, ressources et événements
               </p>
             </div>
-            <Button
-              onClick={() => navigate("/admin")}
-              variant="outline"
-            >
-              Retour au dashboard
-            </Button>
           </div>
         </div>
       </header>
@@ -843,7 +837,7 @@ const EntrepreneuriatAdmin = () => {
               />
             </div>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Statut" />
@@ -868,8 +862,8 @@ const EntrepreneuriatAdmin = () => {
                 <SelectItem value="success">Success stories</SelectItem>
               </SelectContent>
             </Select>
-
-            <Button
+          </div>
+          <Button
               variant="outline"
               onClick={() => {
                 setSearchTerm("");
@@ -880,13 +874,12 @@ const EntrepreneuriatAdmin = () => {
               <Filter className="w-4 h-4 mr-2" />
               Réinitialiser
             </Button>
-          </div>
         </div>
 
         {/* Tabs et contenu */}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row  justify-between items-center">
               <div>
                 <CardTitle>Contenu Entrepreneuriat</CardTitle>
                 <CardDescription>
@@ -906,7 +899,7 @@ const EntrepreneuriatAdmin = () => {
                     setShowEventModal(true);
                   }
                 }}
-                className="bg-[#556B2F] hover:bg-[#556B2F]/90"
+                className="bg-[#556B2F] mt-6 hover:bg-[#556B2F]/90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Ajouter
@@ -915,7 +908,7 @@ const EntrepreneuriatAdmin = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full md:grid-cols-3 grid-cols-1 h-auto">
                 <TabsTrigger value="interviews">
                   <PlayCircle className="w-4 h-4 mr-2" />
                   Interviews ({interviews.length})

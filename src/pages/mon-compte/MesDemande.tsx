@@ -55,34 +55,44 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
   const [loading, setLoading] = useState(false);
   const [selectedMetier, setSelectedMetier] = useState("");
 
-  // Charger les métiers et services au montage
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [metiersResponse, servicesResponse] = await Promise.all([
-          api.get("/metiers/all"),
-          api.get("/services"),
-        ]);
-        setMetiers(metiersResponse.data);
-        setServices(servicesResponse.data);
-      } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
-      }
-    };
-    fetchData();
-  }, []);
+ 
+ // Modifiez l'effet qui charge les données pour mieux gérer les erreurs
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const [metiersResponse, servicesResponse] = await Promise.all([
+        api.get("/metiers/all"),
+        api.get("/services"),
+      ]);
+      
+      // S'assurer que les données sont bien des tableaux
+      setMetiers(Array.isArray(metiersResponse.data) ? metiersResponse.data : []);
+      setServices(Array.isArray(servicesResponse.data) ? servicesResponse.data : []);
+    } catch (error) {
+      console.error("Erreur lors du chargement des données:", error);
+      setMetiers([]);
+      setServices([]);
+    }
+  };
+  fetchData();
+}, []);
 
   // Filtrer les services quand un métier est sélectionné
-  useEffect(() => {
-    if (selectedMetier) {
-      const filtered = services.filter((service) =>
-        service.metiers.some((metier) => metier.id === parseInt(selectedMetier))
-      );
-      setFilteredServices(filtered);
-    } else {
-      setFilteredServices(services);
-    }
-  }, [selectedMetier, services]);
+
+useEffect(() => {
+  if (selectedMetier && services && Array.isArray(services)) {
+    const filtered = services.filter((service) => {
+      // Vérifiez la structure de service.metiers
+      if (!service.metiers || !Array.isArray(service.metiers)) {
+        return false;
+      }
+      return service.metiers.some((metier) => metier.id === parseInt(selectedMetier));
+    });
+    setFilteredServices(filtered);
+  } else {
+    setFilteredServices(services || []);
+  }
+}, [selectedMetier, services]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -323,32 +333,37 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
               </div>
             </div>
 
-            {/* Service */}
-            <div className="space-y-3">
-              <label className="block text-gray-700 font-medium text-sm">
-                Service demandé
-              </label>
-              <div className="relative">
-                <select
-                  value={formData.serviceId}
-                  onChange={(e) =>
-                    handleInputChange("serviceId", e.target.value)
-                  }
-                  className="w-full bg-[#6B8E23]/5 border border-[#D3D3D3] px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent appearance-none transition-all duration-200"
-                  required
-                >
-                  <option value="">Sélectionnez un service</option>
-                  {filteredServices.map((service) => (
-                    <option key={service.id} value={service.id}>
-                      {service.name}
-                    </option>
-                  ))}
-                </select>
-                <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#8B4513] pointer-events-none">
-                  ▼
-                </span>
-              </div>
-            </div>
+           
+{/* Service */}
+<div className="space-y-3">
+  <label className="block text-gray-700 font-medium text-sm">
+    Service demandé
+  </label>
+  <div className="relative">
+    <select
+      value={formData.serviceId}
+      onChange={(e) =>
+        handleInputChange("serviceId", e.target.value)
+      }
+      className="w-full bg-[#6B8E23]/5 border border-[#D3D3D3] px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent appearance-none transition-all duration-200"
+      required
+    >
+      <option value="">Sélectionnez un service</option>
+      {filteredServices && Array.isArray(filteredServices) && filteredServices.length > 0 ? (
+        filteredServices.map((service) => (
+          <option key={service.id} value={service.id}>
+            {service.name}
+          </option>
+        ))
+      ) : (
+        <option value="" disabled>Aucun service disponible</option>
+      )}
+    </select>
+    <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#8B4513] pointer-events-none">
+      ▼
+    </span>
+  </div>
+</div>
 
             {/* Nombre d'artisans */}
             <div className="space-y-3">

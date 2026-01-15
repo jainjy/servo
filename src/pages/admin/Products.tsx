@@ -38,7 +38,7 @@ const ProductsPage = () => {
             </p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row items-center gap-3">
             <Button
               variant="outline"
               className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#556B2F] hover:border-[#6B8E23]"

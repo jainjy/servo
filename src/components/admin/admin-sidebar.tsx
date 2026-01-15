@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-// Remplacement du Link et du usePathname de Next.js
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils"; // Utilitaire cn (à s'assurer qu'il est disponible)
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
@@ -12,9 +11,7 @@ import {
   Plane,
   CreditCard,
   Newspaper,
-  Settings,
   ShieldCheck,
-  ChevronUp,
   ChevronDown,
   MessageCircle,
   FileCheck,
@@ -24,15 +21,14 @@ import {
   WalletCards,
   Globe,
   Wallet2Icon,
-  Scale,
   UserCog,
   Video,
   Image,
   Lightbulb,
   Briefcase,
+  Menu,
+  X,
 } from "lucide-react";
-// Remplacement de Image de next/image par la balise <img>
-import logo from "../../assets/logo.png";
 import ServoLogo from "../components/ServoLogo";
 
 const navigation = [
@@ -48,9 +44,8 @@ const navigation = [
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Annonces", href: "/admin/listings", icon: Building2 },
   { name: "Services", href: "/admin/services", icon: Wrench },
-
   {
-    name: "categorie de services",
+    name: "Categorie de services",
     href: "/admin/service-categories",
     icon: Tag,
   },
@@ -66,7 +61,7 @@ const navigation = [
   { name: "Demandes de services", href: "/admin/demandes", icon: FileCheck },
   { name: "Demandes de Conseil", href: "/admin/conseil", icon: UserCog },
   {
-    name: "demandes de Financements",
+    name: "Demandes de Financements",
     href: "/admin/financement-demandes",
     icon: FileText,
   },
@@ -76,7 +71,6 @@ const navigation = [
     icon: Globe,
   },
   { name: "Demandes de rendez-vous entreprise", href: "/admin/rendezvous", icon: Calendar },
-  // { name: "Droit de famille", href: "/admin/demandeDroitFamille", icon: Scale },
 
   // === SERVICES FINANCIERS ===
   {
@@ -87,22 +81,59 @@ const navigation = [
 
   // === MARKETING & COMMUNICATION ===
   { name: "Publicité", href: "/admin/publicite", icon: MessageCircle },
-  { name: "blog", href: "/admin/blog", icon: Newspaper },
+  { name: "Blog", href: "/admin/blog", icon: Newspaper },
   { name: "Portraits", href: "/admin/portraits", icon: Image },
   { name: "Gestion des Médias", href: "/admin/media", icon: Video },
   { name: "Bon Plans & Conseils", href: "/admin/conseils", icon: Lightbulb },
 ];
 
 export function AdminSidebar() {
-  // Remplacement de usePathname (Next.js) par useLocation (React Router DOM)
   const location = useLocation();
   const pathname = location.pathname;
+  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const [showAll, setShowAll] = useState(false);
+  // Fonction pour fermer le sidebar
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
 
-  // Séparation pour la barre mobile
-  const mainIcons = navigation.slice(0, 3);
-  const otherIcons = navigation.slice(3);
+  // Fonction pour fermer le sidebar quand on clique sur un lien
+  const handleLinkClick = () => {
+    closeSidebar();
+  };
+
+  // Fermer le sidebar quand la route change
+  useEffect(() => {
+    closeSidebar();
+  }, [pathname]);
+
+  // Empêcher le scroll du body quand le sidebar est ouvert
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isSidebarOpen]);
+
+  // Fermer le sidebar avec la touche Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeSidebar();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
 
   // Fonction pour grouper les éléments par catégorie
   const getNavigationSections = () => {
@@ -117,15 +148,12 @@ export function AdminSidebar() {
     };
 
     navigation.forEach((item) => {
-      // Dashboard & Administration
       if (["Dashboard", "Utilisateurs", "Audit"].includes(item.name)) {
         sections.dashboard.push(item);
       }
-      // Abonnements & Finances
       else if (["Abonnement Pro", "Paiements"].includes(item.name)) {
         sections.finances.push(item);
       }
-      // Annonces & Services
       else if (
         ["Annonces", "Services", "categorie de services", "Métiers", "Entrepreneuriat"].includes(
           item.name
@@ -133,27 +161,22 @@ export function AdminSidebar() {
       ) {
         sections.annoncesServices.push(item);
       }
-      // Réservations & Produits
       else if (["Réservations", "Produits", "Tourisme"].includes(item.name)) {
         sections.reservationsProduits.push(item);
       }
-      // Demandes
       else if (
         item.name.includes("Demandes") ||
         item.name.includes("demandes") ||
-        item.name === "Droit de famille" ||
         item.name === "Investissement International"
       ) {
         sections.demandes.push(item);
       }
-      // Services Financiers
       else if (
         item.name.includes("financiers") ||
         item.name.includes("Financement")
       ) {
         sections.servicesFinanciers.push(item);
       }
-      // Marketing & Communication
       else if (["Publicité", "blog", "Portraits", "Gestion des Médias", "Bon Plans & Conseils"].includes(item.name)) {
         sections.marketing.push(item);
       }
@@ -174,12 +197,12 @@ export function AdminSidebar() {
         </h3>
         <div className="space-y-1">
           {items.map((item) => {
-            // Logique d'activité du lien pour les routes exactes (ajustez si vous voulez des correspondances partielles)
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
-                to={item.href} // Remplacement de 'href' par 'to'
+                to={item.href}
+                onClick={handleLinkClick}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   isActive
@@ -188,7 +211,7 @@ export function AdminSidebar() {
                 )}
               >
                 <item.icon className="h-4 w-4" />
-                {item.name}
+                <span className="truncate">{item.name}</span>
               </Link>
             );
           })}
@@ -199,8 +222,25 @@ export function AdminSidebar() {
 
   return (
     <>
+      {/* Bouton Burger pour mobile */}
+      <button
+        onClick={() => setIsSidebarOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-40 p-2 rounded-lg bg-[#556B2F] text-white shadow-lg hover:bg-[#6B8E23] transition-colors"
+        aria-label="Ouvrir le menu"
+      >
+        <Menu className="h-6 w-6" />
+      </button>
+
+      {/* Overlay pour mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-50 md:hidden transition-opacity duration-300"
+          onClick={closeSidebar}
+        />
+      )}
+
       {/* Sidebar desktop */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-[#D3D3D3] bg-[#FFFFFF]">
+      <aside className="hidden md:flex w-64 flex-col border-r border-[#D3D3D3] bg-[#FFFFFF] min-h-screen">
         <div className="flex h-16 items-center gap-2 border-b border-[#D3D3D3] px-6">
           <Link to="/" className="flex items-center gap-2">
             <ServoLogo />
@@ -232,87 +272,53 @@ export function AdminSidebar() {
         </nav>
       </aside>
 
-      {/* Sidebar mobile */}
-      <nav className="fixed bg-[#FFFFFF] bottom-0 left-0 right-0 z-40 bg-sidebar border-t border-[#D3D3D3] py-1 shadow-lg md:hidden">
-        <div
-          className={cn(
-            "grid gap-1 px-2 place-items-center",
-            showAll ? "grid-cols-4 sm:grid-cols-4" : "grid-cols-4"
-          )}
-        >
-          {/* Les 3 premières icônes principales */}
-          {mainIcons.map((item, i) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                to={item.href} // Remplacement de 'href' par 'to'
-                className={cn(
-                  "flex flex-col items-center justify-center py-2 px-1 rounded transition-colors",
-                  isActive
-                    ? "bg-[#6B8E23]/10 text-[#556B2F] font-bold shadow-md"
-                    : "text-gray-900 hover:bg-[#6B8E23]/5"
-                )}
-              >
-                <item.icon className="h-6 w-6" />
-                <span
-                  className={cn(
-                    "mt-1 text-xs truncate",
-                    isActive && "font-bold"
-                  )}
-                >
-                  {item.name}
-                </span>
-              </Link>
-            );
-          })}
+      {/* Sidebar mobile - Version slide depuis la gauche */}
+      <aside
+        className={cn(
+          "fixed top-0 left-0 h-full w-80 bg-[#FFFFFF] border-r border-[#D3D3D3] z-50 transform transition-transform duration-300 ease-in-out md:hidden",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {/* En-tête du sidebar mobile */}
+        <div className="flex h-16 items-center justify-between border-b border-[#D3D3D3] px-6">
 
           <button
-            aria-label={showAll ? "Réduire" : "Voir plus"}
-            onClick={() => setShowAll((v) => !v)}
-            // Le style a été ajusté pour rester dans le flux de la grille pour la colonne 4
-            className={cn(
-              " flex flex-col items-center justify-center py-1 rounded transition-colors w-full h-full",
-              "border-t shadow-lg border-[#D3D3D3] font-bold text-white bg-[#556B2F]"
-            )}
+            onClick={closeSidebar}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Fermer le menu"
           >
-            {showAll ? (
-              <ChevronUp className="h-6 w-6" />
-            ) : (
-              <ChevronDown className="h-6 w-6" />
-            )}
-            <span className="mt-1 text-xs"> {showAll ? "Moins" : "Plus"} </span>
+            <X className="h-6 w-6 text-gray-700" />
           </button>
-
-          {/* Icônes additionnelles si ouvert. Ces icônes occuperont les lignes suivantes dans la grille. */}
-          {showAll &&
-            otherIcons.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href} // Remplacement de 'href' par 'to'
-                  className={cn(
-                    "flex flex-col items-center justify-center py-2 px-1 rounded transition-colors",
-                    isActive
-                      ? "bg-[#6B8E23]/10 text-[#556B2F] font-bold shadow-md"
-                      : "text-gray-900 hover:bg-[#6B8E23]/5"
-                  )}
-                >
-                  <item.icon className="h-6 w-6" />
-                  <span
-                    className={cn(
-                      "mt-1 text-xs truncate",
-                      isActive && "font-bold"
-                    )}
-                  >
-                    {item.name}
-                  </span>
-                </Link>
-              );
-            })}
         </div>
-      </nav>
+
+        {/* Contenu du sidebar mobile */}
+        <div className="h-[calc(100vh-64px)] overflow-y-auto">
+          <nav className="p-4">
+            <Section
+              title="Dashboard & Administration"
+              items={sections.dashboard}
+            />
+            <Section title="Abonnements & Finances" items={sections.finances} />
+            <Section
+              title="Annonces & Services"
+              items={sections.annoncesServices}
+            />
+            <Section
+              title="Réservations & Produits"
+              items={sections.reservationsProduits}
+            />
+            <Section title="Demandes" items={sections.demandes} />
+            <Section
+              title="Services Financiers"
+              items={sections.servicesFinanciers}
+            />
+            <Section
+              title="Marketing & Communication"
+              items={sections.marketing}
+            />
+          </nav>
+        </div>
+      </aside>
     </>
   );
 }
