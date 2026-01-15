@@ -105,14 +105,14 @@ const Footer: React.FC = () => {
               <div className="flex items-start gap-1.5">
                 <MapPin className="w-3 h-3 text-white/70 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-white text-xs">123 Rue de l'Immobilier</p>
-                  <p className="text-white/60 text-xs">75000 Paris</p>
+                  <p className="text-white text-xs">45 rue monseigneur de Beaumont Saint Denis</p>
+                  
                 </div>
               </div>
 
               <a href="tel:+33123456789" className="flex items-center gap-1.5 group">
                 <Phone className="w-3 h-3 text-white/70 flex-shrink-0" />
-                <span className="text-white/80 text-xs group-hover:text-white transition-colors">+33 1 23 45 67 89</span>
+                <span className="text-white/80 text-xs group-hover:text-white transition-colors">+262 692 66 77 55</span>
               </a>
 
               <a href="mailto:contact@oliplus.fr" className="flex items-center gap-1.5 group">

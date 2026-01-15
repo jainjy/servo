@@ -1,5 +1,3 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-
 export interface UserWelcomeData {
     email: string;
     userName?: string;
@@ -59,9 +57,27 @@ export interface ProviderOnboardingData {
 }
 
 class EmailApiService {
+    // Utilisation de import.meta.env pour Vite ou REACT_APP_ pour CRA
+    private getApiBaseUrl(): string {
+        // Pour Vite
+        if (typeof import.meta !== 'undefined' && import.meta.env) {
+            return import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        }
+        // Pour Create React App
+        else if (typeof process !== 'undefined' && process.env) {
+            return process.env.REACT_APP_API_URL || 'http://localhost:3001';
+        }
+        // Fallback
+        return 'http://localhost:3001';
+    }
+
+    private getApiUrl(endpoint: string): string {
+        return `${this.getApiBaseUrl()}/api/oliplus-email${endpoint}`;
+    }
+
     // Email de bienvenue utilisateur
     async sendUserWelcome(data: UserWelcomeData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-user-welcome`, {
+        const response = await fetch(this.getApiUrl('/send-user-welcome'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -73,7 +89,7 @@ class EmailApiService {
 
     // Confirmation RGPD
     async sendRgpdConfirmation(data: UserWelcomeData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-rgpd-confirmation`, {
+        const response = await fetch(this.getApiUrl('/send-rgpd-confirmation'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -85,7 +101,7 @@ class EmailApiService {
 
     // Confirmation de paiement
     async sendPaymentConfirmation(data: PaymentConfirmationData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-payment-confirmation`, {
+        const response = await fetch(this.getApiUrl('/send-payment-confirmation'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -97,7 +113,7 @@ class EmailApiService {
 
     // Alerte de sécurité
     async sendSecurityAlert(data: SecurityAlertData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-security-alert`, {
+        const response = await fetch(this.getApiUrl('/send-security-alert'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -109,7 +125,7 @@ class EmailApiService {
 
     // Mise à jour CGU
     async sendCguUpdate(data: CguUpdateData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-cgu-update`, {
+        const response = await fetch(this.getApiUrl('/send-cgu-update'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -121,7 +137,7 @@ class EmailApiService {
 
     // Bienvenue prestataire
     async sendProviderWelcome(data: ProviderWelcomeData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-provider-welcome`, {
+        const response = await fetch(this.getApiUrl('/send-provider-welcome'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -131,21 +147,20 @@ class EmailApiService {
         return response.json();
     }
 
-    // RGPD prestataire
-    async sendProviderRgpd(data: ProviderWelcomeData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-provider-rgpd`, {
-            method: 'POST',
-            headers: {
+            async sendProviderRgpd(data: ProviderWelcomeData): Promise<any> {
+            const response = await fetch(this.getApiUrl('/send-provider-rgpd'), {
+                method: 'POST',
+                headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-        return response.json();
-    }
+                },
+                body: JSON.stringify(data),
+            });
+            return response.json();
+            }
 
     // Facturation prestataire
     async sendProviderBilling(data: ProviderBillingData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-provider-billing`, {
+        const response = await fetch(this.getApiUrl('/send-provider-billing'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -157,7 +172,7 @@ class EmailApiService {
 
     // Sécurité prestataire
     async sendProviderSecurity(data: ProviderSecurityData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-provider-security`, {
+        const response = await fetch(this.getApiUrl('/send-provider-security'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -169,7 +184,7 @@ class EmailApiService {
 
     // CGU prestataire
     async sendProviderCgu(data: ProviderCguData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-provider-cgu`, {
+        const response = await fetch(this.getApiUrl('/send-provider-cgu'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -181,7 +196,7 @@ class EmailApiService {
 
     // Onboarding prestataire
     async sendProviderOnboarding(data: ProviderOnboardingData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-provider-onboarding`, {
+        const response = await fetch(this.getApiUrl('/send-provider-onboarding'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -193,7 +208,7 @@ class EmailApiService {
 
     // Pack complet prestataire (2 emails)
     async sendProviderWelcomePack(data: ProviderWelcomeData): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/email/send-provider-welcome-pack`, {
+        const response = await fetch(this.getApiUrl('/send-provider-welcome-pack'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
