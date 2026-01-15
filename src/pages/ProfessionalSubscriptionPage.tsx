@@ -49,7 +49,7 @@ const ProfessionalSubscriptionPage = () => {
       setLoading(true);
       const response = await subscriptionPlansAPI.getAllPlans();
       if (response.success) {
-        const plansWithIcons = response.data.map((plan: any) => {
+        const plansWithIcons = response.data.map((plan: any, index: number) => {
           let icon;
           switch (plan.id) {
             case "professional":
@@ -73,17 +73,18 @@ const ProfessionalSubscriptionPage = () => {
           return {
             ...plan,
             icon,
+            uniqueId: `${plan.id}-${index}`,
           };
         });
 
         const sortedPlans = sortPlansByPrice(plansWithIcons);
         setSubscriptionPlans(sortedPlans);
 
-        // Initialiser l'état de visibilité renforcée
+        // Initialiser l'état de visibilité renforcée avec uniqueId
         const initialVisibility: { [key: string]: boolean } = {};
         sortedPlans.forEach((plan: any) => {
           if (plan.enhancedVisibilityPrice) {
-            initialVisibility[plan.id] = false;
+            initialVisibility[plan.uniqueId] = false;
           }
         });
         setEnhancedVisibility(initialVisibility);
@@ -97,6 +98,16 @@ const ProfessionalSubscriptionPage = () => {
       const fallbackPlans = getFallbackPlans();
       const sortedFallbackPlans = sortPlansByPrice(fallbackPlans);
       setSubscriptionPlans(sortedFallbackPlans);
+
+      // Initialiser l'état de visibilité renforcée pour fallback
+      const initialVisibility: { [key: string]: boolean } = {};
+      sortedFallbackPlans.forEach((plan: any, index: number) => {
+        if (plan.enhancedVisibilityPrice) {
+          const uniqueId = `${plan.id}-${index}`;
+          initialVisibility[uniqueId] = false;
+        }
+      });
+      setEnhancedVisibility(initialVisibility);
     } finally {
       setLoading(false);
     }
@@ -190,7 +201,7 @@ const ProfessionalSubscriptionPage = () => {
         "Avis et recommandations",
         "Outils de planification",
       ],
-      userTypes: ["BIEN_ETRE", "COACH", "SPORT"],
+      userTypes: ["BIEN_ETRE"],
       isVisibilityEnhanced: true,
     },
   ];
@@ -215,36 +226,43 @@ const ProfessionalSubscriptionPage = () => {
     return colors[color as keyof typeof colors] || colors.olive;
   };
 
-  const handleEnhancedVisibilityToggle = (planId: string, checked: boolean) => {
+  const handleEnhancedVisibilityToggle = (
+    planUniqueId: string,
+    checked: boolean
+  ) => {
+    // Empêcher la propagation de l'événement
     setEnhancedVisibility((prev) => ({
       ...prev,
-      [planId]: checked,
+      [planUniqueId]: checked,
     }));
   };
 
   const calculateFinalPrice = (plan: any) => {
     const basePrice = parseFloat(plan.price);
-    if (enhancedVisibility[plan.id] && plan.enhancedVisibilityPrice) {
+    if (enhancedVisibility[plan.uniqueId] && plan.enhancedVisibilityPrice) {
       return parseFloat(plan.enhancedVisibilityPrice);
     }
     return basePrice;
   };
 
-  const handleSubscriptionSelect = async (planId: string) => {
+  const handleSubscriptionSelect = async (
+    planUniqueId: string,
+    planId: string
+  ) => {
     if (redirecting) return;
 
-    setSelectedPlan(planId);
+    setSelectedPlan(planUniqueId);
     setRedirecting(true);
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     const selectedPlanData = subscriptionPlans.find(
-      (plan) => plan.id === planId
+      (plan) => plan.uniqueId === planUniqueId
     );
 
     if (selectedPlanData) {
       const finalPrice = calculateFinalPrice(selectedPlanData);
-      const visibilityOption = enhancedVisibility[planId]
+      const visibilityOption = enhancedVisibility[planUniqueId]
         ? "enhanced"
         : "standard";
 
@@ -258,7 +276,7 @@ const ProfessionalSubscriptionPage = () => {
             userTypes: selectedPlanData?.userTypes,
             truePlanId: selectedPlanData?.truePlanId,
             visibilityOption: visibilityOption,
-            enhancedVisibility: enhancedVisibility[planId],
+            enhancedVisibility: enhancedVisibility[planUniqueId],
             basePrice: selectedPlanData?.price,
             enhancedPrice: selectedPlanData?.enhancedVisibilityPrice,
           },
@@ -331,7 +349,7 @@ const ProfessionalSubscriptionPage = () => {
             .filter((plan) => plan.id && plan.planType !== "advertising")
             .map((plan) => {
               const color = getColorClasses(plan.color);
-              const isSelected = selectedPlan === plan.id;
+              const isSelected = selectedPlan === plan.uniqueId;
               const isRedirecting = isSelected && redirecting;
               const showEnhancedOption =
                 plan.isVisibilityEnhanced && plan.enhancedVisibilityPrice;
@@ -343,7 +361,7 @@ const ProfessionalSubscriptionPage = () => {
 
               return (
                 <div
-                  key={plan.id}
+                  key={plan.uniqueId}
                   className={`relative border-2 ${
                     isSelected ? color.hoverBorder : color.border
                   } rounded-2xl p-6 hover:${
@@ -353,7 +371,9 @@ const ProfessionalSubscriptionPage = () => {
                       ? "opacity-50 pointer-events-none"
                       : ""
                   }`}
-                  onClick={() => handleSubscriptionSelect(plan.id)}
+                  onClick={() =>
+                    handleSubscriptionSelect(plan.uniqueId, plan.id)
+                  }
                 >
                   {plan.popular && (
                     <div className="absolute -top-4 left-2 z-10">
@@ -392,7 +412,10 @@ const ProfessionalSubscriptionPage = () => {
                           </div>
                         </div>
                         {showEnhancedOption && (
-                          <div className="mt-4 p-3 rounded-xl bg-gradient-to-r from-[#556B2F]/10 to-[#6B8E23]/10 border border-[#6B8E23]/30">
+                          <div
+                            className="mt-4 p-3 rounded-xl bg-gradient-to-r from-[#556B2F]/10 to-[#6B8E23]/10 border border-[#6B8E23]/30"
+                            onClick={(e) => e.stopPropagation()} // Empêcher le clic sur cette div de sélectionner la carte
+                          >
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center space-x-2">
                                 <Sparkles className={`h-4 w-4 ${color.text}`} />
@@ -401,15 +424,19 @@ const ProfessionalSubscriptionPage = () => {
                                 </span>
                               </div>
                               <Checkbox
-                                checked={enhancedVisibility[plan.id] || false}
+                                checked={
+                                  enhancedVisibility[plan.uniqueId] || false
+                                }
                                 onCheckedChange={(checked) => {
                                   handleEnhancedVisibilityToggle(
-                                    plan.id,
+                                    plan.uniqueId,
                                     checked === true
                                   );
                                 }}
                                 className={`${color.checkbox} border-2`}
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Empêcher la propagation du clic
+                                }}
                               />
                             </div>
 
@@ -469,7 +496,7 @@ const ProfessionalSubscriptionPage = () => {
                       } ${isRedirecting ? "animate-pulse" : ""}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSubscriptionSelect(plan.id);
+                        handleSubscriptionSelect(plan.uniqueId, plan.id);
                       }}
                       disabled={redirecting}
                     >

@@ -135,6 +135,7 @@ const ProRegisterPage = () => {
         setMetiersLoading(true);
         const response = await api.get("/metiers/all");
         setMetiersList(response.data);
+        console.log("subscriptionData:", subscriptionData);
       } catch (error) {
         console.error("Erreur lors du chargement des métiers:", error);
         toast.error("Impossible de charger les métiers");

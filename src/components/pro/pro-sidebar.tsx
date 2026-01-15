@@ -29,7 +29,6 @@ import {
   Plane,
   BookOpen,
   Plus,
-  Heart,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import ServoLogo from "../components/ServoLogo";
@@ -42,20 +41,27 @@ interface NavigationItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   // Permissions par catégorie de professionnel
-  allowedCategories?: ProfessionalCategory[];
+  allowedCategories?: string[];
   // Exclusions par catégorie
-  excludedCategories?: ProfessionalCategory[];
-  // Priorité d'affichage (optionnel)
-  priority?: number;
+  excludedCategories?: string[];
 }
 
-// Types de professionnels - Mise à jour
-export type ProfessionalCategory = 
-  | 'immobilier'
-  | 'ameublement'
-  | 'prestataire'
-  | 'bien-etre'  // Renommé de 'sante' pour plus de clarté
-  | 'default';
+// Types de professionnels
+export type ProfessionalCategory =
+  | "immobilier"
+  | "ameublement"
+  | "prestataire"
+  | "artisan"
+  | "commerçant"
+  | "tourisme"
+  | "education"
+  | "sante"
+  | "transport"
+  | "restauration"
+  | "evenementiel"
+  | "finance"
+  | "conseil"
+  | "default";
 
 interface CategoryConfig {
   title: string;
@@ -66,245 +72,301 @@ interface CategoryConfigMap {
   [key: string]: CategoryConfig;
 }
 
-// Tous les items de navigation possibles - REVU POUR CHAQUE CATÉGORIE
+// Tous les items de navigation possibles
 const allNavigationItems: NavigationItem[] = [
-  // === TABLEAU DE BORD === (COMMUN À TOUS)
-  { 
-    name: "Tableau de Bord", 
-    href: "/pro", 
-    icon: LayoutDashboard,
-    allowedCategories: ['immobilier', 'ameublement', 'prestataire', 'bien-etre', 'default'],
-    priority: 0
+  // === TABLEAU DE BORD ===
+  { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
+
+  // === GESTION DES ANNONCES & SERVICES ===
+  {
+    name: "Mes Annonces",
+    href: "/pro/listings",
+    icon: Building2,
+    allowedCategories: ["immobilier", "ameublement", "tourisme", "commerçant"],
+  },
+  {
+    name: "Mes Services",
+    href: "/pro/services",
+    icon: Wrench,
+    allowedCategories: [
+      "prestataire",
+      "artisan",
+      "sante",
+      "transport",
+      "restauration",
+      "evenementiel",
+      "conseil",
+    ],
+  },
+  {
+    name: "Mes projets",
+    href: "/pro/projet",
+    icon: Hammer,
+    allowedCategories: ["artisan", "prestataire", "immobilier"],
   },
 
-  // === IMMOBILIER ===
-  { 
-    name: "Mes Annonces Immobilier", 
-    href: "/pro/listings", 
-    icon: Building2,
-    allowedCategories: ['immobilier'],
-    priority: 1
+  // === ÉVÉNEMENTS & DÉCOUVERTES ===
+  {
+    name: "Événements & Découvertes",
+    href: "/pro/events-discoveries",
+    icon: CalendarDays,
+    allowedCategories: ["evenementiel", "tourisme", "default"],
   },
-  { 
-    name: "Projets Immobiliers", 
-    href: "/pro/projet", 
-    icon: Hammer,
-    allowedCategories: ['immobilier'],
-    priority: 2
+
+  // === ART ET CRÉATION ===
+  {
+    name: "Art et Creation",
+    href: "/pro/art-et-creation-page",
+    icon: Brush,
+    allowedCategories: ["artisan", "prestataire", "default"],
+  },
+
+  // === EMPLOI & FORMATIONS ===
+  {
+    name: "Gestion des Formations",
+    href: "/pro/gestion-formations",
+    icon: GraduationCap,
+    allowedCategories: ["education", "prestataire", "conseil"],
   },
   {
-    name: "Demandes de locations/achats",
-    href: "/pro/demandes-immobilier",
-    icon: FileText,
-    allowedCategories: ['immobilier'],
-    priority: 3
+    name: "Gestion des Offres d'Emploi",
+    href: "/pro/gestion-emplois",
+    icon: Briefcase,
+    allowedCategories: ["default"], // Tous peuvent publier des offres
   },
   {
-    name: "Mes Rendez-vous",
+    name: "Gestion Alternance/Stages",
+    href: "/pro/gestion-alternance",
+    icon: Book,
+    allowedCategories: ["default"], // Tous peuvent publier des stages
+  },
+
+  // === GESTION DES RÉSERVATIONS & COMMANDES ===
+  {
+    name: "Mon Agenda",
     href: "/pro/calendar",
     icon: Calendar,
-    allowedCategories: ['immobilier'],
-    priority: 4
+    allowedCategories: [
+      "prestataire",
+      "artisan",
+      "sante",
+      "transport",
+      "restauration",
+      "evenementiel",
+      "conseil",
+      "education",
+    ],
+  },
+  {
+    name: "Reservations tourisme",
+    href: "/pro/reservations",
+    icon: ShoppingBag,
+    allowedCategories: ["tourisme", "evenementiel"],
+  },
+  {
+    name: "Gestion de locations des vehicules",
+    href: "/pro/vehicules",
+    icon: Car,
+    allowedCategories: ["transport"],
+  },
+  {
+    name: "Reservations bien-être",
+    href: "/pro/reservationbien-etre",
+    icon: ShoppingBag,
+    allowedCategories: ["sante", "prestataire"],
+  },
+  {
+    name: "Mes Commandes",
+    href: "/pro/orders",
+    icon: ShoppingCart,
+    allowedCategories: ["commerçant", "ameublement", "artisan", "prestataire"],
+  },
+  {
+    name: "Reservations Cours",
+    href: "/pro/reservations-cours",
+    icon: Plus,
+    allowedCategories: ["education"],
   },
 
-  // === AMEUBLEMENT ===
-  { 
-    name: "Mes Produits Ameublement", 
-    href: "/pro/products", 
-    icon: ShoppingBag,
-    allowedCategories: ['ameublement'],
-    priority: 1
+  // === GESTION DES PRODUITS ===
+  {
+    name: "Tourisme",
+    href: "/pro/tourisme",
+    icon: Plane,
+    allowedCategories: ["tourisme"],
   },
-  { 
-    name: "Mes Commandes", 
-    href: "/pro/orders", 
-    icon: ShoppingCart,
-    allowedCategories: ['ameublement'],
-    priority: 2
+  {
+    name: "Mes Produits",
+    href: "/pro/products",
+    icon: ShoppingBag,
+    allowedCategories: ["commerçant", "ameublement"],
+  },
+
+  // === GESTION DES DEMANDES ===
+  {
+    name: "Mes Demandes de financement",
+    href: "/pro/financement-demandes",
+    icon: Building2,
+    allowedCategories: ["default"], // Tous peuvent faire des demandes
+  },
+  {
+    name: "Mes Demandes de services",
+    href: "/pro/demandes",
+    icon: FileText,
+    allowedCategories: ["prestataire", "artisan"],
+  },
+  {
+    name: "Liste demande immobilier",
+    href: "/pro/demandes-immobilier",
+    icon: Building2,
+    allowedCategories: ["immobilier"],
+  },
+  {
+    name: "Les demandes de devis",
+    href: "/pro/demandes-devis",
+    icon: FileText,
+    allowedCategories: ["artisan", "prestataire", "conseil"],
+  },
+  {
+    name: "Demandes de conseil et accompagnement",
+    href: "/pro/conseil",
+    icon: Briefcase,
+    allowedCategories: ["conseil"],
+  },
+
+  // === GESTION FINANCIÈRE ===
+  {
+    name: "Mon abonnements",
+    href: "/pro/subscription",
+    icon: WalletCards,
+    allowedCategories: ["default"], // Tous ont des abonnements
   },
   {
     name: "Devis & Factures",
     href: "/pro/billing",
     icon: FileText,
-    allowedCategories: ['ameublement'],
-    priority: 3
-  },
-  { 
-    name: "Mon Art et Création", 
-    href: "/pro/art-et-creation-page", 
-    icon: Brush,
-    allowedCategories: ['ameublement'],
-    priority: 4
-  },
-
-  // === PRESTATAIRE DE SERVICES ===
-  { 
-    name: "Mes Services", 
-    href: "/pro/services", 
-    icon: Wrench,
-    allowedCategories: ['prestataire'],
-    priority: 1
-  },
-  { 
-    name: "Mon Agenda", 
-    href: "/pro/calendar", 
-    icon: Calendar,
-    allowedCategories: ['prestataire'],
-    priority: 2
+    allowedCategories: ["default"], // Tous ont des factures
   },
   {
-    name: "Demandes de devis",
-    href: "/pro/demandes-devis",
-    icon: FileText,
-    allowedCategories: ['prestataire'],
-    priority: 3
-  },
-  { 
-    name: "Mes Projets", 
-    href: "/pro/projet", 
-    icon: Hammer,
-    allowedCategories: ['prestataire'],
-    priority: 4
-  },
-  {
-    name: "Mes Formations",
-    href: "/pro/gestion-formations",
-    icon: GraduationCap,
-    allowedCategories: ['prestataire'],
-    priority: 5
-  },
-
-  // === BIEN-ÊTRE ===
-  { 
-    name: "Mes Prestations Bien-Être", 
-    href: "/pro/services", 
-    icon: Heart,
-    allowedCategories: ['bien-etre'],
-    priority: 1
-  },
-  { 
-    name: "Mon Agenda Bien-Être", 
-    href: "/pro/calendar", 
-    icon: Calendar,
-    allowedCategories: ['bien-etre'],
-    priority: 2
-  },
-  {
-    name: "Réservations Bien-Être",
-    href: "/pro/reservationbien-etre",
-    icon: ShoppingBag,
-    allowedCategories: ['bien-etre'],
-    priority: 3
-  },
-  {
-    name: "Gestion des Rendez-vous",
-    href: "/pro/reservations-cours",
-    icon: Plus,
-    allowedCategories: ['bien-etre'],
-    priority: 4
-  },
-
-  // === COMMUNS À TOUS === (mais avec certaines exclusions)
-  { 
-    name: "Abonnement", 
-    href: "/pro/subscription", 
-    icon: WalletCards,
-    allowedCategories: ['immobilier', 'ameublement', 'prestataire', 'bien-etre', 'default'],
-    excludedCategories: [],
-    priority: 90
-  },
-  { 
-    name: "Mes Documents", 
-    href: "/pro/documents", 
-    icon: FileText,
-    allowedCategories: ['immobilier', 'ameublement', 'prestataire', 'bien-etre', 'default'],
-    excludedCategories: [],
-    priority: 91
-  },
-  { 
-    name: "Demandes Financement", 
-    href: "/pro/financement-demandes", 
-    icon: Building2,
-    allowedCategories: ['immobilier', 'ameublement', 'prestataire', 'bien-etre', 'default'],
-    priority: 92
-  },
-  { 
-    name: "Services Financiers", 
-    href: "/pro/financement-services", 
+    name: "Liste des services financiers",
+    href: "/pro/financement-services",
     icon: Wallet2Icon,
-    allowedCategories: ['immobilier', 'ameublement', 'prestataire', 'bien-etre', 'default'],
-    priority: 93
-  },
-  { 
-    name: "Messages & Contacts", 
-    href: "/pro/contact-messages", 
-    icon: Contact2Icon,
-    allowedCategories: ['immobilier', 'ameublement', 'prestataire', 'bien-etre', 'default'],
-    priority: 94
-  },
-  { 
-    name: "Avis Clients", 
-    href: "/pro/reviews", 
-    icon: Star,
-    allowedCategories: ['immobilier', 'ameublement', 'prestataire', 'bien-etre', 'default'],
-    priority: 95
-  },
-  { 
-    name: "Paramètres", 
-    href: "/pro/settings", 
-    icon: Settings,
-    allowedCategories: ['immobilier', 'ameublement', 'prestataire', 'bien-etre', 'default'],
-    priority: 96
+    allowedCategories: ["finance", "default"],
   },
 
-  // === ÉVÉNEMENTS (Optionnel selon besoin) ===
-  { 
-    name: "Événements", 
-    href: "/pro/events-discoveries", 
-    icon: CalendarDays,
-    allowedCategories: ['prestataire', 'bien-etre'], // Seulement prestataire et bien-être
-    priority: 50
+  // === GESTION DES CONTACTS & MESSAGES ===
+  {
+    name: "Listes des Contacts messages",
+    href: "/pro/contact-messages",
+    icon: Contact2Icon,
+    allowedCategories: ["default"], // Tous ont des contacts
+  },
+
+  // === DOCUMENTS & MÉDIAS ===
+  {
+    name: "Mes Documents",
+    href: "/pro/documents",
+    icon: FileText,
+    allowedCategories: ["default"], // Tous ont des documents
+  },
+
+  // === ÉDUCATION ===
+  {
+    name: "Cours à Domicile",
+    href: "/pro/cours-domicile",
+    icon: BookOpen,
+    allowedCategories: ["education"],
+  },
+
+  // === AVIS & PARAMÈTRES ===
+  {
+    name: "Avis",
+    href: "/pro/reviews",
+    icon: Star,
+    allowedCategories: ["default"], // Tous ont des avis
+  },
+  {
+    name: "Paramètres",
+    href: "/pro/settings",
+    icon: Settings,
+    allowedCategories: ["default"], // Tous ont des paramètres
   },
 ];
 
-// Configuration des catégories (groupement visuel) - SIMPLIFIÉE
+// Configuration des catégories (groupement visuel)
 const categoryConfig: {
   categories: CategoryConfigMap;
   defaultCategory: CategoryConfig;
 } = {
   categories: {
-    principal: {
-      title: "Principal",
-      matcher: (item) => item.priority! < 10,
+    tableauDeBord: {
+      title: "Tableau de bord",
+      matcher: (item) => item.name === "Tableau de Bord",
     },
-    gestion: {
-      title: "Gestion",
-      matcher: (item) => item.priority! >= 10 && item.priority! < 50,
+    evenementsDecouvertes: {
+      title: "Événements & Découvertes",
+      matcher: (item) =>
+        item.name.includes("Événements") || item.name.includes("Découvertes"),
     },
-    evenements: {
-      title: "Événements",
-      matcher: (item) => item.name.includes("Événements"),
+    annoncesServices: {
+      title: "Annonces & Services",
+      matcher: (item) =>
+        [
+          "Mes Annonces",
+          "Mes Services",
+          "Art et Creation",
+          "Mes projets",
+        ].includes(item.name),
+    },
+    emploiFormations: {
+      title: "Emploi & Formations",
+      matcher: (item) =>
+        item.name.includes("Formations") ||
+        item.name.includes("Emploi") ||
+        item.name.includes("Alternance") ||
+        item.name.includes("Stages"),
+    },
+    reservationsCommandes: {
+      title: "Réservations & Commandes",
+      matcher: (item) =>
+        item.name.includes("Réservations") ||
+        item.name.includes("Reservations") ||
+        item.name.includes("Commandes") ||
+        item.name.includes("Agenda") ||
+        item.name.includes("véhicules"),
+    },
+    produits: {
+      title: "Produits",
+      matcher: (item) => ["Tourisme", "Mes Produits"].includes(item.name),
+    },
+    demandes: {
+      title: "Demandes",
+      matcher: (item) =>
+        item.name.toLowerCase().includes("demande") ||
+        item.name.toLowerCase().includes("devis"),
     },
     financier: {
       title: "Financier",
-      matcher: (item) => 
-        item.name.includes("abonnement") || 
-        item.name.includes("Factures") || 
-        item.name.includes("financier") ||
-        item.name.includes("Financement"),
+      matcher: (item) =>
+        item.name.includes("abonnements") ||
+        item.name.includes("Factures") ||
+        item.name.includes("financiers"),
     },
-    communication: {
-      title: "Communication",
-      matcher: (item) => 
-        item.name.includes("Messages") || 
-        item.name.includes("Contacts") ||
-        item.name.includes("Avis"),
+    contacts: {
+      title: "Contacts",
+      matcher: (item) => item.name.includes("Contacts"),
     },
-    administration: {
-      title: "Administration",
-      matcher: (item) => 
-        item.name.includes("Documents") || 
-        item.name.includes("Paramètres"),
+    documentsMedias: {
+      title: "Documents & Médias",
+      matcher: (item) => ["Mes Documents"].includes(item.name),
+    },
+    education: {
+      title: "Éducation",
+      matcher: (item) => item.name.includes("Cours"),
+    },
+    avisParametres: {
+      title: "Avis & Paramètres",
+      matcher: (item) => ["Avis", "Paramètres"].includes(item.name),
     },
   },
 
@@ -314,64 +376,101 @@ const categoryConfig: {
   },
 };
 
-// Mapper les rôles/catégories d'utilisateur - SIMPLIFIÉ
-const getUserProfessionalCategory = (user: User | null): ProfessionalCategory => {
-  if (!user || !user.role) return 'default';
-  
-  const userCategory = (user.professionalCategory || user.category || user.role || '').toLowerCase();
-  
-  // Mapping simplifié pour les 4 catégories
+// Interface pour les sections
+interface NavigationSections {
+  [key: string]: NavigationItem[];
+}
+
+// Mapper les rôles/catégories d'utilisateur
+const getUserProfessionalCategory = (
+  user: User | null
+): ProfessionalCategory => {
+  if (!user || !user.role) return "default";
+
+  const userCategory =
+    user.professionalCategory || user.category || user.role.toLowerCase();
+
+  // Mapping des rôles vers les catégories
   const categoryMap: Record<string, ProfessionalCategory> = {
     // Immobilier
-    'immobilier': 'immobilier',
-    'agent_immobilier': 'immobilier',
-    'real_estate': 'immobilier',
-    'propriétaire': 'immobilier',
-    
-    // Ameublement
-    'ameublement': 'ameublement',
-    'decorateur': 'ameublement',
-    'furniture': 'ameublement',
-    'artisanat': 'ameublement',
-    
-    // Prestataire
-    'prestataire': 'prestataire',
-    'prestataires': 'prestataire',
-    'service': 'prestataire',
-    'freelance': 'prestataire',
-    'consultant': 'prestataire',
-    'conseil': 'prestataire',
-    
-    // Bien-être
-    'bien-etre': 'bien-etre',
-    'bien_etre': 'bien-etre',
-    'sante': 'bien-etre',
-    'health': 'bien-etre',
-    'therapeute': 'bien-etre',
-    'coach': 'bien-etre',
-    'yoga': 'bien-etre',
-    'massage': 'bien-etre',
-    'esthetique': 'bien-etre',
-  };
-  
-  return categoryMap[userCategory] || 'default';
-};
+    agent_immobilier: "immobilier",
+    immobilier: "immobilier",
+    real_estate: "immobilier",
 
-// Titres par catégorie pour l'affichage
-const categoryTitles: Record<ProfessionalCategory, string> = {
-  'immobilier': 'Professionnel Immobilier',
-  'ameublement': 'Professionnel Ameublement',
-  'prestataire': 'Prestataire de Services',
-  'bien-etre': 'Professionnel Bien-Être',
-  'default': 'Espace Professionnel'
+    // Ameublement
+    ameublement: "ameublement",
+    furniture: "ameublement",
+    decorateur: "ameublement",
+
+    // Prestataires de services
+    prestataire: "prestataire",
+    service_provider: "prestataire",
+    freelance: "prestataire",
+
+    // Artisans
+    artisan: "artisan",
+    craftsman: "artisan",
+    plombier: "artisan",
+    electricien: "artisan",
+
+    // Commerçants
+    commercant: "commerçant",
+    merchant: "commerçant",
+    boutique: "commerçant",
+
+    // Tourisme
+    tourisme: "tourisme",
+    tour_operator: "tourisme",
+    hotel: "tourisme",
+
+    // Éducation
+    enseignant: "education",
+    teacher: "education",
+    formateur: "education",
+
+    // Santé
+    sante: "sante",
+    health: "sante",
+    therapeute: "sante",
+
+    // Transport
+    transport: "transport",
+    driver: "transport",
+    livreur: "transport",
+
+    // Restauration
+    restauration: "restauration",
+    restaurant: "restauration",
+    catering: "restauration",
+
+    // Événementiel
+    evenementiel: "evenementiel",
+    event: "evenementiel",
+    organisateur: "evenementiel",
+
+    // Finance
+    finance: "finance",
+    financial: "finance",
+    conseiller_financier: "finance",
+
+    // Conseil
+    conseil: "conseil",
+    consultant: "conseil",
+    advisor: "conseil",
+  };
+
+  return categoryMap[userCategory] || "default";
 };
 
 export function ProSidebar() {
   const location = useLocation();
   const pathname = location.pathname;
   const [menuOpen, setMenuOpen] = useState(false);
-  const [userCategory, setUserCategory] = useState<ProfessionalCategory>('default');
-  const [filteredNavigation, setFilteredNavigation] = useState<NavigationItem[]>([]);
+  const [userCategory, setUserCategory] =
+    useState<ProfessionalCategory>("default");
+  const [filteredNavigation, setFilteredNavigation] = useState<
+    NavigationItem[]
+  >([]);
   const { user } = useAuth();
   const { notifications, loading } = useOrderNotifications();
 
@@ -379,32 +478,26 @@ export function ProSidebar() {
     if (user) {
       const category = getUserProfessionalCategory(user);
       setUserCategory(category);
-      
+
       // Filtrer les items selon la catégorie de l'utilisateur
-      const filtered = allNavigationItems.filter(item => {
-        // Vérifier les exclusions d'abord
-        if (item.excludedCategories && item.excludedCategories.includes(category)) {
-          return false;
-        }
-        
-        // Vérifier les permissions
+      const filtered = allNavigationItems.filter((item) => {
+        // Si l'item a des catégories autorisées spécifiques
         if (item.allowedCategories && item.allowedCategories.length > 0) {
-          // Vérifier si la catégorie est autorisée
-          // Ne pas inclure 'default' automatiquement sauf si explicitement listé
-          return item.allowedCategories.includes(category);
+          return (
+            item.allowedCategories.includes(category) ||
+            item.allowedCategories.includes("default")
+          );
         }
-        
-        // Si pas de allowedCategories défini, on n'affiche pas (sécurité)
-        return false;
-      }).sort((a, b) => {
-        // Trier par priorité (plus petit = plus haut)
-        const priorityA = a.priority || 100;
-        const priorityB = b.priority || 100;
-        return priorityA - priorityB;
+
+        // Si l'item a des catégories exclues
+        if (item.excludedCategories && item.excludedCategories.length > 0) {
+          return !item.excludedCategories.includes(category);
+        }
+
+        // Par défaut, on affiche l'item
+        return true;
       });
-      
-      console.log(`Catégorie utilisateur: ${category}`);
-      console.log(`Items filtrés:`, filtered.map(i => i.name));
+
       setFilteredNavigation(filtered);
     }
   }, [user]);
@@ -419,12 +512,10 @@ export function ProSidebar() {
     switch (itemName) {
       case "Mes Commandes":
         return notifications.pendingOrders || 0;
-      case "Messages & Contacts":
+      case "Messages":
         return notifications.messages || 0;
-      case "Réservations Bien-Être":
+      case "Réservations":
         return notifications.reservations || 0;
-      case "Demandes de devis":
-        return notifications.quotes || 0;
       default:
         return 0;
     }
@@ -439,12 +530,10 @@ export function ProSidebar() {
     switch (itemName) {
       case "Mes Commandes":
         return "bg-[#8B4513] text-white";
-      case "Messages & Contacts":
+      case "Messages":
         return "bg-red-500 text-white";
-      case "Réservations Bien-Être":
+      case "Réservations":
         return "bg-[#556B2F] text-white";
-      case "Demandes de devis":
-        return "bg-blue-500 text-white";
       default:
         return "bg-[#D3D3D3] text-[#8B4513]";
     }
@@ -460,32 +549,32 @@ export function ProSidebar() {
     });
     sections.default = [];
 
-    // Trier les éléments filtrés
-    filteredNavigation.forEach((item) => {
-      let assigned = false;
+    // Trier les éléments non classés
+    const unassignedItems = [...filteredNavigation];
+    const assignedItems = new Set<string>();
 
-      // Essayer de trouver une catégorie correspondante
-      Object.entries(categoryConfig.categories).forEach(
-        ([categoryKey, config]) => {
-          if (!assigned && config.matcher(item)) {
+    // Assigner chaque élément à sa catégorie
+    Object.entries(categoryConfig.categories).forEach(
+      ([categoryKey, config]) => {
+        filteredNavigation.forEach((item) => {
+          if (!assignedItems.has(item.name) && config.matcher(item)) {
             sections[categoryKey].push(item);
-            assigned = true;
+            assignedItems.add(item.name);
+
+            // Retirer de la liste des non assignés
+            const index = unassignedItems.findIndex(
+              (i) => i.name === item.name
+            );
+            if (index !== -1) {
+              unassignedItems.splice(index, 1);
+            }
           }
-        }
-      );
-
-      // Si aucune catégorie ne correspond, mettre dans "Autres"
-      if (!assigned) {
-        sections.default.push(item);
+        });
       }
-    });
+    );
 
-    // Supprimer les sections vides (sauf default si elle contient quelque chose)
-    Object.keys(sections).forEach(key => {
-      if (key !== 'default' && sections[key].length === 0) {
-        delete sections[key];
-      }
-    });
+    // Ajouter les éléments non classés à la catégorie par défaut
+    sections.default = [...unassignedItems];
 
     return sections;
   };
@@ -496,9 +585,10 @@ export function ProSidebar() {
   interface SectionProps {
     title: string;
     items: NavigationItem[];
+    categoryKey: string;
   }
 
-  const Section: React.FC<SectionProps> = ({ title, items }) => {
+  const Section: React.FC<SectionProps> = ({ title, items, categoryKey }) => {
     if (items.length === 0) return null;
 
     return (
@@ -516,7 +606,7 @@ export function ProSidebar() {
 
             return (
               <Link
-                key={`${item.href}-${item.name}`}
+                key={item.name}
                 to={item.href}
                 onClick={() => setMenuOpen(false)}
                 className={cn(
@@ -562,7 +652,7 @@ export function ProSidebar() {
             <ServoLogo />
           </Link>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-xs text-[#8B4513]">{categoryTitles[userCategory]}</p>
+            <p className="text-xs text-[#8B4513]">Espace Pro</p>
             <span className="text-xs px-2 py-0.5 bg-[#556B2F]/10 text-[#556B2F] rounded-full capitalize">
               {userCategory}
             </span>
@@ -575,13 +665,12 @@ export function ProSidebar() {
         {/* Afficher toutes les sections qui ont des éléments */}
         {Object.entries(categoryConfig.categories).map(
           ([categoryKey, config]) => (
-            sections[categoryKey] && (
-              <Section
-                key={categoryKey}
-                title={config.title}
-                items={sections[categoryKey]}
-              />
-            )
+            <Section
+              key={categoryKey}
+              title={config.title}
+              items={sections[categoryKey] || []}
+              categoryKey={categoryKey}
+            />
           )
         )}
 
@@ -590,6 +679,7 @@ export function ProSidebar() {
           <Section
             title={categoryConfig.defaultCategory.title}
             items={sections.default}
+            categoryKey="default"
           />
         )}
 
@@ -597,7 +687,7 @@ export function ProSidebar() {
         {filteredNavigation.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <p>Aucun menu disponible pour votre catégorie.</p>
-            <p className="text-sm mt-2">Contactez l'administrateur pour configurer vos accès.</p>
+            <p className="text-sm mt-2">Contactez l'administrateur.</p>
           </div>
         )}
       </nav>
