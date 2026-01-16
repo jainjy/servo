@@ -76,6 +76,7 @@ const AdminSubscriptions = () => {
   const [selectedSubscription, setSelectedSubscription] = useState(null);
   const [editSubscription, setEditSubscription] = useState(null);
   const [editEndDate, setEditEndDate] = useState(null);
+  const [editVisibilityOption, setEditVisibilityOption] = useState("standard");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const navigate = useNavigate();
   const [stats, setStats] = useState({
@@ -248,6 +249,7 @@ const AdminSubscriptions = () => {
   const handleEditSubscription = (subscription) => {
     setEditSubscription(subscription);
     setEditEndDate(new Date(subscription.endDate));
+    setEditVisibilityOption(subscription.visibilityOption || "standard");
     setIsEditDialogOpen(true);
   };
 
@@ -257,14 +259,16 @@ const AdminSubscriptions = () => {
     try {
       await api.patch(`/admin/subscriptions/${editSubscription.id}`, {
         endDate: editEndDate.toISOString(),
+        visibilityOption: editVisibilityOption,
       });
-      toast.success("Date d'expiration mise à jour avec succès");
+      toast.success("Abonnement mis à jour avec succès");
       setIsEditDialogOpen(false);
       setEditSubscription(null);
       setEditEndDate(null);
+      setEditVisibilityOption("standard");
       fetchSubscriptions();
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour de la date d'expiration");
+      toast.error("Erreur lors de la mise à jour de l'abonnement");
     }
   };
 
@@ -542,20 +546,30 @@ const AdminSubscriptions = () => {
                       </div>
                       <div className="text-right flex-shrink-0">
                         <p className="text-base md:text-lg font-bold text-[#556B2F]">
-                          {subscription.plan?.price
+                          {subscription.visibilityOption === "enhanced" && subscription.plan?.enhancedVisibilityPrice
+                            ? `${subscription.plan.enhancedVisibilityPrice}€`
+                            : subscription.plan?.price
                             ? `${subscription.plan.price}€`
                             : "Gratuit"}
                         </p>
-                        <Badge
-                          variant={
-                            subscription.autoRenew ? "default" : "outline"
-                          }
-                          className="text-xs mt-1 bg-[#6B8E23]/10 text-[#6B8E23] border-[#6B8E23]/20"
-                        >
-                          {subscription.autoRenew
-                            ? "Auto"
-                            : "Manuel"}
-                        </Badge>
+                        <div className="flex gap-1 justify-end flex-wrap mt-1">
+                          <Badge
+                            variant={
+                              subscription.autoRenew ? "default" : "outline"
+                            }
+                            className="text-xs bg-[#6B8E23]/10 text-[#6B8E23] border-[#6B8E23]/20"
+                          >
+                            {subscription.autoRenew
+                              ? "Auto"
+                              : "Manuel"}
+                          </Badge>
+                          {subscription.visibilityOption === "enhanced" && (
+                            <Badge className="text-xs bg-[#6B8E23] text-white border-[#6B8E23] flex items-center gap-1">
+                              <Star className="h-3 w-3" />
+                              Renforcée
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -581,6 +595,16 @@ const AdminSubscriptions = () => {
                         </p>
                       </div>
                     </div>
+
+                    {/* Visibilité */}
+                    {subscription.visibilityOption && (
+                      <div className="flex items-center gap-2 text-xs md:text-sm mb-2 p-2 rounded-md bg-[#6B8E23]/5 border border-[#6B8E23]/20">
+                        <Eye className="h-3 w-3 flex-shrink-0 text-[#6B8E23]" />
+                        <span className="text-[#6B8E23] font-medium">
+                          Visibilité: {subscription.visibilityOption === "enhanced" ? "Renforcée ⭐" : "Standard"}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Entreprise */}
                     {subscription.user?.companyName && (
@@ -722,11 +746,13 @@ const AdminSubscriptions = () => {
         )}
       </div>
 
-      {/* Dialog de modification - Responsive */}
+      {/* Dialog de modification - Responsive - MISE À JOUR */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="w-11/12 md:max-w-md rounded-lg border-[#D3D3D3]">
           <DialogHeader>
-            <DialogTitle className="text-lg md:text-xl text-[#8B4513]">Modifier l'abonnement</DialogTitle>
+            <DialogTitle className="text-lg md:text-xl text-[#8B4513]">
+              Modifier l'abonnement
+            </DialogTitle>
           </DialogHeader>
           {editSubscription && (
             <div className="space-y-4">
@@ -744,15 +770,15 @@ const AdminSubscriptions = () => {
                   <p className="text-xs md:text-sm font-medium text-gray-600">
                     Plan
                   </p>
-                  <p className="text-sm md:text-base font-semibold text-[#8B4513]">{editSubscription.plan?.name}</p>
+                  <p className="text-sm md:text-base font-semibold text-[#8B4513]">
+                    {editSubscription.plan?.name}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs md:text-sm font-medium text-gray-600">
                     Statut actuel
                   </p>
-                  <div className="mt-1">
-                    {getStatusBadge(editSubscription.status)}
-                  </div>
+                  <div className="mt-1">{getStatusBadge(editSubscription.status)}</div>
                 </div>
                 <div>
                   <p className="text-xs md:text-sm font-medium text-gray-600">
@@ -762,8 +788,11 @@ const AdminSubscriptions = () => {
                 </div>
               </div>
 
+              {/* Date d'expiration */}
               <div className="space-y-2">
-                <Label htmlFor="endDate" className="text-xs md:text-sm text-[#8B4513]">Date d'expiration</Label>
+                <Label htmlFor="endDate" className="text-xs md:text-sm text-[#8B4513]">
+                  Date d'expiration
+                </Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -797,6 +826,76 @@ const AdminSubscriptions = () => {
                 </p>
               </div>
 
+              {/* Option de visibilité - NOUVEAU */}
+              <div className="space-y-3 border-t border-[#D3D3D3] pt-4">
+                <p className="text-xs md:text-sm font-medium text-[#8B4513]">
+                  Options de visibilité
+                </p>
+                
+                <div className="space-y-2">
+                  {/* Option Standard */}
+                  <div className="flex items-center space-x-2 p-3 border border-[#D3D3D3] rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => setEditVisibilityOption("standard")}
+                  >
+                    <input
+                      type="radio"
+                      id="standard"
+                      name="visibility"
+                      value="standard"
+                      checked={editVisibilityOption === "standard"}
+                      onChange={(e) => setEditVisibilityOption(e.target.value)}
+                      className="w-4 h-4 text-[#6B8E23]"
+                    />
+                    <label htmlFor="standard" className="flex-1 cursor-pointer">
+                      <p className="text-xs md:text-sm font-medium text-[#8B4513]">
+                        Visibilité Standard
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Affichage normal du profil
+                      </p>
+                    </label>
+                  </div>
+
+                  {/* Option Enhanced */}
+                  <div className="flex items-center space-x-2 p-3 border border-[#6B8E23] rounded-lg bg-[#6B8E23]/5 hover:bg-[#6B8E23]/10 cursor-pointer"
+                    onClick={() => setEditVisibilityOption("enhanced")}
+                  >
+                    <input
+                      type="radio"
+                      id="enhanced"
+                      name="visibility"
+                      value="enhanced"
+                      checked={editVisibilityOption === "enhanced"}
+                      onChange={(e) => setEditVisibilityOption(e.target.value)}
+                      className="w-4 h-4 text-[#6B8E23]"
+                    />
+                    <label htmlFor="enhanced" className="flex-1 cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs md:text-sm font-medium text-[#6B8E23]">
+                          Visibilité Renforcée ⭐
+                        </p>
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        Profil mis en avant avec meilleure visibilité
+                      </p>
+                      {editSubscription.plan?.enhancedVisibilityPrice && (
+                        <p className="text-xs font-semibold text-[#556B2F] mt-1">
+                          +{editSubscription.plan.enhancedVisibilityPrice}€
+                        </p>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Résumé des modifications */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs md:text-sm text-blue-800">
+                  <span className="font-semibold">Visibilité sélectionnée:</span> {" "}
+                  {editVisibilityOption === "enhanced" ? "Renforcée ⭐" : "Standard"}
+                </p>
+              </div>
+
               <DialogFooter className="flex gap-2 flex-col sm:flex-row">
                 <Button
                   variant="outline"
@@ -806,9 +905,9 @@ const AdminSubscriptions = () => {
                   <X className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                   Annuler
                 </Button>
-                <Button 
-                  onClick={handleSaveEdit} 
-                  disabled={!editEndDate} 
+                <Button
+                  onClick={handleSaveEdit}
+                  disabled={!editEndDate}
                   className="text-xs md:text-sm bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                 >
                   <Save className="h-3 w-3 md:h-4 md:w-4 mr-2" />
