@@ -1,4 +1,4 @@
-// SubscriptionPaymentPage.jsx - Adaptation pour paiement d'abonnement avec Google Pay/Apple Pay
+// SubscriptionPaymentPage.jsx - Adaptation pour paiement d'abonnement avec options de visibilité
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
@@ -22,11 +22,18 @@ import {
   AlertCircle,
   Smartphone,
   CreditCard as ApplePayIcon,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Info,
 } from "lucide-react";
 import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -39,31 +46,84 @@ const CheckoutForm = ({ subscriptionData }) => {
   const { confirmPayment } = useAuth();
   const [copiedCard, setCopiedCard] = useState(null);
   const [paymentRequest, setPaymentRequest] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("card"); // 'card', 'google_pay', 'apple_pay'
+  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [visibilityOption, setVisibilityOption] = useState("standard");
+  const [selectedPrice, setSelectedPrice] = useState(
+    subscriptionData.price || 0
+  );
+  const [planDetails, setPlanDetails] = useState(null);
+  const [loadingPlan, setLoadingPlan] = useState(false);
+
+  // Charger les détails du plan
+  useEffect(() => {
+    const fetchPlanDetails = async () => {
+      if (subscriptionData.truePlanId) {
+        try {
+          setLoadingPlan(true);
+          const response = await api.get(
+            `/subscription-payments/plan-details/${subscriptionData.truePlanId}`
+          );
+          if (response.data.success) {
+            setPlanDetails(response.data.plan);
+            // Si le plan supporte la visibilité renforcée, vérifier s'il y a déjà une option sélectionnée
+            if (subscriptionData.visibilityOption) {
+              setVisibilityOption(subscriptionData.visibilityOption);
+              updatePrice(
+                subscriptionData.visibilityOption,
+                response.data.plan
+              );
+            } else {
+              updatePrice("standard", response.data.plan);
+            }
+          }
+        } catch (error) {
+          console.error("Erreur chargement plan:", error);
+        } finally {
+          setLoadingPlan(false);
+        }
+      }
+    };
+    fetchPlanDetails();
+  }, [subscriptionData.truePlanId]);
+
+  const updatePrice = (option, plan) => {
+    if (option === "enhanced" && plan.enhancedVisibilityPrice) {
+      setSelectedPrice(plan.enhancedVisibilityPrice);
+    } else {
+      setSelectedPrice(plan.price);
+    }
+  };
+
+  const handleVisibilityChange = (option) => {
+    setVisibilityOption(option);
+    if (planDetails) {
+      updatePrice(option, planDetails);
+    }
+  };
 
   useEffect(() => {
-    if (!stripe) return;
+    if (!stripe || !planDetails) return;
 
     // Configuration du PaymentRequest pour Google Pay/Apple Pay
     const pr = stripe.paymentRequest({
       country: "FR",
       currency: "eur",
       total: {
-        label: `Abonnement ${subscriptionData.planTitle}`,
-        amount: Math.round(subscriptionData.price * 100), // Montant en centimes
+        label: `Abonnement ${subscriptionData.planTitle} (${
+          visibilityOption === "enhanced" ? "Visibilité renforcée" : "Standard"
+        })`,
+        amount: Math.round(selectedPrice * 100), // Montant en centimes
       },
       requestPayerName: true,
       requestPayerEmail: true,
     });
 
-    // Vérifier si Google Pay/Apple Pay est disponible
     pr.canMakePayment().then((result) => {
       if (result) {
         setPaymentRequest(pr);
       }
     });
 
-    // Gérer la complétion du paiement via Google Pay/Apple Pay
     pr.on("paymentmethod", async (ev) => {
       setIsProcessing(true);
       setMessage("");
@@ -73,14 +133,14 @@ const CheckoutForm = ({ subscriptionData }) => {
         const response = await api.post(
           "/subscription-payments/create-payment-intent",
           {
-            amount: parseInt(subscriptionData.price),
             planId: subscriptionData.truePlanId,
+            visibilityOption: visibilityOption,
           }
         );
 
         const { clientSecret } = response.data;
 
-        // Confirmer le paiement avec la méthode de Google Pay/Apple Pay
+        // Confirmer le paiement
         const { error: confirmError } = await stripe.confirmCardPayment(
           clientSecret,
           {
@@ -114,7 +174,7 @@ const CheckoutForm = ({ subscriptionData }) => {
         setIsProcessing(false);
       }
     });
-  }, [stripe, subscriptionData]);
+  }, [stripe, subscriptionData, visibilityOption, selectedPrice, planDetails]);
 
   const handlePayment = async () => {
     if (!stripe || !elements) return;
@@ -122,14 +182,15 @@ const CheckoutForm = ({ subscriptionData }) => {
     setMessage("");
 
     try {
-      // Utiliser la nouvelle route
+      // Créer le PaymentIntent avec l'option de visibilité
       const response = await api.post(
         "/subscription-payments/create-payment-intent",
         {
-          amount: parseInt(subscriptionData.price),
           planId: subscriptionData.truePlanId,
+          visibilityOption: visibilityOption,
         }
       );
+
       const { clientSecret, paymentIntentId } = response.data;
 
       // Confirmer le paiement
@@ -137,7 +198,7 @@ const CheckoutForm = ({ subscriptionData }) => {
         payment_method: {
           card: elements.getElement(CardElement),
           billing_details: {
-            name: "Nom du pro", // À adapter avec user data
+            name: subscriptionData.userName || "Nom du pro",
           },
         },
       });
@@ -145,7 +206,7 @@ const CheckoutForm = ({ subscriptionData }) => {
       if (result.error) {
         setMessage(result.error.message || "Erreur lors du paiement");
       } else if (result.paymentIntent.status === "succeeded") {
-        // Utiliser la nouvelle route de confirmation
+        // Confirmer l'abonnement
         const confirmResponse = await api.post(
           "/subscription-payments/confirm-upgrade",
           {
@@ -200,6 +261,17 @@ const CheckoutForm = ({ subscriptionData }) => {
     },
   ];
 
+  if (loadingPlan) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center">
+          <Clock className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Chargement des détails du plan...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="w-full max-w-4xl">
@@ -215,6 +287,119 @@ const CheckoutForm = ({ subscriptionData }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Colonne gauche - Formulaire de paiement */}
           <div className="lg:col-span-2">
+            {/* Section Option de visibilité */}
+            {planDetails?.enhancedVisibilityPrice && (
+              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <Sparkles className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Option de visibilité
+                    </h2>
+                    <p className="text-gray-600 text-sm">
+                      Choisissez le niveau de visibilité de votre profil
+                    </p>
+                  </div>
+                </div>
+
+                <RadioGroup
+                  value={visibilityOption}
+                  onValueChange={handleVisibilityChange}
+                  className="space-y-4"
+                >
+                  <div
+                    className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                      visibilityOption === "standard"
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem value="standard" id="standard" />
+                        <div>
+                          <Label
+                            htmlFor="standard"
+                            className="font-bold text-gray-900 cursor-pointer"
+                          >
+                            Visibilité Standard
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Profil visible dans les résultats de recherche
+                            normaux
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-gray-900">
+                          {planDetails?.price} €
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {planDetails?.interval === "year" ? "/an" : "/mois"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                      visibilityOption === "enhanced"
+                        ? "border-purple-500 bg-purple-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        <RadioGroupItem value="enhanced" id="enhanced" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label
+                              htmlFor="enhanced"
+                              className="font-bold text-gray-900 cursor-pointer"
+                            >
+                              Visibilité Renforcée
+                            </Label>
+                            <Badge className="bg-purple-100 text-purple-700">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Recommandé
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Votre profil est mis en avant dans les résultats de
+                            recherche
+                          </p>
+                          <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-purple-500" />
+                              Positionné en haut des résultats
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-purple-500" />
+                              Badge "Recommandé" sur votre profil
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-purple-500" />
+                              Priorité dans les suggestions
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-gray-900">
+                          {planDetails?.enhancedVisibilityPrice} €
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {planDetails?.interval === "year" ? "/an" : "/mois"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
+
             {/* Carte de paiement */}
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6">
               <div className="flex items-center gap-3 mb-6">
@@ -357,7 +542,7 @@ const CheckoutForm = ({ subscriptionData }) => {
                     <Button
                       className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg rounded-xl shadow-lg transition-all duration-200 mb-4"
                       onClick={handlePayment}
-                      disabled={isProcessing || !subscriptionData.price}
+                      disabled={isProcessing || !selectedPrice}
                     >
                       {isProcessing ? (
                         <div className="flex items-center gap-2">
@@ -365,7 +550,7 @@ const CheckoutForm = ({ subscriptionData }) => {
                           Traitement en cours...
                         </div>
                       ) : (
-                        `Payer ${subscriptionData.price} € - Finaliser`
+                        `Payer ${selectedPrice} € - Finaliser`
                       )}
                     </Button>
                   </>
@@ -451,6 +636,12 @@ const CheckoutForm = ({ subscriptionData }) => {
                   <p className="text-lg font-bold text-gray-900">
                     {subscriptionData.planTitle}
                   </p>
+                  {visibilityOption === "enhanced" && (
+                    <Badge className="mt-1 bg-purple-100 text-purple-700">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Visibilité renforcée
+                    </Badge>
+                  )}
                 </div>
 
                 {subscriptionData.description && (
@@ -466,6 +657,13 @@ const CheckoutForm = ({ subscriptionData }) => {
                   <p className="text-sm text-gray-600">Période</p>
                   <p className="text-sm font-medium text-gray-900">
                     {subscriptionData.period || "mensuel"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-600">Option de visibilité</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {visibilityOption === "enhanced" ? "Renforcée" : "Standard"}
                   </p>
                 </div>
               </div>
@@ -486,6 +684,22 @@ const CheckoutForm = ({ subscriptionData }) => {
                         <span className="text-gray-700">{feature}</span>
                       </li>
                     ))}
+                    {visibilityOption === "enhanced" && (
+                      <>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Sparkles className="h-4 w-4 text-purple-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700">
+                            Positionnement prioritaire dans les résultats
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Sparkles className="h-4 w-4 text-purple-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700">
+                            Badge "Recommandé" visible
+                          </span>
+                        </li>
+                      </>
+                    )}
                   </ul>
                 </div>
               )}
@@ -493,11 +707,28 @@ const CheckoutForm = ({ subscriptionData }) => {
               {/* Tarif */}
               <div className="py-4 space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Montant</span>
+                  <span className="text-gray-600">Plan de base</span>
                   <span className="font-medium text-gray-900">
-                    {subscriptionData.price} €
+                    {planDetails?.price || subscriptionData.price} €
                   </span>
                 </div>
+
+                {visibilityOption === "enhanced" &&
+                  planDetails?.enhancedVisibilityPrice && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">
+                        Option visibilité renforcée
+                      </span>
+                      <span className="font-medium text-purple-600">
+                        +
+                        {(
+                          planDetails.enhancedVisibilityPrice -
+                          planDetails.price
+                        ).toFixed(2)}{" "}
+                        €
+                      </span>
+                    </div>
+                  )}
 
                 {subscriptionData.isRenewal && (
                   <div className="flex justify-between text-sm">
@@ -511,10 +742,13 @@ const CheckoutForm = ({ subscriptionData }) => {
                 <div className="pt-3 border-t border-gray-200">
                   <div className="flex justify-between">
                     <span className="font-bold text-gray-900">Total</span>
-                    <span className="text-2xl font-bold text-primary">
-                      {subscriptionData.price} €
+                    <span className="text-2xl font-bold text-blue-600">
+                      {selectedPrice} €
                     </span>
                   </div>
+                  <p className="text-xs text-gray-500 text-right mt-1">
+                    {planDetails?.interval === "year" ? "par an" : "par mois"}
+                  </p>
                 </div>
               </div>
 
