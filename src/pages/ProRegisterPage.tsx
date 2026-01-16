@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
 import api from "@/lib/api";
@@ -483,7 +483,16 @@ const ProRegisterPage = () => {
             <div className="mb-8">
               <div className="flex justify-center items-center gap-3">
 
-                <ServoLogo />
+                <Link to={"/#hero"} onClick={() => {
+                  setTimeout(() => {
+                    const heroElement = document.getElementById('hero');
+                    if (heroElement) {
+                      heroElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}>
+                  <ServoLogo />
+                </Link>
 
               </div>
               <p className="text-md font-semibold">

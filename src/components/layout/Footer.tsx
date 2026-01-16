@@ -236,7 +236,7 @@ const Footer: React.FC = () => {
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-1 order-1 md:order-2 mb-1 md:mb-0">
-                {["Cookies", "Confidentialité", "Mentions", "CGU", "RGPD"].map(
+                {["Cookies", "Confidentialité", "Mentions-legales", "CGU", "RGPD"].map(
                   (label) => (
                     <Link
                       key={label}

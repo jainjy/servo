@@ -11,7 +11,7 @@ return (
     />
     <CarteBoutton 
       size="lg"
-      position="bottom-right"
+      position="bottom-left"
       className="bg-green-600 hover:bg-green-600"
       category="agences"
     />

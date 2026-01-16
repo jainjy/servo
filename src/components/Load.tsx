@@ -193,7 +193,7 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
           className="relative z-10 min-h-screen h-screen w-full flex flex-col items-center px-4 snap-start"
         >
 
-          <div className='z-40 lg:block hidden cursor-pointer' onClick={handleClick0}>
+          <div className='-z-10 lg:block hidden cursor-pointer'>
             <InteractivePortrait />
           </div>
           {/* Logo centré */}
@@ -202,16 +202,16 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
             id='containerImg'
             ref={logoRef}
             className="flex absolute flex-col pt-10 cursor-pointer"
-            onClick={handleClick}
+            onClick={handleClick0}
           >
 
             <div
               className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-secondary-text shadow-lg"
-              style={{
-                animation: 'float 6s ease-in-out infinite',
-              }}
+            // style={{
+            //   animation: 'float 6s ease-in-out infinite',
+            // }}
             >
-              <div className="absolute top-5 z-[9999] w-56 h-56">
+              <div className="absolute top-5 z-[99999] w-40 h-40 lg:w-56 lg:h-56">
                 <Lottie
                   animationData={loginAnimation}
                   loop
@@ -224,7 +224,7 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
               <img
                 src="golo.png"
                 alt="Logo Oliplus"
-                className="w-full h-full object-cover rounded-full z-10 transform group-hover:scale-110 transition-transform duration-700 bg-[#b4b4b4] p-8"
+                className="w-full h-full object-cover rounded-full z-10 transform group-hover:scale-110 transition-transform duration-700 bg-[#ffffff] p-8"
               />
 
               <div className="absolute -inset-2 rounded-full z-0 group-hover:opacity-60 transition-opacity duration-500" />
@@ -233,24 +233,48 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
           </div>
 
           {/* Partenaires en bas */}
-          <div className="w-full pt-20 mt-64 pb-10">
+          <div className="w-full pt-20 mt-64 pb-10 pointer-events-none">
             <div className="container mx-auto px-4">
               <h3 className="text-center text-white text-xl uppercase tracking-widest mb-12 font-extralight">
                 Nos Partenaires de Confiance
               </h3>
 
-              <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+              <div className="grid grid-cols-3 md:grid-cols-8 gap-3">
+                <style>{`
+    @keyframes shine {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+    @keyframes grayscalePulse {
+      0%, 100% { filter: grayscale(100%); }
+      45%, 55% { filter: grayscale(0%); }
+    }
+  `}</style>
+
                 {partners.map((partner) => (
                   <div
                     key={partner.id}
                     className="bg-black/60 backdrop-blur-lg rounded-md hover:bg-black/80 transition-all duration-500 group border border-white/10 hover:border-white/20 shadow-lg overflow-hidden relative aspect-square"
                   >
+                    {/* Animation de surbrillance */}
+                    <div className="absolute inset-0 overflow-hidden rounded-md">
+                      <div
+                        className="absolute -left-full top-0 h-full w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg]"
+                        style={{
+                          animation: 'shine 3s infinite',
+                        }}
+                      ></div>
+                    </div>
+
                     <img
                       src={partner.logo}
                       alt={partner.name}
-                      className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500 filter grayscale group-hover:grayscale-0 opacity-70 group-hover:opacity-100"
+                      className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500 opacity-70 group-hover:opacity-100 z-10"
+                      style={{
+                        animation: 'grayscalePulse 3s infinite',
+                      }}
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 group-hover:bg-black/60 transition-all duration-500">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 group-hover:bg-black/60 transition-all duration-500 z-20">
                       <p className="text-white text-xs font-light text-center tracking-wide whitespace-nowrap px-2">
                         {partner.name}
                       </p>
@@ -268,17 +292,200 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
           id='section2'
           className="relative z-[9999] overflow-hidden min-h-screen h-screen w-full flex flex-col items-center justify-center bg-[#252c1d] pb-10 snap-start"
         >
-          {/* Vidéo en fond */}
-          <video
-            autoPlay
-            muted
-            loop
-            className="absolute inset-0 w-full h-full object-cover opacity-50"
-          >
-            <source src={vid} type="video/mp4" />
-            <source src={vid} type="video/webm" />
-            Votre navigateur ne supporte pas la vidéo.
-          </video>
+
+          {/* Double cercle décoratif animé */}
+          <div className="pointer-events-none absolute top-0 right-28 flex items-center justify-center z-50">
+            <style>{`
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes spinFast {
+      from { transform: rotate(360deg); }
+      to   { transform: rotate(0deg); }
+    }
+  `}</style>
+
+            {/* Cercle externe – lent */}
+            <svg
+              width="760"
+              height="760"
+              viewBox="0 0 460 460"
+              className="absolute opacity-60"
+              style={{
+                animation: "spinSlow 88s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="230"
+                cy="230"
+                r="180"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="1 3"
+                strokeLinecap="round"
+                transform="rotate(-90 230 230)"
+              />
+            </svg>
+
+            {/* Cercle interne – plus rapide */}
+            <svg
+              width="600"
+              height="600"
+              viewBox="0 0 400 400"
+              className="absolute opacity-80"
+              style={{
+                animation: "spinFast 93s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="2 4"
+                strokeLinecap="round"
+                transform="rotate(-90 200 200)"
+              />
+            </svg>
+          </div>
+
+{/* Double cercle décoratif animé */}
+          <div className="pointer-events-none absolute bottom-0 left-28 flex items-center justify-center z-50">
+            <style>{`
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes spinFast {
+      from { transform: rotate(360deg); }
+      to   { transform: rotate(0deg); }
+    }
+  `}</style>
+
+            {/* Cercle externe – lent */}
+            <svg
+              width="760"
+              height="760"
+              viewBox="0 0 460 460"
+              className="absolute opacity-60"
+              style={{
+                animation: "spinSlow 88s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="230"
+                cy="230"
+                r="180"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="1 3"
+                strokeLinecap="round"
+                transform="rotate(-90 230 230)"
+              />
+            </svg>
+
+            {/* Cercle interne – plus rapide */}
+            <svg
+              width="600"
+              height="600"
+              viewBox="0 0 400 400"
+              className="absolute opacity-80"
+              style={{
+                animation: "spinFast 93s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="2 4"
+                strokeLinecap="round"
+                transform="rotate(-90 200 200)"
+              />
+            </svg>
+          </div>
+
+          {/* Double cercle décoratif animé */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-50">
+            <style>{`
+    @keyframes spinFast {
+      from { transform: rotate(360deg); }
+      to   { transform: rotate(0deg); }
+    }
+  `}</style>
+
+            {/* Cercle interne – plus rapide */}
+            <svg
+              width="600"
+              height="600"
+              viewBox="0 0 400 400"
+              className="absolute opacity-80"
+              style={{
+                animation: "spinFast 93s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="2 4"
+                strokeLinecap="round"
+                transform="rotate(-90 200 200)"
+              />
+            </svg>
+          </div>
+
+           {/* Double cercle décoratif animé */}
+          <div className="pointer-events-none absolute mr-44 inset-0 flex items-center justify-center z-30">
+            <style>{`
+    @keyframes spinFast {
+      from { transform: rotate(360deg); }
+      to   { transform: rotate(0deg); }
+    }
+  `}</style>
+
+            {/* Cercle interne – plus rapide */}
+            <svg
+              width="400"
+              height="400"
+              viewBox="0 0 400 400"
+              className="absolute opacity-80"
+              style={{
+                animation: "spinFast 93s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#93960a"
+                strokeWidth="1"
+                strokeDasharray="1 1"
+                strokeLinecap="round"
+                transform="rotate(-90 200 200)"
+              />
+            </svg>
+          </div>
 
           {/* Overlay semi-transparent pour la lisibilité */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#252c1d]/90 to-[#252c1d]/90 backdrop-blur-md z-10" />
@@ -290,7 +497,7 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
           </div>
           <div
             ref={philosophyRef}
-            className="max-w-5xl w-full text-center z-20 relative"
+            className="max-w-5xl w-full text-center z-50 relative"
           >
 
             <div className="relative">
@@ -298,7 +505,7 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
                 "
               </div>
 
-              <h2 id='text' className="uppercase text-xl md:text-2xl lg:text-5xl leading-relaxed tracking-wide font-extrabold text-white px-8">
+              <h2 id='text' className="uppercase text-xl md:text-2xl lg:text-5xl leading-relaxed tracking-wide font-extralight lg:font-extrabold text-white px-8">
                 <span className='engagment mb-4 text-[#93960b]'>{philosophyText}</span>
                 <span className='bebas mb-4'>{philosophyText0}</span>
                 <span className='engagment mb-4 text-[#93960b]'>{philosophyText1}</span>
@@ -315,21 +522,28 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
             </div>
           </div>
           <button onClick={handleClick} className="group relative mt-10 px-8 py-4 border-2 border-[#93960b] rounded-full h-14 overflow-hidden hover:shadow-[0_0_25px_rgba(147,150,11,0.2)] transition-shadow z-20">
-            <span className="flex text-[#93960b] font-bold tracking-wide">
-              {text.split("").map((letter, i) => (
-                <span key={i} className="relative inline-block h-6 overflow-hidden">
-                  <span
-                    className="block transition-transform tracking-widest duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-6"
-                    style={{ transitionDelay: `${i * 45}ms` }}
-                  >
-                    {letter}
-                  </span>
-                  <span
-                    className="absolute left-0 top-6 block transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-6"
-                    style={{ transitionDelay: `${i * 45}ms` }}
-                  >
-                    {letter}
-                  </span>
+            <span className="flex text-[#93960b] font-bold gap-2">
+              {text.split(" ").map((word, wordIndex) => (
+                <span key={wordIndex} className="flex">
+                  {word.split("").map((letter, letterIndex) => {
+                    const globalIndex = text.substring(0, text.indexOf(word) + letterIndex).length;
+                    return (
+                      <span key={letterIndex} className="relative inline-block h-6 overflow-hidden">
+                        <span
+                          className="block transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-6"
+                          style={{ transitionDelay: `${globalIndex * 45}ms` }}
+                        >
+                          {letter}
+                        </span>
+                        <span
+                          className="absolute left-0 top-6 block transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-6"
+                          style={{ transitionDelay: `${globalIndex * 45}ms` }}
+                        >
+                          {letter}
+                        </span>
+                      </span>
+                    );
+                  })}
                 </span>
               ))}
             </span>
@@ -339,4 +553,5 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
       </div>
     </>
   );
+
 }

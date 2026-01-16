@@ -37,7 +37,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // État pour la publicité personnalisée
   const [isAdVisible, setIsAdVisible] = useState(true);
   const [adTimeRemaining, setAdTimeRemaining] = useState(120); // 2 minutes en secondes
@@ -48,10 +48,10 @@ const LoginPage = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -81,7 +81,7 @@ const LoginPage = () => {
   };
 
   const { login } = useAuth();
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -203,7 +203,7 @@ const LoginPage = () => {
                 <span>Visible : <span className="font-medium text-white">2 min</span></span>
               </div>
 
-            
+
             </div>
           </div>
         </motion.article>
@@ -220,10 +220,15 @@ const LoginPage = () => {
           </button>
           <div className="relative z-10 flex flex-col justify-center h-full">
             <div className="mb-8">
-              <Link to="/">
-                <div className="flex items-center gap-3 mb-6">
-                  <ServoLogo />
-                </div>
+              <Link to={"/#hero"} onClick={() => {
+                setTimeout(() => {
+                  const heroElement = document.getElementById('hero');
+                  if (heroElement) {
+                    heroElement.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 100);
+              }}>
+                <ServoLogo />
               </Link>
               <p className="text-[#8B4513] text-sm text-justify">
                 Des biens immobiliers, ses services additionnels, produits

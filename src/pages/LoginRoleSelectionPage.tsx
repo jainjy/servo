@@ -99,12 +99,12 @@ const LoginRoleSelectionPage = () => {
         />
         <div className="absolute inset-0 backdrop-blur-md z-0" />
       </div>
-      
+
       {/* Advertisement Popup */}
       <div className="absolute top-4 left-4 right-4 z-50">
         <AdvertisementPopup />
       </div>
-      
+
       <div className="absolute inset-0 -z-20">
         <img
           src="/nature.jpeg"
@@ -124,13 +124,20 @@ const LoginRoleSelectionPage = () => {
           <span className="font-semibold">Retour</span>
         </Button>
       </div>
-      
+
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
-      
+
       <div className="w-full">
         <div className="text-center">
-          <Link to="/">
+          <Link to={"/#hero"} onClick={() => {
+            setTimeout(() => {
+              const heroElement = document.getElementById('hero');
+              if (heroElement) {
+                heroElement.scrollIntoView({ behavior: 'smooth' });
+              }
+            }, 100);
+          }}>
             <ServoLogo />
           </Link>
           <CardTitle className="text-xl lg:text-4xl font-bold text-white tracking-wide mb-2">
@@ -211,22 +218,21 @@ const LoginRoleSelectionPage = () => {
               >
                 <UserPlus className="h-4 w-4" />
                 Créer un compte
-                <ChevronDown 
-                  className={`h-4 w-4 transition-transform duration-300 ${
-                    showRegisterDropdown ? "rotate-180" : ""
-                  }`}
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-300 ${showRegisterDropdown ? "rotate-180" : ""
+                    }`}
                 />
               </Button>
-              
+
               {/* Drop-up Menu */}
               {showRegisterDropdown && (
                 <>
                   {/* Backdrop pour fermer en cliquant à l'extérieur */}
-                  <div 
+                  <div
                     className="fixed inset-0 z-40"
                     onClick={() => setShowRegisterDropdown(false)}
                   />
-                  
+
                   <div className="absolute bottom-full left-0 mb-2 w-64 bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm border border-gray-700/50 rounded-xl shadow-2xl z-50 overflow-hidden">
                     <div className="p-1">
                       {roleOptions.map((role) => {
@@ -234,9 +240,8 @@ const LoginRoleSelectionPage = () => {
                         return (
                           <button
                             key={`register-${role.id}`}
-                            className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 hover:bg-white/5 ${
-                              role.id === "professional" ? "border-t border-white/5" : ""
-                            }`}
+                            className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 hover:bg-white/5 ${role.id === "professional" ? "border-t border-white/5" : ""
+                              }`}
                             onClick={() => handleRegisterSelection(role.id as "particular" | "professional")}
                           >
                             <div className={`${color.text} flex-shrink-0`}>
@@ -247,8 +252,8 @@ const LoginRoleSelectionPage = () => {
                                 {role.title}
                               </span>
                               <span className="text-gray-400 text-xs font-light">
-                                {role.id === "particular" 
-                                  ? "Compte personnel" 
+                                {role.id === "particular"
+                                  ? "Compte personnel"
                                   : "Compte professionnel"}
                               </span>
                             </div>
@@ -256,7 +261,7 @@ const LoginRoleSelectionPage = () => {
                         );
                       })}
                     </div>
-                    
+
                     {/* Pointe du drop-up */}
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                       <div className="w-4 h-4 bg-gray-900 border-l border-t border-gray-700/50 rotate-45"></div>
@@ -267,7 +272,7 @@ const LoginRoleSelectionPage = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="lg:flex hidden items-center mt-16 justify-between px-2 text-sm text-gray-500">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
