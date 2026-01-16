@@ -109,9 +109,9 @@ const LoginPage = () => {
   };
 
   // Fonction pour la pub
-  const handleAdClick = () => {
-    navigate('/register/professional/subscription');
-  };
+  // const handleAdClick = () => {
+  //   navigate('/register/professional/subscription');
+  // };
 
   return (
     <div className="min-h-screen flex overflow-hidden relative">
@@ -386,7 +386,7 @@ const LoginPage = () => {
                   <div className="text-center text-sm text-gray-600">
                     Pas encore de compte ?{" "}
                     <a
-                      href="/register/professional/subscription"
+                      href="/register/particular"
                       className="text-[#556B2F] w-full cursor-pointer hover:text-[#556B2F]/90 font-medium"
                     >
                       Créer un compte
