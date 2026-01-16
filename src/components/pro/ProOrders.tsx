@@ -26,7 +26,8 @@ import {
   Sparkles,
   Heart,
   Zap,
-  Flame
+  Flame,
+  Info
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +53,24 @@ const COLORS = {
   separator: "#D3D3D3",      /* Light gray - separator */
   secondaryText: "#8B4513",  /* Saddle brown - secondary-text */
   smallText: "#000000",      /* Black for small text */
+};
+
+// Fonction pour masquer l'email
+const maskEmail = (email) => {
+  if (!email) return '';
+  const [name, domain] = email.split('@');
+  const maskedName = name.length > 2 
+    ? name.substring(0, 2) + '***' 
+    : '***';
+  return `${maskedName}@${domain}`;
+};
+
+// Fonction pour masquer le téléphone
+const maskPhone = (phone) => {
+  if (!phone) return '';
+  // Garde les 4 derniers chiffres visibles
+  const visibleDigits = phone.slice(-4);
+  return `•••• •••• ${visibleDigits}`;
 };
 
 const ProOrders = () => {
@@ -244,9 +263,7 @@ const ProOrders = () => {
   // Charger les statistiques
   const fetchStats = async () => {
     try {
-      // console.log('📊 Chargement des statistiques...');
       const response = await ordersProAPI.getProStats();
-      // console.log('✅ Statistiques reçues:', response.data);
       setStats(response.data.stats);
     } catch (error) {
       console.error('❌ Erreur chargement statistiques:', error);
@@ -256,10 +273,8 @@ const ProOrders = () => {
   // Charger les statistiques par type de produit
   const fetchProductTypeStats = async () => {
     try {
-      // console.log('📈 Chargement des statistiques par type de produit...');
       const response = await ordersProAPI.getProProductTypes();
       if (response.data.success) {
-        // console.log('✅ Statistiques types produits reçues:', response.data.productTypes);
         setProductTypeStats(response.data.productTypes);
       }
     } catch (error) {
@@ -272,20 +287,29 @@ const ProOrders = () => {
     try {
       setLoading(true);
       setError(null);
-      // console.log(`🔄 Chargement des commandes (productType: ${productType}, status: ${status})...`);
       
       const response = await ordersProAPI.getProOrders({
         productType: productType !== 'all' ? productType : undefined,
         status: status !== 'all' ? status : undefined
       });
       
-      // console.log('✅ Commandes reçues:', response.data);
-      
       if (response.data.success) {
         let filteredOrders = response.data.orders || [];
         
+        // Transformation des données pour s'adapter au nouveau format backend
+        const transformedOrders = filteredOrders.map(order => ({
+          ...order,
+          // Adaptation : utilisation de deliveryAddress au lieu de user
+          user: {
+            firstName: order.deliveryAddress?.firstName || 'Non',
+            lastName: order.deliveryAddress?.lastName || 'renseigné',
+            email: order.contactInfo?.email ? maskEmail(order.contactInfo.email) : 'Email masqué',
+            phone: order.contactInfo?.phone ? maskPhone(order.contactInfo.phone) : undefined
+          }
+        }));
+        
         if (productType === 'produitnaturel') {
-          filteredOrders = filteredOrders.filter(order => 
+          const naturalOrders = transformedOrders.filter(order => 
             order.items?.some(item => 
               item.productType === 'produitnaturel' || 
               (item.productType && [
@@ -298,9 +322,10 @@ const ProOrders = () => {
               ].includes(item.productType))
             )
           );
+          setOrders(naturalOrders);
+        } else {
+          setOrders(transformedOrders);
         }
-        
-        setOrders(filteredOrders);
         
         if (productType === 'all' && status === 'all') {
           await fetchStats();
@@ -347,12 +372,9 @@ const ProOrders = () => {
   // Mettre à jour le statut d'une commande
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      // console.log(`🔄 Mise à jour statut commande ${orderId} vers: ${newStatus}`);
-      
       const response = await ordersProAPI.updateOrderStatus(orderId, newStatus);
       
       if (response.data.success) {
-        // console.log('✅ Statut mis à jour avec succès');
         fetchOrders(activeTab, statusFilter);
         triggerNotificationsUpdate();
       } else {
@@ -472,9 +494,9 @@ const ProOrders = () => {
     
     const matchesSearch = 
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      order.deliveryAddress?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.deliveryAddress?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (order.contactInfo?.email && maskEmail(order.contactInfo.email).toLowerCase().includes(searchTerm.toLowerCase()));
 
     return matchesSearch;
   });
@@ -626,18 +648,28 @@ const ProOrders = () => {
             </div>
           </div>
 
-          {/* Informations client */}
+          {/* Informations client (adaptées au nouveau format) */}
           <div className="space-y-2 mb-3">
             <div className="flex items-center gap-2">
               <Users className="h-3 w-3" style={{ color: COLORS.logo }} />
               <span className="font-medium text-sm" style={{ color: COLORS.smallText }}>
-                {order.user?.firstName || 'Non'} {order.user?.lastName || 'renseigné'}
+                {order.deliveryAddress?.firstName || 'Non'} {order.deliveryAddress?.lastName || 'renseigné'}
               </span>
             </div>
-            {order.user?.email && (
+            {order.contactInfo?.email && (
               <div className="flex items-center gap-2">
                 <Mail className="h-3 w-3" style={{ color: COLORS.logo }} />
-                <span className="text-xs truncate" style={{ color: COLORS.logo }}>{order.user.email}</span>
+                <span className="text-xs truncate" style={{ color: COLORS.logo }}>
+                  {maskEmail(order.contactInfo.email)}
+                </span>
+              </div>
+            )}
+            {order.contactInfo?.phone && (
+              <div className="flex items-center gap-2">
+                <Phone className="h-3 w-3" style={{ color: COLORS.logo }} />
+                <span className="text-xs truncate" style={{ color: COLORS.logo }}>
+                  {maskPhone(order.contactInfo.phone)}
+                </span>
               </div>
             )}
           </div>
@@ -777,6 +809,24 @@ const ProOrders = () => {
           {refreshing ? 'Actualisation...' : 'Actualiser'}
         </Button>
       </div>
+
+      {/* Message d'information sur la protection des données */}
+      <Card style={{ borderColor: COLORS.separator, backgroundColor: '#FFFBF5' }}>
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 mt-0.5" style={{ color: COLORS.primary }} />
+            <div>
+              <p className="text-sm font-medium" style={{ color: COLORS.secondaryText }}>
+                🔒 Protection des données personnelles
+              </p>
+              <p className="text-xs mt-1" style={{ color: COLORS.logo }}>
+                Seules les informations nécessaires à la livraison sont affichées. 
+                Les coordonnées complètes sont masquées conformément au RGPD.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Statistiques améliorées */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
@@ -932,7 +982,7 @@ const ProOrders = () => {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4" style={{ color: COLORS.logo }} />
               <Input
-                placeholder="Rechercher par numéro, client, email..."
+                placeholder="Rechercher par numéro, nom client, email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 text-sm lg:text-base"
@@ -1003,7 +1053,7 @@ const ProOrders = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead style={{ color: COLORS.secondaryText }}>Numéro</TableHead>
-                      <TableHead style={{ color: COLORS.secondaryText }}>Client</TableHead>
+                      <TableHead style={{ color: COLORS.secondaryText }}>Client (Données limitées)</TableHead>
                       <TableHead style={{ color: COLORS.secondaryText }}>Articles</TableHead>
                       <TableHead style={{ color: COLORS.secondaryText }}>Types</TableHead>
                       <TableHead style={{ color: COLORS.secondaryText }}>Total</TableHead>
@@ -1035,11 +1085,16 @@ const ProOrders = () => {
                             <TableCell>
                               <div>
                                 <div className="font-medium" style={{ color: COLORS.smallText }}>
-                                  {order.user?.firstName || 'Non'} {order.user?.lastName || 'renseigné'}
+                                  {order.deliveryAddress?.firstName || 'Non'} {order.deliveryAddress?.lastName || 'renseigné'}
                                 </div>
                                 <div className="text-sm" style={{ color: COLORS.logo }}>
-                                  {order.user?.email || 'Email non disponible'}
+                                  {order.contactInfo?.email ? maskEmail(order.contactInfo.email) : 'Contact masqué'}
                                 </div>
+                                {order.contactInfo?.phone && (
+                                  <div className="text-xs mt-1" style={{ color: COLORS.logo }}>
+                                    {maskPhone(order.contactInfo.phone)}
+                                  </div>
+                                )}
                               </div>
                             </TableCell>
                             <TableCell>
