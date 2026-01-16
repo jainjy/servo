@@ -24,7 +24,7 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
       title: "Lieux historiques & culturels",
       path: "/lieux_historique",
     },
-    { id: 3, title: "Événements & découvertes", path: "/evenement-decouverte" },
+    // { id: 3, title: "Événements & découvertes", path: "/evenement-decouverte" },
     { id: 4, title: "Nature & patrimoine", path: "/nature-patrimoine" },
   ];
 
