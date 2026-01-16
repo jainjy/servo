@@ -205,6 +205,8 @@ const AnnonceCard = ({ property }: { property: Property }) => {
         </div>
 
         {/* Bouton de contact */}
+        {/* Bouton de contact */}
+        {isLoggedIn ? (
           <a
             href={`https://www.olimmoreunion.re/biens/${property.id}`}
             target="_blank"
@@ -214,8 +216,8 @@ const AnnonceCard = ({ property }: { property: Property }) => {
             <button
               disabled={!isAvailable}
               className={`w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center group/btn ${isAvailable
-                ? "text-white hover:bg-[#7BA05B]" /* hover-primary */
-                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  ? "text-white hover:bg-[#7BA05B]" /* hover-primary */
+                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
                 }`}
               style={
                 isAvailable
@@ -234,7 +236,21 @@ const AnnonceCard = ({ property }: { property: Property }) => {
               )}
             </button>
           </a>
-        
+        ) : (
+          <button
+            onClick={callError}
+            className="w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center"
+            style={{
+              backgroundColor: colors["primary-dark"],
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Afficher details
+          </button>
+        )}
+
       </div>
     </div>
   );
