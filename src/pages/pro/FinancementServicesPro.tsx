@@ -41,14 +41,15 @@ const FinancementServicesPro = () => {
   const [selectedType, setSelectedType] = useState("");
   const queryClient = useQueryClient();
 
-  // Récupérer les partenaires de l'utilisateur
-  const { data: partenaires, isLoading: isLoadingPartenaires } = useQuery({
-    queryKey: ["mes-partenaires-financement"],
-    queryFn: async () => {
-      const response = await financementAPI.getPartenairesPro();
-      return response.data;
-    },
-  });
+  // Modifiez votre query dans le frontend
+const { data: partenaires, isLoading: isLoadingPartenaires } = useQuery({
+  queryKey: ["mes-partenaires-financement"],
+  queryFn: async () => {
+    // Utilisez la route publique au lieu de la route pro
+    const response = await financementAPI.getPartenaires();
+    return response.data;
+  },
+});
 
   // Récupérer les services financiers
   const { data: servicesData, isLoading: isLoadingServices } = useQuery({
