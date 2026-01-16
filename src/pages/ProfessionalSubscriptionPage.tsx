@@ -266,6 +266,15 @@ const ProfessionalSubscriptionPage = () => {
         ? "enhanced"
         : "standard";
 
+      // Déterminer la catégorie basée sur le titre du plan
+      let category = "AUTRE";
+      const title = selectedPlanData.title;
+      
+      if (title.includes("Immobilier")) category = "IMMOBILIER";
+      else if (title.includes("Artisan")) category = "ARTISAN";
+      else if (title.includes("Tourisme")) category = "TOURISME";
+      else if (title.includes("Sport")) category = "BIEN_ETRE";
+
       navigate("/register/professional/form", {
         state: {
           subscriptionData: {
@@ -279,6 +288,7 @@ const ProfessionalSubscriptionPage = () => {
             enhancedVisibility: enhancedVisibility[planUniqueId],
             basePrice: selectedPlanData?.price,
             enhancedPrice: selectedPlanData?.enhancedVisibilityPrice,
+            category: category,
           },
         },
       });
@@ -337,7 +347,7 @@ const ProfessionalSubscriptionPage = () => {
           <CardDescription className="text-md font-extralight text-[#D3D3D3]/70 max-w-2xl mx-auto">
             Sélectionnez l'offre qui correspond le mieux à votre activité
             professionnelle. Tous nos abonnements incluent un essai gratuit de
-            14 jours.{" "}
+            60 jours.{" "}
             <span className="text-[#6B8E23] font-semibold">
               Option "Meilleure Présence" disponible !
             </span>

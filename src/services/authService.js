@@ -88,7 +88,6 @@ class AuthService {
       this.setAuthData(user, token, refreshToken);
       return { user, token };
     } catch (error) {
-      
       // Juste extraire le message d'erreur
       if (error.response?.data?.error) {
         throw new Error(error.response.data.error);
@@ -140,7 +139,7 @@ class AuthService {
     }
   }
   // Inscription Pro sans paiement (avec plan sélectionné gratuit 2 mois)
-  static async signupPro(userData, planId) {
+  static async signupPro(userData, planId, visibilityOption) {
     try {
       // Valider le mot de passe avant d'envoyer
       const passwordValidation = validatePassword(userData.password);
@@ -154,6 +153,7 @@ class AuthService {
           metiers: userData.metiers || [], // AJOUT: Inclure les métiers
         },
         planId,
+        visibilityOption
       });
       const { user, token, refreshToken } = response.data;
       if (user && token) {
@@ -402,7 +402,6 @@ class AuthService {
       }
       return updatedUser;
     } catch (error) {
-  
       throw this.handleError(error, "Erreur lors de la mise à jour du profil");
     }
   }

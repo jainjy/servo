@@ -6,7 +6,6 @@ import {
   Lock,
   User,
   Building,
-  Phone,
   Home,
   Car,
   Trees,
@@ -18,6 +17,15 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -32,7 +40,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
 import api from "@/lib/api";
-import { formatDate } from "date-fns";
 import ServoLogo from "@/components/components/ServoLogo";
 
 // Fonction de validation des mots de passe
@@ -78,6 +85,8 @@ const ProRegisterPage = () => {
   const [metiersList, setMetiersList] = useState([]);
   const [metiersLoading, setMetiersLoading] = useState(false);
   const [metiersSearchQuery, setMetiersSearchQuery] = useState("");
+  const [customMetierModalOpen, setCustomMetierModalOpen] = useState(false);
+  const [customMetierDescription, setCustomMetierDescription] = useState("");
   const [passwordValidation, setPasswordValidation] = useState({
     minLength: false,
     maxLength: false,
@@ -115,19 +124,11 @@ const ProRegisterPage = () => {
     // Métiers (si prestataire)
     metiers: [] as number[],
     acceptTerms: false,
+    descriptionMetierUser: "",
     dataImported: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
-  const bienEtreMetiers = [
-    "BoutiqueNaturels",
-    "Podcasteur",
-    "Thérapeute",
-    "Masseur",
-    "Formateur",
-  ];
-  const espacementMetiers = ["espace ameublements"];
-
   useEffect(() => {
     // Charger les métiers depuis l'API
     const loadMetiers = async () => {
@@ -162,15 +163,19 @@ const ProRegisterPage = () => {
   }, [formData.userType, metiersList]);
 
   const getFilteredMetiers = () => {
-    return metiersList.filter((metier) => {
-      if (formData.userType === "BIEN_ETRE") {
-        return bienEtreMetiers.includes(metier.libelle);
-      }
-      if (formData.userType === "VENDEUR") {
-        return espacementMetiers.includes(metier.libelle);
-      }
-      return true;
-    });
+    if (!subscriptionData?.category) return metiersList;
+
+    const selectedCategory = subscriptionData.category;
+    const categoriesToDisplay = [selectedCategory];
+
+    if (selectedCategory === "IMMOBILIER") {
+      categoriesToDisplay.push("COMMERCE");
+    }
+    if (selectedCategory === "ARTISAN") {
+      categoriesToDisplay.push("AUTRE");
+    }
+
+    return metiersList.filter((metier: any) => categoriesToDisplay.includes(metier.categorie));
   };
 
   const getSearchFilteredMetiers = () => {
@@ -210,18 +215,23 @@ const ProRegisterPage = () => {
     }
 
     // DÉTERMINER userType BASÉ SUR L'ABONNEMENT EXACT
-    let finalUserType = "CLIENT"; // Valeur par défaut
-    if (subscriptionData) {
-      // Mapping exact basé sur les abonnements de vos images
-      // console.log(subscriptionData);
-      const subscriptionToUserType: { [key: string]: string } = {
-        "Pro Immobilier Complet": "AGENCE",
-        "Prestataires de Services": "PRESTATAIRE",
-        "Espace Annonceur": "VENDEUR",
-        "Bien-être": "BIEN_ETRE",
-      };
-      finalUserType =
-        subscriptionToUserType[subscriptionData.name] || "PRESTATAIRE";
+    let finalUserType = formData.userType; // Utiliser le type déjà défini dans le state
+
+    if (!finalUserType && subscriptionData) {
+      // Fallback si non défini
+      if (subscriptionData.userTypes && subscriptionData.userTypes.length > 0) {
+        finalUserType = subscriptionData.userTypes[0];
+      } else {
+        // Mapping de secours basé sur le titre
+        const subscriptionToUserType: { [key: string]: string } = {
+          "Immobilier & Commerces": "AGENCE",
+          "Artisans & Professions": "PRESTATAIRE",
+          "Tourisme & Loisirs": "TOURISME",
+          "Sport & Bien-être": "BIEN_ETRE",
+        };
+        finalUserType =
+          subscriptionToUserType[subscriptionData.planTitle] || "PRESTATAIRE";
+      }
     }
 
     // Créer le mapping metiersLabel
@@ -238,7 +248,14 @@ const ProRegisterPage = () => {
     formData.userType = finalUserType;
     formData.metiers = formData.metiers || [];
     try {
-      const response = await signupPro(formData, subscriptionData.truePlanId);
+      console.log(
+        "formData",
+        formData,
+        "subscriptionsData",
+        subscriptionData.truePlanId,
+        subscriptionData.visibilityOption
+      );
+      const response = await signupPro(formData, subscriptionData.truePlanId,subscriptionData.visibilityOption);
 
       // ENVOYER L'EMAIL DE BIENVENUE APRES L'INSCRIPTION RÉUSSIE
       // Dans votre handleSubmit, remplacez la partie email par :
@@ -283,16 +300,18 @@ const ProRegisterPage = () => {
   // Afficher l'abonnement sélectionné dans le formulaire
   useEffect(() => {
     if (subscriptionData) {
-      // console.log("Subscription selected:", subscriptionData);
-      // Pré-remplir userType basé sur l'abonnement exact
-      const subscriptionToUserType: { [key: string]: string } = {
-        "Pro Immobilier Complet": "AGENCE",
-        "Prestataires de Services": "PRESTATAIRE",
-        "Espace Annonceur": "VENDEUR",
-        "Bien-être": "BIEN_ETRE",
-      };
-      const userTypeFromSubscription =
-        subscriptionToUserType[subscriptionData.name];
+      let userTypeFromSubscription = subscriptionData.userTypes?.[0];
+
+      if (!userTypeFromSubscription && subscriptionData.planTitle) {
+        const subscriptionToUserType: { [key: string]: string } = {
+          "Immobilier & Commerces": "AGENCE",
+          "Artisans & Professions": "PRESTATAIRE",
+          "Tourisme & Loisirs": "TOURISME",
+          "Sport & Bien-être": "BIEN_ETRE",
+        };
+        userTypeFromSubscription = subscriptionToUserType[subscriptionData.planTitle];
+      }
+
       if (userTypeFromSubscription) {
         setFormData((prev) => ({
           ...prev,
@@ -321,6 +340,51 @@ const ProRegisterPage = () => {
         ? prev.metiers.filter((id) => id !== metierId)
         : [...prev.metiers, metierId],
     }));
+  };
+
+  const handleCustomMetierSubmit = () => {
+    if (!customMetierDescription.trim()) {
+      toast.error("Veuillez entrer une description.");
+      return;
+    }
+
+    // Chercher le métier générique correspondant à la catégorie (celui qui a le même nom que le plan ou similaire)
+    const planTitle = subscriptionData?.planTitle || "";
+    const normalize = (s: string) =>
+      s.toLowerCase().replace(/s$/, "").replace(/s /g, " ");
+
+    const genericMetier = metiersList.find(
+      (m: any) =>
+        m.categorie === subscriptionData.category &&
+        (normalize(m.libelle) === normalize(planTitle) ||
+          m.libelle.includes("&"))
+    );
+
+    if (genericMetier) {
+      setFormData((prev) => ({
+        ...prev,
+        metiers: [genericMetier.id],
+        descriptionMetierUser: customMetierDescription,
+      }));
+      setCustomMetierModalOpen(false);
+      toast.success("Description enregistrée avec le métier : " + genericMetier.libelle);
+    } else {
+      // Fallback si aucun métier générique trouvé
+      const fallbackMetier = metiersList.find(
+        (m: any) => m.categorie === subscriptionData.category
+      );
+      if (fallbackMetier) {
+        setFormData((prev) => ({
+          ...prev,
+          metiers: [fallbackMetier.id],
+          descriptionMetierUser: customMetierDescription,
+        }));
+        setCustomMetierModalOpen(false);
+        toast.success("Description enregistrée.");
+      } else {
+        toast.error("Aucun métier trouvé pour cette catégorie.");
+      }
+    }
   };
 
   const features = [
@@ -702,10 +766,10 @@ const ProRegisterPage = () => {
                                 </span>
                               )}
                           </label>
-
-                          {/* Barre de recherche */}
-                          {getFilteredMetiers().length > 2 && (
-                            <div className="mb-4 relative">
+                          
+                          {/* Barre de recherche et bouton métier personnalisé */}
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="relative flex-grow">
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                               <Input
                                 type="text"
@@ -726,8 +790,15 @@ const ProRegisterPage = () => {
                                 </button>
                               )}
                             </div>
-                          )}
-
+                            <Button
+                              type="button"
+                              variant="link"
+                              className="text-[#556B2F] hover:text-[#6B8E23] text-sm shrink-0 whitespace-nowrap"
+                              onClick={() => setCustomMetierModalOpen(true)}
+                            >
+                              Votre métier n'est pas là ?
+                            </Button>
+                          </div>
                           {/* Liste des métiers */}
                           <div className="space-y-2">
                             {metiersLoading ? (
@@ -1130,6 +1201,39 @@ const ProRegisterPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal pour métier personnalisé */}
+      <Dialog
+        open={customMetierModalOpen}
+        onOpenChange={setCustomMetierModalOpen}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Décrivez votre métier</DialogTitle>
+            <DialogDescription>
+              Si votre métier ne figure pas dans la liste, décrivez-le ici. Nous
+              l'associerons à votre catégorie d'abonnement.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label htmlFor="description" className="text-sm font-medium">
+                Description de votre activité
+              </label>
+              <Textarea
+                id="description"
+                value={customMetierDescription}
+                onChange={(e) => setCustomMetierDescription(e.target.value)}
+                placeholder="Ex: Je suis spécialisé dans la restauration de meubles anciens..."
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleCustomMetierSubmit} className="bg-[#556B2F] hover:bg-[#6B8E23] text-white">Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
