@@ -261,6 +261,8 @@ const PropertyDetailModal = ({
 
 const AnnonceCard = ({ property }: { property: Property }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const { user } = useAuth();
+  const isLoggedIn = Boolean(user);
   
   const formatPrice = (price: number, type: string) => {
     if (type === "location") {
@@ -270,6 +272,16 @@ const AnnonceCard = ({ property }: { property: Property }) => {
   };
 
   const isAvailable = property.status === "available";
+
+  const handleShowDetails = () => {
+    if (!isAvailable) return;
+    
+    if (isLoggedIn) {
+      setShowDetails(true);
+    } else {
+      toast.info("Vous devez être connecté pour voir les détails de cette annonce !");
+    }
+  };
 
   return (
     <>
@@ -399,10 +411,10 @@ const AnnonceCard = ({ property }: { property: Property }) => {
 
           {/* Bouton de détails */}
           <button
-            onClick={() => isAvailable && setShowDetails(true)}
+            onClick={handleShowDetails}
             disabled={!isAvailable}
             className={`w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center group/btn ${isAvailable
-              ? "text-white hover:bg-[#7BA05B] cursor-pointer"
+              ? `text-white hover:bg-[#7BA05B] cursor-pointer ${!isLoggedIn ? 'hover:bg-[#7BA05B]' : ''}`
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
               }`}
             style={
@@ -415,7 +427,7 @@ const AnnonceCard = ({ property }: { property: Property }) => {
           >
             <Eye className="w-4 h-4 mr-2" />
             {isAvailable ? "Afficher details" : "Non disponible"}
-            {isAvailable && (
+            {isAvailable && isLoggedIn && (
               <div className="ml-2 opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all duration-200">
                 →
               </div>
@@ -424,12 +436,14 @@ const AnnonceCard = ({ property }: { property: Property }) => {
         </div>
       </div>
 
-      {/* Modal de détails */}
-      <PropertyDetailModal
-        property={property}
-        isOpen={showDetails}
-        onClose={() => setShowDetails(false)}
-      />
+      {/* Modal de détails - uniquement accessible si connecté */}
+      {isLoggedIn && (
+        <PropertyDetailModal
+          property={property}
+          isOpen={showDetails}
+          onClose={() => setShowDetails(false)}
+        />
+      )}
     </>
   );
 };
