@@ -524,10 +524,10 @@ const App = () => {
                     element={<FormationsTourisme />}
                   />
                   <Route path="/voyages" element={<Voyages />} />
-                  <Route
+                  {/* <Route
                     path="/confidentialite"
                     element={<PrivacyPolicyWidget />}
-                  />
+                  /> */}
                   <Route
                     path="/mentions_legales"
                     element={<LegalMentionsWidget />}
@@ -1025,7 +1025,7 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />
                   <Route path="/import-info" element={<ImportInfo />} />
-                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/cgu" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   {/* Routes RGPD et légales */}
                   <Route
@@ -1033,11 +1033,11 @@ const App = () => {
                     element={<MentionsLegales />}
                   />
                   <Route
-                    path="/politique-confidentialite"
+                    path="/confidentialite"
                     element={<PolitiqueConfidentialiteComplete />}
                   />
                   <Route
-                    path="/gestion-droits-rgpd"
+                    path="/rgpd"
                     element={<GestionDroitsRGPD />}
                   />
                   <Route path="/contact-dpo" element={<ContactDPO />} />

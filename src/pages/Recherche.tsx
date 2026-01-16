@@ -78,11 +78,11 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     setVisiteModal({ isOpen: false, property: null });
     setShowMapModal(false);
     setShowNearbyModal(false);
-    
+
     if (typeof onClick === 'function') {
       onClick();
     }
-    
+
     // Rediriger vers la page d'accueil
     navigate('/');
   };
@@ -1052,8 +1052,17 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
           <div className="mb-6">
             <div className="p-4 flex items-center gap-3">
               <div className=" relative lg:block hidden cursor-pointer" onClick={handleClose}>
+                <Link to={"/#hero"} onClick={() => {
+                  setTimeout(() => {
+                    const heroElement = document.getElementById('hero');
+                    if (heroElement) {
+                      heroElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}>
                   <ServoLogo />
-                  <div className="absolute inset-0"></div>
+                </Link>
+                <div className="absolute inset-0"></div>
               </div>
 
               <div className="relative bg-white rounded-lg flex-1" onClick={() => setShowMapModal(false)}>
@@ -1487,9 +1496,9 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
           onClick={handleShowMapModal}
           className="fixed z-40 p-3 bg-logo hover:bg-primary-dark text-white rounded-full shadow-lg transition-colors
             // Mobile: plus petit
-            bottom-4 right-4
+            bottom-4 left-4
             // Desktop: taille normale
-            md:bottom-8 md:right-8"
+            md:bottom-8 md:left-8"
           title="Afficher la carte"
         >
           <MapPin className="h-5 w-5 md:h-6 md:w-6" />
