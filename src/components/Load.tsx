@@ -293,6 +293,200 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
           className="relative z-[9999] overflow-hidden min-h-screen h-screen w-full flex flex-col items-center justify-center bg-[#252c1d] pb-10 snap-start"
         >
 
+          {/* Double cercle décoratif animé */}
+          <div className="pointer-events-none absolute top-0 right-28 flex items-center justify-center z-50">
+            <style>{`
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes spinFast {
+      from { transform: rotate(360deg); }
+      to   { transform: rotate(0deg); }
+    }
+  `}</style>
+
+            {/* Cercle externe – lent */}
+            <svg
+              width="760"
+              height="760"
+              viewBox="0 0 460 460"
+              className="absolute opacity-60"
+              style={{
+                animation: "spinSlow 88s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="230"
+                cy="230"
+                r="180"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="1 3"
+                strokeLinecap="round"
+                transform="rotate(-90 230 230)"
+              />
+            </svg>
+
+            {/* Cercle interne – plus rapide */}
+            <svg
+              width="600"
+              height="600"
+              viewBox="0 0 400 400"
+              className="absolute opacity-80"
+              style={{
+                animation: "spinFast 93s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="2 4"
+                strokeLinecap="round"
+                transform="rotate(-90 200 200)"
+              />
+            </svg>
+          </div>
+
+{/* Double cercle décoratif animé */}
+          <div className="pointer-events-none absolute bottom-0 left-28 flex items-center justify-center z-50">
+            <style>{`
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes spinFast {
+      from { transform: rotate(360deg); }
+      to   { transform: rotate(0deg); }
+    }
+  `}</style>
+
+            {/* Cercle externe – lent */}
+            <svg
+              width="760"
+              height="760"
+              viewBox="0 0 460 460"
+              className="absolute opacity-60"
+              style={{
+                animation: "spinSlow 88s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="230"
+                cy="230"
+                r="180"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="1 3"
+                strokeLinecap="round"
+                transform="rotate(-90 230 230)"
+              />
+            </svg>
+
+            {/* Cercle interne – plus rapide */}
+            <svg
+              width="600"
+              height="600"
+              viewBox="0 0 400 400"
+              className="absolute opacity-80"
+              style={{
+                animation: "spinFast 93s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="2 4"
+                strokeLinecap="round"
+                transform="rotate(-90 200 200)"
+              />
+            </svg>
+          </div>
+
+          {/* Double cercle décoratif animé */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-50">
+            <style>{`
+    @keyframes spinFast {
+      from { transform: rotate(360deg); }
+      to   { transform: rotate(0deg); }
+    }
+  `}</style>
+
+            {/* Cercle interne – plus rapide */}
+            <svg
+              width="600"
+              height="600"
+              viewBox="0 0 400 400"
+              className="absolute opacity-80"
+              style={{
+                animation: "spinFast 93s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#93960b"
+                strokeWidth="1"
+                strokeDasharray="2 4"
+                strokeLinecap="round"
+                transform="rotate(-90 200 200)"
+              />
+            </svg>
+          </div>
+
+           {/* Double cercle décoratif animé */}
+          <div className="pointer-events-none absolute mr-44 inset-0 flex items-center justify-center z-30">
+            <style>{`
+    @keyframes spinFast {
+      from { transform: rotate(360deg); }
+      to   { transform: rotate(0deg); }
+    }
+  `}</style>
+
+            {/* Cercle interne – plus rapide */}
+            <svg
+              width="400"
+              height="400"
+              viewBox="0 0 400 400"
+              className="absolute opacity-80"
+              style={{
+                animation: "spinFast 93s linear infinite",
+                transformOrigin: "50% 50%",
+              }}
+            >
+              <circle
+                cx="200"
+                cy="200"
+                r="150"
+                fill="none"
+                stroke="#93960a"
+                strokeWidth="1"
+                strokeDasharray="1 1"
+                strokeLinecap="round"
+                transform="rotate(-90 200 200)"
+              />
+            </svg>
+          </div>
+
           {/* Overlay semi-transparent pour la lisibilité */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#252c1d]/90 to-[#252c1d]/90 backdrop-blur-md z-10" />
 
@@ -303,7 +497,7 @@ export default function LoadingScreen({ onLoadingComplete }: LoadingScreenProps)
           </div>
           <div
             ref={philosophyRef}
-            className="max-w-5xl w-full text-center z-20 relative"
+            className="max-w-5xl w-full text-center z-50 relative"
           >
 
             <div className="relative">
