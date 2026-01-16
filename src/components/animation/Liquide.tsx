@@ -160,7 +160,7 @@ export default function InteractivePortrait() {
       helmetImage.geometry = new THREE.PlaneGeometry(planeWidth, planeHeight)
     })
 
-    const helmetTexture = textureLoader.load("/Gemini.png")
+    const helmetTexture = textureLoader.load("/house.jpg")
 
     baseTexture.colorSpace = THREE.SRGBColorSpace
     helmetTexture.colorSpace = THREE.SRGBColorSpace

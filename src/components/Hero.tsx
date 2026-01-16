@@ -724,7 +724,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-            className="mb-2 lg:mb-6 text-2xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white mt-32"
+            className="mb-2 lg:mb-6 text-4xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white mt-32"
           >
             <span className="block">La super-application</span>
             <span
@@ -741,7 +741,7 @@ const Hero = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="mx-auto max-w-3xl"
+            className="mx-auto max-w-3xl my-0 lg:my-5"
             onClick={openModal}
           >
             <div

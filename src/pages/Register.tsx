@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ServoLogo from "@/components/components/ServoLogo";
 import { api } from "@/lib/axios";
@@ -264,7 +264,16 @@ const RegisterPage = () => {
             <div className="mb-8">
               <div className="flex items-center gap-3">
 
-                <ServoLogo />
+                <Link to={"/#hero"} onClick={() => {
+                  setTimeout(() => {
+                    const heroElement = document.getElementById('hero');
+                    if (heroElement) {
+                      heroElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}>
+                  <ServoLogo />
+                </Link>
 
               </div>
               <p className="text-md font-semibold">
