@@ -25,6 +25,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import {
@@ -79,6 +86,15 @@ const ProRegisterPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
+  const [phonePrefix, setPhonePrefix] = useState("+262");
+  
+  const countryCodes = [
+    { code: "+262", label: "Réunion (+262)", flag: "🇷🇪" },
+    { code: "+33", label: "France (+33)", flag: "🇫🇷" },
+    { code: "+261", label: "Madagascar (+261)", flag: "🇲🇬" },
+    { code: "+230", label: "Maurice (+230)", flag: "🇲🇺" },
+    { code: "+269", label: "Mayotte (+269)", flag: "🇾🇹" },
+  ];
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { subscriptionData } = location.state || {};
   const [locationModalOpen, setLocationModalOpen] = useState(false);
@@ -87,6 +103,7 @@ const ProRegisterPage = () => {
   const [metiersSearchQuery, setMetiersSearchQuery] = useState("");
   const [customMetierModalOpen, setCustomMetierModalOpen] = useState(false);
   const [customMetierDescription, setCustomMetierDescription] = useState("");
+  const [hasCustomMetier, setHasCustomMetier] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState({
     minLength: false,
     maxLength: false,
@@ -245,17 +262,23 @@ const ProRegisterPage = () => {
 
     // Appel à l'API d'inscription sans paiement
     setIsLoading(true);
-    formData.userType = finalUserType;
-    formData.metiers = formData.metiers || [];
+    
+    const submissionData = {
+      ...formData,
+      userType: finalUserType,
+      metiers: formData.metiers || [],
+      phone: `${phonePrefix}${formData.phone}`
+    };
+
     try {
       console.log(
-        "formData",
-        formData,
+        "submissionData",
+        submissionData,
         "subscriptionsData",
         subscriptionData.truePlanId,
         subscriptionData.visibilityOption
       );
-      const response = await signupPro(formData, subscriptionData.truePlanId,subscriptionData.visibilityOption);
+      const response = await signupPro(submissionData, subscriptionData.truePlanId,subscriptionData.visibilityOption);
 
       // ENVOYER L'EMAIL DE BIENVENUE APRES L'INSCRIPTION RÉUSSIE
       // Dans votre handleSubmit, remplacez la partie email par :
@@ -366,6 +389,7 @@ const ProRegisterPage = () => {
         metiers: [genericMetier.id],
         descriptionMetierUser: customMetierDescription,
       }));
+      setHasCustomMetier(true);
       setCustomMetierModalOpen(false);
       toast.success("Description enregistrée avec le métier : " + genericMetier.libelle);
     } else {
@@ -379,6 +403,7 @@ const ProRegisterPage = () => {
           metiers: [fallbackMetier.id],
           descriptionMetierUser: customMetierDescription,
         }));
+        setHasCustomMetier(true);
         setCustomMetierModalOpen(false);
         toast.success("Description enregistrée.");
       } else {
@@ -588,28 +613,45 @@ const ProRegisterPage = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
-                            Téléphone (Réunion) *
+                            Téléphone *
                           </label>
-                          <div className="relative">
-                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
-                              <span className="text-gray-600 text-sm font-medium">+262</span>
+                          <div className="flex gap-2">
+                            <Select
+                              value={phonePrefix}
+                              onValueChange={setPhonePrefix}
+                            >
+                              <SelectTrigger className="w-[110px] h-11 bg-[#FFFFFF] border-[#D3D3D3]">
+                                <SelectValue placeholder="+262" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {countryCodes.map((country) => (
+                                  <SelectItem key={country.code} value={country.code}>
+                                    <span className="flex items-center gap-2">
+                                      <span>{country.flag}</span>
+                                      <span>{country.code}</span>
+                                    </span>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <div className="relative flex-1">
+                              <Input
+                                placeholder="692 12 34 56"
+                                className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                value={formData.phone}
+                                onChange={(e) => {
+                                  // Nettoyer l'entrée : garder uniquement les chiffres
+                                  const cleanedValue = e.target.value.replace(/\D/g, '');
+                                  // Limiter à 9 chiffres (format Réunion : 692 12 34 56)
+                                  const limitedValue = cleanedValue.slice(0, 9);
+                                  handleInputChange("phone", limitedValue);
+                                }}
+                                required
+                              />
                             </div>
-                            <Input
-                              placeholder="692 12 34 56"
-                              className="pl-16 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.phone}
-                              onChange={(e) => {
-                                // Nettoyer l'entrée : garder uniquement les chiffres
-                                const cleanedValue = e.target.value.replace(/\D/g, '');
-                                // Limiter à 9 chiffres (format Réunion : 692 12 34 56)
-                                const limitedValue = cleanedValue.slice(0, 9);
-                                handleInputChange("phone", limitedValue);
-                              }}
-                              required
-                            />
                           </div>
                           <p className="text-xs text-gray-500">
-                            Format : 9 chiffres (ex: 692123456)
+                            Sans le 0 initial (ex: 692123456)
                           </p>
                         </div>
                       </div>
@@ -768,6 +810,7 @@ const ProRegisterPage = () => {
                           </label>
                           
                           {/* Barre de recherche et bouton métier personnalisé */}
+                          {!hasCustomMetier && (
                           <div className="flex items-center gap-4 mb-4">
                             <div className="relative flex-grow">
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -799,12 +842,31 @@ const ProRegisterPage = () => {
                               Votre métier n'est pas là ?
                             </Button>
                           </div>
+                          )}
                           {/* Liste des métiers */}
                           <div className="space-y-2">
                             {metiersLoading ? (
                               <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
                                 <div className="w-5 h-5 border-2 border-gray-400 border-t-[#556B2F] rounded-full animate-spin mx-auto mb-2"></div>
                                 Chargement des métiers...
+                              </div>
+                            ) : hasCustomMetier ? (
+                              <div className="p-4 bg-[#556B2F]/10 border border-[#556B2F]/20 rounded-xl flex justify-between items-center animate-in fade-in slide-in-from-top-2">
+                                <div>
+                                  <p className="font-medium text-[#556B2F]">Métier personnalisé défini</p>
+                                  <p className="text-sm text-gray-600">{formData.descriptionMetierUser}</p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setHasCustomMetier(false);
+                                    setFormData((prev) => ({ ...prev, metiers: [], descriptionMetierUser: "" }));
+                                  }}
+                                  className="text-gray-500 hover:text-red-500 hover:bg-red-50"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
                               </div>
                             ) : getSearchFilteredMetiers().length > 0 ? (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-2">
