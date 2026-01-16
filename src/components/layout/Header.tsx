@@ -744,11 +744,11 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg", // Image d'illustration santé
         },
-        // {
-        //   title: "Emploi & Formations",
-        //   description: "Offres d'emploi, formations et alternance",
-        //   href: "/emploi-formations",
-        //   image:
+        {
+          title: "Emploi & Formations",
+          description: "Offres d'emploi, formations et alternance",
+          href: "/emploi-formations",
+          image:
         //     "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg", // Image d'illustration emploi
         // },
         // {
