@@ -63,103 +63,87 @@ export const ModalDemandeVisite = ({
     }
   }, [open, user, isAuthenticated]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!property) return;
-    
-    // VÉRIFICATION CRITIQUE - Empêcher l'envoi si date ou heure ne sont pas sélectionnées
-    if (!formData.dateSouhaitee || !formData.heureSouhaitee) {
-      setFormErrors({
-        dateSouhaitee: !formData.dateSouhaitee,
-        heureSouhaitee: !formData.heureSouhaitee
-      });
-      toast.error("Veuillez sélectionner une date et un créneau horaire.");
-      return;
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!property) return;
+  
+  // VÉRIFICATION CRITIQUE - Empêcher l'envoi si date ou heure ne sont pas sélectionnées
+  if (!formData.dateSouhaitee || !formData.heureSouhaitee) {
+    setFormErrors({
+      dateSouhaitee: !formData.dateSouhaitee,
+      heureSouhaitee: !formData.heureSouhaitee
+    });
+    toast.error("Veuillez sélectionner une date et un créneau horaire.");
+    return;
+  }
 
-    // Réinitialiser les erreurs si tout est valide
-    setFormErrors({ dateSouhaitee: false, heureSouhaitee: false });
-    
-    // Track contact action
-    if (onPropertyContact) {
-      onPropertyContact(property);
-    }
-    
-    if (isAlreadySent) {
-      toast.error("Vous avez déjà envoyé une demande pour ce bien.");
-      return;
-    }
+  // Réinitialiser les erreurs si tout est valide
+  setFormErrors({ dateSouhaitee: false, heureSouhaitee: false });
+  
+  // Track contact action
+  if (onPropertyContact) {
+    onPropertyContact(property);
+  }
+  
+  if (isAlreadySent) {
+    toast.error("Vous avez déjà envoyé une demande pour ce bien.");
+    return;
+  }
 
-    if (!isAuthenticated || !user) {
-      toast.error('Veuillez vous connecter pour demander une visite.');
-      return;
-    }
+  if (!isAuthenticated || !user) {
+    toast.error('Veuillez vous connecter pour demander une visite.');
+    return;
+  }
 
-    setLoadingSubmit(true);
-    try {
-      // Récupérer un service pertinent (préférence pour un service lié à l'immobilier/visite)
-      const servicesResp = await api.get('/services');
-      const services = servicesResp.data || [];
+  setLoadingSubmit(true);
+  try {
+    // Récupérer l'ID du propriétaire du bien
+    const propertyOwnerId = property?.ownerId || property?.createdById || user.id;
 
-      if (!Array.isArray(services) || services.length === 0) {
-        toast.error('Aucun service disponible sur le serveur. Créez un service ou configurez-en un pour les visites.');
-        setLoadingSubmit(false);
-        return;
-      }
+    // Ensure backend-required contactPrenom and contactNom are provided
+    const nameParts = String(formData.nomPrenom || '').trim().split(/\s+/).filter(Boolean);
+    const contactPrenom = nameParts.length > 0 ? nameParts[0] : '';
+    const contactNom = nameParts.length > 1 ? nameParts.slice(1).join(' ') : (nameParts[0] || '');
 
-      // Essayer de trouver un service lié aux visites ou à l'immobilier
-      let chosenService = services.find((s: any) => /visite|visiter/i.test(String(s.name || s.libelle || '')));
-      if (!chosenService) {
-        chosenService = services.find((s: any) => /immobilier|property|bien/i.test(String(s.name || s.libelle || '')));
-      }
-      if (!chosenService) {
-        // fallback: first service
-        chosenService = services[0];
-      }
+    const payload = {
+      // NE PAS envoyer de serviceId - le backend utilisera l'ID du propriétaire
+      // serviceId: null, // Optionnel, laissé vide
+      createdById: user.id, // ID de la personne qui envoie la demande
+      propertyId: property?.id,
+      contactNom,
+      contactPrenom,
+      contactEmail: formData.email,
+      contactTel: formData.telephone,
+      description: `Demande visite pour le bien: ${property?.title || property?.id} (${property?.id}). ${formData.message || ''}`,
+      lieuAdresse: property?.address || property?.city || '',
+      dateSouhaitee: formData.dateSouhaitee,
+      heureSouhaitee: formData.heureSouhaitee,
+    };
 
-      // Ensure backend-required contactPrenom and contactNom are provided
-      const nameParts = String(formData.nomPrenom || '').trim().split(/\s+/).filter(Boolean);
-      const contactPrenom = nameParts.length > 0 ? nameParts[0] : '';
-      const contactNom = nameParts.length > 1 ? nameParts.slice(1).join(' ') : (nameParts[0] || '');
+    await api.post('/demandes/immobilier', payload);
 
-      const payload = {
-        serviceId: chosenService.id,
-        createdById: user.id,
-        propertyId: property?.id,
-        contactNom,
-        contactPrenom,
-        contactEmail: formData.email,
-        contactTel: formData.telephone,
-        description: `Demande visite pour le bien: ${property?.title || property?.id} (${property?.id}). ${formData.message || ''}`,
-        lieuAdresse: property?.address || property?.city || '',
-        dateSouhaitee: formData.dateSouhaitee,
-        heureSouhaitee: formData.heureSouhaitee,
-      };
+    // Notify parent that a request was sent
+    onSuccess?.(String(property.id));
 
-      await api.post('/demandes/immobilier', payload);
+    toast.success("Votre demande de visite a bien été envoyée.");
 
-      // Notify parent that a request was sent
-      onSuccess?.(String(property.id));
-
-      toast.success("Votre demande de visite a bien été envoyée.");
-
-      // Réinitialiser le formulaire et fermer le modal
-      setFormData({
-        nomPrenom: "",
-        email: "",
-        telephone: "",
-        message: "",
-        dateSouhaitee: "",
-        heureSouhaitee: "",
-      });
-      onClose();
-    } catch (err: any) {
-      console.error('Erreur en envoyant la demande de visite', err);
-      toast.error(err?.response?.data?.error || err?.message || 'Impossible d\'envoyer la demande. Réessayez.');
-    } finally {
-      setLoadingSubmit(false);
-    }
-  };
+    // Réinitialiser le formulaire et fermer le modal
+    setFormData({
+      nomPrenom: "",
+      email: "",
+      telephone: "",
+      message: "",
+      dateSouhaitee: "",
+      heureSouhaitee: "",
+    });
+    onClose();
+  } catch (err: any) {
+    console.error('Erreur en envoyant la demande de visite', err);
+    toast.error(err?.response?.data?.error || err?.message || 'Impossible d\'envoyer la demande. Réessayez.');
+  } finally {
+    setLoadingSubmit(false);
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
