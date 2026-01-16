@@ -1060,9 +1060,10 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                     }
                   }, 100);
                 }}>
+                  <div className="absolute inset-0"></div>
                   <ServoLogo />
                 </Link>
-                <div className="absolute inset-0"></div>
+                
               </div>
 
               <div className="relative bg-white rounded-lg flex-1" onClick={() => setShowMapModal(false)}>
