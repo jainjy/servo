@@ -166,39 +166,67 @@ const Entrepreneuriat = () => {
     loadPageData();
   }, [activeFilter]);
 
-  const loadPageData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+// Dans la fonction loadPageData :
+    const loadPageData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Charger les données en parallèle
-      const [interviewsRes, resourcesRes, eventsRes, statsRes] =
-        await Promise.all([
-          EntrepreneuriatService.getInterviews({
-            category: activeFilter !== "tous" ? activeFilter : undefined,
-            limit: 12,
-          }),
-          EntrepreneuriatService.getResources({ limit: 8 }),
-          EntrepreneuriatService.getEvents({ upcoming: "true", limit: 6 }),
-          EntrepreneuriatService.getStats(),
-        ]);
+        // Charger les données en parallèle
+        const [interviewsRes, resourcesRes, eventsRes, statsRes] =
+          await Promise.all([
+            EntrepreneuriatService.getInterviews({
+              category: activeFilter !== "tous" ? activeFilter : undefined,
+              limit: 12,
+            }),
+            EntrepreneuriatService.getResources({ limit: 8 }),
+            EntrepreneuriatService.getEvents({ upcoming: "true", limit: 6 }),
+            EntrepreneuriatService.getStats(),
+          ]);
 
-      setInterviews(interviewsRes.data);
-      setResources(resourcesRes.data);
-      setEvents(eventsRes.data);
-      setStats(statsRes.data);
-    } catch (err: any) {
-      console.error("Erreur chargement données:", err);
-      setError(err.response?.data?.error || "Erreur de chargement des données");
+        // Vérifier le succès de chaque requête
+        if (statsRes.success) {
+          setStats(statsRes.data); // statsRes.data contient les statistiques
+        } else {
+          console.error("Erreur stats:", statsRes.error);
+          // Utiliser des valeurs par défaut
+          setStats({
+            interviews: 0,
+            entrepreneurs: 0,
+            resources: 0,
+            events: 0,
+            downloads: 0,
+            featuredInterviews: [],
+            recentEvents: [],
+          });
+        }
 
-      // Données de secours
-      setInterviews([]);
-      setResources([]);
-      setEvents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+        // Les autres données
+        setInterviews(interviewsRes.data);
+        setResources(resourcesRes.data);
+        setEvents(eventsRes.data);
+        
+      } catch (err: any) {
+        console.error("Erreur chargement données:", err);
+        setError(err.response?.data?.error || "Erreur de chargement des données");
+
+        // Données de secours
+        setInterviews([]);
+        setResources([]);
+        setEvents([]);
+        setStats({
+          interviews: 0,
+          entrepreneurs: 0,
+          resources: 0,
+          events: 0,
+          downloads: 0,
+          featuredInterviews: [],
+          recentEvents: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    }; 
 
   const filteredInterviews =
     activeFilter === "tous"
@@ -356,54 +384,55 @@ const Entrepreneuriat = () => {
         </div>
       </section>
 
-      {/* Statistiques */}
-      {stats && (
-        <section className="py-12 bg-[#6B8E23]/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                {
-                  icon: <Video className="w-8 h-8" />,
-                  value: `${stats.interviews}+`,
-                  label: "Interviews",
-                },
-                {
-                  icon: <Users className="w-8 h-8" />,
-                  value: `${stats.entrepreneurs}+`,
-                  label: "Entrepreneurs",
-                },
-                {
-                  icon: <Headphones className="w-8 h-8" />,
-                  value: `${Math.floor(stats.downloads / 1000)}K+`,
-                  label: "Téléchargements",
-                },
-                {
-                  icon: <BookOpen className="w-8 h-8" />,
-                  value: `${stats.resources}+`,
-                  label: "Ressources gratuites",
-                },
-              ].map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="text-[#8B4513] mb-2 flex justify-center">
-                    {stat.icon}
-                  </div>
-                  <div className="text-3xl font-bold text-[#556B2F]">
-                    {stat.value}
-                  </div>
-                  <div className="text-gray-600">{stat.label}</div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+    {/* Statistiques */}
+      {stats && (  
+    <section className="py-12 bg-[#6B8E23]/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            {
+              icon: <Video className="w-8 h-8" />,
+              value: stats?.interviews ? `${stats.interviews}+` : "0+",
+              label: "Interviews",
+            },
+            {
+              icon: <Users className="w-8 h-8" />,
+              value: stats?.entrepreneurs ? `${stats.entrepreneurs}+` : "0+",
+              label: "Entrepreneurs",
+            },
+            {
+              icon: <Headphones className="w-8 h-8" />,
+              value: stats?.downloads 
+                ? `${Math.floor(stats.downloads / 1000)}K+`
+                : "0+",
+              label: "Téléchargements",
+            },
+            {
+              icon: <BookOpen className="w-8 h-8" />,
+              value: stats?.resources ? `${stats.resources}+` : "0+",
+              label: "Ressources gratuites",
+            },
+          ].map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="text-center"
+            >
+              <div className="text-[#8B4513] mb-2 flex justify-center">
+                {stat.icon}
+              </div>
+              <div className="text-3xl font-bold text-[#556B2F]">
+                {stat.value}
+              </div>
+              <div className="text-gray-600">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
       )}
-
       {/* Filtres */}
       <section className="py-8 sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-[#D3D3D3]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

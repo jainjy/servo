@@ -177,28 +177,35 @@ class EntrepreneuriatService {
     }
   }
 
-  // Statistiques
-  static async getStats() {
-    try {
-      const response = await api.get("/entrepreneuriat/admin/stats");
-      // Retourner directement data.data si c'est la structure
-      return {
-        data: response.data.data || response.data,
-      };
-    } catch (error) {
-      console.error("❌ Erreur récupération stats:", error);
-      // Retourner les stats par défaut
-      return {
-        data: {
-          totalInterviews: 0,
-          totalResources: 0,
-          totalEvents: 0,
-          totalDownloads: 0,
-          recentInteractions: [],
-        },
-      };
-    }
+ // Statistiques
+static async getStats() {
+  try {
+    // CORRECTION : Utiliser la bonne route (/entrepreneuriat/stats)
+    const response = await api.get("/entrepreneuriat/stats");
+    
+    // Le backend retourne : { success: true, data: {...} }
+    // Donc on retourne directement response.data
+    return response.data;
+    
+  } catch (error) {
+    console.error("❌ Erreur récupération stats:", error);
+    
+    // Retourner la même structure que le backend même en cas d'erreur
+    return {
+      success: false,
+      error: error.response?.data?.error || "Erreur lors de la récupération des statistiques",
+      data: {
+        interviews: 0,
+        entrepreneurs: 0,
+        resources: 0,
+        events: 0,
+        downloads: 0,
+        featuredInterviews: [],
+        recentEvents: [],
+      }
+    };
   }
+}
 
   static async getCategories() {
     try {
