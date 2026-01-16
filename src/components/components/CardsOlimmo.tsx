@@ -11,6 +11,12 @@ import {
   Home,
   Eye,
   ArrowRight,
+  X,
+  Calendar,
+  Ruler,
+  Building,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
@@ -62,7 +68,200 @@ const colors = {
   "hover-secondary": "#A0522D" /* état hover secondary - Sienna */,
 };
 
+// Composant Modal pour afficher les détails
+const PropertyDetailModal = ({ 
+  property, 
+  isOpen, 
+  onClose 
+}: { 
+  property: Property | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
+  if (!isOpen || !property) return null;
+
+  const formatPrice = (price: number, type: string) => {
+    if (type === "location") {
+      return `${price.toLocaleString("fr-FR")} €/mois`;
+    }
+    return `${price.toLocaleString("fr-FR")} €`;
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div 
+        className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
+        style={{ backgroundColor: colors["light-bg"] }}
+      >
+        {/* Bouton fermer */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-gray-100 transition-colors"
+          style={{ color: colors["neutral-dark"] }}
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        {/* Contenu du modal */}
+        <div className="grid md:grid-cols-2 gap-0">
+          {/* Section image */}
+          <div className="relative h-full min-h-[400px]">
+            <img
+              src={property.image_url || "https://via.placeholder.com/600x400?text=No+Image"}
+              alt={property.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+              <div className="flex items-center justify-between">
+                <div
+                  className={`px-4 py-2 rounded-full text-sm font-semibold ${property.type === "location"
+                    ? "bg-[#6B8E23] text-white"
+                    : "bg-[#8B4513] text-white"
+                    }`}
+                >
+                  {property.type === "location" ? "À louer" : "À vendre"}
+                </div>
+                <div className="text-2xl font-bold text-white">
+                  {formatPrice(property.price, property.type)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section détails */}
+          <div className="p-8">
+            <h2 
+              className="text-2xl font-bold mb-4"
+              style={{ color: colors["neutral-dark"] }}
+            >
+              {property.title}
+            </h2>
+            
+            <div className="flex items-center mb-6">
+              <MapPin
+                className="w-5 h-5 mr-2"
+                style={{ color: colors["secondary-text"] }}
+              />
+              <span 
+                className="text-lg font-medium"
+                style={{ color: colors["secondary-text"] }}
+              >
+                {property.location}
+              </span>
+            </div>
+
+            {/* Caractéristiques principales */}
+            <div 
+              className="grid grid-cols-3 gap-4 mb-8 p-4 rounded-xl"
+              style={{ backgroundColor: colors["accent-light"] + "20" }}
+            >
+              <div className="text-center">
+                <Bed className="w-6 h-6 mx-auto mb-2" style={{ color: colors["primary-dark"] }} />
+                <span className="font-semibold" style={{ color: colors["neutral-dark"] }}>
+                  {property.bedrooms || 0} chambres
+                </span>
+              </div>
+              <div className="text-center">
+                <Bath className="w-6 h-6 mx-auto mb-2" style={{ color: colors["primary-dark"] }} />
+                <span className="font-semibold" style={{ color: colors["neutral-dark"] }}>
+                  {property.bathrooms || 0} salles de bain
+                </span>
+              </div>
+              <div className="text-center">
+                <Square className="w-6 h-6 mx-auto mb-2" style={{ color: colors["primary-dark"] }} />
+                <span className="font-semibold" style={{ color: colors["neutral-dark"] }}>
+                  {property.surface || "?"} m²
+                </span>
+              </div>
+            </div>
+
+            {/* Description complète */}
+            <div className="mb-8">
+              <h3 
+                className="text-lg font-semibold mb-3"
+                style={{ color: colors["neutral-dark"] }}
+              >
+                Description
+              </h3>
+              <p className="text-gray-700 leading-relaxed">
+                {property.description || "Aucune description disponible"}
+              </p>
+            </div>
+
+            {/* Informations supplémentaires */}
+            <div className="space-y-3">
+              {property.energy_rating && (
+                <div className="flex items-center">
+                  <span className="w-32 font-medium" style={{ color: colors["neutral-dark"] }}>
+                    Énergie:
+                  </span>
+                  <span style={{ color: colors["secondary-text"] }}>
+                    {property.energy_rating}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center">
+                <span className="w-32 font-medium" style={{ color: colors["neutral-dark"] }}>
+                  Statut:
+                </span>
+                <span 
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${property.status === "available"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"}`}
+                >
+                  {property.status === "available" ? "Disponible" : "Non disponible"}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <span className="w-32 font-medium" style={{ color: colors["neutral-dark"] }}>
+                  Mise à jour:
+                </span>
+                <span style={{ color: colors["secondary-text"] }}>
+                  {new Date(property.updated_at).toLocaleDateString('fr-FR')}
+                </span>
+              </div>
+            </div>
+
+            {/* Boutons d'action */}
+            <div className="flex gap-4 mt-8 pt-6 border-t" style={{ borderColor: colors["separator"] }}>
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 px-4 rounded-xl font-semibold transition-colors hover:opacity-90"
+                style={{
+                  backgroundColor: colors["light-bg"],
+                  color: colors["neutral-dark"],
+                  border: `2px solid ${colors["separator"]}`
+                }}
+              >
+                Fermer
+              </button>
+              <a
+                href={`https://www.olimmoreunion.re/biens/${property.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <button
+                  className="w-full py-3 px-4 rounded-xl font-semibold transition-all hover:scale-[1.02] hover:opacity-90"
+                  style={{
+                    backgroundColor: colors["secondary-text"],
+                    color: colors["light-bg"]
+                  }}
+                >
+                  Voir plus
+                </button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AnnonceCard = ({ property }: { property: Property }) => {
+  const [showDetails, setShowDetails] = useState(false);
+  
   const formatPrice = (price: number, type: string) => {
     if (type === "location") {
       return `${price.toLocaleString("fr-FR")} €/mois`;
@@ -72,187 +271,166 @@ const AnnonceCard = ({ property }: { property: Property }) => {
 
   const isAvailable = property.status === "available";
 
-  const { user } = useAuth();
-  const isLoggedIn = Boolean(user);
-
-  const callError = () => {
-    toast.info("Vous devez être connecté pour voir plus de détails !");
-  };
-
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-      {/* Image avec overlay */}
-      <div className="relative h-56 bg-gray-100 overflow-hidden">
-        <img
-          src={
-            property.image_url ||
-            "https://via.placeholder.com/400x300?text=No+Image"
-          }
-          alt={property.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-
-        {/* Overlay gradient personnalisé */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Badge type */}
-        <div
-          className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-sm font-semibold ${property.type === "location"
-            ? "bg-[#6B8E23] text-white" /* primary-dark */
-            : "bg-[#8B4513] text-white" /* secondary-text */
-            }`}
-          style={{
-            backgroundColor:
-              property.type === "location"
-                ? colors["primary-dark"]
-                : colors["secondary-text"],
-          }}
-        >
-          {property.type === "location" ? "À louer" : "À vendre"}
-        </div>
-
-        {/* Badge statut */}
-        {!isAvailable && (
-          <div
-            className="absolute top-4 right-12 px-3 py-1.5 rounded-full text-sm font-semibold text-white"
-            style={{ backgroundColor: colors["neutral-dark"] }}
-          >
-            Non disponible
-          </div>
-        )}
-
-        {/* Prix */}
-        <div
-          className="absolute bottom-4 left-4 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm"
-          style={{
-            backgroundColor: `${colors["primary-dark"]}CC` /* Avec opacité */,
-            color: "white",
-          }}
-        >
-          <span className="font-bold text-sm">
-            {formatPrice(property.price, property.type)}
-          </span>
-        </div>
-      </div>
-
-      {/* Contenu de la carte */}
-      <div className="p-6">
-        {/* Titre */}
-        <h3
-          className="text-xl font-semibold mb-2 line-clamp-1 group-hover:text-[#6B8E23] transition-colors"
-          style={{ color: colors["neutral-dark"] }}
-        >
-          {property.title}
-        </h3>
-
-        {/* Description */}
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
-          {property.description || "Aucune description disponible"}
-        </p>
-
-        {/* Caractéristiques */}
-        <div
-          className="flex items-center justify-between mb-4 pb-4 border-b"
-          style={{ borderColor: colors["separator"] }}
-        >
-          <div className="flex items-center space-x-2">
-            <Bed
-              className="w-4 h-4"
-              style={{ color: colors["primary-dark"] }}
-            />
-            <span
-              className="text-sm font-medium"
-              style={{ color: colors["neutral-dark"] }}
-            >
-              {property.bedrooms || 0} ch.
-            </span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Bath
-              className="w-4 h-4"
-              style={{ color: colors["primary-dark"] }}
-            />
-            <span
-              className="text-sm font-medium"
-              style={{ color: colors["neutral-dark"] }}
-            >
-              {property.bathrooms || 0} sdb
-            </span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Square
-              className="w-4 h-4"
-              style={{ color: colors["primary-dark"] }}
-            />
-            <span
-              className="text-sm font-medium"
-              style={{ color: colors["neutral-dark"] }}
-            >
-              {property.surface || "?"} m²
-            </span>
-          </div>
-        </div>
-
-        {/* Localisation */}
-        <div className="flex items-center mb-6">
-          <MapPin
-            className="w-4 h-4 mr-2"
-            style={{ color: colors["secondary-text"] }}
+    <>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+        {/* Image avec overlay */}
+        <div className="relative h-56 bg-gray-100 overflow-hidden">
+          <img
+            src={
+              property.image_url ||
+              "https://via.placeholder.com/400x300?text=No+Image"
+            }
+            alt={property.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          <span className="text-sm" style={{ color: colors["secondary-text"] }}>
-            {property.location}
-          </span>
-        </div>
 
-        {/* Bouton de contact */}
-        {/* Bouton de contact */}
-        {isLoggedIn ? (
-          <a
-            href={`https://www.olimmoreunion.re/biens/${property.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center"
-          >
-            <button
-              disabled={!isAvailable}
-              className={`w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center group/btn ${isAvailable
-                  ? "text-white hover:bg-[#7BA05B]" /* hover-primary */
-                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                }`}
-              style={
-                isAvailable
-                  ? {
-                    backgroundColor: colors["primary-dark"],
-                  }
-                  : {}
-              }
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              {isAvailable ? "Afficher details" : "Non disponible"}
-              {isAvailable && (
-                <div className="ml-2 opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all duration-200">
-                  →
-                </div>
-              )}
-            </button>
-          </a>
-        ) : (
-          <button
-            onClick={callError}
-            className="w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center"
+          {/* Overlay gradient personnalisé */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Badge type */}
+          <div
+            className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-sm font-semibold ${property.type === "location"
+              ? "bg-[#6B8E23] text-white"
+              : "bg-[#8B4513] text-white"
+              }`}
             style={{
-              backgroundColor: colors["primary-dark"],
-              color: "white",
-              cursor: "pointer",
+              backgroundColor:
+                property.type === "location"
+                  ? colors["primary-dark"]
+                  : colors["secondary-text"],
             }}
           >
-            <Eye className="w-4 h-4 mr-2" />
-            Afficher details
-          </button>
-        )}
+            {property.type === "location" ? "À louer" : "À vendre"}
+          </div>
 
+          {/* Badge statut */}
+          {!isAvailable && (
+            <div
+              className="absolute top-4 right-12 px-3 py-1.5 rounded-full text-sm font-semibold text-white"
+              style={{ backgroundColor: colors["neutral-dark"] }}
+            >
+              Non disponible
+            </div>
+          )}
+
+          {/* Prix */}
+          <div
+            className="absolute bottom-4 left-4 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm"
+            style={{
+              backgroundColor: `${colors["primary-dark"]}CC`,
+              color: "white",
+            }}
+          >
+            <span className="font-bold text-sm">
+              {formatPrice(property.price, property.type)}
+            </span>
+          </div>
+        </div>
+
+        {/* Contenu de la carte */}
+        <div className="p-6">
+          {/* Titre */}
+          <h3
+            className="text-xl font-semibold mb-2 line-clamp-1 group-hover:text-[#6B8E23] transition-colors"
+            style={{ color: colors["neutral-dark"] }}
+          >
+            {property.title}
+          </h3>
+
+          {/* Description */}
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+            {property.description || "Aucune description disponible"}
+          </p>
+
+          {/* Caractéristiques */}
+          <div
+            className="flex items-center justify-between mb-4 pb-4 border-b"
+            style={{ borderColor: colors["separator"] }}
+          >
+            <div className="flex items-center space-x-2">
+              <Bed
+                className="w-4 h-4"
+                style={{ color: colors["primary-dark"] }}
+              />
+              <span
+                className="text-sm font-medium"
+                style={{ color: colors["neutral-dark"] }}
+              >
+                {property.bedrooms || 0} ch.
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Bath
+                className="w-4 h-4"
+                style={{ color: colors["primary-dark"] }}
+              />
+              <span
+                className="text-sm font-medium"
+                style={{ color: colors["neutral-dark"] }}
+              >
+                {property.bathrooms || 0} sdb
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Square
+                className="w-4 h-4"
+                style={{ color: colors["primary-dark"] }}
+              />
+              <span
+                className="text-sm font-medium"
+                style={{ color: colors["neutral-dark"] }}
+              >
+                {property.surface || "?"} m²
+              </span>
+            </div>
+          </div>
+
+          {/* Localisation */}
+          <div className="flex items-center mb-6">
+            <MapPin
+              className="w-4 h-4 mr-2"
+              style={{ color: colors["secondary-text"] }}
+            />
+            <span className="text-sm" style={{ color: colors["secondary-text"] }}>
+              {property.location}
+            </span>
+          </div>
+
+          {/* Bouton de détails */}
+          <button
+            onClick={() => isAvailable && setShowDetails(true)}
+            disabled={!isAvailable}
+            className={`w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center group/btn ${isAvailable
+              ? "text-white hover:bg-[#7BA05B] cursor-pointer"
+              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+              }`}
+            style={
+              isAvailable
+                ? {
+                  backgroundColor: colors["primary-dark"],
+                }
+                : {}
+            }
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            {isAvailable ? "Afficher details" : "Non disponible"}
+            {isAvailable && (
+              <div className="ml-2 opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all duration-200">
+                →
+              </div>
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+
+      {/* Modal de détails */}
+      <PropertyDetailModal
+        property={property}
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+      />
+    </>
   );
 };
 
@@ -456,5 +634,5 @@ const AnnoncesImmobilieres = () => {
   );
 };
 
-export { AnnoncesImmobilieres };
 export default AnnoncesImmobilieres;
+export { AnnoncesImmobilieres };
