@@ -21,13 +21,8 @@ function Load1() {
     // Données pour les partenaires
     const partners = [
         { id: 1, name: 'Olimmo', logo: 'olimmo.png' },
-        { id: 2, name: 'Partenaire 2', logo: 'https://i.pinimg.com/736x/cc/3c/db/cc3cdb8498f8d4135b87f8501f3faa31.jpg' },
-        { id: 3, name: 'Partenaire 3', logo: 'https://i.pinimg.com/1200x/9d/1b/af/9d1baf24622b6c568ed6f41f826c7105.jpg' },
-        { id: 4, name: 'Partenaire 4', logo: 'https://i.pinimg.com/1200x/4d/7a/ec/4d7aecb5e539968fec979b35f5618527.jpg' },
-        { id: 5, name: 'Partenaire 5', logo: 'https://i.pinimg.com/736x/f0/64/d7/f064d7192801ed944991351e99efdbf2.jpg' },
-        { id: 6, name: 'Partenaire 6', logo: 'https://i.pinimg.com/736x/bb/d6/2a/bbd62ab19fe388ef4dac11d2f21be3f7.jpg' },
-        { id: 7, name: 'Partenaire 7', logo: 'https://i.pinimg.com/1200x/83/5d/9d/835d9d7c0f06a49b079418cd59914762.jpg' },
-        { id: 8, name: 'Partenaire 8', logo: 'https://i.pinimg.com/736x/52/52/5c/52525c7b87e0600a27bf66a9ec1e04f2.jpg' },
+        { id: 2, name: 'Guy hoquet Réunion', logo: 'Reunion.png' },
+        
     ];
 const navigate = useNavigate()
     const containerRef = useRef<HTMLDivElement>(null);
@@ -107,7 +102,7 @@ const navigate = useNavigate()
                     >
 
                         <div
-                            className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-secondary-text shadow-lg"
+                            className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-logo shadow-lg"
                         // style={{
                         //   animation: 'float 6s ease-in-out infinite',
                         // }}
@@ -134,13 +129,13 @@ const navigate = useNavigate()
                     </div>
 
                     {/* Partenaires en bas */}
-                    <div className="w-full pt-20 mt-64 pb-10 pointer-events-none">
+                    <div className="w-full pt-80 pointer-events-none">
                         <div className="container mx-auto px-4">
                             <h3 className="text-center text-white text-xl uppercase tracking-widest mb-12 font-extralight">
                                 Nos Partenaires de Confiance
                             </h3>
 
-                            <div className="grid grid-cols-3 md:grid-cols-8 gap-3">
+                            <div className="flex justify-center items-center gap-10">
                                 <style>{`
                 @keyframes shine {
                   0% { left: -100%; }
@@ -155,7 +150,7 @@ const navigate = useNavigate()
                                 {partners.map((partner) => (
                                     <div
                                         key={partner.id}
-                                        className="bg-black/60 backdrop-blur-lg rounded-md hover:bg-black/80 transition-all duration-500 group border border-white/10 hover:border-white/20 shadow-lg overflow-hidden relative aspect-square"
+                                        className="bg-black/60 h-32 w-32 lg:h-52 lg:w-52 backdrop-blur-lg rounded-md hover:bg-black/80 transition-all duration-500 group border border-white/10 hover:border-white/20 shadow-lg overflow-hidden relative aspect-square"
                                     >
                                         {/* Animation de surbrillance */}
                                         <div className="absolute inset-0 overflow-hidden rounded-md">
@@ -175,7 +170,7 @@ const navigate = useNavigate()
                                                 animation: 'grayscalePulse 3s infinite',
                                             }}
                                         />
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 group-hover:bg-black/60 transition-all duration-500 z-20">
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full p-2 backdrop-blur-md group-hover:bg-black/60 transition-all duration-500 z-20">
                                             <p className="text-white text-xs font-light text-center tracking-wide whitespace-nowrap px-2">
                                                 {partner.name}
                                             </p>
