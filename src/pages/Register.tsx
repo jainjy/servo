@@ -66,6 +66,7 @@ const RegisterPage = () => {
     firstName: "",
     lastName: "",
     email: "",
+    countryCode: "+262",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -134,6 +135,7 @@ const RegisterPage = () => {
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
+        countryCode: formData.countryCode,
         password: formData.password,
         address: formData.address,
         addressComplement: formData.addressComplement,
@@ -389,25 +391,35 @@ const RegisterPage = () => {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">
-                        Téléphone (Réunion) *
+                        Téléphone (International) *
                       </label>
-                      <div className="relative">
-                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
-                          <span className="text-gray-600 text-sm font-medium">+262</span>
+                      <div className="flex gap-2">
+                        <select
+                          value={formData.countryCode}
+                          onChange={(e) =>
+                            handleInputChange("countryCode", e.target.value)
+                          }
+                          className="h-11 px-3 bg-[#FFFFFF] border border-[#D3D3D3] rounded-md text-gray-600 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent"
+                        >
+                          <option value="+33">🇫🇷 +33 </option>
+                          <option value="+262">🇷🇪 +262 </option>
+                          <option value="+261">🇲🇬 +261</option>
+                        </select>
+                        <div className="flex-1 relative">
+                          <Input
+                            placeholder="692 12 34 56"
+                            className="pl-4 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                            value={formData.phone}
+                            onChange={(e) => {
+                              // Nettoyer l'entrée : garder uniquement les chiffres
+                              const cleanedValue = e.target.value.replace(/\D/g, '');
+                              // Limiter à 9 chiffres
+                              const limitedValue = cleanedValue.slice(0, 9);
+                              handleInputChange("phone", limitedValue);
+                            }}
+                            required
+                          />
                         </div>
-                        <Input
-                          placeholder="692 12 34 56"
-                          className="pl-16 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                          value={formData.phone}
-                          onChange={(e) => {
-                            // Nettoyer l'entrée : garder uniquement les chiffres
-                            const cleanedValue = e.target.value.replace(/\D/g, '');
-                            // Limiter à 9 chiffres (format Réunion : 692 12 34 56)
-                            const limitedValue = cleanedValue.slice(0, 9);
-                            handleInputChange("phone", limitedValue);
-                          }}
-                          required
-                        />
                       </div>
                       <p className="text-xs text-gray-500">
                         Format : 9 chiffres (ex: 692123456)

@@ -170,11 +170,6 @@ const navigate = useNavigate()
                                                 animation: 'grayscalePulse 3s infinite',
                                             }}
                                         />
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full p-2 backdrop-blur-md group-hover:bg-black/60 transition-all duration-500 z-20">
-                                            <p className="text-white text-xs font-light text-center tracking-wide whitespace-nowrap px-2">
-                                                {partner.name}
-                                            </p>
-                                        </div>
                                     </div>
                                 ))}
                             </div>

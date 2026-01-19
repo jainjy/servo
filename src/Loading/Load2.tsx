@@ -283,13 +283,13 @@ function Load2({ onLoadingComplete }: LoadingScreenProps) {
                             </div>
 
                             <h2 id='text' className="uppercase text-xl md:text-2xl lg:text-5xl leading-relaxed tracking-wide font-extralight lg:font-extrabold text-white px-8">
-                                <span className='redhawk text-xl md:text-2xl lg:text-4xl mb-4 text-[#93960b]'>{philosophyText}</span>
+                                <span className=' mb-4 text-[#93960b]'>{philosophyText}</span>
                                 <span className='bebas mb-4'>{philosophyText0}</span>
-                                <span className='redhawk  text-xl md:text-2xl lg:text-4xl mb-4 text-[#93960b]'>{philosophyText1}</span>
+                                <span className=' mb-4 text-[#93960b]'>{philosophyText1}</span>
                                 <span className='bebas mb-4'>{philosophyText2}</span>
-                                <span className='redhawk  text-xl md:text-2xl lg:text-4xl mb-4 text-[#93960b]'>{philosophyText3}</span>
+                                <span className=' mb-4 text-[#93960b]'>{philosophyText3}</span>
                                 <span className='bebas mb-4'>{philosophyText4}</span>
-                                <span className='redhawk  text-xl md:text-2xl lg:text-4xl mb-4 text-[#93960b]'>{philosophyText5}</span>
+                                <span className=' mb-4 text-[#93960b]'>{philosophyText5}</span>
                                 <span className='bebas mb-4'>{philosophyText6}</span>
                             </h2>
 
