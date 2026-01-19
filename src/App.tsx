@@ -252,6 +252,8 @@ import ExperienceDetail from "./components/components/ExperienceDetail";
 import ExperienceBooking from "./components/components/ExperienceBooking";
 import EntrepreneuriatAdmin from "./pages/admin/EntrepreneuriatAdmin";
 import ChatBot from "./components/chatbot";
+import Load1 from "./Loading/Load1";
+import Load2 from "./Loading/Load2";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -349,7 +351,10 @@ const App = () => {
                     path="/services-partners"
                     element={<ServicesPartnersPage />}
                   />
-                  <Route path="/" element={<Index />} />
+                  {/* <Route path="/" element={<Index />} /> */}
+                   <Route path="/" element={<Load1 />} />
+                   <Route path="/about" element={<Load2 />} />
+                   <Route path="/home" element={<Index />} />
                   {/* NOUVELLE ROUTE POUR LA PAGE D'ACCOMPAGNEMENT */}
                   <Route
                     path="/accompagnement"

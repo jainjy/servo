@@ -1753,7 +1753,7 @@ const Header = () => {
         className="fixed w-screen top-0 z-50 bg-[#FFFFFF] backdrop-blur-md border shadow-lg"
       >
         <div className="container flex h-16 items-center justify-between px-6">
-          <Link to={"/#hero"} onClick={() => {
+          <Link to={"/home"} onClick={() => {
             setTimeout(() => {
               const heroElement = document.getElementById('hero');
               if (heroElement) {

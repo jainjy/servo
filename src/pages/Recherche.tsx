@@ -1052,7 +1052,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
           <div className="mb-6">
             <div className="p-4 flex items-center gap-3">
               <div className=" relative lg:block hidden cursor-pointer" onClick={handleClose}>
-                <Link to={"/#hero"} onClick={() => {
+                <Link to={"/home"} onClick={() => {
                   setTimeout(() => {
                     const heroElement = document.getElementById('hero');
                     if (heroElement) {

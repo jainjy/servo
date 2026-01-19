@@ -329,8 +329,8 @@ export default function TopographicPage() {
   }, [])
 
   return (
-    <div className="relative h-[200vh] ">
-      <canvas ref={canvasRef} className="absolute inset-0 top-0 left-0 w-full" style={{ height: "200vh" }} />
+    <div className="relative h-[100vh]">
+      <canvas ref={canvasRef} className="absolute inset-0 top-0 left-0 w-full" style={{ height: "100vh" }} />
     </div>
   )
 }

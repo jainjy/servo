@@ -130,7 +130,7 @@ const LoginRoleSelectionPage = () => {
 
       <div className="w-full">
         <div className="text-center">
-          <Link to={"/#hero"} onClick={() => {
+          <Link to={"/home"} onClick={() => {
             setTimeout(() => {
               const heroElement = document.getElementById('hero');
               if (heroElement) {
