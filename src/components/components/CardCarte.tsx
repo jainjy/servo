@@ -405,7 +405,7 @@ const CardCarte: React.FC = () => {
           )}
 
           {/* Légende */}
-          <div className="absolute bottom-4 left-4 z-[1000]">
+          <div className="absolute bottom-4 left-4 z-40">
             <div
               className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border"
               style={{
@@ -455,7 +455,7 @@ const CardCarte: React.FC = () => {
           </div>
 
           {/* Statistiques en haut à droite */}
-          <div className="absolute top-4 right-4 z-[1000]">
+          <div className="absolute top-4 right-4 z-40">
             <div
               className="bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-lg border"
               style={{
@@ -487,7 +487,7 @@ const CardCarte: React.FC = () => {
           </div>
 
           {/* Badge en bas à droite */}
-          <div className="absolute bottom-4 right-4 z-[1000]">
+          <div className="absolute bottom-4 right-4 z-40">
             <div className="relative">
               <div className="relative flex items-center gap-2 bg-black/70 backdrop-blur-sm rounded-full px-3 py-2">
                 <span className="relative flex h-2.5 w-2.5">

@@ -84,7 +84,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     }
 
     // Rediriger vers la page d'accueil
-    navigate('/');
+    navigate('/home');
   };
 
   const [stage, setStage] = useState<Stage>("idle");

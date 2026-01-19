@@ -34,10 +34,11 @@ const navigate = useNavigate()
     const section1Ref = useRef<HTMLDivElement>(null);
     const logoRef = useRef<HTMLDivElement>(null);
     const handleClick0 = () => {
-        setIsNavigating(true);
-        setTimeout(() => {
-            navigate('/about');
-        }, 1500);
+        const heroElement = document.getElementById('section2');
+        if (heroElement) {
+            heroElement.scrollIntoView({ behavior: 'smooth' });
+        }
+        navigate('/about')
     }
 
     
