@@ -442,7 +442,8 @@ const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, set
       {/* Image en haut */}
       <div className="h-48 bg-gradient-to-br from-[#556B2F]/10 to-[#6B8E23]/10">
         <img
-          src={metier.users[0]?.avatar || getDefaultImage(metier.libelle)}
+          // src={metier.users[0]?.avatar || getDefaultImage(metier.libelle)}
+           src={getDefaultImage(metier.libelle)}
           alt={metier.libelle}
           className="w-full h-full object-cover"
           onError={(e) => handleImageError(e, metier.libelle)}
