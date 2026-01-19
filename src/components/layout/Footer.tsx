@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
     {
       name: "Guy Hoquet Réunion - Saint-Denis",
       url: "/professional/f716640c-04e6-4eb0-9cd7-690208f011cb",
-      logo: "/agence.png",
+      logo: "/Reunion.png",
     },
     // {
     //   name: "Expert Immobilier",
@@ -189,30 +189,25 @@ const Footer: React.FC = () => {
           <h3 className="text-xs font-semibold text-white/90 mb-1.5 text-center">
             Partenaires officiels
           </h3>
-          <div className="grid grid-cols-4 gap-1 max-w-md mx-auto">
+          <div className="flex justify-center items-center gap-3 max-w-2xl mx-auto">
             {partners.map((partner, index) => (
-              <a
+              <button
                 key={index}
-                href={partner.url}
-                onClick={(e) => partner.url === "#" && e.preventDefault()}
-                className="p-1 bg-white/5 rounded border border-white/10 hover:border-[#8B4513]/30 transition-all duration-150 flex flex-col items-center"
+                onClick={() => handlePartnerClick(partner.url)}
+                className="group p-2 bg-black/10 backdrop-blur-sm rounded border border-white/20 hover:border-[#8B4513]/50 hover:bg-black/20 transition-all duration-200 flex flex-col items-center gap-1"
               >
-                <div className="w-6 h-6 mb-0.5 flex items-center justify-center bg-white/5 rounded border border-white/10 overflow-hidden">
+                <div className="w-12 h-12 flex items-center justify-center bg-white/10 rounded border border-white/15 overflow-hidden group-hover:bg-white/15 transition-all">
                   <img
                     src={partner.logo}
                     alt={partner.name}
-                    className="w-full h-full object-contain p-0.5"
+                    className="w-full h-full object-contain p-1 opacity-90 group-hover:opacity-100 transition-opacity"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
                       const parent = target.parentElement;
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="text-[10px] font-bold ${
-                            partner.name === "Olimmo Réunion"
-                              ? "text-[#8B4513]"
-                              : "text-white/60"
-                          }">
+                          <div class="text-sm font-bold text-[#8B4513]">
                             ${partner.name.split(" ")[0].charAt(0)}
                           </div>
                         `;
@@ -220,10 +215,10 @@ const Footer: React.FC = () => {
                     }}
                   />
                 </div>
-                <span className="text-white/70 text-[10px] text-center truncate w-full">
+                <span className="text-white/80 text-xs text-center font-medium max-w-[80px]">
                   {partner.name.split(" ")[0]}
                 </span>
-              </a>
+              </button>
             ))}
           </div>
 
