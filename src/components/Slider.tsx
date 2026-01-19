@@ -6,8 +6,9 @@ export default function Test() {
       link: "https://www.olimmoreunion.re/"
     },
     {
-      src: "https://i.pinimg.com/736x/cc/3c/db/cc3cdb8498f8d4135b87f8501f3faa31.jpg",
+      src: "/Reunion.png",
       alt: "Image",
+      link: "https://www.guyhoquet-reunion.fr/"
     },
     {
       src: "https://i.pinimg.com/1200x/9d/1b/af/9d1baf24622b6c568ed6f41f826c7105.jpg",
