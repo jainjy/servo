@@ -625,7 +625,7 @@ const ServicesPartnersPage = () => {
                 {view === "default"
                   ? "Découvrez Notre Univers"
                   : view === "partenaires"
-                    ? "Nos Partenaires d'Excellence"
+                    ? "Trouvers nos Partenaires d'Excellence par leur metiers"
                     : view === "services"
                       ? "Tous nos Services"
                       : "Centre d'Aide"}
@@ -667,7 +667,7 @@ const ServicesPartnersPage = () => {
                   }`}
               >
                 <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                Partenaires
+                Tous les metiers
                 {view === "partenaires" && <ChevronDown className="w-5 h-5" />}
               </button>
             </div>
