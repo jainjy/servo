@@ -96,7 +96,7 @@ const Index = () => {
 
   return (
     <>
-      <Load />
+      {/* <Load /> */}
       <div
         className="min-h-screen bg-background [scrollbar-width:none]"
         style={{ backgroundColor: colors["light-bg"] }}

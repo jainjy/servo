@@ -220,7 +220,7 @@ const LoginPage = () => {
           </button>
           <div className="relative z-10 flex flex-col justify-center h-full">
             <div className="mb-8">
-              <Link to={"/#hero"} onClick={() => {
+              <Link to={"/home"} onClick={() => {
                 setTimeout(() => {
                   const heroElement = document.getElementById('hero');
                   if (heroElement) {

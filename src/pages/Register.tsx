@@ -264,7 +264,7 @@ const RegisterPage = () => {
             <div className="mb-8">
               <div className="flex items-center gap-3">
 
-                <Link to={"/#hero"} onClick={() => {
+                <Link to={"/home"} onClick={() => {
                   setTimeout(() => {
                     const heroElement = document.getElementById('hero');
                     if (heroElement) {
