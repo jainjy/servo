@@ -13,24 +13,24 @@ const Footer: React.FC = () => {
   const partners = [
     {
       name: "Olimmo Réunion",
-      url: "/professional/89220134-7f2f-4a82-9660-1e422cad9b0d",
+      url: "/professional/2ae50d32-7ec3-4de4-89f0-21218a953cf0",
       logo: "/olimmo.png",
     },
     {
-      name: "Agence Partenaire",
-      url: "#",
+      name: "Guy Hoquet Réunion - Saint-Denis",
+      url: "/professional/f716640c-04e6-4eb0-9cd7-690208f011cb",
       logo: "/agence.png",
     },
-    {
-      name: "Expert Immobilier",
-      url: "#",
-      logo: "/expert.jpg",
-    },
-    {
-      name: "Banque Partenaire",
-      url: "#",
-      logo: "/banque.png",
-    },
+    // {
+    //   name: "Expert Immobilier",
+    //   url: "#",
+    //   logo: "/expert.jpg",
+    // },
+    // {
+    //   name: "Banque Partenaire",
+    //   url: "#",
+    //   logo: "/banque.png",
+    // },
   ];
 
   const handlePartnerClick = (url: string) => {
