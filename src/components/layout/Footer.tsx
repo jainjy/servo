@@ -134,7 +134,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Colonne Réseaux sociaux */}
-          <div className="md:col-span-2 lg:col-span-2">
+          {/* <div className="md:col-span-2 lg:col-span-2">
             <h3 className="text-xs font-semibold text-white mb-2">
               Suivez-nous
             </h3>
@@ -181,7 +181,7 @@ const Footer: React.FC = () => {
                 </a>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Partenaires logos - Ultra compact */}
@@ -189,7 +189,6 @@ const Footer: React.FC = () => {
           <h3 className="text-xs font-semibold text-white/90 mb-1.5 text-center">
             Partenaires officiels
           </h3>
-
           <div className="grid grid-cols-4 gap-1 max-w-md mx-auto">
             {partners.map((partner, index) => (
               <a
