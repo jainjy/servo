@@ -855,7 +855,7 @@ const Therapeute = () => {
       </div>
 
       {/* SECTION FORFAITS */}
-      <SlideIn direction="up" delay={400}>
+      {/* <SlideIn direction="up" delay={400}>
         <div className="mt-12 bg-gradient-to-r from-logo/10 to-primary-dark/10 rounded-2xl p-8 border border-logo/20">
           <div className="flex items-center gap-4 mb-6">
             <div className="p-3 rounded-xl bg-logo">
@@ -947,7 +947,7 @@ const Therapeute = () => {
             </div>
           </div>
         </div>
-      </SlideIn>
+      </SlideIn> */}
 
       {/* MODAL */}
       <ReservationBienEtreModal
