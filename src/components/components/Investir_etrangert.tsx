@@ -100,44 +100,6 @@ const InvestirEtranger = () => {
       image: <FlagIcon />,
       couleur: 'from-[#6B8E23] to-[#556B2F]'
     },
-    dubai: {
-      nom: 'Dubaï',
-      avantages: [
-        "Absence d'impôt sur le revenu",
-        'Sécurité et stabilité',
-        'Croissance immobilière constante',
-        'Régime de propriété freehold'
-      ],
-      opportunites: [
-        'Appartements de luxe',
-        'Villas sur Palm Jumeirah',
-        'Commercial (DPI, DMC)',
-        'Projets hors plan'
-      ],
-      fiscalite: '0% impôt sur le revenu',
-      rendement: 'Rendement locatif: 5-8% net',
-      image: <Building2 />,
-      couleur: 'from-[#556B2F] to-[#556B2F]'
-    },
-    portugal: {
-      nom: 'Portugal',
-      avantages: [
-        'Golden Visa à partir de 500K€',
-        'Croissance économique robuste',
-        'Qualité de vie exceptionnelle',
-        'Régime fiscal NHR avantageux'
-      ],
-      opportunites: [
-        'Appartements Lisbonne/Porto',
-        'Résidences de tourisme',
-        'Rehabilitation urbaine',
-        'Immobilier viticole'
-      ],
-      fiscalite: 'Régime NHR: 0-20% IR',
-      rendement: 'Rendement locatif: 3-5% net',
-      image: <CastleIcon />,
-      couleur: 'from-[#556B2F] to-[#6B8E23]'
-    }
   };
 
   const typesBiens: Record<string, TypeBienData> = {

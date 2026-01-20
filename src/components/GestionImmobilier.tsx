@@ -71,70 +71,70 @@ const GestionImmobilier = () => {
   const servicesRef = useRef(null);
   const ctaRef = useRef(null);
 
-  const services = [
-    {
-      id: "gestion",
-      title: "Mise en Gestion de Votre Bien",
-      description:
-        "Confiez la gestion complète de votre bien immobilier à nos experts",
-      icon: Home,
-      features: [
-        "Recherche et sélection de locataires",
-        "Gestion des loyers et charges",
-        "Entretien et maintenance",
-        "Relation locative complète",
-        "Suivi administratif et juridique",
-      ],
-      price: "À partir de 6% du loyer HT",
-      duration: "Engagement 3 ans",
-    },
-    {
-      id: "bail",
-      title: "Rédaction de Bail",
-      description: "Bail personnalisé et sécurisé conforme à la législation",
-      icon: FileText,
-      features: [
-        "Bail personnalisé selon votre bien",
-        "Conforme à la loi ALUR",
-        "Clauses spécifiques adaptées",
-        "Double exemplaire certifié",
-        "Conseils juridiques inclus",
-      ],
-      price: "190€ TTC",
-      duration: "Délai 48h",
-    },
-    {
-      id: "etat-lieux",
-      title: "État des Lieux",
-      description: "État des lieux détaillé et contradictoire avec photos",
-      icon: ClipboardList,
-      features: [
-        "État des lieux d'entrée et sortie",
-        "Photos haute définition",
-        "Description détaillée du bien",
-        "Signature électronique",
-        "Archivage sécurisé 10 ans",
-      ],
-      price: "150€ TTC",
-      duration: "2 heures en moyenne",
-    },
-    {
-      id: "revenu",
-      title: "Optimisation Revenu Foncier",
-      description: "Maximisez votre rendement et optimisez votre fiscalité",
-      icon: TrendingUp,
-      features: [
-        "Analyse de rentabilité",
-        "Optimisation fiscale",
-        "Simulation d'investissement",
-        "Conseils en défiscalisation",
-        "Suivi performance patrimoniale",
-      ],
-      price: "À partir de 300€",
-      duration: "Étude personnalisée",
-    },
-  ];
-
+  // const services = [
+  //   {
+  //     id: "gestion",
+  //     title: "Mise en Gestion de Votre Bien",
+  //     description:
+  //       "Confiez la gestion complète de votre bien immobilier à nos experts",
+  //     icon: Home,
+  //     features: [
+  //       "Recherche et sélection de locataires",
+  //       "Gestion des loyers et charges",
+  //       "Entretien et maintenance",
+  //       "Relation locative complète",
+  //       "Suivi administratif et juridique",
+  //     ],
+  //     price: "À partir de 6% du loyer HT",
+  //     duration: "Engagement 3 ans",
+  //   },
+  //   {
+  //     id: "bail",
+  //     title: "Rédaction de Bail",
+  //     description: "Bail personnalisé et sécurisé conforme à la législation",
+  //     icon: FileText,
+  //     features: [
+  //       "Bail personnalisé selon votre bien",
+  //       "Conforme à la loi ALUR",
+  //       "Clauses spécifiques adaptées",
+  //       "Double exemplaire certifié",
+  //       "Conseils juridiques inclus",
+  //     ],
+  //     price: "190€ TTC",
+  //     duration: "Délai 48h",
+  //   },
+  //   {
+  //     id: "etat-lieux",
+  //     title: "État des Lieux",
+  //     description: "État des lieux détaillé et contradictoire avec photos",
+  //     icon: ClipboardList,
+  //     features: [
+  //       "État des lieux d'entrée et sortie",
+  //       "Photos haute définition",
+  //       "Description détaillée du bien",
+  //       "Signature électronique",
+  //       "Archivage sécurisé 10 ans",
+  //     ],
+  //     price: "150€ TTC",
+  //     duration: "2 heures en moyenne",
+  //   },
+  //   {
+  //     id: "revenu",
+  //     title: "Optimisation Revenu Foncier",
+  //     description: "Maximisez votre rendement et optimisez votre fiscalité",
+  //     icon: TrendingUp,
+  //     features: [
+  //       "Analyse de rentabilité",
+  //       "Optimisation fiscale",
+  //       "Simulation d'investissement",
+  //       "Conseils en défiscalisation",
+  //       "Suivi performance patrimoniale",
+  //     ],
+  //     price: "À partir de 300€",
+  //     duration: "Étude personnalisée",
+  //   },
+  // ];
+ const services=[]; 
   const stats = [
     { number: "500+", label: "Biens gérés" },
     { number: "98%", label: "Taux de satisfaction" },
