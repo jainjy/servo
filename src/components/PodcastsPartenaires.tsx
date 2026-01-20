@@ -341,11 +341,8 @@ const PodcastsPartenaires: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center text-white">
             {/* Titre Principal */}
-            <h1 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight drop-shadow-lg">
-              Podcast{" "}
-              <span className="text-white bg-gradient-to-r from-[#6B8E23] to-[#8FBC8F] bg-clip-text text-transparent">
-                Partenaires
-              </span>
+            <h1 className="text-2xl lg:text-4xl uppercase font-bold mb-6 leading-tight drop-shadow-lg">
+              Podcasts{" "}Partenaires
             </h1>
 
             {/* Sous-titre */}

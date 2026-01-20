@@ -38,6 +38,7 @@ export default function Test() {
 
   return (
     <div className="relative my-4">
+      <span className="absolute bg-white px-2 right-20 -top-5 text-sm lg:text-xl tracking-widest font-bold z-40 text-black/80 ">LES PARTENAIRES OFFICIELS</span>
       {/* Lignes horizontales décoratives */}
       <div className="absolute -top-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/70 to-transparent opacity-80 z-10"></div>
       <div className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/70 to-transparent opacity-80 z-10"></div>

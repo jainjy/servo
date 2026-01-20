@@ -98,7 +98,7 @@ const Footer: React.FC = () => {
 
           {/* Colonne Contact */}
           <div className="lg:col-span-3">
-            <h3 className="text-xs font-semibold text-white mb-2">Contact</h3>
+            <h3 className="text-xs font-semibold text-white mb-2">Contacts</h3>
 
             <div className="space-y-1.5">
               <div className="flex items-start gap-1.5">

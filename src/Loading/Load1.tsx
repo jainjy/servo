@@ -107,7 +107,7 @@ function Load1() {
               //   animation: 'float 6s ease-in-out infinite',
               // }}
             >
-              <div className="absolute top-5 z-[99999] w-40 h-40 lg:w-56 lg:h-56">
+              <div className="absolute inset-0 flex items-center justify-center z-[99999]">
                 <Lottie animationData={loginAnimation} loop autoplay />
               </div>
               <div className="absolute inset-0 z-0" />
@@ -116,7 +116,7 @@ function Load1() {
               <img
                 src="golo.png"
                 alt="Logo Oliplus"
-                className="w-full h-full object-cover rounded-full z-10 transform group-hover:scale-110 transition-transform duration-700 bg-[#ffffff] p-8"
+                className="absolute inset-0 w-full h-full object-cover rounded-full z-10 transform group-hover:scale-110 transition-transform duration-700 bg-[#ffffff]"
               />
 
               <div className="absolute -inset-2 rounded-full z-0 group-hover:opacity-60 transition-opacity duration-500" />

@@ -247,21 +247,30 @@ const ArtETCreationShowcase = () => {
           <div
             key={card.id}
             onClick={() => handleCardClick(card.link)}
-            className={`relative overflow-hidden rounded-xl p-6 cursor-pointer shadow-md transition-transform transform hover:scale-[1.01] hover:shadow-xl bg-gradient-to-tr ${card.gradient}`}
+            className={`relative overflow-hidden rounded-xl cursor-pointer shadow-md transition-transform transform hover:scale-[1.01] hover:shadow-xl bg-gradient-to-tr ${card.gradient}`}
           >
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_left,_#00000020,_transparent_70%)]"></div>
-            <div className="relative flex items-start gap-4">
-              <div className="p-3 bg-white/80 backdrop-blur-sm rounded-md text-gray-700">
-                {card.icon}
+            <div className="relative flex flex-col h-full">
+              {/* En-tête avec titre et icône */}
+              <div className="flex items-start gap-3 p-6 pb-4">
+                <div className="p-3 bg-white/80 backdrop-blur-sm rounded-md text-gray-700 flex-shrink-0">
+                  {card.icon}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg text-gray-900 leading-tight">{card.title}</h3>
+                </div>
               </div>
-              <div className="text-left">
-                <h3 className="font-semibold text-gray-800 mb-1">{card.title}</h3>
-                <p className="text-gray-600 text-sm leading-snug">{card.description}</p>
+
+              {/* Fond verre pour la description et le bouton */}
+              <div className="flex-1 flex flex-col px-6 pb-4">
+                <div className="bg-white/30 backdrop-blur-md rounded-lg p-4 border border-white/40 flex-1 flex flex-col">
+                  <p className="text-gray-700 text-sm leading-snug flex-1">{card.description}</p>
+                  <div className="flex items-center gap-1 text-sm font-medium mt-3 text-[#556B2F] group">
+                    Explorer
+                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-1 text-sm font-medium mt-4 text-[#556B2F] group">
-              Explorer
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
         ))}

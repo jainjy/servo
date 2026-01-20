@@ -69,11 +69,11 @@ const colors = {
 };
 
 // Composant Modal pour afficher les détails
-const PropertyDetailModal = ({ 
-  property, 
-  isOpen, 
-  onClose 
-}: { 
+const PropertyDetailModal = ({
+  property,
+  isOpen,
+  onClose
+}: {
   property: Property | null;
   isOpen: boolean;
   onClose: () => void;
@@ -89,7 +89,7 @@ const PropertyDetailModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div 
+      <div
         className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
         style={{ backgroundColor: colors["light-bg"] }}
       >
@@ -130,19 +130,19 @@ const PropertyDetailModal = ({
 
           {/* Section détails */}
           <div className="p-8">
-            <h2 
+            <h2
               className="text-2xl font-bold mb-4"
               style={{ color: colors["neutral-dark"] }}
             >
               {property.title}
             </h2>
-            
+
             <div className="flex items-center mb-6">
               <MapPin
                 className="w-5 h-5 mr-2"
                 style={{ color: colors["secondary-text"] }}
               />
-              <span 
+              <span
                 className="text-lg font-medium"
                 style={{ color: colors["secondary-text"] }}
               >
@@ -151,7 +151,7 @@ const PropertyDetailModal = ({
             </div>
 
             {/* Caractéristiques principales */}
-            <div 
+            <div
               className="grid grid-cols-3 gap-4 mb-8 p-4 rounded-xl"
               style={{ backgroundColor: colors["accent-light"] + "20" }}
             >
@@ -177,7 +177,7 @@ const PropertyDetailModal = ({
 
             {/* Description complète */}
             <div className="mb-8">
-              <h3 
+              <h3
                 className="text-lg font-semibold mb-3"
                 style={{ color: colors["neutral-dark"] }}
               >
@@ -204,7 +204,7 @@ const PropertyDetailModal = ({
                 <span className="w-32 font-medium" style={{ color: colors["neutral-dark"] }}>
                   Statut:
                 </span>
-                <span 
+                <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${property.status === "available"
                     ? "bg-green-100 text-green-800"
                     : "bg-red-100 text-red-800"}`}
@@ -263,7 +263,7 @@ const AnnonceCard = ({ property }: { property: Property }) => {
   const [showDetails, setShowDetails] = useState(false);
   const { user } = useAuth();
   const isLoggedIn = Boolean(user);
-  
+
   const formatPrice = (price: number, type: string) => {
     if (type === "location") {
       return `${price.toLocaleString("fr-FR")} €/mois`;
@@ -275,7 +275,7 @@ const AnnonceCard = ({ property }: { property: Property }) => {
 
   const handleShowDetails = () => {
     if (!isAvailable) return;
-    
+
     if (isLoggedIn) {
       setShowDetails(true);
     } else {
@@ -285,153 +285,98 @@ const AnnonceCard = ({ property }: { property: Property }) => {
 
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-        {/* Image avec overlay */}
-        <div className="relative h-56 bg-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+        {/* Image avec badges */}
+        <div className="relative h-48 overflow-hidden">
           <img
-            src={
-              property.image_url ||
-              "https://via.placeholder.com/400x300?text=No+Image"
-            }
+            src={property.image_url || "https://via.placeholder.com/400x300"}
             alt={property.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
 
-          {/* Overlay gradient personnalisé */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Overlay gradient subtil */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
 
-          {/* Badge type */}
-          <div
-            className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-sm font-semibold ${property.type === "location"
-              ? "bg-[#6B8E23] text-white"
-              : "bg-[#8B4513] text-white"
-              }`}
-            style={{
-              backgroundColor:
-                property.type === "location"
-                  ? colors["primary-dark"]
-                  : colors["secondary-text"],
-            }}
-          >
-            {property.type === "location" ? "À louer" : "À vendre"}
+          {/* Badges groupés */}
+          <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+            {/* Badge type */}
+            <div
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold ${property.type === "location"
+                ? "bg-[#6B8E23] text-white"
+                : "bg-[#8B4513] text-white"}`}
+            >
+              {property.type === "location" ? "À louer" : "À vendre"}
+            </div>
+
+            {/* Badge prix */}
+            <div className="backdrop-blur-sm px-3 py-2 rounded-lg bg-white/90 shadow-sm">
+              <span className="font-bold text-sm text-gray-800">
+                {formatPrice(property.price, property.type)}
+              </span>
+            </div>
           </div>
 
-          {/* Badge statut */}
+          {/* Badge disponibilité (si nécessaire) */}
           {!isAvailable && (
-            <div
-              className="absolute top-4 right-12 px-3 py-1.5 rounded-full text-sm font-semibold text-white"
-              style={{ backgroundColor: colors["neutral-dark"] }}
-            >
-              Non disponible
+            <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-700/90 text-white backdrop-blur-sm">
+              Indisponible
             </div>
           )}
-
-          {/* Prix */}
-          <div
-            className="absolute bottom-4 left-4 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm"
-            style={{
-              backgroundColor: `${colors["primary-dark"]}CC`,
-              color: "white",
-            }}
-          >
-            <span className="font-bold text-sm">
-              {formatPrice(property.price, property.type)}
-            </span>
-          </div>
         </div>
 
-        {/* Contenu de la carte */}
-        <div className="p-6">
-          {/* Titre */}
-          <h3
-            className="text-xl font-semibold mb-2 line-clamp-1 group-hover:text-[#6B8E23] transition-colors"
-            style={{ color: colors["neutral-dark"] }}
-          >
-            {property.title}
-          </h3>
+        {/* Contenu compact */}
+        <div className="p-4">
+          {/* Titre et localisation */}
+          <div className="mb-3">
+            <h3 className="text-lg font-semibold text-gray-800 line-clamp-1 mb-1 group-hover:text-[#6B8E23] transition-colors">
+              {property.title}
+            </h3>
+            <div className="flex items-center text-sm text-gray-500">
+              <MapPin className="w-3.5 h-3.5 mr-1.5" />
+              <span className="line-clamp-1">{property.location}</span>
+            </div>
+          </div>
 
-          {/* Description */}
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
-            {property.description || "Aucune description disponible"}
+          {/* Description ultra courte */}
+          <p className="text-gray-600 text-xs mb-3 line-clamp-2 leading-relaxed">
+            {property.description || "Description non disponible"}
           </p>
 
-          {/* Caractéristiques */}
-          <div
-            className="flex items-center justify-between mb-4 pb-4 border-b"
-            style={{ borderColor: colors["separator"] }}
-          >
-            <div className="flex items-center space-x-2">
-              <Bed
-                className="w-4 h-4"
-                style={{ color: colors["primary-dark"] }}
-              />
-              <span
-                className="text-sm font-medium"
-                style={{ color: colors["neutral-dark"] }}
-              >
-                {property.bedrooms || 0} ch.
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Bath
-                className="w-4 h-4"
-                style={{ color: colors["primary-dark"] }}
-              />
-              <span
-                className="text-sm font-medium"
-                style={{ color: colors["neutral-dark"] }}
-              >
-                {property.bathrooms || 0} sdb
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Square
-                className="w-4 h-4"
-                style={{ color: colors["primary-dark"] }}
-              />
-              <span
-                className="text-sm font-medium"
-                style={{ color: colors["neutral-dark"] }}
-              >
-                {property.surface || "?"} m²
-              </span>
+          {/* Caractéristiques en ligne */}
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1.5">
+                <Bed className="w-4 h-4 text-[#6B8E23]" />
+                <span className="text-sm font-medium text-gray-700">
+                  {property.bedrooms || 0}
+                </span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <Bath className="w-4 h-4 text-[#6B8E23]" />
+                <span className="text-sm font-medium text-gray-700">
+                  {property.bathrooms || 0}
+                </span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <Square className="w-4 h-4 text-[#6B8E23]" />
+                <span className="text-sm font-medium text-gray-700">
+                  {property.surface || "?"}m²
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Localisation */}
-          <div className="flex items-center mb-6">
-            <MapPin
-              className="w-4 h-4 mr-2"
-              style={{ color: colors["secondary-text"] }}
-            />
-            <span className="text-sm" style={{ color: colors["secondary-text"] }}>
-              {property.location}
-            </span>
-          </div>
-
-          {/* Bouton de détails */}
+          {/* Bouton compact */}
           <button
             onClick={handleShowDetails}
             disabled={!isAvailable}
-            className={`w-full py-3 px-4 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center group/btn ${isAvailable
-              ? `text-white hover:bg-[#7BA05B] cursor-pointer ${!isLoggedIn ? 'hover:bg-[#7BA05B]' : ''}`
-              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            className={`w-full py-2.5 px-4 rounded-lg transition-all duration-200 font-medium text-sm flex items-center justify-center ${isAvailable
+                ? "bg-[#6B8E23] text-white hover:bg-[#5A7D1C] cursor-pointer"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
               }`}
-            style={
-              isAvailable
-                ? {
-                  backgroundColor: colors["primary-dark"],
-                }
-                : {}
-            }
           >
-            <Eye className="w-4 h-4 mr-2" />
-            {isAvailable ? "Afficher details" : "Non disponible"}
-            {isAvailable && isLoggedIn && (
-              <div className="ml-2 opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all duration-200">
-                →
-              </div>
-            )}
+            <Eye className="w-3.5 h-3.5 mr-2" />
+            {isAvailable ? "Voir détails" : "Indisponible"}
           </button>
         </div>
       </div>
