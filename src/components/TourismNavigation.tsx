@@ -81,8 +81,8 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
   };
 
   const renderSection = (buttons: TourismButton[]) => (
-    <div className="mb-6">
-      <div className="flex flex-wrap gap-3">
+    <div className="mb-6 flex justify-center">
+      <div className="flex flex-wrap gap-3 justify-center max-w-4xl">
         {filterButtons(buttons).map((btn) => {
           const isActive = location.pathname === btn.path;
           return (
@@ -94,9 +94,10 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
                 rounded-full 
                 text-sm font-medium
                 transition
-                ${isActive 
-                  ? 'bg-[#479c0f] text-white border-2 border-[#62e50a] shadow-lg' 
-                  : 'bg-logo text-white hover:border-[#556B2F]/50 hover:bg-logo/50'
+                ${
+                  isActive
+                    ? "bg-[#479c0f] text-white border-2 border-[#62e50a] shadow-lg"
+                    : "bg-logo text-white hover:border-[#556B2F]/50 hover:bg-logo/50"
                 }
               `}
             >
@@ -110,24 +111,24 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
 
   return (
     <div className="py-4 px-4" style={{ backgroundColor: "transparent" }}>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-full mx-auto flex flex-col items-center">
         {/* Section Découvrir & Sortir */}
-        {showDecouvrir && renderSection( DecouvrirButtons)}
+        {showDecouvrir && renderSection(DecouvrirButtons)}
 
         {/* Section Séjourner & Voyager */}
-        {showSejourner && renderSection( SejournerButtons)}
+        {showSejourner && renderSection(SejournerButtons)}
 
         {/* Section Manger & Consommer */}
-        {showManger && renderSection( MangerButtons)}
+        {showManger && renderSection(MangerButtons)}
 
         {/* Section Maison & Quotidien */}
-        {showMaison && renderSection( MaisonButtons)}
+        {showMaison && renderSection(MaisonButtons)}
 
         {/* Section Art & Création */}
-        {showArt && renderSection( ArtButtons)}
+        {showArt && renderSection(ArtButtons)}
 
         {/* Section Inspirer & Éveiller */}
-        {showInspirer && renderSection( InspirerButtons)}
+        {showInspirer && renderSection(InspirerButtons)}
       </div>
     </div>
   );

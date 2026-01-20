@@ -349,7 +349,7 @@ const BienEtreShowcase = () => {
         {/* En-tête compact */}
         <div className="text-center mb-6">
           <h2
-            className="text-2xl font-bold mb-1"
+            className="text-2xl font-extrabold mb-1"
             style={{ color: colors["neutral-dark"] }}
           >
             Santé & Bien-Être

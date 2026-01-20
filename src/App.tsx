@@ -354,9 +354,12 @@ const App = () => {
                     element={<ServicesPartnersPage />}
                   />
                   {/* <Route path="/" element={<Index />} /> */}
-                   <Route path="/" element={<Load1 />} />
-                   <Route path="/about" element={<Load2 />} />
-                   <Route path="/home" element={<Index />} />
+                  <Route
+                    path="/"
+                    element={<Navigate to="/home" replace />}
+                  />
+                  <Route path="/about" element={<Load2 />} />
+                  <Route path="/home" element={<Index />} />
                   {/* NOUVELLE ROUTE POUR LA PAGE D'ACCOMPAGNEMENT */}
                   <Route
                     path="/accompagnement"
@@ -526,12 +529,7 @@ const App = () => {
                       <LieuxHistoriques ville="Paris" typeFiltre="tous" />
                     }
                   />
-                  <Route
-                    path="/parapente"
-                    element={
-                      <UserParapentePage />
-                    }
-                  />
+                  <Route path="/parapente" element={<UserParapentePage />} />
                   <Route
                     path="/formationTourisme"
                     element={<FormationsTourisme />}
@@ -835,10 +833,7 @@ const App = () => {
                       path="vehicules"
                       element={<PrestataireVehiculesPage />}
                     />
-                     <Route
-                      path="parapente"
-                      element={<ParapentePage />}
-                    />
+                    <Route path="parapente" element={<ParapentePage />} />
                     <Route
                       path="contact-messages"
                       element={<ContactMessagesPage />}
@@ -989,7 +984,10 @@ const App = () => {
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="blog" element={<Blog />} />
-                    <Route path="entrepreneuriat" element={<EntrepreneuriatAdmin />} />
+                    <Route
+                      path="entrepreneuriat"
+                      element={<EntrepreneuriatAdmin />}
+                    />
                     <Route path="portraits" element={<PortraitsAdmin />} />
                     <Route path="bookings" element={<Bookings />} />
                     <Route path="listings" element={<Listings />} />
@@ -1047,16 +1045,13 @@ const App = () => {
                   {/* Routes RGPD et légales */}
                   <Route
                     path="/mentions-legales"
-                    element={<MentionsLegales />}
+                    element={<MentionsLegales pdfUrl={null} />}
                   />
                   <Route
                     path="/confidentialite"
                     element={<PolitiqueConfidentialiteComplete />}
                   />
-                  <Route
-                    path="/rgpd"
-                    element={<GestionDroitsRGPD />}
-                  />
+                  <Route path="/rgpd" element={<GestionDroitsRGPD />} />
                   <Route path="/contact-dpo" element={<ContactDPO />} />
                   {/* Onglets Arts et Creations */}
                   <Route path="/art-et-creation" element={<ArtETCreation />} />
@@ -1087,7 +1082,7 @@ const App = () => {
                 )}
                 <CookieConsent />
               </Layout>
-                 <ChatBot />
+              <ChatBot />
             </BrowserRouter>
           </CartProvider>
         </SocketProvider>

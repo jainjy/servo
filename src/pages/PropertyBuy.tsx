@@ -1132,7 +1132,6 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   return (
     <div className="min-h-screen">
       <Suspense fallback={<LoadingFallback />}>
-
         {/* Advertisement Popup - Absolute Position */}
         <div className="absolute top-12 left-4 right-4 z-50">
           <AdvertisementPopup />
@@ -1141,8 +1140,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         <div className="mt-20 relative">
           <div className="fixed -z-10 overflow-hidden bg-black w-full h-96 top-0">
             <img
-              src="https://i.pinimg.com/1200x/c1/df/87/c1df875d53d18c0e8cd9ac21a20c035c.jpg"
-              className="opacity-45 object-cover w-full h-full"
+              src="/property-1.jpg"
+              className="opacity-45 o
+              object-cover w-full h-full"
               alt="Background immobilier"
             />
           </div>
@@ -1180,7 +1180,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   onClick={() => setIsMobileFiltersOpen(true)}
                 >
                   <SlidersHorizontal className="h-4 w-4" />
-                  Filtres avancés {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                  Filtres avancés{" "}
+                  {activeFiltersCount > 0 && `(${activeFiltersCount})`}
                 </Button>
               </div>
 
@@ -1191,7 +1192,10 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Type de bien
                   </label>
-                  <Select value={typeBienAchat} onValueChange={setTypeBienAchat}>
+                  <Select
+                    value={typeBienAchat}
+                    onValueChange={setTypeBienAchat}
+                  >
                     <SelectTrigger className="h-12">
                       <Home className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Tous les types" />
@@ -1200,8 +1204,12 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       <SelectItem value="maison">Maison / Villa</SelectItem>
                       <SelectItem value="appartement">Appartement</SelectItem>
                       <SelectItem value="terrain">Terrain</SelectItem>
-                      <SelectItem value="commercial">Local commercial</SelectItem>
-                      <SelectItem value="professionnel">Local professionnel</SelectItem>
+                      <SelectItem value="commercial">
+                        Local commercial
+                      </SelectItem>
+                      <SelectItem value="professionnel">
+                        Local professionnel
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1232,20 +1240,32 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     <div className="relative flex-1">
                       <Input
                         placeholder="Min"
-                        value={priceMin || ''}
-                        onChange={(e) => setPriceMin(e.target.value ? Number(e.target.value) : undefined)}
+                        value={priceMin || ""}
+                        onChange={(e) =>
+                          setPriceMin(
+                            e.target.value ? Number(e.target.value) : undefined,
+                          )
+                        }
                         className="pl-8 h-12"
                       />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                        €
+                      </span>
                     </div>
                     <div className="relative flex-1">
                       <Input
                         placeholder="Max"
-                        value={priceMax || ''}
-                        onChange={(e) => setPriceMax(e.target.value ? Number(e.target.value) : undefined)}
+                        value={priceMax || ""}
+                        onChange={(e) =>
+                          setPriceMax(
+                            e.target.value ? Number(e.target.value) : undefined,
+                          )
+                        }
                         className="pl-8 h-12"
                       />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                        €
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1258,13 +1278,19 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     </label>
                     <button
                       type="button"
-                      onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-300'
-                        }`}
+                      onClick={() =>
+                        setRadiusFilterEnabled(!radiusFilterEnabled)
+                      }
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${
+                        radiusFilterEnabled ? "bg-[#556B2F]" : "bg-gray-300"
+                      }`}
                     >
                       <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${radiusFilterEnabled ? 'translate-x-8' : 'translate-x-1'
-                          }`}
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                          radiusFilterEnabled
+                            ? "translate-x-8"
+                            : "translate-x-1"
+                        }`}
                       />
                     </button>
                   </div>
@@ -1273,7 +1299,10 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     <div className="flex items-center gap-2">
                       <Navigation className="h-4 w-4 text-[#556B2F]" />
                       <span className="text-sm text-gray-600">
-                        Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
+                        Rayon:{" "}
+                        <span className="text-[#556B2F] font-bold">
+                          {radiusKm} km
+                        </span>
                       </span>
                     </div>
 
@@ -1314,8 +1343,12 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     <div className="relative flex-1">
                       <Input
                         placeholder="Min"
-                        value={surfaceMin || ''}
-                        onChange={(e) => setSurfaceMin(e.target.value ? Number(e.target.value) : undefined)}
+                        value={surfaceMin || ""}
+                        onChange={(e) =>
+                          setSurfaceMin(
+                            e.target.value ? Number(e.target.value) : undefined,
+                          )
+                        }
                         className="pl-10 h-12"
                       />
                       <Maximize2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -1323,8 +1356,12 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     <div className="relative flex-1">
                       <Input
                         placeholder="Max"
-                        value={surfaceMax || ''}
-                        onChange={(e) => setSurfaceMax(e.target.value ? Number(e.target.value) : undefined)}
+                        value={surfaceMax || ""}
+                        onChange={(e) =>
+                          setSurfaceMax(
+                            e.target.value ? Number(e.target.value) : undefined,
+                          )
+                        }
                         className="pl-10 h-12"
                       />
                       <Maximize2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -1338,7 +1375,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   </label>
                   <Select
                     value={bedrooms?.toString()}
-                    onValueChange={(v) => setBedrooms(v ? parseInt(v) : undefined)}
+                    onValueChange={(v) =>
+                      setBedrooms(v ? parseInt(v) : undefined)
+                    }
                   >
                     <SelectTrigger className="h-12">
                       <Bed className="h-4 w-4 mr-2" />
@@ -1359,7 +1398,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   </label>
                   <Select
                     value={bathrooms?.toString()}
-                    onValueChange={(v) => setBathrooms(v ? parseInt(v) : undefined)}
+                    onValueChange={(v) =>
+                      setBathrooms(v ? parseInt(v) : undefined)
+                    }
                   >
                     <SelectTrigger className="h-12">
                       <Bath className="h-4 w-4 mr-2" />
@@ -1420,7 +1461,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     Aucune propriété trouvée
                   </h3>
                   <p className="text-gray-600 max-w-md mx-auto mb-6">
-                    Essayez de modifier vos critères de recherche ou contactez-nous pour une recherche personnalisée.
+                    Essayez de modifier vos critères de recherche ou
+                    contactez-nous pour une recherche personnalisée.
                   </p>
                   <Button
                     onClick={handleResetFilters}
@@ -1436,16 +1478,24 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     const totalImages = images.length;
                     const idx = currentImageIndexes[property.id] || 0;
                     const featuresArr = normalizeFeatures(property.features);
-                    const priceLabel = formatPrice(property.price || 0, property.type, property.status);
+                    const priceLabel = formatPrice(
+                      property.price || 0,
+                      property.type,
+                      property.status,
+                    );
 
                     // Calcul de la distance si applicable
                     let distanceInfo = null;
-                    if (radiusFilterEnabled && property.latitude && property.longitude) {
+                    if (
+                      radiusFilterEnabled &&
+                      property.latitude &&
+                      property.longitude
+                    ) {
                       const distance = getDistanceKm(
                         userLocation.lat,
                         userLocation.lon,
                         property.latitude,
-                        property.longitude
+                        property.longitude,
                       );
                       if (distance <= radiusKm) {
                         distanceInfo = (
@@ -1503,7 +1553,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                     variant="ghost"
                                     size="icon"
                                     className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
-                                    onClick={(e) => prevImage(property.id, totalImages, e)}
+                                    onClick={(e) =>
+                                      prevImage(property.id, totalImages, e)
+                                    }
                                   >
                                     <ChevronLeft className="h-4 w-4" />
                                   </Button>
@@ -1511,7 +1563,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                     variant="ghost"
                                     size="icon"
                                     className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
-                                    onClick={(e) => nextImage(property.id, totalImages, e)}
+                                    onClick={(e) =>
+                                      nextImage(property.id, totalImages, e)
+                                    }
                                   >
                                     <ChevronRight className="h-4 w-4" />
                                   </Button>
@@ -1546,19 +1600,25 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                 {property.surface && (
                                   <div className="flex items-center gap-1.5">
                                     <Ruler className="h-3.5 w-3.5" />
-                                    <span className="font-medium">{property.surface} m²</span>
+                                    <span className="font-medium">
+                                      {property.surface} m²
+                                    </span>
                                   </div>
                                 )}
                                 {(property.bedrooms || property.rooms) && (
                                   <div className="flex items-center gap-1.5">
                                     <Bed className="h-3.5 w-3.5" />
-                                    <span className="font-medium">{property.bedrooms || property.rooms} ch.</span>
+                                    <span className="font-medium">
+                                      {property.bedrooms || property.rooms} ch.
+                                    </span>
                                   </div>
                                 )}
                                 {property.bathrooms && (
                                   <div className="flex items-center gap-1.5">
                                     <Bath className="h-3.5 w-3.5" />
-                                    <span className="font-medium">{property.bathrooms} sdb</span>
+                                    <span className="font-medium">
+                                      {property.bathrooms} sdb
+                                    </span>
                                   </div>
                                 )}
                               </div>
@@ -1566,15 +1626,17 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                               {/* Features */}
                               {featuresArr.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mb-5">
-                                  {featuresArr.slice(0, 3).map((feature, index) => (
-                                    <span
-                                      key={index}
-                                      className="inline-flex items-center gap-1.5 bg-[#6B8E23]/10 text-[#556B2F] px-3 py-1.5 rounded-full text-xs font-medium"
-                                    >
-                                      <div className="w-1.5 h-1.5 bg-[#556B2F] rounded-full" />
-                                      {feature}
-                                    </span>
-                                  ))}
+                                  {featuresArr
+                                    .slice(0, 3)
+                                    .map((feature, index) => (
+                                      <span
+                                        key={index}
+                                        className="inline-flex items-center gap-1.5 bg-[#6B8E23]/10 text-[#556B2F] px-3 py-1.5 rounded-full text-xs font-medium"
+                                      >
+                                        <div className="w-1.5 h-1.5 bg-[#556B2F] rounded-full" />
+                                        {feature}
+                                      </span>
+                                    ))}
                                 </div>
                               )}
 
@@ -1583,7 +1645,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                 <div className="flex gap-3">
                                   <Button
                                     className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
-                                    onClick={(e) => handleDemanderVisite(property, e)}
+                                    onClick={(e) =>
+                                      handleDemanderVisite(property, e)
+                                    }
                                     disabled={!!sentRequests?.[property?.id]}
                                   >
                                     {sentRequests?.[property?.id]
@@ -1593,7 +1657,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                   <Button
                                     variant="outline"
                                     className="border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
-                                    onClick={() => handlePropertyClick(property)}
+                                    onClick={() =>
+                                      handlePropertyClick(property)
+                                    }
                                   >
                                     <Eye className="w-4 h-4" />
                                   </Button>
@@ -1645,7 +1711,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                 <div className="p-4 space-y-6">
                   {/* Section Localisation et Rayon mobile */}
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-3">Localisation et Rayon</h4>
+                    <h4 className="font-medium text-gray-900 mb-3">
+                      Localisation et Rayon
+                    </h4>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1668,18 +1736,28 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-gray-900">Recherche par rayon</p>
-                          <p className="text-sm text-gray-500">Activer le rayon de recherche</p>
+                          <p className="font-medium text-gray-900">
+                            Recherche par rayon
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Activer le rayon de recherche
+                          </p>
                         </div>
                         <button
                           type="button"
-                          onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
-                            }`}
+                          onClick={() =>
+                            setRadiusFilterEnabled(!radiusFilterEnabled)
+                          }
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                            radiusFilterEnabled ? "bg-[#556B2F]" : "bg-gray-200"
+                          }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
-                              }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              radiusFilterEnabled
+                                ? "translate-x-6"
+                                : "translate-x-1"
+                            }`}
                           />
                         </button>
                       </div>
@@ -1687,7 +1765,10 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium">
-                            Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
+                            Rayon:{" "}
+                            <span className="text-[#556B2F] font-bold">
+                              {radiusKm} km
+                            </span>
                           </span>
                         </div>
 
@@ -1705,7 +1786,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                             <Button
                               key={value}
                               type="button"
-                              variant={radiusKm === value ? "default" : "outline"}
+                              variant={
+                                radiusKm === value ? "default" : "outline"
+                              }
                               size="sm"
                               onClick={() => setRadiusKm(value)}
                               className="flex-1 text-xs"
@@ -1721,66 +1804,105 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   {/* Autres filtres mobiles */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-3">Type de bien</h4>
-                      <Select value={typeBienAchat} onValueChange={setTypeBienAchat}>
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Type de bien
+                      </h4>
+                      <Select
+                        value={typeBienAchat}
+                        onValueChange={setTypeBienAchat}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Tous les types" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="maison">Maison / Villa</SelectItem>
-                          <SelectItem value="appartement">Appartement</SelectItem>
+                          <SelectItem value="appartement">
+                            Appartement
+                          </SelectItem>
                           <SelectItem value="terrain">Terrain</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-3">Budget (€)</h4>
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Budget (€)
+                      </h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Input
                             placeholder="Min"
-                            value={priceMin || ''}
-                            onChange={(e) => setPriceMin(e.target.value ? Number(e.target.value) : undefined)}
+                            value={priceMin || ""}
+                            onChange={(e) =>
+                              setPriceMin(
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined,
+                              )
+                            }
                           />
                         </div>
                         <div>
                           <Input
                             placeholder="Max"
-                            value={priceMax || ''}
-                            onChange={(e) => setPriceMax(e.target.value ? Number(e.target.value) : undefined)}
+                            value={priceMax || ""}
+                            onChange={(e) =>
+                              setPriceMax(
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined,
+                              )
+                            }
                           />
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-3">Surface (m²)</h4>
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Surface (m²)
+                      </h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Input
                             placeholder="Min"
-                            value={surfaceMin || ''}
-                            onChange={(e) => setSurfaceMin(e.target.value ? Number(e.target.value) : undefined)}
+                            value={surfaceMin || ""}
+                            onChange={(e) =>
+                              setSurfaceMin(
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined,
+                              )
+                            }
                           />
                         </div>
                         <div>
                           <Input
                             placeholder="Max"
-                            value={surfaceMax || ''}
-                            onChange={(e) => setSurfaceMax(e.target.value ? Number(e.target.value) : undefined)}
+                            value={surfaceMax || ""}
+                            onChange={(e) =>
+                              setSurfaceMax(
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined,
+                              )
+                            }
                           />
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-3">Caractéristiques</h4>
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Caractéristiques
+                      </h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Select
                             value={bedrooms?.toString()}
-                            onValueChange={(v) => setBedrooms(v ? parseInt(v) : undefined)}
+                            onValueChange={(v) =>
+                              setBedrooms(v ? parseInt(v) : undefined)
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Chambres" />
@@ -1795,7 +1917,9 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         <div>
                           <Select
                             value={bathrooms?.toString()}
-                            onValueChange={(v) => setBathrooms(v ? parseInt(v) : undefined)}
+                            onValueChange={(v) =>
+                              setBathrooms(v ? parseInt(v) : undefined)
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Salles de bain" />
@@ -1846,8 +1970,12 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         property={selectedProperty}
-        isAlreadySent={selectedProperty ? !!sentRequests?.[selectedProperty.id] : false}
-        onSuccess={(id: string) => setSentRequests((prev) => ({ ...prev, [id]: true }))}
+        isAlreadySent={
+          selectedProperty ? !!sentRequests?.[selectedProperty.id] : false
+        }
+        onSuccess={(id: string) =>
+          setSentRequests((prev) => ({ ...prev, [id]: true }))
+        }
         onPropertyContact={handlePropertyContact}
       />
 

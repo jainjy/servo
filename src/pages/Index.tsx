@@ -104,9 +104,9 @@ const Index = () => {
         <Suspense fallback={<LoadingFallback />}>
           <div className="fixed w-1/2 bottom-0 right-4 z-50">
             <AdvertisementPopup
-              refreshMinutes={10}           // Rafraîchir toutes les 3 min
-              displayDuration={2}          // Affichage de 2 min pour les images
-              listThreshold={2}            // Passer en mode liste à partir de 3 pub
+              refreshMinutes={10} // Rafraîchir toutes les 3 min
+              displayDuration={2} // Affichage de 2 min pour les images
+              listThreshold={2} // Passer en mode liste à partir de 3 pub
             />
           </div>
           <Hero />
@@ -137,7 +137,7 @@ const Index = () => {
           <>
             <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
               <h2
-                className="text-xl lg:text-3xl font-bold ml-8 my-6"
+                className="text-xl lg:text-3xl font-extrabold ml-8 my-6"
                 style={{ color: colors["neutral-dark"] }}
               >
                 Nos biens immobiliers

@@ -102,7 +102,7 @@ const iconMap = {
 const colors = {
   logo: "#556B2F",
   primaryDark: "#6B8E23",
-  lightBg: "#FFFFF0",
+  lightBg: "#FFFFFF",
   separator: "#D3D3D3",
   secondaryText: "#8B4513",
   primaryLight: "#8FBC8F",
@@ -905,8 +905,7 @@ const ConseilPage = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
-      {/* Hero Section - Simplifiée */}
+    <div className="min-h-screen" style={{ backgroundColor: "#FFFFFF" }}>
       {/* Advertisement Popup - Absolute Position */}
       <div className="absolute top-12 left-4 right-4 z-50">
         <AdvertisementPopup />

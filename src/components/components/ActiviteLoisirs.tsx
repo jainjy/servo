@@ -116,19 +116,17 @@ const ActivitesLoisirsFAQ: React.FC = () => {
         <div
           className="relative pt-20 pb-8 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage:
-              'url("https://i.pinimg.com/736x/fa/05/b9/fa05b9dba51cec6eb5e7441b75d0c153.jpg")',
+            backgroundImage: 'url("/couple-together-kayaking-river.jpg")',
           }}
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-center text-white">
-
             <h1 className="text-xl md:text-4xl font-extrabold drop-shadow-2xl tracking-wide mb-4">
               Activités & Loisirs
             </h1>
             <p className="my-4 text-sm max-w-3xl mx-auto font-medium leading-relaxed">
-              Découvrez nos expériences touristiques immersives et aventures nature
-              au cœur des paysages exceptionnels.
+              Découvrez nos expériences touristiques immersives et aventures
+              nature au cœur des paysages exceptionnels.
             </p>
             <TourismNavigation />
           </div>
@@ -161,11 +159,12 @@ const ActivitesLoisirsFAQ: React.FC = () => {
         <button
           onClick={() => setActiveCategory("all")}
           className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all shadow-md border-2
-            ${activeCategory === "all"
-              ? // Utilisation du dégradé du thème pour l'état actif
-              `bg-gradient-to-r ${defaultGradient} text-white border-transparent shadow-lg`
-              : // Utilisation de la couleur de bordure du thème pour l'état inactif
-              `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+            ${
+              activeCategory === "all"
+                ? // Utilisation du dégradé du thème pour l'état actif
+                  `bg-gradient-to-r ${defaultGradient} text-white border-transparent shadow-lg`
+                : // Utilisation de la couleur de bordure du thème pour l'état inactif
+                  `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
             } hover:scale-105 hover:shadow-lg`}
         >
           <Compass className="w-5 h-5" />
@@ -180,11 +179,13 @@ const ActivitesLoisirsFAQ: React.FC = () => {
             key={cat.id}
             onClick={() => setActiveCategory(cat.name)}
             className={`flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm transition-all shadow-md border-2
-              ${activeCategory === cat.name
-                ? // Si cat.color est défini, on l'utilise, sinon le dégradé du thème
-                `bg-gradient-to-r ${cat.color || defaultGradient
-                } text-white border-transparent shadow-lg`
-                : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+              ${
+                activeCategory === cat.name
+                  ? // Si cat.color est défini, on l'utilise, sinon le dégradé du thème
+                    `bg-gradient-to-r ${
+                      cat.color || defaultGradient
+                    } text-white border-transparent shadow-lg`
+                  : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
               } hover:scale-105 hover:shadow-lg`}
           >
             {iconMap[cat.icon] ?? <Star className="w-5 h-5" />}

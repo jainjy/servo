@@ -218,7 +218,7 @@ const ArtETCreationShowcase = () => {
       )}
 
       <div className="max-w-4xl mx-auto text-center mb-12">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-3 tracking-tight">
+        <h2 className="text-3xl font-extrabold text-gray-800 mb-3 tracking-tight">
           Art & Création
         </h2>
         <p className="text-gray-500 text-sm">
