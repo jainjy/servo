@@ -254,6 +254,8 @@ import EntrepreneuriatAdmin from "./pages/admin/EntrepreneuriatAdmin";
 import ChatBot from "./components/chatbot";
 import Load1 from "./Loading/Load1";
 import Load2 from "./Loading/Load2";
+import ParapentePage from "./components/pro/ParapentePage";
+import UserParapentePage from "./pages/UserParapentePage";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -522,6 +524,12 @@ const App = () => {
                     path="/lieux_historique"
                     element={
                       <LieuxHistoriques ville="Paris" typeFiltre="tous" />
+                    }
+                  />
+                  <Route
+                    path="/parapente"
+                    element={
+                      <UserParapentePage />
                     }
                   />
                   <Route
@@ -826,6 +834,10 @@ const App = () => {
                     <Route
                       path="vehicules"
                       element={<PrestataireVehiculesPage />}
+                    />
+                     <Route
+                      path="parapente"
+                      element={<ParapentePage />}
                     />
                     <Route
                       path="contact-messages"

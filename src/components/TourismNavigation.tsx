@@ -26,6 +26,7 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
     },
     // { id: 3, title: "Événements & découvertes", path: "/evenement-decouverte" },
     { id: 4, title: "Nature & patrimoine", path: "/nature-patrimoine" },
+    { id: 5, title: "parapente", path: "/parapente" },
   ];
 
   const SejournerButtons: TourismButton[] = [
