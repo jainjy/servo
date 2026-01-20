@@ -549,17 +549,17 @@ const ServicesMaison = ({ searchTerm = "", onSearchChange }: { searchTerm?: stri
                 <Home className="w-8 h-8 text-logo" />
               </div>
               <div>
-                <h2 className="text-2xl lg:text-3xl font-bold" style={{ color: '#8B4513' }}>
+                <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white drop-shadow-md">
                   Services Maison
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                <p className="text-gray-700 dark:text-gray-300 mt-2 font-medium">
                   Prenez soin de votre maison avec nos professionnels qualifiés
                 </p>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-logo/5 to-primary-dark/5 rounded-2xl p-6 mb-8 border border-logo/20">
-              <p className="text-gray-700 dark:text-gray-300">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 mb-8 border-2 border-logo/30 shadow-md">
+              <p className="text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
                 Confiez l'entretien de votre maison à des experts certifiés. Que ce soit pour le ménage, le jardinage, 
                 l'entretien de votre piscine ou la sécurité de votre foyer, nous proposons des solutions complètes et personnalisées 
                 pour répondre à tous vos besoins.
@@ -569,7 +569,7 @@ const ServicesMaison = ({ searchTerm = "", onSearchChange }: { searchTerm?: stri
             {/* Catégories de services */}
             {categories.length > 0 && (
               <div className="mb-10">
-                <h3 className="text-xl font-bold mb-4" style={{ color: '#8B4513' }}>Nos domaines d'expertise</h3>
+                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white drop-shadow-md">Nos domaines d'expertise</h3>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {categories.map((category, index) => (
                     <div key={index} className="bg-white dark:bg-card rounded-xl p-4 text-center border border-separator dark:border-border hover:shadow-lg transition-all duration-300">
