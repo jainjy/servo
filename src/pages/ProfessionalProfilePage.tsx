@@ -310,23 +310,16 @@ const ProfessionalProfilePage = () => {
                 <Card className="relative p-6 bg-[#FFFFFF] border border-[#D3D3D3] shadow-sm">
                   <div className="absolute top-0 overflow-hidden left-0 w-11/12 h-44 my-2 mx-4 rounded-lg bg-[#556B2F]/20 -z-0">
                     {/* Avec bordure glow */}
-                    <div
-                      className="absolute -bottom-16 rotate-[30deg] -left-4 w-56 h-56 bg-[#6B8E23]/15 rounded-lg backdrop-blur-sm 
-                shadow-[0_0_35px_rgba(107,142,35,0.5)] 
-                border border-[#6B8E23]/30 
-                hover:shadow-[0_0_50px_rgba(107,142,35,0.7)] 
-                hover:border-[#6B8E23]/50 
-                transition-all duration-500"
-                    ></div>
+   
 
                     {/* Avec bordure glow */}
                     <div
                       className="absolute -top-20 -right-10 w-56 h-56 bg-[#556B2F]/15 rounded-full backdrop-blur-sm 
-                shadow-[0_0_40px_rgba(85,107,47,0.6)] 
-                border border-[#556B2F]/30 
-                hover:shadow-[0_0_55px_rgba(85,107,47,0.8)] 
-                hover:border-[#556B2F]/50 
-                transition-all duration-500"
+                shadow-[0_0_20px_rgba(85,107,47,0.6)] 
+                border border-[#556B2F]/10 
+  
+         
+      "
                     ></div>
                   </div>
                   <div className=" text-center">
@@ -340,7 +333,7 @@ const ProfessionalProfilePage = () => {
                         <AvatarFallback className="bg-[#556B2F] text-white text-2xl font-bold">
                           {getInitials(
                             profile.firstName || "",
-                            profile.lastName || ""
+                            profile.lastName || "",
                           )}
                         </AvatarFallback>
                       </Avatar>
@@ -370,7 +363,7 @@ const ProfessionalProfilePage = () => {
                         <div className="flex">
                           {renderStars(
                             Math.round(stats.noteMoyenne),
-                            "w-5 h-5"
+                            "w-5 h-5",
                           )}
                         </div>
                         <div className="text-center">
@@ -619,8 +612,8 @@ const OverviewTab = ({
               Fort de ${
                 stats?.totalDemandes || 0
               } demandes traitées avec un taux de satisfaction de ${
-                  stats?.tauxAcceptation || 0
-                }%.`
+                stats?.tauxAcceptation || 0
+              }%.`
               : `Professionnel spécialisé en ${profile.metiers
                   .map((m) => m.metier.libelle)
                   .join(", ")}. 
@@ -736,14 +729,15 @@ const LocationTab = ({ profile }: { profile: ProfessionalProfile }) => {
         setLoadingMap(true);
         setMapError(null);
 
-        const address = profile.ProfessionalSettings?.adresse || profile.address;
+        const address =
+          profile.ProfessionalSettings?.adresse || profile.address;
         const city = profile.city;
         const fullAddress = `${address}, ${city}`;
 
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            fullAddress
-          )}`
+            fullAddress,
+          )}`,
         );
         const data = await response.json();
 
@@ -773,9 +767,12 @@ const LocationTab = ({ profile }: { profile: ProfessionalProfile }) => {
   useEffect(() => {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-      iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-      shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+      iconRetinaUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+      iconUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
     });
   }, []);
 
@@ -801,7 +798,9 @@ const LocationTab = ({ profile }: { profile: ProfessionalProfile }) => {
       ) : mapError || !coordinates ? (
         <div className="p-12 bg-[#FFFFFF] border border-[#D3D3D3] text-center rounded-lg">
           <MapPin className="w-16 h-16 text-[#8B4513] mx-auto mb-4" />
-          <p className="text-[#8B4513]">{mapError || "Impossible de charger la carte"}</p>
+          <p className="text-[#8B4513]">
+            {mapError || "Impossible de charger la carte"}
+          </p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -813,9 +812,7 @@ const LocationTab = ({ profile }: { profile: ProfessionalProfile }) => {
             <div className="flex-1">
               <h3 className="font-bold text-gray-900 mb-2">Adresse</h3>
               <p className="text-[#8B4513] text-sm font-medium">{address}</p>
-              {zipCode && (
-                <p className="text-[#8B4513]">{zipCode}</p>
-              )}
+              {zipCode && <p className="text-[#8B4513]">{zipCode}</p>}
             </div>
           </div>
 
@@ -833,7 +830,9 @@ const LocationTab = ({ profile }: { profile: ProfessionalProfile }) => {
               <Marker position={coordinates}>
                 <Popup>
                   <div className="text-center">
-                    <p className="font-bold text-sm">{profile.firstName} {profile.lastName}</p>
+                    <p className="font-bold text-sm">
+                      {profile.firstName} {profile.lastName}
+                    </p>
                     <p className="text-xs text-gray-600">{address}</p>
                   </div>
                 </Popup>
@@ -976,7 +975,7 @@ const ReviewsTab = ({
                   <AvatarFallback className="bg-[#556B2F] text-white font-semibold">
                     {getInitials(
                       review.user.firstName || "",
-                      review.user.lastName || ""
+                      review.user.lastName || "",
                     )}
                   </AvatarFallback>
                 </Avatar>

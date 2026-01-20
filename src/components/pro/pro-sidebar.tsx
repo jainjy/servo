@@ -302,7 +302,7 @@ const allNavigationItems: NavigationItem[] = [
     name: "Liste des services financiers",
     href: "/pro/financement-services",
     icon: Wallet2Icon,
-    userTypes: ["AGENCE", "VENDEUR"],
+    userTypes: ["PRESTATAIRE", "ARTISAN"],
   },
 
   // === GESTION DES CONTACTS & MESSAGES ===

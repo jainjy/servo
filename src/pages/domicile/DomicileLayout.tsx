@@ -367,14 +367,14 @@ const DomicileLayout = () => {
         <AdvertisementPopup />
       </div>
       <div className="absolute inset-0 -z-20 overflow-hidden h-80 w-full">
-        <div className="bg-black/50 absolute w-full h-full backdrop-blur-sm "></div>
+        <div className="bg-black/70 absolute w-full h-full backdrop-blur-sm "></div>
         <img
           className="h-full w-full object-cover"
           src="https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg"
           alt=""
         />
       </div>
-      <h1 className="text-5xl font-bold mb-6 text-white text-center">
+      <h1 className="text-5xl font-bold mb-6 text-white text-center drop-shadow-lg">
         Entretien & Equipements
       </h1>
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
