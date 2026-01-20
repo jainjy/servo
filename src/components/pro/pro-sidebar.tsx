@@ -29,6 +29,7 @@ import {
   Plane,
   BookOpen,
   Plus,
+ Bird
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import ServoLogo from "../components/ServoLogo";
@@ -199,6 +200,12 @@ const allNavigationItems: NavigationItem[] = [
     icon: Car,
     userTypes: ["TOURISME", "PRESTATAIRE", "ARTISAN"],
   },
+      {
+      name: "Activité parapente",
+      href: "/pro/parapente",
+      icon: Bird,
+      userTypes: ["TOURISME", "PRESTATAIRE", "ARTISAN"],
+    },
   {
     name: "Reservations bien-être",
     href: "/pro/reservationbien-etre",
