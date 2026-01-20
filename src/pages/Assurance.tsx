@@ -474,7 +474,7 @@ export default function Assurance() {
       )}
 
       {/* Hero Section */}
-      <section className="relative py-24 overflow-hidden">
+      <section className="relative pt-5 pb-24 overflow-hidden">
         {/* Image de fond avec overlay */}
         <div className="absolute top-12 left-4 right-4 z-50">
           <AdvertisementPopup />
