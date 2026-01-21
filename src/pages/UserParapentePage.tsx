@@ -186,8 +186,20 @@ const UserParapentePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#556B2F] to-[#6B8E23] text-white">
-        <div className="container mx-auto px-4 py-16">
+      <div className="bg-gradient-to-r from-[#556B2F]/50 to-[#6B8E23]/10 text-white relative overflow-hidden">
+        {/* Image de fond */}
+        <div
+          className="absolute inset-0 opacity-30 bg-cover bg-center"
+          style={{
+            backgroundImage: "url(/parapente.jpg)",
+          }}
+        ></div>
+
+        {/* Contenu du hero */}
+        <div
+          className="container mx-auto px-4 py-16 relative z-10"
+  
+        >
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Découvrez l'Expérience Parapente
@@ -195,7 +207,7 @@ const UserParapentePage: React.FC = () => {
             <p className="text-xl mb-8 opacity-90">
               Réservez votre vol en parapente avec des instructeurs certifiés
             </p>
-            
+
             {/* Barre de recherche principale */}
             <div className="bg-white rounded-lg p-4 shadow-lg">
               <div className="flex flex-col md:flex-row gap-4">
@@ -206,12 +218,17 @@ const UserParapentePage: React.FC = () => {
                       type="text"
                       placeholder="Rechercher un parapente, un lieu..."
                       value={searchFilters.searchQuery}
-                      onChange={(e) => setSearchFilters({...searchFilters, searchQuery: e.target.value})}
+                      onChange={(e) =>
+                        setSearchFilters({
+                          ...searchFilters,
+                          searchQuery: e.target.value,
+                        })
+                      }
                       className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#556B2F] text-gray-800"
                     />
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => filterParapentes()}
                   className="bg-[#8B4513] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#A0522D] transition-colors"
                 >
@@ -228,61 +245,91 @@ const UserParapentePage: React.FC = () => {
         {/* Filtres avancés */}
         <div className="mb-8 bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-5 h-5" style={{ color: '#556B2F' }} />
-            <h2 className="text-lg font-semibold" style={{ color: '#8B4513' }}>
+            <Filter className="w-5 h-5" style={{ color: "#556B2F" }} />
+            <h2 className="text-lg font-semibold" style={{ color: "#8B4513" }}>
               Filtres de recherche
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#8B4513' }}>
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "#8B4513" }}
+              >
                 Lieu
               </label>
               <input
                 type="text"
                 placeholder="Tous les lieux"
                 value={searchFilters.location}
-                onChange={(e) => setSearchFilters({...searchFilters, location: e.target.value})}
+                onChange={(e) =>
+                  setSearchFilters({
+                    ...searchFilters,
+                    location: e.target.value,
+                  })
+                }
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:outline-none"
-                style={{ 
-                  borderColor: '#D3D3D3',
-                  '--tw-ring-color': '#556B2F'
-                } as React.CSSProperties}
+                style={
+                  {
+                    borderColor: "#D3D3D3",
+                    "--tw-ring-color": "#556B2F",
+                  } as React.CSSProperties
+                }
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#8B4513' }}>
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "#8B4513" }}
+              >
                 Prix minimum (€)
               </label>
               <input
                 type="number"
                 min="0"
                 value={searchFilters.minPrice}
-                onChange={(e) => setSearchFilters({...searchFilters, minPrice: parseInt(e.target.value) || 0})}
+                onChange={(e) =>
+                  setSearchFilters({
+                    ...searchFilters,
+                    minPrice: parseInt(e.target.value) || 0,
+                  })
+                }
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:outline-none"
-                style={{ 
-                  borderColor: '#D3D3D3',
-                  '--tw-ring-color': '#556B2F'
-                } as React.CSSProperties}
+                style={
+                  {
+                    borderColor: "#D3D3D3",
+                    "--tw-ring-color": "#556B2F",
+                  } as React.CSSProperties
+                }
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#8B4513' }}>
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "#8B4513" }}
+              >
                 Prix maximum (€)
               </label>
               <input
                 type="number"
                 min="0"
                 value={searchFilters.maxPrice}
-                onChange={(e) => setSearchFilters({...searchFilters, maxPrice: parseInt(e.target.value) || 1000})}
+                onChange={(e) =>
+                  setSearchFilters({
+                    ...searchFilters,
+                    maxPrice: parseInt(e.target.value) || 1000,
+                  })
+                }
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:outline-none"
-                style={{ 
-                  borderColor: '#D3D3D3',
-                  '--tw-ring-color': '#556B2F'
-                } as React.CSSProperties}
+                style={
+                  {
+                    borderColor: "#D3D3D3",
+                    "--tw-ring-color": "#556B2F",
+                  } as React.CSSProperties
+                }
               />
             </div>
           </div>
@@ -291,24 +338,35 @@ const UserParapentePage: React.FC = () => {
         {/* Résultats */}
         {loading ? (
           <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#556B2F' }}></div>
-            <p className="mt-4" style={{ color: '#8B4513' }}>Chargement des parapentes...</p>
+            <div
+              className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto"
+              style={{ borderColor: "#556B2F" }}
+            ></div>
+            <p className="mt-4" style={{ color: "#8B4513" }}>
+              Chargement des parapentes...
+            </p>
           </div>
         ) : error ? (
           <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#DC2626' }}>
+            <div
+              className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "#DC2626" }}
+            >
               <Search className="w-12 h-12 text-white" />
             </div>
-            <h2 className="text-2xl font-bold mb-2" style={{ color: '#8B4513' }}>
+            <h2
+              className="text-2xl font-bold mb-2"
+              style={{ color: "#8B4513" }}
+            >
               Erreur
             </h2>
             <p className="text-gray-600 mb-8">{error}</p>
             <button
               onClick={fetchParapentes}
               className="px-6 py-3 rounded-lg font-medium"
-              style={{ 
-                backgroundColor: '#556B2F',
-                color: 'white'
+              style={{
+                backgroundColor: "#556B2F",
+                color: "white",
               }}
             >
               Réessayer
@@ -318,12 +376,14 @@ const UserParapentePage: React.FC = () => {
           <>
             {/* En-tête des résultats */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
-                {filteredParapentes.length} parapente{filteredParapentes.length > 1 ? 's' : ''} disponible{filteredParapentes.length > 1 ? 's' : ''}
+              <h2 className="text-2xl font-bold" style={{ color: "#8B4513" }}>
+                {filteredParapentes.length} parapente
+                {filteredParapentes.length > 1 ? "s" : ""} disponible
+                {filteredParapentes.length > 1 ? "s" : ""}
               </h2>
-              
-              <div className="text-sm" style={{ color: '#8B4513' }}>
-                Tri: 
+
+              <div className="text-sm" style={{ color: "#8B4513" }}>
+                Tri:
                 <select className="ml-2 p-2 border rounded-lg">
                   <option value="newest">Plus récents</option>
                   <option value="price_asc">Prix croissant</option>
@@ -335,8 +395,14 @@ const UserParapentePage: React.FC = () => {
             {/* Grille des parapentes */}
             {filteredParapentes.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-lg shadow">
-                <Search className="w-16 h-16 mx-auto mb-4" style={{ color: '#8B4513' }} />
-                <h3 className="text-xl font-semibold mb-2" style={{ color: '#8B4513' }}>
+                <Search
+                  className="w-16 h-16 mx-auto mb-4"
+                  style={{ color: "#8B4513" }}
+                />
+                <h3
+                  className="text-xl font-semibold mb-2"
+                  style={{ color: "#8B4513" }}
+                >
                   Aucun résultat trouvé
                 </h3>
                 <p className="text-gray-600">
@@ -346,7 +412,10 @@ const UserParapentePage: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredParapentes.map((parapente) => (
-                  <div key={parapente.id} className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                  <div
+                    key={parapente.id}
+                    className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300"
+                  >
                     {/* Image */}
                     <div className="relative h-48">
                       {parapente.images.length > 0 ? (
@@ -356,7 +425,10 @@ const UserParapentePage: React.FC = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#6B8E23' }}>
+                        <div
+                          className="w-full h-full flex items-center justify-center"
+                          style={{ backgroundColor: "#6B8E23" }}
+                        >
                           <span className="text-white">Pas d'image</span>
                         </div>
                       )}
@@ -371,7 +443,10 @@ const UserParapentePage: React.FC = () => {
                     <div className="p-5">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h3 className="text-lg font-bold mb-1" style={{ color: '#8B4513' }}>
+                          <h3
+                            className="text-lg font-bold mb-1"
+                            style={{ color: "#8B4513" }}
+                          >
                             {parapente.title}
                           </h3>
                           <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -379,10 +454,14 @@ const UserParapentePage: React.FC = () => {
                             <span>{parapente.location}</span>
                           </div>
                         </div>
-                        
+
                         {/* Note (exemple) */}
                         <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4" style={{ color: '#FBBF24' }} fill="#FBBF24" />
+                          <Star
+                            className="w-4 h-4"
+                            style={{ color: "#FBBF24" }}
+                            fill="#FBBF24"
+                          />
                           <span className="text-sm font-semibold">4.8</span>
                         </div>
                       </div>
@@ -395,19 +474,29 @@ const UserParapentePage: React.FC = () => {
                       <div className="flex items-center gap-3 mb-4 pt-4 border-t border-gray-100">
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
                           {parapente.user.avatar ? (
-                            <img 
-                              src={parapente.user.avatar} 
+                            <img
+                              src={parapente.user.avatar}
                               alt={`${parapente.user.firstName} ${parapente.user.lastName}`}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-sm" style={{ backgroundColor: '#556B2F', color: 'white' }}>
-                              {parapente.user.firstName.charAt(0)}{parapente.user.lastName.charAt(0)}
+                            <div
+                              className="w-full h-full flex items-center justify-center text-sm"
+                              style={{
+                                backgroundColor: "#556B2F",
+                                color: "white",
+                              }}
+                            >
+                              {parapente.user.firstName.charAt(0)}
+                              {parapente.user.lastName.charAt(0)}
                             </div>
                           )}
                         </div>
                         <div>
-                          <p className="text-sm font-medium" style={{ color: '#8B4513' }}>
+                          <p
+                            className="text-sm font-medium"
+                            style={{ color: "#8B4513" }}
+                          >
                             {parapente.user.firstName} {parapente.user.lastName}
                           </p>
                           <p className="text-xs text-gray-500">Propriétaire</p>
@@ -418,8 +507,8 @@ const UserParapentePage: React.FC = () => {
                       <button
                         onClick={() => handleReservation(parapente)}
                         className="w-full py-3 rounded-lg font-medium text-white transition-colors"
-                        style={{ 
-                          backgroundColor: '#556B2F'
+                        style={{
+                          backgroundColor: "#556B2F",
                         }}
                       >
                         Réserver maintenant
@@ -439,7 +528,7 @@ const UserParapentePage: React.FC = () => {
           <div className="bg-white rounded-lg w-full max-w-md">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold" style={{ color: '#8B4513' }}>
+                <h2 className="text-xl font-bold" style={{ color: "#8B4513" }}>
                   Réserver ce parapente
                 </h2>
                 <button
@@ -452,13 +541,18 @@ const UserParapentePage: React.FC = () => {
               </div>
 
               {/* Détails du parapente */}
-              <div className="mb-6 p-4 rounded-lg border" style={{ borderColor: '#D3D3D3' }}>
-                <h3 className="font-semibold mb-2" style={{ color: '#8B4513' }}>
+              <div
+                className="mb-6 p-4 rounded-lg border"
+                style={{ borderColor: "#D3D3D3" }}
+              >
+                <h3 className="font-semibold mb-2" style={{ color: "#8B4513" }}>
                   {selectedParapente.title}
                 </h3>
                 <div className="flex justify-between text-sm">
                   <span>Prix par jour:</span>
-                  <span className="font-semibold">{formatPrice(selectedParapente.price)}</span>
+                  <span className="font-semibold">
+                    {formatPrice(selectedParapente.price)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span>Lieu:</span>
@@ -468,7 +562,10 @@ const UserParapentePage: React.FC = () => {
               {/* Formulaire de réservation */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#8B4513' }}>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: "#8B4513" }}
+                  >
                     <Users className="inline w-4 h-4 mr-1" />
                     Nombre de participants
                   </label>
@@ -477,29 +574,50 @@ const UserParapentePage: React.FC = () => {
                     min="1"
                     max="10"
                     value={reservationData.participants}
-                    onChange={(e) => setReservationData({...reservationData, participants: parseInt(e.target.value) || 1})}
+                    onChange={(e) =>
+                      setReservationData({
+                        ...reservationData,
+                        participants: parseInt(e.target.value) || 1,
+                      })
+                    }
                     className="w-full p-3 border rounded-lg"
-                    style={{ borderColor: '#D3D3D3' }}
+                    style={{ borderColor: "#D3D3D3" }}
                     disabled={reservationLoading}
                   />
                 </div>
 
-              
-
                 {/* Résumé du prix */}
-                <div className="p-4 rounded-lg" style={{ backgroundColor: '#F0F7F0' }}>
+                <div
+                  className="p-4 rounded-lg"
+                  style={{ backgroundColor: "#F0F7F0" }}
+                >
                   <div className="flex justify-between mb-1">
                     <span>Prix par jour:</span>
                     <span>{formatPrice(selectedParapente.price)}</span>
                   </div>
                   <div className="flex justify-between mb-1">
                     <span>Nombre de jours:</span>
-                    <span>{calculateDays(reservationData.startDate, reservationData.endDate)} jours</span>
+                    <span>
+                      {calculateDays(
+                        reservationData.startDate,
+                        reservationData.endDate,
+                      )}{" "}
+                      jours
+                    </span>
                   </div>
-                  <div className="flex justify-between font-bold text-lg pt-2 border-t" style={{ borderColor: '#D3D3D3' }}>
+                  <div
+                    className="flex justify-between font-bold text-lg pt-2 border-t"
+                    style={{ borderColor: "#D3D3D3" }}
+                  >
                     <span>Total:</span>
-                    <span style={{ color: '#556B2F' }}>
-                      {formatPrice(selectedParapente.price * calculateDays(reservationData.startDate, reservationData.endDate))}
+                    <span style={{ color: "#556B2F" }}>
+                      {formatPrice(
+                        selectedParapente.price *
+                          calculateDays(
+                            reservationData.startDate,
+                            reservationData.endDate,
+                          ),
+                      )}
                     </span>
                   </div>
                 </div>
@@ -509,9 +627,9 @@ const UserParapentePage: React.FC = () => {
                   <button
                     onClick={() => setIsReservationModalOpen(false)}
                     className="flex-1 py-3 border rounded-lg font-medium"
-                    style={{ 
-                      borderColor: '#D3D3D3',
-                      color: '#8B4513'
+                    style={{
+                      borderColor: "#D3D3D3",
+                      color: "#8B4513",
                     }}
                     disabled={reservationLoading}
                   >
@@ -520,8 +638,10 @@ const UserParapentePage: React.FC = () => {
                   <button
                     onClick={submitReservation}
                     className="flex-1 py-3 rounded-lg font-medium text-white flex items-center justify-center gap-2"
-                    style={{ 
-                      backgroundColor: reservationLoading ? '#9CA3AF' : '#556B2F',
+                    style={{
+                      backgroundColor: reservationLoading
+                        ? "#9CA3AF"
+                        : "#556B2F",
                     }}
                     disabled={reservationLoading}
                   >
@@ -531,7 +651,7 @@ const UserParapentePage: React.FC = () => {
                         Traitement...
                       </>
                     ) : (
-                      'Confirmer la réservation'
+                      "Confirmer la réservation"
                     )}
                   </button>
                 </div>
