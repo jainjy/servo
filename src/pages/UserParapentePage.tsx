@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, MapPin, Euro, Calendar, Users, Star } from 'lucide-react';
+import { Search, Filter, MapPin, Euro, Calendar, Users, Star, Globe, User, Mail, Phone, AlertCircle, Briefcase, Map } from 'lucide-react';
 import api from "../lib/api";
 import { useAuth } from '../hooks/useAuth';
 
@@ -16,7 +16,29 @@ interface Parapente {
     firstName: string;
     lastName: string;
     avatar: string;
+    email: string;
+    phone: string;
   };
+}
+
+interface Profile {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  commercialName: string | null;
+  companyName: string | null;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  zipCode: string | null;
+  avatar: string | null;
+  websiteUrl: string | null;
+  professionalCategory: string | null;
+  description?: string;
+  experience?: string;
+  rating?: number;
+  totalFlights?: number;
 }
 
 interface SearchFilters {
@@ -30,7 +52,10 @@ const UserParapentePage: React.FC = () => {
   const [parapentes, setParapentes] = useState<Parapente[]>([]);
   const [filteredParapentes, setFilteredParapentes] = useState<Parapente[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     location: '',
     minPrice: 0,
@@ -50,6 +75,7 @@ const UserParapentePage: React.FC = () => {
 
   // Chargement initial
   useEffect(() => {
+    fetchProfile();
     fetchParapentes();
   }, []);
 
@@ -57,6 +83,62 @@ const UserParapentePage: React.FC = () => {
   useEffect(() => {
     filterParapentes();
   }, [searchFilters, parapentes]);
+
+  const fetchProfile = async () => {
+    try {
+      setProfileLoading(true);
+      setProfileError(null);
+      
+      // Utiliser la nouvelle API
+      const response = await api.get('/parapenteprofile');
+      
+     
+      
+      let userData;
+      
+      // Vérifier différents formats de réponse possibles
+      if (response.data.success && response.data.data) {
+        // Format: { success: true, data: {...} }
+        userData = response.data.data;
+      } else if (response.data && response.data.id) {
+        // Format direct ou { data: {...} }
+        userData = response.data;
+      } else {
+        throw new Error('Format de réponse inattendu de l\'API');
+      }
+
+      if (userData) {
+        // Transformer les données de l'API en format Profile
+        const profileData: Profile = {
+          id: userData.id || '1',
+          firstName: userData.firstName || "Air",
+          lastName: userData.lastName || "Lagon",
+          commercialName: userData.commercialName || userData.companyName || "AIR LAGON PARAPENTE",
+          companyName: userData.companyName || "Air Lagon Parapente",
+          email: userData.email || "contact@airlagon-parapente.fr",
+          phone: userData.phone || "+33 4 67 96 00 00",
+          address: userData.address || userData.location ||"" ,
+          city: userData.city || "",
+          zipCode: userData.zipCode || "34",
+          avatar: userData.avatar || userData.image || "/airlagon-avatar.jpg",
+          websiteUrl: userData.websiteUrl || userData.website || "https://www.airlagon-parapente.fr",
+          professionalCategory: userData.professionalCategory || userData.category || "tourism",
+          description: userData.description || "École de parapente certifiée, spécialisée dans les vols tandem et les stages d'initiation au-dessus du magnifique Lac du Salagou.",
+          experience: userData.experience || "10+ ans",
+          rating: userData.rating || 4.9,
+          totalFlights: userData.totalFlights || userData.flightCount || 5000
+        };
+        setProfile(profileData);
+      } else {
+        throw new Error('Aucune donnée de profil reçue');
+      }
+    } catch (err: any) {
+      console.error('Erreur lors du chargement du profil:', err);
+      setProfileError(err.message || 'Impossible de charger le profil. Veuillez réessayer.');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const fetchParapentes = async () => {
     try {
@@ -102,28 +184,6 @@ const UserParapentePage: React.FC = () => {
     setFilteredParapentes(filtered);
   };
 
-  const handleReservation = (parapente: Parapente) => {
-    if (!isAuthenticated) {
-      alert('Vous devez être connecté pour effectuer une réservation');
-      return;
-    }
-    
-    setSelectedParapente(parapente);
-    setIsReservationModalOpen(true);
-    
-    // Initialiser les dates par défaut (demain et après-demain)
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const dayAfterTomorrow = new Date();
-    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
-    
-    setReservationData({
-      startDate: tomorrow.toISOString().split('T')[0],
-      endDate: dayAfterTomorrow.toISOString().split('T')[0],
-      participants: 1,
-      notes: '',
-    });
-  };
 
   const submitReservation = async () => {
     if (!selectedParapente) return;
@@ -131,8 +191,6 @@ const UserParapentePage: React.FC = () => {
     try {
       setReservationLoading(true);
       
-      // Ici vous devrez créer une route de réservation dans votre backend
-      // Exemple: POST /reservations
       const response = await api.post('/reservations', {
         parapenteId: selectedParapente.id,
         startDate: reservationData.startDate,
@@ -158,6 +216,12 @@ const UserParapentePage: React.FC = () => {
     }
   };
 
+  const visitWebsite = () => {
+    if (profile?.websiteUrl) {
+      window.open(profile.websiteUrl, '_blank');
+    }
+  };
+
   // Calculer le nombre de jours entre deux dates
   const calculateDays = (start: string, end: string) => {
     const startDate = new Date(start);
@@ -174,15 +238,6 @@ const UserParapentePage: React.FC = () => {
     }).format(price);
   };
 
-  // Formatage de la date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -191,32 +246,179 @@ const UserParapentePage: React.FC = () => {
         <div
           className="absolute inset-0 opacity-30 bg-cover bg-center"
           style={{
-            backgroundImage: "url(/parapente.jpg)",
+            backgroundImage: "url(/parapente-salagou-wide.jpg)",
           }}
         ></div>
 
         {/* Contenu du hero */}
         <div
           className="container mx-auto px-4 py-16 relative z-10"
-  
         >
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Découvrez l'Expérience Parapente
+              {profile?.commercialName || "Air Lagon Parapente"}
             </h1>
             <p className="text-xl mb-8 opacity-90">
-              Réservez votre vol en parapente avec des instructeurs certifiés
+              École de parapente au Lac du Salagou - Vols tandem & Stages
             </p>
+          </div>
+        </div>
+      </div>
 
-            {/* Barre de recherche principale */}
-            <div className="bg-white rounded-lg p-4 shadow-lg">
+      {/* Contenu principal avec profil à gauche et activités à droite */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* PROFIL À GAUCHE */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-lg sticky top-8">
+              {profileLoading ? (
+                <div className="p-6 text-center">
+                  <div
+                    className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto"
+                    style={{ borderColor: "#556B2F" }}
+                  ></div>
+                  <p className="mt-4" style={{ color: "#8B4513" }}>
+                    Chargement du profil...
+                  </p>
+                </div>
+              ) : profileError ? (
+                <div className="p-6 text-center">
+                  <div
+                    className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: "#DC2626" }}
+                  >
+                    <AlertCircle className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-600 mb-8">{profileError}</p>
+                  <button
+                    onClick={fetchProfile}
+                    className="px-6 py-3 rounded-lg font-medium"
+                    style={{
+                      backgroundColor: "#556B2F",
+                      color: "white",
+                    }}
+                  >
+                    Réessayer
+                  </button>
+                </div>
+              ) : profile ? (
+                <>
+                  {/* Photo de profil */}
+                  <div className="relative h-48  rounded-t-lg overflow-hidden">
+                    {profile.avatar ? (
+                      <img
+                        src={profile.avatar}
+                        alt={profile.commercialName || `${profile.firstName} ${profile.lastName}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="w-24 h-24 text-white/70" />
+                      </div>
+                    )}
+                    <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-5 h-5 text-yellow-500" fill="#FBBF24" />
+                        <span className="font-bold">{profile.rating || 4.9}</span>
+                       
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informations du profil */}
+                  <div className="p-6">
+                    <h2 className="text-2xl font-bold mb-2" style={{ color: "#8B4513" }}>
+                      {profile.commercialName || `${profile.firstName} ${profile.lastName}`}
+                    </h2>
+                    {profile.companyName && (
+                      <div className="flex items-center gap-2 mb-2">
+                        <Briefcase className="w-4 h-4" style={{ color: "#556B2F" }} />
+                        <span className="text-gray-600 text-sm">{profile.companyName}</span>
+                      </div>
+                    )}
+                    <p className="text-gray-600 mb-4">{profile.description || "École de parapente certifiée au Lac du Salagou."}</p>
+
+                
+
+                    {/* Contact */}
+                    <div className="space-y-3 mb-6">
+                      {profile.address && (
+                        <div className="flex items-start gap-3">
+                          <MapPin className="w-5 h-5 mt-0.5" style={{ color: "#556B2F" }} />
+                          <div>
+                            <span className="text-gray-700">{profile.address}</span>
+                            {(profile.city || profile.zipCode) && (
+                              <div className="text-gray-600 text-sm">
+                                {profile.zipCode} {profile.city}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {profile.email && (
+                        <div className="flex items-center gap-3">
+                          <Mail className="w-5 h-5" style={{ color: "#556B2F" }} />
+                          <span className="text-gray-700">{profile.email}</span>
+                        </div>
+                      )}
+                      {profile.phone && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="w-5 h-5" style={{ color: "#556B2F" }} />
+                          <span className="text-gray-700">{profile.phone}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bouton Visiter le site */}
+                    {profile.websiteUrl && (
+                      <button
+                        onClick={visitWebsite}
+                        className="w-full py-3 rounded-lg font-medium text-white flex items-center justify-center gap-2"
+                        style={{ backgroundColor: "#8B4513" }}
+                      >
+                        <Globe className="w-5 h-5" />
+                        Visiter le site officiel
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="p-6 text-center">
+                  <AlertCircle className="w-12 h-12 mx-auto mb-4" style={{ color: "#8B4513" }} />
+                  <p className="text-gray-600">Profil non disponible</p>
+                  <button
+                    onClick={fetchProfile}
+                    className="mt-4 px-6 py-2 rounded-lg font-medium"
+                    style={{
+                      backgroundColor: "#556B2F",
+                      color: "white",
+                    }}
+                  >
+                    Recharger le profil
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ACTIVITÉS À DROITE */}
+          <div className="lg:col-span-2">
+            {/* Barre de recherche et filtres */}
+            <div className="mb-8 bg-white rounded-lg shadow p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Search className="w-5 h-5" style={{ color: "#556B2F" }} />
+                <h2 className="text-lg font-semibold" style={{ color: "#8B4513" }}>
+                  Rechercher des activités
+                </h2>
+              </div>
+
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
                       type="text"
-                      placeholder="Rechercher un parapente, un lieu..."
+                      placeholder="Rechercher une activité..."
                       value={searchFilters.searchQuery}
                       onChange={(e) =>
                         setSearchFilters({
@@ -224,7 +426,7 @@ const UserParapentePage: React.FC = () => {
                           searchQuery: e.target.value,
                         })
                       }
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#556B2F] text-gray-800"
+                      className="w-full pl-4 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#556B2F] text-gray-800"
                     />
                   </div>
                 </div>
@@ -236,290 +438,132 @@ const UserParapentePage: React.FC = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Contenu principal */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Filtres avancés */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-5 h-5" style={{ color: "#556B2F" }} />
-            <h2 className="text-lg font-semibold" style={{ color: "#8B4513" }}>
-              Filtres de recherche
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label
-                className="block text-sm font-medium mb-2"
-                style={{ color: "#8B4513" }}
-              >
-                Lieu
-              </label>
-              <input
-                type="text"
-                placeholder="Tous les lieux"
-                value={searchFilters.location}
-                onChange={(e) =>
-                  setSearchFilters({
-                    ...searchFilters,
-                    location: e.target.value,
-                  })
-                }
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:outline-none"
-                style={
-                  {
-                    borderColor: "#D3D3D3",
-                    "--tw-ring-color": "#556B2F",
-                  } as React.CSSProperties
-                }
-              />
-            </div>
-
-            <div>
-              <label
-                className="block text-sm font-medium mb-2"
-                style={{ color: "#8B4513" }}
-              >
-                Prix minimum (€)
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={searchFilters.minPrice}
-                onChange={(e) =>
-                  setSearchFilters({
-                    ...searchFilters,
-                    minPrice: parseInt(e.target.value) || 0,
-                  })
-                }
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:outline-none"
-                style={
-                  {
-                    borderColor: "#D3D3D3",
-                    "--tw-ring-color": "#556B2F",
-                  } as React.CSSProperties
-                }
-              />
-            </div>
-
-            <div>
-              <label
-                className="block text-sm font-medium mb-2"
-                style={{ color: "#8B4513" }}
-              >
-                Prix maximum (€)
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={searchFilters.maxPrice}
-                onChange={(e) =>
-                  setSearchFilters({
-                    ...searchFilters,
-                    maxPrice: parseInt(e.target.value) || 1000,
-                  })
-                }
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:outline-none"
-                style={
-                  {
-                    borderColor: "#D3D3D3",
-                    "--tw-ring-color": "#556B2F",
-                  } as React.CSSProperties
-                }
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Résultats */}
-        {loading ? (
-          <div className="text-center py-16">
-            <div
-              className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto"
-              style={{ borderColor: "#556B2F" }}
-            ></div>
-            <p className="mt-4" style={{ color: "#8B4513" }}>
-              Chargement des parapentes...
-            </p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-16">
-            <div
-              className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#DC2626" }}
-            >
-              <Search className="w-12 h-12 text-white" />
-            </div>
-            <h2
-              className="text-2xl font-bold mb-2"
-              style={{ color: "#8B4513" }}
-            >
-              Erreur
-            </h2>
-            <p className="text-gray-600 mb-8">{error}</p>
-            <button
-              onClick={fetchParapentes}
-              className="px-6 py-3 rounded-lg font-medium"
-              style={{
-                backgroundColor: "#556B2F",
-                color: "white",
-              }}
-            >
-              Réessayer
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* En-tête des résultats */}
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: "#8B4513" }}>
-                {filteredParapentes.length} parapente
-                {filteredParapentes.length > 1 ? "s" : ""} disponible
-                {filteredParapentes.length > 1 ? "s" : ""}
-              </h2>
-
-              <div className="text-sm" style={{ color: "#8B4513" }}>
-                Tri:
-                <select className="ml-2 p-2 border rounded-lg">
-                  <option value="newest">Plus récents</option>
-                  <option value="price_asc">Prix croissant</option>
-                  <option value="price_desc">Prix décroissant</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Grille des parapentes */}
-            {filteredParapentes.length === 0 ? (
+            {/* Contenu des activités */}
+            {loading ? (
               <div className="text-center py-16 bg-white rounded-lg shadow">
-                <Search
-                  className="w-16 h-16 mx-auto mb-4"
-                  style={{ color: "#8B4513" }}
-                />
-                <h3
-                  className="text-xl font-semibold mb-2"
-                  style={{ color: "#8B4513" }}
-                >
-                  Aucun résultat trouvé
-                </h3>
-                <p className="text-gray-600">
-                  Essayez de modifier vos critères de recherche
+                <div
+                  className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto"
+                  style={{ borderColor: "#556B2F" }}
+                ></div>
+                <p className="mt-4" style={{ color: "#8B4513" }}>
+                  Chargement des activités...
                 </p>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredParapentes.map((parapente) => (
-                  <div
-                    key={parapente.id}
-                    className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300"
+            ) : error ? (
+              <div className="text-center py-16 bg-white rounded-lg shadow">
+                <div
+                  className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "#DC2626" }}
+                >
+                  <AlertCircle className="w-8 h-8 text-white" />
+                </div>
+                <h2
+                  className="text-xl font-bold mb-2"
+                  style={{ color: "#8B4513" }}
+                >
+                  Erreur de chargement
+                </h2>
+                <p className="text-gray-600 mb-8">{error}</p>
+                <button
+                  onClick={fetchParapentes}
+                  className="px-6 py-3 rounded-lg font-medium"
+                  style={{
+                    backgroundColor: "#556B2F",
+                    color: "white",
+                  }}
+                >
+                  Réessayer
+                </button>
+              </div>
+            ) : filteredParapentes.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-lg shadow">
+                <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: "#F0F7F0" }}>
+                  <AlertCircle className="w-8 h-8" style={{ color: "#556B2F" }} />
+                </div>
+                <h3 className="text-xl font-semibold mb-2" style={{ color: "#8B4513" }}>
+                  Aucune activité disponible
+                </h3>
+                <p className="text-gray-600 mb-8">
+                  Aucune activité de parapente n'est disponible pour le moment.
+                </p>
+                {profile?.websiteUrl && (
+                  <button
+                    onClick={visitWebsite}
+                    className="px-6 py-3 rounded-lg font-medium text-white flex items-center gap-2 mx-auto"
+                    style={{ backgroundColor: "#8B4513" }}
                   >
-                    {/* Image */}
-                    <div className="relative h-48">
-                      {parapente.images.length > 0 ? (
-                        <img
-                          src={parapente.images[0]}
-                          alt={parapente.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div
-                          className="w-full h-full flex items-center justify-center"
-                          style={{ backgroundColor: "#6B8E23" }}
-                        >
-                          <span className="text-white">Pas d'image</span>
-                        </div>
-                      )}
-                      <div className="absolute top-3 left-3">
-                        <span className="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-semibold px-3 py-1 rounded-full">
-                          {formatPrice(parapente.price)}/jour
-                        </span>
-                      </div>
-                    </div>
+                    <Globe className="w-5 h-5" />
+                    Consulter le site officiel pour les activités
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* En-tête des résultats */}
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold" style={{ color: "#8B4513" }}>
+                    {filteredParapentes.length} activité{filteredParapentes.length > 1 ? "s" : ""} disponible{filteredParapentes.length > 1 ? "s" : ""}
+                  </h2>
+                </div>
 
-                    {/* Contenu */}
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3
-                            className="text-lg font-bold mb-1"
-                            style={{ color: "#8B4513" }}
-                          >
-                            {parapente.title}
-                          </h3>
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <MapPin className="w-4 h-4" />
-                            <span>{parapente.location}</span>
+                {/* Liste des activités de l'API */}
+                <div className="space-y-6">
+                  {filteredParapentes.map((parapente) => (
+                    <div
+                      key={parapente.id}
+                      className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300"
+                    >
+                      <div className="flex flex-col md:flex-row">
+                        {/* Image */}
+                        <div className="md:w-1/3">
+                          <div className="h-48 md:h-full">
+                            {parapente.images.length > 0 ? (
+                              <img
+                                src={parapente.images[0]}
+                                alt={parapente.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div
+                                className="w-full h-full flex items-center justify-center"
+                                style={{ backgroundColor: "#6B8E23" }}
+                              >
+                                <span className="text-white">Pas d'image</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* Note (exemple) */}
-                        <div className="flex items-center gap-1">
-                          <Star
-                            className="w-4 h-4"
-                            style={{ color: "#FBBF24" }}
-                            fill="#FBBF24"
-                          />
-                          <span className="text-sm font-semibold">4.8</span>
-                        </div>
-                      </div>
-
-                      <p className="text-gray-600 mb-4 line-clamp-2">
-                        {parapente.description}
-                      </p>
-
-                      {/* Propriétaire */}
-                      <div className="flex items-center gap-3 mb-4 pt-4 border-t border-gray-100">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                          {parapente.user.avatar ? (
-                            <img
-                              src={parapente.user.avatar}
-                              alt={`${parapente.user.firstName} ${parapente.user.lastName}`}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div
-                              className="w-full h-full flex items-center justify-center text-sm"
-                              style={{
-                                backgroundColor: "#556B2F",
-                                color: "white",
-                              }}
-                            >
-                              {parapente.user.firstName.charAt(0)}
-                              {parapente.user.lastName.charAt(0)}
+                        {/* Contenu */}
+                        <div className="md:w-2/3 p-6">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className="text-xl font-bold mb-2" style={{ color: "#8B4513" }}>
+                                {parapente.title}
+                              </h3>
+                              <div className="flex items-center gap-1 text-sm text-gray-600 mb-3">
+                                <MapPin className="w-4 h-4" />
+                                <span>{parapente.location}</span>
+                              </div>
                             </div>
-                          )}
-                        </div>
-                        <div>
-                          <p
-                            className="text-sm font-medium"
-                            style={{ color: "#8B4513" }}
-                          >
-                            {parapente.user.firstName} {parapente.user.lastName}
-                          </p>
-                          <p className="text-xs text-gray-500">Propriétaire</p>
+                            <div className="text-2xl font-bold" style={{ color: "#556B2F" }}>
+                              {formatPrice(parapente.price)}/jour
+                            </div>
+                          </div>
+
+                          <p className="text-gray-600 mb-4">{parapente.description}</p>
+
+                         
                         </div>
                       </div>
-
-                      {/* Bouton Réservation */}
-                      <button
-                        onClick={() => handleReservation(parapente)}
-                        className="w-full py-3 rounded-lg font-medium text-white transition-colors"
-                        style={{
-                          backgroundColor: "#556B2F",
-                        }}
-                      >
-                        Réserver maintenant
-                      </button>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
-          </>
-        )}
+          </div>
+        </div>
       </div>
 
       {/* Modal de réservation */}
@@ -529,7 +573,7 @@ const UserParapentePage: React.FC = () => {
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold" style={{ color: "#8B4513" }}>
-                  Réserver ce parapente
+                  Réserver cette activité
                 </h2>
                 <button
                   onClick={() => setIsReservationModalOpen(false)}
@@ -540,7 +584,7 @@ const UserParapentePage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Détails du parapente */}
+              {/* Détails de l'activité */}
               <div
                 className="mb-6 p-4 rounded-lg border"
                 style={{ borderColor: "#D3D3D3" }}
@@ -559,8 +603,55 @@ const UserParapentePage: React.FC = () => {
                   <span>{selectedParapente.location}</span>
                 </div>
               </div>
+
               {/* Formulaire de réservation */}
               <div className="space-y-4">
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: "#8B4513" }}
+                  >
+                    <Calendar className="inline w-4 h-4 mr-1" />
+                    Date de début
+                  </label>
+                  <input
+                    type="date"
+                    value={reservationData.startDate}
+                    onChange={(e) =>
+                      setReservationData({
+                        ...reservationData,
+                        startDate: e.target.value,
+                      })
+                    }
+                    className="w-full p-3 border rounded-lg"
+                    style={{ borderColor: "#D3D3D3" }}
+                    disabled={reservationLoading}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: "#8B4513" }}
+                  >
+                    <Calendar className="inline w-4 h-4 mr-1" />
+                    Date de fin
+                  </label>
+                  <input
+                    type="date"
+                    value={reservationData.endDate}
+                    onChange={(e) =>
+                      setReservationData({
+                        ...reservationData,
+                        endDate: e.target.value,
+                      })
+                    }
+                    className="w-full p-3 border rounded-lg"
+                    style={{ borderColor: "#D3D3D3" }}
+                    disabled={reservationLoading}
+                  />
+                </div>
+
                 <div>
                   <label
                     className="block text-sm font-medium mb-2"
@@ -583,6 +674,29 @@ const UserParapentePage: React.FC = () => {
                     className="w-full p-3 border rounded-lg"
                     style={{ borderColor: "#D3D3D3" }}
                     disabled={reservationLoading}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: "#8B4513" }}
+                  >
+                    Notes supplémentaires
+                  </label>
+                  <textarea
+                    value={reservationData.notes}
+                    onChange={(e) =>
+                      setReservationData({
+                        ...reservationData,
+                        notes: e.target.value,
+                      })
+                    }
+                    className="w-full p-3 border rounded-lg"
+                    style={{ borderColor: "#D3D3D3" }}
+                    rows={3}
+                    disabled={reservationLoading}
+                    placeholder="Informations supplémentaires (allergies, préférences, etc.)"
                   />
                 </div>
 
