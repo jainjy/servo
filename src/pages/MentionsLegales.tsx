@@ -196,7 +196,7 @@ export default function MentionsLegales({ pdfUrl }) {
                         Téléphone
                       </p>
                       <p className="text-gray-900 dark:text-white">
-                        +33 6 92 66 77 55
+                        +262 692 66 77 55
                       </p>
                     </div>
                   </div>

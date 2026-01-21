@@ -395,7 +395,7 @@ const ExpertDashboardPage: React.FC = () => {
           firstName: "Accomp",
           lastName: "Client",
           email: "test@accomp.fr",
-          phone: "+33 6 99 88 77 66",
+          phone: "+262 699 88 77 66",
           companyName: "Startup Test",
           avatar: ""
         },
