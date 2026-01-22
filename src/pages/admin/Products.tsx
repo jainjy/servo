@@ -4,11 +4,13 @@ import { ProductsTable } from "@/components/admin/products/products-table";
 import { ProductModal } from "@/components/admin/products/product-modal";
 import { Button } from "@/components/ui/button";
 import { Plus, Package, Filter, Download } from "lucide-react";
+import DeliveryCategoryPriceModal from "./DeliveryCategoryPriceModal";
 
 const ProductsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [open, setOpen] = useState(false);
 
   const handleSuccess = () => {
     setRefreshKey(prev => prev + 1);
@@ -37,8 +39,13 @@ const ProductsPage = () => {
               Gérez les produits, catégories et commandes du marketplace OliPlus.
             </p>
           </div>
+<<<<<<< Updated upstream
           
           <div className="flex items-center gap-3">
+=======
+
+          <div className="flex flex-col md:flex-row items-center gap-3">
+>>>>>>> Stashed changes
             <Button
               variant="outline"
               className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#556B2F] hover:border-[#6B8E23]"
@@ -53,6 +60,9 @@ const ProductsPage = () => {
               <Plus className="mr-2 h-4 w-4" />
               Nouveau produit
             </Button>
+            <Button onClick={() => setOpen(true)}>
+              Gérer les prix de livraison
+            </Button>
           </div>
         </div>
 
@@ -62,11 +72,10 @@ const ProductsPage = () => {
             <button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                activeFilter === filter.id
-                  ? "bg-[#6B8E23] text-white"
-                  : "text-[#8B4513] hover:bg-[#6B8E23]/10 border border-[#D3D3D3]"
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeFilter === filter.id
+                ? "bg-[#6B8E23] text-white"
+                : "text-[#8B4513] hover:bg-[#6B8E23]/10 border border-[#D3D3D3]"
+                }`}
             >
               <Filter className="h-3.5 w-3.5" />
               {filter.label}
@@ -114,6 +123,10 @@ const ProductsPage = () => {
         onOpenChange={setIsModalOpen}
         mode="create"
         onSuccess={handleSuccess}
+      />
+      <DeliveryCategoryPriceModal
+        open={open}
+        onClose={() => setOpen(false)}
       />
     </div>
   );

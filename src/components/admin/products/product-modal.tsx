@@ -26,7 +26,14 @@ interface ProductModalProps {
   onSuccess?: () => void
 }
 
+interface DeliveryPrice { // Prix par catégorie de livraison
+  id: string;
+  category: string;
+  price: number;
+}
+
 export function ProductModal({ open, onOpenChange, product, mode, onSuccess }: ProductModalProps) {
+  const [deliveryPrices, setDeliveryPrices] = useState<DeliveryPrice[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -145,6 +152,24 @@ export function ProductModal({ open, onOpenChange, product, mode, onSuccess }: P
     }
   }
 
+  useEffect(() => {
+    if (open) {
+      fetchDeliveryPrices();
+    }
+  }, [open]);
+
+  const fetchDeliveryPrices = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/orders/delivery-prices`);
+      setDeliveryPrices(response.data);
+    } catch {
+      toast.error('Erreur lors du chargement des prix des catégories de livraison');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addImage = () => {
     if (imageInput.trim() && !formData.images.includes(imageInput.trim())) {
       setFormData({
@@ -162,12 +187,12 @@ export function ProductModal({ open, onOpenChange, product, mode, onSuccess }: P
   }
 
   const categories = [
-    "Équipements de chauffage", "Électroménager", "Meubles", "Décoration", 
+    "Équipements de chauffage", "Électroménager", "Meubles", "Décoration",
     "Jardinage", "Outillage", "Sécurité maison", "Luminaires",
     "Matériaux de construction", "Isolation", "Revêtements de sol", "Carrelage",
     "Bois et panneaux", "Menuiserie", "Plomberie", "Électricité",
-    "Peinture & Revêtements", "Mobilier Design", "Décoration Murale", 
-    "Luminaires Design", "Textiles Décoratifs", "Accessoires Déco", 
+    "Peinture & Revêtements", "Mobilier Design", "Décoration Murale",
+    "Luminaires Design", "Textiles Décoratifs", "Accessoires Déco",
     "Art & Tableaux", "Rangements Design"
   ]
 
@@ -220,7 +245,7 @@ export function ProductModal({ open, onOpenChange, product, mode, onSuccess }: P
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="category">Catégorie *</Label>
+                <Label htmlFor="category">Catégorie * /Prix de livraison</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -230,9 +255,9 @@ export function ProductModal({ open, onOpenChange, product, mode, onSuccess }: P
                     <SelectValue placeholder="Sélectionner une catégorie" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                    {deliveryPrices.map((category) => (
+                      <SelectItem key={category.id} value={category.category}>
+                        {category.category}{category.price ? ` - ${category.price.toFixed(2)} €` : '- 0 €'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -469,16 +494,16 @@ export function ProductModal({ open, onOpenChange, product, mode, onSuccess }: P
           </div>
 
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)} 
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
               disabled={loading}
             >
               Annuler
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={loading}
             >
               {loading ? (

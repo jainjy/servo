@@ -143,6 +143,8 @@ const UserOrders = () => {
     try {
       setLoading(true);
       const response = await api.get('/orders/user/my-orders');
+
+      console.log("Response orders: ", response.data);
       
       if (response.data.success) {
         const ordersData = response.data.orders || [];
@@ -526,7 +528,7 @@ const UserOrders = () => {
     const isExpanded = expandedOrder === order.id;
 
     return (
-      <Card className="border-0 shadow-sm hover:shadow-lg transition-all duration-300 bg-white overflow-hidden group">
+      <Card className="border-2 border-red-100 shadow-sm shadow-xl bg-white overflow-hidden group">
         {/* En-tête de la carte - Toujours visible */}
         <CardHeader 
           className={`pb-4 border-b-2 ${statusConfig.border} ${statusConfig.bg} cursor-pointer`}
@@ -584,49 +586,6 @@ const UserOrders = () => {
         <Collapsible open={isExpanded}>
           <CollapsibleContent>
             <CardContent className="p-6 space-y-6">
-              {/* Barre de progression */}
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border" style={{ borderColor: COLORS.separator }}>
-                <div className="flex items-center justify-between mb-4">
-                  {['pending', 'confirmed', 'processing', 'shipped', 'delivered'].map((status, index) => {
-                    const stepConfig = getStatusConfig(status);
-                    const StepIcon = stepConfig.icon;
-                    const isActive = order.status === status;
-                    const isCompleted = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
-                      .indexOf(order.status) >= ['pending', 'confirmed', 'processing', 'shipped', 'delivered'].indexOf(status);
-                    
-                    return (
-                      <div key={status} className="flex flex-col items-center flex-1 relative">
-                        {/* Ligne de connexion */}
-                        {index > 0 && (
-                          <div className={`absolute top-5 -left-1/2 w-full h-0.5 ${
-                            isCompleted ? 'bg-green-500' : 'bg-gray-300'
-                          }`} />
-                        )}
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 ${
-                          isCompleted 
-                            ? 'bg-green-500 border-green-500 text-white' 
-                            : isActive
-                            ? 'bg-blue-500 border-blue-500 text-white'
-                            : 'bg-white border-gray-300 text-gray-400'
-                        } transition-all duration-300`}>
-                          <StepIcon className="h-4 w-4" />
-                        </div>
-                        <span className={`text-xs mt-2 font-medium text-center`} style={{ 
-                          color: isActive ? COLORS.logo : isCompleted ? '#16a34a' : COLORS.smallText 
-                        }}>
-                          {status === 'pending' ? 'Attente' :
-                           status === 'confirmed' ? 'Confirmée' :
-                           status === 'processing' ? 'Traitement' :
-                           status === 'shipped' ? 'Expédiée' : 'Livrée'}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <Separator />
-
               {/* Articles de la commande */}
               <div>
                 <h4 className="font-semibold mb-4 flex items-center gap-2 text-lg" style={{ color: COLORS.secondaryText }}>
@@ -670,6 +629,49 @@ const UserOrders = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              <Separator />
+
+               {/* Barre de progression */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border" style={{ borderColor: COLORS.separator }}>
+                <div className="flex items-center justify-between mb-4">
+                  {['pending', 'confirmed', 'processing', 'shipped', 'delivered'].map((status, index) => {
+                    const stepConfig = getStatusConfig(status);
+                    const StepIcon = stepConfig.icon;
+                    const isActive = order.status === status;
+                    const isCompleted = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
+                      .indexOf(order.status) >= ['pending', 'confirmed', 'processing', 'shipped', 'delivered'].indexOf(status);
+                    
+                    return (
+                      <div key={status} className="flex flex-col items-center flex-1 relative">
+                        {/* Ligne de connexion */}
+                        {index > 0 && (
+                          <div className={`absolute top-5 -left-1/2 w-full h-0.5 ${
+                            isCompleted ? 'bg-green-500' : 'bg-gray-300'
+                          }`} />
+                        )}
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 ${
+                          isCompleted 
+                            ? 'bg-green-500 border-green-500 text-white' 
+                            : isActive
+                            ? 'bg-blue-500 border-blue-500 text-white'
+                            : 'bg-white border-gray-300 text-gray-400'
+                        } transition-all duration-300`}>
+                          <StepIcon className="h-4 w-4" />
+                        </div>
+                        <span className={`text-xs mt-2 font-medium text-center`} style={{ 
+                          color: isActive ? COLORS.logo : isCompleted ? '#16a34a' : COLORS.smallText 
+                        }}>
+                          {status === 'pending' ? 'Attente' :
+                           status === 'confirmed' ? 'Confirmée' :
+                           status === 'processing' ? 'Traitement' :
+                           status === 'shipped' ? 'Expédiée' : 'Livrée'}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -1,8 +1,10 @@
 // components/Cart.tsx - VERSION AVEC SYNCHRONISATION LIVRAISON
 import { useState, useEffect, useRef } from "react";
-import { 
-  X, Plus, Minus, Trash2, ShoppingBag, MapPin, ChevronRight, 
-  Package, User, Home, Truck, Clock, CheckCircle, AlertCircle 
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  X, Plus, Minus, Trash2, ShoppingBag, MapPin, ChevronRight,
+  Package, User, Home, Truck, Clock, CheckCircle, AlertCircle,
+  Check
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -57,14 +59,15 @@ const Cart = ({ isOpen, onClose }) => {
   const [isDraggingMarker, setIsDraggingMarker] = useState(false);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [hasLoadedUserAddress, setHasLoadedUserAddress] = useState(false);
-  
+
   // NOUVEAUX ÉTATS POUR LA LIVRAISON
   const [deliveryStatus, setDeliveryStatus] = useState(null);
   const [trackingNumber, setTrackingNumber] = useState(null);
   const [deliveryETA, setDeliveryETA] = useState(null);
   const [syncStatus, setSyncStatus] = useState('pending'); // pending, syncing, synced, failed
   const [lastCreatedOrderId, setLastCreatedOrderId] = useState(null);
-  
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const navigate = useNavigate();
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -82,6 +85,7 @@ const Cart = ({ isOpen, onClose }) => {
   // Synchroniser avec les items du contexte
   useEffect(() => {
     setLocalCartItems(cartItems || []);
+    console.log("Cart items updated: ", cartItems);
   }, [cartItems]);
 
   // Vérifier l'authentification et tracker l'ouverture du panier
@@ -111,13 +115,13 @@ const Cart = ({ isOpen, onClose }) => {
       const checkDeliveryStatus = async () => {
         try {
           const statusData = await deliveryAPI.getDeliveryStatus(lastCreatedOrderId);
-          
+
           if (statusData?.success) {
             setDeliveryStatus(statusData.deliveryStatus);
             setTrackingNumber(statusData.trackingNumber);
             setDeliveryETA(statusData.eta);
             setSyncStatus('synced');
-            
+
             // Si livrée, arrêter de vérifier
             if (statusData.deliveryStatus === 'delivered') {
               toast.success("🎉 Votre commande a été livrée !");
@@ -298,8 +302,26 @@ const Cart = ({ isOpen, onClose }) => {
     }));
   };
 
-  // Calcul du total
+  // Calcul du total AVEC livraison
   const calculateTotal = () => {
+    return (localCartItems || []).reduce((total, item) => {
+      const price = item?.price || 0;
+      const quantity = item?.quantity || 0;
+      const deliveryPrice = item?.deliveryPrice || 0; // Ajout du prix de livraison
+      return total + (price + deliveryPrice) * quantity;
+    }, 0);
+  };
+
+  // Calcul du sous-total pour un article AVEC livraison
+  const calculateItemTotal = (item) => {
+    const price = item?.price || 0;
+    const quantity = item?.quantity || 0;
+    const deliveryPrice = item?.deliveryPrice || 0; // Ajout du prix de livraison
+    return (price + deliveryPrice) * quantity;
+  };
+
+  // Nouvelle fonction pour calculer le total SANS livraison
+  const calculateSubtotal = () => {
     return (localCartItems || []).reduce((total, item) => {
       const price = item?.price || 0;
       const quantity = item?.quantity || 0;
@@ -307,11 +329,13 @@ const Cart = ({ isOpen, onClose }) => {
     }, 0);
   };
 
-  // Calcul du sous-total pour un article
-  const calculateItemTotal = (item) => {
-    const price = item?.price || 0;
-    const quantity = item?.quantity || 0;
-    return price * quantity;
+  // Nouvelle fonction pour calculer le total des frais de livraison
+  const calculateDeliveryTotal = () => {
+    return (localCartItems || []).reduce((total, item) => {
+      const deliveryPrice = item?.deliveryPrice || 0;
+      const quantity = item?.quantity || 0;
+      return total + deliveryPrice * quantity;
+    }, 0);
   };
 
   // Mettre à jour la quantité avec tracking
@@ -680,6 +704,7 @@ const Cart = ({ isOpen, onClose }) => {
           postalCode: extractPostalCodeFromAddress(finalAddress),
           country: "France"
         },
+<<<<<<< Updated upstream
         deliveryAddress: finalAddress,
         latitude: coordinates.lat,
         longitude: coordinates.lng,
@@ -689,6 +714,28 @@ const Cart = ({ isOpen, onClose }) => {
           name: `${user?.firstName} ${user?.lastName}`,
           phone: user?.phone || "",
           email: user?.email || ""
+=======
+        deliveryAddress: finalAddress, // Adresse texte complète
+        latitude: coordinates.lat,     // Coordonnées GPS
+        longitude: coordinates.lng,    // Coordonnées GPS
+        paymentMethod: "card",
+
+        // NOUVEAUX CHAMPS POUR LA SYNCHRONISATION
+        deliveryInfo: {
+          geocoded: true, // Puisque vous avez géocodé l'adresse
+          coordinates: {
+            lat: coordinates.lat,
+            lng: coordinates.lng
+          },
+          // Ces champs seront remplis par le backend
+          syncStatus: "pending", // À envoyer pour être clair
+          estimatedDelivery: null,
+          metadata: {
+            source: "web",
+            device: navigator.userAgent,
+            timestamp: new Date().toISOString()
+          }
+>>>>>>> Stashed changes
         }
       };
 
@@ -697,10 +744,11 @@ const Cart = ({ isOpen, onClose }) => {
       // 2. Appeler l'API avec deliveryAPI (nouvelle fonction)
       const response = await deliveryAPI.createOrderWithDelivery(orderData);
 
+      console.log("📥 Réponse de l'API de création de commande avec livraison:", response);
       if (response.success) {
         // Succès - stocker l'ID pour le suivi
         setLastCreatedOrderId(response.order.id);
-        
+
         // Clear cart et fermer modals
         clearCart();
         onClose();
@@ -785,7 +833,7 @@ const Cart = ({ isOpen, onClose }) => {
   // NOUVELLE FONCTION : Afficher le statut de synchronisation
   const renderSyncStatus = () => {
     if (syncStatus === 'pending') return null;
-    
+
     const statusConfig = {
       syncing: {
         icon: <Clock className="h-4 w-4 animate-pulse" />,
@@ -975,130 +1023,119 @@ const Cart = ({ isOpen, onClose }) => {
               )}
 
               {items.map((item) => (
-                <Card
-                  key={item.id}
-                  className="p-4 shadow-sm"
-                  style={{
-                    backgroundColor: COLORS.lightBg,
-                    border: `1px solid ${COLORS.separator}`
-                  }}
-                >
-                  <div className="flex gap-4">
-                    {/* Image du produit */}
-                    <div className="flex-shrink-0">
-                      {item.images &&
-                        item.images.length > 0 &&
-                        !imageErrors[item.id] ? (
-                        <img
-                          src={item.images[0]}
-                          alt={item.name || "Produit"}
-                          className="w-16 h-16 object-cover rounded-lg"
-                          onError={() => handleImageError(item.id)}
-                        />
-                      ) : (
-                        <div
-                          className="w-16 h-16 rounded-lg flex items-center justify-center"
-                          style={{
-                            background: `linear-gradient(135deg, ${COLORS.primaryDark}15, ${COLORS.logo}15)`
-                          }}
-                        >
-                          <ShoppingBag
-                            className="h-6 w-6"
-                            style={{ color: COLORS.logo }}
+                <Card key={item.id} className="p-4 shadow-sm mb-3 overflow-hidden">
+                  {/* En-tête toujours visible */}
+                  <div
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden">
+                        {item.images &&
+                          item.images.length > 0 &&
+                          !imageErrors[item.id] ? (
+                          <img
+                            src={item.images[0]}
+                            alt={item.name || "Produit"}
+                            className="w-16 h-16 object-cover rounded-lg"
+                            onError={() => handleImageError(item.id)}
+                          />
+                        ) : (
+                          <div
+                            className="w-16 h-16 rounded-lg flex items-center justify-center"
+                            style={{
+                              background: `linear-gradient(135deg, ${COLORS.primaryDark}15, ${COLORS.logo}15)`
+                            }}
+                          >
+                            <ShoppingBag
+                              className="h-6 w-6"
+                              style={{ color: COLORS.logo }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm">{item.name}</h4>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold">€{calculateItemTotal(item).toFixed(2)}</span>
+                          <ChevronRight
+                            className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
                           />
                         </div>
-                      )}
-                    </div>
-
-                    {/* Détails du produit */}
-                    <div className="flex-1 min-w-0">
-                      <h4
-                        className="font-semibold text-sm mb-1 line-clamp-2"
-                        style={{ color: COLORS.secondaryText }}
-                      >
-                        {item.name || "Produit sans nom"}
-                      </h4>
-                      <p
-                        className="font-bold text-lg mb-2"
-                        style={{ color: COLORS.logo }}
-                      >
-                        €{item.price ? item.price.toFixed(2) : "0.00"}
-                      </p>
-
-                      {/* Sous-total de l'article */}
-                      <p
-                        className="text-sm mb-3"
-                        style={{ color: COLORS.smallText }}
-                      >
-                        Sous-total:{" "}
-                        <span className="font-semibold">
-                          €{calculateItemTotal(item).toFixed(2)}
-                        </span>
-                      </p>
-
-                      {/* Contrôles de quantité */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 rounded-full border-2"
-                            style={{
-                              borderColor: COLORS.separator,
-                              color: COLORS.smallText
-                            }}
-                            onClick={() =>
-                              handleUpdateQuantity(
-                                item.id,
-                                (item.quantity || 0) - 1
-                              )
-                            }
-                            disabled={(item.quantity || 0) <= 1}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-
-                          <span
-                            className="w-8 text-center font-bold"
-                            style={{ color: COLORS.smallText }}
-                          >
-                            {item.quantity || 0}
-                          </span>
-
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 rounded-full border-2"
-                            style={{
-                              borderColor: COLORS.separator,
-                              color: COLORS.smallText
-                            }}
-                            onClick={() =>
-                              handleUpdateQuantity(
-                                item.id,
-                                (item.quantity || 0) + 1
-                              )
-                            }
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-full"
-                          style={{
-                            color: "#DC2626",
-                            backgroundColor: "transparent"
-                          }}
-                          onClick={() => handleRemoveItem(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
                     </div>
+
+                    {/* Badge livraison rapide */}
+                    {item.deliveryPrice !== undefined && (
+                      <span className={`text-xs px-2 py-1 rounded-full ${item.deliveryPrice > 0 ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                        {item.deliveryPrice > 0 ? `€${item.deliveryPrice.toFixed(2)} liv.` : 'Gratuit'}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Contenu dépliable avec animation */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 pt-3 border-t space-y-3">
+                          {/* Détails */}
+                          <div className="text-sm space-y-2">
+                            <div className="flex justify-between">
+                              <span>Prix unitaire:</span>
+                              <span>€{(item.price || 0).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Livraison unitaire:</span>
+                              <span>{item.deliveryPrice > 0 ? `€${item.deliveryPrice.toFixed(2)}` : 'Gratuite'}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Quantité:</span>
+                              <span>{item.quantity || 0}</span>
+                            </div>
+                          </div>
+
+                          {/* Calcul détaillé */}
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <div className="space-y-1">
+                              <div className="flex justify-between">
+                                <span>Produit:</span>
+                                <span>€{((item.price || 0) * (item.quantity || 0)).toFixed(2)}</span>
+                              </div>
+                              {item.deliveryPrice > 0 && (
+                                <div className="flex justify-between">
+                                  <span>Livraison:</span>
+                                  <span className="text-blue-600">
+                                    + €{((item.deliveryPrice || 0) * (item.quantity || 0)).toFixed(2)}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex justify-between font-bold pt-2 border-t">
+                                <span>Total:</span>
+                                <span>€{calculateItemTotal(item).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex justify-between">
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleUpdateQuantity(item.id, (item.quantity || 0) - 1)}>-</Button>
+                              <Button size="sm" onClick={() => handleUpdateQuantity(item.id, (item.quantity || 0) + 1)}>+</Button>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => handleRemoveItem(item.id)}>
+                              Supprimer
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Card>
               ))}
             </div>
@@ -1116,7 +1153,7 @@ const Cart = ({ isOpen, onClose }) => {
           >
             {/* Résumé de commande */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-sm">
+              {/* <div className="flex justify-between items-center text-sm">
                 <span style={{ color: COLORS.smallText }}>
                   Sous-total:
                 </span>
@@ -1126,18 +1163,7 @@ const Cart = ({ isOpen, onClose }) => {
                 >
                   €{totalAmount.toFixed(2)}
                 </span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span style={{ color: COLORS.smallText }}>
-                  Livraison:
-                </span>
-                <span
-                  className="font-medium"
-                  style={{ color: COLORS.logo }}
-                >
-                  Gratuite
-                </span>
-              </div>
+              </div> */}
               <div
                 className="border-t pt-2"
                 style={{ borderColor: COLORS.separator }}
@@ -1254,7 +1280,7 @@ const Cart = ({ isOpen, onClose }) => {
                       <div className="flex-1">
                         <p className="font-medium text-sm">{item.name}</p>
                         <p className="text-xs text-gray-500">
-                          Quantité: {item.quantity} × €{item.price?.toFixed(2)}
+                          Quantité: {item.quantity} × ( €{item.price?.toFixed(2)} + Livraison: {item.deliveryPrice > 0 ? `€${item.deliveryPrice.toFixed(2)}` : 'Gratuite'} )
                         </p>
                       </div>
                       <div className="font-semibold">
@@ -1267,14 +1293,14 @@ const Cart = ({ isOpen, onClose }) => {
                 <Separator className="my-3" />
 
                 <div className="space-y-2">
-                  <div className="flex justify-between">
+                  {/* <div className="flex justify-between">
                     <span>Sous-total:</span>
                     <span className="font-bold">€{totalAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Livraison:</span>
                     <span className="text-green-600 font-bold">Gratuite</span>
-                  </div>
+                  </div> */}
                   <Separator />
                   <div className="flex justify-between text-lg">
                     <span>Total:</span>

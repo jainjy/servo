@@ -2,10 +2,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { 
-  Brush, 
-  Search, 
-  Filter, 
+import {
+  Brush,
+  Search,
+  Filter,
   X,
   ShoppingCart,
   Star,
@@ -14,7 +14,9 @@ import {
   Heart,
   Zap,
   Tag,
-  TrendingUp
+  TrendingUp,
+  Truck,
+  Info
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -35,6 +37,7 @@ interface DesignProduct {
   featured: boolean;
   slug: string;
   category: string;
+  deliveryPrice?: number;
   tags?: string[];
   viewCount?: number;
 }
@@ -55,7 +58,7 @@ const DesignSection = ({
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [viewedProducts, setViewedProducts] = useState<Set<string>>(new Set());
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
-  
+
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart } = useCart();
@@ -73,16 +76,30 @@ const DesignSection = ({
   const loadProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get('/design/products', {
+      // 1. Récupérer produits
+      const productsData = await api.get('/design/products', {
         params: { 
           search: localSearch,
           limit: 50
         }
       });
-      setProducts(response.data.products || []);
+
+      // 2. Récupérer prix livraison
+      const deliveryData = await api.get(`orders/delivery-prices/Accessoires Déco`);
+      const deliveryPrice = deliveryData.data.price;
+
+      // 3. Combiner
+      const productsWithDelivery = productsData.data.products.map(product => ({
+        ...product,
+        deliveryPrice: deliveryPrice, // C'est ici que vous ajoutez
+        totalWithDelivery: product.price + deliveryPrice
+      }));
+
+      // 4. Mettre à jour le state
+      setProducts(productsWithDelivery || []);
     } catch (error) {
       console.error("Erreur lors du chargement des produits:", error);
-      setProducts(getMockProducts());
+      //setProducts(getMockProducts());
     } finally {
       setIsLoading(false);
     }
@@ -243,7 +260,7 @@ const DesignSection = ({
 
   const handleAddToCart = async (product: DesignProduct, e: React.MouseEvent) => {
     e.stopPropagation(); // Empêcher la navigation
-    
+
     if (!user) {
       toast.warning("Connectez-vous pour ajouter des articles au panier");
       navigate('/login');
@@ -256,13 +273,13 @@ const DesignSection = ({
     }
 
     setAddingProductId(product.id);
-    
+
     try {
       await addToCart({
         ...product,
         quantity: 1
       });
-      
+
       toast.success(`${product.name} a été ajouté au panier !`, {
 
       });
@@ -493,6 +510,20 @@ const DesignSection = ({
                   -{Math.round((1 - product.price / product.comparePrice) * 100)}%
                 </Badge>
               )}
+
+              {/* Badge prix livraison - NOUVEAU */}
+              {product.deliveryPrice && product.deliveryPrice > 0 && (
+                <Badge className="bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-lg">
+                  <Truck className="h-3 w-3 mr-1" />
+                  Livraison: {product.deliveryPrice.toFixed(2)}€
+                </Badge>
+              )}
+              {product.deliveryPrice === 0 && (
+                <Badge className="bg-green-500 hover:bg-green-600 text-white border-0 shadow-lg">
+                  <Truck className="h-3 w-3 mr-1" />
+                  Livraison gratuite
+                </Badge>
+              )}
             </div>
 
             {/* Bouton wishlist */}
@@ -502,8 +533,8 @@ const DesignSection = ({
               className="absolute top-3 right-3 z-10 bg-white/80 hover:bg-white shadow-md rounded-full h-8 w-8"
               onClick={(e) => handleAddToWishlist(product.id, e)}
             >
-              <Heart 
-                className={`h-4 w-4 ${wishlist.has(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} 
+              <Heart
+                className={`h-4 w-4 ${wishlist.has(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
               />
             </Button>
 
@@ -521,7 +552,7 @@ const DesignSection = ({
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
+
               {/* Overlay avec bouton rapide */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
                 <Button
@@ -567,30 +598,67 @@ const DesignSection = ({
               </div>
 
               {/* Prix et stock */}
-              <div className="flex justify-between items-center">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-[#556B2F]">
-                      €{product.price.toFixed(2)}
-                    </span>
-                    {product.comparePrice && (
-                      <span className="text-sm text-gray-500 line-through">
-                        €{product.comparePrice.toFixed(2)}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-[#556B2F]">
+                        €{product.price.toFixed(2)}
                       </span>
+                      {product.comparePrice && (
+                        <span className="text-sm text-gray-500 line-through">
+                          €{product.comparePrice.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                    {product.viewCount && (
+                      <p className="text-xs text-gray-500">
+                        {product.viewCount} vues
+                      </p>
                     )}
                   </div>
-                  {product.viewCount && (
-                    <p className="text-xs text-gray-500">
-                      {product.viewCount} vues
-                    </p>
-                  )}
+                  <Badge
+                    variant={product.quantity > 10 ? "default" : product.quantity > 0 ? "secondary" : "destructive"}
+                    className="bg-[#556B2F]/10 text-[#556B2F] border-[#556B2F]/20 hover:bg-[#556B2F]/20"
+                  >
+                    {product.quantity > 10 ? "En stock" : product.quantity > 0 ? `${product.quantity} restant${product.quantity > 1 ? 's' : ''}` : "Épuisé"}
+                  </Badge>
                 </div>
-                <Badge 
-                  variant={product.quantity > 10 ? "default" : product.quantity > 0 ? "secondary" : "destructive"}
-                  className="bg-[#556B2F]/10 text-[#556B2F] border-[#556B2F]/20 hover:bg-[#556B2F]/20"
-                >
-                  {product.quantity > 10 ? "En stock" : product.quantity > 0 ? `${product.quantity} restant${product.quantity > 1 ? 's' : ''}` : "Épuisé"}
-                </Badge>
+
+                {/* Section Livraison - NOUVEAU */}
+                {product.deliveryPrice !== undefined && (
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        Frais de livraison:
+                      </span>
+                    </div>
+                    <span className={`text-sm font-medium ${product.deliveryPrice > 0 ? 'text-blue-600' : 'text-green-600'}`}>
+                      {product.deliveryPrice > 0 ? `€${product.deliveryPrice.toFixed(2)}` : 'Gratuite'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Prix total avec livraison - NOUVEAU */}
+                {product.deliveryPrice !== undefined && product.deliveryPrice > 0 && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-700">
+                        Prix total avec livraison:
+                      </span>
+                      <span className="text-lg font-bold text-blue-700">
+                        €{(product.price + product.deliveryPrice).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Info className="h-3 w-3 text-blue-500" />
+                      <span className="text-xs text-blue-600">
+                        {product.price.toFixed(2)}€ + {product.deliveryPrice.toFixed(2)}€ livraison
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Tags */}
@@ -606,7 +674,7 @@ const DesignSection = ({
 
               {/* Bouton principal */}
               <Button
-                className="w-full bg-[#556B2F] hover:bg-[#6B8E23] text-white font-medium h-11"
+                className="w-full bg-[#556B2F] hover:bg-[#6B8E23] text-white font-medium h-11 relative group/btn"
                 onClick={(e) => handleAddToCart(product, e)}
                 disabled={product.quantity === 0 || addingProductId === product.id}
               >
@@ -619,6 +687,12 @@ const DesignSection = ({
                   <>
                     <ShoppingCart className="h-4 w-4 mr-2" />
                     {product.quantity > 0 ? "Ajouter au panier" : "Épuisé"}
+                    {/* Tooltip prix total - NOUVEAU */}
+                    {product.deliveryPrice !== undefined && product.deliveryPrice > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                        Total: €{(product.price + product.deliveryPrice).toFixed(2)}
+                      </span>
+                    )}
                   </>
                 )}
               </Button>
@@ -632,8 +706,8 @@ const DesignSection = ({
                 {localSearch ? "Aucun produit trouvé" : "Aucun produit disponible"}
               </h3>
               <p className="text-gray-600 mb-6">
-                {localSearch 
-                  ? "Essayez de modifier vos critères de recherche" 
+                {localSearch
+                  ? "Essayez de modifier vos critères de recherche"
                   : "Revenez bientôt pour découvrir nos nouvelles collections"
                 }
               </p>
