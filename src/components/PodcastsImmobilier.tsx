@@ -493,12 +493,12 @@ const PodcastsImmobilier: React.FC = () => {
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}
       >
         {/* Overlay avec gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#556B2F]/70 via-[#6B8E23]/50 to-[#FFFFFF0]/30"></div>
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center text-white">
             {/* Titre Principal */}
-            <h1 className="text-xl md:text-4xl font-bold mb-2 leading-tight drop-shadow-lg">
+            <h1 className="text-xl uppercase md:text-4xl font-medium mb-2 leading-tight drop-shadow-lg">
               Podcast{" "}
               <span className="text-white bg-gradient-to-r from-[#6B8E23] to-[#8FBC8F] bg-clip-text text-transparent">
                 Immobilier

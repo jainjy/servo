@@ -96,8 +96,8 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
                 transition
                 ${
                   isActive
-                    ? "bg-[#479c0f] text-white border-2 border-[#62e50a] shadow-lg"
-                    : "bg-logo text-white hover:border-[#556B2F]/50 hover:bg-logo/50"
+                    ? "bg-logo text-white shadow-lg"
+                    : "bg-white text-slate-900 hover:border-[#556B2F] hover:bg-logo"
                 }
               `}
             >

@@ -217,14 +217,14 @@ const ArtETCreationShowcase = () => {
         </motion.article>
       )}
 
-      <div className="max-w-7xl mx-auto text-center mb-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto text-center mb-4 flex lg:flex-row flex-col items-center justify-between">
         <h2 className="text-3xl lg:text-5xl font-medium text-gray-800 mb-3 tracking-tight">
           Art & Création
         </h2>
         {/* <p className="text-gray-500 text-sm">
           Découvrez nos univers créatifs et rencontrez les artistes de demain.
         </p> */}
-        <div className="flex justify-center mt-6 gap-3">
+        <div className="flex lg:flex-row flex-col justify-center mt-6 gap-3">
           <button
             onClick={handleRefresh}
             className="px-4 py-2 flex items-center gap-2 text-sm font-medium text-logo bg-olive-600 border border-logo rounded-lg hover:bg-olive-700 transition-all"
@@ -278,7 +278,7 @@ const ArtETCreationShowcase = () => {
 
                  
                   {/* Bouton d'exploration */}
-                  <div className="flex bg-white shadow-lg p-4 rounded-full justify-center items-center gap-3 text-base font-semibold text-[#556B2F] group">
+                  <div className="flex bg-white shadow-lg p-2 lg:p-4 rounded-full justify-center items-center gap-3 text-sm lg:text-base font-semibold text-[#556B2F] group">
                     <span className="group-hover:translate-x-1 text-center transition-transform duration-300">
                       Explorer cette catégorie
                     </span>

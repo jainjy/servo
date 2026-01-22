@@ -429,16 +429,16 @@ const PodcastsEntreprise: React.FC = () => {
         <AdvertisementPopup />
       </div>
       <div
-        className="relative py-20 bg-cover bg-center bg-no-repeat"
+        className="relative py-10 pt-20 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}
       >
         {/* Overlay avec gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#556B2F]/70 via-[#6B8E23]/50 to-[#FFFFFF0]/30"></div>
+        <div className="absolute inset-0 backdrop-blur-sm bg-black/50"></div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center text-white">
             {/* Titre Principal */}
-            <h1 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight drop-shadow-lg">
+            <h1 className="text-2xl lg:text-4xl font-medium uppercase mb-6 leading-tight drop-shadow-lg">
               Podcast{" "}
               <span className="text-white bg-gradient-to-r from-[#6B8E23] to-[#8FBC8F] bg-clip-text text-transparent">
                 Services
@@ -446,7 +446,7 @@ const PodcastsEntreprise: React.FC = () => {
             </h1>
 
             {/* Sous-titre */}
-            <p className="text-md md:text-xl text-gray-100 max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
+            <p className="text-sm md:text-md text-gray-100 max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
               Stratégies de croissance, management, innovation et conseils pour
               entrepreneurs
             </p>

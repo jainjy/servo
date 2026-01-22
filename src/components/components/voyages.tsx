@@ -443,17 +443,17 @@ const VoyagesAeriens: React.FC = () => {
         <AdvertisementPopup />
       </div>
       {/* Hero */}
-      <div className="relative rounded-2xl overflow-hidden mb-8">
+      <div className="relative rounded-2xl overflow-hidden">
         <div
-          className="relative pb-8 pt-20 bg-cover bg-center bg-no-repeat"
+          className="relative pt-20 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage:
               'url("https://i.pinimg.com/1200x/79/94/5c/79945cc369cdb035eadcc41efc866a4c.jpg")',
           }}
         >
-          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 backdrop-blur-sm"></div>
           <div className="relative z-10 text-center text-white">
-            <h1 className="text-xl lg:text-4xl font-bold mb-4">
+            <h1 className="text-xl lg:text-4xl uppercase font-medium mb-4">
               Explorer le Monde
             </h1>
             <p className="text-sm mb-5 max-w-2xl mx-auto">

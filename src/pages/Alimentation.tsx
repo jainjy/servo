@@ -534,10 +534,10 @@ const Alimentation = () => {
           {/* En-tête */}
           <div className="bg-white/90 py-5 rounded-b-lg backdrop-blur-sm">
             <div className="text-center mb-5">
-              <h1 className="tracking-widest h-full text-xl lg:text-5xl md:text-4xl font-bold mb-4 text-logo">
+              <h1 className="tracking-widest h-full text-xl lg:text-5xl md:text-4xl uppercase font-medium mb-4 text-logo">
                 Manger & Consommer
               </h1>
-              <p className="text-sm px-2 lg:text-sm text-[#8B4513] max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm  px-2 lg:text-sm text-[#8B4513] max-w-2xl mx-auto leading-relaxed">
                 Découvrez les saveurs authentiques de La Réunion : restaurants locaux, produits frais, marchés artisanaux et bien-être
               </p>
             </div>

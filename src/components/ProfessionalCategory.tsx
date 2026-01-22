@@ -145,10 +145,10 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{ backgroundImage: `url('${bannerImage}')` }}
         />
-        <div className="relative container mx-auto px-4 py-16">
+        <div className="relative container mx-auto px-4 pt-20 pb-5">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{title}</h1>
-            <p className="text-lg md:text-xl text-gray-200 mb-8">
+            <h1 className="text-3xl md:text-5xl font-medium uppercase mb-4">{title}</h1>
+            <p className="text-sm md:text-md text-gray-200 mb-8">
               {description}
             </p>
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-3">

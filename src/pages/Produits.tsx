@@ -250,7 +250,7 @@ const Produits = () => {
           {/* En-tête avec animation */}
           <div className="bg-white py-5 rounded-lg">
             <div className="text-center mb-5 animate-fade-in">
-              <h1 className="tracking-widest text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#0052FF] bg-clip-text text-transparent">
+              <h1 className="tracking-widest text-xl lg:text-5xl md:text-4xl font-medium mb-4 text-logo uppercase">
                 Produits & Accessoires
               </h1>
               <p className="text-sm px-2 lg:text-md text-[#5A6470] max-w-2xl mx-auto leading-relaxed">

@@ -1541,7 +1541,7 @@ export default function Financement() {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
+            <h1 className="text-2xl uppercase lg:text-5xl md:text-6xl font-medium mb-6 text-white drop-shadow-lg">
               Financement
             </h1>
             <p className="text-sm text-slate-100 mb-4 lg:mb-10 leading-relaxed drop-shadow">

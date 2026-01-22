@@ -358,7 +358,7 @@ const GestionImmobilier = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative py-16 bg-[#556B2F]  overflow-hidden"
+        className="relative py-16 bg-black  overflow-hidden"
         ref={heroRef}
       >
         {/* Image de fond avec opacité */}
@@ -366,21 +366,21 @@ const GestionImmobilier = () => {
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          className="absolute inset-0 bg-cover bg-center z-0 opacity-70"
+          className="absolute inset-0 bg-black bg-center z-0 opacity-70"
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8)),url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
           }}
         />
 
         {/* Contenu */}
-        <div className="container mx-auto px-4 py-2 relative z-10">
+        <div className="container mx-auto px-4 py-2 pt-10 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-5xl mx-auto text-center"
           >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+            <h1 className="text-3xl uppercase md:text-4xl lg:text-5xl font-medium text-white mb-4">
               Gestion Immobilière{" "}
               <motion.span
                 initial={{ opacity: 0, scale: 0.8 }}

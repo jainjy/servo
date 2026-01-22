@@ -162,12 +162,11 @@ const TousLesPartenaires = () => {
                 'url("https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200")',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-green-900/60 to-blue-900/40" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(0,0,0,0.3)_80%)]" />
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           </div>
 
           <div className="relative text-center py-10 px-0">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+            <h1 className="text-3xl md:text-5xl font-medium uppercase text-white mb-4 drop-shadow-lg">
               Tous Nos Partenaires
             </h1>
             <p className="text-sm md:text-md text-gray-100 max-w-3xl mx-auto drop-shadow-md">

@@ -710,7 +710,7 @@ const PortraitsLocaux = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-transparent"></div>
 
         <div className="relative z-10 max-w-6xl mx-auto text-center">
-          <h1 className="text-xl md:text-4xl font-bold text-gray-100 mb-6 tracking-tight">
+          <h1 className="text-xl md:text-4xl font-medium uppercase text-gray-100 mb-6 tracking-tight">
             Portraits locaux
           </h1>
           <p className="text-sm text-gray-200 max-w-3xl mx-auto leading-relaxed">

@@ -374,7 +374,7 @@ const DomicileLayout = () => {
           alt=""
         />
       </div>
-      <h1 className="text-5xl font-bold mb-6 text-white text-center drop-shadow-lg">
+      <h1 className="text-3xl lg:text-5xl font-medium uppercase mb-6 text-white text-center drop-shadow-lg">
         Entretien & Equipements
       </h1>
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>

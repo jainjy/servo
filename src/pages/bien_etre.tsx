@@ -124,15 +124,15 @@ const BienEtre = () => {
       <section
         className="relative h-80 py-16 lg:py-20 text-center text-white overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(85, 107, 47, 0.8), rgba(107, 142, 35, 0.6)), url('https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1999&q=80')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1999&q=80')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0  bg-gradient-to-b from-logo/20 to-primary-dark/40"></div>
+        <div className="absolute inset-0  backdrop-blur-sm"></div>
         <div className="container mx-auto px-4 relative z-10  h-full flex flex-col justify-center">
           <SlideIn direction="up">
-            <h1 className="text-4xl sm:text-5xl  lg:text-6xl font-extrabold mb-4 leading-tight" style={{ color: '#8B4513' }}>
+            <h1 className="text-4xl sm:text-5xl  lg:text-6xl font-medium uppercase mb-4 leading-tight text-white">
               Santé & Bien-Être
             </h1>
           </SlideIn>

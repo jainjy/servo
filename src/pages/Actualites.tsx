@@ -473,7 +473,7 @@ ${window.location.origin}/blog/article/${article.id}
       <Header />
 
       {/* Hero Section */}
-      <section className="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+      <section className="relative py-8 sm:py-12 lg:pt-20 lg:pb-8 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
@@ -483,11 +483,11 @@ ${window.location.origin}/blog/article/${article.id}
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-elegant font-light text-white mb-4 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-elegant uppercase font-light text-white mb-4 tracking-tight">
               Blogs et conseils
             </h1>
 
-            <p className="text-sm sm:text-base md:text-lg font-modern font-light text-slate-200 mb-6 max-w-2xl mx-auto px-4">
+            <p className="text-sm md:text-md font-modern font-light text-slate-200 mb-6 max-w-2xl mx-auto px-4">
               Restez informé avec nos dernières actualités, guides et podcasts sur l'immobilier.
             </p>
 

@@ -1137,7 +1137,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
         </div>
 
         <div className="pt-2 w-11/12 mx-auto flex flex-col">
-          <span className="text-2xl lg:text-5xl text-white text-center tracking-wider font-sans font-semibold">
+          <span className="text-2xl uppercase lg:text-5xl text-white text-center tracking-wider font-sans font-semibold">
             Locations Immobilières
           </span>
           <span className="text-center text-sm pt-5 text-white/80">
