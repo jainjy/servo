@@ -335,16 +335,16 @@ const PodcastsReunion: React.FC = () => {
     <div className="min-h-screen bg-white">
       {/* Hero Section avec Image de Background */}
       <div
-        className="relative py-20 bg-cover bg-center bg-no-repeat"
+        className="relative pt-20 pb-5 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}
       >
         {/* Overlay avec gradient qui utilise les nouvelles couleurs */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#556B2F]/70 via-[#6B8E23]/50 to-[#FFFFFF0]/30"></div>
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center text-white">
             {/* Titre Principal */}
-            <h1 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight drop-shadow-lg">
+            <h1 className="text-2xl lg:text-4xl font-meduim uppercase mb-6 leading-tight drop-shadow-lg">
               Découvrir{" "}
               <span className="text-white bg-gradient-to-r from-[#6B8E23] to-[#8FBC8F] bg-clip-text text-transparent">
                 La Réunion
@@ -352,7 +352,7 @@ const PodcastsReunion: React.FC = () => {
             </h1>
 
             {/* Sous-titre */}
-            <p className="text-md md:text-xl text-gray-100 max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
+            <p className="text-sm md:text-md text-gray-100 max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
               Explorez l'île intense à travers nos vidéos : paysages, culture,
               gastronomie et aventures
             </p>

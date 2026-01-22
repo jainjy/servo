@@ -474,7 +474,7 @@ export default function Assurance() {
       )}
 
       {/* Hero Section */}
-      <section className="relative pt-5 pb-24 overflow-hidden">
+      <section className="relative pt-16 pb-44 overflow-hidden">
         {/* Image de fond avec overlay */}
         <div className="absolute top-12 left-4 right-4 z-50">
           <AdvertisementPopup />
@@ -492,14 +492,14 @@ export default function Assurance() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/70"></div>
         </div>
 
-        <div className="container mx-auto px-4 h-24 relative z-10">
+        <div className="container mx-auto px-4 pt-10 h-24 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
+            <h1 className="text-2xl uppercase lg:text-5xl md:text-6xl font-medium mb-6 text-white drop-shadow-lg">
               Assurance
             </h1>
             <p className="text-sm text-slate-100 mb-4 lg:mb-10 leading-relaxed drop-shadow">

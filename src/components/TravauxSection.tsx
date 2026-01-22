@@ -1127,7 +1127,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
         <div className="relative container mx-auto px-4 pt-20 pb-16">
           <div className="text-center mb-0 lg:mb-12">
-            <h1 className="text-4xl md:text-4xl font-bold text-gray-100 mb-6">
+            <h1 className="text-4xl md:text-4xl font-medium text-gray-100 mb-6">
               {currentCategory.label}
             </h1>
             <p className="text-sm lg:text-md text-gray-200 max-w-2xl mx-auto mb-8">

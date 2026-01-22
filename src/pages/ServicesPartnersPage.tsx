@@ -612,16 +612,16 @@ const ServicesPartnersPage = () => {
       {/* Header amélioré */}
       <header className="relative overflow-hidden">
         {/* Background avec gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700">
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1920')] opacity-10 bg-cover bg-center"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 backdrop-blur-md"></div>
         </div>
 
         <div className="relative z-10">
           <div className="max-w-6xl mx-auto px-4 pt-20 pb-10">
             {/* Titres */}
             <div className="text-center mb-12">
-              <h1 className="text-xl lg:text-3xl font-bold text-white mb-4 leading-tight">
+              <h1 className="text-xl lg:text-3xl font-medium uppercase text-white mb-4 leading-tight">
                 {view === "default"
                   ? "Découvrez Notre Univers"
                   : view === "partenaires"

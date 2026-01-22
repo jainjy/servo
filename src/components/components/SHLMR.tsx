@@ -771,13 +771,13 @@ const LogementsSHLMR = () => {
                 </div>
 
                 {/* Contenu */}
-                <div className="container mx-auto px-4 relative z-10 py-20">
+                <div className="container mx-auto px-4 relative z-10 py-5">
                     <div className="max-w-4xl mx-auto text-center">
                         <motion.h1
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2, duration: 0.6 }}
-                            className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6"
+                            className="text-3xl uppercase md:text-4xl lg:text-5xl font-medium text-white mb-6"
                         >
                             Logements Sociaux
                         </motion.h1>
@@ -1176,12 +1176,12 @@ const LogementsSHLMR = () => {
                                 </div>
                                 
                                 {/* Bouton de filtrage rapide */}
-                                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                <div className="grid grid-cols-3 h-fit sm:grid-cols-6 gap-2">
                                     {socialTypes.slice(1).map((type) => (
                                         <button
                                             key={type.id}
                                             onClick={() => handleSocialTypeSelect(type.id)}
-                                            className={`px-2 py-1 rounded-full text-xs whitespace-nowrap transition-colors truncate ${selectedSocialType === type.id
+                                            className={`px-2 py-1 shadow-lg rounded-full text-xs whitespace-nowrap transition-colors truncate ${selectedSocialType === type.id
                                                     ? 'text-white'
                                                     : 'hover:bg-gray-100'
                                                 }`}

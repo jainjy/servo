@@ -241,24 +241,17 @@ const UserParapentePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#556B2F]/50 to-[#6B8E23]/10 text-white relative overflow-hidden">
-        {/* Image de fond */}
-        <div
-          className="absolute inset-0 opacity-30 bg-cover bg-center"
-          style={{
-            backgroundImage: "url(/parapente-salagou-wide.jpg)",
-          }}
-        ></div>
+      <div className=" text-slate-900 relative overflow-hidden">
 
         {/* Contenu du hero */}
         <div
-          className="container mx-auto px-4 py-16 relative z-10"
+          className="container mx-auto px-4 pb-4 pt-20 relative z-10"
         >
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <h1 className="text-4xl md:text-5xl font-medium mb-4">
               {profile?.commercialName || "Air Lagon Parapente"}
             </h1>
-            <p className="text-xl mb-8 opacity-90">
+            <p className="text-md mb-8 opacity-90">
               École de parapente au Lac du Salagou - Vols tandem & Stages
             </p>
           </div>
@@ -305,7 +298,7 @@ const UserParapentePage: React.FC = () => {
               ) : profile ? (
                 <>
                   {/* Photo de profil */}
-                  <div className="relative h-48  rounded-t-lg overflow-hidden">
+                  <div className="relative h-48 bg-secondary-text  rounded-t-lg overflow-hidden">
                     {profile.avatar ? (
                       <img
                         src={profile.avatar}

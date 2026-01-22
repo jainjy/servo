@@ -517,7 +517,7 @@ const BonsPlansConseils = () => {
         </div>
         <div className="relative z-10 max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-xl md:text-4xl font-bold text-gray-100 mb-6">
+            <h1 className="text-xl md:text-4xl font-medium uppercase text-gray-100 mb-6">
               Bons plans & conseils
             </h1>
             <p className="text-sm text-gray-200 max-w-3xl mx-auto leading-relaxed">

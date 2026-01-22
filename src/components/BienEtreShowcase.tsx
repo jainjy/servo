@@ -220,7 +220,7 @@ const BienEtreShowcase = () => {
         </motion.article>
       )}
 
-      <div className="max-w-7xl mx-auto text-center mb-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto text-center mb-4 flex lg:flex-row flex-col items-center justify-between">
         <h2 className="text-3xl lg:text-5xl font-medium text-gray-800 mb-3 tracking-tight">
           Santé & Bien-Être
         </h2>

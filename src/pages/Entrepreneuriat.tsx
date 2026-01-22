@@ -352,14 +352,14 @@ const Entrepreneuriat = () => {
     <div className="min-h-screen bg-gradient-to-b from-white via-[#F5F5F5] to-[#E8E8E8]">
       {/* Hero Section */}
       <section
-        className="relative mt-16 pt-20 pb-16 px-4 sm:px-6 lg:px-8"
+        className="relative pt-20 px-4 sm:px-6 lg:px-8"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundBlendMode: "overlay",
-          backgroundColor: "rgba(107, 142, 35, 0.85)",
+          backgroundColor: "rgba(0, 0, 0, 0.85)",
         }}
       >
         <div className="relative z-10 max-w-7xl mx-auto">
@@ -369,13 +369,10 @@ const Entrepreneuriat = () => {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <Badge className="mb-4 bg-[#556B2F] hover:bg-[#556B2F]/90 text-white px-4 py-1 text-sm font-medium">
-              L'esprit d'entreprendre
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl md:text-5xl font-medium uppercase text-white mb-6">
               Entrepreneuriat
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
+            <p className="text-sm md:text-md text-white/90 mb-8 max-w-3xl mx-auto">
               Découvrez les parcours inspirants, les conseils pratiques et les
               ressources pour lancer et développer votre entreprise
             </p>

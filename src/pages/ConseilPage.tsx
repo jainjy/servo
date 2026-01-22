@@ -924,7 +924,7 @@ const ConseilPage = () => {
         />
 
         <div className="relative z-10 container mx-auto px-4 max-w-4xl text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-medium uppercase mb-4">
             Conseil <span style={{ color: colors.accentGold }}>Expert</span>
           </h1>
 
