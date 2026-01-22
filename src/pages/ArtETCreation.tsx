@@ -139,21 +139,21 @@ const ArtEtCreation = () => {
     <div className="min-h-screen bg-white mt-12">
       {/* HERO */}
       <div
-        className="relative pt-20 pb-10 px-4"
+        className="relative pt-10 px-4"
         style={{
           backgroundImage: `url('${backgroundImages[activeTab]}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          minHeight: '320px',
+          minHeight: '250px',
         }}
       >
-        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
         <div className="relative max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-medium uppercase text-white mb-4">
             {titles[activeTab].main}
           </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
+          <p className="text-sm text-white/90 max-w-3xl mx-auto mb-8">
             {titles[activeTab].subtitle}
           </p>
 
