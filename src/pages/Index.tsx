@@ -137,23 +137,16 @@ const Index = () => {
           <>
             <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
               <h2
-                className="text-xl lg:text-3xl font-extrabold ml-8 my-6"
-                style={{ color: colors["neutral-dark"] }}
+                className="text-3xl lg:text-5xl font-medium ml-8 my-6 text-slate-900"
               >
                 Nos biens immobiliers
               </h2>
               {/* Voir plus button */}
 
               <Button
-                className="relative px-8 mx-auto py-3 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
+                className="relative px-8 mx-auto py-3 bg-logo hover:bg-logo/90 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 "
                 onClick={() => navigate("/immobilier")}
-                style={{ backgroundColor: colors["primary-dark"] }}
               >
-                {/* Cercle animé à droite */}
-                <span
-                  className="absolute inset-0 -right-3 top-12 w-36 h-32 group-hover:-top-12 transition-all duration-700 ease-out origin-bottom rounded-full transform group-hover:scale-105"
-                  style={{ backgroundColor: colors["accent-light"] }}
-                ></span>
 
                 {/* Contenu */}
                 <span

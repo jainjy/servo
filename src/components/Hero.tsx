@@ -724,7 +724,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-            className="mb-2 lg:mb-6 text-4xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white mt-32"
+            className="mb-2 lg:mb-6 text-4xl md:text-6xl lg:text-8xl tracking-tight font-medium text-white mt-32"
           >
             <span className="block">La super-application</span>
             <span

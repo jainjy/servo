@@ -529,6 +529,7 @@ const App = () => {
                       <LieuxHistoriques ville="Paris" typeFiltre="tous" />
                     }
                   />
+                  
                   <Route path="/parapente" element={<UserParapentePage />} />
                   <Route
                     path="/formationTourisme"

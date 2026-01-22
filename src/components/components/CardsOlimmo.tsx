@@ -462,31 +462,23 @@ const AnnoncesImmobilieres = () => {
 
   return (
     <div
-      className="w-full py-12 px-4 sm:px-2 lg:px-4"
-      style={{ backgroundColor: colors["light-bg"] }}
+      className="w-full py-12 px-4 sm:px-2 lg:px-4 bg-slate-100"
     >
       <div className="max-w-7xl mx-auto">
         {/* En-tête */}
         <div className="mb-12 grid place-items-center lg:flex justify-between items-center">
           <h2
-            className="text-xl sm:text-4xl font-bold mb-3 text-center lg:text-left"
-            style={{ color: colors["neutral-dark"] }}
+            className="text-3xl sm:text-5xl font-medium mb-3 text-center lg:text-left text-slate-900"
           >
             Propriétés de nos partenaires
           </h2>
           <div className="text-center grid lg:flex items-center justify-between">
             <Button
-              className="relative px-8 mx-auto py-3 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
+              className="relative bg-logo hover:bg-logo/90 px-8 mx-auto py-3 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
               onClick={() =>
                 window.open("https://www.olimmoreunion.re/biens", "_blank")
               }
-              style={{ backgroundColor: colors["primary-dark"] }}
             >
-              {/* Cercle animé à droite */}
-              <span
-                className="absolute inset-0 -right-14 top-12 w-36 h-32 group-hover:-top-12 transition-all duration-700 ease-out origin-bottom rounded-full transform group-hover:scale-105"
-                style={{ backgroundColor: colors["accent-light"] }}
-              ></span>
 
               {/* Contenu */}
               <span
