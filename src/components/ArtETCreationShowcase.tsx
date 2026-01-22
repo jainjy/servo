@@ -19,7 +19,7 @@ const ArtETCreationShowcase = () => {
   const navigate = useNavigate();
   const [displayedCards, setDisplayedCards] = useState<ArtCard[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  
+
   // État pour la publicité
   const [isAdVisible, setIsAdVisible] = useState(true);
   const [adTimeRemaining, setAdTimeRemaining] = useState(120); // 2 minutes en secondes
@@ -30,10 +30,10 @@ const ArtETCreationShowcase = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -210,20 +210,20 @@ const ArtETCreationShowcase = () => {
                   <span>Visible : <span className="font-medium text-black">2 minutes</span></span>
                 </div>
 
-              
+
               </div>
             </div>
           </div>
         </motion.article>
       )}
 
-      <div className="max-w-4xl mx-auto text-center mb-12">
-        <h2 className="text-3xl font-extrabold text-gray-800 mb-3 tracking-tight">
+      <div className="max-w-7xl mx-auto text-center mb-4 flex items-center justify-between">
+        <h2 className="text-3xl lg:text-5xl font-extrabold text-gray-800 mb-3 tracking-tight">
           Art & Création
         </h2>
-        <p className="text-gray-500 text-sm">
+        {/* <p className="text-gray-500 text-sm">
           Découvrez nos univers créatifs et rencontrez les artistes de demain.
-        </p>
+        </p> */}
         <div className="flex justify-center mt-6 gap-3">
           <button
             onClick={handleRefresh}
@@ -242,35 +242,53 @@ const ArtETCreationShowcase = () => {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 px-4">
+      <div className="grid md:grid-cols-3 gap-8 px-4">
         {displayedCards.map((card) => (
           <div
             key={card.id}
             onClick={() => handleCardClick(card.link)}
-            className={`relative overflow-hidden rounded-xl cursor-pointer shadow-md transition-transform transform hover:scale-[1.01] hover:shadow-xl bg-gradient-to-tr ${card.gradient}`}
+            className={`relative overflow-hidden rounded-2xl cursor-pointer shadow-lg transition-all duration-300 hover:shadow-2xl bg-white min-h-[420px] h-full`}
           >
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_left,_#00000020,_transparent_70%)]"></div>
             <div className="relative flex flex-col h-full">
-              {/* En-tête avec titre et icône */}
-              <div className="flex items-start gap-3 p-6 pb-4">
-                <div className="p-3 bg-white/80 backdrop-blur-sm rounded-md text-gray-700 flex-shrink-0">
-                  {card.icon}
+              {/* En-tête avec titre et icône AGRANDIE */}
+              <div className="flex items-start gap-5 p-8 pb-6">
+                <div className="p-5 bg-white/90 backdrop-blur-sm rounded-2xl text-gray-800 shadow-xl flex-shrink-0 transform group-hover:rotate-6 transition-transform duration-500">
+                  {/* Icône agrandie avec animation */}
+                  <div className="w-14 h-14 flex items-center justify-center">
+                    {React.cloneElement(card.icon as React.ReactElement, {
+                      size: 32,
+                      strokeWidth: 1.5
+                    })}
+                  </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg text-gray-900 leading-tight">{card.title}</h3>
+                  <h3 className="font-bold text-2xl text-gray-900 leading-tight">{card.title}</h3>
                 </div>
               </div>
 
-              {/* Fond verre pour la description et le bouton */}
-              <div className="flex-1 flex flex-col px-6 pb-4">
-                <div className="bg-white/30 backdrop-blur-md rounded-lg p-4 border border-white/40 flex-1 flex flex-col">
-                  <p className="text-gray-700 text-sm leading-snug flex-1">{card.description}</p>
-                  <div className="flex items-center gap-1 text-sm font-medium mt-3 text-[#556B2F] group">
-                    Explorer
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              {/* Contenu principal avec effet verre */}
+              <div className="flex-1 flex flex-col px-8 pb-8">
+                <div className="bg-white/40 backdrop-blur-lg rounded-2xl p-6 border border-white/50 flex-1 flex flex-col h-full">
+                  <div className="flex-1 ">
+                    <p className="text-gray-800 text-lg leading-relaxed h-full">
+                      {card.description}
+                    </p>
+                  </div>
+
+                 
+                  {/* Bouton d'exploration */}
+                  <div className="flex bg-white shadow-lg p-4 rounded-full justify-center items-center gap-3 text-base font-semibold text-[#556B2F] group">
+                    <span className="group-hover:translate-x-1 text-center transition-transform duration-300">
+                      Explorer cette catégorie
+                    </span>
+                    <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform duration-300" />
                   </div>
                 </div>
               </div>
+
+              {/* Effet de bordure au hover */}
+              <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/30 transition-all duration-300"></div>
             </div>
           </div>
         ))}

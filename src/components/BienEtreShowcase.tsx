@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Apple, Heart, Users, Leaf, Sprout, ArrowRight } from 'lucide-react';
+import { Apple, Heart, Users, Leaf, Sprout, ArrowRight, RefreshCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import AuthService from '@/services/authService';
 
 interface BienEtreCard {
   id: string;
   title: string;
   description: string;
   icon: React.ReactNode;
-  bgColor: string;
-  borderColor: string;
+  gradient: string;
   category: string;
   link: string;
-}
-
-interface TabData {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  cards: BienEtreCard[];
 }
 
 const colors = {
@@ -33,8 +26,8 @@ const colors = {
 
 const BienEtreShowcase = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Nutrition');
   const [displayedCards, setDisplayedCards] = useState<BienEtreCard[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   
   // État pour la publicité
   const [isAdVisible, setIsAdVisible] = useState(true);
@@ -78,184 +71,64 @@ const BienEtreShowcase = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const tabsData: TabData[] = [
+  const allCards: BienEtreCard[] = [
     {
-      id: 'Nutrition',
-      label: 'Nutrition',
-      icon: <Apple size={14} />,
-      cards: [
-        {
-          id: 'nutrition-1',
-          title: 'Consultation Nutrition',
-          description: 'Bilan complet et plan nutritionnel personnalisé.',
-          icon: <Apple size={16} />,
-          bgColor: 'bg-orange-50',
-          borderColor: 'border-orange-200',
-          category: 'nutrition',
-          link: 'Nutrition'
-        },
-        {
-          id: 'nutrition-2',
-          title: 'Suivi Mensuel',
-          description: 'Séances de suivi et ajustement de programme.',
-          icon: <Heart size={16} />,
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          category: 'nutrition',
-          link: 'Nutrition'
-        },
-        {
-          id: 'nutrition-3',
-          title: 'Perte de Poids',
-          description: 'Accompagnement complet sur 3 mois.',
-          icon: <Leaf size={16} />,
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          category: 'nutrition',
-          link: 'Nutrition'
-        }
-      ]
+      id: 'nutrition',
+      title: 'Nutrition',
+      description: 'Consultation nutrition et plans personnalisés pour votre santé.',
+      icon: <Apple size={22} />,
+      gradient: 'from-orange-100 via-amber-100 to-yellow-100',
+      category: 'nutrition',
+      link: 'Nutrition'
     },
     {
-      id: 'Soin',
-      label: 'Soins',
-      icon: <Heart size={14} />,
-      cards: [
-        {
-          id: 'soin-1',
-          title: 'Soin du Visage',
-          description: 'Soin facial complet avec produits naturels.',
-          icon: <Heart size={16} />,
-          bgColor: 'bg-pink-50',
-          borderColor: 'border-pink-200',
-          category: 'soin',
-          link: 'Soin'
-        },
-        {
-          id: 'soin-2',
-          title: 'Massage Thérapeutique',
-          description: 'Massage relaxant pour soulager les tensions.',
-          icon: <Heart size={16} />,
-          bgColor: 'bg-purple-50',
-          borderColor: 'border-purple-200',
-          category: 'soin',
-          link: 'Soin'
-        },
-        {
-          id: 'soin-3',
-          title: 'Soins Corporels',
-          description: 'Traitements corps complets et hydratants.',
-          icon: <Leaf size={16} />,
-          bgColor: 'bg-teal-50',
-          borderColor: 'border-teal-200',
-          category: 'soin',
-          link: 'Soin'
-        }
-      ]
+      id: 'soin',
+      title: 'Soins',
+      description: 'Services de soins corporels et faciaux pour votre bien-être.',
+      icon: <Heart size={22} />,
+      gradient: 'from-pink-100 via-rose-100 to-red-100',
+      category: 'soin',
+      link: 'Soin'
     },
     {
-      id: 'Therapeute',
-      label: 'Thérapeutes',
-      icon: <Users size={14} />,
-      cards: [
-        {
-          id: 'therapie-1',
-          title: 'Psychothérapie',
-          description: 'Consultations avec thérapeutes expérimentés.',
-          icon: <Users size={16} />,
-          bgColor: 'bg-indigo-50',
-          borderColor: 'border-indigo-200',
-          category: 'therapeute',
-          link: 'Therapeute'
-        },
-        {
-          id: 'therapie-2',
-          title: 'Coaching Personnel',
-          description: 'Accompagnement pour objectifs de vie.',
-          icon: <Heart size={16} />,
-          bgColor: 'bg-violet-50',
-          borderColor: 'border-violet-200',
-          category: 'therapeute',
-          link: 'Therapeute'
-        },
-        {
-          id: 'therapie-3',
-          title: 'Gestion du Stress',
-          description: 'Techniques pour stress et anxiété.',
-          icon: <Leaf size={16} />,
-          bgColor: 'bg-lime-50',
-          borderColor: 'border-lime-200',
-          category: 'therapeute',
-          link: 'Therapeute'
-        }
-      ]
+      id: 'therapeute',
+      title: 'Thérapeutes',
+      description: 'Consultations avec professionnels pour équilibre émotionnel.',
+      icon: <Users size={22} />,
+      gradient: 'from-indigo-100 via-purple-100 to-violet-100',
+      category: 'therapeute',
+      link: 'Therapeute'
     },
     {
-      id: 'HuilesEssentielles',
-      label: 'Huiles',
-      icon: <Sprout size={14} />,
-      cards: [
-        {
-          id: 'huile-1',
-          title: 'Aromathérapie',
-          description: 'Séances pour détente et bien-être émotionnel.',
-          icon: <Sprout size={16} />,
-          bgColor: 'bg-emerald-50',
-          borderColor: 'border-emerald-200',
-          category: 'huile',
-          link: 'HuilesEssentielles'
-        },
-        {
-          id: 'huile-2',
-          title: 'Consultation',
-          description: 'Conseil personnalisé en huiles essentielles.',
-          icon: <Leaf size={16} />,
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          category: 'huile',
-          link: 'HuilesEssentielles'
-        }
-      ]
+      id: 'huile',
+      title: 'Huiles Essentielles',
+      description: 'Aromathérapie et solutions naturelles pour la détente.',
+      icon: <Sprout size={22} />,
+      gradient: 'from-emerald-100 via-green-100 to-teal-100',
+      category: 'huile',
+      link: 'HuilesEssentielles'
     },
     {
-      id: 'MedecinesNaturelles',
-      label: 'Naturelles',
-      icon: <Leaf size={14} />,
-      cards: [
-        {
-          id: 'medecine-1',
-          title: 'Phytothérapie',
-          description: 'Traitement par les plantes pour la santé.',
-          icon: <Leaf size={16} />,
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          category: 'medecine',
-          link: 'MedecinesNaturelles'
-        },
-        {
-          id: 'medecine-2',
-          title: 'Acupuncture',
-          description: 'Pratique pour équilibrer votre énergie.',
-          icon: <Heart size={16} />,
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          category: 'medecine',
-          link: 'MedecinesNaturelles'
-        }
-      ]
+      id: 'medecine',
+      title: 'Médecines Naturelles',
+      description: 'Approches holistiques pour votre santé et bien-être.',
+      icon: <Leaf size={22} />,
+      gradient: 'from-lime-100 via-green-50 to-emerald-100',
+      category: 'medecine',
+      link: 'MedecinesNaturelles'
     }
   ];
 
-  useEffect(() => {
-    const currentTab = tabsData.find(tab => tab.id === activeTab);
-    if (currentTab) {
-      setDisplayedCards(currentTab.cards);
-    }
-  }, [activeTab]);
-
-  const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId);
+  const getRandomCards = () => {
+    const shuffled = [...allCards].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
   };
+
+  useEffect(() => {
+    setDisplayedCards(getRandomCards());
+  }, []);
+
+  const handleRefresh = () => setDisplayedCards(getRandomCards());
 
   const handleCardClick = (link: string) => {
     navigate('/bien-etre', { state: { activeTab: link } });
@@ -263,11 +136,15 @@ const BienEtreShowcase = () => {
 
   // Fonction pour ouvrir le lien de la pub
   const handleAdClick = () => {
-    navigate('/bien-etre');
+    if (AuthService.isAuthenticated()) {
+      navigate('/bien-etre');
+    } else {
+      setShowAuthModal(true);
+    }
   };
 
   return (
-    <div className="py-8 px-4 bg-gradient-to-b from-white to-gray-50 relative">
+    <section className="py-16 bg-gradient-to-b from-gray-50 via-white to-gray-100 relative">
       {/* Publicité - seulement sur desktop */}
       {!isMobile && isAdVisible && (
         <motion.article
@@ -310,7 +187,7 @@ const BienEtreShowcase = () => {
           {/* Contenu */}
           <div className="flex p-4 gap-4">
             {/* Image */}
-            <div className="w-36 h-28 rounded-lg overflow-hidden border border-white/20 flex-shrink-0">
+            <div className="w-36 h-28 rounded-lg overflow-hidden border border-black/20 flex-shrink-0">
               <img
                 src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=500&q=80"
                 alt="Santé & Bien-Être"
@@ -329,119 +206,93 @@ const BienEtreShowcase = () => {
               </p>
 
               <div className="flex items-center justify-between pt-3 border-t border-white/15">
-                <div className="flex items-center text-xs text-white/65">
+                <div className="flex items-center text-xs text-black/65">
                   <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className='text-black'>Visible : <span className="font-medium text-black">2 minutes</span></span>
+                  <span>Visible : <span className="font-medium text-black">2 minutes</span></span>
                 </div>
-
-              
               </div>
             </div>
           </div>
         </motion.article>
       )}
 
-      <div className="max-w-7xl mx-auto">
-        {/* En-tête compact */}
-        <div className="text-center mb-6">
-          <h2
-            className="text-2xl font-extrabold mb-1"
-            style={{ color: colors["neutral-dark"] }}
+      <div className="max-w-7xl mx-auto text-center mb-4 flex items-center justify-between">
+        <h2 className="text-3xl lg:text-5xl font-extrabold text-gray-800 mb-3 tracking-tight">
+          Santé & Bien-Être
+        </h2>
+        <div className="flex justify-center mt-6 gap-3">
+          <button
+            onClick={handleRefresh}
+            className="px-4 py-2 flex items-center gap-2 text-sm font-medium text-logo bg-olive-600 border border-logo rounded-lg hover:bg-olive-700 transition-all"
           >
-            Santé & Bien-Être
-          </h2>
-          <p
-            className="text-sm mb-4"
-            style={{ color: colors["secondary-text"] }}
-          >
-            Services pour votre santé et bien-être
-          </p>
-        </div>
-
-        {/* Onglets compacts */}
-        <div className="flex flex-wrap gap-1 mb-6 justify-center">
-          {tabsData.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabClick(tab.id)}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'text-white shadow-sm'
-                  : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }`}
-              style={{
-                backgroundColor: activeTab === tab.id ? colors["primary-dark"] : 'transparent'
-              }}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Grille de cartes compacte */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-          {displayedCards.map((card) => (
-            <div
-              key={card.id}
-              onClick={() => handleCardClick(card.link)}
-              className={`${card.bgColor} border ${card.borderColor} rounded-md p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]`}
-            >
-              <div className="flex items-start gap-2">
-                <div
-                  className="p-1.5 rounded flex-shrink-0 mt-0.5"
-                  style={{ backgroundColor: colors["primary-dark"] + "20" }}
-                >
-                  <div style={{ color: colors["primary-dark"] }}>
-                    {card.icon}
-                  </div>
-                </div>
-                
-                <div className="flex-1">
-                  <h3
-                    className="font-bold text-sm mb-1"
-                    style={{ color: colors["neutral-dark"] }}
-                  >
-                    {card.title}
-                  </h3>
-                  <p
-                    className="text-xs text-gray-600 mb-2 leading-snug line-clamp-2"
-                  >
-                    {card.description}
-                  </p>
-                  
-                  <div
-                    className="flex items-center gap-1 font-medium text-xs"
-                    style={{ color: colors["primary-dark"] }}
-                  >
-                    <span>Voir plus</span>
-                    <ArrowRight size={12} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Bouton compact */}
-        <div className="text-center">
+            <RefreshCw size={16} />
+            Autres catégories
+          </button>
           <Button
-            className="px-4 py-2 flex items-center gap-2 text-sm rounded-md transition-all duration-300 hover:shadow-md mx-auto"
+            className="px-4 py-2 flex items-center gap-2 text-sm rounded-lg bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
             onClick={() => navigate('/bien-etre')}
-            style={{ backgroundColor: colors["primary-dark"] }}
           >
-            <span className="font-semibold">
-              Tous les services
-            </span>
-            <ArrowRight size={14} />
+            Tous les services
+            <ArrowRight size={16} />
           </Button>
         </div>
       </div>
-    </div>
+
+      <div className="grid md:grid-cols-3 gap-8 px-4">
+        {displayedCards.map((card) => (
+          <div
+            key={card.id}
+            onClick={() => handleCardClick(card.link)}
+            className={`relative overflow-hidden rounded-2xl cursor-pointer shadow-lg transition-all duration-300 hover:shadow-2xl bg-white min-h-[420px] h-full`}
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_left,_#00000020,_transparent_70%)]"></div>
+            <div className="relative flex flex-col h-full">
+              {/* En-tête avec titre et icône AGRANDIE */}
+              <div className="flex items-start gap-5 p-8 pb-6">
+                <div className="p-5 bg-white/90 backdrop-blur-sm rounded-2xl text-gray-800 shadow-xl flex-shrink-0 transform group-hover:rotate-6 transition-transform duration-500">
+                  {/* Icône agrandie avec animation */}
+                  <div className="w-14 h-14 flex items-center justify-center">
+                    {React.cloneElement(card.icon as React.ReactElement, {
+                      size: 32,
+                      strokeWidth: 1.5
+                    })}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-2xl text-gray-900 leading-tight">{card.title}</h3>
+                </div>
+              </div>
+
+              {/* Contenu principal avec effet verre */}
+              <div className="flex-1 flex flex-col px-8 pb-8">
+                <div className="bg-white/40 backdrop-blur-lg rounded-2xl p-6 border border-white/50 flex-1 flex flex-col h-full">
+                  <div className="flex-1 ">
+                    <p className="text-gray-800 text-lg leading-relaxed h-full">
+                      {card.description}
+                    </p>
+                  </div>
+
+                  {/* Bouton d'exploration */}
+                  <div onClick={() => handleCardClick(card.link)} className="flex bg-white shadow-lg p-4 rounded-full justify-center items-center gap-3 text-base font-semibold text-[#556B2F] group">
+                    <span className="group-hover:translate-x-1 text-center transition-transform duration-300">
+                      Découvrir
+                    </span>
+                    <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform duration-300" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Effet de bordure au hover */}
+              <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/30 transition-all duration-300"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
 

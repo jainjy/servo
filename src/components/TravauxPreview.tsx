@@ -189,17 +189,27 @@
         )}
 
         {/* Contenu principal des travaux */}
-        <div className="bg-white shadow-lg px-8 py-5 rounded-3xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
+        <div className="bg-slate-100 shadow-lg px-8 py-5 rounded-3xl">
+          <div className="text-center mb-4 flex items-center justify-between">
+            <h2 className="text-3xl lg:text-5xl font-extrabold text-gray-900 mb-4">
               Nos Travaux
             </h2>
-            <p className="text-gray-600 lg:text-md text-sm max-w-2xl mx-auto">
+            {/* <p className="text-gray-600 lg:text-md text-sm max-w-2xl mx-auto">
               Découvrez un aperçu de nos travaux les plus récents
-            </p>
+            </p> */}
+            <Button
+            variant="outline"
+            className="rounded-2xl border-1 lg:w-auto w-full bg-logo hover:bg-logo/90 text-lg py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
+            onClick={() => navigate("/travaux?categorie=interieurs")}
+          >
+            <span className="text-white text-base font-mono">
+              VOIR TOUS NOS TRAVAUX
+            </span>
+            <ArrowRight className="h-5 w-5 text-blue-100 group-hover:text-purple-100 transition-transform group-hover:translate-x-1 ml-2" />
+          </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-2 lg:px-10 mb-4">
             {displayedPrestations.map((prestation) => {
               const currentImageIndex = currentImageIndexes[prestation.id] || 0;
               const totalImages = prestation.images.length;
@@ -226,7 +236,7 @@
                       <img
                         src={prestation.images[currentImageIndex]}
                         alt={prestation.title}
-                        className={homeCards ? "h-full w-full" : "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"}
+                        className={homeCards ? "h-full w-full object-cover" : "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"}
                       />
 
                       <div 
@@ -271,17 +281,6 @@
               );
             })}
           </div>
-
-          <Button
-            variant="outline"
-            className="rounded-2xl border-1 lg:w-auto w-full bg-slate-950 border-gray-300 hover:border-blue-500 hover:bg-black text-lg py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
-            onClick={() => navigate("/travaux?categorie=interieurs")}
-          >
-            <span className="text-white text-base font-mono">
-              VOIR TOUS NOS TRAVAUX
-            </span>
-            <ArrowRight className="h-5 w-5 text-blue-600 group-hover:text-purple-600 transition-transform group-hover:translate-x-1 ml-2" />
-          </Button>
         </div>
       </section>
     );
