@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, MapPin, Euro, Calendar, Users, Star, Globe, User, Mail, Phone, AlertCircle, Briefcase, Map } from 'lucide-react';
 import api from "../lib/api";
 import { useAuth } from '../hooks/useAuth';
+import TourismNavigation from '@/components/TourismNavigation';
 
 interface Parapente {
   id: string;
@@ -241,19 +242,25 @@ const UserParapentePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className=" text-slate-900 relative overflow-hidden">
-
+      <div className="text-slate-900 relative overflow-hidden" style={{
+        backgroundImage: 'url(/parapente_air.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
+        {/* Overlay pour améliorer la lisibilité */}
+        <div className="absolute inset-0 bg-black/30"></div>
+        
         {/* Contenu du hero */}
-        <div
-          className="container mx-auto px-4 pb-4 pt-20 relative z-10"
-        >
+        <div className="container mx-auto px-4 pb-4 pt-20 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-medium mb-4">
+            <h1 className="text-4xl md:text-5xl font-medium mb-4 text-white">
               {profile?.commercialName || "Air Lagon Parapente"}
             </h1>
-            <p className="text-md mb-8 opacity-90">
+            <p className="text-md mb-8 opacity-90 text-white">
               École de parapente au Lac du Salagou - Vols tandem & Stages
             </p>
+            <TourismNavigation />
           </div>
         </div>
       </div>
@@ -261,7 +268,6 @@ const UserParapentePage: React.FC = () => {
       {/* Contenu principal avec profil à gauche et activités à droite */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* PROFIL À GAUCHE */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-lg sticky top-8">
@@ -302,7 +308,10 @@ const UserParapentePage: React.FC = () => {
                     {profile.avatar ? (
                       <img
                         src={profile.avatar}
-                        alt={profile.commercialName || `${profile.firstName} ${profile.lastName}`}
+                        alt={
+                          profile.commercialName ||
+                          `${profile.firstName} ${profile.lastName}`
+                        }
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -312,35 +321,54 @@ const UserParapentePage: React.FC = () => {
                     )}
                     <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full">
                       <div className="flex items-center gap-2">
-                        <Star className="w-5 h-5 text-yellow-500" fill="#FBBF24" />
-                        <span className="font-bold">{profile.rating || 4.9}</span>
-                       
+                        <Star
+                          className="w-5 h-5 text-yellow-500"
+                          fill="#FBBF24"
+                        />
+                        <span className="font-bold">
+                          {profile.rating || 4.9}
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Informations du profil */}
                   <div className="p-6">
-                    <h2 className="text-2xl font-bold mb-2" style={{ color: "#8B4513" }}>
-                      {profile.commercialName || `${profile.firstName} ${profile.lastName}`}
+                    <h2
+                      className="text-2xl font-bold mb-2"
+                      style={{ color: "#8B4513" }}
+                    >
+                      {profile.commercialName ||
+                        `${profile.firstName} ${profile.lastName}`}
                     </h2>
                     {profile.companyName && (
                       <div className="flex items-center gap-2 mb-2">
-                        <Briefcase className="w-4 h-4" style={{ color: "#556B2F" }} />
-                        <span className="text-gray-600 text-sm">{profile.companyName}</span>
+                        <Briefcase
+                          className="w-4 h-4"
+                          style={{ color: "#556B2F" }}
+                        />
+                        <span className="text-gray-600 text-sm">
+                          {profile.companyName}
+                        </span>
                       </div>
                     )}
-                    <p className="text-gray-600 mb-4">{profile.description || "École de parapente certifiée au Lac du Salagou."}</p>
-
-                
+                    <p className="text-gray-600 mb-4">
+                      {profile.description ||
+                        "École de parapente certifiée au Lac du Salagou."}
+                    </p>
 
                     {/* Contact */}
                     <div className="space-y-3 mb-6">
                       {profile.address && (
                         <div className="flex items-start gap-3">
-                          <MapPin className="w-5 h-5 mt-0.5" style={{ color: "#556B2F" }} />
+                          <MapPin
+                            className="w-5 h-5 mt-0.5"
+                            style={{ color: "#556B2F" }}
+                          />
                           <div>
-                            <span className="text-gray-700">{profile.address}</span>
+                            <span className="text-gray-700">
+                              {profile.address}
+                            </span>
                             {(profile.city || profile.zipCode) && (
                               <div className="text-gray-600 text-sm">
                                 {profile.zipCode} {profile.city}
@@ -351,13 +379,19 @@ const UserParapentePage: React.FC = () => {
                       )}
                       {profile.email && (
                         <div className="flex items-center gap-3">
-                          <Mail className="w-5 h-5" style={{ color: "#556B2F" }} />
+                          <Mail
+                            className="w-5 h-5"
+                            style={{ color: "#556B2F" }}
+                          />
                           <span className="text-gray-700">{profile.email}</span>
                         </div>
                       )}
                       {profile.phone && (
                         <div className="flex items-center gap-3">
-                          <Phone className="w-5 h-5" style={{ color: "#556B2F" }} />
+                          <Phone
+                            className="w-5 h-5"
+                            style={{ color: "#556B2F" }}
+                          />
                           <span className="text-gray-700">{profile.phone}</span>
                         </div>
                       )}
@@ -378,7 +412,10 @@ const UserParapentePage: React.FC = () => {
                 </>
               ) : (
                 <div className="p-6 text-center">
-                  <AlertCircle className="w-12 h-12 mx-auto mb-4" style={{ color: "#8B4513" }} />
+                  <AlertCircle
+                    className="w-12 h-12 mx-auto mb-4"
+                    style={{ color: "#8B4513" }}
+                  />
                   <p className="text-gray-600">Profil non disponible</p>
                   <button
                     onClick={fetchProfile}
@@ -401,7 +438,10 @@ const UserParapentePage: React.FC = () => {
             <div className="mb-8 bg-white rounded-lg shadow p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Search className="w-5 h-5" style={{ color: "#556B2F" }} />
-                <h2 className="text-lg font-semibold" style={{ color: "#8B4513" }}>
+                <h2
+                  className="text-lg font-semibold"
+                  style={{ color: "#8B4513" }}
+                >
                   Rechercher des activités
                 </h2>
               </div>
@@ -471,10 +511,19 @@ const UserParapentePage: React.FC = () => {
               </div>
             ) : filteredParapentes.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-lg shadow">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: "#F0F7F0" }}>
-                  <AlertCircle className="w-8 h-8" style={{ color: "#556B2F" }} />
+                <div
+                  className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "#F0F7F0" }}
+                >
+                  <AlertCircle
+                    className="w-8 h-8"
+                    style={{ color: "#556B2F" }}
+                  />
                 </div>
-                <h3 className="text-xl font-semibold mb-2" style={{ color: "#8B4513" }}>
+                <h3
+                  className="text-xl font-semibold mb-2"
+                  style={{ color: "#8B4513" }}
+                >
                   Aucune activité disponible
                 </h3>
                 <p className="text-gray-600 mb-8">
@@ -495,8 +544,13 @@ const UserParapentePage: React.FC = () => {
               <>
                 {/* En-tête des résultats */}
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold" style={{ color: "#8B4513" }}>
-                    {filteredParapentes.length} activité{filteredParapentes.length > 1 ? "s" : ""} disponible{filteredParapentes.length > 1 ? "s" : ""}
+                  <h2
+                    className="text-2xl font-bold"
+                    style={{ color: "#8B4513" }}
+                  >
+                    {filteredParapentes.length} activité
+                    {filteredParapentes.length > 1 ? "s" : ""} disponible
+                    {filteredParapentes.length > 1 ? "s" : ""}
                   </h2>
                 </div>
 
@@ -532,7 +586,10 @@ const UserParapentePage: React.FC = () => {
                         <div className="md:w-2/3 p-6">
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <h3 className="text-xl font-bold mb-2" style={{ color: "#8B4513" }}>
+                              <h3
+                                className="text-xl font-bold mb-2"
+                                style={{ color: "#8B4513" }}
+                              >
                                 {parapente.title}
                               </h3>
                               <div className="flex items-center gap-1 text-sm text-gray-600 mb-3">
@@ -540,14 +597,17 @@ const UserParapentePage: React.FC = () => {
                                 <span>{parapente.location}</span>
                               </div>
                             </div>
-                            <div className="text-2xl font-bold" style={{ color: "#556B2F" }}>
+                            <div
+                              className="text-2xl font-bold"
+                              style={{ color: "#556B2F" }}
+                            >
                               {formatPrice(parapente.price)}/jour
                             </div>
                           </div>
 
-                          <p className="text-gray-600 mb-4">{parapente.description}</p>
-
-                         
+                          <p className="text-gray-600 mb-4">
+                            {parapente.description}
+                          </p>
                         </div>
                       </div>
                     </div>
