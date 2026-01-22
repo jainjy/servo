@@ -191,7 +191,7 @@
         {/* Contenu principal des travaux */}
         <div className="bg-slate-100 shadow-lg px-8 py-5 rounded-3xl">
           <div className="text-center mb-4 flex items-center justify-between">
-            <h2 className="text-3xl lg:text-5xl font-extrabold text-gray-900 mb-4">
+            <h2 className="text-3xl lg:text-5xl font-medium text-gray-900 mb-4">
               Nos Travaux
             </h2>
             {/* <p className="text-gray-600 lg:text-md text-sm max-w-2xl mx-auto">

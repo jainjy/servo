@@ -468,7 +468,7 @@ const AnnoncesImmobilieres = () => {
         {/* En-tête */}
         <div className="mb-12 grid place-items-center lg:flex justify-between items-center">
           <h2
-            className="text-3xl sm:text-5xl font-bold mb-3 text-center lg:text-left text-slate-900"
+            className="text-3xl sm:text-5xl font-medium mb-3 text-center lg:text-left text-slate-900"
           >
             Propriétés de nos partenaires
           </h2>
