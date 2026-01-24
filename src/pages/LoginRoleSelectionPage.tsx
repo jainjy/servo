@@ -163,13 +163,11 @@ const LoginRoleSelectionPage = () => {
                     {role.icon}
                   </div>
 
-                  <div className="space-y-4 mt-4">
+                  <div className="space-y-4 mt-4 mb-4">
                     <h3 className="text-xl font-bold text-white transition-transform duration-300 tracking-wide">
                       {role.title}
                     </h3>
-                    <p className="text-gray-300 leading-relaxed text-sm font-light">
-                      {role.description}
-                    </p>
+         
                   </div>
 
                   <Button
