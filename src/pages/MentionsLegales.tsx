@@ -182,7 +182,7 @@ export default function MentionsLegales({ pdfUrl }) {
                         href="mailto:contact@oliplus.fr"
                         className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                       >
-                        contact@oliplus.fr
+                        contact@oliplus.re
                       </a>
                     </div>
                   </div>
@@ -221,7 +221,7 @@ export default function MentionsLegales({ pdfUrl }) {
                         href="mailto:dpo@oliplus.re"
                         className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                       >
-                        dpo@oliplus.re
+                        security@oliplus.re
                       </a>
                     </div>
                   </div>
@@ -373,10 +373,10 @@ export default function MentionsLegales({ pdfUrl }) {
                   Pour exercer ces droits, contactez notre Délégué à la
                   Protection des Données à l'adresse :{" "}
                   <a
-                    href="mailto:dpo@oliplus.re"
+                    href="mailto:security@oliplus.re"
                     className="text-red-600 dark:text-red-400 font-semibold ml-1 hover:underline"
                   >
-                    dpo@oliplus.re
+                    security@oliplus.re
                   </a>
                 </p>
               </div>

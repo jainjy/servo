@@ -128,7 +128,7 @@ Les données archivées pour conformité légale sont inaccessibles mais conserv
 • Droit à la limitation : arrêter temporairement un traitement
 • Droit à la non-décision automatisée : refuser profilage automatique
 
-Pour exercer ces droits, contactez notre DPO : dpo@oliplus.re ou accédez à votre section "Gestion des droits RGPD".`,
+Pour exercer ces droits, contactez notre DPO : contact@oliplus.re ou accédez à votre section "Gestion des droits RGPD".`,
     },
     {
       id: "securite",
@@ -154,8 +154,8 @@ Malgré ces mesures, aucune transmission internet n'est 100% sécurisée.`,
       content: `Pour toute question concernant cette politique :
 
 Délégué à la Protection des Données (DPO)
-Email : dpo@oliplus.re
-Téléphone : +261 XX XX XX XX
+Email : security@oliplus.re
+Téléphone : +262 692 66 77 55
 
 Responsable Traitement
 Email : legal@oliplus.re
