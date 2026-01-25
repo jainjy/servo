@@ -39,6 +39,7 @@ import { toast } from "@/hooks/use-toast";
 import { useImmobilierTracking } from "@/hooks/useImmobilierTracking";
 import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Chargement dynamique du Header seulement
 const Header = lazy(() => import('@/components/layout/Header'));
@@ -1281,16 +1282,14 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       onClick={() =>
                         setRadiusFilterEnabled(!radiusFilterEnabled)
                       }
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${
-                        radiusFilterEnabled ? "bg-[#556B2F]" : "bg-gray-300"
-                      }`}
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${radiusFilterEnabled ? "bg-[#556B2F]" : "bg-gray-300"
+                        }`}
                     >
                       <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                          radiusFilterEnabled
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${radiusFilterEnabled
                             ? "translate-x-8"
                             : "translate-x-1"
-                        }`}
+                          }`}
                       />
                     </button>
                   </div>
@@ -1429,7 +1428,13 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                 </div>
               )}
             </div>
-
+            <Allpub
+              title="Offres spéciales"
+              description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+              image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+              background="bg-white"
+              textbg="text-slate-900"
+            />
             {/* Résultats */}
             <div className="mt-4 bg-white rounded-xl shadow-lg p-6 ">
               <div className="flex justify-between items-center mb-6">
@@ -1748,16 +1753,14 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                           onClick={() =>
                             setRadiusFilterEnabled(!radiusFilterEnabled)
                           }
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            radiusFilterEnabled ? "bg-[#556B2F]" : "bg-gray-200"
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${radiusFilterEnabled ? "bg-[#556B2F]" : "bg-gray-200"
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              radiusFilterEnabled
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${radiusFilterEnabled
                                 ? "translate-x-6"
                                 : "translate-x-1"
-                            }`}
+                              }`}
                           />
                         </button>
                       </div>

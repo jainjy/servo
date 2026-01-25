@@ -25,6 +25,7 @@ import AdvancedSearchBar from "../components/AdvancedSearchBar";
 import Lottie from "lottie-react";
 import search from "@/assets/search.json";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Types pour TypeScript
 interface Service {
@@ -674,6 +675,14 @@ const ServicesPartnersPage = () => {
           </div>
         </div>
       </header>
+
+      <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
 
       {/* Advertisement Popup - Absolute Position */}
       <div className="absolute top-12 left-4 right-4 z-50">

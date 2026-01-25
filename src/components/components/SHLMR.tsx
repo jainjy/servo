@@ -33,6 +33,7 @@ import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
 import { Card } from "@/components/ui/card";
 import { Ruler } from "lucide-react";
 import AdvertisementPopup from '../AdvertisementPopup';
+import Allpub from '../Allpub';
 
 // Couleurs fournies
 const COLORS = {
@@ -804,6 +805,14 @@ const LogementsSHLMR = () => {
                     </div>
                 </div>
             </motion.section>
+
+            <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
 
             {/* Navigation par onglets */}
             <section className="py-8 -mt-10 relative z-20">

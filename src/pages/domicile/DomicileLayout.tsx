@@ -10,6 +10,7 @@ import UtilitiesProduits from "@/components/produits/UtilitiesProduits";
 import Marketplace from "../Marketplace";
 import Modal from "@/components/ui/modal";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 interface ItemDetails {
   title: string;
   price: string;
@@ -393,6 +394,13 @@ const DomicileLayout = () => {
             </Tab>
           ))}
         </Tab.List>
+         <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
         <Tab.Panels>
           {sections.map((section) => (
             <Tab.Panel

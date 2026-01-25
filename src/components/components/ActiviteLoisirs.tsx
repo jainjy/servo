@@ -13,6 +13,7 @@ import {
 import { api } from "@/lib/axios";
 import TourismNavigation from "../TourismNavigation";
 import AdvertisementPopup from "../AdvertisementPopup";
+import Allpub from "../Allpub";
 
 interface ActivityCategory {
   id: number;
@@ -136,6 +137,8 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       </div>
       {/* Fin Hero */}
 
+      
+
       {/* SEARCH BAR */}
       <div className="max-w-3xl mx-auto px-4 -mt-10 mb-14 relative z-20">
         <div
@@ -155,6 +158,14 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           />
         </div>
       </div>
+
+       <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
 
       {/* CATEGORY FILTERS */}
       <div className="flex flex-wrap justify-center gap-3 px-4 mb-16">

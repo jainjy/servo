@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Types
 interface AssuranceService {
@@ -590,6 +591,15 @@ export default function Assurance() {
           <ModalAssurance isOpen={isModalOpen} onClose={handleCloseModal} data={selectedCategorie} />
         </div>
       </section>
+
+      <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
+
       {/* Section Services d'Assurance */}
       <section className="py-8 lg:py-4 bg-white" id="services-assurance">
         <div className="container mx-auto px-4">
@@ -655,6 +665,14 @@ export default function Assurance() {
         </div>
       </section>
 
+      <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
+
       {/* Section Avantages */}
       <section className="py-8 lg:py-4 bg-[#FAFAFA]" id="avantages-assurance">
         <div className="container mx-auto px-4">
@@ -714,6 +732,14 @@ export default function Assurance() {
           </div>
         </div>
       </section>
+
+      <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
 
       {/* CTA Section */}
       <section className="py-2 lg:py-4 m-4" id="devis-assurance">

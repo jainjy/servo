@@ -15,6 +15,7 @@ import React, { useState } from 'react';
 import Api from '../../lib/api.js';
 import DemandeAudit from '../../components/DemandeAudit.tsx';
 import AdvertisementPopup from '../AdvertisementPopup.tsx';
+import Allpub from '../Allpub.tsx';
 
 interface InvestFormData {
   nom: string;
@@ -263,6 +264,14 @@ const InvestirEtranger = () => {
         </div>
       </section>
 
+      <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
+
       {/* Section Pays Active */}
       <section className="py-6">
         <div className="container mx-auto px-4">
@@ -486,6 +495,14 @@ const InvestirEtranger = () => {
           </div>
         </div>
       </section>
+
+      <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
 
       {/* Section Vente/Location/Gestion */}
       <section className="py-8 bg-[#FAFAFA] border-t border-[#D3D3D3]">

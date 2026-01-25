@@ -40,6 +40,7 @@ import { toast } from "@/hooks/use-toast";
 import { useImmobilierTracking } from "@/hooks/useImmobilierTracking";
 import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Données locales de fallback
 const localRentProperties = [
@@ -1413,7 +1414,13 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
               </div>
             )}
           </div>
-
+          <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
           {/* Résultats */}
           <div className="mt-4 bg-white rounded-xl shadow-lg p-6">
             <div className="flex justify-between items-center mb-6">

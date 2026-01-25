@@ -55,6 +55,7 @@ import {
 import { toast } from "sonner";
 import { conseilService } from "@/services/conseilService";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Mappage des icônes
 const iconMap = {
@@ -986,6 +987,14 @@ const ConseilPage = () => {
           </div>
         </div>
       </section>
+
+       <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
 
       {/* Section Notre Processus */}
       {processusConseil.length > 0 && (

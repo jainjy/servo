@@ -1326,6 +1326,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Types
 interface FinancementPartenaire {
@@ -1574,6 +1575,13 @@ export default function Financement() {
         </div>
       </section>
 
+<Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
       {/* Section Financement détaillé */}
       <section className="py-2 lg:py-20 bg-[#FAFAFA]" id="financement-detail">
         <div className="container mx-auto px-4">
@@ -1658,6 +1666,14 @@ export default function Financement() {
           </div>
         </div>
       </section>
+
+      <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
       {/* Section Partenaires Financement */}
       <section className="lg:py-20 bg-white" id="partenaires">
         <div className="container mx-auto px-4">

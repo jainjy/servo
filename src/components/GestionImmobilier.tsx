@@ -41,6 +41,7 @@ import {
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import AdvertisementPopup from "./AdvertisementPopup";
+import Allpub from "./Allpub";
 
 const GestionImmobilier = () => {
   const [activeService, setActiveService] = useState("gestion");
@@ -459,6 +460,14 @@ const GestionImmobilier = () => {
           </motion.div>
         </div>
       </section>
+
+      <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
       {/* Services Section */}
       <section id="services" className="py-12 bg-gray-50" ref={servicesRef}>
         <div className="container mx-auto px-4">

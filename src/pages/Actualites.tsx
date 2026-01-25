@@ -16,6 +16,7 @@ import ArticleModal from "@/components/ArticleModal";
 import ConseilModal from "@/components/ConseilModal";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import Allpub from "@/components/Allpub";
 
 const categories = ["Toutes", "Immobilier", "Travaux", "Financement", "Produits", "Rénovation"];
 
@@ -506,6 +507,14 @@ ${window.location.origin}/blog/article/${article.id}
           </div>
         </div>
       </section>
+
+      <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
 
       {/* Navigation par catégories */}
       <section className="bg-white/95 backdrop-blur-md border-b border-slate-100/50 sticky top-0 z-40 shadow-sm">
