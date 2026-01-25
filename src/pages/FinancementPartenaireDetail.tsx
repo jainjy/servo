@@ -151,9 +151,9 @@ export default function FinancementPartenaireDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#FFFFFF] via-[#FFFFFF] to-[#D3D3D3] flex flex-col">
-        <Header />
+        {/* <Header /> */}
         <LoadingSpinner text="chargement des details " />
-        <Footer />
+        {/* <Footer /> */}
       </div>
     );
   }
@@ -161,7 +161,7 @@ export default function FinancementPartenaireDetail() {
   if (error || !partenaire) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#FFFFFF] via-[#FFFFFF] to-[#D3D3D3] flex flex-col">
-        <Header />
+        {/* <Header /> */}
         <div className="flex-1 flex items-center justify-center">
           <Card className="p-8 max-w-md border-2 border-[#8B4513]/20 bg-[#8B4513]/10">
             <div className="flex items-center mb-4">
@@ -178,14 +178,14 @@ export default function FinancementPartenaireDetail() {
             </Button>
           </Card>
         </div>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFFFFF] via-[#FFFFFF] to-[#D3D3D3] flex flex-col">
-      <Header />
+      {/* <Header /> */}
       {/* Bouton retour */}
       <section className="pt-6 px-4">
         <div className="container mx-auto">

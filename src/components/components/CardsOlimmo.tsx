@@ -468,13 +468,13 @@ const AnnoncesImmobilieres = () => {
         {/* En-tête */}
         <div className="mb-12 grid place-items-center lg:flex justify-between items-center">
           <h2
-            className="text-3xl sm:text-5xl font-medium mb-3 text-center lg:text-left text-slate-900"
+            className="text-3xl sm:text-5xl font-serif font-medium mb-3 text-center lg:text-left text-slate-900"
           >
             Propriétés de nos partenaires
           </h2>
           <div className="text-center grid lg:flex items-center justify-between">
             <Button
-              className="relative bg-logo hover:bg-logo/90 px-8 mx-auto py-3 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
+              className="relative bg-secondary-text lg:bg-logo hover:bg-logo/90 px-8 mx-auto py-3 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
               onClick={() =>
                 window.open("https://www.olimmoreunion.re/biens", "_blank")
               }

@@ -137,7 +137,7 @@ const ChatBot = () => {
       {/* Bouton rond à DROITE */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`chatbot-button ${isOpen ? 'active' : ''}`}
+        className={`bg-secondary-text lg:bg-logo chatbot-button ${isOpen ? 'active' : ''}`}
         aria-label={isOpen ? "Fermer le chat" : "Ouvrir le chat OLIPLUS.RE"}
         style={{
           position: 'fixed',

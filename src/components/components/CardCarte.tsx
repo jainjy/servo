@@ -124,7 +124,7 @@ const CardCarte: React.FC = () => {
               Réseau de partenaires
             </p>
             <h2
-              className="text-lg lg:text-4xl font-semibold mb-4 leading-snug flex items-center gap-2"
+              className="text-lg lg:text-4xl font-serif font-medium mb-4 leading-snug flex items-center gap-2"
               style={{ color: colors["neutral-dark"] }}
             >
               <Map
@@ -134,9 +134,8 @@ const CardCarte: React.FC = () => {
               Carte des partenaires et propriétés
             </h2>
             <p
-              className="text-sm inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
+              className="text-sm bg-secondary-text lg:bg-logo inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
               style={{
-                backgroundColor: colors["primary-dark"],
                 color: colors["light-bg"],
               }}
             >
@@ -276,9 +275,8 @@ const CardCarte: React.FC = () => {
           <div className="flex flex-wrap items-center gap-4">
             <button
               onClick={() => (window.location.href = "/carte")}
-              className="inline-flex items-center gap-2 rounded-full text-sm font-medium px-5 py-3 shadow-sm transition-colors"
+              className="bg-secondary-text lg:bg-logo inline-flex items-center gap-2 rounded-full text-sm font-medium px-5 py-3 shadow-sm transition-colors"
               style={{
-                backgroundColor: colors["primary-dark"],
                 color: colors["light-bg"],
               }}
               onMouseEnter={(e) => {

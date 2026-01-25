@@ -784,7 +784,7 @@ const AccompagnementPage: React.FC = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
-      <Header />
+      {/* <Header /> */}
 
       {/* Hero Section — Minimal + Glassmorphism */}
       <section className="relative py-24 overflow-hidden">

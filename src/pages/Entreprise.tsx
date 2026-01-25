@@ -93,7 +93,7 @@ const Entreprise: React.FC = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
-      <Header />
+      {/* <Header /> */}
 
       {/* Hero Section */}
       <HeroSection

@@ -148,7 +148,6 @@ const ArtETCreationShowcase = () => {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
           className="
-            hidden sm:block
             relative w-full max-w-2xl mx-auto mb-8
             rounded-xl border border-white/20
             bg-gradient-to-br from-white/12 to-white/6
@@ -218,7 +217,7 @@ const ArtETCreationShowcase = () => {
       )}
 
       <div className="max-w-7xl mx-auto text-center mb-4 flex lg:flex-row flex-col items-center justify-between">
-        <h2 className="text-3xl lg:text-5xl font-medium text-gray-800 mb-3 tracking-tight">
+        <h2 className="text-3xl font-serif lg:text-5xl font-medium text-gray-800 mb-3 tracking-tight">
           Art & Création
         </h2>
         {/* <p className="text-gray-500 text-sm">
@@ -233,7 +232,7 @@ const ArtETCreationShowcase = () => {
             Autres catégories
           </button>
           <Button
-            className="px-4 py-2 flex items-center gap-2 text-sm rounded-lg bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
+            className="px-4 py-2 flex items-center gap-2 text-sm rounded-lg bg-secondary-text lg:bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
             onClick={() => navigate('/art-et-creation')}
           >
             Toutes les catégories
@@ -263,7 +262,7 @@ const ArtETCreationShowcase = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-2xl text-gray-900 leading-tight">{card.title}</h3>
+                  <h3 className="font-bold text-2xl font-serif text-gray-900 leading-tight">{card.title}</h3>
                 </div>
               </div>
 

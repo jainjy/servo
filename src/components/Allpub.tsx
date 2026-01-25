@@ -14,24 +14,7 @@ const Allpub: React.FC<AllpubProps> = ({ title, description, image, background, 
   const [timeRemaining, setTimeRemaining] = useState<number>(2 * 60);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Détection mobile
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  useEffect(() => {
-    if (isMobile) {
-      setIsVisible(false);
-      return;
-    }
-
     const savedState = sessionStorage.getItem("adCardState");
 
     if (savedState) {
@@ -49,11 +32,11 @@ const Allpub: React.FC<AllpubProps> = ({ title, description, image, background, 
     } else {
       setIsVisible(true);
     }
-  }, [isMobile]);
+  }, []);
 
   useEffect(() => {
-    if (isVisible === null || isMobile) return;
 
+    
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
         let newTime = prev - 1;
@@ -61,7 +44,7 @@ const Allpub: React.FC<AllpubProps> = ({ title, description, image, background, 
 
         if (newTime <= 0) {
           newIsVisible = !isVisible;
-          newTime = newIsVisible ? 2 * 60 : 8 * 60;
+          newTime = newIsVisible && 2 * 60 ;
           setIsVisible(newIsVisible);
         }
 
@@ -87,11 +70,9 @@ const Allpub: React.FC<AllpubProps> = ({ title, description, image, background, 
   if (isVisible === null) {
     return <div className="w-full min-h-[140px] bg-gray-100 rounded-2xl animate-pulse" />;
   }
-
-  if (!isVisible || isMobile) {
+if (!isVisible || isMobile) {
     return null;
   }
-
   return (
     <motion.article
       initial={{ opacity: 0, y: -8 }}
@@ -99,17 +80,18 @@ const Allpub: React.FC<AllpubProps> = ({ title, description, image, background, 
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.25 }}
       className={`
+
         relative w-full max-w-2xl mx-auto
         rounded-xl border border-white/20
-         ${background} shadow-lg overflow-hidden z-40 mb-4`}
+         ${background} shadow-lg overflow-hidden z-40 my-4`}
     >
       {/* Header */}
       <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 text-xs">
-        <span className={`px-2.5 py-1 rounded-full bg-white/25 ${textbg} font-semibold backdrop-blur-sm`}>
+        <span className={`px-2.5 py-1 lg:block hidden rounded-full bg-white/25 ${textbg} font-semibold backdrop-blur-sm`}>
           Pub
         </span>
 
-        <div className="flex items-center bg-black/35 px-2.5 py-1 rounded-full text-white backdrop-blur-sm">
+        <div className="hidden lg:flex items-center bg-black/35 px-2.5 py-1 rounded-full text-white backdrop-blur-sm">
           <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
@@ -144,7 +126,7 @@ const Allpub: React.FC<AllpubProps> = ({ title, description, image, background, 
             {title}
           </h2>
 
-          <p className={`text-sm ${textbg} leading-relaxed mb-3`}>
+          <p className={`text-xs lg:text-sm ${textbg} leading-relaxed mb-3`}>
             {description}
           </p>
 
@@ -155,7 +137,10 @@ const Allpub: React.FC<AllpubProps> = ({ title, description, image, background, 
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span>Visible : <span className={`font-medium ${textbg}`}>2 minutes</span></span>
+              <span className="flex gap-2">Visible :
+                 <span className={`font-medium lg:block hidden ${textbg}`}>2 minutes</span>
+                 <span className={`font-medium lg:hidden block ${textbg}`}>{formatTime(timeRemaining)}</span>              
+              </span>
             </div>
           </div>
         </div>

@@ -167,7 +167,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
           className="
-              hidden sm:block
+              
               relative w-full max-w-2xl mx-auto
               rounded-xl border border-white/20
               bg-gradient-to-br from-white/12 to-white/6

@@ -113,7 +113,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       <div className="fixed w-1/2 bottom-0 right-4 z-50">
         <AdvertisementPopup />
       </div>
-      <div className="relative rounded-2xl overflow-hidden mb-8">
+      <div className="relative overflow-hidden mb-8">
         <div
           className="relative pt-20 pb-8 bg-cover bg-center bg-no-repeat"
           style={{
@@ -193,8 +193,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
             className={`flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm transition-all shadow-md border-2
               ${activeCategory === cat.name
                 ? // Si cat.color est défini, on l'utilise, sinon le dégradé du thème
-                `bg-gradient-to-r ${cat.color || defaultGradient
-                } text-white border-transparent shadow-lg`
+                `bg-gradient-to-r ${cat.color || defaultGradient} text-white border-transparent shadow-lg`
                 : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
               } hover:scale-105 hover:shadow-lg`}
           >

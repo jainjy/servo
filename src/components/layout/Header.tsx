@@ -1750,7 +1750,7 @@ const Header = () => {
     <>
       <header
         id="head"
-        className="fixed w-screen top-0 z-50 bg-[#FFFFFF] backdrop-blur-md border shadow-lg"
+        className="fixed w-screen lg:rounded-br-full lg:px-10 lg:rounded-bl-full lg:max-w-[1300px] 2xl:[1540px] xl:w-[1420px] translate-x-0 lg:translate-x-8 top-0 z-50 bg-[#FFFFFF] border shadow-lg"
       >
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/home"} onClick={() => {
@@ -2079,7 +2079,7 @@ const Header = () => {
                     h-9 w-9 rounded-lg border transition-all duration-200 ml-2
                     ${isSearchOpen
                       ? "bg-[#556B2F] text-[#FFFFFF] border-[#6B8E23]"
-                      : "bg-[#556B2F] text-[#FFFFFF] border-[#556B2F] hover:bg-[#6B8E23]"
+                      : "bg-secondary-text lg:bg-[#556B2F] text-[#FFFFFF] border-[#556B2F] hover:bg-[#6B8E23]"
                     }
                   `}
                   onClick={openRecherchePage}

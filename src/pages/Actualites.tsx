@@ -471,7 +471,7 @@ ${window.location.origin}/blog/article/${article.id}
         `
       }} />
 
-      <Header />
+      
 
       {/* Hero Section */}
       <section className="relative py-8 sm:py-12 lg:pt-20 lg:pb-8 overflow-hidden">

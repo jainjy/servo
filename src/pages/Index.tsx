@@ -137,14 +137,14 @@ const Index = () => {
           <>
             <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
               <h2
-                className="text-3xl lg:text-5xl font-medium ml-8 my-6 text-slate-900"
+                className="text-3xl lg:text-5xl font-serif font-medium ml-8 my-6 text-slate-900"
               >
                 Nos biens immobiliers
               </h2>
               {/* Voir plus button */}
 
               <Button
-                className="relative px-8 mx-auto py-3 bg-logo hover:bg-logo/90 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 "
+                className="relative px-8 py-3 bg-secondary-text lg:bg-logo hover:bg-logo/90 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 "
                 onClick={() => navigate("/immobilier")}
               >
 

@@ -115,7 +115,6 @@ const LocalAdCard = () => {
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.25 }}
       className="
-        hidden sm:block
         relative w-full max-w-2xl mx-auto
         rounded-xl border border-white/20
         bg-gradient-to-br from-white/12 to-white/6
@@ -159,11 +158,11 @@ const LocalAdCard = () => {
 
         {/* Texte */}
         <div className="flex-1">
-          <h2 className="text-base font-semibold text-white mb-1.5">
+          <h2 className="text-base text-start font-semibold text-white mb-1.5">
             Offres spéciales
           </h2>
 
-          <p className="text-sm text-white/80 leading-relaxed mb-3">
+          <p className="text-sm text-start text-white/80 leading-relaxed mb-3">
             Bénéficiez de réductions exclusives sur nos meilleurs services.
           </p>
 
@@ -716,7 +715,7 @@ const Hero = () => {
 
         <div className="container relative z-25 mx-auto px-1 lg:px-4 py-5 lg:py-20 text-center">
           {/* Publicité en avant-plan, en haut */}
-          <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-full max-w-4xl z-10">
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full max-w-4xl z-10">
             <LocalAdCard />
           </div>
 
@@ -724,13 +723,13 @@ const Hero = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-            className="mb-2 lg:mb-6 text-4xl md:text-6xl lg:text-8xl tracking-tight font-medium text-white mt-32"
+            className="mb-2 lg:mb-16 text-4xl md:text-6xl lg:text-8xl tracking-tight font-medium text-white"
           >
-            <span className="block">La super-application</span>
+            <span className="block font-serif">La super-application</span>
             <span
-              className="block mt-1 lg:mt-4"
+              className="block text-secondary-text lg:text-logo mt-1 lg:mt-4 font-serif"
               style={{
-                color: colors.sruvol,
+                // color: colors.sruvol,
                 textShadow: "0 2px 10px rgba(0,0,0,0.3)",
               }}
             >
@@ -745,7 +744,7 @@ const Hero = () => {
             onClick={openModal}
           >
             <div
-              className="flex flex-col md:flex-row gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-2xl cursor-text hover:bg-white/15 transition-all duration-300"
+              className="flex flex-col md:flex-row gap-3 bg-white/10 backdrop-blur-sm rounded-lg lg:rounded-full p-2 border-t border-l border-white/50 shadow-2xl cursor-text hover:bg-white/15 transition-all duration-300"
               style={{ backdropFilter: "blur(10px)" }}
             >
               <div className="flex-1 relative">
@@ -759,10 +758,8 @@ const Hero = () => {
               </div>
               <Button
                 size="lg"
-                className="md:w-auto h-14 lg:h-16 px-8 text-lg font-medium rounded-xl hover:scale-105 transition-transform duration-200"
+                className="md:w-auto bg-secondary-text lg:bg-logo h-14 lg:h-16 px-8 text-md font-medium rounded-md lg:rounded-full hover:bg-logo/50 transition-transform duration-200"
                 style={{
-                  backgroundColor: colors.sruvol,
-                  color: "white",
                   boxShadow: "0 4px 20px rgba(104, 142, 35, 0.3)",
                 }}
               >
