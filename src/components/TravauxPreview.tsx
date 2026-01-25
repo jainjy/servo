@@ -103,7 +103,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
 
   const scrollSlider = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
-      const scrollAmount = 540;
+      const scrollAmount = window.innerWidth < 768 ? sliderRef.current.clientWidth : 540;
       const newScrollPosition = sliderRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       sliderRef.current.scrollTo({ left: newScrollPosition, behavior: 'smooth' });
 
@@ -137,7 +137,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
   useEffect(() => {
     const autoScroll = setInterval(() => {
       if (sliderRef.current) {
-        const scrollAmount = 540;
+        const scrollAmount = window.innerWidth < 768 ? sliderRef.current.clientWidth : 540;
         const currentScroll = sliderRef.current.scrollLeft;
         const maxScroll = sliderRef.current.scrollWidth - sliderRef.current.clientWidth;
 
@@ -295,7 +295,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
                       <Card
                         key={prestation.id}
                         onClick={() => handleCardClick(prestation)}
-                        className="group relative min-w-[250px] lg:min-w-[450px] h-[200px] sm:h-[240px] md:h-[280px] lg:h-[320px] rounded-xl md:rounded-2xl overflow-hidden border-0 cursor-pointer bg-transparent snap-start flex-shrink-0"
+                        className="group relative w-full md:min-w-[250px] lg:max-w-[450px] h-[200px] sm:h-[240px] md:h-[280px] lg:h-[320px] rounded-xl md:rounded-2xl overflow-hidden border-0 cursor-pointer bg-transparent snap-start flex-shrink-0"
                       >
                         <div className="relative w-full h-full">
                           {/* Image */}
