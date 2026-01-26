@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -91,7 +91,10 @@ const Header = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   // Scroll effet 
-  const scrolled = useScrolled(50);
+  const scrolledRaw = useScrolled(50);
+  const { pathname } = useLocation();
+  // Utiliser le style scroll sur les routes spécifiées
+  const scrolled = pathname.startsWith("/professional") ? true : scrolledRaw;
 
   const openRecherchePage = () => {
     navigate("/recherche");
