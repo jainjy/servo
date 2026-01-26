@@ -1756,7 +1756,7 @@ const Header = () => {
       <header
         id="head"
         className={`fixed w-screen lg:rounded-br-full lg:px-10 lg:rounded-bl-full lg:max-w-[1300px] 2xl:[1540px] xl:w-[1420px] translate-x-0 lg:translate-x-8 top-0 z-50 transition-colors duration-300
-          ${scrolled ? "bg-white/90 backdrop-blur border-neutral-200" : "bg-transparent border-transparent"}`}
+          ${scrolled ? "bg-white/90 backdrop-blur border-neutral-200 shadow-lg" : "bg-transparent border-transparent"}`}
       >
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/home"} onClick={() => {
