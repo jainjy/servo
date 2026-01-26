@@ -60,6 +60,8 @@ import type { User as AuthUser } from "@/types/type";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api.js";
 import ServoLogo from "../components/ServoLogo";
+import { useScrolled } from "@/hooks/useScrolled";
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
@@ -88,6 +90,9 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  // Scroll effet 
+  const scrolled = useScrolled(50);
+
   const openRecherchePage = () => {
     navigate("/recherche");
   };
@@ -1750,7 +1755,8 @@ const Header = () => {
     <>
       <header
         id="head"
-        className="fixed w-screen lg:rounded-br-full lg:px-10 lg:rounded-bl-full lg:max-w-[1300px] 2xl:[1540px] xl:w-[1420px] translate-x-0 lg:translate-x-8 top-0 z-50 bg-[#FFFFFF] border shadow-lg"
+        className={`fixed w-screen lg:rounded-br-full lg:px-10 lg:rounded-bl-full lg:max-w-[1300px] 2xl:[1540px] xl:w-[1420px] translate-x-0 lg:translate-x-8 top-0 z-50 transition-colors duration-300
+          ${scrolled ? "bg-white/90 backdrop-blur border-neutral-200" : "bg-transparent border-transparent"}`}
       >
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/home"} onClick={() => {
@@ -2093,12 +2099,12 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative hidden lg:flex"
+                className={`relative hidden lg:flex ${scrolled ? "text-gray-600" : "text-white"}`}
                 onClick={() => setIsCartOpen(true)}
               >
                 <ShoppingCart className="h-5 w-5" />
                 {getCartItemsCount() > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-[#FFFFFF]">
+                  <Badge className={`absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-[#FFFFFF]`}>
                     {getCartItemsCount()}
                   </Badge>
                 )}
