@@ -144,7 +144,7 @@ const Index = () => {
               {/* Voir plus button */}
 
               <Button
-                className="relative px-8 py-3 bg-secondary-text lg:bg-logo hover:bg-logo/90 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 "
+                className="relative px-8 py-3 bg-logo hover:bg-logo/90 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 "
                 onClick={() => navigate("/immobilier")}
               >
 

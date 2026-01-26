@@ -2088,7 +2088,7 @@ const Header = () => {
                     h-9 w-9 rounded-lg border transition-all duration-200 ml-2
                     ${isSearchOpen
                       ? "bg-[#556B2F] text-[#FFFFFF] border-[#6B8E23]"
-                      : "bg-secondary-text lg:bg-[#556B2F] text-[#FFFFFF] border-[#556B2F] hover:bg-[#6B8E23]"
+                      : "bg-[#556B2F] text-[#FFFFFF] border-[#556B2F] hover:bg-[#6B8E23]"
                     }
                   `}
                   onClick={openRecherchePage}

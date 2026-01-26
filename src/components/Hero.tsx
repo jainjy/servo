@@ -758,7 +758,7 @@ const Hero = () => {
               </div>
               <Button
                 size="lg"
-                className="md:w-auto bg-secondary-text lg:bg-logo h-14 lg:h-16 px-8 text-md font-medium rounded-md lg:rounded-full hover:bg-logo/50 transition-transform duration-200"
+                className="md:w-auto bg-logo h-14 lg:h-16 px-8 text-md font-medium rounded-md lg:rounded-full hover:bg-logo/50 transition-transform duration-200"
                 style={{
                   boxShadow: "0 4px 20px rgba(104, 142, 35, 0.3)",
                 }}

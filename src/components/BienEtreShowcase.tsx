@@ -233,7 +233,7 @@ const BienEtreShowcase = () => {
             Autres catégories
           </button>
           <Button
-            className="px-4 py-2 flex items-center gap-2 text-sm rounded-lg bg-secondary-text lg:bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
+            className="px-4 py-2 flex items-center gap-2 text-sm rounded-lg bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
             onClick={() => navigate('/bien-etre')}
           >
             Tous les services
