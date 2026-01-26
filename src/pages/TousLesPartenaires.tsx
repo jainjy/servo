@@ -152,10 +152,10 @@ const TousLesPartenaires = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen pt-8 pb-4">
-      <main className="container mx-auto px-0 py-2 max-w-7xl">
+    <div className="bg-white min-h-screen pb-4">
+      <main className="container mx-auto px-0 max-w-7xl">
         {/* En-tête */}
-        <div className="relative mb-2">
+        <div className="relative pt-16 mb-2">
           <div
             className="absolute inset-0 bg-cover bg-center overflow-hidden"
             style={{

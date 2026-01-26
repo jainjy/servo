@@ -1756,7 +1756,7 @@ const Header = () => {
       <header
         id="head"
         className={`fixed w-screen lg:rounded-br-full lg:px-10 lg:rounded-bl-full lg:max-w-[1300px] 2xl:[1540px] xl:w-[1420px] translate-x-0 lg:translate-x-8 top-0 z-50 transition-colors duration-300
-          ${scrolled ? "bg-white/90 backdrop-blur border-neutral-200 shadow-lg" : "bg-transparent border-transparent"}`}
+          ${scrolled ? "bg-white border-neutral-200 shadow-lg" : "backdrop-blur-md border-transparent"}`}
       >
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/home"} onClick={() => {
@@ -1779,7 +1779,7 @@ const Header = () => {
                     <>
                       <Button
                         variant="ghost"
-                        className="flex items-center gap-1 text-[11px] font-bold text-gray-700 hover:text-gray-900 transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]"
+                        className={`flex items-center hover:bg-transparent gap-1 text-[11px] font-bold ${scrolled ? "text-gray-700 hover:text-gray-900" : "text-white hover:text-white"} transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]`}
                       >
                         {section.title}
                         <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
@@ -1846,7 +1846,7 @@ const Header = () => {
                   ) : (
                     <Link
                       to={section.href}
-                      className="flex items-center gap-1 text-[11px] font-bold bg-transparent hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-all duration-200 px-4 py-2 rounded-lg border border-transparent hover:border-[#D3D3D3] group"
+                      className={`flex items-center gap-1 text-[11px] font-bold bg-transparent hover:border-gray-50 ${scrolled ? "text-gray-700 hover:text-gray-900" : "text-white hover:text-white"} transition-all duration-200 px-4 py-2 rounded-lg border border-transparent hover:border-[#D3D3D3] group`}
                     >
                       {section.title}
                     </Link>

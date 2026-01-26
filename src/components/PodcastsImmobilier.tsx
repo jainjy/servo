@@ -489,7 +489,7 @@ const PodcastsImmobilier: React.FC = () => {
         <AdvertisementPopup />
       </div>
       <div
-        className="relative mt-16 py-6 bg-cover bg-center bg-no-repeat"
+        className="relative pt-20 pb-6 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}
       >
         {/* Overlay avec gradient */}
