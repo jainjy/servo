@@ -474,7 +474,7 @@ const AnnoncesImmobilieres = () => {
           </h2>
           <div className="text-center grid lg:flex items-center justify-between">
             <Button
-              className="relative bg-secondary-text lg:bg-logo hover:bg-logo/90 px-8 mx-auto py-3 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
+              className="relative bg-logo hover:bg-logo/90 px-8 mx-auto py-3 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
               onClick={() =>
                 window.open("https://www.olimmoreunion.re/biens", "_blank")
               }
