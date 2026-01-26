@@ -249,7 +249,7 @@ const UserParapentePage: React.FC = () => {
         backgroundAttachment: 'fixed'
       }}>
         {/* Overlay pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-black/30"></div>
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-md"></div>
         
         {/* Contenu du hero */}
         <div className="container mx-auto px-4 pb-4 pt-20 relative z-10">

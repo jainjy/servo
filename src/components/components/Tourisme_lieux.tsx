@@ -473,11 +473,11 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = () => {
 
   return (
     <div
-      className="min-h-screen py-8"
+      className="min-h-screen"
       style={{ backgroundColor: colors.lightBg }}
     >
       {/* Hero */}
-      <div className="relative rounded-2xl overflow-hidden mb-8">
+      <div className="relative overflow-hidden mb-8">
         <div
           className="relative pt-20 pb-8 bg-cover bg-center bg-no-repeat"
           style={{
@@ -485,10 +485,10 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = () => {
               'url("https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80")',
           }}
         >
-          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
           <div className="relative z-10 text-center text-white">
             
-            <h1 className="text-xl lg:text-4xl font-bold mb-3">
+            <h1 className="text-xl uppercase lg:text-4xl font-bold mb-3">
               Lieux Touristiques & Culturels
             </h1>
             <p className="text-sm max-w-2xl mb-5 mx-auto opacity-90">
@@ -584,75 +584,97 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = () => {
 
         {/* Grille des lieux */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-          {lieuxFiltres.map((lieu) => (
-            <div
-              key={lieu.id}
-              className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-xl transition-all duration-300"
-              style={{ borderColor: colors.separator }}
-            >
-              <div className="h-56 relative overflow-hidden">
-                <img
-                  src={getSafeImageUrl(lieu.images[0], lieu.category)}
-                  alt={lieu.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => handleImageError(e, lieu.category)}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-2xl font-bold">{lieu.title}</h3>
-                  <div className="flex items-center mt-1">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    <span>{lieu.city}</span>
-                  </div>
-                </div>
-                <div
-                  className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium"
-                  style={{ color: colors.logo }}
-                >
-                  {getCategoryLabel(lieu.category)}
-                </div>
-              </div>
-
-              <div className="p-6">
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {lieu.description}
-                </p>
-
-                <div className="flex justify-between items-center mb-4 text-sm">
-                  <div className="flex items-center text-gray-600">
-                    <Clock className="w-4 h-4 mr-2" />
-                    {lieu.openingHours || "Horaires variables"}
-                  </div>
-                  <div className="text-right">
-                    <div
-                      className="text-2xl font-bold"
-                      style={{ color: colors.logo }}
-                    >
-                      {lieu.price === 0 ? "Gratuit" : `${lieu.price}€`}
+          {lieuxFiltres.length > 0 ? (
+            lieuxFiltres.map((lieu) => (
+              <div
+                key={lieu.id}
+                className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-xl transition-all duration-300"
+                style={{ borderColor: colors.separator }}
+              >
+                <div className="h-56 relative overflow-hidden">
+                  <img
+                    src={getSafeImageUrl(lieu.images[0], lieu.category)}
+                    alt={lieu.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => handleImageError(e, lieu.category)}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-2xl font-bold">{lieu.title}</h3>
+                    <div className="flex items-center mt-1">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span>{lieu.city}</span>
                     </div>
                   </div>
+                  <div
+                    className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium"
+                    style={{ color: colors.logo }}
+                  >
+                    {getCategoryLabel(lieu.category)}
+                  </div>
                 </div>
 
-                <div className="flex justify-between items-center mb-4">
-                  {renderStars(lieu.rating)}
-                  <span className="text-sm text-gray-500">
-                    {lieu.reviewCount.toLocaleString()} avis
-                  </span>
+                <div className="p-6">
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {lieu.description}
+                  </p>
+
+                  <div className="flex justify-between items-center mb-4 text-sm">
+                    <div className="flex items-center text-gray-600">
+                      <Clock className="w-4 h-4 mr-2" />
+                      {lieu.openingHours || "Horaires variables"}
+                    </div>
+                    <div className="text-right">
+                      <div
+                        className="text-2xl font-bold"
+                        style={{ color: colors.logo }}
+                      >
+                        {lieu.price === 0 ? "Gratuit" : `${lieu.price}€`}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center mb-4">
+                    {renderStars(lieu.rating)}
+                    <span className="text-sm text-gray-500">
+                      {lieu.reviewCount.toLocaleString()} avis
+                    </span>
+                  </div>
+
+                  {lieu.amenities.length > 0 && renderAmenities(lieu.amenities)}
+
+                  <button
+                    onClick={() => handleOpenReservation(lieu)}
+                    className="w-full mt-6 text-white font-bold py-4 rounded-lg flex items-center justify-center transition-all hover:scale-105"
+                    style={{ backgroundColor: colors.logo }}
+                  >
+                    <Ticket className="w-5 h-5 mr-2" />
+                    {lieu.price === 0 ? "Réserver visite" : "Acheter billet"}
+                  </button>
                 </div>
-
-                {lieu.amenities.length > 0 && renderAmenities(lieu.amenities)}
-
-                <button
-                  onClick={() => handleOpenReservation(lieu)}
-                  className="w-full mt-6 text-white font-bold py-4 rounded-lg flex items-center justify-center transition-all hover:scale-105"
-                  style={{ backgroundColor: colors.logo }}
-                >
-                  <Ticket className="w-5 h-5 mr-2" />
-                  {lieu.price === 0 ? "Réserver visite" : "Acheter billet"}
-                </button>
               </div>
+            ))
+          ) : (
+            <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+              <MapPin className="w-16 h-16 text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                Aucun lieu trouvé
+              </h3>
+              <p className="text-gray-500 mb-6">
+                Aucun lieu touristique ne correspond à vos critères de recherche.
+              </p>
+              <button
+                onClick={() => {
+                  setFiltreType("tous");
+                  setTri("rating");
+                }}
+                className="px-6 py-2 rounded-lg text-white font-medium transition-all hover:scale-105"
+                style={{ backgroundColor: colors.logo }}
+              >
+                Réinitialiser les filtres
+              </button>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Modal Réservation */}
