@@ -241,30 +241,6 @@ const UserParapentePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="text-slate-900 relative overflow-hidden" style={{
-        backgroundImage: 'url(/parapente_air.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}>
-        {/* Overlay pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-black/30 backdrop-blur-md"></div>
-        
-        {/* Contenu du hero */}
-        <div className="container mx-auto px-4 pb-4 pt-20 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-medium mb-4 text-white">
-              {profile?.commercialName || "Air Lagon Parapente"}
-            </h1>
-            <p className="text-md mb-8 opacity-90 text-white">
-              École de parapente au Lac du Salagou - Vols tandem & Stages
-            </p>
-            <TourismNavigation />
-          </div>
-        </div>
-      </div>
-
       {/* Contenu principal avec profil à gauche et activités à droite */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
