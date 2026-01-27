@@ -146,7 +146,7 @@ const BienEtreShowcase = () => {
   return (
     <section className="py-16 bg-gradient-to-b from-gray-50 via-white to-gray-100 relative">
       {/* Publicité - seulement sur desktop */}
-      {!isMobile && isAdVisible && (
+      {false && (
         <motion.article
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
