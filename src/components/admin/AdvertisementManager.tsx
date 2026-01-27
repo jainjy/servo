@@ -108,7 +108,7 @@ const AdvertisementManager = () => {
       if (filters.position !== 'all') params.position = filters.position;
   
       const response = await advertisementsAPI.getAdvertisements(params);
-      
+
       if (response.data && Array.isArray(response.data.advertisements)) {
         setAdvertisements(response.data.advertisements);
       } else if (response.data && response.data.success) {
@@ -331,7 +331,7 @@ const AdvertisementManager = () => {
       title: '',
       description: '',
       targetUrl: '',
-      position: 'header',
+      position: 'hero',
       type: 'banner',
       status: 'active',
       startDate: '',
@@ -615,10 +615,10 @@ const AdvertisementManager = () => {
 
   const getPositionBadge = (position) => {
     const labels = {
-      header: 'En-tête',
-      sidebar: 'Barre latérale',
-      homepage: 'Accueil',
-      footer: 'Pied de page'
+      header: 'hero',
+      sidebar: 'section1',
+      homepage: 'section2',
+      footer: 'section3'
     }
     const icons = {
       header: <Target className="w-3 h-3 mr-1" />,
@@ -776,11 +776,12 @@ const AdvertisementManager = () => {
                         <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="border-[#D3D3D3]">
-                          <SelectItem value="header">En-tête</SelectItem>
-                          <SelectItem value="sidebar">Barre latérale</SelectItem>
-                          <SelectItem value="homepage">Page d'accueil</SelectItem>
-                          <SelectItem value="footer">Pied de page</SelectItem>
+                        <SelectContent className="border-[#D3D3D3]">                          
+                          <SelectItem value="all">tous</SelectItem>
+                          <SelectItem value="hero">hero</SelectItem>
+                          <SelectItem value="section1">section1</SelectItem>
+                          <SelectItem value="section2">section2</SelectItem>
+                          <SelectItem value="poup">Pop-up</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1232,11 +1233,11 @@ const AdvertisementManager = () => {
                   <SelectValue placeholder="Position" className="text-[#8B4513]" />
                 </SelectTrigger>
                 <SelectContent className="border-[#D3D3D3]">
-                  <SelectItem value="all" className="text-[#8B4513]">Toutes positions</SelectItem>
-                  <SelectItem value="header" className="text-[#8B4513]">En-tête</SelectItem>
-                  <SelectItem value="sidebar" className="text-[#8B4513]">Barre latérale</SelectItem>
-                  <SelectItem value="homepage" className="text-[#8B4513]">Page d'accueil</SelectItem>
-                  <SelectItem value="footer" className="text-[#8B4513]">Pied de page</SelectItem>
+                  <SelectItem value="all" className="text-[#8B4513]">tous</SelectItem>
+                  <SelectItem value="hero" className="text-[#8B4513]">hero</SelectItem>
+                  <SelectItem value="section1" className="text-[#8B4513]">section1</SelectItem>
+                  <SelectItem value="section2" className="text-[#8B4513]">section2</SelectItem>
+                  <SelectItem value="pop-up" className="text-[#8B4513]">pop-up</SelectItem>
                 </SelectContent>
               </Select>
             </div>
