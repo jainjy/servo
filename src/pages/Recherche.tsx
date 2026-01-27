@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home, MapPin, Users, Loader, TreePalm, X, Mail, Phone, DollarSign, Ruler, ChevronDown } from "lucide-react";
+import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home, MapPin, Users, Loader, TreePalm, X, Mail, Phone, DollarSign, Ruler, ChevronDown, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
@@ -38,6 +38,24 @@ interface SearchItem {
   images?: string[];
   city?: string;
   address?: string;
+  // Nouveaux champs pour les professionnels
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
+  commercialName?: string;
+  userType?: string;
+  professionalCategory?: string;
+  services?: Array<{ id: number | string; name: string }>;
+  metiers?: Array<{ id: number | string; name: string }>;
+  matchType?: string;
+  professionalType?: string;
+  associatedServices?: any[];
+  associatedMetiers?: any[];
+  creatorInfo?: {
+    id: string | number;
+    name: string;
+    companyName?: string;
+  };
 }
 
 type Stage = "idle" | "loading" | "results";
@@ -202,20 +220,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       setMapLoading(true);
       const allPoints = await MapService.getAllMapPoints();
 
-      // DEBUG: Vérifier les données
-      // console.log("📊 Données carte chargées:", {
-      //   total: allPoints.length,
-      //   users: allPoints.filter(p => p.type === "user").length,
-      //   properties: allPoints.filter(p => p.type === "property").length,
-      //   firstPoints: allPoints.slice(0, 3).map(p => ({
-      //     id: p.id,
-      //     name: p.name,
-      //     type: p.type,
-      //     lat: p.latitude,
-      //     lng: p.longitude
-      //   }))
-      // });
-
       setMapPoints(allPoints);
       setFilteredMapPoints(allPoints);
       setMapError(null);
@@ -292,7 +296,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
   // Fonction pour gérer le clic sur un point de la carte
   const handleMapPointClick = useCallback((point: MapPoint) => {
-    // console.log("Point carte cliqué:", point);
     setSelectedMapPoint(point);
   }, []);
 
@@ -558,69 +561,120 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
   // Normalisation des résultats - AMÉLIORÉE pour inclure plus de données
   const normalizeApiResults = (apiResults: any[]): SearchItem[] => {
-    return apiResults.map((item) => {
-      let title = "";
-      let image = "";
-      let price: number | undefined;
-      let location = "";
-      let route = "/";
-      let type = item.source || item.source_table;
+  return apiResults.map((item) => {
+    let title = "";
+    let image = "";
+    let price: number | undefined;
+    let location = "";
+    let route = "/";
+    
+    // Normalisation améliorée de source_table
+    const rawSource = (item.source || item.source_table || "").toLowerCase();
+    let type = "UNKNOWN";
+    let normalizedSource = "unknown";
 
-      switch (item.source || item.source_table) {
-        case "Property":
-          title = item.title || "Propriété";
-          image = extractFirstValidImage(item.images);
-          price = item.price;
-          location = item.city || "";
-          route = `/immobilier/${item.id}`;
-          break;
+    if (rawSource.includes("professional") || rawSource.includes("user")) {
+      normalizedSource = "Professional";
+      type = "PROFESSIONNEL";
+    } else if (rawSource.includes("property")) {
+      normalizedSource = "Property";
+      type = "PROPRIÉTÉ";
+    } else if (rawSource.includes("product")) {
+      normalizedSource = "Product";
+      type = "PRODUIT";
+    } else if (rawSource.includes("service")) {
+      normalizedSource = "Service";
+      type = "SERVICE";
+    } else if (rawSource.includes("metier")) {
+      normalizedSource = "Metier";
+      type = "MÉTIER";
+    } else if (rawSource.includes("blog")) {
+      normalizedSource = "BlogArticle";
+      type = "ARTICLE";
+    }
 
-        case "Product":
-          title = item.name || "Produit";
-          image = extractFirstValidImage(item.images);
-          price = item.price;
-          route = `/produits/${item.id}`;
-          break;
+    switch (normalizedSource) {
+      case "Property":
+        title = item.title || "Propriété";
+        image = extractFirstValidImage(item.images);
+        price = item.price;
+        location = item.city || "";
+        route = `/immobilier/${item.id}`;
+        break;
 
-        case "Service":
-          title = item.libelle || "Service";
-          image = extractFirstValidImage(item.images);
-          price = item.price;
-          route = `/services`;
-          break;
+      case "Product":
+        title = item.name || "Produit";
+        image = extractFirstValidImage(item.images);
+        price = item.price;
+        route = `/produits/${item.id}`;
+        break;
 
-        case "Metier":
-          title = item.libelle || "Métier";
-          image = extractFirstValidImage(item.images);
-          route = `/professionnels`;
-          break;
+      case "Service":
+        title = item.libelle || "Service";
+        image = extractFirstValidImage(item.images);
+        price = item.price;
+        route = `/services`;
+        break;
 
-        default:
-          title = item.title || item.name || item.libelle || "Élément";
-          image = extractFirstValidImage(item.images);
-          route = "/";
-      }
+      case "Metier":
+        title = item.libelle || "Métier";
+        image = extractFirstValidImage(item.images);
+        route = `/professionnels`;
+        break;
 
-      return {
-        id: item.id,
-        title,
-        image,
-        price,
-        location,
-        route,
-        type: type ? type.toUpperCase() : "UNKNOWN",
-        source_table: item.source || item.source_table || "unknown",
-        similarity: item.similarity,
-        libelle: item.libelle || title,
-        description: item.description,
-        name: item.name || title,
-        images: Array.isArray(item.images) ? item.images : [image].filter(Boolean),
-        city: item.city,
-        address: item.address
-      };
-    });
-  };
+      case "Professional":
+        // Utiliser companyName ou firstName/lastName pour le titre
+        title = item.companyName || item.commercialName || `${item.firstName || ''} ${item.lastName || ''}`.trim() || "Professionnel";
+        image = ""; // Les professionnels n'ont pas d'images dans les résultats API
+        location = item.city || "";
+        route = `/professional/${item.id}`; // Route vers la page de profil professionnel
+        break;
 
+      case "BlogArticle":
+        title = item.title || item.name || "Article";
+        image = extractFirstValidImage(item.images);
+        route = `/blog/${item.id}`;
+        break;
+
+      default:
+        title = item.title || item.name || item.libelle || "Élément";
+        image = extractFirstValidImage(item.images);
+        route = "/";
+    }
+
+    return {
+      id: item.id,
+      title,
+      image,
+      price,
+      location,
+      route,
+      type: type,
+      source_table: normalizedSource, // Utiliser la source normalisée
+      similarity: item.similarity,
+      libelle: item.libelle || title,
+      description: item.description,
+      name: item.name || title,
+      images: Array.isArray(item.images) ? item.images : [image].filter(Boolean),
+      city: item.city,
+      address: item.address,
+      // Champs spécifiques aux professionnels
+      firstName: item.firstName,
+      lastName: item.lastName,
+      companyName: item.companyName,
+      commercialName: item.commercialName,
+      userType: item.userType,
+      professionalCategory: item.professionalCategory,
+      services: item.services || item.associatedServices || [],
+      metiers: item.metiers || item.associatedMetiers || [],
+      matchType: item.matchType,
+      professionalType: item.professionalType,
+      associatedServices: item.associatedServices,
+      associatedMetiers: item.associatedMetiers,
+      creatorInfo: item.creatorInfo
+    };
+  });
+};
   // Fonctions de recherche existantes
   const removeDuplicates = (results: SearchItem[]): SearchItem[] => {
     const seen = new Set();
@@ -702,7 +756,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       setFilteredResults([]);
       setStage("results");
 
-      // 🔥 Réafficher TOUTES les données sur la carte
+      // Réafficher TOUTES les données sur la carte
       setFilteredMapPoints(mapPoints);
 
       navigate('/recherche', { replace: true });
@@ -751,7 +805,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
     try {
       const response = await api.post("/recherche", { prompt: q });
-      // console.log("Réponse API:", response.data);
+      console.log("Réponse API:", response.data);
 
       if (response.data.success && Array.isArray(response.data.results)) {
         const normalizedResults = normalizeApiResults(response.data.results);
@@ -759,7 +813,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
         const filtered = filterResults(normalizedResults);
         setFilteredResults(filtered);
 
-        // 🔥 Synchroniser la carte avec les résultats API (filtrés)
+        // Synchroniser la carte avec les résultats API (filtrés)
         const idsFromResults = filtered.map(r => r.id);
 
         // Si la table source est "Property", on filtre par id
@@ -772,7 +826,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
         // Mettre à jour les points de carte
         setFilteredMapPoints(mappedPoints);
 
-        // 🔥 Si on a au moins un point → centrer dessus
+        // Si on a au moins un point → centrer dessus
         if (mappedPoints.length > 0) {
           const p = mappedPoints[0];
           setTimeout(() => {
@@ -915,71 +969,138 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     }).format(price);
   };
 
-  // Fonction pour rendre le bouton approprié selon le type
-  const renderActionButton = (item: SearchItem) => {
-    switch (item.source_table) {
-      case "Service":
-      case "Metier":
-        return (
-          <Button
-            size="sm"
-            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-            onClick={(e) => handleDevis(item, e)}
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Faire un devis
-          </Button>
-        );
+// Fonction pour rendre le bouton approprié selon le type - CORRIGÉE
+const renderActionButton = (item: SearchItem) => {
+  console.log("🔍 renderActionButton - source_table:", item.source_table, "title:", item.title); // Debug
+  
+  switch (item.source_table) {
+    case "Service":
+    case "Metier":
+      return (
+        <Button
+          size="sm"
+          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={(e) => handleDevis(item, e)}
+        >
+          <FileText className="h-4 w-4 mr-2" />
+          Faire un devis
+        </Button>
+      );
 
-      case "Property":
-        return (
-          <Button
-            size="sm"
-            className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white"
-            onClick={(e) => handleVisite(item, e)}
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Demande visite
-          </Button>
-        );
+    case "Property":
+      return (
+        <Button
+          size="sm"
+          className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white"
+          onClick={(e) => handleVisite(item, e)}
+        >
+          <Calendar className="h-4 w-4 mr-2" />
+          Demande visite
+        </Button>
+      );
 
-      case "Product":
-        return (
-          <Button
-            size="sm"
-            className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white"
-            onClick={(e) => handleAddToCart(item, e)}
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Ajouter au panier
-          </Button>
-        );
+    case "Product":
+      return (
+        <Button
+          size="sm"
+          className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white"
+          onClick={(e) => handleAddToCart(item, e)}
+        >
+          <ShoppingCart className="h-4 w-4 mr-2" />
+          Ajouter au panier
+        </Button>
+      );
 
-      case "BlogArticle":
-        return (
-          <Button
-            size="sm"
-            className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(item.route);
-            }}
-          >
-            <Play className="h-4 w-4 mr-2" />
-            Lire l'article
-          </Button>
-        );
+    case "BlogArticle":
+      return (
+        <Button
+          size="sm"
+          className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(item.route);
+          }}
+        >
+          <Play className="h-4 w-4 mr-2" />
+          Lire l'article
+        </Button>
+      );
 
-      default:
-        return null;
-    }
-  };
+    case "Professional":
+      return (
+        <Button
+          size="sm"
+          className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log("Navigating to professional profile:", item.id); // Debug
+            navigate(`/professional/${item.id}`);
+          }}
+        >
+          <User className="h-4 w-4 mr-2" />
+          Voir profil
+        </Button>
+      );
 
-  // Rendu de l'image avec fallback aux initiales
+    default:
+      console.warn("⚠️ Type inconnu pour le bouton d'action:", item.source_table, "ID:", item.id);
+      // Retourner null pour ne pas afficher de bouton pour les types inconnus
+      return null;
+  }
+};
+
+
+
+  // Rendu de l'image avec fallback aux initiales - AMÉLIORÉ pour les professionnels
   const renderImageWithFallback = (item: SearchItem) => {
     const hasValidImage = item.image && isValidImageUrl(item.image);
     const initials = generateInitials(item.title);
     const bgColor = getBackgroundColor(item);
+
+    // Pour les professionnels, afficher le nom complet
+    if (item.source_table === "Professional") {
+      const displayName = item.companyName || item.commercialName || 
+                         `${item.firstName || ''} ${item.lastName || ''}`.trim();
+      
+      return (
+        <div className="relative h-48 overflow-hidden rounded-t-xl">
+          <div className={`w-full h-full ${bgColor} flex items-center justify-center text-white`}>
+            <div className="text-center p-4">
+              <User className="h-16 w-16 mb-3 mx-auto opacity-90" />
+              <div className="text-xl font-bold mb-1 truncate max-w-full">
+                {displayName}
+              </div>
+              {item.firstName && item.lastName && (
+                <div className="text-sm opacity-80">
+                  {item.firstName} {item.lastName}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="absolute top-2 right-2">
+            <span className="bg-indigo-600 text-white text-xs px-2 py-1 rounded-full">
+              PROFESSIONNEL
+            </span>
+          </div>
+          {item.similarity && (
+            <div className="absolute top-2 left-2">
+              <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                {Math.round(item.similarity)}%
+              </span>
+            </div>
+          )}
+          <div className="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white p-2">
+            <div className="text-xs font-medium truncate">{item.title}</div>
+            {item.location && (
+              <div className="text-xs opacity-80 flex items-center">
+                <PositionIcon className="w-3 h-3 mr-1" />
+                {item.location}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
 
     if (hasValidImage && item.source_table !== "Metier") {
       return (
@@ -1013,7 +1134,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
               {item.type}
             </span>
           </div>
-
         </div>
       );
     }
@@ -1040,6 +1160,54 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
         <div className="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white p-2">
           <div className="text-xs font-medium truncate">{item.title}</div>
         </div>
+      </div>
+    );
+  };
+
+  // Fonction pour afficher les informations supplémentaires des professionnels - AMÉLIORÉE
+  const renderProfessionalDetails = (item: SearchItem) => {
+    if (item.source_table !== "Professional") return null;
+
+    const displayName = item.companyName || item.commercialName || 
+                       `${item.firstName || ''} ${item.lastName || ''}`.trim();
+
+    return (
+      <div className="mt-2 text-sm text-gray-600">
+        {/* Nom complet */}
+        <div className="mb-2">
+          <div className="font-semibold text-gray-900">{displayName}</div>
+          {item.firstName && item.lastName && item.companyName && (
+            <div className="text-xs text-gray-500">
+              {item.firstName} {item.lastName} • {item.companyName}
+            </div>
+          )}
+        </div>
+        
+        {item.matchType && (
+          <div className="flex items-center gap-1 mb-2">
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              Correspondance: {item.matchType}
+            </span>
+          </div>
+        )}
+        
+        {(item.services?.length > 0 || item.metiers?.length > 0) && (
+          <div className="mt-2">
+            <div className="font-medium mb-1">Spécialisations:</div>
+            <div className="flex flex-wrap gap-1">
+              {item.metiers?.map((metier, idx) => (
+                <span key={`metier-${idx}`} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                  {metier.name}
+                </span>
+              ))}
+              {item.services?.map((service, idx) => (
+                <span key={`service-${idx}`} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                  {service.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -1073,7 +1241,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                   value={query}
                   onChange={setQuery}
                   onSearch={handleSearch}
-                  placeholder="Rechercher un bien, service, article..."
+                  placeholder="Rechercher un bien, service, article, professionnel..."
                   disabled={isLoading}
                 />
 
@@ -1198,7 +1366,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                     Recherche avancée
                   </h1>
                   <p className="text-sm text-gray-600 mb-8">
-                    Trouvez des biens immobiliers, services, produits et articles
+                    Trouvez des biens immobiliers, services, produits, professionnels et articles
                   </p>
                 </div>
               </div>
@@ -1221,6 +1389,23 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                       <h2 className="text-2xl font-bold text-gray-900 mb-2">
                         Résultats de recherche
                       </h2>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                          {filteredResults.filter(r => r.source_table === "Property").length} Propriétés
+                        </span>
+                        <span className="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                          {filteredResults.filter(r => r.source_table === "Service").length} Services
+                        </span>
+                        <span className="text-sm bg-orange-100 text-orange-800 px-3 py-1 rounded-full">
+                          {filteredResults.filter(r => r.source_table === "Product").length} Produits
+                        </span>
+                        <span className="text-sm bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">
+                          {filteredResults.filter(r => r.source_table === "Professional").length} Professionnels
+                        </span>
+                        <span className="text-sm bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                          {filteredResults.filter(r => r.source_table === "Metier").length} Métiers
+                        </span>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -1241,6 +1426,9 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                                 {item.title}
                               </h3>
 
+                              {/* Affichage des informations détaillées pour les professionnels */}
+                              {item.source_table === "Professional" && renderProfessionalDetails(item)}
+
                               {(item.price || item.location) && (
                                 <div className="mt-auto space-y-1">
                                   {item.price && (
@@ -1257,7 +1445,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                                 </div>
                               )}
 
-                              {!item.price && !item.location && (
+                              {!item.price && !item.location && item.source_table !== "Professional" && (
                                 <div className="mt-2 text-sm text-gray-500">
                                   {item.source_table === 'Service' && 'Service professionnel'}
                                   {item.source_table === 'Metier' && 'Expert métier'}
@@ -1333,14 +1521,11 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
         </div>
       </main>
 
-      {/* // =============== MODAL DE LA CARTE (CENTRÉ ET AGRANDI) =============== */}
+      {/* MODAL DE LA CARTE (CENTRÉ ET AGRANDI) */}
       {showMapModal && (
         <div className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden
-          // Mobile: prend tout l'écran sauf padding haut
           top-16 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] h-[calc(100vh-8rem)]
-          // Tablet: taille plus grande et centrée
           md:top-20 md:w-[calc(100%-2rem)] md:h-[calc(100vh-10rem)] md:max-w-4xl
-          // Desktop: taille complète avec padding
           lg:w-[90vw] lg:h-[80vh] lg:max-w-6xl"
         >
           {/* Header de la carte */}
@@ -1443,9 +1628,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
               </div>
             ) : (
               <>
-                {/* Log de debug */}
-
-
                 <GenericMap
                   points={filteredMapPoints}
                   userLocation={userLocation}
@@ -1453,7 +1635,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                   zoom={10}
                   onPointClick={handleMapPointClick}
                 />
-
 
                 {/* Overlay de debug */}
                 <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-black/70 text-white text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5 rounded pointer-events-none">
@@ -1496,9 +1677,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
         <button
           onClick={handleShowMapModal}
           className="fixed z-40 p-3 bg-logo hover:bg-primary-dark text-white rounded-full shadow-lg transition-colors
-            // Mobile: plus petit
             bottom-4 left-4
-            // Desktop: taille normale
             md:bottom-8 md:left-8"
           title="Afficher la carte"
         >
