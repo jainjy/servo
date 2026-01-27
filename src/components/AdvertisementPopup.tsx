@@ -17,15 +17,33 @@ interface Props {
   refreshMinutes?: number;
   displayDuration?: number;
   listThreshold?: number;
+  size?: "small" | "medium" | "large";
+  position: string;
 }
 
-// Composant pour une publicité individuelle
-const SingleAdvertisement: React.FC<{
+interface SingleAdvertisementProps {
   ad: Advertisement;
   displayDuration: number;
   index: number;
-  onClose: (id: string) => void;
-}> = ({ ad, displayDuration, index, onClose }) => {
+  totalCount: number;
+  size: "small" | "medium" | "large";
+  onClose: (adId: string) => void;
+  onNext?: () => void;
+  onPrevious?: () => void;
+}
+
+const SingleAdvertisement: React.FC<SingleAdvertisementProps> = ({
+  ad,
+  displayDuration,
+  index,
+  totalCount,
+  size,
+  onClose,
+  onNext,
+  onPrevious
+}) => {
+  const [timer, setTimer] = useState(displayDuration * 60); // en secondes
+
   const [visible, setVisible] = useState(true);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -34,11 +52,21 @@ const SingleAdvertisement: React.FC<{
   const timeoutRef = useRef<NodeJS.Timeout>();
   const countdownRef = useRef<NodeJS.Timeout>();
 
-  const formatTimeLeft = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
-  };
+
+  useEffect(() => {
+    const countdown = setInterval(() => {
+      setTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(countdown);
+          onClose(ad.id);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, [ad.id, onClose]);
 
   const getFileExtension = (url: string) => {
     return url.split('.').pop()?.toLowerCase();
@@ -53,22 +81,6 @@ const SingleAdvertisement: React.FC<{
   const isVideoAd = (advertisement: Advertisement) => advertisement?.type === 'video';
 
   const currentAdIsVideo = ad ? (isVideoAd(ad) || isVideoUrl(ad.imageUrl)) : false;
-
-  useEffect(() => {
-    if (visible && ad && currentAdIsVideo && videoRef.current) {
-      const playVideo = async () => {
-        try {
-          await videoRef.current?.play();
-          setIsVideoPlaying(true);
-        } catch (error) {
-          console.warn("Lecture automatique bloquée:", error);
-        }
-      };
-
-      const timer = setTimeout(playVideo, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [visible, ad, currentAdIsVideo]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -94,29 +106,6 @@ const SingleAdvertisement: React.FC<{
       video.removeEventListener('ended', handleEnded);
     };
   }, [currentAdIsVideo, ad.id, onClose]);
-
-  useEffect(() => {
-    if (visible && !currentAdIsVideo) {
-      setTimeLeft(displayDuration * 60);
-
-      countdownRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            setVisible(false);
-            onClose(ad.id);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => {
-        if (countdownRef.current) {
-          clearInterval(countdownRef.current);
-        }
-      };
-    }
-  }, [visible, currentAdIsVideo, displayDuration, ad.id, onClose]);
 
   const handleVideoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -163,9 +152,6 @@ const SingleAdvertisement: React.FC<{
     onClose(ad.id);
   };
 
-  // Si l'ad n'est plus visible, ne rien rendre
-  if (!visible) return null;
-
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -177,10 +163,12 @@ const SingleAdvertisement: React.FC<{
         stiffness: 250,
         duration: 0.6
       }}
-      className="relative w-full overflow-hidden min-h-[180px] sm:min-h-[140px] max-w-7xl mx-auto rounded-xl sm:rounded-2xl border border-slate-200 my-2 sm:my-3 bg-white shadow-md sm:shadow-lg"
+      className={`relative w-full overflow-hidden min-h-[180px] sm:min-h-[140px] 
+        ${size == "small"  && "max-w-2xl " } ${size == "medium"  && "max-w-4xl " } ${size == "large"  && "max-w-7xl " }
+        mx-auto rounded-xl sm:rounded-2xl border border-slate-200 my-2 sm:my-3 bg-white shadow-md sm:shadow-lg`}
     >
       {/* Badge et contrôles */}
-      <div className="absolute right-2 sm:right-3 top-2 sm:top-3 z-10 flex items-center space-x-1 sm:space-x-2">
+      <div className="absolute right-2 sm:right-3 top-2 sm:top-3 z-10 flex items-center space-x-1 sm:space-x-2 text-sm">
         <div className="relative">
           <div className="absolute inset-0 animate-ping opacity-20">
             <span className="rounded-full bg-secondary-text px-2 py-0.5 text-[8px] sm:px-3 sm:py-1 sm:text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
@@ -192,7 +180,7 @@ const SingleAdvertisement: React.FC<{
           </span>
         </div>
 
-        {!currentAdIsVideo && (
+        {/* {!currentAdIsVideo && ( */}
           <div className="flex items-center bg-gray-800 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">
             <svg
               className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1"
@@ -207,9 +195,9 @@ const SingleAdvertisement: React.FC<{
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span>{formatTimeLeft(timeLeft)}</span>
+            <span>{timer}s</span>
           </div>
-        )}
+        {/* )} */}
         <button
           title="Fermer la publicité"
           onClick={handleClose}
@@ -303,28 +291,49 @@ const SingleAdvertisement: React.FC<{
 const AdvertisementPopup: React.FC<Props> = ({
   refreshMinutes = 3,
   displayDuration = 2,
-  listThreshold = 2
+  listThreshold = 2,
+  size = "small",
+  position // "header", "sidebar", "footer", "popup", etc.
 }) => {
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
-  const [visibleAds, setVisibleAds] = useState<Set<string>>(new Set());
-  const [useListView, setUseListView] = useState(false);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [nextAdTimer, setNextAdTimer] = useState<NodeJS.Timeout | null>(null);
+  const [shownAdIds, setShownAdIds] = useState<Set<string>>(new Set());
 
   const fetchAdvertisements = async () => {
     try {
-      const response = await api.get("/advertisements/active");
+      // Récupérer les pubs actives pour cette position spécifique
+      const response = await api.get(`/advertisements/active?position=${position}`);
       const data = response.data;
 
       if (data.advertisements && data.advertisements.length > 0) {
-        setAdvertisements(data.advertisements);
-        setUseListView(data.advertisements.length > listThreshold);
-
-        // Initialiser tous les ads comme visibles
-        const allAdIds = new Set<string>(data.advertisements.map(ad => ad.id));
-        setVisibleAds(allAdIds);
-        setVisible(true);
+        // Trier les publicités par priorité (1 à 10) pour cette section
+        const sortedAds = data.advertisements.sort((a: Advertisement, b: Advertisement) => {
+          return a.priority - b.priority; // Ordre croissant: 1, 2, 3...
+        });
+        
+        setAdvertisements(sortedAds);
+        
+        // Trouver la pub avec la priorité la plus haute (1) non encore affichée
+        const adsToShow = sortedAds.filter(ad => !shownAdIds.has(ad.id));
+        
+        if (adsToShow.length > 0) {
+          // Prendre la première (priorité la plus haute) parmi celles non affichées
+          const nextAd = adsToShow[0];
+          const nextIndex = sortedAds.findIndex(ad => ad.id === nextAd.id);
+          setCurrentAdIndex(nextIndex);
+          setVisible(true);
+          
+          // Ajouter à la liste des pubs déjà affichées
+          setShownAdIds(prev => new Set([...prev, nextAd.id]));
+        } else {
+          // Toutes les pubs de cette section ont été montrées
+          // On pourrait soit réinitialiser, soit ne rien montrer
+          setVisible(false);
+        }
       } else {
-        console.warn("Aucune publicité active trouvée");
+        console.warn(`Aucune publicité active trouvée pour la position: ${position}`);
         setVisible(false);
       }
     } catch (error) {
@@ -339,56 +348,106 @@ const AdvertisementPopup: React.FC<Props> = ({
     const interval = setInterval(fetchAdvertisements, refreshMinutes * 60 * 1000);
     return () => {
       clearInterval(interval);
+      if (nextAdTimer) clearTimeout(nextAdTimer);
     };
-  }, [refreshMinutes]);
+  }, [refreshMinutes, position]);
 
-  const handleAdClose = (adId: string) => {
-    setVisibleAds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(adId);
-      if (newSet.size === 0) {
-        setVisible(false);
+  const scheduleNextAd = () => {
+    // Nettoyer tout timer existant
+    if (nextAdTimer) {
+      clearTimeout(nextAdTimer);
+    }
+
+    // Planifier la prochaine publicité dans 3 minutes
+    const timer = setTimeout(() => {
+      // Trouver la prochaine pub non affichée dans cette section
+      const remainingAds = advertisements.filter(ad => !shownAdIds.has(ad.id));
+      
+      if (remainingAds.length > 0) {
+        // Prendre celle avec la priorité la plus haute
+        const nextAd = remainingAds[0];
+        const nextIndex = advertisements.findIndex(ad => ad.id === nextAd.id);
+        setCurrentAdIndex(nextIndex);
+        setVisible(true);
+        
+        // Ajouter à la liste des pubs déjà affichées
+        setShownAdIds(prev => new Set([...prev, nextAd.id]));
+      } else {
+        // Toutes les pubs de cette section ont été montrées
+        // Option 1: Réinitialiser pour recommencer le cycle
+        // setShownAdIds(new Set());
+        // const firstAd = advertisements[0];
+        // setCurrentAdIndex(0);
+        // setVisible(true);
+        // setShownAdIds(prev => new Set([...prev, firstAd.id]));
+        
+        // Option 2: Ne rien afficher (actuellement)
+        console.log(`Toutes les pubs de la section ${position} ont été affichées`);
       }
-      return newSet;
-    });
+    }, 3 * 60 * 1000); // 3 minutes
+
+    setNextAdTimer(timer);
   };
 
-  // Filtrer les publicités qui sont encore visibles
-  const visibleAdvertisements = advertisements.filter(ad => visibleAds.has(ad.id));
+  const handleAdClose = (adId: string, clicked: boolean = false) => {
+    // Fermer la publicité courante
+    setVisible(false);
+    
+    // Si l'utilisateur a cliqué ou fermé manuellement, programmer la suivante
+    if (advertisements.length > shownAdIds.size) {
+      scheduleNextAd();
+    }
+    
+    // Mettre à jour les statistiques
+    if (clicked) {
+      api.post(`/advertisements/${adId}/click`);
+    } else {
+      api.post(`/advertisements/${adId}/impression`);
+    }
+  };
 
-  if (!visible || visibleAdvertisements.length === 0) {
+  const handleAdClick = (adId: string, targetUrl?: string) => {
+    // Fermer la publicité immédiatement
+    handleAdClose(adId, true);
+    
+    // Ouvrir l'URL cible si elle existe
+    if (targetUrl) {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Réinitialiser les pubs affichées quand on change de section
+  useEffect(() => {
+    setShownAdIds(new Set());
+    setCurrentAdIndex(0);
+    if (nextAdTimer) clearTimeout(nextAdTimer);
+  }, [position]);
+
+  if (!visible || advertisements.length === 0 || currentAdIndex >= advertisements.length) {
     return null;
   }
 
+  const currentAd = advertisements[currentAdIndex];
+  const progress = ((shownAdIds.size) / advertisements.length) * 100;
+
   return (
-    <div className="w-full">
-      {useListView ? (
-        // Mode liste : afficher toutes les publicités en une colonne
-        <div className="space-y-2 sm:space-y-3">
-          {visibleAdvertisements.map((ad, index) => (
-            <SingleAdvertisement
-              key={ad.id}
-              ad={ad}
-              displayDuration={displayDuration}
-              index={index}
-              onClose={handleAdClose}
-            />
-          ))}
-        </div>
-      ) : (
-        // Mode popup classique : afficher chaque publicité individuellement
-        <div className="space-y-2 sm:space-y-3">
-          {visibleAdvertisements.map((ad, index) => (
-            <SingleAdvertisement
-              key={ad.id}
-              ad={ad}
-              displayDuration={displayDuration}
-              index={index}
-              onClose={handleAdClose}
-            />
-          ))}
-        </div>
-      )}
+    <div className={`advertisement-container advertisement-${position}`}>
+      <div className="space-y-2 sm:space-y-3">
+        
+        {/* Affichage de la publicité courante */}
+        <SingleAdvertisement
+          key={`${currentAd.id}-${position}-${currentAdIndex}`}
+          ad={currentAd}
+          displayDuration={displayDuration}
+          index={currentAdIndex}
+          totalCount={advertisements.length}
+          size={size}
+          shownCount={shownAdIds.size}
+          onClose={handleAdClose}
+          onClick={handleAdClick}
+        />
+        
+      </div>
     </div>
   );
 };
