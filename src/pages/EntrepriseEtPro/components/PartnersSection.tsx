@@ -19,42 +19,49 @@ import {
   Handshake,
   LucideIcon,
   Building,
-  Wrench,
-  Cpu,
-  Palette,
+  FileText,
+  Calculator,
+  Scale,
   Briefcase,
-  HeartHandshake,
-  Rocket,
+  Globe,
   Target,
   Zap,
+  MessageSquare,
+  Users as UsersIcon,
+  Award,
+  CheckCircle,
+  Clock,
+  Rocket,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Partenaire } from "../data/partnersData";
 import { Colors } from "../data/colors";
 import { useState, useEffect } from "react";
-import UserMetierService from "@/services/userMetierService";
+import { EnterpriseService } from "@/services/enterpriseService";
+import { PartenaireExpert } from "../types/partenaireTypes";
 
-// Interface pour les métiers depuis l'API
-interface MetierFromAPI {
-  id: number;
-  libelle: string;
-  _count?: {
-    services: number;
-    users: number;
-    demandes: number;
-    ContactMessage: number;
-  };
+// Types pour les experts
+interface ExpertPartenaire extends PartenaireExpert {
+  secteur: string;
+  secteurIcon: LucideIcon;
+  rating: number;
+  projets: number;
+  badge: string;
+  badgeColor: string;
+  specialites: string[];
+  experience: string;
+  certification?: string;
+  languages?: string[];
 }
 
 interface PartnersSectionProps {
-  handleContact: (partenaire: Partenaire) => void;
+  handleContact: (expert: ExpertPartenaire) => void;
   handleOpenMap: () => void;
-  handlePartnerLocation: (partenaire: Partenaire) => void;
+  handlePartnerLocation: (expert: ExpertPartenaire) => void;
   trackBusinessInteraction: (
     id: string,
     name: string,
     action: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ) => void;
   colors: Colors;
 }
@@ -70,6 +77,7 @@ interface Advantage {
   icon: LucideIcon;
   color: string;
 }
+
 const PartnersSection: React.FC<PartnersSectionProps> = ({
   handleContact,
   handleOpenMap,
@@ -77,123 +85,162 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
   trackBusinessInteraction,
   colors,
 }) => {
-  const [partenaires, setPartenaires] = useState<Partenaire[]>([]);
+  const [experts, setExperts] = useState<ExpertPartenaire[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedSecteur, setSelectedSecteur] = useState<string>("tous");
+  const [selectedSpecialite, setSelectedSpecialite] = useState<string>("tous");
 
-  // --- PAGINATION : uniquement Suivant / Précédent ---
+  // PAGINATION
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 8; // nombre de cartes par page
+  const itemsPerPage = 8;
 
+  // Filtres pour les spécialités d'experts
   const filters: FilterOption[] = [
-    { label: "Présentation partenaires", value: "presentation" },
-    { label: "Demandes de prestations", value: "prestations" },
-    { label: "Aides disponibles", value: "aides" },
+    { label: "Spécialité", value: "specialite" },
+    { label: "Type d'expertise", value: "expertise" },
+    { label: "Niveau d'expérience", value: "experience" },
   ];
 
-  // Icônes pour différents secteurs
+  // Icônes par secteur
   const secteurIcons: Record<string, LucideIcon> = {
-    Construction: Building,
-    Services: Briefcase,
-    Artisanat: Wrench,
-    Technique: Cpu,
-    Général: Users,
-    Design: Palette,
-    Santé: HeartHandshake,
-    Technologie: Cpu,
-    Finance: Coins,
-    Marketing: Rocket,
-    Consulting: Target,
-    Énergie: Zap,
+    "Création d'entreprise": Rocket,
+    Comptabilité: Calculator,
+    Juridique: Scale,
+    Fiscalité: Coins,
+    Audit: FileText,
+    Conseil: MessageSquare,
+    Financement: TrendingUp,
+    International: Globe,
+    Marketing: Target,
+    RH: UsersIcon,
+    Digital: Zap,
   };
 
-  // Fonction pour transformer les données de l'API en Partenaire
-  const transformMetierToPartenaire = (metier: MetierFromAPI): Partenaire => {
-    const getSecteurFromLibelle = (libelle: string): string => {
-      const libelleLower = libelle.toLowerCase();
-      if (
-        libelleLower.includes("plombier") ||
-        libelleLower.includes("électricien") ||
-        libelleLower.includes("maçon") ||
-        libelleLower.includes("construction")
-      ) {
-        return "Construction";
-      } else if (
-        libelleLower.includes("consultant") ||
-        libelleLower.includes("conseil") ||
-        libelleLower.includes("formation") ||
-        libelleLower.includes("expert")
-      ) {
-        return "Services";
-      } else if (
-        libelleLower.includes("artisan") ||
-        libelleLower.includes("menuiserie") ||
-        libelleLower.includes("ébéniste") ||
-        libelleLower.includes("design")
-      ) {
-        return "Artisanat";
-      } else if (
-        libelleLower.includes("technicien") ||
-        libelleLower.includes("ingénieur") ||
-        libelleLower.includes("informatique") ||
-        libelleLower.includes("développeur")
-      ) {
-        return "Technique";
-      } else if (
-        libelleLower.includes("médecin") ||
-        libelleLower.includes("infirmier") ||
-        libelleLower.includes("thérapeute")
-      ) {
-        return "Santé";
-      } else if (
-        libelleLower.includes("comptable") ||
-        libelleLower.includes("financier") ||
-        libelleLower.includes("banquier")
-      ) {
-        return "Finance";
-      } else if (
-        libelleLower.includes("marketing") ||
-        libelleLower.includes("communication") ||
-        libelleLower.includes("publicité")
-      ) {
-        return "Marketing";
-      }
-      return "Général";
-    };
+  // Données simulées d'experts (à remplacer par l'API)
+  const expertCategories = [
+    {
+      id: "1",
+      nom: "Création d'entreprise",
+      description:
+        "Experts en accompagnement à la création et formalités légales",
+      secteur: "Création d'entreprise",
+      rating: 4.8,
+      projets: 150,
+      specialites: ["Statuts juridiques", "Immatriculation", "Business Plan"],
+      experience: "10+ années",
+      certification: "Expert-comptable",
+    },
+    {
+      id: "2",
+      nom: "Expert-comptable",
+      description: "Comptabilité générale, déclarations fiscales, bilan annuel",
+      secteur: "Comptabilité",
+      rating: 4.9,
+      projets: 300,
+      specialites: ["Comptabilité générale", "TVA", "Bilan"],
+      experience: "15+ années",
+      certification: "DEC",
+    },
+    {
+      id: "3",
+      nom: "Avocat d'affaires",
+      description:
+        "Droit des sociétés, contrats commerciaux, propriété intellectuelle",
+      secteur: "Juridique",
+      rating: 4.7,
+      projets: 200,
+      specialites: ["Droit des sociétés", "Contrats", "PI"],
+      experience: "12+ années",
+      certification: "CAPA",
+    },
+    {
+      id: "4",
+      nom: "Consultant fiscal",
+      description: "Optimisation fiscale, déclarations, conseil stratégique",
+      secteur: "Fiscalité",
+      rating: 4.6,
+      projets: 180,
+      specialites: ["Optimisation fiscale", "IS", "Impôts"],
+      experience: "8+ années",
+    },
+    {
+      id: "5",
+      nom: "Auditeur certifié",
+      description: "Audit comptable et financier, due diligence",
+      secteur: "Audit",
+      rating: 4.9,
+      projets: 250,
+      specialites: ["Audit financier", "Due diligence", "Contrôle"],
+      experience: "20+ années",
+      certification: "CAC",
+    },
+    {
+      id: "6",
+      nom: "Conseil en financement",
+      description: "Montage de dossiers, recherche de subventions, prêts",
+      secteur: "Financement",
+      rating: 4.5,
+      projets: 120,
+      specialites: ["Subventions", "Prêts", "Levée de fonds"],
+      experience: "6+ années",
+    },
+    {
+      id: "7",
+      nom: "Expert international",
+      description: "Développement à l'international, implantation étrangère",
+      secteur: "International",
+      rating: 4.4,
+      projets: 90,
+      specialites: ["Export", "Implantation", "Douanes"],
+      experience: "10+ années",
+      languages: ["Anglais", "Espagnol"],
+    },
+    {
+      id: "8",
+      nom: "Consultant RH",
+      description: "Recrutement, contrats de travail, convention collective",
+      secteur: "RH",
+      rating: 4.3,
+      projets: 160,
+      specialites: ["Recrutement", "Paie", "Droit du travail"],
+      experience: "7+ années",
+    },
+  ];
 
-    const secteur = getSecteurFromLibelle(metier.libelle);
+  // Transformer les catégories en experts
+  const transformToExpert = (category: any): ExpertPartenaire => {
+    const secteur = category.secteur;
     const secteurIcon = secteurIcons[secteur] || Briefcase;
 
-    const nombreProjets = (metier._count?.services || 0) * 5 + 10;
-    const rating = 3.5 + Math.random() * 1.5;
     const badgeLevel =
-      nombreProjets > 50
+      category.projets > 250
         ? "Expert"
-        : nombreProjets > 20
-        ? "Confirmé"
-        : "Débutant";
+        : category.projets > 100
+          ? "Confirmé"
+          : "Junior";
 
     const badgeColors = {
       Expert: "#10B981",
       Confirmé: "#3B82F6",
-      Débutant: "#F59E0B",
-    } as const;
+      Junior: "#F59E0B",
+    };
 
     return {
-      id: metier.id.toString(),
-      nom: metier.libelle,
-      description: `Spécialiste en ${metier.libelle.toLowerCase()}. ${
-        metier._count?.services || 0
-      } services proposés.`,
+      id: category.id,
+      nom: category.nom,
+      description: category.description,
       secteur: secteur,
       secteurIcon: secteurIcon,
-      rating: parseFloat(rating.toFixed(1)),
-      projets: nombreProjets,
+      rating: category.rating,
+      projets: category.projets,
       badge: badgeLevel,
       badgeColor:
         badgeColors[badgeLevel as keyof typeof badgeColors] ||
         colors.primaryDark,
+      specialites: category.specialites || [],
+      experience: category.experience || "5+ années",
+      certification: category.certification,
+      languages: category.languages,
       location: {
         address: "Paris, France",
         lat: 48.8566 + (Math.random() * 0.1 - 0.05),
@@ -202,51 +249,49 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
     };
   };
 
-  // Charger les métiers depuis l'API
+  // Charger les experts
   useEffect(() => {
-    const fetchMetiers = async () => {
+    const loadExperts = async () => {
       try {
         setLoading(true);
-        const response = await UserMetierService.getAllMetiers();
+        // TODO: Remplacer par l'API réelle
+        // const response = await ExpertService.getAllExperts();
+        const expertsFromData = expertCategories.map(transformToExpert);
 
-        const partenairesFromAPI: Partenaire[] = response.map(
-          (metier: MetierFromAPI) => transformMetierToPartenaire(metier)
-        );
-
-        setPartenaires(partenairesFromAPI);
+        setExperts(expertsFromData);
         setError(null);
 
         trackBusinessInteraction(
-          "metiers_loaded",
-          "Métiers chargés",
+          "experts_loaded",
+          "Experts chargés",
           "data_loaded",
-          { count: partenairesFromAPI.length }
+          { count: expertsFromData.length },
         );
       } catch (err: any) {
-        console.error("Erreur lors du chargement des métiers:", err);
-        setError("Impossible de charger les métiers. Veuillez réessayer.");
+        console.error("Erreur lors du chargement des experts:", err);
+        setError("Impossible de charger les experts. Veuillez réessayer.");
 
         trackBusinessInteraction(
-          "metiers_error",
-          "Erreur chargement métiers",
+          "experts_error",
+          "Erreur chargement experts",
           "error",
-          { error: err.message }
+          { error: err.message },
         );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMetiers();
+    loadExperts();
   }, []);
 
   const handleFilterChange = (filter: FilterOption, value: string) => {
-    if (filter.value === "presentation") {
-      setSelectedSecteur(value);
-      setCurrentPage(1); // reset page quand on change de filtre
+    if (filter.value === "specialite") {
+      setSelectedSpecialite(value);
+      setCurrentPage(1);
     }
 
-    trackBusinessInteraction("partner_filter", filter.label, "filter_select", {
+    trackBusinessInteraction("expert_filter", filter.label, "filter_select", {
       filter: filter.value,
       value: value,
     });
@@ -254,41 +299,36 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
   };
 
   const handleCTAClick = () => {
-    trackBusinessInteraction(
-      "become_partner",
-      "Devenir partenaire",
-      "cta_click"
-    );
+    trackBusinessInteraction("become_expert", "Devenir expert", "cta_click");
+    // TODO: Rediriger vers formulaire d'inscription expert
   };
 
-  // Filtrer les partenaires par secteur
-  const filteredPartenaires =
-    selectedSecteur === "tous"
-      ? partenaires
-      : partenaires.filter((p) =>
-          p.secteur.toLowerCase().includes(selectedSecteur.toLowerCase())
+  // Filtrer les experts par spécialité
+  const filteredExperts =
+    selectedSpecialite === "tous"
+      ? experts
+      : experts.filter((expert) =>
+          expert.specialites.some((s) =>
+            s.toLowerCase().includes(selectedSpecialite.toLowerCase()),
+          ),
         );
 
-  // --- LOGIQUE DE PAGINATION (client-side) ---
-  const totalPages = Math.ceil(filteredPartenaires.length / itemsPerPage) || 1;
+  // Logique de pagination
+  const totalPages = Math.ceil(filteredExperts.length / itemsPerPage) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const indexOfLast = safeCurrentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentPartenaires = filteredPartenaires.slice(
-    indexOfFirst,
-    indexOfLast
-  );
+  const currentExperts = filteredExperts.slice(indexOfFirst, indexOfLast);
 
   const handlePageChange = (page: number) => {
-  if (page < 1 || page > totalPages) return;
-  setCurrentPage(page);
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
 
-  // Défilement fluide vers le haut de la section "partenaire"
-  const section = document.getElementById("partenaire");
-  if (section) {
-    section.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-};
+    const section = document.getElementById("experts");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
     <motion.section
@@ -304,7 +344,7 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
           },
         },
       }}
-      id="partenaire"
+      id="experts"
       style={{ backgroundColor: colors.lightBg }}
     >
       <div className="container mx-auto px-4">
@@ -326,18 +366,21 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
             className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6"
             style={{ color: colors.primaryDark }}
           >
-            Devenir{" "}
-            <span style={{ color: colors.secondaryText }}>Partenaire</span>
+            Nos{" "}
+            <span style={{ color: colors.secondaryText }}>
+              Experts & Partenaires
+            </span>
           </h1>
           <p
             className="text-sm lg:text-sm max-w-2xl mx-auto mb-4 lg:mb-8"
             style={{ color: colors.textSecondary }}
           >
-            Rejoignez notre réseau d&apos;experts et développez votre activité
+            Des professionnels qualifiés pour accompagner chaque étape de votre
+            entreprise : création, développement, gestion et optimisation
           </p>
         </motion.div>
 
-        {/* Filtres et actions */}
+        {/* Filtres pour experts */}
         <motion.div
           variants={{
             hidden: { y: 20, opacity: 0 },
@@ -364,14 +407,25 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
                     <SelectValue placeholder={filter.label} />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="tous">Tous les métiers</SelectItem>
-                    <SelectItem value="construction">Construction</SelectItem>
-                    <SelectItem value="services">Services</SelectItem>
-                    <SelectItem value="artisanat">Artisanat</SelectItem>
-                    <SelectItem value="technique">Technique</SelectItem>
-                    <SelectItem value="santé">Santé</SelectItem>
-                    <SelectItem value="finance">Finance</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
+                    {filter.value === "specialite" && (
+                      <>
+                        <SelectItem value="tous">Toutes spécialités</SelectItem>
+                        <SelectItem value="comptabilité">
+                          Comptabilité
+                        </SelectItem>
+                        <SelectItem value="juridique">Juridique</SelectItem>
+                        <SelectItem value="fiscalité">Fiscalité</SelectItem>
+                        <SelectItem value="audit">Audit</SelectItem>
+                        <SelectItem value="création">
+                          Création d'entreprise
+                        </SelectItem>
+                        <SelectItem value="financement">Financement</SelectItem>
+                        <SelectItem value="international">
+                          International
+                        </SelectItem>
+                        <SelectItem value="rh">Ressources Humaines</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </motion.div>
@@ -395,14 +449,14 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
                 }}
                 onClick={handleOpenMap}
               >
-                Localisation
+                Voir sur la carte
                 <MapPin className="h-4 w-4" />
               </Button>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* État de chargement */}
+        {/* États de chargement et erreur */}
         {loading && (
           <div className="text-center py-12">
             <div
@@ -410,12 +464,11 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
               style={{ borderColor: colors.primaryDark }}
             ></div>
             <p className="mt-4" style={{ color: colors.textSecondary }}>
-              Chargement des métiers...
+              Chargement des experts...
             </p>
           </div>
         )}
 
-        {/* État d'erreur */}
         {error && !loading && (
           <div className="text-center py-12">
             <p className="text-red-500 mb-4">{error}</p>
@@ -428,13 +481,13 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
           </div>
         )}
 
-        {/* Grille + pagination */}
+        {/* Grille d'experts + pagination */}
         {!loading && !error && (
           <>
-            {filteredPartenaires.length > 0 ? (
+            {filteredExperts.length > 0 ? (
               <>
-                <PartnersGrid
-                  partenaires={currentPartenaires}
+                <ExpertsGrid
+                  experts={currentExperts}
                   handleContact={handleContact}
                   handlePartnerLocation={handlePartnerLocation}
                   colors={colors}
@@ -450,32 +503,33 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
             ) : (
               <div className="text-center py-12">
                 <p style={{ color: colors.textSecondary }}>
-                  Aucun métier trouvé pour ce filtre
+                  Aucun expert trouvé pour cette spécialité
                 </p>
               </div>
             )}
           </>
         )}
 
-        {/* Avantages partenariat */}
+        {/* Avantages de collaborer avec nos experts */}
         <AdvantagesSection colors={colors} />
 
-        {/* CTA devenir partenaire */}
+        {/* CTA pour devenir expert partenaire */}
         <CTAButton onCTAClick={handleCTAClick} colors={colors} />
       </div>
     </motion.section>
   );
 };
 
-interface PartnersGridProps {
-  partenaires: Partenaire[];
-  handleContact: (partenaire: Partenaire) => void;
-  handlePartnerLocation: (partenaire: Partenaire) => void;
+// Sous-composant Grille d'Experts
+interface ExpertsGridProps {
+  experts: ExpertPartenaire[];
+  handleContact: (expert: ExpertPartenaire) => void;
+  handlePartnerLocation: (expert: ExpertPartenaire) => void;
   colors: Colors;
 }
 
-const PartnersGrid: React.FC<PartnersGridProps> = ({
-  partenaires,
+const ExpertsGrid: React.FC<ExpertsGridProps> = ({
+  experts,
   handleContact,
   handlePartnerLocation,
   colors,
@@ -492,12 +546,12 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
       },
     }}
   >
-    {partenaires.map((partenaire) => {
-      const SecteurIcon = partenaire.secteurIcon;
+    {experts.map((expert) => {
+      const SecteurIcon = expert.secteurIcon;
 
       return (
         <motion.div
-          key={partenaire.id}
+          key={expert.id}
           variants={{
             hidden: { y: 20, opacity: 0 },
             visible: {
@@ -520,20 +574,21 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
               backgroundColor: colors.cardBg,
             }}
           >
+            {/* Badge niveau d'expertise */}
             <motion.div
               className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10"
               style={{
-                backgroundColor: partenaire.badgeColor,
+                backgroundColor: expert.badgeColor,
                 color: colors.lightBg,
               }}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.5 }}
             >
-              {partenaire.badge}
+              {expert.badge}
             </motion.div>
 
-            {/* Icône + contenu en colonne */}
+            {/* Icône de secteur */}
             <motion.div
               className="w-16 h-16 mb-6 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 mx-auto"
               style={{
@@ -548,71 +603,114 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
               />
             </motion.div>
 
-            {/* Contenu + bouton en flex-col pour pousser le bouton en bas */}
+            {/* Contenu */}
             <div className="text-center flex flex-col h-full">
               <h3
                 className="text-xl font-bold mb-2"
                 style={{ color: colors.textPrimary }}
               >
-                {partenaire.nom}
+                {expert.nom}
               </h3>
 
-              <p
-                className="text-sm mb-3 px-2 py-1 rounded-full inline-block"
-                style={{
-                  backgroundColor: `${colors.primaryDark}10`,
-                  color: colors.primaryDark,
-                  border: `1px solid ${colors.primaryDark}20`,
-                }}
-              >
-                {partenaire.secteur}
-              </p>
+              {/* Certification */}
+              {expert.certification && (
+                <div className="mb-3 flex items-center justify-center gap-1">
+                  <Award
+                    className="h-4 w-4"
+                    style={{ color: colors.secondaryText }}
+                  />
+                  <span
+                    className="text-xs px-2 py-1 rounded-full"
+                    style={{
+                      backgroundColor: `${colors.secondaryText}10`,
+                      color: colors.secondaryText,
+                    }}
+                  >
+                    {expert.certification}
+                  </span>
+                </div>
+              )}
 
               <p
                 className="leading-relaxed text-sm mb-4"
                 style={{ color: colors.textSecondary }}
               >
-                {partenaire.description}
+                {expert.description}
               </p>
 
-              <motion.div
-                className="flex items-center justify-center gap-2 cursor-pointer group mb-4"
-                onClick={() => handlePartnerLocation(partenaire)}
-              >
-                <MapPin
-                  className="h-4 w-4"
-                  style={{ color: colors.textSecondary }}
-                />
-                <span
-                  className="text-sm transition-colors"
-                  style={{ color: colors.textSecondary }}
+              {/* Spécialités */}
+              <div className="mb-4">
+                <p
+                  className="text-xs font-semibold mb-2"
+                  style={{ color: colors.primaryDark }}
                 >
-                  {partenaire.location.address}
-                </span>
-              </motion.div>
-
-              <div className="flex items-center justify-center gap-6 text-sm mb-6">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4" style={{ color: colors.warning }} />
-                  <span
-                    className="font-semibold"
-                    style={{ color: colors.textPrimary }}
-                  >
-                    {partenaire.rating}
-                  </span>
+                  Spécialités :
+                </p>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {expert.specialites.slice(0, 2).map((spec, idx) => (
+                    <span
+                      key={idx}
+                      className="text-xs px-2 py-1 rounded-full"
+                      style={{
+                        backgroundColor: `${colors.primaryDark}10`,
+                        color: colors.primaryDark,
+                        border: `1px solid ${colors.primaryDark}20`,
+                      }}
+                    >
+                      {spec}
+                    </span>
+                  ))}
+                  {expert.specialites.length > 2 && (
+                    <span
+                      className="text-xs px-2 py-1 rounded-full"
+                      style={{
+                        backgroundColor: colors.separator,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      +{expert.specialites.length - 2}
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Users
+              </div>
+
+              {/* Informations */}
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center justify-center gap-1 text-sm">
+                  <Clock
                     className="h-4 w-4"
                     style={{ color: colors.textSecondary }}
                   />
                   <span style={{ color: colors.textSecondary }}>
-                    {partenaire.projets} projets
+                    Expérience : {expert.experience}
                   </span>
+                </div>
+                <div className="flex items-center justify-center gap-6 text-sm">
+                  <div className="flex items-center gap-1">
+                    <Star
+                      className="h-4 w-4"
+                      style={{ color: colors.warning }}
+                    />
+                    <span
+                      className="font-semibold"
+                      style={{ color: colors.textPrimary }}
+                    >
+                      {expert.rating}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <CheckCircle
+                      className="h-4 w-4"
+                      style={{ color: colors.success }}
+                    />
+                    <span style={{ color: colors.textSecondary }}>
+                      {expert.projets} missions
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* BOUTON DE CONTACT toujours en bas */}
+              {/* Bouton de contact */}
               <motion.div className="mt-auto">
                 <Button
                   className="w-full font-semibold rounded-xl gap-2 border-2 transition-all duration-300 py-3"
@@ -629,9 +727,9 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
                     e.currentTarget.style.backgroundColor = colors.primaryDark;
                     e.currentTarget.style.borderColor = colors.primaryDark;
                   }}
-                  onClick={() => handleContact(partenaire)}
+                  onClick={() => handleContact(expert)}
                 >
-                  REJOINDRE
+                  CONTACTER L'EXPERT
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </motion.div>
@@ -643,6 +741,7 @@ const PartnersGrid: React.FC<PartnersGridProps> = ({
   </motion.div>
 );
 
+// Avantages de collaborer avec nos experts
 interface AdvantagesSectionProps {
   colors: Colors;
 }
@@ -650,24 +749,23 @@ interface AdvantagesSectionProps {
 const AdvantagesSection: React.FC<AdvantagesSectionProps> = ({ colors }) => {
   const advantages: Advantage[] = [
     {
-      title: "Visibilité accrue",
+      title: "Expertise certifiée",
       description:
-        "Bénéficiez d'une exposition privilégiée auprès de notre communauté",
-      icon: TrendingUp,
+        "Tous nos partenaires sont diplômés et certifiés dans leur domaine",
+      icon: Award,
       color: colors.primaryDark,
     },
     {
-      title: "Opportunités business",
+      title: "Accompagnement sur mesure",
       description:
-        "Accédez à de nouveaux marchés et développez votre chiffre d'affaires",
-      icon: Coins,
+        "Des solutions adaptées à la taille et aux besoins de votre entreprise",
+      icon: Users,
       color: colors.secondaryText,
     },
     {
-      title: "Support dédié",
-      description:
-        "Un accompagnement personnalisé pour maximiser votre réussite",
-      icon: Shield,
+      title: "Suivi personnalisé",
+      description: "Un interlocuteur dédié pour chaque mission",
+      icon: MessageSquare,
       color: colors.logo,
     },
   ];
@@ -683,7 +781,7 @@ const AdvantagesSection: React.FC<AdvantagesSectionProps> = ({ colors }) => {
         className="text-2xl lg:text-3xl font-bold text-center mb-8 lg:mb-12"
         style={{ color: colors.primaryDark }}
       >
-        Avantages du partenariat
+        Pourquoi choisir nos experts ?
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -727,6 +825,7 @@ const AdvantagesSection: React.FC<AdvantagesSectionProps> = ({ colors }) => {
   );
 };
 
+// CTA pour devenir expert
 interface CTAButtonProps {
   onCTAClick: () => void;
   colors: Colors;
@@ -758,13 +857,17 @@ const CTAButton: React.FC<CTAButtonProps> = ({ onCTAClick, colors }) => (
         onClick={onCTAClick}
       >
         <Handshake className="h-6 w-6 mr-3" />
-        Devenir Partenaire
+        Devenir Expert Partenaire
       </Button>
+      <p className="mt-4 text-sm" style={{ color: colors.textSecondary }}>
+        Rejoignez notre réseau d'experts et proposez vos services aux
+        entreprises
+      </p>
     </motion.div>
   </motion.div>
 );
 
-// --- COMPOSANT PAGINATION SIMPLE (Précédent / Suivant uniquement) ---
+// Pagination simple
 interface SimplePaginationProps {
   currentPage: number;
   totalPages: number;
