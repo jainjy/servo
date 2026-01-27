@@ -108,7 +108,14 @@ const allNavigationItems: NavigationItem[] = [
     name: "Mes Services",
     href: "/pro/services",
     icon: Wrench,
-    userTypes: ["PRESTATAIRE", "ARTISAN", "BIEN_ETRE"],
+    userTypes: [
+      "AGENCE",
+      "VENDEUR",
+      "PRESTATAIRE",
+      "ARTISAN",
+      "TOURISME",
+      "BIEN_ETRE",
+    ],
   },
   {
     name: "Mes projets",
@@ -197,7 +204,7 @@ const allNavigationItems: NavigationItem[] = [
     name: "Activité parapente",
     href: "/pro/parapente",
     icon: Bird,
-    userTypes: ["TOURISME", ],
+    userTypes: ["TOURISME"],
   },
   {
     name: "Reservations bien-être",
@@ -209,11 +216,7 @@ const allNavigationItems: NavigationItem[] = [
     name: "Mes Commandes",
     href: "/pro/orders",
     icon: ShoppingCart,
-    userTypes: [
-      "AGENCE",
-      "VENDEUR",
-
-    ],
+    userTypes: ["AGENCE", "VENDEUR"],
   },
   {
     name: "Reservations Cours",
@@ -241,7 +244,7 @@ const allNavigationItems: NavigationItem[] = [
     name: "Mes Demandes de financement",
     href: "/pro/financement-demandes",
     icon: Building2,
-    userTypes: [ "PRESTATAIRE", "ARTISAN"],
+    userTypes: ["PRESTATAIRE", "ARTISAN"],
   },
   {
     name: "Mes Demandes de services",
