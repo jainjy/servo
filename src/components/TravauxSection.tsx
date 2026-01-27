@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 import MateriauxTravauxSection from "./MateriauxTravauxSection";
 import AdvertisementPopup from "./AdvertisementPopup";
+import Allpub from "./Allpub";
 
 // Images de fond pour chaque catégorie
 const backgroundImages = {
@@ -1252,6 +1253,14 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                 )
             )}
           </Tabs>
+
+          <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
 
           {/* AFFICHAGE CONDITIONNEL : SPINNER OU CONTENU DE LA CATÉGORIE */}
           {isLoadingServices ? (

@@ -153,7 +153,7 @@ const BienEtreShowcase = () => {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
           className="
-            hidden sm:block
+            
             relative w-full max-w-2xl mx-auto mb-8
             rounded-xl border border-white/20
             bg-gradient-to-br from-white/12 to-white/6
@@ -221,7 +221,7 @@ const BienEtreShowcase = () => {
       )}
 
       <div className="max-w-7xl mx-auto text-center mb-4 flex lg:flex-row flex-col items-center justify-between">
-        <h2 className="text-3xl lg:text-5xl font-medium text-gray-800 mb-3 tracking-tight">
+        <h2 className="text-3xl lg:text-5xl font-medium font-serif text-gray-800 mb-3 tracking-tight">
           Santé & Bien-Être
         </h2>
         <div className="flex justify-center mt-6 gap-3">
@@ -263,7 +263,7 @@ const BienEtreShowcase = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-2xl text-gray-900 leading-tight">{card.title}</h3>
+                  <h3 className="font-bold text-2xl text-gray-900 font-serif leading-tight">{card.title}</h3>
                 </div>
               </div>
 

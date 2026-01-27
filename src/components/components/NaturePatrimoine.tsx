@@ -522,7 +522,7 @@ const NaturePatrimoine = () => {
 
         {/* En-tête minimaliste */}
         <div className="text-center mb-20">
-          <h1 className="text-xl md:text-4xl font-light text-gray-100 mb-6 tracking-tight">
+          <h1 className="text-xl uppercase md:text-4xl font-light text-gray-100 mb-6 tracking-tight">
             Nature & patrimoine
           </h1>
           <p className="text-sm text-gray-200 max-w-3xl mx-auto font-light leading-relaxed">

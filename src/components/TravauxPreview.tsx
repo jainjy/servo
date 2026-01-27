@@ -103,7 +103,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
 
   const scrollSlider = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
-      const scrollAmount = 540;
+      const scrollAmount = window.innerWidth < 768 ? sliderRef.current.clientWidth : 540;
       const newScrollPosition = sliderRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       sliderRef.current.scrollTo({ left: newScrollPosition, behavior: 'smooth' });
 
@@ -137,7 +137,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
   useEffect(() => {
     const autoScroll = setInterval(() => {
       if (sliderRef.current) {
-        const scrollAmount = 540;
+        const scrollAmount = window.innerWidth < 768 ? sliderRef.current.clientWidth : 540;
         const currentScroll = sliderRef.current.scrollLeft;
         const maxScroll = sliderRef.current.scrollWidth - sliderRef.current.clientWidth;
 
@@ -167,7 +167,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
           className="
-              hidden sm:block
+              
               relative w-full max-w-2xl mx-auto
               rounded-xl border border-white/20
               bg-gradient-to-br from-white/12 to-white/6
@@ -237,153 +237,153 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
       )}
 
       {/* SECTION NOS TRAVAUX – COTE A COTE PORTFOLIO */}
-<section className="bg-slate-100 py-8 sm:py-10 md:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 rounded-md">
-  <div className="max-w-[1400px] mx-auto">
+      <section className="bg-slate-100 py-8 sm:py-10 md:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 rounded-md">
+        <div className="max-w-[1400px] mx-auto">
 
-    <div className="flex flex-col lg:grid lg:grid-cols-5 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-start">
+          <div className="flex flex-col lg:grid lg:grid-cols-5 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-start">
 
-      {/* ===== COLONNE GAUCHE (CONTENU) ===== */}
-      <div className="lg:col-span-2 lg:sticky lg:top-32">
-        {/* Titre responsive */}
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-serif text-slate-900 mb-4 sm:mb-5 md:mb-6">
-          Nos Travaux
-        </h2>
+            {/* ===== COLONNE GAUCHE (CONTENU) ===== */}
+            <div className="lg:col-span-2 lg:sticky lg:top-32">
+              {/* Titre responsive */}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-serif text-slate-900 mb-4 sm:mb-5 md:mb-6">
+                Nos Travaux
+              </h2>
 
-        {/* Texte descriptif */}
-        <p className="text-[#5c5047] text-sm sm:text-base max-w-full lg:max-w-md leading-relaxed mb-6 sm:mb-8 md:mb-10">
-          Découvrez un aperçu de nos travaux les plus récents
-        </p>
+              {/* Texte descriptif */}
+              <p className="text-[#5c5047] text-sm sm:text-base max-w-full lg:max-w-md leading-relaxed mb-6 sm:mb-8 md:mb-10">
+                Découvrez un aperçu de nos travaux les plus récents
+              </p>
 
-        {/* Bouton responsive */}
-        <Button
-          variant="outline"
-          className="rounded-full border border-[#3a2f27] bg-transparent px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 text-slate-900 hover:bg-logo hover:text-white transition-all duration-300 group w-full sm:w-auto"
-          onClick={() => navigate("/travaux?categorie=interieurs")}
-        >
-          <span className="font-mono text-xs sm:text-sm">
-            VOIR TOUS NOS TRAVAUX
-          </span>
-          <ArrowRight className="ml-2 sm:ml-3 h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
-        </Button>
-      </div>
+              {/* Bouton responsive */}
+              <Button
+                variant="outline"
+                className="rounded-full border border-[#3a2f27] bg-transparent px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 text-slate-900 hover:bg-logo hover:text-white transition-all duration-300 group w-full sm:w-auto"
+                onClick={() => navigate("/travaux?categorie=interieurs")}
+              >
+                <span className="font-mono text-xs sm:text-sm">
+                  VOIR TOUS NOS TRAVAUX
+                </span>
+                <ArrowRight className="ml-2 sm:ml-3 h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </div>
 
-      {/* ===== COLONNE DROITE (PROJETS) ===== */}
-      <div className="lg:col-span-3 w-full">
-        <div className="relative">
-          {/* Conteneur du slider */}
-          <div
-            ref={sliderRef}
-            className="flex gap-4 sm:gap-6 md:gap-8 lg:gap-12 pb-6 sm:pb-8 md:pb-10 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
-            style={{
-              scrollbarWidth: 'none', // Firefox
-              msOverflowStyle: 'none', // IE/Edge
-            }}
-          >
-            {displayedPrestations.map((prestation) => {
-              const currentImageIndex = currentImageIndexes[prestation.id] || 0;
-              const totalImages = prestation.images.length;
-
-              const category = Object.entries(prestationsData).find(([_, prestations]) =>
-                prestations.some((p) => p.id === prestation.id)
-              )?.[0];
-
-              const prestationType = prestationTypesByCategory[category]?.find(
-                (t) => t.value === prestation.type
-              );
-
-              return (
-                <Card
-                  key={prestation.id}
-                  onClick={() => handleCardClick(prestation)}
-                  className="group relative min-w-[250px] lg:min-w-[450px] h-[200px] sm:h-[240px] md:h-[280px] lg:h-[320px] rounded-xl md:rounded-2xl overflow-hidden border-0 cursor-pointer bg-transparent snap-start flex-shrink-0"
+            {/* ===== COLONNE DROITE (PROJETS) ===== */}
+            <div className="lg:col-span-3 w-full">
+              <div className="relative">
+                {/* Conteneur du slider */}
+                <div
+                  ref={sliderRef}
+                  className="flex gap-4 sm:gap-6 md:gap-8 lg:gap-12 pb-6 sm:pb-8 md:pb-10 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+                  style={{
+                    scrollbarWidth: 'none', // Firefox
+                    msOverflowStyle: 'none', // IE/Edge
+                  }}
                 >
-                  <div className="relative w-full h-full">
-                    {/* Image */}
-                    <img
-                      src={prestation.images[currentImageIndex]}
-                      alt={prestation.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
-                    />
+                  {displayedPrestations.map((prestation) => {
+                    const currentImageIndex = currentImageIndexes[prestation.id] || 0;
+                    const totalImages = prestation.images.length;
 
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    const category = Object.entries(prestationsData).find(([_, prestations]) =>
+                      prestations.some((p) => p.id === prestation.id)
+                    )?.[0];
 
-                    {/* Badge catégorie */}
-                    <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold text-[#3a2f27]">
-                      {prestationType?.label}
-                    </div>
+                    const prestationType = prestationTypesByCategory[category]?.find(
+                      (t) => t.value === prestation.type
+                    );
 
-                    {/* Boutons de navigation d'image (seulement sur desktop) */}
-                    {totalImages > 1 && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/80 backdrop-blur-sm opacity-0 lg:group-hover:opacity-100 transition hidden lg:flex"
-                          onClick={(e) => prevImage(prestation.id, totalImages, e)}
-                        >
-                          <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-[#3a2f27]" />
-                        </Button>
+                    return (
+                      <Card
+                        key={prestation.id}
+                        onClick={() => handleCardClick(prestation)}
+                        className="group relative w-full md:min-w-[250px] lg:max-w-[450px] h-[200px] sm:h-[240px] md:h-[280px] lg:h-[320px] rounded-xl md:rounded-2xl overflow-hidden border-0 cursor-pointer bg-transparent snap-start flex-shrink-0"
+                      >
+                        <div className="relative w-full h-full">
+                          {/* Image */}
+                          <img
+                            src={prestation.images[currentImageIndex]}
+                            alt={prestation.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                          />
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/80 backdrop-blur-sm opacity-0 lg:group-hover:opacity-100 transition hidden lg:flex"
-                          onClick={(e) => nextImage(prestation.id, totalImages, e)}
-                        >
-                          <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-[#3a2f27]" />
-                        </Button>
-                      </>
-                    )}
+                          {/* Overlay gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-                    {/* Titre du projet */}
-                    <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 text-white">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-serif tracking-wide">
-                        {prestation.title}
-                      </h3>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
+                          {/* Badge catégorie */}
+                          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold text-[#3a2f27]">
+                            {prestationType?.label}
+                          </div>
+
+                          {/* Boutons de navigation d'image (seulement sur desktop) */}
+                          {totalImages > 1 && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/80 backdrop-blur-sm opacity-0 lg:group-hover:opacity-100 transition hidden lg:flex"
+                                onClick={(e) => prevImage(prestation.id, totalImages, e)}
+                              >
+                                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-[#3a2f27]" />
+                              </Button>
+
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/80 backdrop-blur-sm opacity-0 lg:group-hover:opacity-100 transition hidden lg:flex"
+                                onClick={(e) => nextImage(prestation.id, totalImages, e)}
+                              >
+                                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-[#3a2f27]" />
+                              </Button>
+                            </>
+                          )}
+
+                          {/* Titre du projet */}
+                          <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 text-white">
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-serif tracking-wide">
+                              {prestation.title}
+                            </h3>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {/* Boutons de navigation du slider (visible sur desktop seulement) */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => scrollSlider('left')}
+                  disabled={!canScrollLeft}
+                  className="absolute -left-4 lg:-left-8 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full bg-[#3a2f27] hover:bg-[#3a2f27]/80 text-white disabled:opacity-30 disabled:cursor-not-allowed z-10 hidden lg:flex"
+                >
+                  <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => scrollSlider('right')}
+                  disabled={!canScrollRight}
+                  className="absolute -right-4 lg:-right-8 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full bg-[#3a2f27] hover:bg-[#3a2f27]/80 text-white disabled:opacity-30 disabled:cursor-not-allowed z-10 hidden lg:flex"
+                >
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              </div>
+
+              {/* Indicateurs de défilement pour mobile (optionnel) */}
+              <div className="flex justify-center gap-2 mt-4 lg:hidden">
+                {displayedPrestations.map((_, index) => (
+                  <div
+                    key={index}
+                    className="h-1.5 w-1.5 rounded-full bg-[#3a2f27]/30"
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-
-          {/* Boutons de navigation du slider (visible sur desktop seulement) */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => scrollSlider('left')}
-            disabled={!canScrollLeft}
-            className="absolute -left-4 lg:-left-8 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full bg-[#3a2f27] hover:bg-[#3a2f27]/80 text-white disabled:opacity-30 disabled:cursor-not-allowed z-10 hidden lg:flex"
-          >
-            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => scrollSlider('right')}
-            disabled={!canScrollRight}
-            className="absolute -right-4 lg:-right-8 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full bg-[#3a2f27] hover:bg-[#3a2f27]/80 text-white disabled:opacity-30 disabled:cursor-not-allowed z-10 hidden lg:flex"
-          >
-            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
         </div>
-
-        {/* Indicateurs de défilement pour mobile (optionnel) */}
-        <div className="flex justify-center gap-2 mt-4 lg:hidden">
-          {displayedPrestations.map((_, index) => (
-            <div
-              key={index}
-              className="h-1.5 w-1.5 rounded-full bg-[#3a2f27]/30"
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
 
 
     </section>

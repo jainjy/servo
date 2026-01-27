@@ -13,6 +13,7 @@ import {
 import { api } from "@/lib/axios";
 import TourismNavigation from "../TourismNavigation";
 import AdvertisementPopup from "../AdvertisementPopup";
+import Allpub from "../Allpub";
 
 interface ActivityCategory {
   id: number;
@@ -112,7 +113,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       <div className="fixed w-1/2 bottom-0 right-4 z-50">
         <AdvertisementPopup />
       </div>
-      <div className="relative rounded-2xl overflow-hidden mb-8">
+      <div className="relative overflow-hidden mb-8">
         <div
           className="relative pt-20 pb-8 bg-cover bg-center bg-no-repeat"
           style={{
@@ -136,6 +137,8 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       </div>
       {/* Fin Hero */}
 
+      
+
       {/* SEARCH BAR */}
       <div className="max-w-3xl mx-auto px-4 -mt-10 mb-14 relative z-20">
         <div
@@ -155,6 +158,14 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           />
         </div>
       </div>
+
+       <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
 
       {/* CATEGORY FILTERS */}
       <div className="flex flex-wrap justify-center gap-3 px-4 mb-16">
@@ -182,8 +193,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
             className={`flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm transition-all shadow-md border-2
               ${activeCategory === cat.name
                 ? // Si cat.color est défini, on l'utilise, sinon le dégradé du thème
-                `bg-gradient-to-r ${cat.color || defaultGradient
-                } text-white border-transparent shadow-lg`
+                `bg-gradient-to-r ${cat.color || defaultGradient} text-white border-transparent shadow-lg`
                 : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
               } hover:scale-105 hover:shadow-lg`}
           >

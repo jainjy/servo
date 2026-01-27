@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 import CarteBoutton from "./CarteBoutton";
+import Allpub from "@/components/Allpub";
 
 interface Professional {
   id: string;
@@ -151,10 +152,10 @@ const TousLesPartenaires = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen pt-8 pb-4">
-      <main className="container mx-auto px-0 py-2 max-w-7xl">
+    <div className="bg-white min-h-screen pb-4">
+      <main className="container mx-auto px-0 max-w-7xl">
         {/* En-tête */}
-        <div className="relative mb-2">
+        <div className="relative pt-16 mb-2">
           <div
             className="absolute inset-0 bg-cover bg-center overflow-hidden"
             style={{
@@ -293,6 +294,13 @@ const TousLesPartenaires = () => {
           </div>
         </div>
 
+      <Allpub
+        title="Offres spéciales"
+        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+        background="bg-white"
+        textbg="text-slate-900"
+      />
         {/* Contenu */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">

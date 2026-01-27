@@ -38,7 +38,7 @@ export default function Test() {
 
   return (
     <div className="relative my-4">
-      <span className="absolute bg-white px-2 right-20 -top-5 text-sm lg:text-xl tracking-widest font-bold z-40 text-black/80 ">LES PARTENAIRES OFFICIELS</span>
+      <span className="absolute bg-white px-2 right-20 -top-5 text-sm lg:text-xl tracking-widest font-serif font-bold z-40 text-black/80 ">LES PARTENAIRES OFFICIELS</span>
       {/* Lignes horizontales décoratives */}
       <div className="absolute -top-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/70 to-transparent opacity-80 z-10"></div>
       <div className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/70 to-transparent opacity-80 z-10"></div>
@@ -76,13 +76,13 @@ export default function Test() {
               <div
                 key={i}
                 className="
-                flex-none py-7 flex justify-center items-center h-full w-28 lg:w-52
+                flex-none py-7 flex justify-center items-center  h-full w-28 lg:w-52
                 transition-all duration-500 ease-in-out
               "
               >
 
                 <img
-                  className="object-cover w-full h-full filter rounded-lg bg-gradient-to-r from-black/80 to-slate-900/90  hover:grayscale hover:scale-105 transition-all duration-500 brightness-110 contrast-110"
+                  className="object-cover w-full h-full filter border-gray-500/10 border rounded-lg bg-gradient-to-r from-black/80 to-slate-900/90  hover:grayscale hover:scale-105 transition-all duration-500 brightness-110 contrast-110"
                   src={image.src}
                   alt={image.alt}
                   width={130}
@@ -114,7 +114,7 @@ export default function Test() {
               >
 
                 <img
-                  className="object-cover rounded-lg w-full h-full bg-gradient-to-r from-black/80 to-slate-900/90 filter hover:scale-105 hover:grayscale brightness-110 contrast-110"
+                  className="object-cover rounded-lg w-full h-full border-gray-500/10 border bg-gradient-to-r from-black/80 to-slate-900/90 filter hover:scale-105 hover:grayscale brightness-110 contrast-110"
                   src={image.src}
                   alt={image.alt}
                   width={130}

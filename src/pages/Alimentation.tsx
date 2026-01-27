@@ -45,6 +45,7 @@ import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import api from "@/lib/api";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Composant Skeleton Loading
 const SectionSkeleton = () => (
@@ -88,8 +89,8 @@ const QuickNavigation = ({ sections, activeSection, onSectionClick }) => {
                 key={section.id}
                 onClick={() => onSectionClick(section.id)}
                 className={`relative p-2 rounded-xl transition-all duration-300 ${isActive
-                    ? 'bg-[#556B2F] text-white'
-                    : 'hover:bg-[#556B2F]/10 text-[#556B2F]'
+                  ? 'bg-[#556B2F] text-white'
+                  : 'hover:bg-[#556B2F]/10 text-[#556B2F]'
                   }`}
                 title={section.title}
               >
@@ -495,7 +496,7 @@ const Alimentation = () => {
       </div>
     );
   }
-//console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
+  //console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
 
   return (
     <div className="min-h-screen relative pt-16 bg-[#FFFFFF]">
@@ -562,7 +563,13 @@ const Alimentation = () => {
             </div>
           </div>
 
-
+          <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
 
           {/* Sections */}
           {isCategoriesLoading ? (

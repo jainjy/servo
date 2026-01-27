@@ -151,7 +151,6 @@ const LoginPage = () => {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
           className="
-            hidden sm:block
             absolute top-20 right-4 z-40
             w-full max-w-xs
             rounded-xl border border-white/20

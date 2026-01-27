@@ -23,6 +23,7 @@ import { default as ProductCard } from "@/components/ProductCard";
 import api from "@/lib/api";
 import { useProduitsTracking } from '@/hooks/useProduitsTracking';
 import AdvertisementPopup from '@/components/AdvertisementPopup';
+import Allpub from '@/components/Allpub';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -292,6 +293,8 @@ const Produits = () => {
             </form> */}
           </div>
 
+         
+
           {/* Affichage des résultats de recherche */}
           {searchQuery && products.length > 0 && (
             <div className="mb-12 animate-fade-in">
@@ -310,6 +313,14 @@ const Produits = () => {
             </div>
           )}
 
+           <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
+
           {/* Sections avec props de tracking */}
           <EquipementSection
             searchQuery={searchQuery}
@@ -322,6 +333,14 @@ const Produits = () => {
           <DesignSection
             searchQuery={searchQuery}
             onCategoryClick={trackCategoryClick}
+          />
+
+           <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
           />
 
           {/* Section CTA */}

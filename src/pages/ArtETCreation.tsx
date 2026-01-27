@@ -21,6 +21,7 @@ import SculpturePage from './ArtEtCreation/SculpturePage';
 
 // Import du modal existant
 import ModalDemandeVisite from '@/components/ModalDemandeVisite';
+import Allpub from '@/components/Allpub';
 
 const ArtEtCreation = () => {
   const { isAuthenticated } = useAuth();
@@ -136,10 +137,10 @@ const ArtEtCreation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white mt-12">
+    <div className="min-h-screen bg-white">
       {/* HERO */}
       <div
-        className="relative pt-10 px-4"
+        className="relative pt-20 px-4"
         style={{
           backgroundImage: `url('${backgroundImages[activeTab]}')`,
           backgroundSize: 'cover',
@@ -182,6 +183,14 @@ const ArtEtCreation = () => {
           </div>
         </div>
       </div>
+
+      <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
 
       {/* ONGLET PILULE */}
       <div className="sticky top-0 z-20 bg-white shadow-sm">
