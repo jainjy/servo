@@ -33,6 +33,7 @@ import { Partenaire } from "../data/partnersData";
 import { Colors } from "../data/colors";
 import { useState, useEffect } from "react";
 import UserMetierService from "@/services/userMetierService";
+import { Navigate, useNavigate } from "react-router-dom";
 
 // Interface pour les métiers depuis l'API
 interface MetierFromAPI {
@@ -81,7 +82,7 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSecteur, setSelectedSecteur] = useState<string>("tous");
-
+  const navigate = useNavigate();
   // --- PAGINATION : uniquement Suivant / Précédent ---
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 8; // nombre de cartes par page
@@ -461,7 +462,7 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
         <AdvantagesSection colors={colors} />
 
         {/* CTA devenir partenaire */}
-        <CTAButton onCTAClick={handleCTAClick} colors={colors} />
+        <CTAButton onCTAClick={()=>{navigate("/register/professional/subscription");}} colors={colors} />
       </div>
     </motion.section>
   );
