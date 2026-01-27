@@ -2,7 +2,6 @@ import axios from 'axios';
 
 // Utilisez l'URL absolue pour le développement
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
-                     process.env.REACT_APP_API_URL || 
                      'http://localhost:3001/api';
 
 export interface ChatMessage {
