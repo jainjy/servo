@@ -1,32 +1,35 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaRobot, FaTimes, FaPaperPlane, FaUser } from 'react-icons/fa';
+import { FaRobot, FaTimes, FaPaperPlane, FaUser, FaChevronDown, FaLightbulb } from 'react-icons/fa';
+import { sendMessageToAI, ChatMessage } from '../services/chatbotService';
 import './chatbot.css';
 
-const ChatBot = () => {
-  const [messages, setMessages] = useState([
+const ChatBot: React.FC = () => {
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "👋 Bonjour ! Je suis l'assistant OLIPLUS.RE. Comment puis-je vous aider pour votre projet immobilier à La Réunion ?",
+      content: "👋 Bonjour ! Je suis l'assistant IA d'OLIPLUS.RE. Comment puis-je vous aider pour votre projet immobilier à La Réunion ?",
     },
   ]);
 
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const chatRef = useRef(null);
-  const messagesEndRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 🔽 Auto-scroll vers le bas
+  // Auto-scroll vers le bas
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // 🔽 Ferme le chat si clic à l'extérieur
+  // Ferme le chat si clic à l'extérieur
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (chatRef.current && !chatRef.current.contains(event.target) && isOpen) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (chatRef.current && !chatRef.current.contains(event.target as Node) && isOpen) {
         setIsOpen(false);
       }
     };
@@ -40,85 +43,64 @@ const ChatBot = () => {
     };
   }, [isOpen]);
 
-  // 🔽 Réponses OLIPLUS.RE
-  const getResponse = (userInput) => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('bonjour') || input.includes('salut') || input.includes('hello')) {
-      return "Bonjour ! 👋 OLIPLUS.RE est votre expert immobilier à La Réunion. Je peux vous aider avec :\n• Vente de votre bien\n• Achat accompagné\n• Location & gestion\n• Estimation gratuite\n\nQue recherchez-vous ?";
-    }
-    
-    if (input.includes('service') || input.includes('offre')) {
-      return "**Services OLIPLUS.RE :**\n\n🏠 **VENTE** - Estimation gratuite, marketing personnalisé, accompagnement complet\n\n🏡 **ACHAT** - Recherche ciblée, visites, négociation\n\n🏢 **LOCATION** - Gestion locative complète\n\n📊 **ESTIMATION** - Analyse de marché gratuite\n\nPlus d'infos sur OLIPLUS.RE";
-    }
-    
-    if (input.includes('contact') || input.includes('téléphone') || input.includes('mail')) {
-      return "**Contact OLIPLUS.RE :**\n\n📞 06 92 66 77 55\n📧 contact@oliplus.re\n📍 45 Rue Alexis De Villeneuve, Saint-Denis 97400\n🌐 www.oliplus.re\n\nHoraires : Lundi-Vendredi 9h-18h";
-    }
-    
-    if (input.includes('estimation') || input.includes('prix') || input.includes('valeur')) {
-      return "OLIPLUS.RE propose une **estimation gratuite** de votre bien. Notre expert visite votre propriété, analyse le marché réunionnais et vous donne une valorisation précise. Souhaitez-vous prendre rendez-vous ?";
-    }
-    
-    if (input.includes('location') || input.includes('louer')) {
-      return "Pour la **location avec OLIPLUS.RE**, nous gérons : recherche de locataires, visites, dossiers, bail, état des lieux et suivi des loyers. Service complet pour propriétaires et locataires.";
-    }
-    
-    if (input.includes('vente') || input.includes('vendre')) {
-      return "**Vendre avec OLIPLUS.RE :**\n1. Estimation stratégique\n2. Marketing premium\n3. Visites organisées\n4. Négociation experte\n5. Suivi jusqu'au notaire\n\nNotre objectif : vendre au meilleur prix, dans les meilleurs délais.";
-    }
-    
-    if (input.includes('site') || input.includes('web') || input.includes('internet')) {
-      return "Visitez notre site **OLIPLUS.RE** pour :\n• Consulter nos annonces\n• Découvrir nos services\n• Demander une estimation\n• Nous contacter\n\n👉 www.oliplus.re";
-    }
-    
-    if (input.includes('adresse') || input.includes('agence') || input.includes('local')) {
-      return "**Agence OLIPLUS.RE :**\n45 Rue Alexis De Villeneuve\n97400 SAINT-DENIS\nLa Réunion\n\nNous recevons sur rendez-vous du lundi au vendredi.";
-    }
-    
-    if (input.includes('bien') || input.includes('annonce') || input.includes('propriété')) {
-      return "OLIPLUS.RE propose une sélection de biens sur toute La Réunion : appartements, maisons, villas, terrains. Consultez nos annonces sur www.oliplus.re ou contactez-nous pour une recherche personnalisée.";
-    }
-    
-    if (input.includes('réunion') || input.includes('la réunion') || input.includes('974')) {
-      return "OLIPLUS.RE couvre toute l'île de La Réunion : Saint-Denis, Saint-Pierre, Saint-Paul, Le Tampon, Saint-Benoît, etc. Notre expertise locale nous permet de vous conseiller au mieux.";
-    }
-    
-    return "Merci pour votre message ! Pour une réponse personnalisée, contactez OLIPLUS.RE :\n📞 06 92 66 77 55\n📧 contact@oliplus.re\n🌐 www.oliplus.re\n\nJe reste à votre disposition pour d'autres questions sur l'immobilier à La Réunion.";
-  };
-
-  const sendMessage = (text = null) => {
+  const sendMessage = async (text: string | null = null) => {
     const messageToSend = text || input;
     
     if (!messageToSend.trim() || isLoading) return;
 
-    const userMessage = { role: "user", content: messageToSend };
+    const userMessage: ChatMessage = { 
+      role: "user", 
+      content: messageToSend,
+      timestamp: new Date().toISOString()
+    };
+    
     setMessages((prev) => [...prev, userMessage]);
+    setShowSuggestions(false); // Cache les suggestions après envoi
     
     if (!text) {
       setInput("");
     }
     
     setIsLoading(true);
+    setIsTyping(true);
 
-    // Réponse instantanée
-    setTimeout(() => {
-      const reply = getResponse(userMessage.content);
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+    try {
+      const aiResponse = await sendMessageToAI(messageToSend, messages);
+      
+      const assistantMessage: ChatMessage = {
+        role: "assistant",
+        content: aiResponse.response,
+        timestamp: aiResponse.timestamp
+      };
+      
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Erreur IA:', error);
+      
+      const errorMessage: ChatMessage = {
+        role: "assistant",
+        content: "Désolé, je rencontre des difficultés techniques. Veuillez nous contacter directement au 📞 06 92 66 77 55 ou par email à contact@oliplus.re",
+        timestamp: new Date().toISOString()
+      };
+      
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 500);
+      setIsTyping(false);
+    }
   };
 
   const clearChat = () => {
     setMessages([
       {
         role: "assistant",
-        content: "👋 Bonjour ! Je suis l'assistant OLIPLUS.RE. Comment puis-je vous aider pour votre projet immobilier à La Réunion ?",
+        content: "👋 Bonjour ! Je suis l'assistant IA d'OLIPLUS.RE. Comment puis-je vous aider pour votre projet immobilier à La Réunion ?",
       },
     ]);
+    setShowSuggestions(true);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -126,25 +108,27 @@ const ChatBot = () => {
   };
 
   const quickQuestions = [
-    "Services OLIPLUS.RE",
-    "Estimation gratuite",
-    "Nous contacter",
-    "Visiter le site"
+    "Quels sont vos services immobiliers ?",
+    "Comment obtenir une estimation gratuite ?",
+    "Pouvez-vous m'aider à trouver un bien à Saint-Denis ?",
+    "Quels sont vos frais d'agence ?",
+    "Comment vendre rapidement mon bien ?",
+    "Proposez-vous des locations ?",
+    "Dans quelles villes intervenez-vous ?",
+    "Quels sont vos horaires d'ouverture ?"
   ];
+
+  const toggleSuggestions = () => {
+    setShowSuggestions(!showSuggestions);
+  };
 
   return (
     <div className="chatbot-wrapper">
-      {/* Bouton rond à DROITE */}
+      {/* Bouton rond flottant */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`bg-logo chatbot-button ${isOpen ? 'active' : ''}`}
+        className={`oliplus-chatbot-button ${isOpen ? 'active' : ''}`}
         aria-label={isOpen ? "Fermer le chat" : "Ouvrir le chat OLIPLUS.RE"}
-        style={{
-          position: 'fixed',
-          bottom: '30px',
-          right: '30px',
-          zIndex: 1000
-        }}
       >
         {isOpen ? <FaTimes /> : <FaRobot />}
       </button>
@@ -154,25 +138,39 @@ const ChatBot = () => {
         <div 
           ref={chatRef} 
           className="chatbot-window"
-          style={{
-            position: 'fixed',
-            bottom: '100px',
-            right: '30px',
-            zIndex: 999
-          }}
         >
           {/* Header */}
           <div className="chatbot-header">
             <div className="header-left">
-              <FaRobot className="header-icon" />
-              <div>
+              <div className="header-avatar">
+                <FaRobot className="header-robot-icon" />
+                <span className="online-indicator"></span>
+              </div>
+              <div className="header-info">
                 <h3>OLIPLUS.RE Assistant</h3>
-                <p>Expert immobilier La Réunion</p>
+                <p className="header-subtitle">Expert immobilier La Réunion</p>
+                <div className="header-status">
+                  <span className="status-dot"></span>
+                  <span className="status-text">En ligne</span>
+                </div>
               </div>
             </div>
-            <button onClick={clearChat} className="clear-btn">
-              Effacer
-            </button>
+            <div className="header-actions">
+              <button 
+                onClick={clearChat} 
+                className="header-action-btn"
+                title="Nouvelle conversation"
+              >
+                <span className="action-text">Effacer</span>
+              </button>
+              <button 
+                onClick={() => setIsOpen(false)} 
+                className="header-action-btn close-btn"
+                title="Fermer"
+              >
+                <FaTimes />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
@@ -189,22 +187,31 @@ const ChatBot = () => {
                   {msg.content.split('\n').map((line, i) => (
                     <p key={i}>{line}</p>
                   ))}
+                  {msg.timestamp && (
+                    <small className="message-timestamp">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </small>
+                  )}
                 </div>
               </div>
             ))}
             
             {/* Indicateur "bot en train d'écrire" */}
-            {isLoading && (
+            {isTyping && (
               <div className="message bot">
                 <div className="message-avatar">
                   <FaRobot />
                 </div>
-                <div className="message-content typing-indicator-message">
-                  <div className="three-dots-typing">
+                <div className="message-content typing-indicator">
+                  <div className="typing-dots">
                     <span></span>
                     <span></span>
                     <span></span>
                   </div>
+                  <span className="typing-text">L'assistant OLIPLUS.RE écrit...</span>
                 </div>
               </div>
             )}
@@ -212,39 +219,77 @@ const ChatBot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Questions rapides */}
-          <div className="quick-questions">
-            {quickQuestions.map((question, index) => (
+          {/* Bouton Suggestions */}
+          {!showSuggestions && (
+            <div className="suggestions-toggle-container">
               <button
-                key={index}
-                onClick={() => sendMessage(question)}
-                className="question-btn"
+                onClick={toggleSuggestions}
+                className="suggestions-toggle-btn"
+                title="Voir les questions fréquentes"
               >
-                {question}
+                <FaLightbulb className="suggestions-icon" />
+                <span>Questions suggérées</span>
+                <FaChevronDown className="chevron-icon" />
               </button>
-            ))}
-          </div>
+            </div>
+          )}
 
-          {/* Input */}
+          {/* Suggestions déroulantes */}
+          {showSuggestions && (
+            <div className="suggestions-dropdown">
+              <div className="suggestions-header">
+                <FaLightbulb className="suggestions-header-icon" />
+                <span className="suggestions-title">Questions fréquentes</span>
+                <button 
+                  onClick={toggleSuggestions} 
+                  className="suggestions-close-btn"
+                  title="Fermer"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              <div className="suggestions-grid">
+                {quickQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => sendMessage(question)}
+                    disabled={isLoading}
+                    className="suggestion-btn"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Zone de saisie */}
           <div className="chatbot-input">
             <div className="input-wrapper">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Votre message..."
+                placeholder="Écrivez votre message..."
+                disabled={isLoading}
+                rows={1}
               />
               <button
                 onClick={() => sendMessage()}
                 disabled={!input.trim() || isLoading}
                 className="send-btn"
+                title="Envoyer"
               >
                 <FaPaperPlane />
               </button>
             </div>
-            <div className="input-info">
-              <span>Appuyez sur <strong>Entrée</strong> pour envoyer</span>
-              <a href="tel:0692667755" className="phone">📞 06 92 66 77 55</a>
+            <div className="input-footer">
+              <div className="input-hint">
+                💡 <strong>Astuce</strong> : Posez des questions précises
+              </div>
+              <a href="tel:0692667755" className="phone-link">
+                📞 06 92 66 77 55
+              </a>
             </div>
           </div>
         </div>
