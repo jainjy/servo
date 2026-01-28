@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '@/services/authService';
 import { motion } from 'framer-motion';
+import AdvertisementPopup from '@/components/AdvertisementPopup';
 
 interface ArtCard {
   id: string;
@@ -215,6 +216,9 @@ const ArtETCreationShowcase = () => {
           </div>
         </motion.article>
       )}
+
+      {/* Publicité section Travevaux */}
+      <AdvertisementPopup position="section-accueil-art-creation" size="medium"/>
 
       <div className="max-w-7xl mx-auto text-center mb-4 flex lg:flex-row flex-col items-center justify-between">
         <h2 className="text-3xl font-serif lg:text-5xl font-medium text-gray-800 mb-3 tracking-tight">

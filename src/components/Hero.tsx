@@ -557,7 +557,7 @@ const Hero = () => {
       <section
         id="hero"
         ref={heroRef}
-        className="relative h-[500px] lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
+        className="relative h-auto lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -714,9 +714,14 @@ const Hero = () => {
         )}
 
         <div className="container relative z-25 mx-auto px-1 lg:px-4 py-5 lg:py-20 text-center">
-          {/* Publicité en avant-plan, en haut */}
-          <div >
-            <AdvertisementPopup position="hero"/>
+           {/* Publicité en avant-plan, en haut */}
+          <AdvertisementPopup position="hero-top" />
+          
+          <div className="absolute">
+            <AdvertisementPopup position="hero-left"/>
+          </div>
+          <div className="absolute right-0">
+            <AdvertisementPopup position="hero-right"/>
           </div>
 
           <motion.h1
@@ -767,6 +772,7 @@ const Hero = () => {
               </Button>
             </div>
           </motion.div>
+          <AdvertisementPopup position="hero-bottom" />
         </div>
       </section>
 

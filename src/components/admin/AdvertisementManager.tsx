@@ -35,12 +35,12 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/components/ui/use-toast"
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  BarChart3, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  BarChart3,
   Search,
   Filter,
   Upload,
@@ -74,7 +74,19 @@ const AdvertisementManager = () => {
     status: 'all',
     position: 'all',
     search: ''
-  })
+  });
+
+  const positionList = [
+    { value: 'hero-top', label: 'Hero - Haut' },
+    { value: 'hero-bottom', label: 'Hero - Bas' },
+    { value: 'hero-left', label: 'Hero - Gauche' },
+    { value: 'hero-right', label: 'Hero - Droit' },
+    { value: 'section-accueil-travaux', label: 'section-accueil-travaux' },
+    { value: 'section-accueil-art-creation', label: 'section-accueil-art-creation' },
+    { value: 'section-accueil-carte-partenaire', label: 'section-accueil-carte-partenaire' },
+    { value: 'section-accueil-partenaire-officiel', label: 'section-accueil-partenaire-officiel' },
+    { value: 'page-achat', label: 'page-achat' }
+  ]
 
   // Références pour les éléments vidéo
   const videoPreviewRef = useRef(null)
@@ -102,11 +114,11 @@ const AdvertisementManager = () => {
   const loadAdvertisements = async () => {
     try {
       setLoading(true);
-      
+
       const params = {};
       if (filters.status !== 'all') params.status = filters.status;
       if (filters.position !== 'all') params.position = filters.position;
-  
+
       const response = await advertisementsAPI.getAdvertisements(params);
 
       if (response.data && Array.isArray(response.data.advertisements)) {
@@ -169,7 +181,7 @@ const AdvertisementManager = () => {
     if (startDate && endDate) {
       const start = new Date(startDate)
       const end = new Date(endDate)
-      
+
       if (end < start) {
         setDateError('La date de fin ne peut pas être avant la date de début')
         return false
@@ -224,7 +236,7 @@ const AdvertisementManager = () => {
         })
         return
       }
-      
+
       // Validation du type de fichier
       const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
       if (!imageTypes.includes(file.type)) {
@@ -235,7 +247,7 @@ const AdvertisementManager = () => {
         })
         return
       }
-      
+
       // Nettoyer l'ancienne prévisualisation
       if (imagePreview) {
         URL.revokeObjectURL(imagePreview);
@@ -243,7 +255,7 @@ const AdvertisementManager = () => {
       if (videoPreview) {
         URL.revokeObjectURL(videoPreview);
       }
-      
+
       setFormData(prev => ({ ...prev, image: file, video: null }))
       setImagePreview(URL.createObjectURL(file))
       setVideoPreview('')
@@ -264,7 +276,7 @@ const AdvertisementManager = () => {
         })
         return
       }
-      
+
       // Validation du type de fichier
       const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo']
       if (!videoTypes.includes(file.type)) {
@@ -275,7 +287,7 @@ const AdvertisementManager = () => {
         })
         return
       }
-      
+
       // Nettoyer l'ancienne prévisualisation
       if (imagePreview) {
         URL.revokeObjectURL(imagePreview);
@@ -283,7 +295,7 @@ const AdvertisementManager = () => {
       if (videoPreview) {
         URL.revokeObjectURL(videoPreview);
       }
-      
+
       setFormData(prev => ({ ...prev, video: file, image: null }))
       setVideoPreview(URL.createObjectURL(file))
       setImagePreview('')
@@ -326,12 +338,12 @@ const AdvertisementManager = () => {
     if (videoPreview) {
       URL.revokeObjectURL(videoPreview);
     }
-    
+
     setFormData({
       title: '',
       description: '',
       targetUrl: '',
-      position: 'hero',
+      position: positionList[0].value,
       type: 'banner',
       status: 'active',
       startDate: '',
@@ -349,7 +361,7 @@ const AdvertisementManager = () => {
   // CORRECTION CRITIQUE : Créer une publicité avec le bon nom de champ pour le fichier
   const handleCreate = async (e) => {
     e.preventDefault()
-    
+
     // Validation des dates
     if (!validateDates(formData.startDate, formData.endDate)) {
       return
@@ -386,7 +398,7 @@ const AdvertisementManager = () => {
 
     try {
       const formDataToSend = new FormData()
-      
+
       // Ajouter tous les champs texte
       Object.keys(formData).forEach(key => {
         if (key !== 'image' && key !== 'video' && formData[key] !== null && formData[key] !== '') {
@@ -437,7 +449,7 @@ const AdvertisementManager = () => {
   // CORRECTION CRITIQUE : Modifier une publicité avec le bon nom de champ pour le fichier
   const handleEdit = async (e) => {
     e.preventDefault()
-    
+
     // Validation des dates
     if (!validateDates(formData.startDate, formData.endDate)) {
       return
@@ -474,7 +486,7 @@ const AdvertisementManager = () => {
 
     try {
       const formDataToSend = new FormData()
-      
+
       // Ajouter tous les champs texte
       Object.keys(formData).forEach(key => {
         if (key !== 'image' && key !== 'video' && formData[key] !== null && formData[key] !== '') {
@@ -560,11 +572,11 @@ const AdvertisementManager = () => {
       image: null,
       video: null
     })
-    
+
     // Nettoyer les anciennes prévisualisations
     if (imagePreview) URL.revokeObjectURL(imagePreview);
     if (videoPreview) URL.revokeObjectURL(videoPreview);
-    
+
     // Mettre à jour l'aperçu selon le type
     if (ad.type === 'video') {
       setVideoPreview(ad.imageUrl || '')
@@ -581,10 +593,10 @@ const AdvertisementManager = () => {
   const getCurrentStatus = (ad) => {
     // Si le statut est 'inactive', retourner directement
     if (ad.status === 'inactive') return 'inactive'
-    
+
     // Pour les statuts 'scheduled' stockés, les garder comme scheduled
     if (ad.status === 'scheduled') return 'scheduled'
-    
+
     // Pour le statut 'active', vérifier les dates
     const now = new Date()
     const startDate = ad.startDate ? new Date(ad.startDate) : null
@@ -592,7 +604,7 @@ const AdvertisementManager = () => {
 
     if (startDate && now < startDate) return 'scheduled'
     if (endDate && now > endDate) return 'expired'
-    
+
     return 'active'
   }
 
@@ -677,26 +689,26 @@ const AdvertisementManager = () => {
   // Obtenir l'URL de l'aperçu pour une publicité
   const getAdPreviewUrl = (ad) => {
     if (!ad) return '';
-    
+
     // Si c'est une nouvelle publicité en cours de création/modification
     if (ad.id === selectedAd?.id) {
       if (ad.type === 'video' && videoPreview) return videoPreview;
       if (ad.type !== 'video' && imagePreview) return imagePreview;
     }
-    
+
     // Pour les publicités existantes
     return ad.imageUrl || '';
   }
 
   // Filtrer les publicités selon les critères
   const filteredAdvertisements = advertisements.filter(ad => {
-    const matchesSearch = filters.search === '' || 
+    const matchesSearch = filters.search === '' ||
       ad.title.toLowerCase().includes(filters.search.toLowerCase()) ||
       (ad.description && ad.description.toLowerCase().includes(filters.search.toLowerCase()))
-    
+
     const matchesStatus = filters.status === 'all' || getCurrentStatus(ad) === filters.status
     const matchesPosition = filters.position === 'all' || ad.position === filters.position
-    
+
     return matchesSearch && matchesStatus && matchesPosition
   })
 
@@ -713,8 +725,8 @@ const AdvertisementManager = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={loadAdvertisements}
             disabled={loading}
             className="flex items-center gap-2 border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
@@ -746,7 +758,7 @@ const AdvertisementManager = () => {
                     <Target className="w-4 h-4" />
                     Informations de base
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="title" className="flex items-center gap-2 text-[#8B4513]">
@@ -769,19 +781,17 @@ const AdvertisementManager = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="position" className="text-[#8B4513]">Position *</Label>
-                      <Select 
-                        value={formData.position} 
+                      <Select
+                        value={formData.position}
                         onValueChange={(value) => handleInputChange('position', value)}
                       >
                         <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="border-[#D3D3D3]">                          
-                          <SelectItem value="all">tous</SelectItem>
-                          <SelectItem value="hero">hero</SelectItem>
-                          <SelectItem value="section1">section1</SelectItem>
-                          <SelectItem value="section2">section2</SelectItem>
-                          <SelectItem value="poup">Pop-up</SelectItem>
+                        <SelectContent className="border-[#D3D3D3]">
+                          {positionList.map((pos) => (
+                            <SelectItem value={pos.value}>{pos.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -821,12 +831,12 @@ const AdvertisementManager = () => {
                     <BarChart3 className="w-4 h-4" />
                     Configuration
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="type" className="text-[#8B4513]">Type de publicité *</Label>
-                      <Select 
-                        value={formData.type} 
+                      <Select
+                        value={formData.type}
                         onValueChange={(value) => handleInputChange('type', value)}
                       >
                         <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
@@ -841,8 +851,8 @@ const AdvertisementManager = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="status" className="text-[#8B4513]">Statut *</Label>
-                      <Select 
-                        value={formData.status} 
+                      <Select
+                        value={formData.status}
                         onValueChange={(value) => handleInputChange('status', value)}
                       >
                         <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
@@ -876,7 +886,7 @@ const AdvertisementManager = () => {
                     <Calendar className="w-4 h-4" />
                     Planning
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="startDate" className="text-[#8B4513]">Date de début</Label>
@@ -901,22 +911,22 @@ const AdvertisementManager = () => {
                       />
                     </div>
                   </div>
-                  
+
                   {dateError && (
                     <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
                       <AlertCircle className="w-4 h-4" />
                       {dateError}
                     </div>
                   )}
-                  
+
                   {(formData.startDate || formData.endDate) && !dateError && (
                     <div className="text-sm text-[#8B4513] bg-[#6B8E23]/10 p-3 rounded-lg border border-[#D3D3D3]">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         <span>
-                          {formData.startDate && formData.endDate 
+                          {formData.startDate && formData.endDate
                             ? `Du ${new Date(formData.startDate).toLocaleDateString('fr-FR')} au ${new Date(formData.endDate).toLocaleDateString('fr-FR')}`
-                            : formData.startDate 
+                            : formData.startDate
                               ? `À partir du ${new Date(formData.startDate).toLocaleDateString('fr-FR')}`
                               : `Jusqu'au ${new Date(formData.endDate).toLocaleDateString('fr-FR')}`
                           }
@@ -936,7 +946,7 @@ const AdvertisementManager = () => {
                     )}
                     {formData.type === 'video' ? 'Vidéo de la publicité' : 'Image de la publicité'} *
                   </h3>
-                  
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="media" className="text-[#8B4513]">
@@ -955,7 +965,7 @@ const AdvertisementManager = () => {
                         </Button>
                       )}
                     </div>
-                    
+
                     {/* Zone de dépôt de fichier */}
                     <div className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-8 text-center hover:border-[#556B2F] transition-colors bg-[#6B8E23]/5">
                       <Input
@@ -1013,15 +1023,15 @@ const AdvertisementManager = () => {
                         </div>
                       </Label>
                     </div>
-                    
+
                     {/* Aperçu du média */}
                     {imagePreview && formData.type !== 'video' && (
                       <div className="mt-4">
                         <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu de l'image :</p>
                         <div className="relative max-h-60 rounded-lg overflow-hidden border border-[#D3D3D3] group">
-                          <img 
-                            src={imagePreview} 
-                            alt="Aperçu de l'image" 
+                          <img
+                            src={imagePreview}
+                            alt="Aperçu de l'image"
                             className="w-full h-full object-contain max-h-60"
                           />
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1038,15 +1048,15 @@ const AdvertisementManager = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Aperçu de la vidéo */}
                     {videoPreview && formData.type === 'video' && (
                       <div className="mt-4">
                         <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu de la vidéo :</p>
                         <div className="relative max-h-60 rounded-lg overflow-hidden border border-[#D3D3D3] group">
-                          <video 
+                          <video
                             ref={videoPreviewRef}
-                            src={videoPreview} 
+                            src={videoPreview}
                             className="w-full h-full object-contain max-h-60"
                             controls={isVideoPlaying}
                             onEnded={() => setIsVideoPlaying(false)}
@@ -1054,7 +1064,7 @@ const AdvertisementManager = () => {
                           {!isVideoPlaying && (
                             <>
                               <div className="absolute inset-0 bg-black/20" />
-                              <div 
+                              <div
                                 className="absolute inset-0 flex items-center justify-center cursor-pointer"
                                 onClick={toggleVideoPlay}
                               >
@@ -1101,9 +1111,9 @@ const AdvertisementManager = () => {
                 </div>
 
                 <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => {
                       setIsCreateDialogOpen(false)
                       resetForm()
@@ -1112,8 +1122,8 @@ const AdvertisementManager = () => {
                   >
                     Annuler
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={loading || !!dateError || (formData.type === 'video' ? !formData.video : !formData.image)}
                     className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                   >
@@ -1149,7 +1159,7 @@ const AdvertisementManager = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="border-l-4 border-l-[#6B8E23] border-[#D3D3D3]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -1163,7 +1173,7 @@ const AdvertisementManager = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="border-l-4 border-l-[#8B4513] border-[#D3D3D3]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -1177,7 +1187,7 @@ const AdvertisementManager = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="border-l-4 border-l-[#A52A2A] border-[#D3D3D3]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -1209,8 +1219,8 @@ const AdvertisementManager = () => {
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Select 
-                value={filters.status} 
+              <Select
+                value={filters.status}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
               >
                 <SelectTrigger className="w-40 border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
@@ -1225,8 +1235,8 @@ const AdvertisementManager = () => {
                   <SelectItem value="expired" className="text-[#8B4513]">Expirées</SelectItem>
                 </SelectContent>
               </Select>
-              <Select 
-                value={filters.position} 
+              <Select
+                value={filters.position}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, position: value }))}
               >
                 <SelectTrigger className="w-48 border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
@@ -1234,10 +1244,9 @@ const AdvertisementManager = () => {
                 </SelectTrigger>
                 <SelectContent className="border-[#D3D3D3]">
                   <SelectItem value="all" className="text-[#8B4513]">tous</SelectItem>
-                  <SelectItem value="hero" className="text-[#8B4513]">hero</SelectItem>
-                  <SelectItem value="section1" className="text-[#8B4513]">section1</SelectItem>
-                  <SelectItem value="section2" className="text-[#8B4513]">section2</SelectItem>
-                  <SelectItem value="pop-up" className="text-[#8B4513]">pop-up</SelectItem>
+                  {positionList.map((pos) => (
+                    <SelectItem value={pos.value}>{pos.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -1273,15 +1282,15 @@ const AdvertisementManager = () => {
                 }
               </p>
               {(filters.status !== 'all' || filters.position !== 'all' || filters.search) ? (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setFilters({ status: 'all', position: 'all', search: '' })}
                   className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
                 >
                   Réinitialiser les filtres
                 </Button>
               ) : (
-                <Button 
+                <Button
                   onClick={() => setIsCreateDialogOpen(true)}
                   className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                 >
@@ -1329,8 +1338,8 @@ const AdvertisementManager = () => {
                             </div>
                           ) : (
                             <div className="relative w-16 h-16">
-                              <img 
-                                src={getAdPreviewUrl(ad)} 
+                              <img
+                                src={getAdPreviewUrl(ad)}
                                 alt={ad.title}
                                 className="w-full h-full rounded-lg object-cover border border-[#D3D3D3]"
                                 onError={(e) => {
@@ -1446,7 +1455,7 @@ const AdvertisementManager = () => {
                 <Target className="w-4 h-4" />
                 Informations de base
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-title" className="flex items-center gap-2 text-[#8B4513]">
@@ -1469,18 +1478,17 @@ const AdvertisementManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-position" className="text-[#8B4513]">Position *</Label>
-                  <Select 
-                    value={formData.position} 
+                  <Select
+                    value={formData.position}
                     onValueChange={(value) => handleInputChange('position', value)}
                   >
                     <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="border-[#D3D3D3]">
-                      <SelectItem value="header">En-tête</SelectItem>
-                      <SelectItem value="sidebar">Barre latérale</SelectItem>
-                      <SelectItem value="homepage">Page d'accueil</SelectItem>
-                      <SelectItem value="footer">Pied de page</SelectItem>
+                      {positionList.map((pos) => (
+                        <SelectItem value={pos.value}>{pos.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1520,12 +1528,12 @@ const AdvertisementManager = () => {
                 <BarChart3 className="w-4 h-4" />
                 Configuration
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-type" className="text-[#8B4513]">Type de publicité *</Label>
-                  <Select 
-                    value={formData.type} 
+                  <Select
+                    value={formData.type}
                     onValueChange={(value) => handleInputChange('type', value)}
                   >
                     <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
@@ -1540,8 +1548,8 @@ const AdvertisementManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-status" className="text-[#8B4513]">Statut *</Label>
-                  <Select 
-                    value={formData.status} 
+                  <Select
+                    value={formData.status}
                     onValueChange={(value) => handleInputChange('status', value)}
                   >
                     <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
@@ -1575,7 +1583,7 @@ const AdvertisementManager = () => {
                 <Calendar className="w-4 h-4" />
                 Planning
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-startDate" className="text-[#8B4513]">Date de début</Label>
@@ -1600,22 +1608,22 @@ const AdvertisementManager = () => {
                   />
                 </div>
               </div>
-              
+
               {dateError && (
                 <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
                   <AlertCircle className="w-4 h-4" />
                   {dateError}
                 </div>
               )}
-              
+
               {(formData.startDate || formData.endDate) && !dateError && (
                 <div className="text-sm text-[#8B4513] bg-[#6B8E23]/10 p-3 rounded-lg border border-[#D3D3D3]">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     <span>
-                      {formData.startDate && formData.endDate 
+                      {formData.startDate && formData.endDate
                         ? `Du ${new Date(formData.startDate).toLocaleDateString('fr-FR')} au ${new Date(formData.endDate).toLocaleDateString('fr-FR')}`
-                        : formData.startDate 
+                        : formData.startDate
                           ? `À partir du ${new Date(formData.startDate).toLocaleDateString('fr-FR')}`
                           : `Jusqu'au ${new Date(formData.endDate).toLocaleDateString('fr-FR')}`
                       }
@@ -1635,7 +1643,7 @@ const AdvertisementManager = () => {
                 )}
                 {formData.type === 'video' ? 'Vidéo de la publicité' : 'Image de la publicité'}
               </h3>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="edit-media" className="text-[#8B4513]">
@@ -1654,7 +1662,7 @@ const AdvertisementManager = () => {
                     </Button>
                   )}
                 </div>
-                
+
                 {/* Zone de dépôt de fichier */}
                 <div className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-8 text-center hover:border-[#556B2F] transition-colors bg-[#6B8E23]/5">
                   <Input
@@ -1712,7 +1720,7 @@ const AdvertisementManager = () => {
                     </div>
                   </Label>
                 </div>
-                
+
                 {/* Aperçu du média */}
                 {imagePreview && formData.type !== 'video' && (
                   <div className="mt-4">
@@ -1720,9 +1728,9 @@ const AdvertisementManager = () => {
                       {formData.image ? 'Nouvel aperçu' : 'Aperçu actuel'} :
                     </p>
                     <div className="relative max-h-60 rounded-lg overflow-hidden border border-[#D3D3D3] group">
-                      <img 
-                        src={imagePreview} 
-                        alt="Aperçu" 
+                      <img
+                        src={imagePreview}
+                        alt="Aperçu"
                         className="w-full h-full object-contain max-h-60"
                       />
                       {formData.image && (
@@ -1741,7 +1749,7 @@ const AdvertisementManager = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Aperçu de la vidéo */}
                 {videoPreview && formData.type === 'video' && (
                   <div className="mt-4">
@@ -1749,9 +1757,9 @@ const AdvertisementManager = () => {
                       {formData.video ? 'Nouvel aperçu' : 'Aperçu actuel'} :
                     </p>
                     <div className="relative max-h-60 rounded-lg overflow-hidden border border-[#D3D3D3] group">
-                      <video 
+                      <video
                         ref={videoPreviewRef}
-                        src={videoPreview} 
+                        src={videoPreview}
                         className="w-full h-full object-contain max-h-60"
                         controls={isVideoPlaying}
                         onEnded={() => setIsVideoPlaying(false)}
@@ -1759,7 +1767,7 @@ const AdvertisementManager = () => {
                       {!isVideoPlaying && (
                         <>
                           <div className="absolute inset-0 bg-black/20" />
-                          <div 
+                          <div
                             className="absolute inset-0 flex items-center justify-center cursor-pointer"
                             onClick={toggleVideoPlay}
                           >
@@ -1806,7 +1814,7 @@ const AdvertisementManager = () => {
                     )}
                   </div>
                 )}
-                
+
                 {/* Message d'information */}
                 {!formData.video && !formData.image && selectedAd && (
                   <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -1830,9 +1838,9 @@ const AdvertisementManager = () => {
             </div>
 
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => {
                   setIsEditDialogOpen(false)
                   setSelectedAd(null)
@@ -1842,8 +1850,8 @@ const AdvertisementManager = () => {
               >
                 Annuler
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading || !!dateError}
                 className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
               >

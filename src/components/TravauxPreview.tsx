@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import AdvertisementPopup from '@/components/AdvertisementPopup';
 
 const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
   const navigate = useNavigate();
@@ -160,7 +161,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
   return (
     <section className="container mx-auto -mt-6 py-8 relative">
       {/* Publicité - Version taille intermédiaire */}
-      {isAdVisible && !isMobile && (
+      {false && (
         <motion.article
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -235,6 +236,9 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           </div>
         </motion.article>
       )}
+
+      {/* Publicité section Travevaux */}
+      <AdvertisementPopup position="section-accueil-travaux" size="medium"/>
 
       {/* SECTION NOS TRAVAUX – COTE A COTE PORTFOLIO */}
       <section className="bg-slate-100 py-8 sm:py-10 md:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 rounded-md">

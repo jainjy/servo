@@ -658,8 +658,6 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   </Button>
                 </div>
               )}
-
-              <AdvertisementPopup />
             </div>
 
             {/* Résultats */}
@@ -1133,10 +1131,6 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   return (
     <div className="min-h-screen">
       <Suspense fallback={<LoadingFallback />}>
-        {/* Advertisement Popup - Absolute Position */}
-        <div className="absolute top-12 left-4 right-4 z-50">
-          <AdvertisementPopup />
-        </div>
         {/* Hero Section avec margin-top */}
         <div className="mt-20 relative">
           <div className="fixed -z-10 overflow-hidden bg-black w-full h-96 top-0">
@@ -1428,13 +1422,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                 </div>
               )}
             </div>
-            <Allpub
-              title="Offres spéciales"
-              description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-              image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-              background="bg-white"
-              textbg="text-slate-900"
-            />
+            <AdvertisementPopup position="page-achat" />
             {/* Résultats */}
             <div className="mt-4 bg-white rounded-xl shadow-lg p-6 ">
               <div className="flex justify-between items-center mb-6">
@@ -2000,7 +1988,6 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
           status: p.status,
         }))}
       />
-      <AdvertisementPopup />
     </div>
   );
 };

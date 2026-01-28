@@ -297,9 +297,8 @@ const MapPage: React.FC = () => {
   return (
     <div className="px-8 pb-5 pt-28">
       {/* En-tête avec statistiques */}
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
+      <AdvertisementPopup position="section-accueil-carte-partenaire" size="large"/>
+      
       <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
         <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-[#ffffff]/60'></div>
         <img src="https://i.pinimg.com/1200x/01/2d/ea/012dea65a1f79da54266c118fe39e07e.jpg" className='h-full object-cover w-full' alt="" />
