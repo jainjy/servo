@@ -605,7 +605,7 @@ const AdvertisementPopup: React.FC<Props> = ({
   const currentAd = advertisements[currentAdIndex];
   const progress = ((shownAdIds.size) / advertisements.length) * 100;
 
-  if (isMobile) return null;
+  if (isMobile && position !== "pop-up") return null;
 
   return (
     <div className={`advertisement-container advertisement-${position}`}>

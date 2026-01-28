@@ -85,7 +85,8 @@ const AdvertisementManager = () => {
     { value: 'section-accueil-art-creation', label: 'section-accueil-art-creation' },
     { value: 'section-accueil-carte-partenaire', label: 'section-accueil-carte-partenaire' },
     { value: 'section-accueil-partenaire-officiel', label: 'section-accueil-partenaire-officiel' },
-    { value: 'page-achat', label: 'page-achat' }
+    { value: 'page-achat', label: 'page-achat' },
+    { value: 'pop-up', label: 'pop-up' },
   ]
 
   // Références pour les éléments vidéo
