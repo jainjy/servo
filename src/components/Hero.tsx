@@ -557,7 +557,7 @@ const Hero = () => {
       <section
         id="hero"
         ref={heroRef}
-        className="relative h-[450px] md:h-auto lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
+        className="relative min-h-[350px] pt-[90px] md:h-auto lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -772,7 +772,7 @@ const Hero = () => {
               </Button>
             </div>
           </motion.div>
-          <AdvertisementPopup position="hero-bottom" />
+          <AdvertisementPopup position="hero-bottom" showOnMobile={true}/>
         </div>
       </section>
 

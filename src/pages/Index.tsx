@@ -106,6 +106,7 @@ const Index = () => {
             <AdvertisementPopup
               size="small"
               position="pop-up"
+              showOnMobile={true}
             />
           </div>
           <Hero />

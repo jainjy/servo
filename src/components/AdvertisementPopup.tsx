@@ -19,6 +19,7 @@ interface Props {
   listThreshold?: number;
   size?: "small" | "medium" | "large";
   position: string;
+  showOnMobile?: boolean;
 }
 
 interface SingleAdvertisementProps {
@@ -312,7 +313,7 @@ const SingleAdvertisement: React.FC<SingleAdvertisementProps> = ({
         </div>
       ) : (
         // VERSION NORMALE - Avec texte et image
-        <div className="flex flex-col sm:flex-row pt-10 sm:pt-0">
+        <div className="flex flex-col sm:flex-row sm:pt-0">
           {/* Media - Image/Vidéo */}
           <div className="w-full h-32 sm:w-40 md:w-56 lg:w-64 sm:h-40 md:h-44 flex-shrink-0 bg-slate-100 relative group">
             {currentAdIsVideo ? (
@@ -455,7 +456,8 @@ const AdvertisementPopup: React.FC<Props> = ({
   displayDuration = 2,
   listThreshold = 2,
   size = "small", // "small" | "medium" | "large"
-  position // "header", "sidebar", "footer", "popup", etc.
+  position, // "header", "sidebar", "footer", "popup", etc.,
+  showOnMobile = false
 }) => {
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
@@ -605,7 +607,7 @@ const AdvertisementPopup: React.FC<Props> = ({
   const currentAd = advertisements[currentAdIndex];
   const progress = ((shownAdIds.size) / advertisements.length) * 100;
 
-  if (isMobile && position !== "pop-up") return null;
+  if (isMobile && !showOnMobile) return null;
 
   return (
     <div className={`advertisement-container advertisement-${position}`}>
