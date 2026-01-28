@@ -213,7 +213,7 @@ export const BusRoutesView = () => {
               <div className={`h-2 w-full ${network.color}`}></div>
               <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                  <span className="text-[#8B4513]">{network.name}</span>
+                  <span className="text-slate-900">{network.name}</span>
                   <ChevronRight className="h-5 w-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
                 </CardTitle>
                 <CardDescription className="line-clamp-2">

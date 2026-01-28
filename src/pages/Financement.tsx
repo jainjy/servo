@@ -1553,7 +1553,7 @@ export default function Financement() {
             <div className="flex flex-wrap gap-5 justify-center">
               <motion.div>
                 <Button
-                  className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="bg-white hover:bg-white/80 text-slate-900 rounded-xl px-8 py-5 text-lg font-semibold hover:border-white transition-all duration-300 shadow-lg hover:shadow-xl"
                   onClick={() => openModal('service')}
                 >
                   <FileText className="h-5 w-5 mr-3" />
@@ -1591,7 +1591,7 @@ export default function Financement() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-2 text-[#8B4513]">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-2 text-slate-900">
               Nos Solutions de <span className="text-[#556B2F]">Financement</span>
             </h2>
 
@@ -1646,7 +1646,7 @@ export default function Financement() {
                       <service.icon className="h-6 w-6 text-[#556B2F] group-hover:text-white transition-colors duration-300" />
                     )}
                   </div>
-                  <h3 className="text-xl font-bold text-[#8B4513] mb-3">{service.title}</h3>
+                  <h3 className="text-xl font-bold text-logo mb-3">{service.title}</h3>
                   <p className="text-slate-600 mb-4 text-sm leading-relaxed">{service.description}</p>
                   <ul className="space-y-2">
                     {service.features.map((feature, idx) => (
@@ -1656,7 +1656,7 @@ export default function Financement() {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-4 flex items-center text-[#556B2F] font-semibold text-sm group-hover:text-[#6B8E23] transition-colors duration-300">
+                  <div className="mt-4 flex text-center justify-center items-center bg-white p-4 rounded-full shadow-lg text-[#556B2F] font-semibold text-sm group-hover:text-[#6B8E23] transition-colors duration-300">
                     Simuler mon projet
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
@@ -1683,7 +1683,7 @@ export default function Financement() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
               Nos <span className="text-[#556B2F]">Partenaires Financement</span>
             </h2>
             <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto">
@@ -1713,7 +1713,7 @@ export default function Financement() {
                       )}
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-[#8B4513]">{partenaire.nom}</h3>
+                      <h3 className="text-2xl font-bold text-logo">{partenaire.nom}</h3>
                       <div className="flex items-center mt-1">
                         <Star className="h-5 w-5 text-yellow-400 fill-current" />
                         <span className="text-sm text-slate-600 ml-2">{partenaire.rating}</span>
@@ -1733,7 +1733,7 @@ export default function Financement() {
                   </div>
 
                   <div className="mb-6">
-                    <h4 className="font-semibold text-[#8B4513] mb-2">Services proposés :</h4>
+                    <h4 className="font-semibold text-slate-900 mb-2">Services proposés :</h4>
                     <div className="flex flex-wrap gap-2">
                       {partenaire.services && partenaire.services.map((service, idx) => (
                         <span key={idx} className="px-3 py-1 bg-[#6B8E23]/10 text-[#556B2F] text-sm rounded-full border border-[#6B8E23]/20">

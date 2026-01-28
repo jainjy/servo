@@ -185,8 +185,8 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* Informations de contact */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-[#8B4513]" />
-                <span className="text-[#8B4513] font-medium">Vos coordonnées</span>
+                <User className="w-5 h-5 text-slate-900" />
+                <span className="text-slate-900 font-medium">Vos coordonnées</span>
               </div>
 
               <div className="space-y-3">
@@ -231,8 +231,8 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* Date et heure souhaitées */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#8B4513]" />
-                <span className="text-[#8B4513] font-medium">Disponibilités</span>
+                <Calendar className="w-4 h-4 text-slate-900" />
+                <span className="text-slate-900 font-medium">Disponibilités</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -285,7 +285,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
             {/* Message */}
             <div className="space-y-3">
-              <label className="block text-[#8B4513] font-medium text-sm">
+              <label className="block text-slate-900 font-medium text-sm">
                 Message complémentaire (optionnel)
               </label>
               <textarea

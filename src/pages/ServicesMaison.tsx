@@ -592,7 +592,7 @@ const ServicesMaison = ({ searchTerm = "", onSearchChange }: { searchTerm?: stri
         <div className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="text-xl font-bold" style={{ color: '#8B4513' }}>
+              <h3 className="text-xl font-bold text-slate-900">
                 Nos Services Maison
               </h3>
               {selectedCategory !== "Tous" || selectedMetier !== "Tous" || priceRange.min || priceRange.max || localSearchTerm ? (
@@ -655,7 +655,7 @@ const ServicesMaison = ({ searchTerm = "", onSearchChange }: { searchTerm?: stri
         {/* Section avantages */}
         <SlideIn direction="up" delay={300}>
           <div className="mt-12 pt-8 border-t border-separator">
-            <h3 className="text-xl font-bold mb-6" style={{ color: '#8B4513' }}>Nos engagements qualité</h3>
+            <h3 className="text-xl font-bold mb-6 text-logo">Nos engagements qualité</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white dark:bg-card rounded-2xl p-6 border border-separator dark:border-border">
                 <div className="flex items-center gap-4 mb-4">

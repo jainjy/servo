@@ -684,7 +684,7 @@ const SejoursExperiences = () => {
           </div>
 
           <div className="text-center">
-            <div className="bg-secondary-text text-white rounded-3xl p-12 mb-8">
+            <div className="bg-logo text-white rounded-3xl p-12 mb-8">
               <h2 className="text-3xl font-bold mb-4">Prêt à vivre l'extraordinaire ?</h2>
               <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
                 Contactez nos experts pour créer le séjour parfaitement adapté à vos envies.

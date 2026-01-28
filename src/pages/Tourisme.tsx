@@ -1127,7 +1127,7 @@ export const TourismSection = () => {
         {/* Slider des destinations populaires */}
         <div className="relative mb-12" data-aos="fade-up">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-[#8B4513]">
+            <h3 className="text-2xl font-bold text-slate-900">
               Destinations populaires
             </h3>
           </div>
@@ -1808,11 +1808,11 @@ export const TourismSection = () => {
           data-aos-delay="200"
         >
           <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-[#8B4513] mb-3 flex items-center justify-center">
+            <h3 className="text-3xl font-bold text-logo mb-3 flex items-center justify-center">
               <Lightbulb className="w-8 h-8 mr-3 text-[#6B8E23]" />
               Suggestions intelligentes
             </h3>
-            <p className="text-[#8B4513] text-lg max-w-2xl mx-auto">
+            <p className="text-slate-900 text-lg max-w-2xl mx-auto">
               Notre IA analyse vos préférences pour des recommandations sur
               mesure
             </p>

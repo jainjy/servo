@@ -773,7 +773,7 @@ const Soin = () => {
         </div>
 
         <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-gray-200 dark:border-gray-700/40">
-          <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Nos engagements qualité</h3>
+          <h3 className="text-2xl font-bold mb-6 text-logo">Nos engagements qualité</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
               <span className="font-medium text-gray-700 dark:text-gray-300">Spécialistes certifiés</span>
