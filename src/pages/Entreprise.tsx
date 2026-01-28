@@ -123,7 +123,7 @@ const Entreprise: React.FC = () => {
             style={{ color: colors.primaryDark }}
           >
             Services{" "}
-            <span style={{ color: colors.secondaryText }}>
+            <span className="text-slate-900">
               Entreprise & Pro
             </span>
           </h1>

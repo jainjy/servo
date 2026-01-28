@@ -1190,8 +1190,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                       {/* Section Filtres par type */}
                       <div className="flex-1">
                         <div className="flex justify-center items-start gap-3 mb-3">
-                          <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
-                          <span className="text-xs font-semibold text-[#8B4513]">
+                          <BookCheck className="h-4 w-4 text-slate-900 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-slate-900">
                             {section.label.toUpperCase()} :
                           </span>
                         </div>
@@ -1220,8 +1220,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                       {/* Filtre Métiers */}
                       <div className="flex-1 border-t pt-4">
                         <div className="flex justify-center items-start gap-3 mb-3">
-                          <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
-                          <span className="text-xs font-semibold text-[#8B4513]">
+                          <BookCheck className="h-4 w-4 text-slate-900 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-slate-900">
                             MÉTIERS :
                           </span>
                         </div>
@@ -1279,7 +1279,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                 <>
                   {/* Filtres pour les autres catégories */}
                   <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-sm font-semibold text-[#8B4513] mr-2 flex items-center gap-2">
+                    <span className="text-sm font-semibold text-logo mr-2 flex items-center gap-2">
                       <BookCheck className="h-4 w-4" />
                       LISTES :
                     </span>

@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
             {/* Bouton Télécharger */}
             <button
               onClick={() => setIsApkModalOpen(true)}
-              className="py-1.5 px-3 bg-gradient-to-r from-[#8B4513] to-[#6B8E23] hover:from-[#6B8E23] hover:to-[#556B2F] text-white rounded-lg font-medium flex items-center gap-1.5 text-xs transition-all duration-200 hover:shadow-sm"
+              className="py-1.5 px-3 bg-white hover:bg-white/80 text-slate-900 rounded-lg font-medium flex items-center gap-1.5 text-xs transition-all duration-200 hover:shadow-sm"
             >
               <Download className="w-3 h-3" />
               <span>Télécharger l'app</span>

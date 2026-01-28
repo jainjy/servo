@@ -333,11 +333,11 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
         
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-[#8B4513] mb-2 flex items-center">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2 flex items-center">
             <Camera className="mr-3" size={28} />
             Photographie
           </h1>
-          <div className="h-1 w-20 bg-[#8B4513] rounded-full"></div>
+          <div className="h-1 w-20 bg-slate-900 rounded-full"></div>
         </div>
 
         {/* Erreur principale */}
@@ -438,8 +438,8 @@ const PhotographiePage: React.FC<PhotographiePageProps> = ({ onContactClick }) =
             <div className="flex items-center">
               {!isCategoryPage && (
                 <>
-                  <Star size={24} className="mr-2 text-[#8B4513]" />
-                  <h2 className="text-2xl font-bold text-[#8B4513]">
+                  <Star size={24} className="mr-2 text-logo" />
+                  <h2 className="text-2xl font-bold text-logo">
                     {displayTitle}
                   </h2>
                 </>

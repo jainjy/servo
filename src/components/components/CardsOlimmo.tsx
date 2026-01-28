@@ -303,7 +303,7 @@ const AnnonceCard = ({ property }: { property: Property }) => {
             <div
               className={`px-3 py-1.5 rounded-full text-xs font-semibold ${property.type === "location"
                 ? "bg-[#6B8E23] text-white"
-                : "bg-[#8B4513] text-white"}`}
+                : "bg-logo text-slate-100"}`}
             >
               {property.type === "location" ? "À louer" : "À vendre"}
             </div>

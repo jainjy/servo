@@ -674,7 +674,7 @@ const Nutrition = () => {
               {/* En-tête avec compteur */}
               <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h3 className="text-2xl font-bold" style={{ color: '#8B4513' }}>
+                  <h3 className="text-2xl font-bold text-logo">
                     Nos Services Nutrition
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mt-2">
@@ -747,7 +747,7 @@ const Nutrition = () => {
       {/* POURQUOI NOUS CHOISIR */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
         <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-gray-200 dark:border-gray-700/40">
-          <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Notre approche</h3>
+          <h3 className="text-2xl font-bold mb-6 text-slate-900">Notre approche</h3>
           <div className="space-y-6">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-logo/10 rounded-xl">
@@ -780,7 +780,7 @@ const Nutrition = () => {
         </div>
 
         <div className="bg-white dark:bg-card rounded-3xl shadow-lg p-8 border border-gray-200 dark:border-gray-700/40">
-          <h3 className="text-2xl font-bold mb-6" style={{ color: '#8B4513' }}>Nos engagements</h3>
+          <h3 className="text-2xl font-bold mb-6 text-slate-900">Nos engagements</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
               <span className="font-medium text-gray-700 dark:text-gray-300">Consultation initiale approfondie</span>

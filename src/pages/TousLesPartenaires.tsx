@@ -466,7 +466,7 @@ const ProfessionalCardTLP: React.FC<{
   className="relative bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col items-center text-center p-0"
 >
   {/* Bannière incurvée compacte */}
-  <div className="relative w-full h-24 bg-secondary-text rounded-b-3xl mb-10 overflow-hidden">
+  <div className="relative w-full h-24 bg-logo/70 rounded-b-3xl mb-10 overflow-hidden">
     {/* Éléments décoratifs d'arrière-plan */}
     <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
     <div className="absolute top-4 right-4 w-16 h-16 bg-white/10 rounded-full"></div>

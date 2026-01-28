@@ -410,7 +410,7 @@ const GestionImmobilier = () => {
             >
               <motion.div variants={fadeInUp}>
                 <Button
-                  className="bg-[#8B4513] hover:bg-[#6B8E23] text-white px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
+                  className="bg-logo hover:bg-[#6B8E23] text-white px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
                   onClick={() =>
                     document
                       .getElementById("services")
@@ -449,7 +449,7 @@ const GestionImmobilier = () => {
                 className="stat-item text-center bg-white py-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-default"
                 whileHover={{ scale: 1.05 }}
               >
-                <div className="text-3xl md:text-4xl font-bold text-[#8B4513] mb-2">
+                <div className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
                   {stat.number}
                 </div>
                 <div className="text-gray-800 font-medium text-sm">
@@ -472,7 +472,7 @@ const GestionImmobilier = () => {
       <section id="services" className="py-12 bg-gray-50" ref={servicesRef}>
         <div className="container mx-auto px-4">
 
-          <h2 className=" text-2xl text-center md:text-3xl font-bold text-[#8B4513] mb-4">
+          <h2 className=" text-2xl text-center md:text-3xl font-bold text-slate-900 mb-4">
             Nos Services de Gestion
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -529,7 +529,7 @@ const GestionImmobilier = () => {
                       <currentService.icon className="h-6 w-6 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-[#8B4513]">
+                      <h3 className="text-xl font-bold text-slate-900">
                         {currentService.title}
                       </h3>
                       <p className="text-gray-600 text-sm mt-1">
@@ -557,7 +557,7 @@ const GestionImmobilier = () => {
 
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div>
-                      <div className="text-base font-bold text-[#8B4513]">
+                      <div className="text-base font-bold text-slate-900">
                         {currentService.price}
                       </div>
                       <div className="text-gray-600 text-xs flex items-center">
@@ -567,7 +567,7 @@ const GestionImmobilier = () => {
                     </div>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                       <Button
-                        className="bg-transparent border-2 border-[#8B4513] hover:bg-[#8B4513] hover:text-white text-[#8B4513] rounded-lg text-sm px-4 py-2 transition-all duration-300"
+                        className="bg-transparent border-2 border-slate-900 hover:bg-slate-900 text-white rounded-lg text-sm px-4 py-2 transition-all duration-300"
                         onClick={() => handleServiceClick(currentService.id)}
                       >
                         Choisir ce service
@@ -597,7 +597,7 @@ const GestionImmobilier = () => {
                     >
                       <Shield className="h-8 w-8 text-[#6B8E23]" />
                     </motion.div>
-                    <h4 className="text-lg font-bold text-[#8B4513] mb-2">
+                    <h4 className="text-lg font-bold text-slate-900 mb-2">
                       Garantie Satisfaction
                     </h4>
                     <p className="text-gray-600 text-sm">
@@ -630,7 +630,7 @@ const GestionImmobilier = () => {
                   <div className="w-10 h-10 bg-[#6B8E23] bg-opacity-10 rounded-lg flex items-center justify-center mb-3 group-hover:bg-[#6B8E23] transition-colors">
                     <service.icon className="h-5 w-5 text-[#6B8E23] group-hover:text-white transition-colors" />
                   </div>
-                  <h3 className="font-bold text-[#8B4513] text-sm mb-2">
+                  <h3 className="font-bold text-slate-900 text-sm mb-2">
                     {service.title}
                   </h3>
                   <p className="text-gray-600 text-xs mb-3">
@@ -694,7 +694,7 @@ const GestionImmobilier = () => {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-gray-200">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between text-[#8B4513]">
+            <DialogTitle className="flex items-center justify-between text-slate-900">
               <span>Demande de Devis</span>
             </DialogTitle>
           </DialogHeader>
@@ -921,7 +921,7 @@ const GestionImmobilier = () => {
       <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-gray-200">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between text-[#8B4513]">
+            <DialogTitle className="flex items-center justify-between text-logo">
               <span className="flex items-center">
                 <Mail className="h-5 w-5 mr-2 text-[#6B8E23]" />
                 Nous écrire

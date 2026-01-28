@@ -328,7 +328,7 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
             style={{ color: colors.primaryDark }}
           >
             Devenir{" "}
-            <span style={{ color: colors.secondaryText }}>Partenaire</span>
+            <span className="text-slate-900">Partenaire</span>
           </h1>
           <p
             className="text-sm lg:text-sm max-w-2xl mx-auto mb-4 lg:mb-8"

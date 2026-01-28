@@ -511,7 +511,7 @@ export default function Assurance() {
             <div className="flex flex-wrap gap-5 justify-center">
               <motion.div>
                 <Button
-                  className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="bg-white hover:bg-white/80 text-slate-900 rounded-xl px-8 py-5 text-lg font-semibold border-2 border-white hover:border-white/80 transition-all duration-300 shadow-lg hover:shadow-xl"
                   onClick={() => openModal('service-assurance')}
                 >
                   <Shield className="h-5 w-5 mr-3" />
@@ -542,7 +542,7 @@ export default function Assurance() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
               Nos <span className="text-[#556B2F]">Catégories d'Assurance</span>
             </h2>
             <p className="text-sm text-slate-600 max-w-2xl mx-auto">
@@ -609,7 +609,7 @@ export default function Assurance() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
               Nos <span className="text-[#556B2F]">Services d'Assurance</span>
             </h2>
             <p className="text-sm text-slate-600 max-w-2xl mx-auto">
@@ -682,7 +682,7 @@ export default function Assurance() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
               Pourquoi choisir <span className="text-[#556B2F]">nos assurances</span> ?
             </h2>
           </motion.div>
@@ -724,7 +724,7 @@ export default function Assurance() {
                       <avantage.icon className="h-8 w-8 text-[#556B2F]" />
                     )}
                   </div>
-                  <h3 className="text-xl font-bold text-[#8B4513] mb-3">{avantage.title}</h3>
+                  <h3 className="text-xl font-bold text-logo mb-3">{avantage.title}</h3>
                   <p className="text-slate-600 text-sm leading-relaxed">{avantage.description}</p>
                 </Card>
               </motion.div>
@@ -749,7 +749,7 @@ export default function Assurance() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-[#8B4513]">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-logo">
               Besoin d'une protection adaptée ?
             </h2>
             <p className="text-sm text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
