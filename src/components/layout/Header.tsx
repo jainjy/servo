@@ -1782,7 +1782,7 @@ const Header = () => {
                     <>
                       <Button
                         variant="ghost"
-                        className={`flex items-center hover:bg-transparent gap-1 text-[11px] font-bold ${scrolled ? "text-gray-700 hover:text-gray-900" : "text-white hover:text-white"} transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]`}
+                        className={`flex items-center hover:bg-transparent gap-1 text-[11px] font-bold ${scrolled ? "text-gray-700 hover:text-gray-900" : "text-white text-sm font-normal hover:text-white"} transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]`}
                       >
                         {section.title}
                         <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
@@ -1849,7 +1849,7 @@ const Header = () => {
                   ) : (
                     <Link
                       to={section.href}
-                      className={`flex items-center gap-1 text-[11px] font-bold bg-transparent hover:border-gray-50 ${scrolled ? "text-gray-700 hover:text-gray-900" : "text-white hover:text-white"} transition-all duration-200 px-4 py-2 rounded-lg border border-transparent hover:border-[#D3D3D3] group`}
+                      className={`flex items-center gap-1 text-[11px] font-bold bg-transparent hover:border-gray-50 ${scrolled ? "text-gray-700 hover:text-gray-900" : "text-white text-sm font-normal hover:text-white"} transition-all duration-200 px-4 py-2 rounded-lg border border-transparent hover:border-[#D3D3D3] group`}
                     >
                       {section.title}
                     </Link>
