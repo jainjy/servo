@@ -557,7 +557,7 @@ const Hero = () => {
       <section
         id="hero"
         ref={heroRef}
-        className="relative h-auto lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
+        className="relative h-[450px] md:h-auto lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
