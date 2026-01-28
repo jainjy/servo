@@ -462,6 +462,19 @@ const AdvertisementPopup: React.FC<Props> = ({
   const [visible, setVisible] = useState(false);
   const [nextAdTimer, setNextAdTimer] = useState<NodeJS.Timeout | null>(null);
   const [shownAdIds, setShownAdIds] = useState<Set<string>>(new Set());
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Détection mobile
+    useEffect(() => {
+      const checkMobile = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+  
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+  
+      return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
   const fetchAdvertisements = async () => {
     try {
@@ -591,6 +604,8 @@ const AdvertisementPopup: React.FC<Props> = ({
 
   const currentAd = advertisements[currentAdIndex];
   const progress = ((shownAdIds.size) / advertisements.length) * 100;
+
+  if (isMobile) return null;
 
   return (
     <div className={`advertisement-container advertisement-${position}`}>
