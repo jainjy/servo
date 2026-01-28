@@ -135,7 +135,7 @@ const GestionImmobilier = () => {
   //     duration: "Étude personnalisée",
   //   },
   // ];
- const services=[]; 
+  const services = [];
   const stats = [
     { number: "500+", label: "Biens gérés" },
     { number: "98%", label: "Taux de satisfaction" },
@@ -349,10 +349,6 @@ const GestionImmobilier = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
 
       {/* Hero Section avec animation */}
       <motion.section
@@ -461,13 +457,8 @@ const GestionImmobilier = () => {
         </div>
       </section>
 
-      <Allpub
-            title="Offres spéciales"
-            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-            background="bg-white"
-            textbg="text-slate-900"
-          />
+      <AdvertisementPopup position="page-gestion-immobilier" showOnMobile={true}/>
+      
       {/* Services Section */}
       <section id="services" className="py-12 bg-gray-50" ref={servicesRef}>
         <div className="container mx-auto px-4">
@@ -497,8 +488,8 @@ const GestionImmobilier = () => {
                 <Button
                   variant={activeService === service.id ? "default" : "outline"}
                   className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-300 ${activeService === service.id
-                      ? "bg-[#6B8E23] text-white"
-                      : "text-gray-700 border-gray-300 hover:bg-gray-100"
+                    ? "bg-[#6B8E23] text-white"
+                    : "text-gray-700 border-gray-300 hover:bg-gray-100"
                     }`}
                   onClick={() => setActiveService(service.id)}
                 >
@@ -1081,8 +1072,6 @@ const GestionImmobilier = () => {
           </motion.form>
         </DialogContent>
       </Dialog>
-
-       <AdvertisementPopup />
     </div>
   );
 };

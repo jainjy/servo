@@ -538,10 +538,6 @@ const LocationSaisonniere: React.FC = () => {
       className="min-h-screen py-8"
       style={{ backgroundColor: colors.lightBg }}
     >
-      {/* Advertisement Popup */}
-      <div className="absolute top-12 left-4 right-4 z-40">
-        <AdvertisementPopup />
-      </div>
 
       {/* Hero Section */}
       <div className="relative rounded-2xl overflow-hidden mb-8">

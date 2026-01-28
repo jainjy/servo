@@ -907,14 +907,6 @@ const ConseilPage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FFFFFF" }}>
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <section className="relative py-20 bg-slate-900 text-white overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-40"

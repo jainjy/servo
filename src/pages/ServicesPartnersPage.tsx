@@ -676,22 +676,7 @@ const ServicesPartnersPage = () => {
         </div>
       </header>
 
-      <Allpub
-            title="Offres spéciales"
-            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-            background="bg-white"
-            textbg="text-slate-900"
-          />
-
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
+      <AdvertisementPopup position="page-services-trouver-pro" showOnMobile={true}/>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Barre de recherche toujours montée : évite le démontage lors de l'affichage des résultats */}

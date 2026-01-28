@@ -87,6 +87,28 @@ const AdvertisementManager = () => {
     { value: 'section-accueil-partenaire-officiel', label: 'section-accueil-partenaire-officiel' },
     { value: 'page-achat', label: 'page-achat' },
     { value: 'pop-up', label: 'pop-up' },
+    { value: 'page-location', label: 'page-location' },
+    { value: 'page-gestion-immobilier', label: 'page-gestion-immobilier' },
+    { value: 'page-investisment-1', label: 'page-investisment-1' },
+    { value: 'page-investisment-2', label: 'page-investisment-2' },
+    { value: 'page-financement-1', label: 'page-financement-1' },
+    { value: 'page-financement-2', label: 'page-financement-2' },
+    { value: 'page-assurance-1', label: 'page-assurance-1' },
+    { value: 'page-assurance-2', label: 'page-assurance-2' },
+    { value: 'page-assurance-3', label: 'page-assurance-3' },
+    { value: 'page-logement-sociaux', label: 'page-logement-sociaux' },
+    { value: 'page-services-trouver-pro', label: 'page-services-trouver-pro' },
+    { value: 'page-services-traveaux', label: 'page-services-traveaux' },
+    { value: 'page-services-equipements', label: 'page-services-equipements' },
+    { value: 'page-services-bien-etre', label: 'page-services-bien-etre' },
+    { value: 'page-explorer-decouvrir', label: 'page-explorer-decouvrir' },
+    { value: 'page-explorer-manger', label: 'page-explorer-manger' },
+    { value: 'page-explorer-produits-1', label: 'page-explorer-produits-1' },
+    { value: 'page-explorer-produits-2', label: 'page-explorer-produits-2' },
+    { value: 'page-explorer-art', label: 'page-explorer-art' },
+    { value: 'page-partenaires-nos-partenaires', label: 'page-partenaires-nos-partenaires' },
+    { value: 'page-partenaires-nos-agences', label: 'page-partenaires-nos-agences' },
+    { value: 'page-blog', label: 'page-blog' }
   ]
 
   // Références pour les éléments vidéo
