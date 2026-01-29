@@ -16,6 +16,7 @@ import {
   Maximize2,
   X,
   SlidersHorizontal,
+  ExternalLink,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import rentProperties1 from "@/assets/propertyLouer-1.jpg";
@@ -41,6 +42,33 @@ import { useImmobilierTracking } from "@/hooks/useImmobilierTracking";
 import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
 import Allpub from "@/components/Allpub";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialiser Supabase pour Olimmo
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Interface pour les propriétés Olimmo
+interface OlimmoProperty {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  type: string;
+  location: string;
+  bedrooms: number;
+  bathrooms: number;
+  surface: string;
+  image_url: string;
+  featured: boolean;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  latitude?: number;
+  longitude?: number;
+  energy_rating?: string;
+}
 
 // Données locales de fallback
 const localRentProperties = [
@@ -94,6 +122,13 @@ const formatPrice = (price: number, rentType: string) => {
     return `${price.toLocaleString("fr-FR")} €/semaine`;
   }
   return `${price.toLocaleString("fr-FR")} €/mois`;
+};
+
+const formatOlimmoPrice = (price: number, type: string) => {
+  if (type === "location") {
+    return `${price.toLocaleString("fr-FR")} €/mois`;
+  }
+  return `${price.toLocaleString("fr-FR")} €`;
 };
 
 const normalizeFeatures = (features: any): string[] => {
@@ -170,8 +205,11 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
   const [rentType, setRentType] = useState<"longue_duree" | "saisonniere">("longue_duree");
 
   const [rentProperties, setRentProperties] = useState<any[]>([]);
+  const [olimmoProperties, setOlimmoProperties] = useState<OlimmoProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingOlimmo, setLoadingOlimmo] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorOlimmo, setErrorOlimmo] = useState<string | null>(null);
   const [demandesLoading, setDemandesLoading] = useState(false);
   const [currentImageIndexes, setCurrentImageIndexes] = useState<Record<string, number>>({});
   const [sentRequests, setSentRequests] = useState<Record<string, boolean>>({});
@@ -199,6 +237,42 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }, []);
 
+  // Récupérer les propriétés Olimmo à louer depuis Supabase
+  const fetchOlimmoProperties = async () => {
+    try {
+      setLoadingOlimmo(true);
+      setErrorOlimmo(null);
+
+      const { data, error: supabaseError } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("status", "available")
+        .eq("type", "location") // Seulement les propriétés à louer
+        .order("created_at", { ascending: false });
+
+      if (supabaseError) {
+        throw new Error(supabaseError.message);
+      }
+
+      setOlimmoProperties(data || []);
+    } catch (err) {
+      setErrorOlimmo(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement des propriétés Olimmo"
+      );
+      console.error("Erreur Supabase Olimmo:", err);
+      setOlimmoProperties([]);
+    } finally {
+      setLoadingOlimmo(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+    fetchOlimmoProperties();
+  }, [rentType]);
+
   // Intersection Observer pour le tracking
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -206,7 +280,8 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const propertyId = entry.target.getAttribute("data-property-id");
-            const property = rentProperties.find((p) => p.id === propertyId);
+            const property = rentProperties.find((p) => p.id === propertyId) || 
+                            olimmoProperties.find((p) => p.id === propertyId);
 
             if (property) {
               trackPropertyView(property.id, property.type, property.price);
@@ -220,7 +295,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
       { threshold: 0.5 }
     );
 
-    rentProperties.forEach((property) => {
+    [...rentProperties, ...olimmoProperties].forEach((property) => {
       const element = document.querySelector(`[data-property-id="${property.id}"]`);
       if (element) {
         observer.observe(element);
@@ -228,7 +303,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
     });
 
     return () => observer.disconnect();
-  }, [rentProperties, trackPropertyView, onPropertyView]);
+  }, [rentProperties, olimmoProperties, trackPropertyView, onPropertyView]);
 
   // Load user's demandes
   useEffect(() => {
@@ -292,22 +367,19 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
     }
   };
 
-  useEffect(() => {
-    fetchProperties();
-  }, [rentType]);
-
   // Initialize image indexes
   useEffect(() => {
     const indexes: Record<string, number> = {};
-    rentProperties.forEach((p: any) => {
+    [...rentProperties, ...olimmoProperties].forEach((p: any) => {
       indexes[p.id] = indexes[p.id] ?? 0;
     });
     setCurrentImageIndexes((prev) => ({ ...indexes, ...prev }));
-  }, [rentProperties]);
+  }, [rentProperties, olimmoProperties]);
 
   const getPropertyImages = (property: any): string[] => {
     if (property.images && property.images.length > 0) return property.images as string[];
     if (property.localImage) return [property.localImage as string];
+    if (property.image_url) return [property.image_url];
     return [rentProperties1];
   };
 
@@ -315,7 +387,13 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
   const handlePropertyClick = (property: any) => {
     trackPropertyClick(property.id, property.title, property.price);
     if (onPropertyClick) onPropertyClick(property);
-    navigate(`/location/${property.id}`);
+    
+    // Si c'est une propriété Olimmo, ouvrir dans un nouvel onglet
+    if (olimmoProperties.some(p => p.id === property.id)) {
+      window.open(`https://www.olimmoreunion.re/biens/${property.id}`, '_blank');
+    } else {
+      navigate(`/location/${property.id}`);
+    }
   };
 
   const handlePropertyContact = (property: any) => {
@@ -364,9 +442,39 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
     }
   };
 
+  // Combiner toutes les propriétés (API + Olimmo)
+  const allProperties = useMemo(() => {
+    const apiProperties = rentProperties.map(p => ({ ...p, source: 'api' }));
+    const olimmoPropertiesFormatted = olimmoProperties.map(p => ({ 
+      ...p, 
+      source: 'olimmo',
+      city: p.location,
+      surface: parseInt(p.surface) || 0,
+      rooms: p.bedrooms,
+      bedrooms: p.bedrooms,
+      bathrooms: p.bathrooms,
+      features: `${p.bedrooms} ch • ${p.bathrooms} sdb • ${p.surface} m²`,
+      latitude: p.latitude || -20.882057,
+      longitude: p.longitude || 55.450675,
+      rentType: "longue_duree" // Les propriétés Olimmo sont toujours longue durée
+    }));
+    
+    return [...apiProperties, ...olimmoPropertiesFormatted];
+  }, [rentProperties, olimmoProperties]);
+
   const displayed = useMemo(() => {
-    return rentProperties.filter((p) => {
+    return allProperties.filter((p) => {
       if (!p) return false;
+
+      // Filtre par type de location (saisonnière vs longue durée)
+      if (rentType === "saisonniere") {
+        // Pour les locations saisonnières, ne montrer que les propriétés API
+        if (p.source === 'olimmo') return false;
+      } else {
+        // Pour les locations longue durée, on peut montrer les deux
+        // mais si l'API a un type de location spécifique, on filtre
+        if (p.source === 'api' && p.rentType !== rentType) return false;
+      }
 
       // Recherche générale
       if (searchQuery && searchQuery.trim()) {
@@ -375,7 +483,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
           (p.title || "").toLowerCase().includes(searchTerm) ||
           (p.description || "").toLowerCase().includes(searchTerm) ||
           (p.city || "").toLowerCase().includes(searchTerm) ||
-          (p.address || "").toLowerCase().includes(searchTerm);
+          (p.address || p.location || "").toLowerCase().includes(searchTerm);
 
         if (!matchesGeneral) return false;
       }
@@ -384,7 +492,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
       if (localisation && localisation.trim()) {
         const searchTerm = normalizeAddress(localisation);
         const city = normalizeAddress(p.city || "");
-        const address = normalizeAddress(p.address || "");
+        const address = normalizeAddress(p.address || p.location || "");
         const zipCode = normalizeAddress(p.zipCode || "");
 
         const matchesLocation =
@@ -418,7 +526,19 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
 
       // Type filter
       if (typeBienLocation) {
-        if (!String(p.type || "").toLowerCase().includes(String(typeBienLocation).toLowerCase())) return false;
+        const propertyType = p.type?.toLowerCase() || '';
+        const filterType = typeBienLocation.toLowerCase();
+        
+        // Mapping pour Olimmo properties
+        if (p.source === 'olimmo') {
+          if (filterType === 'maison' && propertyType.includes('maison')) return true;
+          if (filterType === 'appartement' && propertyType.includes('appartement')) return true;
+          if (filterType === 'villa' && propertyType.includes('villa')) return true;
+          if (filterType === 'studio' && propertyType.includes('studio')) return true;
+          return false;
+        }
+        
+        if (!propertyType.includes(filterType)) return false;
       }
 
       // Features filters
@@ -447,7 +567,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
 
       return true;
     });
-  }, [rentProperties, searchQuery, localisation, typeBienLocation, priceMax, radiusKm, radiusFilterEnabled, userLocation, surfaceMin, surfaceMax, pieces, chambres, exterieur, extras, getDistanceKm]);
+  }, [allProperties, searchQuery, localisation, typeBienLocation, priceMax, radiusKm, radiusFilterEnabled, userLocation, surfaceMin, surfaceMax, pieces, chambres, exterieur, extras, rentType, getDistanceKm]);
 
   const prevImage = (id: string, total: number, e?: any) => {
     e?.stopPropagation?.();
@@ -468,6 +588,12 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
   const handleDemanderVisite = (property: any, e: React.MouseEvent) => {
     e.stopPropagation();
     handlePropertyContact(property);
+
+    // Pour les propriétés Olimmo, rediriger vers leur site
+    if (property.source === 'olimmo') {
+      window.open(`https://www.olimmoreunion.re/biens/${property.id}`, '_blank');
+      return;
+    }
 
     if (sentRequests?.[property?.id]) {
       toast({
@@ -509,6 +635,148 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
     localisation,
     radiusFilterEnabled,
   ].filter(Boolean).length;
+
+  // Composant Card pour les propriétés Olimmo
+  const OlimmoCard = ({ property }: { property: any }) => {
+    const images = getPropertyImages(property);
+    const totalImages = images.length;
+    const idx = currentImageIndexes[property.id] || 0;
+    const priceLabel = formatOlimmoPrice(property.price, property.type);
+    const isAvailable = property.status === "available";
+
+    // Calcul de la distance si le filtre de rayon est activé
+    let distanceInfo = null;
+    if (radiusFilterEnabled && property.latitude && property.longitude) {
+      const distance = getDistanceKm(
+        userLocation.lat,
+        userLocation.lon,
+        property.latitude,
+        property.longitude
+      );
+      if (distance <= radiusKm) {
+        distanceInfo = (
+          <div className="flex items-center gap-1 text-xs font-medium text-white bg-black/60 px-2 py-1 rounded-full">
+            <Navigation className="w-3 h-3" />
+            {distance.toFixed(1)} km
+          </div>
+        );
+      }
+    }
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="group"
+      >
+        <Card
+          data-property-id={property.id}
+          className="home-card cursor-pointer h-full border border-gray-200 rounded-2xl overflow-hidden bg-white hover:shadow-xl transition-all duration-300 hover:border-[#556B2F]/20"
+          onClick={() => handlePropertyClick(property)}
+        >
+          <div className="relative">
+            {/* En-tête Olimmo */}
+            <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
+              <img src="/olimmo.png" alt="Olimmo" className="w-6 h-6" />
+              <span className="text-xs font-semibold text-[#556B2F]">Olimmo</span>
+            </div>
+
+            <div className="relative h-56 overflow-hidden">
+              <img
+                src={images[idx % totalImages] || "https://via.placeholder.com/400x300?text=Olimmo"}
+                alt={property.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+
+              <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                <span className="bg-[#8B4513] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                  À LOUER
+                </span>
+                {distanceInfo}
+              </div>
+
+              {totalImages > 1 && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                    onClick={(e) => prevImage(property.id, totalImages, e)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                    onClick={(e) => nextImage(property.id, totalImages, e)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
+                    {idx + 1}/{totalImages}
+                  </div>
+                </>
+              )}
+
+              <div className="absolute bottom-3 right-3">
+                <span className="bg-[#556B2F] text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg">
+                  {priceLabel}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-4">
+              <div className="mb-3">
+                <h3 className="font-bold text-[#8B4513] text-base mb-2 line-clamp-2 leading-snug">
+                  {property.title}
+                </h3>
+                <div className="flex items-center text-sm text-gray-600">
+                  <MapPin className="h-3.5 w-3.5 text-[#556B2F] mr-1.5" />
+                  <span className="line-clamp-1">{property.location}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-gray-700 mb-4">
+                {property.surface && (
+                  <div className="flex items-center gap-1.5">
+                    <Ruler className="h-3.5 w-3.5" />
+                    <span className="font-medium">{property.surface} m²</span>
+                  </div>
+                )}
+                {property.bedrooms && (
+                  <div className="flex items-center gap-1.5">
+                    <Bed className="h-3.5 w-3.5" />
+                    <span className="font-medium">{property.bedrooms} ch.</span>
+                  </div>
+                )}
+                {property.bathrooms && (
+                  <div className="flex items-center gap-1.5">
+                    <Bath className="h-3.5 w-3.5" />
+                    <span className="font-medium">{property.bathrooms} sdb</span>
+                  </div>
+                )}
+              </div>
+
+              <p className="text-gray-600 text-xs mb-4 line-clamp-2 leading-relaxed">
+                {property.description || "Propriété proposée par Olimmo"}
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 bg-[#6B8E23] hover:bg-[#5A7D1C] text-white"
+                  onClick={() => handlePropertyClick(property)}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Voir sur Olimmo
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    );
+  };
 
   // Mode cartes seules
   if (cardsOnly) {
@@ -580,12 +848,12 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
               {/* Budget */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {rentType === "saisonniere" ? "Prix max/semaine" : "Prix max/mois"}
+                  Prix max/mois
                 </label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
-                    placeholder={rentType === "saisonniere" ? "Max €/sem" : "Max €"}
+                    placeholder="Max €"
                     value={priceMax || ''}
                     onChange={(e) => setPriceMax(e.target.value ? Number(e.target.value) : undefined)}
                     className="pl-10"
@@ -671,7 +939,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
               </div>
             </div>
 
-            {loading ? (
+            {(loading || loadingOlimmo) ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="animate-pulse">
@@ -701,6 +969,12 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {(maxItems ? displayed.slice(0, maxItems) : displayed).map((property: any, index: number) => {
+                  // Rendre la carte appropriée selon la source
+                  if (property.source === 'olimmo') {
+                    return <OlimmoCard key={property.id} property={property} />;
+                  }
+
+                  // Carte pour les propriétés de l'API
                   const images = getPropertyImages(property);
                   const totalImages = images.length;
                   const idx = currentImageIndexes[property.id] || 0;
@@ -990,10 +1264,10 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                       </div>
 
                       <div>
-                        <h4 className="font-medium text-gray-900 mb-3">Budget ({rentType === "saisonniere" ? "€/semaine" : "€/mois"})</h4>
+                        <h4 className="font-medium text-gray-900 mb-3">Budget (€/mois)</h4>
                         <div className="relative">
                           <Input
-                            placeholder={`Max ${rentType === "saisonniere" ? "€/sem" : "€"}`}
+                            placeholder="Max €"
                             value={priceMax || ''}
                             onChange={(e) => setPriceMax(e.target.value ? Number(e.target.value) : undefined)}
                           />
@@ -1103,10 +1377,10 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
           value={localisation}
           onChange={setLocalisation}
           onLocationSelect={handleLocationSelect}
-          properties={rentProperties.map((p) => ({
+          properties={allProperties.map((p) => ({
             id: p.id,
             title: p.title,
-            address: p.address || "",
+            address: p.address || p.location || "",
             city: p.city,
             latitude: p.latitude,
             longitude: p.longitude,
@@ -1435,7 +1709,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
               )}
             </div>
 
-            {loading ? (
+            {(loading || loadingOlimmo) ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                   <div key={i} className="animate-pulse">
@@ -1464,6 +1738,12 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {displayed.map((property: any, index: number) => {
+                  // Rendre la carte appropriée selon la source
+                  if (property.source === 'olimmo') {
+                    return <OlimmoCard key={property.id} property={property} />;
+                  }
+
+                  // Carte pour les propriétés de l'API
                   const images = getPropertyImages(property);
                   const totalImages = images.length;
                   const idx = currentImageIndexes[property.id] || 0;
@@ -1893,10 +2173,10 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
         value={localisation}
         onChange={setLocalisation}
         onLocationSelect={handleLocationSelect}
-        properties={rentProperties.map((p) => ({
+        properties={allProperties.map((p) => ({
           id: p.id,
           title: p.title,
-          address: p.address || "",
+          address: p.address || p.location || "",
           city: p.city,
           latitude: p.latitude,
           longitude: p.longitude,

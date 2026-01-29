@@ -15,6 +15,8 @@ import {
   Maximize2,
   X,
   SlidersHorizontal,
+  Building,
+  ExternalLink,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import property1 from "@/assets/property-1.jpg";
@@ -39,7 +41,33 @@ import { toast } from "@/hooks/use-toast";
 import { useImmobilierTracking } from "@/hooks/useImmobilierTracking";
 import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
-import Allpub from "@/components/Allpub";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialiser Supabase pour Olimmo
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Interface pour les propriétés Olimmo
+interface OlimmoProperty {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  type: string;
+  location: string;
+  bedrooms: number;
+  bathrooms: number;
+  surface: string;
+  image_url: string;
+  featured: boolean;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  latitude?: number;
+  longitude?: number;
+  energy_rating?: string;
+}
 
 // Chargement dynamique du Header seulement
 const Header = lazy(() => import('@/components/layout/Header'));
@@ -55,60 +83,20 @@ const LoadingFallback = () => (
 
 // Données locales de fallback
 const localBuyProperties = [
-  {
-    id: "1",
-    localImage: property1,
-    price: 350000,
-    title: "Villa avec piscine",
-    city: "Saint-Denis",
-    surface: 180,
-    type: "MAISON / VILLA",
-    status: "for_sale",
-    rooms: 4,
-    bedrooms: 3,
-    bathrooms: 2,
-    features: "4 ch • 3 sdb • Piscine",
-    latitude: -20.8823,
-    longitude: 55.4504,
-  },
-  {
-    id: "2",
-    localImage: property2,
-    price: 245000,
-    title: "Appartement moderne",
-    city: "Saint-Paul",
-    surface: 95,
-    type: "APPARTEMENT",
-    status: "for_sale",
-    rooms: 3,
-    bedrooms: 2,
-    bathrooms: 1,
-    features: "3 ch • 2 sdb • Balcon",
-    latitude: -21.0094,
-    longitude: 55.2696,
-  },
-  {
-    id: "3",
-    localImage: property3,
-    price: 285000,
-    title: "Maison contemporaine",
-    city: "Saint-Pierre",
-    surface: 125,
-    type: "MAISON",
-    status: "for_sale",
-    rooms: 3,
-    bedrooms: 3,
-    bathrooms: 2,
-    features: "3 ch • 2 sdb • Jardin",
-    latitude: -21.3416,
-    longitude: 55.4781,
-  },
+
 ];
 
 // Utilitaires
 const formatPrice = (price: number, _type: string, status: string) => {
   if (status === "service") return "Estimation gratuite";
   if (status === "for_rent") return `${price.toLocaleString("fr-FR")} €/mois`;
+  return `${price.toLocaleString("fr-FR")} €`;
+};
+
+const formatOlimmoPrice = (price: number, type: string) => {
+  if (type === "location") {
+    return `${price.toLocaleString("fr-FR")} €/mois`;
+  }
   return `${price.toLocaleString("fr-FR")} €`;
 };
 
@@ -188,8 +176,11 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   });
 
   const [buyProperties, setBuyProperties] = useState<any[]>([]);
+  const [olimmoProperties, setOlimmoProperties] = useState<OlimmoProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingOlimmo, setLoadingOlimmo] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorOlimmo, setErrorOlimmo] = useState<string | null>(null);
   const [demandesLoading, setDemandesLoading] = useState(false);
   const [currentImageIndexes, setCurrentImageIndexes] = useState<Record<string, number>>({});
   const [sentRequests, setSentRequests] = useState<Record<string, boolean>>({});
@@ -215,7 +206,43 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
     setMounted(true);
     trackImmobilierView();
     fetchProperties();
+    fetchOlimmoProperties();
   }, []);
+
+  // Récupérer les propriétés Olimmo depuis Supabase
+  const fetchOlimmoProperties = async () => {
+    try {
+      setLoadingOlimmo(true);
+      setErrorOlimmo(null);
+
+      const { data, error: supabaseError } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("status", "available")
+        .order("created_at", { ascending: false });
+
+      if (supabaseError) {
+        throw new Error(supabaseError.message);
+      }
+
+      // Filtrer seulement les propriétés à vendre (type !== "location" ou type === "vente")
+      const propertiesForSale = (data || []).filter((property: OlimmoProperty) => 
+        property.type !== "location" || property.type === "vente"
+      );
+
+      setOlimmoProperties(propertiesForSale);
+    } catch (err) {
+      setErrorOlimmo(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement des propriétés Olimmo"
+      );
+      console.error("Erreur Supabase Olimmo:", err);
+      setOlimmoProperties([]);
+    } finally {
+      setLoadingOlimmo(false);
+    }
+  };
 
   // Intersection Observer pour le tracking
   useEffect(() => {
@@ -224,7 +251,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const propertyId = entry.target.getAttribute("data-property-id");
-            const property = buyProperties.find((p) => p.id === propertyId);
+            const property = buyProperties.find((p) => p.id === propertyId) || 
+                            olimmoProperties.find((p) => p.id === propertyId);
 
             if (property) {
               trackPropertyView(property.id, property.type, property.price);
@@ -238,7 +266,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
       { threshold: 0.5 }
     );
 
-    buyProperties.forEach((property) => {
+    [...buyProperties, ...olimmoProperties].forEach((property) => {
       const element = document.querySelector(`[data-property-id="${property.id}"]`);
       if (element) {
         observer.observe(element);
@@ -246,7 +274,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
     });
 
     return () => observer.disconnect();
-  }, [buyProperties, trackPropertyView, onPropertyView]);
+  }, [buyProperties, olimmoProperties, trackPropertyView, onPropertyView]);
 
   // Load user's demandes
   useEffect(() => {
@@ -309,15 +337,16 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   // Initialize image indexes
   useEffect(() => {
     const indexes: Record<string, number> = {};
-    buyProperties.forEach((p: any) => {
+    [...buyProperties, ...olimmoProperties].forEach((p: any) => {
       indexes[p.id] = indexes[p.id] ?? 0;
     });
     setCurrentImageIndexes((prev) => ({ ...indexes, ...prev }));
-  }, [buyProperties]);
+  }, [buyProperties, olimmoProperties]);
 
   const getPropertyImages = (property: any): string[] => {
     if (property.images && property.images.length > 0) return property.images as string[];
     if (property.localImage) return [property.localImage as string];
+    if (property.image_url) return [property.image_url];
     return [property1];
   };
 
@@ -325,7 +354,13 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   const handlePropertyClick = (property: any) => {
     trackPropertyClick(property.id, property.title, property.price);
     if (onPropertyClick) onPropertyClick(property);
-    navigate(`/achat/${property.id}`);
+    
+    // Si c'est une propriété Olimmo, ouvrir dans un nouvel onglet
+    if (olimmoProperties.some(p => p.id === property.id)) {
+      window.open(`https://www.olimmoreunion.re/biens/${property.id}`, '_blank');
+    } else {
+      navigate(`/achat/${property.id}`);
+    }
   };
 
   const handlePropertyContact = (property: any) => {
@@ -362,8 +397,25 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
     handleFilterChange();
   }, [typeBienAchat, priceMin, priceMax, localisation, radiusKm, radiusFilterEnabled, surfaceMin, surfaceMax, bedrooms, bathrooms, searchQuery]);
 
+  // Combiner toutes les propriétés (API + Olimmo)
+  const allProperties = useMemo(() => {
+    const apiProperties = buyProperties.map(p => ({ ...p, source: 'api' }));
+    const olimmoPropertiesFormatted = olimmoProperties.map(p => ({ 
+      ...p, 
+      source: 'olimmo',
+      city: p.location,
+      surface: parseInt(p.surface) || 0,
+      rooms: p.bedrooms,
+      features: `${p.bedrooms} ch • ${p.bathrooms} sdb • ${p.surface} m²`,
+      latitude: p.latitude || -20.882057,
+      longitude: p.longitude || 55.450675
+    }));
+    
+    return [...apiProperties, ...olimmoPropertiesFormatted];
+  }, [buyProperties, olimmoProperties]);
+
   const displayed = useMemo(() => {
-    return buyProperties.filter((p) => {
+    return allProperties.filter((p) => {
       if (!p) return false;
 
       // Recherche générale
@@ -373,7 +425,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
           (p.title || "").toLowerCase().includes(searchTerm) ||
           (p.description || "").toLowerCase().includes(searchTerm) ||
           (p.city || "").toLowerCase().includes(searchTerm) ||
-          (p.address || "").toLowerCase().includes(searchTerm);
+          (p.address || p.location || "").toLowerCase().includes(searchTerm);
 
         if (!matchesGeneral) return false;
       }
@@ -382,7 +434,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
       if (localisation && localisation.trim()) {
         const searchTerm = normalizeAddress(localisation);
         const city = normalizeAddress(p.city || "");
-        const address = normalizeAddress(p.address || "");
+        const address = normalizeAddress(p.address || p.location || "");
         const zipCode = normalizeAddress(p.zipCode || "");
 
         const matchesLocation =
@@ -417,7 +469,18 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
 
       // Type filter
       if (typeBienAchat) {
-        if (!String(p.type || "").toLowerCase().includes(String(typeBienAchat).toLowerCase())) return false;
+        const propertyType = p.type?.toLowerCase() || '';
+        const filterType = typeBienAchat.toLowerCase();
+        
+        // Mapping pour Olimmo properties
+        if (p.source === 'olimmo') {
+          if (filterType === 'maison' && propertyType.includes('maison')) return true;
+          if (filterType === 'appartement' && propertyType.includes('appartement')) return true;
+          if (filterType === 'terrain' && propertyType.includes('terrain')) return true;
+          return false;
+        }
+        
+        if (!propertyType.includes(filterType)) return false;
       }
 
       // Bedrooms filter
@@ -434,7 +497,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
 
       return true;
     });
-  }, [buyProperties, searchQuery, localisation, typeBienAchat, priceMin, priceMax, radiusKm, radiusFilterEnabled, userLocation, surfaceMin, surfaceMax, bedrooms, bathrooms, getDistanceKm]);
+  }, [allProperties, searchQuery, localisation, typeBienAchat, priceMin, priceMax, radiusKm, radiusFilterEnabled, userLocation, surfaceMin, surfaceMax, bedrooms, bathrooms, getDistanceKm]);
 
   const prevImage = (id: string, total: number, e?: any) => {
     e?.stopPropagation?.();
@@ -455,6 +518,12 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   const handleDemanderVisite = (property: any, e: React.MouseEvent) => {
     e.stopPropagation();
     handlePropertyContact(property);
+
+    // Pour les propriétés Olimmo, rediriger vers leur site
+    if (property.source === 'olimmo') {
+      window.open(`https://www.olimmoreunion.re/biens/${property.id}`, '_blank');
+      return;
+    }
 
     if (sentRequests?.[property?.id]) {
       toast({
@@ -508,6 +577,148 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   if (!mounted) {
     return <LoadingFallback />;
   }
+
+  // Composant Card pour les propriétés Olimmo
+  const OlimmoCard = ({ property }: { property: any }) => {
+    const images = getPropertyImages(property);
+    const totalImages = images.length;
+    const idx = currentImageIndexes[property.id] || 0;
+    const priceLabel = formatOlimmoPrice(property.price, property.type);
+    const isAvailable = property.status === "available";
+
+    // Calcul de la distance si le filtre de rayon est activé
+    let distanceInfo = null;
+    if (radiusFilterEnabled && property.latitude && property.longitude) {
+      const distance = getDistanceKm(
+        userLocation.lat,
+        userLocation.lon,
+        property.latitude,
+        property.longitude
+      );
+      if (distance <= radiusKm) {
+        distanceInfo = (
+          <div className="flex items-center gap-1 text-xs font-medium text-white bg-black/60 px-2 py-1 rounded-full">
+            <Navigation className="w-3 h-3" />
+            {distance.toFixed(1)} km
+          </div>
+        );
+      }
+    }
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="group"
+      >
+        <Card
+          data-property-id={property.id}
+          className="home-card cursor-pointer h-full border border-gray-200 rounded-2xl overflow-hidden bg-white hover:shadow-xl transition-all duration-300 hover:border-[#556B2F]/20"
+          onClick={() => handlePropertyClick(property)}
+        >
+          <div className="relative">
+            {/* En-tête Olimmo */}
+            <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
+              <img src="/olimmo.png" alt="Olimmo" className="w-6 h-6" />
+              <span className="text-xs font-semibold text-[#556B2F]">Olimmo</span>
+            </div>
+
+            <div className="relative h-56 overflow-hidden">
+              <img
+                src={images[idx % totalImages] || "https://via.placeholder.com/400x300?text=Olimmo"}
+                alt={property.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+
+              <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                <span className="bg-[#8B4513] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                  {property.type === "location" ? "À LOUER" : "À VENDRE"}
+                </span>
+                {distanceInfo}
+              </div>
+
+              {totalImages > 1 && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                    onClick={(e) => prevImage(property.id, totalImages, e)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                    onClick={(e) => nextImage(property.id, totalImages, e)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
+                    {idx + 1}/{totalImages}
+                  </div>
+                </>
+              )}
+
+              <div className="absolute bottom-3 right-3">
+                <span className="bg-[#556B2F] text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg">
+                  {priceLabel}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-4">
+              <div className="mb-3">
+                <h3 className="font-bold text-[#8B4513] text-base mb-2 line-clamp-2 leading-snug">
+                  {property.title}
+                </h3>
+                <div className="flex items-center text-sm text-gray-600">
+                  <MapPin className="h-3.5 w-3.5 text-[#556B2F] mr-1.5" />
+                  <span className="line-clamp-1">{property.location}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-gray-700 mb-4">
+                {property.surface && (
+                  <div className="flex items-center gap-1.5">
+                    <Ruler className="h-3.5 w-3.5" />
+                    <span className="font-medium">{property.surface} m²</span>
+                  </div>
+                )}
+                {property.bedrooms && (
+                  <div className="flex items-center gap-1.5">
+                    <Bed className="h-3.5 w-3.5" />
+                    <span className="font-medium">{property.bedrooms} ch.</span>
+                  </div>
+                )}
+                {property.bathrooms && (
+                  <div className="flex items-center gap-1.5">
+                    <Bath className="h-3.5 w-3.5" />
+                    <span className="font-medium">{property.bathrooms} sdb</span>
+                  </div>
+                )}
+              </div>
+
+              <p className="text-gray-600 text-xs mb-4 line-clamp-2 leading-relaxed">
+                {property.description || "Propriété proposée par Olimmo"}
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 bg-[#6B8E23] hover:bg-[#5A7D1C] text-white"
+                  onClick={() => handlePropertyClick(property)}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Voir sur Olimmo
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    );
+  };
 
   // Mode cartes seules (pour intégration dans Immobilier)
   if (cardsOnly) {
@@ -671,7 +882,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                 </div>
               </div>
 
-              {loading ? (
+              {(loading || loadingOlimmo) ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="animate-pulse">
@@ -701,6 +912,12 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {(maxItems ? displayed.slice(0, maxItems) : displayed).map((property: any, index: number) => {
+                    // Rendre la carte appropriée selon la source
+                    if (property.source === 'olimmo') {
+                      return <OlimmoCard key={property.id} property={property} />;
+                    }
+
+                    // Carte pour les propriétés de l'API
                     const images = getPropertyImages(property);
                     const totalImages = images.length;
                     const idx = currentImageIndexes[property.id] || 0;
@@ -1110,10 +1327,10 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
             value={localisation}
             onChange={setLocalisation}
             onLocationSelect={handleLocationSelect}
-            properties={buyProperties.map((p) => ({
+            properties={allProperties.map((p) => ({
               id: p.id,
               title: p.title,
-              address: p.address || "",
+              address: p.address || p.location || "",
               city: p.city,
               latitude: p.latitude,
               longitude: p.longitude,
@@ -1136,8 +1353,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
           <div className="fixed -z-10 overflow-hidden bg-black w-full h-96 top-0">
             <img
               src="/property-1.jpg"
-              className="opacity-45 o
-              object-cover w-full h-full"
+              className="opacity-45 object-cover w-full h-full"
               alt="Background immobilier"
             />
           </div>
@@ -1423,6 +1639,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
               )}
             </div>
             <AdvertisementPopup position="page-achat" />
+            
             {/* Résultats */}
             <div className="mt-4 bg-white rounded-xl shadow-lg p-6 ">
               <div className="flex justify-between items-center mb-6">
@@ -1437,7 +1654,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                 )}
               </div>
 
-              {loading ? (
+              {(loading || loadingOlimmo) ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                     <div key={i} className="animate-pulse">
@@ -1467,6 +1684,12 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {displayed.map((property: any, index: number) => {
+                    // Rendre la carte appropriée selon la source
+                    if (property.source === 'olimmo') {
+                      return <OlimmoCard key={property.id} property={property} />;
+                    }
+
+                    // Carte pour les propriétés de l'API
                     const images = getPropertyImages(property);
                     const totalImages = images.length;
                     const idx = currentImageIndexes[property.id] || 0;
@@ -1976,10 +2199,10 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         value={localisation}
         onChange={setLocalisation}
         onLocationSelect={handleLocationSelect}
-        properties={buyProperties.map((p) => ({
+        properties={allProperties.map((p) => ({
           id: p.id,
           title: p.title,
-          address: p.address || "",
+          address: p.address || p.location || "",
           city: p.city,
           latitude: p.latitude,
           longitude: p.longitude,
