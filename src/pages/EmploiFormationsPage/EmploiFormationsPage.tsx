@@ -115,13 +115,6 @@ const EmploiFormationsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F5F5F5] to-white mt-16">
       {/* Hero Section */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <div
         className="relative text-white py-16 px-4 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: heroData[activeSection].bgImage }}

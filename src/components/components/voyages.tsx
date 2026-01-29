@@ -434,14 +434,6 @@ const VoyagesAeriens: React.FC = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       {/* Navigation */}
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden">
         <div

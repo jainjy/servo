@@ -1518,9 +1518,6 @@ export default function Financement() {
       {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
 
-        <div className="absolute top-12 left-4 right-4 z-50">
-          <AdvertisementPopup />
-        </div>
         {/* Image de fond avec overlay */}
         <div className="absolute inset-0">
           <div
@@ -1575,13 +1572,8 @@ export default function Financement() {
         </div>
       </section>
 
-<Allpub
-        title="Offres spéciales"
-        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-        background="bg-white"
-        textbg="text-slate-900"
-      />
+      <AdvertisementPopup position='page-financement-1' showOnMobile={true}/>
+
       {/* Section Financement détaillé */}
       <section className="py-2 lg:py-20 bg-[#FAFAFA]" id="financement-detail">
         <div className="container mx-auto px-4">
@@ -1667,13 +1659,8 @@ export default function Financement() {
         </div>
       </section>
 
-      <Allpub
-        title="Offres spéciales"
-        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-        background="bg-white"
-        textbg="text-slate-900"
-      />
+      <AdvertisementPopup position='page-financement-2' showOnMobile={true}/>
+
       {/* Section Partenaires Financement */}
       <section className="lg:py-20 bg-white" id="partenaires">
         <div className="container mx-auto px-4">
@@ -1803,7 +1790,6 @@ export default function Financement() {
           onSimulationSubmit={handleSimulationSubmit}
         />
       )}
-      <AdvertisementPopup />
     </div>
   );
 }

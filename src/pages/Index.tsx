@@ -106,11 +106,11 @@ const Index = () => {
             <AdvertisementPopup
               size="small"
               position="pop-up"
+              showOnMobile={true}
             />
           </div>
           <Hero />
           <ServiceCards />
-          <AdvertisementPopup  position="section2"/>
           <TravauxPreview homeCards />
 
           {/* Section de recommandations intelligentes - affichée seulement si token valide ET données disponibles */}

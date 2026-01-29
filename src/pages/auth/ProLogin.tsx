@@ -138,11 +138,6 @@ const LoginPage = () => {
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 -z-10 bg-white/5 rounded-full"></div>
 
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-4 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
       {/* Publicité personnalisée pour la page de login - Desktop seulement */}
       {!isMobile && isAdVisible && (
         <motion.article

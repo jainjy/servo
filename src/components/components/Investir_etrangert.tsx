@@ -222,9 +222,6 @@ const InvestirEtranger = () => {
 
   return (
     <div className="min-h-screen  text-[#2a2a2a]">
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       {/* Hero Section */}
       <section className="text-white py-16">
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
@@ -264,13 +261,8 @@ const InvestirEtranger = () => {
         </div>
       </section>
 
-      <Allpub
-        title="Offres spéciales"
-        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-        background="bg-white"
-        textbg="text-slate-900"
-      />
+      
+      <AdvertisementPopup position='page-investisment-1' showOnMobile={true}/>
 
       {/* Section Pays Active */}
       <section className="py-6">
@@ -496,13 +488,7 @@ const InvestirEtranger = () => {
         </div>
       </section>
 
-      <Allpub
-        title="Offres spéciales"
-        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-        background="bg-white"
-        textbg="text-slate-900"
-      />
+      <AdvertisementPopup position='page-investisment-2' showOnMobile={true}/>
 
       {/* Section Vente/Location/Gestion */}
       <section className="py-8 bg-[#FAFAFA] border-t border-[#D3D3D3]">
@@ -648,8 +634,6 @@ const InvestirEtranger = () => {
         onClose={closeAuditModal}
         onAddAudit={handleAddAudit}
       />
-
-      <AdvertisementPopup />
     </div>
   );
 };

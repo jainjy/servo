@@ -238,7 +238,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
       )}
 
       {/* Publicité section Travevaux */}
-      <AdvertisementPopup position="section-accueil-travaux" size="medium"/>
+      <AdvertisementPopup position="section-accueil-travaux" size="medium" showOnMobile={true}/>
 
       {/* SECTION NOS TRAVAUX – COTE A COTE PORTFOLIO */}
       <section className="bg-slate-100 py-8 sm:py-10 md:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 rounded-md">

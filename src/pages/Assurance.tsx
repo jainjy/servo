@@ -477,9 +477,6 @@ export default function Assurance() {
       {/* Hero Section */}
       <section className="relative pt-16 pb-44 overflow-hidden">
         {/* Image de fond avec overlay */}
-        <div className="absolute top-12 left-4 right-4 z-50">
-          <AdvertisementPopup />
-        </div>
         <div className="absolute inset-0">
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -592,13 +589,7 @@ export default function Assurance() {
         </div>
       </section>
 
-      <Allpub
-        title="Offres spéciales"
-        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-        background="bg-white"
-        textbg="text-slate-900"
-      />
+      <AdvertisementPopup position="page-assurance-1" showOnMobile={true}/>
 
       {/* Section Services d'Assurance */}
       <section className="py-8 lg:py-4 bg-white" id="services-assurance">
@@ -665,13 +656,7 @@ export default function Assurance() {
         </div>
       </section>
 
-      <Allpub
-        title="Offres spéciales"
-        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-        background="bg-white"
-        textbg="text-slate-900"
-      />
+      <AdvertisementPopup position="page-assurance-2" showOnMobile={true}/>
 
       {/* Section Avantages */}
       <section className="py-8 lg:py-4 bg-[#FAFAFA]" id="avantages-assurance">
@@ -733,13 +718,7 @@ export default function Assurance() {
         </div>
       </section>
 
-      <Allpub
-        title="Offres spéciales"
-        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-        background="bg-white"
-        textbg="text-slate-900"
-      />
+      <AdvertisementPopup position="page-assurance-3" showOnMobile={true}/>
 
       {/* CTA Section */}
       <section className="py-2 lg:py-4 m-4" id="devis-assurance">
@@ -777,8 +756,6 @@ export default function Assurance() {
           onSubmit={handleSubmit}
         />
       )}
-
-      <AdvertisementPopup />
 
     </div>
   );

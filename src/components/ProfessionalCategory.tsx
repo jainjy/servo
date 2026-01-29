@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import Allpub from "./Allpub";
+import AdvertisementPopup from "./AdvertisementPopup";
 
 interface Professional {
   id: string;
@@ -180,13 +181,9 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
                 }`}
             />
           </button>
-          <Allpub
-            title="Offres spéciales"
-            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-            background="bg-white"
-            textbg="text-slate-900"
-          />
+
+          <AdvertisementPopup position="page-partenaires-nos-agences" showOnMobile={true}/>
+
           {/* Contenu des filtres */}
           <div className={`${showFilters ? "block" : "hidden"} md:block`}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

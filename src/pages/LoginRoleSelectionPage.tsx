@@ -100,11 +100,6 @@ const LoginRoleSelectionPage = () => {
         <div className="absolute inset-0 backdrop-blur-md z-0" />
       </div>
 
-      {/* Advertisement Popup */}
-      <div className="absolute top-4 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
       <div className="absolute inset-0 -z-20">
         <img
           src="/nature.jpeg"

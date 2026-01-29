@@ -114,13 +114,6 @@ const BienEtre = () => {
 
   return (
     <div className="font-sans text-foreground min-h-screen bg-background">
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       {/* HERO - Toujours visible */}
       <section
         className="relative h-80 py-16 lg:py-20 text-center text-white overflow-hidden"
@@ -195,13 +188,7 @@ const BienEtre = () => {
         </SlideIn>
       </div>
 
-      <Allpub
-        title="Offres spéciales"
-        description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-        image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-        background="bg-white"
-        textbg="text-slate-900"
-      />
+      <AdvertisementPopup position="page-services-bien-etre" showOnMobile={true}/>
 
       {/* CONTENU DE LA TABULATION */}
       <div className="container mx-auto px-4 py-8">

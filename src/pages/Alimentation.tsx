@@ -501,14 +501,6 @@ const Alimentation = () => {
   return (
     <div className="min-h-screen relative pt-16 bg-[#FFFFFF]">
       {/* Background Image avec overlay */}
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -563,13 +555,7 @@ const Alimentation = () => {
             </div>
           </div>
 
-          <Allpub
-            title="Offres spéciales"
-            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-            background="bg-white"
-            textbg="text-slate-900"
-          />
+          <AdvertisementPopup position="page-explorer-manger" showOnMobile={true}/>
 
           {/* Sections */}
           {isCategoriesLoading ? (

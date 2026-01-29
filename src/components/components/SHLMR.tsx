@@ -751,9 +751,6 @@ const LogementsSHLMR = () => {
     return (
         <div className="min-h-screen" style={{ backgroundColor: COLORS["light-bg"] }}>
             {/* Hero Section avec image */}
-            <div className="absolute top-12 left-4 right-4 z-50">
-                <AdvertisementPopup />
-            </div>
             <motion.section
                 ref={heroRef}
                 initial={{ opacity: 0 }}
@@ -806,13 +803,7 @@ const LogementsSHLMR = () => {
                 </div>
             </motion.section>
 
-            <Allpub
-            title="Offres spéciales"
-            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
-            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-            background="bg-white"
-            textbg="text-slate-900"
-          />
+           <AdvertisementPopup position="page-logement-sociaux" showOnMobile={true}/>
 
             {/* Navigation par onglets */}
             <section className="py-8 -mt-10 relative z-20">
@@ -1030,7 +1021,6 @@ const LogementsSHLMR = () => {
                                 </div>
                             </motion.div>
                         </div>
-                        <AdvertisementPopup />
                     </motion.section>
                 )}
             </AnimatePresence>
@@ -1148,7 +1138,6 @@ const LogementsSHLMR = () => {
                                 </div>
                             </div>
                         </div>
-                        <AdvertisementPopup />
                     </motion.section>
                 )}
             </AnimatePresence>
@@ -1237,8 +1226,6 @@ const LogementsSHLMR = () => {
                                     />
                                 ))}
                             </div>
-
-                            <AdvertisementPopup />
 
                             {/* Message si aucun résultat */}
                             {filteredLogements.length === 0 && (
