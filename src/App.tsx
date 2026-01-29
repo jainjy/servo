@@ -256,6 +256,7 @@ import Load1 from "./Loading/Load1";
 import Load2 from "./Loading/Load2";
 import ParapentePage from "./components/pro/ParapentePage";
 import UserParapentePage from "./pages/UserParapentePage";
+import { AdvertisementProvider } from "./components/AdvertisementProvider";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -321,770 +322,775 @@ const App = () => {
                 minimumLoadingTime={1500}
               />
             )}
-            <Toaster />
-            <ToastContainer />
-            <Sonner />
-            <NetworkStatus />
-            <BrowserRouter>
-              {/* Intégration du GlobalTracking pour le tracking des pages */}
-              <GlobalTracking />
+            <AdvertisementProvider
+              refreshInterval={5}
+              apiBaseUrl={import.meta.env.VITE_API_URL}
+            >
+              <Toaster />
+              <ToastContainer />
+              <Sonner />
+              <NetworkStatus />
+              <BrowserRouter>
+                {/* Intégration du GlobalTracking pour le tracking des pages */}
+                <GlobalTracking />
 
-              <ScrollToTop />
-              <ScrollToHash />
+                <ScrollToTop />
+                <ScrollToHash />
 
-              <Layout>
-                <Routes>
-                  <Route path="/formations" element={<FormationsPage />} />
-                  <Route
-                    path="/emploi-formations"
-                    element={<EmploiFormationsPage />}
-                  />
-                  <Route path="/emploi" element={<OffresEmploiPage />} />
-                  <Route
-                    path="/location-voiture"
-                    element={<LocationVoiturePage />}
-                  />
-                  <Route
-                    path="/alternance-stages"
-                    element={<AlternanceStagePage />}
-                  />
-                  {/* Section publiques Routes */}
-                  <Route
-                    path="/services-partners"
-                    element={<ServicesPartnersPage />}
-                  />
-                  {/* <Route path="/" element={<Index />} /> */}
-                  <Route
-                    path="/"
-                    element={<Navigate to="/home" replace />}
-                  />
-                  <Route path="/about" element={<Load2 />} />
-                  <Route path="/home" element={<Index />} />
-                  {/* NOUVELLE ROUTE POUR LA PAGE D'ACCOMPAGNEMENT */}
-                  <Route
-                    path="/accompagnement"
-                    element={<AccompagnementPage />}
-                  />
-                  <Route path="/conseil" element={<ConseilPage />} />
-                  <Route path="/payement-test" element={<PaymentTest />} />
-                  <Route path="/bien-etre" element={<BienEtre />} />
-                  <Route
-                    path="/medecines-naturelles"
-                    element={<MedecineNaturelle />}
-                  />
-                  <Route path="/digitalisation" element={<Digitalisation />} />
-                  <Route
-                    path="/digitalisation/services"
-                    element={<Digitalisation />}
-                  />
-                  <Route
-                    path="/digitalisation/partenaires"
-                    element={<DigitalisationPartenaires />}
-                  />
-                  <Route
-                    path="/digitalisation/professionnel/:id"
-                    element={<DigitalisationProfessionnelDetail />}
-                  />
-                  <Route
-                    path="/services/digitalisation/:id"
-                    element={<DigitalisationServiceDetail />}
-                  />
-                  <Route path="/cookies" element={<CookiesPolicy />} />
-                  <Route path="/immobilier" element={<Immobilier />} />
-                  <Route path="/achat" element={<PropertyBuy />} />
-                  <Route path="/location" element={<PropertyRent />} />
-                  <Route path="/rachat" element={<RachatServiceCard />} />
-                  {/* 🔥 ROUTES DES EXPÉRIENCES - CORRIGÉES 🔥 */}
-                  <Route
-                    path="/sejour-experience"
-                    element={<SejoursExperiences />}
-                  />
-                  <Route
-                    path="/sejour-experience/:id"
-                    element={<ExperienceDetail />}
-                  />
-                  <Route
-                    path="/sejour-experience/:id/book"
-                    element={<ExperienceBooking />}
-                  />
-                  {/* Routes alternatives (optionnel) */}
-                  <Route path="/experiences" element={<SejoursExperiences />} />
-                  <Route
-                    path="/experiences/:id"
-                    element={<ExperienceDetail />}
-                  />
-                  <Route
-                    path="/experiences/:id/book"
-                    element={<ExperienceBooking />}
-                  />
-                  <Route path="/explorer-vivre" element={<ExplorerVivre />} />
-                  <Route
-                    path="/evenement-decouverte"
-                    element={<EventsDiscoveries />}
-                  />
-                  <Route
-                    path="/nature-patrimoine"
-                    element={<NaturePatrimoine />}
-                  />
-                  <Route
-                    path="/sejour-experience"
-                    element={<SejoursExperiences />}
-                  />
-                  <Route
-                    path="/bien-etre-alimentation"
-                    element={<BienEtreAlimentation />}
-                  />
-                  <Route
-                    path="/depannage-entretien"
-                    element={<DepannageEntretien />}
-                  />
-                  <Route
-                    path="/artistes-createurs"
-                    element={<ArtistesCreateurs />}
-                  />
-                  <Route
-                    path="/galerie-exposition"
-                    element={<GaleriesExpositions />}
-                  />
-                  <Route
-                    path="/video-creation-visuelle"
-                    element={<VideoCreationVisuelle />}
-                  />
-                  <Route
-                    path="/oeuvre-creation-locales"
-                    element={<OeuvresCreationsLocales />}
-                  />
-                  <Route
-                    path="/podcasts-inspirer-eveiller"
-                    element={<PodcastsComponent />}
-                  />
-                  <Route
-                    path="/videos-inspirer-eveiller"
-                    element={<VideosComponent />}
-                  />
-                  <Route
-                    path="/portraits-locaux"
-                    element={<PortraitsLocaux />}
-                  />
-                  <Route
-                    path="/bon-plan-conseil"
-                    element={<BonsPlansConseils />}
-                  />
-                  <Route
-                    path="/location-Saisonniere"
-                    element={<LocationSaisonniere />}
-                  />
-                  <Route
-                    path="/location-saisonniere"
-                    element={<PropertyRent isSeasonal={true} />}
-                  />
-                  <Route path="/droitFamille" element={<DroitFamille />} />
-                  <Route path="/services-ibr" element={<ServicesIBRPage />} />
-                  {/* Section entreprise */}
-                  <Route path="/reprise" element={<CreationReprise />} />
-                  <Route path="/auditMediation" element={<AuditMediation />} />
-                  <Route path="/aideFonds" element={<AidesLeveesFonds />} />
-                  <Route
-                    path="/communicationMarketing"
-                    element={<CommunicationMarketing />}
-                  />
-                  <Route
-                    path="/Conseil_accompagnement"
-                    element={<ConseilsAccompagnement />}
-                  />
-                  <Route
-                    path="/juridiqueLiquidation"
-                    element={<JuridiqueLiquidation />}
-                  />
-                  <Route
-                    path="/account-suspended"
-                    element={<AccountSuspended />}
-                  />
-                  <Route
-                    path="/tous-les-partenaires"
-                    element={<TousLesPartenaires />}
-                  />
-                  <Route
-                    path="/podcast_service"
-                    element={<PodcastsServices />}
-                  />
-                  <Route
-                    path="/podcasts-batiment"
-                    element={<PodcastsBatiment />}
-                  />
-                  <Route
-                    path="/podcasts-bien_etre"
-                    element={<PodcastsBienEtre />}
-                  />
-                  <Route path="/programme-neuf" element={<ProgrammeNeuf />} />
-                  {/* 🆕 ROUTE POUR INVESTISSEMENT INTERNATIONAL */}
-                  <Route
-                    path="/investir-etranger"
-                    element={<InvestirEtranger />}
-                  />
-                  <Route path="/SHLMR" element={<SHLMR />} />
-                  <Route
-                    path="/lieux_historique"
-                    element={
-                      <LieuxHistoriques ville="Paris" typeFiltre="tous" />
-                    }
-                  />
-                  
-                  <Route path="/parapente" element={<UserParapentePage />} />
-                  <Route
-                    path="/formationTourisme"
-                    element={<FormationsTourisme />}
-                  />
-                  <Route path="/voyages" element={<Voyages />} />
-                  {/* <Route
+                <Layout>
+                  <Routes>
+                    <Route path="/formations" element={<FormationsPage />} />
+                    <Route
+                      path="/emploi-formations"
+                      element={<EmploiFormationsPage />}
+                    />
+                    <Route path="/emploi" element={<OffresEmploiPage />} />
+                    <Route
+                      path="/location-voiture"
+                      element={<LocationVoiturePage />}
+                    />
+                    <Route
+                      path="/alternance-stages"
+                      element={<AlternanceStagePage />}
+                    />
+                    {/* Section publiques Routes */}
+                    <Route
+                      path="/services-partners"
+                      element={<ServicesPartnersPage />}
+                    />
+                    {/* <Route path="/" element={<Index />} /> */}
+                    <Route
+                      path="/"
+                      element={<Navigate to="/home" replace />}
+                    />
+                    <Route path="/about" element={<Load2 />} />
+                    <Route path="/home" element={<Index />} />
+                    {/* NOUVELLE ROUTE POUR LA PAGE D'ACCOMPAGNEMENT */}
+                    <Route
+                      path="/accompagnement"
+                      element={<AccompagnementPage />}
+                    />
+                    <Route path="/conseil" element={<ConseilPage />} />
+                    <Route path="/payement-test" element={<PaymentTest />} />
+                    <Route path="/bien-etre" element={<BienEtre />} />
+                    <Route
+                      path="/medecines-naturelles"
+                      element={<MedecineNaturelle />}
+                    />
+                    <Route path="/digitalisation" element={<Digitalisation />} />
+                    <Route
+                      path="/digitalisation/services"
+                      element={<Digitalisation />}
+                    />
+                    <Route
+                      path="/digitalisation/partenaires"
+                      element={<DigitalisationPartenaires />}
+                    />
+                    <Route
+                      path="/digitalisation/professionnel/:id"
+                      element={<DigitalisationProfessionnelDetail />}
+                    />
+                    <Route
+                      path="/services/digitalisation/:id"
+                      element={<DigitalisationServiceDetail />}
+                    />
+                    <Route path="/cookies" element={<CookiesPolicy />} />
+                    <Route path="/immobilier" element={<Immobilier />} />
+                    <Route path="/achat" element={<PropertyBuy />} />
+                    <Route path="/location" element={<PropertyRent />} />
+                    <Route path="/rachat" element={<RachatServiceCard />} />
+                    {/* 🔥 ROUTES DES EXPÉRIENCES - CORRIGÉES 🔥 */}
+                    <Route
+                      path="/sejour-experience"
+                      element={<SejoursExperiences />}
+                    />
+                    <Route
+                      path="/sejour-experience/:id"
+                      element={<ExperienceDetail />}
+                    />
+                    <Route
+                      path="/sejour-experience/:id/book"
+                      element={<ExperienceBooking />}
+                    />
+                    {/* Routes alternatives (optionnel) */}
+                    <Route path="/experiences" element={<SejoursExperiences />} />
+                    <Route
+                      path="/experiences/:id"
+                      element={<ExperienceDetail />}
+                    />
+                    <Route
+                      path="/experiences/:id/book"
+                      element={<ExperienceBooking />}
+                    />
+                    <Route path="/explorer-vivre" element={<ExplorerVivre />} />
+                    <Route
+                      path="/evenement-decouverte"
+                      element={<EventsDiscoveries />}
+                    />
+                    <Route
+                      path="/nature-patrimoine"
+                      element={<NaturePatrimoine />}
+                    />
+                    <Route
+                      path="/sejour-experience"
+                      element={<SejoursExperiences />}
+                    />
+                    <Route
+                      path="/bien-etre-alimentation"
+                      element={<BienEtreAlimentation />}
+                    />
+                    <Route
+                      path="/depannage-entretien"
+                      element={<DepannageEntretien />}
+                    />
+                    <Route
+                      path="/artistes-createurs"
+                      element={<ArtistesCreateurs />}
+                    />
+                    <Route
+                      path="/galerie-exposition"
+                      element={<GaleriesExpositions />}
+                    />
+                    <Route
+                      path="/video-creation-visuelle"
+                      element={<VideoCreationVisuelle />}
+                    />
+                    <Route
+                      path="/oeuvre-creation-locales"
+                      element={<OeuvresCreationsLocales />}
+                    />
+                    <Route
+                      path="/podcasts-inspirer-eveiller"
+                      element={<PodcastsComponent />}
+                    />
+                    <Route
+                      path="/videos-inspirer-eveiller"
+                      element={<VideosComponent />}
+                    />
+                    <Route
+                      path="/portraits-locaux"
+                      element={<PortraitsLocaux />}
+                    />
+                    <Route
+                      path="/bon-plan-conseil"
+                      element={<BonsPlansConseils />}
+                    />
+                    <Route
+                      path="/location-Saisonniere"
+                      element={<LocationSaisonniere />}
+                    />
+                    <Route
+                      path="/location-saisonniere"
+                      element={<PropertyRent isSeasonal={true} />}
+                    />
+                    <Route path="/droitFamille" element={<DroitFamille />} />
+                    <Route path="/services-ibr" element={<ServicesIBRPage />} />
+                    {/* Section entreprise */}
+                    <Route path="/reprise" element={<CreationReprise />} />
+                    <Route path="/auditMediation" element={<AuditMediation />} />
+                    <Route path="/aideFonds" element={<AidesLeveesFonds />} />
+                    <Route
+                      path="/communicationMarketing"
+                      element={<CommunicationMarketing />}
+                    />
+                    <Route
+                      path="/Conseil_accompagnement"
+                      element={<ConseilsAccompagnement />}
+                    />
+                    <Route
+                      path="/juridiqueLiquidation"
+                      element={<JuridiqueLiquidation />}
+                    />
+                    <Route
+                      path="/account-suspended"
+                      element={<AccountSuspended />}
+                    />
+                    <Route
+                      path="/tous-les-partenaires"
+                      element={<TousLesPartenaires />}
+                    />
+                    <Route
+                      path="/podcast_service"
+                      element={<PodcastsServices />}
+                    />
+                    <Route
+                      path="/podcasts-batiment"
+                      element={<PodcastsBatiment />}
+                    />
+                    <Route
+                      path="/podcasts-bien_etre"
+                      element={<PodcastsBienEtre />}
+                    />
+                    <Route path="/programme-neuf" element={<ProgrammeNeuf />} />
+                    {/* 🆕 ROUTE POUR INVESTISSEMENT INTERNATIONAL */}
+                    <Route
+                      path="/investir-etranger"
+                      element={<InvestirEtranger />}
+                    />
+                    <Route path="/SHLMR" element={<SHLMR />} />
+                    <Route
+                      path="/lieux_historique"
+                      element={
+                        <LieuxHistoriques ville="Paris" typeFiltre="tous" />
+                      }
+                    />
+
+                    <Route path="/parapente" element={<UserParapentePage />} />
+                    <Route
+                      path="/formationTourisme"
+                      element={<FormationsTourisme />}
+                    />
+                    <Route path="/voyages" element={<Voyages />} />
+                    {/* <Route
                     path="/confidentialite"
                     element={<PrivacyPolicyWidget />}
                   /> */}
-                  <Route
-                    path="/mentions_legales"
-                    element={<LegalMentionsWidget />}
-                  />
-                  <Route
-                    path="/plan_administratif"
-                    element={<PlanAdministratifServices />}
-                  />
-                  <Route
-                    path="/podcasts/immobilier"
-                    element={<PodcastsImmobilier />}
-                  />
-                  <Route
-                    path="/podcasts/reunion"
-                    element={<PodcastsReunion />}
-                  />
-                  <Route
-                    path="/podcasts/partenaires"
-                    element={<PodcastsPartenaires />}
-                  />
-                  <Route
-                    path="/podcasts/assurance-finance"
-                    element={<PodcastsAssuranceFinance />}
-                  />
-                  <Route
-                    path="/podcasts/alimentation"
-                    element={<PodcastsAlimentation />}
-                  />
-                  <Route
-                    path="/podcasts/investissement"
-                    element={<PodcastsInvestissement />}
-                  />
-                  <Route
-                    path="/podcasts/tourisme"
-                    element={<PodcastsTourisme />}
-                  />
-                  <Route
-                    path="/podcasts/domicile"
-                    element={<PodcastsDomicile />}
-                  />
-                  <Route
-                    path="/podcasts/bien-etre"
-                    element={<PodcastsBienEtre />}
-                  />
-                  <Route
-                    path="/formation-batiment"
-                    element={<ConstructionServicesPage />}
-                  />
-                  <Route
-                    path="/activiteLoisirs"
-                    element={<ActivitesLoisirsFAQ />}
-                  />
-                  <Route
-                    path="/professional/:id"
-                    element={<ProfessionalProfilePage />}
-                  />
-                  <Route
-                    path="/immobilier-sections"
-                    element={<ImmobilierSections />}
-                  />
-                  <Route
-                    path="/estimation-immobilier"
-                    element={<EstimationImmobilierPage />}
-                  />
-                  <Route
-                    path="/gestion-immobilier"
-                    element={<GestionImmobilier />}
-                  />
-                  {/* Routes Bâtiments */}
-                  <Route path="/batiments" element={<BatimentsLayout />} />
-                  <Route
-                    path="/renovation-chantiers"
-                    element={<BatimentsLayout />}
-                  />
-                  <Route
-                    path="/construction-plans"
-                    element={<BatimentsLayout />}
-                  />
-                  <Route
-                    path="/materiaux-viabilisations"
-                    element={<BatimentsLayout />}
-                  />
-                  <Route
-                    path="/division-parcellaire"
-                    element={<BatimentsLayout />}
-                  />
-                  <Route
-                    path="/formation-podcasts"
-                    element={<BatimentsLayout />}
-                  />
-                  {/* Routes Partenaires */}
-                  <Route path="/agences" element={<Agence />} />
-                  <Route path="/constructeurs" element={<Constructeur />} />
-                  <Route path="/plombiers" element={<Plombier />} />
-                  {/* Routes Domicile */}
-                  <Route path="/domicile" element={<DomicileLayout />} />
-                  <Route path="/juridique" element={<Juridique />} />
-                  <Route
-                    path="/produits-commerces"
-                    element={<DomicileLayout />}
-                  />
-                  <Route
-                    path="/produits-naturels"
-                    element={<BoutiqueNaturel />}
-                  />
-                  <Route
-                    path="/produits-naturels/categorie/:categoryName"
-                    element={<BoutiqueNaturel />}
-                  />
-                  <Route path="/soin" element={<Soin />} />
-                  <Route path="/therapeute" element={<Therapeute />} />
-                  <Route
-                    path="/huiles-essentielles"
-                    element={<HuilesEssentielles />}
-                  />
-                  <Route
-                    path="/huiles-essentielles/:categoryName"
-                    element={<HuilesEssentielles />}
-                  />
-                  <Route path="/nutrition" element={<Nutrition />} />
-                  <Route
-                    path="/comptabilite"
-                    element={
-                      <ComptabiliteServices
-                        entrepriseId="ENT-12345"
-                        typeEntreprise="sarl"
-                        chiffreAffaire={150000}
+                    <Route
+                      path="/mentions_legales"
+                      element={<LegalMentionsWidget />}
+                    />
+                    <Route
+                      path="/plan_administratif"
+                      element={<PlanAdministratifServices />}
+                    />
+                    <Route
+                      path="/podcasts/immobilier"
+                      element={<PodcastsImmobilier />}
+                    />
+                    <Route
+                      path="/podcasts/reunion"
+                      element={<PodcastsReunion />}
+                    />
+                    <Route
+                      path="/podcasts/partenaires"
+                      element={<PodcastsPartenaires />}
+                    />
+                    <Route
+                      path="/podcasts/assurance-finance"
+                      element={<PodcastsAssuranceFinance />}
+                    />
+                    <Route
+                      path="/podcasts/alimentation"
+                      element={<PodcastsAlimentation />}
+                    />
+                    <Route
+                      path="/podcasts/investissement"
+                      element={<PodcastsInvestissement />}
+                    />
+                    <Route
+                      path="/podcasts/tourisme"
+                      element={<PodcastsTourisme />}
+                    />
+                    <Route
+                      path="/podcasts/domicile"
+                      element={<PodcastsDomicile />}
+                    />
+                    <Route
+                      path="/podcasts/bien-etre"
+                      element={<PodcastsBienEtre />}
+                    />
+                    <Route
+                      path="/formation-batiment"
+                      element={<ConstructionServicesPage />}
+                    />
+                    <Route
+                      path="/activiteLoisirs"
+                      element={<ActivitesLoisirsFAQ />}
+                    />
+                    <Route
+                      path="/professional/:id"
+                      element={<ProfessionalProfilePage />}
+                    />
+                    <Route
+                      path="/immobilier-sections"
+                      element={<ImmobilierSections />}
+                    />
+                    <Route
+                      path="/estimation-immobilier"
+                      element={<EstimationImmobilierPage />}
+                    />
+                    <Route
+                      path="/gestion-immobilier"
+                      element={<GestionImmobilier />}
+                    />
+                    {/* Routes Bâtiments */}
+                    <Route path="/batiments" element={<BatimentsLayout />} />
+                    <Route
+                      path="/renovation-chantiers"
+                      element={<BatimentsLayout />}
+                    />
+                    <Route
+                      path="/construction-plans"
+                      element={<BatimentsLayout />}
+                    />
+                    <Route
+                      path="/materiaux-viabilisations"
+                      element={<BatimentsLayout />}
+                    />
+                    <Route
+                      path="/division-parcellaire"
+                      element={<BatimentsLayout />}
+                    />
+                    <Route
+                      path="/formation-podcasts"
+                      element={<BatimentsLayout />}
+                    />
+                    {/* Routes Partenaires */}
+                    <Route path="/agences" element={<Agence />} />
+                    <Route path="/constructeurs" element={<Constructeur />} />
+                    <Route path="/plombiers" element={<Plombier />} />
+                    {/* Routes Domicile */}
+                    <Route path="/domicile" element={<DomicileLayout />} />
+                    <Route path="/juridique" element={<Juridique />} />
+                    <Route
+                      path="/produits-commerces"
+                      element={<DomicileLayout />}
+                    />
+                    <Route
+                      path="/produits-naturels"
+                      element={<BoutiqueNaturel />}
+                    />
+                    <Route
+                      path="/produits-naturels/categorie/:categoryName"
+                      element={<BoutiqueNaturel />}
+                    />
+                    <Route path="/soin" element={<Soin />} />
+                    <Route path="/therapeute" element={<Therapeute />} />
+                    <Route
+                      path="/huiles-essentielles"
+                      element={<HuilesEssentielles />}
+                    />
+                    <Route
+                      path="/huiles-essentielles/:categoryName"
+                      element={<HuilesEssentielles />}
+                    />
+                    <Route path="/nutrition" element={<Nutrition />} />
+                    <Route
+                      path="/comptabilite"
+                      element={
+                        <ComptabiliteServices
+                          entrepriseId="ENT-12345"
+                          typeEntreprise="sarl"
+                          chiffreAffaire={150000}
+                        />
+                      }
+                    />
+                    <Route path="/service-maison" element={<DomicileLayout />} />
+                    <Route
+                      path="/equipements-livraison"
+                      element={<DomicileLayout />}
+                    />
+                    <Route
+                      path="/design-decoration"
+                      element={<DomicileLayout />}
+                    />
+                    <Route
+                      path="/cours-formations"
+                      element={<DomicileLayout />}
+                    />
+                    <Route path="/utilities" element={<DomicileLayout />} />
+                    <Route
+                      path="/gestion-immobilier"
+                      element={<GestionImmobilier />}
+                    />
+                    <Route path="/recherche" element={<Recherche />} />
+                    <Route path="/achat/:id" element={<PropertyPage />} />
+                    <Route path="/location/:id" element={<PropertyPage />} />
+                    <Route path="/immobilier/:id" element={<PropertyPage />} />
+                    <Route path="/travaux" element={<Travaux />} />
+                    <Route path="/produits" element={<Produits />} />
+                    <Route
+                      path="/stripe-create"
+                      element={<StripeConnectButton user={user} />}
+                    />
+                    <Route path="/alimentation" element={<Alimentation />} />
+                    <Route
+                      path="/alimentation/food-category/:categoryName"
+                      element={<AlimentationCategorie />}
+                    />
+                    <Route
+                      path="/medecine-plantes"
+                      element={<MedecinePlants />}
+                    />
+                    <Route
+                      path="/produits/categorie/:categoryName"
+                      element={<CategorieProduits />}
+                    />
+                    <Route path="/entreprise" element={<Entreprise />} />
+                    <Route path="/financement" element={<Financement />} />
+                    <Route path="/assurance" element={<Assurance />} />
+                    <Route
+                      path="/financement/:id"
+                      element={<FinancementPartenaireDetail />}
+                    />
+                    <Route path="/blog" element={<Actualites />} />
+                    <Route path="/tourisme" element={<TourismSection />} />
+                    <Route path="/pack" element={<PricingPacksDisplay />} />
+                    <Route path="/don" element={<Donation />} />
+                    {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
+                    <Route path="/carte" element={<MapPage />} />
+                    <Route path="/PSLA" element={<CartesBiensImmobiliers />} />
+                    {/* Add redirect from /service to /services-partners */}
+                    <Route
+                      path="/service"
+                      element={<Navigate to="/services-partners" replace />}
+                    />
+
+                    <Route
+                      path="/entrepreneuriat"
+                      element={<Entrepreneuriat />}
+                    />
+                    <Route
+                      path="/services-partners"
+                      element={<ServicesPartnersPage />}
+                    />
+                    <Route
+                      path="/estimations"
+                      element={<EstimationImmobilierPage />}
+                    />
+                    {/* Routes d'authentification */}
+                    <Route path="/login" element={<LoginRoleSelectionPage />} />
+                    <Route path="/login/professional" element={<ProLogin />} />
+                    <Route
+                      path="/login/particular"
+                      element={<ParticularLogin />}
+                    />
+                    {/* <Route path="/register" element={<RoleSelectionPage />} /> */}
+                    <Route
+                      path="/register/professional/subscription"
+                      element={<ProfessionalSubscriptionPage />}
+                    />
+                    <Route
+                      path="/register/professional"
+                      element={
+                        <Navigate
+                          to="/register/professional/subscription"
+                          replace
+                        />
+                      }
+                    />
+                    <Route
+                      path="/register/professional/payment"
+                      element={<PaymentPage />}
+                    />
+                    <Route
+                      path="/register/professional/form"
+                      element={<ProRegisterPage />}
+                    />
+                    <Route path="/register/success" element={<SuccessPage />} />
+                    <Route
+                      path="/register/particular"
+                      element={<RegisterPage />}
+                    />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPasswordPage />}
+                    />
+                    <Route
+                      path="/reset-password/:token"
+                      element={<ResetPasswordPage />}
+                    />
+                    <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                    <Route path="/investissement" element={<Investissement />} />
+                    <Route path="/art-commerce" element={<ArtCommerce />} />
+                    <Route
+                      path="/art-commerce/:id"
+                      element={<ArtCommerceDetail />}
+                    />
+                    <Route
+                      path="/aide_financement"
+                      element={
+                        <AidesFinancement
+                          entrepriseId="ENT-12345"
+                          secteurActivite="Technologie"
+                          localisation="Île-de-France"
+                        />
+                      }
+                    />
+                    <Route
+                      path="/formation_finance"
+                      element={
+                        <FormationsFinancement
+                          entrepriseId="ENT-12345"
+                          secteurActivite="Industrie"
+                        />
+                      }
+                    />
+                    <Route
+                      path="/investir/:type"
+                      element={<InvestissementDetail />}
+                    />
+                    {/* Section pro Routes */}
+                    <Route
+                      path="/pro"
+                      element={
+                        <AccountStatusGuard>
+                          <SubscriptionStatusGuard>
+                            <ProLayout />
+                          </SubscriptionStatusGuard>
+                        </AccountStatusGuard>
+                      }
+                    >
+                      <Route index element={<Dashboard />} />
+                      <Route path="listings" element={<ListingsPage />} />
+                      <Route path="calendar" element={<CalendarPage />} />
+                      <Route path="projet" element={<ProjetsPage />} />
+                      <Route
+                        path="vehicules"
+                        element={<PrestataireVehiculesPage />}
                       />
-                    }
-                  />
-                  <Route path="/service-maison" element={<DomicileLayout />} />
-                  <Route
-                    path="/equipements-livraison"
-                    element={<DomicileLayout />}
-                  />
-                  <Route
-                    path="/design-decoration"
-                    element={<DomicileLayout />}
-                  />
-                  <Route
-                    path="/cours-formations"
-                    element={<DomicileLayout />}
-                  />
-                  <Route path="/utilities" element={<DomicileLayout />} />
-                  <Route
-                    path="/gestion-immobilier"
-                    element={<GestionImmobilier />}
-                  />
-                  <Route path="/recherche" element={<Recherche />} />
-                  <Route path="/achat/:id" element={<PropertyPage />} />
-                  <Route path="/location/:id" element={<PropertyPage />} />
-                  <Route path="/immobilier/:id" element={<PropertyPage />} />
-                  <Route path="/travaux" element={<Travaux />} />
-                  <Route path="/produits" element={<Produits />} />
-                  <Route
-                    path="/stripe-create"
-                    element={<StripeConnectButton user={user} />}
-                  />
-                  <Route path="/alimentation" element={<Alimentation />} />
-                  <Route
-                    path="/alimentation/food-category/:categoryName"
-                    element={<AlimentationCategorie />}
-                  />
-                  <Route
-                    path="/medecine-plantes"
-                    element={<MedecinePlants />}
-                  />
-                  <Route
-                    path="/produits/categorie/:categoryName"
-                    element={<CategorieProduits />}
-                  />
-                  <Route path="/entreprise" element={<Entreprise />} />
-                  <Route path="/financement" element={<Financement />} />
-                  <Route path="/assurance" element={<Assurance />} />
-                  <Route
-                    path="/financement/:id"
-                    element={<FinancementPartenaireDetail />}
-                  />
-                  <Route path="/blog" element={<Actualites />} />
-                  <Route path="/tourisme" element={<TourismSection />} />
-                  <Route path="/pack" element={<PricingPacksDisplay />} />
-                  <Route path="/don" element={<Donation />} />
-                  {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
-                  <Route path="/carte" element={<MapPage />} />
-                  <Route path="/PSLA" element={<CartesBiensImmobiliers />} />
-                  {/* Add redirect from /service to /services-partners */}
-                  <Route
-                    path="/service"
-                    element={<Navigate to="/services-partners" replace />}
-                  />
-
-                  <Route
-                    path="/entrepreneuriat"
-                    element={<Entrepreneuriat />}
-                  />
-                  <Route
-                    path="/services-partners"
-                    element={<ServicesPartnersPage />}
-                  />
-                  <Route
-                    path="/estimations"
-                    element={<EstimationImmobilierPage />}
-                  />
-                  {/* Routes d'authentification */}
-                  <Route path="/login" element={<LoginRoleSelectionPage />} />
-                  <Route path="/login/professional" element={<ProLogin />} />
-                  <Route
-                    path="/login/particular"
-                    element={<ParticularLogin />}
-                  />
-                  {/* <Route path="/register" element={<RoleSelectionPage />} /> */}
-                  <Route
-                    path="/register/professional/subscription"
-                    element={<ProfessionalSubscriptionPage />}
-                  />
-                  <Route
-                    path="/register/professional"
-                    element={
-                      <Navigate
-                        to="/register/professional/subscription"
-                        replace
+                      <Route path="parapente" element={<ParapentePage />} />
+                      <Route
+                        path="contact-messages"
+                        element={<ContactMessagesPage />}
                       />
-                    }
-                  />
-                  <Route
-                    path="/register/professional/payment"
-                    element={<PaymentPage />}
-                  />
-                  <Route
-                    path="/register/professional/form"
-                    element={<ProRegisterPage />}
-                  />
-                  <Route path="/register/success" element={<SuccessPage />} />
-                  <Route
-                    path="/register/particular"
-                    element={<RegisterPage />}
-                  />
-                  <Route
-                    path="/forgot-password"
-                    element={<ForgotPasswordPage />}
-                  />
-                  <Route
-                    path="/reset-password/:token"
-                    element={<ResetPasswordPage />}
-                  />
-                  <Route path="/unauthorized" element={<UnauthorizedPage />} />
-                  <Route path="/investissement" element={<Investissement />} />
-                  <Route path="/art-commerce" element={<ArtCommerce />} />
-                  <Route
-                    path="/art-commerce/:id"
-                    element={<ArtCommerceDetail />}
-                  />
-                  <Route
-                    path="/aide_financement"
-                    element={
-                      <AidesFinancement
-                        entrepriseId="ENT-12345"
-                        secteurActivite="Technologie"
-                        localisation="Île-de-France"
+                      <Route
+                        path="financement-demandes"
+                        element={<FinancementDemandesPro />}
                       />
-                    }
-                  />
-                  <Route
-                    path="/formation_finance"
-                    element={
-                      <FormationsFinancement
-                        entrepriseId="ENT-12345"
-                        secteurActivite="Industrie"
+                      <Route
+                        path="financement-services"
+                        element={<FinancementServicesPro />}
                       />
-                    }
-                  />
-                  <Route
-                    path="/investir/:type"
-                    element={<InvestissementDetail />}
-                  />
-                  {/* Section pro Routes */}
-                  <Route
-                    path="/pro"
-                    element={
-                      <AccountStatusGuard>
-                        <SubscriptionStatusGuard>
-                          <ProLayout />
-                        </SubscriptionStatusGuard>
-                      </AccountStatusGuard>
-                    }
-                  >
-                    <Route index element={<Dashboard />} />
-                    <Route path="listings" element={<ListingsPage />} />
-                    <Route path="calendar" element={<CalendarPage />} />
-                    <Route path="projet" element={<ProjetsPage />} />
-                    <Route
-                      path="vehicules"
-                      element={<PrestataireVehiculesPage />}
-                    />
-                    <Route path="parapente" element={<ParapentePage />} />
-                    <Route
-                      path="contact-messages"
-                      element={<ContactMessagesPage />}
-                    />
-                    <Route
-                      path="financement-demandes"
-                      element={<FinancementDemandesPro />}
-                    />
-                    <Route
-                      path="financement-services"
-                      element={<FinancementServicesPro />}
-                    />
-                    <Route
-                      path="reservationbien-etre"
-                      element={<ReservationTable />}
-                    />
-                    <Route path="documents" element={<DocumentsPage />} />
-                    <Route path="reviews" element={<ReviewsPage />} />
-                    <Route path="tourisme" element={<TourismPage />} />
-                    <Route path="reservations" element={<ProBookings />} />
-                    <Route
-                      path="reservationPro"
-                      element={<ProTouristicPlaceBookings />}
-                    />
-                    <Route path="conseil" element={<ExpertDashboardPage />} />
-                    <Route
-                      path="subscription"
-                      element={<SubscriptionStatusPage />}
-                    />
-                    <Route
-                      path="subscription/payment"
-                      element={<SubscriptionPaymentPage />}
-                    />
-                    <Route
-                      path="services"
-                      element={<ProfessionalServicesPage />}
-                    />
-                    <Route
-                      path="Art-commerce-services"
-                      element={<ArtCommerceService />}
-                    />
-                    <Route path="billing" element={<BillingSection />} />
-                    <Route path="settings" element={<ParametresPage />} />
-                    <Route
-                      path="Art-commerce-services"
-                      element={<ParametresPage />}
-                    />
-                    <Route path="orders" element={<ProOrders />} />
-                    <Route
-                      path="demandes-immobilier"
-                      element={<ListeDemandesImmobilier />}
-                    />
-                    <Route path="products" element={<Products />} />
-                    <Route path="demandes" element={<ArtisanDemandesPage />} />
-                    <Route path="messages/:id" element={<MessagesLayout />} />
-                    <Route path="profile" element={<Profile />} />
-                    <Route path="settings" element={<Settings />} />
-                    <Route path="harmonie" element={<HarmoniePage />} />
-                    <Route
-                      path="demandes-devis"
-                      element={<ListeDemandesDevis />}
-                    />
-                    <Route path="cours-domicile" element={<CoursDomicile />} />
-                    <Route
-                      path="reservations-cours"
-                      element={<ProReservations />}
-                    />
+                      <Route
+                        path="reservationbien-etre"
+                        element={<ReservationTable />}
+                      />
+                      <Route path="documents" element={<DocumentsPage />} />
+                      <Route path="reviews" element={<ReviewsPage />} />
+                      <Route path="tourisme" element={<TourismPage />} />
+                      <Route path="reservations" element={<ProBookings />} />
+                      <Route
+                        path="reservationPro"
+                        element={<ProTouristicPlaceBookings />}
+                      />
+                      <Route path="conseil" element={<ExpertDashboardPage />} />
+                      <Route
+                        path="subscription"
+                        element={<SubscriptionStatusPage />}
+                      />
+                      <Route
+                        path="subscription/payment"
+                        element={<SubscriptionPaymentPage />}
+                      />
+                      <Route
+                        path="services"
+                        element={<ProfessionalServicesPage />}
+                      />
+                      <Route
+                        path="Art-commerce-services"
+                        element={<ArtCommerceService />}
+                      />
+                      <Route path="billing" element={<BillingSection />} />
+                      <Route path="settings" element={<ParametresPage />} />
+                      <Route
+                        path="Art-commerce-services"
+                        element={<ParametresPage />}
+                      />
+                      <Route path="orders" element={<ProOrders />} />
+                      <Route
+                        path="demandes-immobilier"
+                        element={<ListeDemandesImmobilier />}
+                      />
+                      <Route path="products" element={<Products />} />
+                      <Route path="demandes" element={<ArtisanDemandesPage />} />
+                      <Route path="messages/:id" element={<MessagesLayout />} />
+                      <Route path="profile" element={<Profile />} />
+                      <Route path="settings" element={<Settings />} />
+                      <Route path="harmonie" element={<HarmoniePage />} />
+                      <Route
+                        path="demandes-devis"
+                        element={<ListeDemandesDevis />}
+                      />
+                      <Route path="cours-domicile" element={<CoursDomicile />} />
+                      <Route
+                        path="reservations-cours"
+                        element={<ProReservations />}
+                      />
 
-                    <Route
-                      path="art-et-creation-page"
-                      element={<ArtCreationProduct />}
-                    />
+                      <Route
+                        path="art-et-creation-page"
+                        element={<ArtCreationProduct />}
+                      />
 
-                    {/* <Route path="media" element={<AdminMedia />} /> */}
-                    <Route
-                      path="gestion-formations"
-                      element={<GestionFormationsPage />}
-                    />
-                    <Route
-                      path="gestion-formations"
-                      element={<GestionFormationsPage />}
-                    />
+                      {/* <Route path="media" element={<AdminMedia />} /> */}
+                      <Route
+                        path="gestion-formations"
+                        element={<GestionFormationsPage />}
+                      />
+                      <Route
+                        path="gestion-formations"
+                        element={<GestionFormationsPage />}
+                      />
 
+                      <Route
+                        path="gestion-emplois"
+                        element={<GestionEmploisPage />}
+                      />
+                      <Route
+                        path="gestion-alternance"
+                        element={<GestionAlternancePage />}
+                      />
+                      <Route
+                        path="delete-account"
+                        element={<DeleteAccountPage />}
+                      />
+                      <Route
+                        path="events-discoveries"
+                        element={<EventsDiscoveriesPro />}
+                      />
+                    </Route>
+                    {/* Section Mon Compte Routes */}
                     <Route
-                      path="gestion-emplois"
-                      element={<GestionEmploisPage />}
-                    />
-                    <Route
-                      path="gestion-alternance"
-                      element={<GestionAlternancePage />}
-                    />
-                    <Route
-                      path="delete-account"
-                      element={<DeleteAccountPage />}
-                    />
-                    <Route
-                      path="events-discoveries"
-                      element={<EventsDiscoveriesPro />}
-                    />
-                  </Route>
-                  {/* Section Mon Compte Routes */}
-                  <Route
-                    path="/mon-compte"
-                    element={
-                      <AccountStatusGuard>
-                        <UserLayout />
-                      </AccountStatusGuard>
-                    }
-                  >
-                    <Route index element={<MonComptePage />} />
-                    <Route path="payement" element={<PaiementPage />} />
-                    <Route path="profil" element={<MonComptePage />} />
-                    <Route path="reservation" element={<ReservationPage />} />
-                    <Route path="demandes" element={<MesDemande />} />
-                    <Route path="agenda" element={<AgendaPage />} />
-                    <Route path="documents" element={<MesDocumentsPage />} />
-                    <Route path="conseil" element={<UserConseilPage />} />
-                    {/* AJOUTEZ CETTE ROUTE */}
-                    <Route path="candidatures" element={<MesCandidatures />} />
+                      path="/mon-compte"
+                      element={
+                        <AccountStatusGuard>
+                          <UserLayout />
+                        </AccountStatusGuard>
+                      }
+                    >
+                      <Route index element={<MonComptePage />} />
+                      <Route path="payement" element={<PaiementPage />} />
+                      <Route path="profil" element={<MonComptePage />} />
+                      <Route path="reservation" element={<ReservationPage />} />
+                      <Route path="demandes" element={<MesDemande />} />
+                      <Route path="agenda" element={<AgendaPage />} />
+                      <Route path="documents" element={<MesDocumentsPage />} />
+                      <Route path="conseil" element={<UserConseilPage />} />
+                      {/* AJOUTEZ CETTE ROUTE */}
+                      <Route path="candidatures" element={<MesCandidatures />} />
 
+                      <Route
+                        path="locationSaisonniere"
+                        element={<GestionLocationSaisonniere />}
+                      />
+                      <Route
+                        path="delete-account"
+                        element={<DeleteAccountPage />}
+                      />
+                      <Route
+                        path="mes-reservations-cours"
+                        element={<UserReservations />}
+                      />
+                      <Route
+                        path="demandes/messages/:id"
+                        element={<MessagesLayout />}
+                      />
+                      <Route
+                        path="demandes-immobilier"
+                        element={<MesDemandesImmobilier />}
+                      />
+                      <Route path="mes-commandes" element={<UserOrders />} />
+                      <Route
+                        path="location-voiture"
+                        element={<MesReservationsVehiculePage />}
+                      />
+                    </Route>
+                    {/* Section Admin Routes */}
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="blog" element={<Blog />} />
+                      <Route
+                        path="entrepreneuriat"
+                        element={<EntrepreneuriatAdmin />}
+                      />
+                      <Route path="portraits" element={<PortraitsAdmin />} />
+                      <Route path="bookings" element={<Bookings />} />
+                      <Route path="listings" element={<Listings />} />
+                      <Route path="audits" element={<AuditsPage />} />
+                      <Route path="payments" element={<Payements />} />
+                      <Route path="conseil" element={<AdminConseilPage />} />
+                      <Route path="rendezvous" element={<RendezVous />} />
+                      <Route path="media" element={<AdminMedia />} />
+                      <Route path="conseils" element={<ConseilsAdminPage />} />
+                      <Route
+                        path="demandeDroitFamille"
+                        element={<DemandeDroitFamille />}
+                      />
+                      <Route
+                        path="financement-services"
+                        element={<FinancementServicesAdmin />}
+                      />
+                      <Route
+                        path="subscriptions"
+                        element={<AdminSubscriptions />}
+                      />
+                      <Route path="products" element={<Products />} />
+                      <Route path="profile" element={<Profile />} />
+                      <Route path="reports" element={<Reports />} />
+                      <Route path="services" element={<Services />} />
+                      <Route path="tourism" element={<Tourism />} />
+                      <Route path="users" element={<Users />} />
+                      <Route path="vendors" element={<Vendors />} />
+                      <Route path="messages/:id" element={<MessagesLayout />} />
+                      <Route
+                        path="publicite"
+                        element={<AdvertisementManager />}
+                      />
+                      <Route path="demandes" element={<ListeDemande />} />
+                      <Route
+                        path="service-categories"
+                        element={<ServiceCategoriesPage />}
+                      />
+                      <Route path="metiers" element={<AdminMetiers />} />
+                      <Route
+                        path="financement-demandes"
+                        element={<FinancementDemandes />}
+                      />
+                      <Route
+                        path="investissement-demandes"
+                        element={<InvestmentDemandesPage />}
+                      />
+                    </Route>
+                    {/* Section not found Routes */}
+                    <Route path="*" element={<NotFound />} />
+                    <Route path="/en-savoir-plus" element={<RGPDInfo />} />
+                    <Route path="/import-info" element={<ImportInfo />} />
+                    <Route path="/cgu" element={<Terms />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    {/* Routes RGPD et légales */}
                     <Route
-                      path="locationSaisonniere"
-                      element={<GestionLocationSaisonniere />}
+                      path="/mentions-legales"
+                      element={<MentionsLegales pdfUrl={null} />}
                     />
                     <Route
-                      path="delete-account"
-                      element={<DeleteAccountPage />}
+                      path="/confidentialite"
+                      element={<PolitiqueConfidentialiteComplete />}
+                    />
+                    <Route path="/rgpd" element={<GestionDroitsRGPD />} />
+                    <Route path="/contact-dpo" element={<ContactDPO />} />
+                    {/* Onglets Arts et Creations */}
+                    <Route path="/art-et-creation" element={<ArtETCreation />} />
+                    <Route path="/photographie" element={<PhotographiePage />} />
+                    <Route
+                      path="/sculpture"
+                      element={<SculpturePage onContactClick={undefined} />}
+                    />
+                    <Route path="/peinture" element={<PeinturePage />} />
+                    <Route
+                      path="/oeuvres/:professionalId"
+                      element={<OeuvrePages />}
+                    />
+                    {/* <Route path="/artisanat" element={<ArtisanatPage />} />*/}
+                    <Route
+                      path="/marketplace-createurs"
+                      element={<MarketplaceCreateurs />}
                     />
                     <Route
-                      path="mes-reservations-cours"
-                      element={<UserReservations />}
+                      path="/art-et-creation/photographie/:categorySlug"
+                      element={<ArtETCreation />}
                     />
-                    <Route
-                      path="demandes/messages/:id"
-                      element={<MessagesLayout />}
-                    />
-                    <Route
-                      path="demandes-immobilier"
-                      element={<MesDemandesImmobilier />}
-                    />
-                    <Route path="mes-commandes" element={<UserOrders />} />
-                    <Route
-                      path="location-voiture"
-                      element={<MesReservationsVehiculePage />}
-                    />
-                  </Route>
-                  {/* Section Admin Routes */}
-                  <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<AdminDashboard />} />
-                    <Route path="blog" element={<Blog />} />
-                    <Route
-                      path="entrepreneuriat"
-                      element={<EntrepreneuriatAdmin />}
-                    />
-                    <Route path="portraits" element={<PortraitsAdmin />} />
-                    <Route path="bookings" element={<Bookings />} />
-                    <Route path="listings" element={<Listings />} />
-                    <Route path="audits" element={<AuditsPage />} />
-                    <Route path="payments" element={<Payements />} />
-                    <Route path="conseil" element={<AdminConseilPage />} />
-                    <Route path="rendezvous" element={<RendezVous />} />
-                    <Route path="media" element={<AdminMedia />} />
-                    <Route path="conseils" element={<ConseilsAdminPage />} />
-                    <Route
-                      path="demandeDroitFamille"
-                      element={<DemandeDroitFamille />}
-                    />
-                    <Route
-                      path="financement-services"
-                      element={<FinancementServicesAdmin />}
-                    />
-                    <Route
-                      path="subscriptions"
-                      element={<AdminSubscriptions />}
-                    />
-                    <Route path="products" element={<Products />} />
-                    <Route path="profile" element={<Profile />} />
-                    <Route path="reports" element={<Reports />} />
-                    <Route path="services" element={<Services />} />
-                    <Route path="tourism" element={<Tourism />} />
-                    <Route path="users" element={<Users />} />
-                    <Route path="vendors" element={<Vendors />} />
-                    <Route path="messages/:id" element={<MessagesLayout />} />
-                    <Route
-                      path="publicite"
-                      element={<AdvertisementManager />}
-                    />
-                    <Route path="demandes" element={<ListeDemande />} />
-                    <Route
-                      path="service-categories"
-                      element={<ServiceCategoriesPage />}
-                    />
-                    <Route path="metiers" element={<AdminMetiers />} />
-                    <Route
-                      path="financement-demandes"
-                      element={<FinancementDemandes />}
-                    />
-                    <Route
-                      path="investissement-demandes"
-                      element={<InvestmentDemandesPage />}
-                    />
-                  </Route>
-                  {/* Section not found Routes */}
-                  <Route path="*" element={<NotFound />} />
-                  <Route path="/en-savoir-plus" element={<RGPDInfo />} />
-                  <Route path="/import-info" element={<ImportInfo />} />
-                  <Route path="/cgu" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  {/* Routes RGPD et légales */}
-                  <Route
-                    path="/mentions-legales"
-                    element={<MentionsLegales pdfUrl={null} />}
-                  />
-                  <Route
-                    path="/confidentialite"
-                    element={<PolitiqueConfidentialiteComplete />}
-                  />
-                  <Route path="/rgpd" element={<GestionDroitsRGPD />} />
-                  <Route path="/contact-dpo" element={<ContactDPO />} />
-                  {/* Onglets Arts et Creations */}
-                  <Route path="/art-et-creation" element={<ArtETCreation />} />
-                  <Route path="/photographie" element={<PhotographiePage />} />
-                  <Route
-                    path="/sculpture"
-                    element={<SculpturePage onContactClick={undefined} />}
-                  />
-                  <Route path="/peinture" element={<PeinturePage />} />
-                  <Route
-                    path="/oeuvres/:professionalId"
-                    element={<OeuvrePages />}
-                  />
-                  {/* <Route path="/artisanat" element={<ArtisanatPage />} />*/}
-                  <Route
-                    path="/marketplace-createurs"
-                    element={<MarketplaceCreateurs />}
-                  />
-                  <Route
-                    path="/art-et-creation/photographie/:categorySlug"
-                    element={<ArtETCreation />}
-                  />
-                </Routes>
+                  </Routes>
 
-                {/* Pop-up Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité. Nous allions expertise, innovation et passion pour vous offrir un service d'exception.globale */}
-                {user && user.role !== "admin" && (
-                  <AdvertisementPopup refreshMinutes={3} />
-                )}
-                <CookieConsent />
-              </Layout>
-              <ChatBot />
-            </BrowserRouter>
+                  {/* Pop-up Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité. Nous allions expertise, innovation et passion pour vous offrir un service d'exception.globale */}
+                  {user && user.role !== "admin" && (
+                    <AdvertisementPopup refreshMinutes={3} />
+                  )}
+                  <CookieConsent />
+                </Layout>
+                <ChatBot />
+              </BrowserRouter>
+            </AdvertisementProvider>
           </CartProvider>
         </SocketProvider>
       </TooltipProvider>

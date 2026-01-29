@@ -717,7 +717,7 @@ const Hero = () => {
            {/* Publicité en avant-plan, en haut */}
           <AdvertisementPopup position="hero-top" />
           
-          <div className="absolute">
+          <div className="absolute left-0">
             <AdvertisementPopup position="hero-left"/>
           </div>
           <div className="absolute right-0">

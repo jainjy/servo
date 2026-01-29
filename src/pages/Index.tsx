@@ -111,7 +111,6 @@ const Index = () => {
           </div>
           <Hero />
           <ServiceCards />
-          <AdvertisementPopup  position="section2"/>
           <TravauxPreview homeCards />
 
           {/* Section de recommandations intelligentes - affichée seulement si token valide ET données disponibles */}
