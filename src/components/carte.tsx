@@ -3,9 +3,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Search, X, Home, Building, Star } from 'lucide-react';
+import { MapPin, Search, X, Home, Building } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import api from '@/lib/api';
 
 // Fix for default markers in Leaflet with Webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -18,13 +19,22 @@ L.Icon.Default.mergeOptions({
 interface PropertyLocation {
   id: string;
   title: string;
-  address: string;
+  description: string;
+  type: string;
+  status: string;
+  price: number;
+  surface: number;
+  rooms: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  address: string | null;
   city: string;
+  zipCode: string;
   latitude: number | null;
   longitude: number | null;
-  type: string;
-  price: number | null;
-  status: string;
+  features: string[];
+  images: string[];
+  isFeatured: boolean;
 }
 
 interface LocationPickerModalProps {
@@ -33,7 +43,6 @@ interface LocationPickerModalProps {
   value: string;
   onChange: (value: string) => void;
   onLocationSelect?: (location: { address: string; lat: number; lng: number }) => void;
-  properties?: PropertyLocation[]; // Ajout des propriétés
 }
 
 const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
@@ -42,22 +51,43 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
   value,
   onChange,
   onLocationSelect,
-  properties = [] // Valeur par défaut
 }) => {
   const [searchQuery, setSearchQuery] = useState(value);
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeTab, setActiveTab] = useState<'properties' | 'search'>('properties'); // Onglets
+  const [activeTab, setActiveTab] = useState<'properties' | 'search'>('properties');
+  const [properties, setProperties] = useState<PropertyLocation[]>([]);
+  const [loadingProperties, setLoadingProperties] = useState(false);
   
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const propertyMarkersRef = useRef<L.Marker[]>([]);
 
+  // Charger les propriétés depuis l'API /properties/sansfiltre
+  useEffect(() => {
+    if (open) {
+      loadProperties();
+    }
+  }, [open]);
+
+  const loadProperties = async () => {
+    setLoadingProperties(true);
+    try {
+      const response = await api.get('/properties/sansfiltre');
+      setProperties(response.data || []);
+    } catch (error) {
+      console.error('Erreur lors du chargement des propriétés:', error);
+      setProperties([]);
+    } finally {
+      setLoadingProperties(false);
+    }
+  };
+
   // Filtrer les propriétés avec des coordonnées valides
   const validProperties = properties.filter(p => 
-    p.latitude && p.longitude && p.address
+    p.latitude && p.longitude && (p.address || p.city)
   );
 
   // Coordonnées par défaut (centré sur les propriétés si disponibles)
@@ -71,12 +101,12 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
         zoom: 11
       };
     }
-    return { lat: 20, lng: 0, zoom: 2 }; // Fallback monde entier
+    return { lat: -20.882057, lng: 55.450675, zoom: 12 }; // La Réunion par défaut
   };
 
-  // Initialiser la carte
-  useEffect(() => {
-    if (!open || !mapRef.current) return;
+  // Initialiser la carte avec délai pour assurer le rendu
+  const initMap = () => {
+    if (!mapRef.current || mapInstanceRef.current) return;
 
     const defaultCenter = getDefaultCenter();
     const map = L.map(mapRef.current).setView([defaultCenter.lat, defaultCenter.lng], defaultCenter.zoom);
@@ -96,8 +126,26 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
 
     // Ajouter les marqueurs des propriétés
     addPropertyMarkers();
+  };
+
+  // USEEFFECT - Initialisation avec délai et invalidation de taille
+  useEffect(() => {
+    if (!open) return;
+
+    // Délai pour assurer que le DOM est prêt
+    const timer = setTimeout(() => {
+      initMap();
+    }, 100);
+
+    // Forcer le redimensionnement de la carte quand le modal s'ouvre
+    if (open && mapInstanceRef.current) {
+      setTimeout(() => {
+        mapInstanceRef.current?.invalidateSize();
+      }, 200);
+    }
 
     return () => {
+      clearTimeout(timer);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -107,7 +155,14 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
       }
       propertyMarkersRef.current = [];
     };
-  }, [open, properties]);
+  }, [open]);
+
+  // Recharger les marqueurs quand les propriétés changent
+  useEffect(() => {
+    if (open && mapInstanceRef.current && !loadingProperties) {
+      addPropertyMarkers();
+    }
+  }, [properties, open, loadingProperties]);
 
   // Ajouter les marqueurs des propriétés sur la carte
   const addPropertyMarkers = () => {
@@ -135,8 +190,8 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
           </div>
         `,
         className: 'custom-property-marker',
-        iconSize: [40, 50],
-        iconAnchor: [20, 50]
+        iconSize: [80, 40],
+        iconAnchor: [40, 40]
       });
 
       const marker = L.marker([property.latitude, property.longitude], { 
@@ -147,12 +202,12 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
       marker.bindPopup(`
         <div class="property-popup-mini">
           <h4>${property.title}</h4>
-          <p class="property-address">${property.address}</p>
+          <p class="property-address">${property.address || ''}</p>
           <p class="property-city">${property.city}</p>
           <p class="property-price"><strong>${
             property.price ? new Intl.NumberFormat('fr-FR').format(property.price) + '€' : 'Prix sur demande'
           }</strong></p>
-          <button onclick="selectPropertyLocation('${property.address}', ${property.latitude}, ${property.longitude})" 
+          <button onclick="selectPropertyLocation('${property.id}')" 
                   class="popup-select-btn">
             Sélectionner cette localisation
           </button>
@@ -168,15 +223,10 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
     });
 
     // Exposer la fonction globale pour les popups
-    (window as any).selectPropertyLocation = (address: string, lat: number, lng: number) => {
-      setSearchQuery(address);
-      onChange(address);
-      setSelectedLocation({ lat, lng, address });
-      
-      // Centrer la carte sur la propriété sélectionnée
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.setView([lat, lng], 15);
-        updateMarker(lat, lng);
+    (window as any).selectPropertyLocation = (propertyId: string) => {
+      const property = validProperties.find(p => p.id === propertyId);
+      if (property) {
+        handlePropertySelect(property);
       }
     };
   };
@@ -185,7 +235,47 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
   const handlePropertySelect = (property: PropertyLocation) => {
     if (!property.latitude || !property.longitude) return;
 
-    const address = property.address || `${property.city}`;
+    // Effacer tous les marqueurs de propriétés existants
+    propertyMarkersRef.current.forEach(marker => {
+      mapInstanceRef.current?.removeLayer(marker);
+    });
+    propertyMarkersRef.current = [];
+
+    // Créer uniquement le marqueur de la propriété sélectionnée
+    const selectedIcon = L.divIcon({
+      html: `
+        <div class="property-map-marker ${property.status === 'for_sale' ? 'sale-marker' : 'rent-marker'} selected-marker">
+          <div class="marker-content">
+            <div class="marker-price">
+              ${property.price ? new Intl.NumberFormat('fr-FR').format(property.price) + '€' : ''}
+            </div>
+            <div class="marker-pin"></div>
+          </div>
+        </div>
+      `,
+      className: 'custom-property-marker',
+      iconSize: [100, 50],
+      iconAnchor: [50, 50]
+    });
+
+    const selectedMarker = L.marker([property.latitude, property.longitude], { 
+      icon: selectedIcon 
+    }).addTo(mapInstanceRef.current!);
+
+    selectedMarker.bindPopup(`
+      <div class="property-popup-mini">
+        <h4>${property.title}</h4>
+        <p class="property-address">${property.address || ''}</p>
+        <p class="property-city">${property.city}</p>
+        <p class="property-price"><strong>${
+          property.price ? new Intl.NumberFormat('fr-FR').format(property.price) + '€' : 'Prix sur demande'
+        }</strong></p>
+      </div>
+    `).openPopup();
+
+    propertyMarkersRef.current.push(selectedMarker);
+
+    const address = property.address || property.city || '';
     setSearchQuery(address);
     onChange(address);
     setSelectedLocation({ 
@@ -197,7 +287,6 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
     // Centrer la carte sur la propriété sélectionnée
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([property.latitude, property.longitude], 15);
-      updateMarker(property.latitude, property.longitude);
     }
   };
 
@@ -309,6 +398,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
       setSearchQuery(value);
       setSearchResults([]);
       setActiveTab('properties');
+      setSelectedLocation(null);
     }
   }, [open, value]);
 
@@ -347,24 +437,22 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
           {/* Panneau latéral */}
           <div className="w-full md:w-80 lg:w-96 flex flex-col border-b md:border-b-0 md:border-r flex-shrink-0 md:flex-1">
             {/* Barre d'onglets */}
-            <div className="flex border-b gap-1 p-1">
+            <div className="flex border-b">
               <button
-                className={`flex-1 py-2 md:py-3 px-2 md:px-3 rounded-lg text-xs md:text-sm font-medium transition-colors ${
-                  activeTab === 'properties' 
-                    ? 'bg-slate-900 text-white' 
-                    : 'bg-gray-100 hover:bg-gray-200'
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  activeTab === 'properties'
+                    ? 'border-b-2 border-primary text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
                 onClick={() => setActiveTab('properties')}
               >
-                <span className="hidden md:inline">Nos propriétés</span>
-                <span className="md:hidden">Propriétés</span>
-                <span className="text-[10px] md:text-xs ml-0.5"> ({validProperties.length})</span>
+                Propriétés ({loadingProperties ? '...' : validProperties.length})
               </button>
               <button
-                className={`flex-1 py-2 md:py-3 px-2 md:px-3 rounded-lg text-xs md:text-sm font-medium transition-colors ${
-                  activeTab === 'search' 
-                    ? 'bg-slate-900 text-white' 
-                    : 'bg-gray-100 hover:bg-gray-200'
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  activeTab === 'search'
+                    ? 'border-b-2 border-primary text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
                 onClick={() => setActiveTab('search')}
               >
@@ -372,38 +460,72 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
               </button>
             </div>
 
-            {/* Barre de recherche */}
-            <div className="p-2 md:p-4 border-b flex-shrink-0">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Rechercher..."
-                  className="pl-8 text-xs md:text-sm h-8 md:h-10"
-                />
+            {/* Barre de recherche (onglet Recherche uniquement) */}
+            {activeTab === 'search' && (
+              <div className="p-3 md:p-4 border-b">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Rechercher une adresse..."
+                    className="pl-10 pr-10 h-10"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        setSearchResults([]);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Contenu selon l'onglet */}
-            <div className="flex-1 overflow-y-auto md:max-h-[400px]">
+            {/* Contenu des onglets */}
+            <div className="flex-1 overflow-y-auto">
               {activeTab === 'properties' ? (
-                <div className="p-2 md:p-4 space-y-2 md:space-y-3">
-                  {validProperties.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <MapPin className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-xs md:text-sm">Aucune propriété avec localisation disponible</p>
+                /* Onglet Propriétés */
+                loadingProperties ? (
+                  <div className="p-4 text-center">
+                    <div className="py-8">
+                      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                      <p className="text-muted-foreground text-sm">
+                        Chargement des propriétés...
+                      </p>
                     </div>
-                  ) : (
-                    validProperties.map((property) => (
+                  </div>
+                ) : validProperties.length === 0 ? (
+                  <div className="p-4 text-center">
+                    <div className="py-8">
+                      <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-30" />
+                      <p className="text-muted-foreground text-sm font-medium">
+                        Il n'y a pas de bien enregistré
+                      </p>
+                      <p className="text-muted-foreground text-xs mt-2">
+                        Les propriétés disponibles s'afficheront ici
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-2 md:p-4 space-y-2">
+                    {validProperties.map((property) => (
                       <div
                         key={property.id}
-                        className="p-2 md:p-3 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group"
+                        className="border rounded-lg hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
                         onClick={() => handlePropertySelect(property)}
                       >
-                        <div className="flex items-start gap-2 md:gap-3">
-                          <div className="p-1 md:p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors flex-shrink-0">
-                            {getPropertyIcon(property.type)}
+                        <div className="p-3 flex gap-3">
+                          <div className="flex-shrink-0">
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                              property.status === 'for_sale' ? 'bg-blue-100' : 'bg-green-100'
+                            }`}>
+                              {getPropertyIcon(property.type)}
+                            </div>
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between mb-1 gap-1">
@@ -420,9 +542,11 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-1 mb-1">
-                              {property.address}
-                            </p>
+                            {property.address && (
+                              <p className="text-xs md:text-sm text-muted-foreground line-clamp-1 mb-1">
+                                {property.address}
+                              </p>
+                            )}
                             <p className="text-xs md:text-sm text-muted-foreground line-clamp-1 mb-2">
                               {property.city}
                             </p>
@@ -443,9 +567,9 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                           </div>
                         </div>
                       </div>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )
               ) : (
                 /* Onglet Recherche */
                 <div className="p-4">
@@ -509,12 +633,17 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
           {/* Carte */}
           <div className="flex-1 relative">
             <div ref={mapRef} className="w-full h-full" />
+            {!loadingProperties && validProperties.length === 0 && (
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-lg shadow-md z-[1000]">
+                <p className="text-sm text-muted-foreground">Aucun bien à afficher sur la carte</p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Section masquée lorsqu'une localisation est sélectionnée */}
         {!selectedLocation && (
-          <div className="grid  lg:gap-0 lg:flex justify-between items-center p-4 border-t">
+          <div className="grid lg:gap-0 lg:flex justify-between items-center p-4 border-t">
             <div className="text-sm text-muted-foreground">
               Cliquez sur la carte ou sélectionnez une propriété
             </div>
@@ -574,6 +703,19 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
           .rent-marker .marker-pin {
             color: #059669;
           }
+
+          .selected-marker .marker-pin {
+            animation: pulse 1.5s ease-in-out infinite;
+          }
+
+          @keyframes pulse {
+            0%, 100% {
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(1.1);
+            }
+          }
           
           .property-popup-mini {
             min-width: 200px;
@@ -625,4 +767,4 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
   );
 };
 
-export default LocationPickerModal; 
+export default LocationPickerModal;
