@@ -178,7 +178,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   const [buyProperties, setBuyProperties] = useState<any[]>([]);
   const [olimmoProperties, setOlimmoProperties] = useState<OlimmoProperty[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingOlimmo, setLoadingOlimmo] = useState(true);
+  const [loadingOlimmo, setLoadingOlimmo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorOlimmo, setErrorOlimmo] = useState<string | null>(null);
   const [demandesLoading, setDemandesLoading] = useState(false);
@@ -206,7 +206,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
     setMounted(true);
     trackImmobilierView();
     fetchProperties();
-    fetchOlimmoProperties();
+    //fetchOlimmoProperties();
   }, []);
 
   // Récupérer les propriétés Olimmo depuis Supabase
