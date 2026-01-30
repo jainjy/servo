@@ -1321,7 +1321,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
             onPropertyContact={handlePropertyContact}
           />
 
-          <LocationPickerModal
+          {/* <LocationPickerModal
             open={isLocationModalOpen}
             onClose={() => setIsLocationModalOpen(false)}
             value={localisation}
@@ -1338,7 +1338,16 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
               price: p.price,
               status: p.status,
             }))}
-          />
+          /> */}
+
+<LocationPickerModal
+  open={isLocationModalOpen}
+  onClose={() => setIsLocationModalOpen(false)}
+  value={localisation}
+  onChange={setLocalisation}
+  onLocationSelect={handleLocationSelect}
+  // SUPPRIMER la prop properties={...}
+/>
         </Suspense>
       </div>
     );
@@ -2193,7 +2202,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         onPropertyContact={handlePropertyContact}
       />
 
-      <LocationPickerModal
+      {/* <LocationPickerModal
         open={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
         value={localisation}
@@ -2210,7 +2219,16 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
           price: p.price,
           status: p.status,
         }))}
-      />
+      /> */}
+
+<LocationPickerModal
+  open={isLocationModalOpen}
+  onClose={() => setIsLocationModalOpen(false)}
+  value={localisation}
+  onChange={setLocalisation}
+  onLocationSelect={handleLocationSelect}
+  // SUPPRIMER la prop properties={...}
+/>
     </div>
   );
 };
