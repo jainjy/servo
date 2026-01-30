@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAdvertisementForPosition } from './AdvertisementProvider';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import api from "@/lib/api";
 
 interface Props {
@@ -39,6 +39,31 @@ const AdvertisementPopup: React.FC<Props> = ({
   const [isMobile, setIsMobile] = useState(false);
   const [shownAdsInSession, setShownAdsInSession] = useState<Set<string>>(new Set());
   const [sessionAdCount, setSessionAdCount] = useState(0);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Helper function to check if URL is a video
+  const isVideoUrl = (url: string): boolean => {
+    if (!url) return false;
+    
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv', '.flv', '.wmv'];
+    const urlLower = url.toLowerCase();
+    
+    return videoExtensions.some(ext => urlLower.includes(ext)) || 
+           urlLower.includes('/video/') || 
+           urlLower.includes('.m3u8') || 
+           urlLower.includes('.mpd');
+  };
+
+  // Helper function to get file extension
+  const getFileExtension = (url: string): string => {
+    if (!url) return '';
+    const urlParts = url.split('?')[0]; // Remove query parameters
+    const filename = urlParts.split('/').pop() || '';
+    const extension = filename.split('.').pop() || '';
+    return extension.toLowerCase();
+  };
 
   // Détection mobile
   useEffect(() => {
@@ -56,8 +81,29 @@ const AdvertisementPopup: React.FC<Props> = ({
   useEffect(() => {
     if (nextAd && (!currentAd || currentAd.id !== nextAd.id)) {
       setCurrentAd(nextAd);
+      // Reset video state when ad changes
+      setIsVideoPlaying(false);
+      setIsMuted(true);
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
     }
   }, [nextAd, currentAd]);
+
+  // Contrôler la vidéo
+  useEffect(() => {
+    if (currentAd && currentAd.imageUrl && isVideoUrl(currentAd.imageUrl)) {
+      if (visible && isVideoPlaying && videoRef.current) {
+        videoRef.current.play().catch(error => {
+          console.error("Erreur de lecture vidéo:", error);
+          setIsVideoPlaying(false);
+        });
+      } else if (!isVideoPlaying && videoRef.current) {
+        videoRef.current.pause();
+      }
+    }
+  }, [visible, isVideoPlaying, currentAd]);
 
   // Afficher la pub courante
   useEffect(() => {
@@ -69,6 +115,11 @@ const AdvertisementPopup: React.FC<Props> = ({
           markAsShown(currentAd.id);
           setShownAdsInSession(prev => new Set([...prev, currentAd.id]));
           setSessionAdCount(prev => prev + 1);
+
+          // Auto-play video if it's a video ad
+          if (currentAd.imageUrl && isVideoUrl(currentAd.imageUrl)) {
+            setIsVideoPlaying(true);
+          }
 
           if (onAdShow) {
             onAdShow(currentAd.id);
@@ -107,6 +158,22 @@ const AdvertisementPopup: React.FC<Props> = ({
       return () => clearTimeout(timer);
     }
   }, [visible, displayDuration]);
+
+  // Gérer la fin de la vidéo
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement || !currentAd || !isVideoUrl(currentAd.imageUrl || '')) return;
+
+    const handleVideoEnd = () => {
+      setIsVideoPlaying(false);
+      // Optionnel: rejouer la vidéo en boucle
+      // videoElement.currentTime = 0;
+      // videoElement.play();
+    };
+
+    videoElement.addEventListener('ended', handleVideoEnd);
+    return () => videoElement.removeEventListener('ended', handleVideoEnd);
+  }, [currentAd]);
 
   // Trouver la prochaine pub
   const rotateToNextAd = useCallback(() => {
@@ -156,6 +223,12 @@ const AdvertisementPopup: React.FC<Props> = ({
     setVisible(false);
     if (rotationTimer) clearTimeout(rotationTimer);
 
+    // Pause video when closing
+    if (videoRef.current) {
+      videoRef.current.pause();
+      setIsVideoPlaying(false);
+    }
+
     // Enregistrer l'impression si une publicité est affichée
     if (currentAd) {
       api.post(`/advertisements/${currentAd.id}/impression`)
@@ -193,6 +266,26 @@ const AdvertisementPopup: React.FC<Props> = ({
     }
   }, [currentAd, onAdClick, handleClose, markAsClicked]);
 
+  const toggleVideoPlay = () => {
+    if (!currentAd?.imageUrl || !isVideoUrl(currentAd.imageUrl)) return;
+    
+    setIsVideoPlaying(prev => !prev);
+  };
+
+  const toggleMute = () => {
+    setIsMuted(prev => !prev);
+  };
+
+  const handleVideoClick = (e: React.MouseEvent) => {
+    // If it's a video, handle play/pause instead of immediate click
+    if (currentAd?.imageUrl && isVideoUrl(currentAd.imageUrl)) {
+      e.stopPropagation();
+      toggleVideoPlay();
+    } else {
+      handleClick();
+    }
+  };
+
   // Ne pas afficher sur mobile si showOnMobile est false
   if (isMobile && !showOnMobile) {
     return null;
@@ -208,10 +301,67 @@ const AdvertisementPopup: React.FC<Props> = ({
   const adsRemaining = Math.max(0, maxAdsPerSession - sessionAdCount);
 
   const normalizedPos = position.toLowerCase();
+  const isVideoAd = currentAd.imageUrl && isVideoUrl(currentAd.imageUrl);
 
   // true si la position force un layout "miroir"
   const shouldMirror =
     normalizedPos.includes("left") || normalizedPos.includes("right");
+
+  const renderMedia = () => {
+    if (!currentAd.imageUrl) return null;
+
+    if (isVideoAd) {
+      return (
+        <div className="relative h-full w-full group">
+          <video
+            ref={videoRef}
+            src={currentAd.imageUrl}
+            className="h-full w-full object-cover cursor-pointer"
+            onClick={handleVideoClick}
+            muted={isMuted}
+            playsInline
+            loop={false}
+            preload="metadata"
+          />
+          
+          {/* Overlay controls */}
+          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="flex items-center gap-3 bg-black/70 rounded-full px-4 py-2">
+              <button
+                onClick={toggleVideoPlay}
+                className="text-white hover:text-gray-300 transition-colors"
+                aria-label={isVideoPlaying ? "Pause" : "Play"}
+              >
+                {isVideoPlaying ? <Pause size={20} /> : <Play size={20} />}
+              </button>
+              
+              <button
+                onClick={toggleMute}
+                className="text-white hover:text-gray-300 transition-colors"
+                aria-label={isMuted ? "Unmute" : "Mute"}
+              >
+                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              </button>
+            </div>
+          </div>
+          
+          {/* Video indicator */}
+          <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+            Vidéo
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={currentAd.imageUrl}
+        alt={currentAd.title}
+        className="h-full w-full object-cover cursor-pointer hover:brightness-110 transition-all"
+        onClick={handleClick}
+      />
+    );
+  };
 
   if (shouldMirror) {
     return (
@@ -226,15 +376,8 @@ const AdvertisementPopup: React.FC<Props> = ({
             </button>
           </div>
 
-          <div className=' w-full h-full px-5 py-6'>
-            {currentAd.imageUrl && (
-              <img
-                src={currentAd.imageUrl}
-                alt={currentAd.title}
-                className="ad-image"
-                onClick={handleClick}
-              />
-            )}
+          <div className='w-full h-full px-5 py-6'>
+            {renderMedia()}
           </div>
 
           <div className="ad-text">
@@ -251,7 +394,7 @@ const AdvertisementPopup: React.FC<Props> = ({
           </div>
         </div>
       </div>
-    )
+    );
   } else {
     return (
       <div className='w-full mx-auto flex justify-center'>
@@ -264,15 +407,10 @@ const AdvertisementPopup: React.FC<Props> = ({
               ×
             </button>
           </div>
+          
           {/* Media - Image/Vidéo */}
           <div className="w-full h-32 sm:w-40 md:w-56 lg:w-64 sm:h-40 md:h-44 flex-shrink-0 bg-slate-100 relative group">
-
-            <img
-              src={currentAd.imageUrl}
-              alt={currentAd.title}
-              className="h-full w-full object-cover cursor-pointer hover:brightness-110 transition-all"
-              onClick={handleClick}
-            />
+            {renderMedia()}
           </div>
 
           {/* Contenu texte */}
@@ -301,7 +439,7 @@ const AdvertisementPopup: React.FC<Props> = ({
           </div>
         </div>
       </div>
-    )
+    );
   }
 };
 

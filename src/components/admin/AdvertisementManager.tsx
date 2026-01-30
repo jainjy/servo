@@ -1323,137 +1323,149 @@ const AdvertisementManager = () => {
               )}
             </div>
           ) : (
-            <div className="rounded-lg border border-[#D3D3D3]">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-b-[#D3D3D3] hover:bg-transparent">
-                    <TableHead className="font-semibold">Publicité</TableHead>
-                    <TableHead className="font-semibold">Position</TableHead>
-                    <TableHead className="font-semibold">Type</TableHead>
-                    <TableHead className="font-semibold">Statut</TableHead>
-                    <TableHead className="font-semibold">Performance</TableHead>
-                    <TableHead className="font-semibold">Planning</TableHead>
-                    <TableHead className="font-semibold w-[120px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAdvertisements.map((ad) => (
-                    <TableRow key={ad.id} className="border-b-[#D3D3D3] hover:bg-[#6B8E23]/5">
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          {ad.type === 'video' ? (
-                            <div className="relative w-16 h-16 rounded-lg border border-[#D3D3D3] overflow-hidden bg-gradient-to-br from-[#556B2F]/20 to-[#6B8E23]/10 flex items-center justify-center">
-                              <div className="relative w-full h-full group">
-                                <video
-                                  src={getAdPreviewUrl(ad)}
-                                  className="w-full h-full object-cover"
-                                  preload="metadata"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <div className="bg-white/90 p-2 rounded-full cursor-pointer">
-                                    <Play className="w-4 h-4 text-[#8B4513]" />
+            <div className="rounded-lg border border-[#D3D3D3] overflow-hidden">
+              <div className="overflow-x-auto"> {/* Added for horizontal scroll if needed */}
+                <div className="max-h-[600px] overflow-y-auto"> {/* Added vertical scroll container */}
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-white z-10"> {/* Make header sticky during scroll */}
+                      <TableRow className="border-b-[#D3D3D3] hover:bg-transparent">
+                        <TableHead className="font-semibold w-[300px] max-w-[300px]"> {/* Fixed width for first column */}
+                          <div className="truncate">Publicité</div>
+                        </TableHead>
+                        <TableHead className="font-semibold w-[120px]">Position</TableHead>
+                        <TableHead className="font-semibold w-[100px]">Type</TableHead>
+                        <TableHead className="font-semibold w-[120px]">Statut</TableHead>
+                        <TableHead className="font-semibold w-[150px]">Performance</TableHead>
+                        <TableHead className="font-semibold w-[180px]">Planning</TableHead>
+                        <TableHead className="font-semibold w-[120px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAdvertisements.map((ad) => (
+                        <TableRow key={ad.id} className="border-b-[#D3D3D3] hover:bg-[#6B8E23]/5">
+                          <TableCell className="w-[300px] max-w-[300px]"> {/* Match header width */}
+                            <div className="flex items-center gap-3">
+                              {ad.type === 'video' ? (
+                                <div className="relative w-16 h-16 rounded-lg border border-[#D3D3D3] overflow-hidden bg-gradient-to-br from-[#556B2F]/20 to-[#6B8E23]/10 flex items-center justify-center shrink-0">
+                                  <div className="relative w-full h-full group">
+                                    <video
+                                      src={getAdPreviewUrl(ad)}
+                                      className="w-full h-full object-cover"
+                                      preload="metadata"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <div className="bg-white/90 p-2 rounded-full cursor-pointer">
+                                        <Play className="w-4 h-4 text-[#8B4513]" />
+                                      </div>
+                                    </div>
+                                    <div className="absolute top-1 right-1">
+                                      <Video className="w-3 h-3 text-white bg-black/50 p-0.5 rounded" />
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="absolute top-1 right-1">
-                                  <Video className="w-3 h-3 text-white bg-black/50 p-0.5 rounded" />
+                              ) : (
+                                <div className="relative w-16 h-16 shrink-0">
+                                  <img
+                                    src={getAdPreviewUrl(ad)}
+                                    alt={ad.title}
+                                    className="w-full h-full rounded-lg object-cover border border-[#D3D3D3]"
+                                    onError={(e) => {
+                                      e.target.src = `https://via.placeholder.com/64x64/556B2F/FFFFFF?text=${encodeURIComponent(ad.title.charAt(0))}`;
+                                    }}
+                                  />
                                 </div>
+                              )}
+                              <div className="min-w-0 flex-1 overflow-hidden"> {/* Added overflow-hidden */}
+                                <div className="font-semibold truncate flex items-center gap-2">
+                                  {ad.title}
+                                </div>
+                                {ad.description && (
+                                  <div className="text-sm text-[#8B4513]/70 truncate">
+                                    {ad.description}
+                                  </div>
+                                )}
+                                {ad.targetUrl && (
+                                  <div className="text-xs text-[#556B2F] flex items-center gap-1 mt-1">
+                                    <Link className="w-3 h-3 shrink-0" />
+                                    <span className="truncate">{formatUrl(ad.targetUrl)}</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                          ) : (
-                            <div className="relative w-16 h-16">
-                              <img
-                                src={getAdPreviewUrl(ad)}
-                                alt={ad.title}
-                                className="w-full h-full rounded-lg object-cover border border-[#D3D3D3]"
-                                onError={(e) => {
-                                  e.target.src = `https://via.placeholder.com/64x64/556B2F/FFFFFF?text=${encodeURIComponent(ad.title.charAt(0))}`;
-                                }}
-                              />
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <div className="font-semibold truncate flex items-center gap-2 ">
-                              {ad.title}
-                            </div>
-                            {ad.description && (
-                              <div className="text-sm text-[#8B4513]/70 truncate">
-                                {ad.description}
+                          </TableCell>
+                          <TableCell className="w-[120px]">
+                            {getPositionBadge(ad.position)}
+                          </TableCell>
+                          <TableCell className="w-[100px]">
+                            {getTypeBadge(ad.type)}
+                          </TableCell>
+                          <TableCell className="w-[120px]">
+                            {getStatusBadge(ad)}
+                          </TableCell>
+                          <TableCell className="w-[150px]">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-sm">
+                                <TrendingUp className="w-3 h-3 text-[#6B8E23] shrink-0" />
+                                <span className="font-medium truncate">{ad.clicks || 0} clics</span>
                               </div>
-                            )}
-                            {ad.targetUrl && (
-                              <div className="text-xs text-[#556B2F] flex items-center gap-1 mt-1">
-                                <Link className="w-3 h-3" />
-                                <span className="truncate">{formatUrl(ad.targetUrl)}</span>
+                              <div className="flex items-center gap-2 text-sm">
+                                <Eye className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{ad.impressions || 0} impressions</span>
                               </div>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getPositionBadge(ad.position)}</TableCell>
-                      <TableCell>{getTypeBadge(ad.type)}</TableCell>
-                      <TableCell>{getStatusBadge(ad)}</TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm">
-                            <TrendingUp className="w-3 h-3 text-[#6B8E23]" />
-                            <span className="font-medium ">{ad.clicks || 0} clics</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm ">
-                            <Eye className="w-3 h-3" />
-                            <span>{ad.impressions || 0} impressions</span>
-                          </div>
-                          {ad.impressions > 0 && (
-                            <div className="text-xs text-[#556B2F]">
-                              CTR: {((ad.clicks / ad.impressions) * 100).toFixed(1)}%
+                              {ad.impressions > 0 && (
+                                <div className="text-xs text-[#556B2F] truncate">
+                                  CTR: {((ad.clicks / ad.impressions) * 100).toFixed(1)}%
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1 text-sm">
-                          {ad.startDate && (
-                            <div className="flex items-center gap-2 ">
-                              <Calendar className="w-3 h-3" />
-                              <span>Début: {new Date(ad.startDate).toLocaleDateString('fr-FR')}</span>
+                          </TableCell>
+                          <TableCell className="w-[180px]">
+                            <div className="space-y-1 text-sm">
+                              {ad.startDate && (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-3 h-3 shrink-0" />
+                                  <span className="truncate">Début: {new Date(ad.startDate).toLocaleDateString('fr-FR')}</span>
+                                </div>
+                              )}
+                              {ad.endDate && (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-3 h-3 shrink-0" />
+                                  <span className="truncate">Fin: {new Date(ad.endDate).toLocaleDateString('fr-FR')}</span>
+                                </div>
+                              )}
+                              {!ad.startDate && !ad.endDate && (
+                                <span className="text-[#8B4513]/60 truncate">Aucune date</span>
+                              )}
                             </div>
-                          )}
-                          {ad.endDate && (
-                            <div className="flex items-center gap-2 ">
-                              <Calendar className="w-3 h-3" />
-                              <span>Fin: {new Date(ad.endDate).toLocaleDateString('fr-FR')}</span>
+                          </TableCell>
+                          <TableCell className="w-[120px]">
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEditDialog(ad)}
+                                title="Modifier"
+                                className="text-[#8B4513] hover:text-[#6B8E23] hover:bg-[#6B8E23]/10 shrink-0"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(ad.id)}
+                                title="Supprimer"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
-                          )}
-                          {!ad.startDate && !ad.endDate && (
-                            <span className="text-[#8B4513]/60">Aucune date</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEditDialog(ad)}
-                            title="Modifier"
-                            className="text-[#8B4513] hover:text-[#6B8E23] hover:bg-[#6B8E23]/10"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(ad.id)}
-                            title="Supprimer"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
