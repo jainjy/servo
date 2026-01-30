@@ -207,7 +207,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
   const [rentProperties, setRentProperties] = useState<any[]>([]);
   const [olimmoProperties, setOlimmoProperties] = useState<OlimmoProperty[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingOlimmo, setLoadingOlimmo] = useState(true);
+  const [loadingOlimmo, setLoadingOlimmo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorOlimmo, setErrorOlimmo] = useState<string | null>(null);
   const [demandesLoading, setDemandesLoading] = useState(false);
@@ -270,7 +270,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
 
   useEffect(() => {
     fetchProperties();
-    fetchOlimmoProperties();
+    //fetchOlimmoProperties();
   }, [rentType]);
 
   // Intersection Observer pour le tracking
