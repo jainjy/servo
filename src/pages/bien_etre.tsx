@@ -10,6 +10,7 @@ import Therapeute from "./Therapeute";
 import MedecinesNaturelles from "./MedecineNaturelle";
 import HuilesEssentielles from "./HuilesEssentielles";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -113,13 +114,6 @@ const BienEtre = () => {
 
   return (
     <div className="font-sans text-foreground min-h-screen bg-background">
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       {/* HERO - Toujours visible */}
       <section
         className="relative h-80 py-16 lg:py-20 text-center text-white overflow-hidden"
@@ -193,6 +187,8 @@ const BienEtre = () => {
           </LayoutGroup>
         </SlideIn>
       </div>
+
+      <AdvertisementPopup position="page-services-bien-etre" showOnMobile={true}/>
 
       {/* CONTENU DE LA TABULATION */}
       <div className="container mx-auto px-4 py-8">

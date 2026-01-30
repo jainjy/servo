@@ -35,16 +35,16 @@ const services = [
 
 const ServiceCards = () => {
   return (
-    <section className="container mx-auto  md:px-8 sm:px-4 lg:px-12 mt-2 lg:-mt-24 relative z-20 mb-8">
+    <section className="container mx-auto relative z-20 mb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {services.map((service) => (
           <Link to={service.href} key={service.title} className="no-underline">
             <Card
               key={service.title}
               className="
-    p-4 sm:p-5 lg:p-6 
+    p-4 sm:p-5 lg:p-6 rounded-none
     text-center flex flex-col items-center 
-    hover:shadow-2xl shadow-lg transition-all duration-500 
+  shadow-lg transition-all duration-500 
     cursor-pointer border border-gray-100 
     bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50
     group relative overflow-hidden
@@ -71,8 +71,6 @@ const ServiceCards = () => {
         group-hover:scale-110
       `} />
                 </div>
-
-                
               </div>
 
               {/* Contenu */}
@@ -82,7 +80,7 @@ const ServiceCards = () => {
       transition-colors duration-300
       text-sm sm:text-base lg:text-xl
       mb-2 lg:mb-3
-      line-clamp-2
+      line-clamp-2 font-serif
     ">
                   {service.title}
                 </h3>
@@ -92,7 +90,7 @@ const ServiceCards = () => {
       text-xs sm:text-sm lg:text-base
       line-clamp-2 sm:line-clamp-3
       opacity-80 group-hover:opacity-100 
-      transition-opacity duration-300
+      transition-opacity duration-300 font-serif
     ">
                   {service.description}
                 </p>

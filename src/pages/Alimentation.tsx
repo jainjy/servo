@@ -45,6 +45,7 @@ import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import api from "@/lib/api";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Composant Skeleton Loading
 const SectionSkeleton = () => (
@@ -88,8 +89,8 @@ const QuickNavigation = ({ sections, activeSection, onSectionClick }) => {
                 key={section.id}
                 onClick={() => onSectionClick(section.id)}
                 className={`relative p-2 rounded-xl transition-all duration-300 ${isActive
-                    ? 'bg-[#556B2F] text-white'
-                    : 'hover:bg-[#556B2F]/10 text-[#556B2F]'
+                  ? 'bg-[#556B2F] text-white'
+                  : 'hover:bg-[#556B2F]/10 text-[#556B2F]'
                   }`}
                 title={section.title}
               >
@@ -495,19 +496,11 @@ const Alimentation = () => {
       </div>
     );
   }
-//console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
+  //console.log("Rendu de la page principale, filteredSections:", filteredSections.length);
 
   return (
     <div className="min-h-screen relative pt-16 bg-[#FFFFFF]">
       {/* Background Image avec overlay */}
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -562,7 +555,7 @@ const Alimentation = () => {
             </div>
           </div>
 
-
+          <AdvertisementPopup position="page-explorer-manger" showOnMobile={true}/>
 
           {/* Sections */}
           {isCategoriesLoading ? (

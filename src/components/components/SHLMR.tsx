@@ -33,6 +33,7 @@ import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
 import { Card } from "@/components/ui/card";
 import { Ruler } from "lucide-react";
 import AdvertisementPopup from '../AdvertisementPopup';
+import Allpub from '../Allpub';
 
 // Couleurs fournies
 const COLORS = {
@@ -750,9 +751,6 @@ const LogementsSHLMR = () => {
     return (
         <div className="min-h-screen" style={{ backgroundColor: COLORS["light-bg"] }}>
             {/* Hero Section avec image */}
-            <div className="absolute top-12 left-4 right-4 z-50">
-                <AdvertisementPopup />
-            </div>
             <motion.section
                 ref={heroRef}
                 initial={{ opacity: 0 }}
@@ -804,6 +802,8 @@ const LogementsSHLMR = () => {
                     </div>
                 </div>
             </motion.section>
+
+           <AdvertisementPopup position="page-logement-sociaux" showOnMobile={true}/>
 
             {/* Navigation par onglets */}
             <section className="py-8 -mt-10 relative z-20">
@@ -1021,7 +1021,6 @@ const LogementsSHLMR = () => {
                                 </div>
                             </motion.div>
                         </div>
-                        <AdvertisementPopup />
                     </motion.section>
                 )}
             </AnimatePresence>
@@ -1139,7 +1138,6 @@ const LogementsSHLMR = () => {
                                 </div>
                             </div>
                         </div>
-                        <AdvertisementPopup />
                     </motion.section>
                 )}
             </AnimatePresence>
@@ -1228,8 +1226,6 @@ const LogementsSHLMR = () => {
                                     />
                                 ))}
                             </div>
-
-                            <AdvertisementPopup />
 
                             {/* Message si aucun résultat */}
                             {filteredLogements.length === 0 && (

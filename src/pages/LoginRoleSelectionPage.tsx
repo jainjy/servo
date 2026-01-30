@@ -100,11 +100,6 @@ const LoginRoleSelectionPage = () => {
         <div className="absolute inset-0 backdrop-blur-md z-0" />
       </div>
 
-      {/* Advertisement Popup */}
-      <div className="absolute top-4 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
       <div className="absolute inset-0 -z-20">
         <img
           src="/nature.jpeg"
@@ -163,13 +158,11 @@ const LoginRoleSelectionPage = () => {
                     {role.icon}
                   </div>
 
-                  <div className="space-y-4 mt-4">
+                  <div className="space-y-4 mt-4 mb-4">
                     <h3 className="text-xl font-bold text-white transition-transform duration-300 tracking-wide">
                       {role.title}
                     </h3>
-                    <p className="text-gray-300 leading-relaxed text-sm font-light">
-                      {role.description}
-                    </p>
+         
                   </div>
 
                   <Button

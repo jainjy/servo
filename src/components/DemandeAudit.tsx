@@ -167,7 +167,7 @@ const DemandeAudit: React.FC<AuditModalProps> = ({
           <div>
             <label
               htmlFor="titre"
-              className="block text-sm font-medium text-[#8B4513] mb-1"
+              className="block text-sm font-medium text-slate-900 mb-1"
             >
               Titre de l&apos;audit *
             </label>
@@ -188,7 +188,7 @@ const DemandeAudit: React.FC<AuditModalProps> = ({
           <div>
             <label
               htmlFor="type"
-              className="block text-sm font-medium text-[#8B4513] mb-1"
+              className="block text-sm font-medium text-slate-900 mb-1"
             >
               Type d&apos;audit *
             </label>
@@ -214,7 +214,7 @@ const DemandeAudit: React.FC<AuditModalProps> = ({
           <div>
             <label
               htmlFor="responsable"
-              className="block text-sm font-medium text-[#8B4513] mb-1"
+              className="block text-sm font-medium text-slate-900 mb-1"
             >
               Responsable souhaité *
             </label>
@@ -235,7 +235,7 @@ const DemandeAudit: React.FC<AuditModalProps> = ({
           <div>
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-[#8B4513] mb-1"
+              className="block text-sm font-medium text-slate-900 mb-1"
             >
               Description
             </label>

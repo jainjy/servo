@@ -13,6 +13,9 @@ import {
 import { api } from "@/lib/axios";
 import TourismNavigation from "../TourismNavigation";
 import AdvertisementPopup from "../AdvertisementPopup";
+import Allpub from "../Allpub";
+import ParapentePage from "../pro/ParapentePage";
+import UserParapentePage from "@/pages/UserParapentePage";
 
 interface ActivityCategory {
   id: number;
@@ -54,6 +57,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"activites" | "parapente">("activites");
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -104,15 +108,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
     // Utilisation de la couleur de fond claire du thème
     <div className={`min-h-screen bg-[${lightBg}] text-gray-900`}>
       {/* Hero */}
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-      <div className="relative rounded-2xl overflow-hidden mb-8">
+      <div className="relative overflow-hidden mb-8">
         <div
           className="relative pt-20 pb-8 bg-cover bg-center bg-no-repeat"
           style={{
@@ -136,6 +132,8 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       </div>
       {/* Fin Hero */}
 
+      
+
       {/* SEARCH BAR */}
       <div className="max-w-3xl mx-auto px-4 -mt-10 mb-14 relative z-20">
         <div
@@ -156,6 +154,36 @@ const ActivitesLoisirsFAQ: React.FC = () => {
         </div>
       </div>
 
+      <AdvertisementPopup position="page-explorer-decouvrir" showOnMobile={true}/>
+
+      {/* TABS */}
+      <div className="flex justify-center gap-4 px-4 mb-8">
+        <button
+          onClick={() => setActiveTab("activites")}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all border-2
+            ${activeTab === "activites"
+              ? `bg-gradient-to-r ${defaultGradient} text-white border-transparent`
+              : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+            }`}
+        >
+          Activités & Loisirs
+        </button>
+        <button
+          onClick={() => setActiveTab("parapente")}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all border-2 flex items-center gap-2
+            ${activeTab === "parapente"
+              ? `bg-gradient-to-r ${defaultGradient} text-white border-transparent`
+              : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+            }`}
+        >
+          <Mountain className="w-5 h-5" />
+          Parapente
+        </button>
+      </div>
+
+      {/* CONTENT */}
+      {activeTab === "activites" && (
+        <>
       {/* CATEGORY FILTERS */}
       <div className="flex flex-wrap justify-center gap-3 px-4 mb-16">
         <button
@@ -182,8 +210,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
             className={`flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm transition-all shadow-md border-2
               ${activeCategory === cat.name
                 ? // Si cat.color est défini, on l'utilise, sinon le dégradé du thème
-                `bg-gradient-to-r ${cat.color || defaultGradient
-                } text-white border-transparent shadow-lg`
+                `bg-gradient-to-r ${cat.color || defaultGradient} text-white border-transparent shadow-lg`
                 : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
               } hover:scale-105 hover:shadow-lg`}
           >
@@ -294,6 +321,13 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           ))}
         </div>
       </div>
+        </>
+      )}
+
+      {/* PARAPENTE TAB */}
+      {activeTab === "parapente" && (
+        <UserParapentePage />
+      )}
     </div>
   );
 };

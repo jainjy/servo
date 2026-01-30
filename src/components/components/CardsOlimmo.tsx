@@ -303,7 +303,7 @@ const AnnonceCard = ({ property }: { property: Property }) => {
             <div
               className={`px-3 py-1.5 rounded-full text-xs font-semibold ${property.type === "location"
                 ? "bg-[#6B8E23] text-white"
-                : "bg-[#8B4513] text-white"}`}
+                : "bg-logo text-slate-100"}`}
             >
               {property.type === "location" ? "À louer" : "À vendre"}
             </div>
@@ -468,7 +468,7 @@ const AnnoncesImmobilieres = () => {
         {/* En-tête */}
         <div className="mb-12 grid place-items-center lg:flex justify-between items-center">
           <h2
-            className="text-3xl sm:text-5xl font-medium mb-3 text-center lg:text-left text-slate-900"
+            className="text-3xl sm:text-5xl font-serif font-medium mb-3 text-center lg:text-left text-slate-900"
           >
             Propriétés de nos partenaires
           </h2>

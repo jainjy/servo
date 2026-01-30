@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 import MateriauxTravauxSection from "./MateriauxTravauxSection";
 import AdvertisementPopup from "./AdvertisementPopup";
+import Allpub from "./Allpub";
 
 // Images de fond pour chaque catégorie
 const backgroundImages = {
@@ -1108,14 +1109,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   return (
     <>
       <section id={currentCategory.sectionId} className="relative min-h-screen">
-        {/* Advertisement Popup - Absolute Position */}
-        <div className="absolute top-12 left-4 right-4 z-50">
-          <AdvertisementPopup />
-        </div>
-
-        <div className="fixed w-1/2 bottom-0 right-4 z-50">
-          <AdvertisementPopup />
-        </div>
         <div className="absolute inset-0 -z-20 overflow-hidden h-80 w-full">
           <div className="bg-black/50 absolute w-full h-full backdrop-blur-sm "></div>
           <img
@@ -1189,8 +1182,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                       {/* Section Filtres par type */}
                       <div className="flex-1">
                         <div className="flex justify-center items-start gap-3 mb-3">
-                          <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
-                          <span className="text-xs font-semibold text-[#8B4513]">
+                          <BookCheck className="h-4 w-4 text-slate-900 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-slate-900">
                             {section.label.toUpperCase()} :
                           </span>
                         </div>
@@ -1219,8 +1212,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                       {/* Filtre Métiers */}
                       <div className="flex-1 border-t pt-4">
                         <div className="flex justify-center items-start gap-3 mb-3">
-                          <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
-                          <span className="text-xs font-semibold text-[#8B4513]">
+                          <BookCheck className="h-4 w-4 text-slate-900 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-slate-900">
                             MÉTIERS :
                           </span>
                         </div>
@@ -1253,6 +1246,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
             )}
           </Tabs>
 
+          <AdvertisementPopup position="page-services-traveaux" showOnMobile={true}/>
+
           {/* AFFICHAGE CONDITIONNEL : SPINNER OU CONTENU DE LA CATÉGORIE */}
           {isLoadingServices ? (
             <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
@@ -1270,7 +1265,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                 <>
                   {/* Filtres pour les autres catégories */}
                   <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-sm font-semibold text-[#8B4513] mr-2 flex items-center gap-2">
+                    <span className="text-sm font-semibold text-logo mr-2 flex items-center gap-2">
                       <BookCheck className="h-4 w-4" />
                       LISTES :
                     </span>

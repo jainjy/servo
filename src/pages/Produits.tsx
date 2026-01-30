@@ -23,6 +23,7 @@ import { default as ProductCard } from "@/components/ProductCard";
 import api from "@/lib/api";
 import { useProduitsTracking } from '@/hooks/useProduitsTracking';
 import AdvertisementPopup from '@/components/AdvertisementPopup';
+import Allpub from '@/components/Allpub';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -207,14 +208,6 @@ const Produits = () => {
   return (
     <div className="min-h-screen relative pt-16 overflow-hidden bg-[#F6F8FA]">
       {/* Background Image avec overlay */}
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
@@ -292,6 +285,8 @@ const Produits = () => {
             </form> */}
           </div>
 
+         
+
           {/* Affichage des résultats de recherche */}
           {searchQuery && products.length > 0 && (
             <div className="mb-12 animate-fade-in">
@@ -310,6 +305,8 @@ const Produits = () => {
             </div>
           )}
 
+          <AdvertisementPopup position="page-explorer-produits-1" showOnMobile={true}/>
+
           {/* Sections avec props de tracking */}
           <EquipementSection
             searchQuery={searchQuery}
@@ -323,6 +320,8 @@ const Produits = () => {
             searchQuery={searchQuery}
             onCategoryClick={trackCategoryClick}
           />
+
+          <AdvertisementPopup position="page-explorer-produits-2" showOnMobile={true}/>
 
           {/* Section CTA */}
           <div

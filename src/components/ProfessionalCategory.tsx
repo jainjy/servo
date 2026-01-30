@@ -12,6 +12,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import api from "@/lib/api";
+import Allpub from "./Allpub";
+import AdvertisementPopup from "./AdvertisementPopup";
 
 interface Professional {
   id: string;
@@ -123,13 +125,12 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
           <Star
             key={star}
             size={14}
-            className={`${
-              star <= Math.floor(rating)
+            className={`${star <= Math.floor(rating)
                 ? "text-yellow-500 fill-yellow-500"
                 : star <= rating
-                ? "text-yellow-500 fill-yellow-500"
-                : "text-gray-300"
-            }`}
+                  ? "text-yellow-500 fill-yellow-500"
+                  : "text-gray-300"
+              }`}
           />
         ))}
         <span className="ml-2 text-sm text-gray-600">{rating.toFixed(1)}</span>
@@ -176,11 +177,12 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
               <span className="font-medium">Filtres et tri</span>
             </div>
             <ChevronDown
-              className={`transform transition-transform ${
-                showFilters ? "rotate-180" : ""
-              }`}
+              className={`transform transition-transform ${showFilters ? "rotate-180" : ""
+                }`}
             />
           </button>
+
+          <AdvertisementPopup position="page-partenaires-nos-agences" showOnMobile={true}/>
 
           {/* Contenu des filtres */}
           <div className={`${showFilters ? "block" : "hidden"} md:block`}>
@@ -302,8 +304,8 @@ const ProfessionalCard: React.FC<{
     professional.firstName && professional.lastName
       ? `${professional.firstName} ${professional.lastName}`
       : professional.commercialName ||
-        professional.companyName ||
-        "Professionnel";
+      professional.companyName ||
+      "Professionnel";
 
   const getJob = () =>
     professional.metiers?.[0]?.metier.libelle ||
@@ -477,9 +479,8 @@ const ProfessionalCard: React.FC<{
           <a
             href={`mailto:${professional.email}`}
             onClick={(e) => e.stopPropagation()}
-            className={`flex items-center gap-2 text-xs sm:text-sm text-gray-700 hover:text-blue-600 transition-colors p-2 hover:bg-white rounded ${
-              professional.phone ? "sm:col-span-2" : "col-span-1 sm:col-span-2"
-            }`}
+            className={`flex items-center gap-2 text-xs sm:text-sm text-gray-700 hover:text-blue-600 transition-colors p-2 hover:bg-white rounded ${professional.phone ? "sm:col-span-2" : "col-span-1 sm:col-span-2"
+              }`}
           >
             <Mail size={16} className="text-gray-400 flex-shrink-0" />
             <span className="truncate">{professional.email}</span>

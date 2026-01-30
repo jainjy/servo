@@ -421,13 +421,6 @@ const PodcastsEntreprise: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section avec Image de Background */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <div
         className="relative py-10 pt-20 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}

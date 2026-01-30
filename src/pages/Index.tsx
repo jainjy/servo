@@ -104,14 +104,13 @@ const Index = () => {
         <Suspense fallback={<LoadingFallback />}>
           <div className="fixed w-1/2 bottom-0 right-4 z-50">
             <AdvertisementPopup
-              refreshMinutes={10} // Rafraîchir toutes les 3 min
-              displayDuration={2} // Affichage de 2 min pour les images
-              listThreshold={2} // Passer en mode liste à partir de 3 pub
+              size="small"
+              position="pop-up"
+              showOnMobile={true}
             />
           </div>
           <Hero />
           <ServiceCards />
-          <AdvertisementPopup />
           <TravauxPreview homeCards />
 
           {/* Section de recommandations intelligentes - affichée seulement si token valide ET données disponibles */}
@@ -137,14 +136,14 @@ const Index = () => {
           <>
             <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
               <h2
-                className="text-3xl lg:text-5xl font-medium ml-8 my-6 text-slate-900"
+                className="text-3xl lg:text-5xl font-serif font-medium ml-8 my-6 text-slate-900"
               >
                 Nos biens immobiliers
               </h2>
               {/* Voir plus button */}
 
               <Button
-                className="relative px-8 mx-auto py-3 bg-logo hover:bg-logo/90 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 "
+                className="relative px-8 py-3 bg-logo hover:bg-logo/90 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 "
                 onClick={() => navigate("/immobilier")}
               >
 
@@ -166,7 +165,7 @@ const Index = () => {
             {/* Section Bien-Être */}
             <BienEtreShowcase />
             <Slider />
-            <AdvertisementPopup />
+            <AdvertisementPopup position={"section3"} />
             <AnnoncesImmobilieres />
           </>
         </Suspense>

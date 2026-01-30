@@ -102,19 +102,33 @@ const allNavigationItems: NavigationItem[] = [
     name: "Mes Annonces",
     href: "/pro/listings",
     icon: Building2,
-    userTypes: ["AGENCE", "VENDEUR", "TOURISME"],
+    userTypes: ["AGENCE", "VENDEUR"],
   },
   {
     name: "Mes Services",
     href: "/pro/services",
     icon: Wrench,
-    userTypes: ["PRESTATAIRE", "ARTISAN", "BIEN_ETRE"],
+    userTypes: [
+      "AGENCE",
+      "VENDEUR",
+      "PRESTATAIRE",
+      "ARTISAN",
+      "TOURISME",
+      "BIEN_ETRE",
+    ],
   },
   {
     name: "Mes projets",
     href: "/pro/projet",
     icon: Hammer,
-    userTypes: ["AGENCE", "VENDEUR", "PRESTATAIRE", "ARTISAN"],
+    userTypes: [
+      "AGENCE",
+      "VENDEUR",
+      "PRESTATAIRE",
+      "ARTISAN",
+      "TOURISME",
+      "BIEN_ETRE",
+    ],
   },
 
   // === ÉVÉNEMENTS & DÉCOUVERTES ===
@@ -137,7 +151,7 @@ const allNavigationItems: NavigationItem[] = [
     name: "Art et Creation",
     href: "/pro/art-et-creation-page",
     icon: Brush,
-    userTypes: ["ARTISAN"],
+    userTypes: ["ARTISAN", "PRESTATAIRE"],
   },
 
   // === EMPLOI & FORMATIONS ===
@@ -145,40 +159,19 @@ const allNavigationItems: NavigationItem[] = [
     name: "Gestion des Formations",
     href: "/pro/gestion-formations",
     icon: GraduationCap,
-    userTypes: [
-      "AGENCE",
-      "VENDEUR",
-      "PRESTATAIRE",
-      "ARTISAN",
-      "TOURISME",
-      "BIEN_ETRE",
-    ],
+    userTypes: ["PRESTATAIRE", "ARTISAN"],
   },
   {
     name: "Gestion des Offres d'Emploi",
     href: "/pro/gestion-emplois",
     icon: Briefcase,
-    userTypes: [
-      "AGENCE",
-      "VENDEUR",
-      "PRESTATAIRE",
-      "ARTISAN",
-      "TOURISME",
-      "BIEN_ETRE",
-    ],
+    userTypes: ["PRESTATAIRE", "ARTISAN"],
   },
   {
     name: "Gestion Alternance/Stages",
     href: "/pro/gestion-alternance",
     icon: Book,
-    userTypes: [
-      "AGENCE",
-      "VENDEUR",
-      "PRESTATAIRE",
-      "ARTISAN",
-      "TOURISME",
-      "BIEN_ETRE",
-    ],
+    userTypes: ["PRESTATAIRE", "ARTISAN"],
   },
 
   // === GESTION DES RÉSERVATIONS & COMMANDES ===
@@ -186,7 +179,14 @@ const allNavigationItems: NavigationItem[] = [
     name: "Mon Agenda",
     href: "/pro/calendar",
     icon: Calendar,
-    userTypes: ["PRESTATAIRE", "ARTISAN", "BIEN_ETRE"],
+    userTypes: [
+      "AGENCE",
+      "VENDEUR",
+      "PRESTATAIRE",
+      "ARTISAN",
+      "TOURISME",
+      "BIEN_ETRE",
+    ],
   },
   {
     name: "Reservations tourisme",
@@ -198,14 +198,14 @@ const allNavigationItems: NavigationItem[] = [
     name: "Gestion de locations des vehicules",
     href: "/pro/vehicules",
     icon: Car,
-    userTypes: ["TOURISME", "PRESTATAIRE", "ARTISAN"],
+    userTypes: ["TOURISME", "ARTISAN", "PRESTATAIRE"],
   },
-      {
-      name: "Activité parapente",
-      href: "/pro/parapente",
-      icon: Bird,
-      userTypes: ["TOURISME", "PRESTATAIRE", "ARTISAN"],
-    },
+  {
+    name: "Activité parapente",
+    href: "/pro/parapente",
+    icon: Bird,
+    userTypes: ["TOURISME"],
+  },
   {
     name: "Reservations bien-être",
     href: "/pro/reservationbien-etre",
@@ -216,14 +216,7 @@ const allNavigationItems: NavigationItem[] = [
     name: "Mes Commandes",
     href: "/pro/orders",
     icon: ShoppingCart,
-    userTypes: [
-      "AGENCE",
-      "VENDEUR",
-      "PRESTATAIRE",
-      "ARTISAN",
-      "TOURISME",
-      "BIEN_ETRE",
-    ],
+    userTypes: ["AGENCE", "VENDEUR"],
   },
   {
     name: "Reservations Cours",
@@ -243,7 +236,7 @@ const allNavigationItems: NavigationItem[] = [
     name: "Mes Produits",
     href: "/pro/products",
     icon: ShoppingBag,
-    userTypes: ["AGENCE", "VENDEUR", "TOURISME"],
+    userTypes: ["AGENCE", "VENDEUR"],
   },
 
   // === GESTION DES DEMANDES ===
@@ -251,7 +244,7 @@ const allNavigationItems: NavigationItem[] = [
     name: "Mes Demandes de financement",
     href: "/pro/financement-demandes",
     icon: Building2,
-    userTypes: ["AGENCE", "VENDEUR", "PRESTATAIRE", "ARTISAN"],
+    userTypes: ["PRESTATAIRE", "ARTISAN"],
   },
   {
     name: "Mes Demandes de services",
@@ -271,12 +264,12 @@ const allNavigationItems: NavigationItem[] = [
     icon: FileText,
     userTypes: ["PRESTATAIRE", "ARTISAN"],
   },
-  {
-    name: "Demandes de conseil et accompagnement",
-    href: "/pro/conseil",
-    icon: Briefcase,
-    userTypes: ["AGENCE", "VENDEUR", "PRESTATAIRE", "ARTISAN"],
-  },
+  // {
+  //   name: "Demandes de conseil et accompagnement",
+  //   href: "/pro/conseil",
+  //   icon: Briefcase,
+  //   userTypes: ["PRESTATAIRE", "ARTISAN"],
+  // },
 
   // === GESTION FINANCIÈRE ===
   {
@@ -771,10 +764,7 @@ export function ProSidebar() {
           <div className="flex flex-col gap-1 mt-1">
             <p className="text-xs text-[#8B4513]">Espace Pro</p>
             <div className="flex flex-wrap gap-1">
-              <span className="text-xs px-2 py-0.5 bg-[#556B2F]/10 text-[#556B2F] rounded-full capitalize">
-                {userCategory}
-              </span>
-              <span className="text-xs px-2 py-0.5 bg-[#8B4513]/10 text-[#8B4513] rounded-full uppercase">
+              <span className="text-xs px-2 py-0.5 bg-[#8B4513]/10 text-[#8B4513] rounded-full uppercase mb-2">
                 {userType}
               </span>
             </div>

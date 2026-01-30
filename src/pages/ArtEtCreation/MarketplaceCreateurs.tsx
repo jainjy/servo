@@ -456,7 +456,7 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
         <div className="mb-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-[#8B4513] mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
                 Marketplace des produits d'art
               </h1>
               <p className="text-gray-600">
@@ -467,7 +467,7 @@ const MarketplaceCreateurs: React.FC<MarketplaceCreateursProps> = ({ onContactCl
             
           </div>
           
-          <div className="h-1 w-20 bg-[#8B4513] rounded-full"></div>
+          <div className="h-1 w-20 bg-logo rounded-full"></div>
         </div>
 
         {error && (

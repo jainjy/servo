@@ -23,7 +23,10 @@ const quickActions = [
     icon: Plus,
     href: "/pro/listings",
     color: "text-blue-600",
-    bgColor: "bg-blue-50"
+    bgColor: "bg-blue-50",
+    usertype: [    "AGENCE",
+    "VENDEUR",
+    ]
   },
   {
     name: "Voir planning",
@@ -31,23 +34,43 @@ const quickActions = [
     icon: Calendar,
     href: "/pro/calendar",
     color: "text-green-600",
-    bgColor: "bg-green-50"
+    bgColor: "bg-green-50",
+    usertype: [    "AGENCE",
+    "VENDEUR",
+    "PRESTATAIRE",
+    "ARTISAN",
+    "TOURISME",
+    "BIEN_ETRE",],
   },
-  {
-    name: "Créer un devis",
-    description: "Envoyer un devis",
-    icon: FileText,
-    href: "/pro/billing",
-    color: "text-orange-600",
-    bgColor: "bg-orange-50"
-  },
+  // {
+  //   name: "Créer un devis",
+  //   description: "Envoyer un devis",
+  //   icon: FileText,
+  //   href: "/pro/billing",
+  //   color: "text-orange-600",
+  //   bgColor: "bg-orange-50",
+  // usertype: [    "AGENCE",
+    // "VENDEUR",
+    // "PRESTATAIRE",
+    // "ARTISAN",
+    // "TOURISME",
+    // "BIEN_ETRE",],
+  // },
   {
     name: "Paramètres",
     description: "Modifier le profil",
     icon: Settings,
     href: "/pro/settings",
     color: "text-gray-600",
-    bgColor: "bg-gray-50"
+    bgColor: "bg-gray-50",
+    
+    usertype: [    "AGENCE",
+    "VENDEUR",
+    "PRESTATAIRE",
+    "ARTISAN",
+    "TOURISME",
+    "BIEN_ETRE",],
+    
   },
   {
     name: "Demande d'accès administrateur",
@@ -56,14 +79,14 @@ const quickActions = [
     href: "#",
     color: "text-gray-600",
     bgColor: "bg-gray-50",
-    isModalAction: true // Nouvelle propriété pour identifier l'action modale
+    isModalAction: true, // Nouvelle propriété pour identifier l'action modale
   },
 ];
 
 export function QuickActions() {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+console.log("utilisateur",user)
   // Fonction pour gérer l'envoi de la demande
   const handleSendRequest = async (data: { email: string; name: string; message?: string }) => {
     console.log("Demande d'accès administrateur:", data);
@@ -115,6 +138,11 @@ export function QuickActions() {
         
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {quickActions.map((action) => {
+            // Vérifier si l'utilisateur a accès à cette action
+            if (action.usertype && !action.usertype.includes(user?.userType)) {
+              return null;
+            }
+
             // Si c'est une action qui ouvre une modale
             if (action.isModalAction) {
               return (

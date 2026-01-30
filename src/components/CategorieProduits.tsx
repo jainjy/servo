@@ -121,7 +121,7 @@ const CategorieProduits = () => {
       <div className="min-h-screen pt-16 bg-[#FFFFFF0] flex items-center justify-center">
         <div className=" py-12 flex flex-col justify-center items-center">
           <img src="/loading.gif" alt="" className='w-24 h-24' />
-          <p className="text-[#8B4513] mt-4">Chargement des produits...</p>
+          <p className="text-slate-900 mt-4">Chargement des produits...</p>
         </div>
       </div>
     );
@@ -146,7 +146,7 @@ const CategorieProduits = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate(-1)}
-                  className="flex items-center gap-2 text-[#8B4513] hover:text-[#556B2F] hover:bg-[#6B8E23]/10"
+                  className="flex items-center gap-2 text-logo hover:text-[#556B2F] hover:bg-[#6B8E23]/10"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Retour
@@ -155,7 +155,7 @@ const CategorieProduits = () => {
                   <h2 className="text-2xl font-bold text-gray-900">
                     {category?.name || decodeURIComponent(categoryName)}
                   </h2>
-                  <p className="text-[#8B4513] text-xs">
+                  <p className="text-slate-900 text-xs">
                     {category?.description || "Découvrez tous nos produits dans cette catégorie"}
                   </p>
                 </div>
@@ -208,7 +208,7 @@ const CategorieProduits = () => {
                   </div>
 
                   {product.vendor?.companyName && (
-                    <div className="flex items-center gap-2 mb-4 text-sm text-[#8B4513]">
+                    <div className="flex items-center gap-2 mb-4 text-sm text-slate-900">
                       <ShoppingCart className="h-4 w-4" />
                       <span>{product.vendor.companyName}</span>
                     </div>
@@ -237,9 +237,9 @@ const CategorieProduits = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Package className="h-16 w-16 text-[#8B4513] mx-auto mb-4" />
+              <Package className="h-16 w-16 text-slate-900 mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2 text-gray-900">Aucun produit trouvé</h3>
-              <p className="text-[#8B4513]">
+              <p className="text-slate-900">
                 Aucun produit disponible dans cette catégorie pour le moment.
               </p>
             </div>

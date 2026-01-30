@@ -55,6 +55,7 @@ import {
 import { toast } from "sonner";
 import { conseilService } from "@/services/conseilService";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 
 // Mappage des icônes
 const iconMap = {
@@ -906,14 +907,6 @@ const ConseilPage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FFFFFF" }}>
-      {/* Advertisement Popup - Absolute Position */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <section className="relative py-20 bg-slate-900 text-white overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-40"
@@ -986,6 +979,14 @@ const ConseilPage = () => {
           </div>
         </div>
       </section>
+
+       <Allpub
+            title="Offres spéciales"
+            description="Bénéficiez de réductions exclusives sur nos meilleurs services."
+            image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
+            background="bg-white"
+            textbg="text-slate-900"
+          />
 
       {/* Section Notre Processus */}
       {processusConseil.length > 0 && (

@@ -15,6 +15,7 @@ import React, { useState } from 'react';
 import Api from '../../lib/api.js';
 import DemandeAudit from '../../components/DemandeAudit.tsx';
 import AdvertisementPopup from '../AdvertisementPopup.tsx';
+import Allpub from '../Allpub.tsx';
 
 interface InvestFormData {
   nom: string;
@@ -221,9 +222,6 @@ const InvestirEtranger = () => {
 
   return (
     <div className="min-h-screen  text-[#2a2a2a]">
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       {/* Hero Section */}
       <section className="text-white py-16">
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
@@ -262,6 +260,9 @@ const InvestirEtranger = () => {
           </div>
         </div>
       </section>
+
+      
+      <AdvertisementPopup position='page-investisment-1' showOnMobile={true}/>
 
       {/* Section Pays Active */}
       <section className="py-6">
@@ -487,6 +488,8 @@ const InvestirEtranger = () => {
         </div>
       </section>
 
+      <AdvertisementPopup position='page-investisment-2' showOnMobile={true}/>
+
       {/* Section Vente/Location/Gestion */}
       <section className="py-8 bg-[#FAFAFA] border-t border-[#D3D3D3]">
         <div className="container mx-auto px-4">
@@ -631,8 +634,6 @@ const InvestirEtranger = () => {
         onClose={closeAuditModal}
         onAddAudit={handleAddAudit}
       />
-
-      <AdvertisementPopup />
     </div>
   );
 };

@@ -10,6 +10,7 @@ import UtilitiesProduits from "@/components/produits/UtilitiesProduits";
 import Marketplace from "../Marketplace";
 import Modal from "@/components/ui/modal";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import Allpub from "@/components/Allpub";
 interface ItemDetails {
   title: string;
   price: string;
@@ -359,13 +360,6 @@ const DomicileLayout = () => {
   ];
   return (
     <div className="container mx-auto px-4 py-8 mt-20">
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
-
-      <div className="fixed w-1/2 bottom-0 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <div className="absolute inset-0 -z-20 overflow-hidden h-80 w-full">
         <div className="bg-black/70 absolute w-full h-full backdrop-blur-sm "></div>
         <img
@@ -393,6 +387,9 @@ const DomicileLayout = () => {
             </Tab>
           ))}
         </Tab.List>
+
+        <AdvertisementPopup position="page-services-equipements" showOnMobile={true}/>
+
         <Tab.Panels>
           {sections.map((section) => (
             <Tab.Panel

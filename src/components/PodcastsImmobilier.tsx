@@ -485,11 +485,8 @@ const PodcastsImmobilier: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section avec Image de Background */}
-      <div className="absolute top-12 left-4 right-4 z-50">
-        <AdvertisementPopup />
-      </div>
       <div
-        className="relative mt-16 py-6 bg-cover bg-center bg-no-repeat"
+        className="relative pt-20 pb-6 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}
       >
         {/* Overlay avec gradient */}
@@ -1014,7 +1011,6 @@ const PodcastsImmobilier: React.FC = () => {
           </div>
         </div>
       )}
-      <AdvertisementPopup />
     </div>
   );
 };

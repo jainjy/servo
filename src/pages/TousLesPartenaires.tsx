@@ -12,6 +12,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 import CarteBoutton from "./CarteBoutton";
+import Allpub from "@/components/Allpub";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 interface Professional {
   id: string;
@@ -151,10 +153,10 @@ const TousLesPartenaires = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen pt-8 pb-4">
-      <main className="container mx-auto px-0 py-2 max-w-7xl">
+    <div className="bg-white min-h-screen pb-4">
+      <main className="container mx-auto px-0 max-w-7xl">
         {/* En-tête */}
-        <div className="relative mb-2">
+        <div className="relative pt-16 mb-2">
           <div
             className="absolute inset-0 bg-cover bg-center overflow-hidden"
             style={{
@@ -292,6 +294,8 @@ const TousLesPartenaires = () => {
             </div>
           </div>
         </div>
+
+        <AdvertisementPopup position="page-partenaires-nos-partenaires" showOnMobile={true}/>
 
         {/* Contenu */}
         {loading ? (
@@ -458,7 +462,7 @@ const ProfessionalCardTLP: React.FC<{
   className="relative bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col items-center text-center p-0"
 >
   {/* Bannière incurvée compacte */}
-  <div className="relative w-full h-24 bg-secondary-text rounded-b-3xl mb-10 overflow-hidden">
+  <div className="relative w-full h-24 bg-logo/70 rounded-b-3xl mb-10 overflow-hidden">
     {/* Éléments décoratifs d'arrière-plan */}
     <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
     <div className="absolute top-4 right-4 w-16 h-16 bg-white/10 rounded-full"></div>

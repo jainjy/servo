@@ -75,7 +75,7 @@ const Cart = ({ isOpen, onClose }) => {
     primaryDark: "#6B8E23",
     lightBg: "#FFFFFF",
     separator: "#D3D3D3",
-    secondaryText: "#8B4513",
+    secondaryText: "#000",
     smallText: "#000000",
   };
 

@@ -4,6 +4,8 @@ import { Briefcase, MapPin } from "lucide-react";
 import { Colors } from "../data/colors";
 import { MouseEvent } from "react";
 
+
+
 interface HeroSectionProps {
   onServicesClick: () => void;
   onMapClick: () => void;
