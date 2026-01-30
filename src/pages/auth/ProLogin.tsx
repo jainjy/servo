@@ -138,6 +138,15 @@ const LoginPage = () => {
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 -z-10 bg-white/5 rounded-full"></div>
 
+      {/* Bouton de retour pour mobile - Responsive */}
+      <button
+        onClick={() => navigate(-1)}
+        className="lg:hidden absolute top-4 left-4 z-40 flex items-center gap-2 bg-white/90 backdrop-blur-sm py-2 px-4 rounded-full text-gray-800 hover:bg-white hover:text-gray-900 transition-all duration-200 shadow-md border border-white/20"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span className="text-sm font-medium">Retour</span>
+      </button>
+
       {/* Publicité personnalisée pour la page de login - Desktop seulement */}
       {!isMobile && isAdVisible && (
         <motion.article
@@ -206,7 +215,7 @@ const LoginPage = () => {
       <div className="w-[80vw] lg:w-[60vw] h-[80vh] m-auto rounded-3xl shadow-xl flex flex-col lg:flex-row overflow-hidden bg-white/0">
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2 bg-gray-700 w-28 py-3 px-4 rounded-full text-gray-100 hover:text-gray-100 mb-4 mx-2 transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -226,7 +235,7 @@ const LoginPage = () => {
               </Link>
               <p className="text-[#8B4513] text-sm text-justify">
                 Des biens immobiliers, ses services additionnels, produits
-                adaptés à vos besoins et vos locations au sein d’une seule
+                adaptés à vos besoins et vos locations au sein d'une seule
                 plateforme
               </p>
             </div>
