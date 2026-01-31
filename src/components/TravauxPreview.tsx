@@ -237,7 +237,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
       )}
 
       {/* SECTION NOS TRAVAUX – COTE A COTE PORTFOLIO */}
-      <section className="bg-slate-100 py-8 sm:py-10 md:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 rounded-md">
+      <section className="bg-[#81794d36] py-8 sm:py-10 md:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 rounded-md">
         <div className="max-w-[1400px] mx-auto">
 
           <div className="flex flex-col lg:grid lg:grid-cols-5 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-start">
