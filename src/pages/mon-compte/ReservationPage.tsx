@@ -52,6 +52,7 @@ import {
   MoreVertical,
   ChevronDown,
   ChevronUp,
+  Activity, // AJOUT: Icône pour les activités
 } from "lucide-react";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
@@ -174,7 +175,14 @@ interface FlightReservation {
   idPrestataire: string;
   nbrPersonne: number;
   place: string;
-  status: "pending" | "confirmed" | "cancelled" | "completed" | "paid" | "failed" | "refunded";
+  status:
+    | "pending"
+    | "confirmed"
+    | "cancelled"
+    | "completed"
+    | "paid"
+    | "failed"
+    | "refunded";
   createdAt: string;
   cancelledAt?: string;
   flight: {
@@ -207,6 +215,59 @@ interface FlightReservation {
   };
 }
 
+// AJOUT: Types pour les réservations d'activités
+interface ActivityBooking {
+  id: string;
+  activityId: string;
+  userId: string;
+
+  bookingDate: string;
+  startTime?: string;
+  endTime?: string;
+
+  participants: number;
+  totalAmount: number;
+
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  paymentStatus: "pending" | "paid" | "refunded" | "failed";
+
+  participantNames: string[];
+  participantEmails: string[];
+  specialRequests?: string;
+
+  bookedAt: string;
+  confirmedAt?: string;
+  cancelledAt?: string;
+
+  activity: {
+    id: string;
+    title: string;
+    description: string;
+    shortDescription?: string;
+    mainImage?: string;
+    images: string[];
+    price?: number;
+    priceType?: string;
+    duration?: number;
+    durationType?: string;
+    level?: string;
+    location?: string;
+    address?: string;
+    meetingPoint?: string;
+    category?: string;
+    userId: string;
+  };
+
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    avatar?: string;
+  };
+}
+
 // Composants utilitaires
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("fr-FR", {
@@ -226,14 +287,14 @@ function TourismStatusBadge({ status }: { status: TourismBooking["status"] }) {
     status === "confirmee"
       ? "Confirmée"
       : status === "en_attente"
-      ? "En attente"
-      : status === "terminee"
-      ? "Terminée"
-      : "Annulée";
+        ? "En attente"
+        : status === "terminee"
+          ? "Terminée"
+          : "Annulée";
 
   return (
     <Badge
-    className="text-white"
+      className="text-white"
       style={{
         backgroundColor: colorMap[status],
         color: status === "annulee" ? "#fff" : theme.logo,
@@ -256,14 +317,14 @@ function ServiceStatusBadge({ status }: { status: ServiceBooking["status"] }) {
     status === "confirmed"
       ? "Confirmée"
       : status === "pending"
-      ? "En attente"
-      : status === "completed"
-      ? "Terminée"
-      : "Annulée";
+        ? "En attente"
+        : status === "completed"
+          ? "Terminée"
+          : "Annulée";
 
   return (
     <Badge
-    className="text-white"
+      className="text-white"
       style={{
         backgroundColor: colorMap[status],
         border: "none",
@@ -274,7 +335,11 @@ function ServiceStatusBadge({ status }: { status: ServiceBooking["status"] }) {
   );
 }
 
-function TouristicPlaceStatusBadge({ status }: { status: TouristicPlaceBooking["status"] }) {
+function TouristicPlaceStatusBadge({
+  status,
+}: {
+  status: TouristicPlaceBooking["status"];
+}) {
   const colorMap: Record<TouristicPlaceBooking["status"], string> = {
     confirmed: theme.success,
     pending: theme.accent,
@@ -285,14 +350,14 @@ function TouristicPlaceStatusBadge({ status }: { status: TouristicPlaceBooking["
     status === "confirmed"
       ? "Confirmée"
       : status === "pending"
-      ? "En attente"
-      : status === "completed"
-      ? "Terminée"
-      : "Annulée";
+        ? "En attente"
+        : status === "completed"
+          ? "Terminée"
+          : "Annulée";
 
   return (
     <Badge
-    className="text-white"
+      className="text-white"
       style={{
         backgroundColor: colorMap[status],
         color: status === "cancelled" ? "#fff" : theme.logo,
@@ -304,7 +369,11 @@ function TouristicPlaceStatusBadge({ status }: { status: TouristicPlaceBooking["
   );
 }
 
-function FlightStatusBadge({ status }: { status: FlightReservation["status"] }) {
+function FlightStatusBadge({
+  status,
+}: {
+  status: FlightReservation["status"];
+}) {
   const colorMap: Record<FlightReservation["status"], string> = {
     confirmed: theme.success,
     paid: theme.success,
@@ -318,21 +387,56 @@ function FlightStatusBadge({ status }: { status: FlightReservation["status"] }) 
     status === "confirmed"
       ? "Confirmée"
       : status === "pending"
-      ? "En attente"
-      : status === "paid"
-      ? "Payée"
-      : status === "completed"
-      ? "Terminée"
-      : status === "refunded"
-      ? "Remboursée"
-      : "Annulée";
+        ? "En attente"
+        : status === "paid"
+          ? "Payée"
+          : status === "completed"
+            ? "Terminée"
+            : status === "refunded"
+              ? "Remboursée"
+              : "Annulée";
 
   return (
     <Badge
-    className="text-white"
+      className="text-white"
       style={{
         backgroundColor: colorMap[status] || theme.info,
         color: ["cancelled", "failed"].includes(status) ? "#fff" : theme.logo,
+        border: "none",
+      }}
+    >
+      {label}
+    </Badge>
+  );
+}
+
+// AJOUT: Badge pour les activités
+function ActivityStatusBadge({
+  status,
+}: {
+  status: ActivityBooking["status"];
+}) {
+  const colorMap: Record<ActivityBooking["status"], string> = {
+    confirmed: theme.success,
+    pending: theme.accent,
+    completed: theme.info,
+    cancelled: theme.error,
+  };
+  const label =
+    status === "confirmed"
+      ? "Confirmée"
+      : status === "pending"
+        ? "En attente"
+        : status === "completed"
+          ? "Terminée"
+          : "Annulée";
+
+  return (
+    <Badge
+      className="text-white"
+      style={{
+        backgroundColor: colorMap[status],
+        color: status === "cancelled" ? "#fff" : theme.logo,
         border: "none",
       }}
     >
@@ -348,7 +452,7 @@ function generateBookingCode(id: string): string {
 // Composant Modal de Détails
 interface DetailModalProps {
   booking: any;
-  type: "tourisme" | "service" | "touristic_place" | "flight";
+  type: "tourisme" | "service" | "touristic_place" | "flight" | "activity";
   isOpen: boolean;
   onClose: () => void;
 }
@@ -360,11 +464,15 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Date d'arrivée</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Date d'arrivée
+          </h4>
           <p>{new Date(booking.checkIn).toLocaleDateString("fr-FR")}</p>
         </div>
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Date de départ</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Date de départ
+          </h4>
           <p>{new Date(booking.checkOut).toLocaleDateString("fr-FR")}</p>
         </div>
       </div>
@@ -374,13 +482,17 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
           <p>{booking.guests} personne(s)</p>
         </div>
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Méthode de paiement</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Méthode de paiement
+          </h4>
           <p>{booking.paymentMethod}</p>
         </div>
       </div>
       {booking.specialRequests && (
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Demandes spéciales</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Demandes spéciales
+          </h4>
           <p>{booking.specialRequests}</p>
         </div>
       )}
@@ -412,27 +524,37 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Date de visite</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Date de visite
+          </h4>
           <p>{new Date(booking.visitDate).toLocaleDateString("fr-FR")}</p>
         </div>
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Heure de visite</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Heure de visite
+          </h4>
           <p>{booking.visitTime}</p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Nombre de billets</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Nombre de billets
+          </h4>
           <p>{booking.numberOfTickets}</p>
         </div>
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Type de billet</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Type de billet
+          </h4>
           <p>{booking.ticketType}</p>
         </div>
       </div>
       {booking.specialRequests && (
         <div>
-          <h4 className="font-semibold text-sm text-gray-500">Demandes spéciales</h4>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Demandes spéciales
+          </h4>
           <p>{booking.specialRequests}</p>
         </div>
       )}
@@ -469,8 +591,62 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
       </div>
       <div>
         <h4 className="font-semibold text-sm text-gray-500">Compagnie</h4>
-        <p>{booking.flight.compagnie} - Vol {booking.flight.numeroVol}</p>
+        <p>
+          {booking.flight.compagnie} - Vol {booking.flight.numeroVol}
+        </p>
       </div>
+    </div>
+  );
+
+  // AJOUT: Détails pour les activités
+  const renderActivityDetails = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Date de l'activité
+          </h4>
+          <p>{new Date(booking.bookingDate).toLocaleDateString("fr-FR")}</p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Horaires</h4>
+          <p>
+            {booking.startTime} {booking.endTime && `- ${booking.endTime}`}
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Participants</h4>
+          <p>{booking.participants} personne(s)</p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Niveau</h4>
+          <p>{booking.activity?.level || "Tous niveaux"}</p>
+        </div>
+      </div>
+      {booking.specialRequests && (
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Demandes spéciales
+          </h4>
+          <p>{booking.specialRequests}</p>
+        </div>
+      )}
+      {booking.participantNames.length > 0 && (
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">
+            Participants inscrits
+          </h4>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {booking.participantNames.map((name: string, index: number) => (
+              <Badge key={index} variant="outline">
+                {name}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -484,8 +660,110 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
         return "Détails de la réservation de billet";
       case "flight":
         return "Détails de la réservation de vol";
+      case "activity":
+        return "Détails de la réservation d'activité";
       default:
         return "Détails de la réservation";
+    }
+  };
+
+  const getBookingImage = () => {
+    switch (type) {
+      case "tourisme":
+        return booking.listing.images?.[0];
+      case "service":
+        return "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+      case "touristic_place":
+        return booking.place.images?.[0];
+      case "flight":
+        return booking.flight.image;
+      case "activity":
+        return booking.activity?.mainImage || booking.activity?.images?.[0];
+      default:
+        return "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+    }
+  };
+
+  const getBookingTitle = () => {
+    switch (type) {
+      case "tourisme":
+        return booking.listing.title;
+      case "service":
+        return booking.service.libelle;
+      case "touristic_place":
+        return booking.place.title;
+      case "flight":
+        return `${booking.flight.compagnie} - Vol ${booking.flight.numeroVol}`;
+      case "activity":
+        return booking.activity?.title;
+      default:
+        return "Réservation";
+    }
+  };
+
+  const getBookingDescription = () => {
+    switch (type) {
+      case "tourisme":
+        return `${booking.listing.city} • ${booking.listing.type}`;
+      case "service":
+        return booking.service.description;
+      case "touristic_place":
+        return `${booking.place.city} • ${booking.place.type}`;
+      case "flight":
+        return `${booking.flight.departVille} → ${booking.flight.arriveeVille}`;
+      case "activity":
+        return `${booking.activity?.location} • ${booking.activity?.category || "Activité"}`;
+      default:
+        return "";
+    }
+  };
+
+  const getStatusBadge = () => {
+    switch (type) {
+      case "tourisme":
+        return <TourismStatusBadge status={booking.status} />;
+      case "service":
+        return <ServiceStatusBadge status={booking.status} />;
+      case "touristic_place":
+        return <TouristicPlaceStatusBadge status={booking.status} />;
+      case "flight":
+        return <FlightStatusBadge status={booking.status} />;
+      case "activity":
+        return <ActivityStatusBadge status={booking.status} />;
+      default:
+        return null;
+    }
+  };
+
+  const getTypeBadge = () => {
+    const typeLabels = {
+      tourisme: "Hébergement",
+      service: "Service",
+      touristic_place: "Billet",
+      flight: "Vol",
+      activity: "Activité",
+    };
+    return (
+      <Badge variant="outline" className="text-xs">
+        {typeLabels[type] || "Réservation"}
+      </Badge>
+    );
+  };
+
+  const getAmount = () => {
+    switch (type) {
+      case "tourisme":
+        return booking.amount;
+      case "service":
+        return booking.service.price;
+      case "touristic_place":
+        return booking.totalAmount;
+      case "flight":
+        return booking.flight.prix * booking.nbrPersonne;
+      case "activity":
+        return booking.totalAmount;
+      default:
+        return 0;
     }
   };
 
@@ -500,53 +778,23 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1">
               <img
-                src={
-                  type === "tourisme" 
-                    ? booking.listing.images?.[0] 
-                    : type === "service"
-                    ? "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                    : type === "touristic_place"
-                    ? booking.place.images?.[0]
-                    : booking.flight.image
-                }
+                src={getBookingImage()}
                 alt="Image"
                 className="w-full h-32 object-cover rounded-lg"
                 onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+                  e.currentTarget.src =
+                    "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
                 }}
               />
             </div>
             <div className="md:col-span-2">
-              <h3 className="font-semibold text-lg">
-                {type === "tourisme" 
-                  ? booking.listing.title
-                  : type === "service"
-                  ? booking.service.libelle
-                  : type === "touristic_place"
-                  ? booking.place.title
-                  : `${booking.flight.compagnie} - Vol ${booking.flight.numeroVol}`
-                }
-              </h3>
+              <h3 className="font-semibold text-lg">{getBookingTitle()}</h3>
               <p className="text-gray-600 text-sm mt-1">
-                {type === "tourisme" 
-                  ? `${booking.listing.city} • ${booking.listing.type}`
-                  : type === "service"
-                  ? booking.service.description
-                  : type === "touristic_place"
-                  ? `${booking.place.city} • ${booking.place.type}`
-                  : `${booking.flight.departVille} → ${booking.flight.arriveeVille}`
-                }
+                {getBookingDescription()}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                {type === "tourisme" && <TourismStatusBadge status={booking.status} />}
-                {type === "service" && <ServiceStatusBadge status={booking.status} />}
-                {type === "touristic_place" && <TouristicPlaceStatusBadge status={booking.status} />}
-                {type === "flight" && <FlightStatusBadge status={booking.status} />}
-                <Badge variant="outline" className="text-xs">
-                  {type === "tourisme" ? " Hébergement" : 
-                   type === "service" ? " Service" : 
-                   type === "touristic_place" ? " Billet" : " Vol"}
-                </Badge>
+                {getStatusBadge()}
+                {getTypeBadge()}
               </div>
             </div>
           </div>
@@ -557,30 +805,37 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
             {type === "service" && renderServiceDetails()}
             {type === "touristic_place" && renderTouristicPlaceDetails()}
             {type === "flight" && renderFlightDetails()}
+            {type === "activity" && renderActivityDetails()}
           </div>
 
           {/* Informations de paiement */}
           <div className="border-t pt-4">
-            <h4 className="font-semibold text-sm text-gray-500 mb-2">Informations de paiement</h4>
+            <h4 className="font-semibold text-sm text-gray-500 mb-2">
+              Informations de paiement
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <h4 className="font-semibold text-sm text-gray-500">Montant total</h4>
+                <h4 className="font-semibold text-sm text-gray-500">
+                  Montant total
+                </h4>
                 <p className="text-lg font-semibold">
-                  {formatCurrency(
-                    type === "tourisme" ? booking.amount :
-                    type === "service" ? booking.service.price :
-                    type === "touristic_place" ? booking.totalAmount :
-                    booking.flight.prix * booking.nbrPersonne
-                  )}
+                  {formatCurrency(getAmount())}
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold text-sm text-gray-500">Référence</h4>
+                <h4 className="font-semibold text-sm text-gray-500">
+                  Référence
+                </h4>
                 <p>
-                  {type === "tourisme" ? booking.code :
-                   type === "touristic_place" ? booking.confirmationNumber :
-                   type === "flight" ? `Vol ${booking.flight.numeroVol}` :
-                   booking.id}
+                  {type === "tourisme"
+                    ? booking.code
+                    : type === "touristic_place"
+                      ? booking.confirmationNumber
+                      : type === "flight"
+                        ? `Vol ${booking.flight.numeroVol}`
+                        : type === "activity"
+                          ? `ACT-${booking.id.slice(-6)}`
+                          : booking.id}
                 </p>
               </div>
             </div>
@@ -597,7 +852,7 @@ function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
 // Composant Carte de Réservation Générique
 interface BookingCardProps {
   booking: any;
-  type: "tourisme" | "service" | "touristic_place" | "flight";
+  type: "tourisme" | "service" | "touristic_place" | "flight" | "activity";
   onViewDetails: () => void;
   onCancel?: () => void;
   getStatusBadge: (status: string) => JSX.Element;
@@ -640,7 +895,8 @@ function BookingCard({
             alt={getBookingTitle()}
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.currentTarget.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+              e.currentTarget.src =
+                "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
             }}
           />
         </div>
@@ -660,9 +916,15 @@ function BookingCard({
                     background: theme.accent,
                   }}
                 >
-                  {type === "tourisme" ? " Hébergement" : 
-                   type === "service" ? " Service" : 
-                   type === "touristic_place" ? " Billet" : " Vol"}
+                  {type === "tourisme"
+                    ? " Hébergement"
+                    : type === "service"
+                      ? " Service"
+                      : type === "touristic_place"
+                        ? " Billet"
+                        : type === "flight"
+                          ? " Vol"
+                          : " Activité"}
                 </Badge>
               </div>
               <h3
@@ -671,7 +933,10 @@ function BookingCard({
               >
                 {getBookingTitle()}
               </h3>
-              <p className="text-sm mb-2" style={{ color: theme.secondaryText }}>
+              <p
+                className="text-sm mb-2"
+                style={{ color: theme.secondaryText }}
+              >
                 {getBookingSubtitle()}
               </p>
             </div>
@@ -685,7 +950,7 @@ function BookingCard({
               >
                 <MoreVertical className="w-4 h-4" />
               </Button>
-              
+
               {showActions && (
                 <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
                   <button
@@ -698,7 +963,7 @@ function BookingCard({
                     <Eye className="w-4 h-4 mr-2" />
                     Voir les détails
                   </button>
-                  
+
                   {canCancel && onCancel && (
                     <button
                       onClick={() => {
@@ -719,7 +984,10 @@ function BookingCard({
           {/* Informations détaillées pour mobile */}
           <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" style={{ color: theme.primaryDark }} />
+              <Calendar
+                className="w-4 h-4"
+                style={{ color: theme.primaryDark }}
+              />
               <span className="text-xs">{getBookingDate()}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -744,12 +1012,20 @@ function BookingCard({
                 {type === "flight" && (
                   <span>Vol: {booking.flight?.numeroVol}</span>
                 )}
+                {type === "activity" && (
+                  <span>Ref: ACT-{booking.id.slice(-6)}</span>
+                )}
               </div>
             </div>
-            
+
             {/* Boutons d'action pour mobile */}
             <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" size="sm" onClick={onViewDetails} className="w-full">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onViewDetails}
+                className="w-full"
+              >
                 <Eye className="w-4 h-4 mr-1" />
                 Détails
               </Button>
@@ -767,7 +1043,8 @@ function BookingCard({
             alt={getBookingTitle()}
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.currentTarget.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+              e.currentTarget.src =
+                "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
             }}
           />
         </div>
@@ -785,9 +1062,15 @@ function BookingCard({
                     borderColor: theme.logo,
                   }}
                 >
-                  {type === "tourisme" ? " Hébergement" : 
-                   type === "service" ? " Service" : 
-                   type === "touristic_place" ? " Billet" : " Vol"}
+                  {type === "tourisme"
+                    ? " Hébergement"
+                    : type === "service"
+                      ? " Service"
+                      : type === "touristic_place"
+                        ? " Billet"
+                        : type === "flight"
+                          ? " Vol"
+                          : " Activité"}
                 </Badge>
               </div>
               <h3
@@ -796,7 +1079,10 @@ function BookingCard({
               >
                 {getBookingTitle()}
               </h3>
-              <p className="text-sm mb-2" style={{ color: theme.secondaryText }}>
+              <p
+                className="text-sm mb-2"
+                style={{ color: theme.secondaryText }}
+              >
                 {getBookingSubtitle()}
               </p>
             </div>
@@ -810,7 +1096,7 @@ function BookingCard({
               >
                 <MoreVertical className="w-4 h-4" />
               </Button>
-              
+
               {showActions && (
                 <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
                   <button
@@ -823,7 +1109,7 @@ function BookingCard({
                     <Eye className="w-4 h-4 mr-2" />
                     Voir les détails
                   </button>
-                  
+
                   {canCancel && onCancel && (
                     <button
                       onClick={() => {
@@ -844,7 +1130,10 @@ function BookingCard({
           {/* Informations détaillées pour desktop */}
           <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" style={{ color: theme.primaryDark }} />
+              <Calendar
+                className="w-4 h-4"
+                style={{ color: theme.primaryDark }}
+              />
               <span>{getBookingDate()}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -869,9 +1158,12 @@ function BookingCard({
                 {type === "flight" && (
                   <span>Vol: {booking.flight?.numeroVol}</span>
                 )}
+                {type === "activity" && (
+                  <span>Ref: ACT-{booking.id.slice(-6)}</span>
+                )}
               </div>
             </div>
-            
+
             {/* Boutons d'action pour desktop */}
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={onViewDetails}>
@@ -894,26 +1186,44 @@ export default function UnifiedReservationPage() {
   // États pour les réservations
   const [tourismBookings, setTourismBookings] = useState<TourismBooking[]>([]);
   const [serviceBookings, setServiceBookings] = useState<ServiceBooking[]>([]);
-  const [touristicPlaceBookings, setTouristicPlaceBookings] = useState<TouristicPlaceBooking[]>([]);
-  const [flightReservations, setFlightReservations] = useState<FlightReservation[]>([]);
-  
+  const [touristicPlaceBookings, setTouristicPlaceBookings] = useState<
+    TouristicPlaceBooking[]
+  >([]);
+  const [flightReservations, setFlightReservations] = useState<
+    FlightReservation[]
+  >([]);
+  const [activityBookings, setActivityBookings] = useState<ActivityBooking[]>(
+    [],
+  ); // AJOUT
+
   const [tourismLoading, setTourismLoading] = useState(true);
   const [serviceLoading, setServiceLoading] = useState(true);
   const [touristicPlaceLoading, setTouristicPlaceLoading] = useState(true);
   const [flightLoading, setFlightLoading] = useState(true);
-  
+  const [activityLoading, setActivityLoading] = useState(true); // AJOUT
+
   const [tourismFilter, setTourismFilter] = useState<string>("all");
   const [serviceFilter, setServiceFilter] = useState<string>("all");
-  const [touristicPlaceFilter, setTouristicPlaceFilter] = useState<string>("all");
+  const [touristicPlaceFilter, setTouristicPlaceFilter] =
+    useState<string>("all");
   const [flightFilter, setFlightFilter] = useState<string>("all");
+  const [activityFilter, setActivityFilter] = useState<string>("all"); // AJOUT
 
-  const [selectedTourismBooking, setSelectedTourismBooking] = useState<TourismBooking | null>(null);
-  const [selectedServiceBooking, setSelectedServiceBooking] = useState<ServiceBooking | null>(null);
-  const [selectedTouristicPlaceBooking, setSelectedTouristicPlaceBooking] = useState<TouristicPlaceBooking | null>(null);
-  const [selectedFlightReservation, setSelectedFlightReservation] = useState<FlightReservation | null>(null);
+  const [selectedTourismBooking, setSelectedTourismBooking] =
+    useState<TourismBooking | null>(null);
+  const [selectedServiceBooking, setSelectedServiceBooking] =
+    useState<ServiceBooking | null>(null);
+  const [selectedTouristicPlaceBooking, setSelectedTouristicPlaceBooking] =
+    useState<TouristicPlaceBooking | null>(null);
+  const [selectedFlightReservation, setSelectedFlightReservation] =
+    useState<FlightReservation | null>(null);
+  const [selectedActivityBooking, setSelectedActivityBooking] =
+    useState<ActivityBooking | null>(null); // AJOUT
 
   const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [currentBookingType, setCurrentBookingType] = useState<"tourisme" | "service" | "touristic_place" | "flight">("tourisme");
+  const [currentBookingType, setCurrentBookingType] = useState<
+    "tourisme" | "service" | "touristic_place" | "flight" | "activity"
+  >("tourisme");
 
   // Charger les réservations tourisme
   useEffect(() => {
@@ -1002,7 +1312,8 @@ export default function UnifiedReservationPage() {
         const response = await api.get("/touristic-place-bookings", {
           params: {
             userId: user.id,
-            status: touristicPlaceFilter !== "all" ? touristicPlaceFilter : undefined,
+            status:
+              touristicPlaceFilter !== "all" ? touristicPlaceFilter : undefined,
           },
         });
 
@@ -1011,15 +1322,20 @@ export default function UnifiedReservationPage() {
         } else {
           toast({
             title: "Erreur",
-            description: "Impossible de charger les réservations de lieux touristiques",
+            description:
+              "Impossible de charger les réservations de lieux touristiques",
             variant: "destructive",
           });
         }
       } catch (error) {
-        console.error("Erreur chargement réservations lieux touristiques:", error);
+        console.error(
+          "Erreur chargement réservations lieux touristiques:",
+          error,
+        );
         toast({
           title: "Erreur",
-          description: "Erreur lors du chargement des réservations de lieux touristiques",
+          description:
+            "Erreur lors du chargement des réservations de lieux touristiques",
           variant: "destructive",
         });
       } finally {
@@ -1056,7 +1372,7 @@ export default function UnifiedReservationPage() {
         toast({
           title: "Erreur",
           description: "Erreur lors du chargement des réservations de vols",
-            variant: "destructive",
+          variant: "destructive",
         });
       } finally {
         setFlightLoading(false);
@@ -1065,6 +1381,136 @@ export default function UnifiedReservationPage() {
 
     fetchFlightReservations();
   }, [isAuthenticated, user, flightFilter, toast]);
+
+  // AJOUT: Charger les réservations d'activités
+  useEffect(() => {
+    const fetchActivityBookings = async () => {
+      if (!isAuthenticated || !user) {
+        setActivityLoading(false);
+        return;
+      }
+
+      try {
+        setActivityLoading(true);
+        const response = await api.get("/activity-bookings/my-bookings", {
+          params: {
+            userId: user.id,
+            status: activityFilter !== "all" ? activityFilter : undefined,
+          },
+        });
+
+        if (response.data.success) {
+          setActivityBookings(response.data.data);
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les réservations d'activités",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Erreur chargement réservations activités:", error);
+        // Si l'API n'est pas disponible, utiliser des données mockées
+        const mockData = getMockActivityBookings();
+        setActivityBookings(mockData);
+      } finally {
+        setActivityLoading(false);
+      }
+    };
+
+    fetchActivityBookings();
+  }, [isAuthenticated, user, activityFilter, toast]);
+
+  // AJOUT: Données mockées pour les activités
+  const getMockActivityBookings = (): ActivityBooking[] => [
+    {
+      id: "act1",
+      activityId: "activity1",
+      userId: "u1",
+      bookingDate: "2024-12-15",
+      startTime: "10:00",
+      endTime: "12:00",
+      participants: 4,
+      totalAmount: 200,
+      status: "confirmed",
+      paymentStatus: "paid",
+      participantNames: ["Jean Dupont", "Marie Martin"],
+      participantEmails: ["jean@email.com", "marie@email.com"],
+      specialRequests: "Matériel pour débutants si possible",
+      bookedAt: new Date().toISOString(),
+      confirmedAt: new Date().toISOString(),
+      activity: {
+        id: "activity1",
+        title: "Randonnée guidée en montagne",
+        description:
+          "Découverte des paysages montagneux avec guide professionnel",
+        shortDescription: "Randonnée pour tous niveaux",
+        mainImage:
+          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        images: [],
+        price: 50,
+        priceType: "per_person",
+        duration: 120,
+        durationType: "minutes",
+        level: "beginner",
+        location: "Chamonix",
+        address: "Mont Blanc",
+        meetingPoint: "Office de tourisme",
+        category: "sport",
+        userId: "pro1",
+      },
+      user: {
+        id: "u1",
+        firstName: "Jean",
+        lastName: "Dupont",
+        email: "jean.dupont@email.com",
+        phone: "+33123456789",
+        avatar: "https://i.pravatar.cc/150?img=1",
+      },
+    },
+    {
+      id: "act2",
+      activityId: "activity2",
+      userId: "u1",
+      bookingDate: "2024-12-20",
+      startTime: "14:00",
+      endTime: "16:00",
+      participants: 2,
+      totalAmount: 120,
+      status: "pending",
+      paymentStatus: "pending",
+      participantNames: ["Sophie Leroy"],
+      participantEmails: ["sophie@email.com"],
+      specialRequests: "Cours particulier",
+      bookedAt: new Date().toISOString(),
+      activity: {
+        id: "activity2",
+        title: "Cours de surf à Biarritz",
+        description: "Apprenez à surfer avec des moniteurs certifiés",
+        shortDescription: "Cours de surf tous niveaux",
+        mainImage:
+          "https://images.unsplash.com/photo-1506929562872-bb421503ef21?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        images: [],
+        price: 60,
+        priceType: "per_person",
+        duration: 120,
+        durationType: "minutes",
+        level: "beginner",
+        location: "Biarritz",
+        address: "Plage de la Côte des Basques",
+        meetingPoint: "École de surf",
+        category: "sport",
+        userId: "pro2",
+      },
+      user: {
+        id: "u1",
+        firstName: "Sophie",
+        lastName: "Leroy",
+        email: "sophie.leroy@email.com",
+        phone: "+33123456790",
+      },
+    },
+  ];
 
   // Fonctions d'annulation
   const cancelTourismBooking = async (id: string) => {
@@ -1076,8 +1522,8 @@ export default function UnifiedReservationPage() {
       if (response.data.success) {
         setTourismBookings((prev) =>
           prev.map((b) =>
-            b.id === id ? { ...b, status: "annulee" as const } : b
-          )
+            b.id === id ? { ...b, status: "annulee" as const } : b,
+          ),
         );
         toast({
           title: "Réservation annulée",
@@ -1088,7 +1534,8 @@ export default function UnifiedReservationPage() {
       console.error("Erreur annulation tourisme:", error);
       toast({
         title: "Erreur",
-        description: error.response?.data?.error || "Erreur lors de l'annulation",
+        description:
+          error.response?.data?.error || "Erreur lors de l'annulation",
         variant: "destructive",
       });
     }
@@ -1098,7 +1545,7 @@ export default function UnifiedReservationPage() {
     try {
       await api.patch(`/appointment/${id}/cancel`);
       setServiceBookings((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b))
+        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b)),
       );
       toast({
         title: "Réservation annulée",
@@ -1118,7 +1565,7 @@ export default function UnifiedReservationPage() {
     try {
       await api.delete(`/touristic-place-bookings/${id}`);
       setTouristicPlaceBookings((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b))
+        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b)),
       );
       toast({
         title: "Réservation annulée",
@@ -1138,7 +1585,7 @@ export default function UnifiedReservationPage() {
     try {
       await api.put(`/Vol/reservations/${id}/status`, { status: "cancelled" });
       setFlightReservations((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b))
+        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b)),
       );
       toast({
         title: "Réservation annulée",
@@ -1146,6 +1593,27 @@ export default function UnifiedReservationPage() {
       });
     } catch (error) {
       console.error("Erreur annulation vol:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'annuler la réservation",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // AJOUT: Annuler une réservation d'activité
+  const cancelActivityBooking = async (id: string) => {
+    try {
+      await api.put(`/activity-bookings/${id}/cancel`);
+      setActivityBookings((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b)),
+      );
+      toast({
+        title: "Réservation annulée",
+        description: "Votre réservation d'activité a été annulée",
+      });
+    } catch (error) {
+      console.error("Erreur annulation activité:", error);
       toast({
         title: "Erreur",
         description: "Impossible d'annuler la réservation",
@@ -1167,7 +1635,9 @@ export default function UnifiedReservationPage() {
 
   // Fonctions utilitaires pour les cartes
   const getTourismCardData = (booking: TourismBooking) => ({
-    image: booking.listing.images?.[0] || "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image:
+      booking.listing.images?.[0] ||
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
     title: booking.listing.title,
     subtitle: `${booking.listing.city} • ${booking.listing.type}`,
     date: `${new Date(booking.checkIn).toLocaleDateString("fr-FR")} - ${new Date(booking.checkOut).toLocaleDateString("fr-FR")}`,
@@ -1177,7 +1647,8 @@ export default function UnifiedReservationPage() {
   });
 
   const getServiceCardData = (booking: ServiceBooking) => ({
-    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image:
+      "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
     title: booking.service.libelle,
     subtitle: booking.service.description,
     date: new Date(booking.date).toLocaleDateString("fr-FR"),
@@ -1187,7 +1658,9 @@ export default function UnifiedReservationPage() {
   });
 
   const getTouristicPlaceCardData = (booking: TouristicPlaceBooking) => ({
-    image: booking.place.images?.[0] || "https://images.unsplash.com/photo-1502602898536-47ad22581b52?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image:
+      booking.place.images?.[0] ||
+      "https://images.unsplash.com/photo-1502602898536-47ad22581b52?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
     title: booking.place.title,
     subtitle: `${booking.place.city} • ${booking.place.type}`,
     date: new Date(booking.visitDate).toLocaleDateString("fr-FR"),
@@ -1197,12 +1670,28 @@ export default function UnifiedReservationPage() {
   });
 
   const getFlightCardData = (booking: FlightReservation) => ({
-    image: booking.flight.image || "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image:
+      booking.flight.image ||
+      "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
     title: `${booking.flight.compagnie} - Vol ${booking.flight.numeroVol}`,
     subtitle: `${booking.flight.departVille} → ${booking.flight.arriveeVille}`,
     date: new Date(booking.flight.departDateHeure).toLocaleDateString("fr-FR"),
     details: `${booking.nbrPersonne} passager${booking.nbrPersonne > 1 ? "s" : ""} • ${booking.flight.classe}`,
     amount: booking.flight.prix * booking.nbrPersonne,
+    canCancel: booking.status !== "cancelled" && booking.status !== "completed",
+  });
+
+  // AJOUT: Fonctions utilitaires pour les cartes d'activités
+  const getActivityCardData = (booking: ActivityBooking) => ({
+    image:
+      booking.activity?.mainImage ||
+      booking.activity?.images?.[0] ||
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    title: booking.activity?.title || "Activité",
+    subtitle: `${booking.activity?.location || "Lieu non spécifié"} • ${booking.activity?.category || "Activité"}`,
+    date: new Date(booking.bookingDate).toLocaleDateString("fr-FR"),
+    details: `${booking.participants} participant${booking.participants > 1 ? "s" : ""} • ${booking.startTime || ""}`,
+    amount: booking.totalAmount,
     canCancel: booking.status !== "cancelled" && booking.status !== "completed",
   });
 
@@ -1231,12 +1720,20 @@ export default function UnifiedReservationPage() {
     setDetailModalOpen(true);
   };
 
+  // AJOUT: Ouvrir les détails d'une activité
+  const openActivityDetails = (booking: ActivityBooking) => {
+    setSelectedActivityBooking(booking);
+    setCurrentBookingType("activity");
+    setDetailModalOpen(true);
+  };
+
   const closeDetailModal = () => {
     setDetailModalOpen(false);
     setSelectedTourismBooking(null);
     setSelectedServiceBooking(null);
     setSelectedTouristicPlaceBooking(null);
     setSelectedFlightReservation(null);
+    setSelectedActivityBooking(null); // AJOUT
   };
 
   const getCurrentBooking = () => {
@@ -1249,10 +1746,46 @@ export default function UnifiedReservationPage() {
         return selectedTouristicPlaceBooking;
       case "flight":
         return selectedFlightReservation;
+      case "activity": // AJOUT
+        return selectedActivityBooking;
       default:
         return null;
     }
   };
+
+  // AJOUT: Mettre à jour les TabsList pour inclure les activités
+  const tabItems = [
+    {
+      value: "services",
+      icon: Scissors,
+      label: "Services de bien-être",
+      count: serviceBookings.length,
+    },
+    {
+      value: "tourisme",
+      icon: Building,
+      label: "Hébergements",
+      count: tourismBookings.length,
+    },
+    {
+      value: "lieux-touristiques",
+      icon: Ticket,
+      label: "Billets",
+      count: touristicPlaceBookings.length,
+    },
+    {
+      value: "vols",
+      icon: Plane,
+      label: "Vols",
+      count: flightReservations.length,
+    },
+    {
+      value: "activites",
+      icon: Activity,
+      label: "Activités",
+      count: activityBookings.length,
+    }, // AJOUT
+  ];
 
   if (!isAuthenticated) {
     return (
@@ -1275,10 +1808,7 @@ export default function UnifiedReservationPage() {
   }
 
   return (
-    <div
-      className="mx-5 py-8 mt-12"
-      style={{ background: theme.lightBg }}
-    >
+    <div className="mx-5 py-8 mt-12" style={{ background: theme.lightBg }}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2" style={{ color: theme.logo }}>
           Mes Réservations tourisme et Bien-être
@@ -1291,52 +1821,25 @@ export default function UnifiedReservationPage() {
 
       <Tabs defaultValue="services" className="space-y-6">
         <TabsList
-          className="grid w-full grid-cols-1 md:grid-cols-4 p-2 h-auto gap-2"
+          className="grid w-full grid-cols-1 md:grid-cols-5 p-2 h-auto gap-2"
           style={{
             background: theme.primaryDark,
             borderColor: theme.separator,
           }}
         >
-          <TabsTrigger
-            value="services"
-            className="flex items-center gap-2 text-white"
-          >
-            <Scissors className="w-4 h-4" />
-            Services de bien-être
-            <Badge variant="secondary" className="ml-2">
-              {serviceBookings.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="tourisme"
-            className="flex items-center gap-2 text-white"
-          >
-            <Building className="w-4 h-4" />
-            Hébergements
-            <Badge variant="secondary" className="ml-2">
-              {tourismBookings.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="lieux-touristiques"
-            className="flex items-center gap-2 text-white"
-          >
-            <Ticket className="w-4 h-4" />
-            Billets
-            <Badge variant="secondary" className="ml-2">
-              {touristicPlaceBookings.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="vols"
-            className="flex items-center gap-2 text-white"
-          >
-            <Plane className="w-4 h-4" />
-            Vols
-            <Badge variant="secondary" className="ml-2">
-              {flightReservations.length}
-            </Badge>
-          </TabsTrigger>
+          {tabItems.map((tab) => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="flex items-center gap-2 text-white"
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+              <Badge variant="secondary" className="ml-2">
+                {tab.count}
+              </Badge>
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         {/* Onglet Hébergements */}
@@ -1431,13 +1934,13 @@ export default function UnifiedReservationPage() {
                   </CardDescription>
                 </div>
                 <Select value={serviceFilter} onValueChange={setServiceFilter}>
-                  <SelectTrigger
-                    className="w-48 bg-logo text-white"
-                    
-                  >
+                  <SelectTrigger className="w-48 bg-logo text-white">
                     <SelectValue placeholder="Filtrer par statut" />
                   </SelectTrigger>
-                  <SelectContent className="" style={{ background: theme.lightBg }}>
+                  <SelectContent
+                    className=""
+                    style={{ background: theme.lightBg }}
+                  >
                     <SelectItem value="all">Toutes</SelectItem>
                     <SelectItem value="pending">En attente</SelectItem>
                     <SelectItem value="confirmed">Confirmées</SelectItem>
@@ -1656,6 +2159,87 @@ export default function UnifiedReservationPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* AJOUT: Onglet Activités */}
+        <TabsContent value="activites">
+          <Card style={{ borderColor: theme.separator }}>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <CardTitle style={{ color: theme.logo }}>
+                    Mes réservations d'activités
+                  </CardTitle>
+                  <CardDescription style={{ color: theme.secondaryText }}>
+                    {activityBookings.length} activité
+                    {activityBookings.length > 1 ? "s" : ""} réservée
+                    {activityBookings.length > 1 ? "s" : ""}
+                  </CardDescription>
+                </div>
+                <Select
+                  value={activityFilter}
+                  onValueChange={setActivityFilter}
+                >
+                  <SelectTrigger
+                    className="w-48"
+                    style={{ background: theme.accent, color: theme.logo }}
+                  >
+                    <SelectValue placeholder="Filtrer par statut" />
+                  </SelectTrigger>
+                  <SelectContent style={{ background: theme.lightBg }}>
+                    <SelectItem value="all">Toutes</SelectItem>
+                    <SelectItem value="pending">En attente</SelectItem>
+                    <SelectItem value="confirmed">Confirmées</SelectItem>
+                    <SelectItem value="completed">Terminées</SelectItem>
+                    <SelectItem value="cancelled">Annulées</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {activityLoading ? (
+                <LoadingSpinner text="Chargement de vos activités" />
+              ) : activityBookings.length === 0 ? (
+                <div className="text-center py-12">
+                  <Activity className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Aucune réservation d'activité
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Vous n'avez pas encore réservé d'activité.
+                  </p>
+                  <Button asChild className="text-white bg-[#556B2F]">
+                    <Link to="/activities">Découvrir les activités</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {activityBookings.map((booking) => {
+                    const cardData = getActivityCardData(booking);
+                    return (
+                      <BookingCard
+                        key={booking.id}
+                        booking={booking}
+                        type="activity"
+                        onViewDetails={() => openActivityDetails(booking)}
+                        onCancel={() => cancelActivityBooking(booking.id)}
+                        getStatusBadge={() => (
+                          <ActivityStatusBadge status={booking.status} />
+                        )}
+                        getBookingImage={() => cardData.image}
+                        getBookingTitle={() => cardData.title}
+                        getBookingSubtitle={() => cardData.subtitle}
+                        getBookingDate={() => cardData.date}
+                        getBookingDetails={() => cardData.details}
+                        getBookingAmount={() => cardData.amount}
+                        canCancel={cardData.canCancel}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Modal de détails */}
@@ -1665,72 +2249,6 @@ export default function UnifiedReservationPage() {
         isOpen={detailModalOpen}
         onClose={closeDetailModal}
       />
-
-      {/* Section d'actions communes 
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Support</CardTitle>
-            <CardDescription>
-              Besoin d'aide pour une réservation ?
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild className="w-full">
-              <Link to="/app/messages">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Contacter le support
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Politique d'annulation</CardTitle>
-            <CardDescription>
-              Consultez les conditions d'annulation
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" asChild className="w-full">
-              <Link to="/app/conditions-annulation">
-                Voir les conditions
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Lieux touristiques</CardTitle>
-            <CardDescription>Découvrez nos sites</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="secondary" asChild className="w-full">
-              <Link to="/tourisme?type=touristic">
-                <Ticket className="w-4 h-4 mr-2" />
-                Voir les lieux
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Vols</CardTitle>
-            <CardDescription>Réservez votre vol</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" asChild className="w-full">
-              <Link to="/vols">
-                <Plane className="w-4 h-4 mr-2" />
-                Voir les vols
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>*/}
     </div>
   );
 }

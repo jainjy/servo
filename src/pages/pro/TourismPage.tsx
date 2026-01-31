@@ -37,12 +37,13 @@ import {
   RefreshCw,
   TreePine,
   Waves,
+  List,
 } from "lucide-react";
 import { toast } from "sonner";
 import { tourismeAPI } from "../../lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import AjoutVolModal from "../../components/components/AjoutVol";
-import AjoutActivitesModal from "@/components/components/AjoutActivites";
+import AjoutActivitesModal from "@/pages/pro/AjoutActiviteModal";
 import AjoutNaturePatrimoineModal from "./AjoutNaturePatrimoine"; // Nouveau
 import { api } from "@/lib/axios";
 import AdminModal from "./AdminModal";
@@ -53,11 +54,13 @@ import NatureDetailModal from "./NatureDetailModal"; // Nouveau
 // Composants importés
 import ListingCard from "./ListingCard";
 import FlightCard from "./FlightCard";
-import ActivityCard from "./ActivityCard";
 import ActivityDetailModal from "./ActivityDetailModal";
+import ActivityCategoryDetailModal from "./ActivityCategoryDetailModal";
 import AdminInterface from "./AdminInterface";
 import NaturePatrimoineCard from "./NaturePatrimoineCard"; // Nouveau
 import ActivityCardAdmin from "./ActivityCardAdmin";
+import CategoryCard from "./CategoryCard";
+import AjoutActivitesModalCategorie from "@/components/components/AjoutActivites";
 
 // Constantes de couleur basées sur votre palette
 const COLORS = {
@@ -122,6 +125,12 @@ const contentTypeOptions = [
     description: "Gérer vos activités et loisirs",
   },
   {
+    id: "categories",
+    label: "categories des activites",
+    icon: List,
+    description: "Gérer les categorie des activites",
+  },
+  {
     id: "nature_patrimoine",
     label: "Nature & Patrimoine",
     icon: TreePine,
@@ -163,7 +172,7 @@ interface Flight {
   arriveeDateHeure: string;
   duree: string;
   escales: number;
-  classe: 'economy' | 'premium' | 'business' | 'first';
+  classe: "economy" | "premium" | "business" | "first";
   prix: number;
   services: string[];
   image?: string;
@@ -211,6 +220,23 @@ interface Stats {
   availableListings?: number;
   totalBookings?: number;
 }
+interface Category {
+  id: string;
+  name?: string;
+  title?: string;
+  description?: string;
+  location?: string;
+  price: number;
+  duration?: string;
+  capacity?: number;
+  category?: string;
+  image?: string;
+  included?: string[];
+  requirements?: string;
+  isActive?: boolean;
+  color?: string;
+  icon?: string;
+}
 
 // Composant principal
 export default function TourismPage() {
@@ -218,6 +244,7 @@ export default function TourismPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [naturePatrimoine, setNaturePatrimoine] = useState<NaturePatrimoine[]>(
     [],
   );
@@ -225,6 +252,8 @@ export default function TourismPage() {
   const [loading, setLoading] = useState(true);
   const [flightsLoading, setFlightsLoading] = useState(false);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
+  const [activitiesCategoriesLoading, setActivitiesCategoriesLoading] =
+    useState(false);
   const [naturePatrimoineLoading, setNaturePatrimoineLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -259,9 +288,9 @@ export default function TourismPage() {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showActivityDetailModal, setShowActivityDetailModal] = useState(false);
   const [showNatureDetailModal, setShowNatureDetailModal] = useState(false);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [showActivityDetailModal, setShowActivityDetailModal] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [editingNaturePatrimoine, setEditingNaturePatrimoine] =
     useState<NaturePatrimoine | null>(null);
@@ -287,6 +316,34 @@ export default function TourismPage() {
   const [showAirlineModal, setShowAirlineModal] = useState(false);
 
   const sliderRef = useRef<HTMLDivElement>(null);
+const [showCategoryDetailModal, setShowCategoryDetailModal] = useState(false);
+const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+// Ajouter ces fonctions de gestion des catégories
+const handleDeleteCategory = async (id: string) => {
+  if (!confirm("Êtes-vous sûr de vouloir supprimer cette catégorie ?")) {
+    return;
+  }
+
+  try {
+    const response = await api.delete(`/ActivityCategory/${id}`);
+
+    if (response.data.success) {
+      toast.success("Catégorie supprimée avec succès");
+      setCategories((prev) => prev.filter((category) => category.id !== id));
+
+      if (selectedCategory?.id === id) {
+        setSelectedCategory(null);
+        setShowCategoryDetailModal(false);
+      }
+    }
+  } catch (error: any) {
+    console.error("❌ Erreur suppression catégorie:", error);
+    toast.error(error.response?.data?.error || "Erreur lors de la suppression");
+  }
+};
 
   // Fonction pour réinitialiser complètement les filtres
   const resetAllFilters = () => {
@@ -320,6 +377,8 @@ export default function TourismPage() {
       loadFlights();
     } else if (contentType === "activities") {
       loadActivities();
+    } else if (contentType === "categories") {
+      loadActivitiesCategories();
     } else if (contentType === "nature_patrimoine") {
       loadNaturePatrimoine();
     }
@@ -388,6 +447,29 @@ export default function TourismPage() {
       toast.error("Erreur lors du chargement des vols");
     } finally {
       setFlightsLoading(false);
+    }
+  };
+
+  const loadActivitiesCategories = async () => {
+    try {
+      setActivitiesCategoriesLoading(true);
+      const response = await api.get("/ActivityCategory");
+
+      if (response.data.success) {
+        setCategories(response.data.data);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des activités:", error);
+      if (error.response) {
+        console.error("Détails de l'erreur:", {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers,
+        });
+      }
+      toast.error("Erreur lors du chargement des activités");
+    } finally {
+      setActivitiesCategoriesLoading(false);
     }
   };
 
@@ -846,6 +928,20 @@ export default function TourismPage() {
     }
   };
 
+const handleEditCategory = (category: Category) => {
+  setEditingCategory(category);
+  setShowCategoryModal(true);
+};
+
+const handleViewCategoryDetails = (category: Category) => {
+  setSelectedCategory(category);
+  setShowCategoryDetailModal(true);
+};
+
+const handleCloseCategoryDetailModal = () => {
+  setShowCategoryDetailModal(false);
+  setSelectedCategory(null);
+};
   const handleCloseAdminModal = () => {
     setShowAdminModal(false);
     setEditingListing(null);
@@ -927,6 +1023,24 @@ export default function TourismPage() {
     );
   };
 
+  // Mettre à jour renderCategoryCards pour envelopper dans une grille
+  const renderCategoryCards = () => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {categories.map((category) => (
+          <CategoryCard
+            key={category.id}
+            category={category}
+            user={user}
+            onViewDetails={handleViewCategoryDetails}
+            onEdit={handleEditCategory}
+            onDelete={handleDeleteCategory}
+          />
+        ))}
+      </div>
+    );
+  };
+
   const handleContentTypeChange = (type: string) => {
     setContentType(type);
   };
@@ -943,12 +1057,15 @@ export default function TourismPage() {
     } else if (contentType === "activities") {
       setEditingActivity(null);
       setShowActivitiesModal(true);
+    } else if (contentType === "categories") {
+      // ← AJOUT: Pour les catégories
+      setEditingCategory(null);
+      setShowCategoryModal(true);
     } else if (contentType === "nature_patrimoine") {
       setEditingNaturePatrimoine(null);
       setShowNaturePatrimoineModal(true);
     }
   };
-
   return (
     <div className="min-h-screen" style={{ backgroundColor: COLORS.lightBg }}>
       <div className="container mx-auto px-4 lg:p-0 py-4">
@@ -964,6 +1081,8 @@ export default function TourismPage() {
           loading={loading}
           flightsLoading={flightsLoading}
           activitiesLoading={activitiesLoading}
+          activitiesCategoriesLoading={activitiesCategoriesLoading}
+          categories={categories}
           naturePatrimoineLoading={naturePatrimoineLoading} // ← Doit être présent
           user={user}
           onContentTypeChange={handleContentTypeChange}
@@ -973,6 +1092,7 @@ export default function TourismPage() {
           renderFlightCards={renderFlightCards}
           renderActivityCards={renderActivityCards}
           renderNaturePatrimoineCards={renderNaturePatrimoineCards} // ← Doit être présent
+          renderCategoryCards={renderCategoryCards}
         />
       </div>
 
@@ -999,6 +1119,33 @@ export default function TourismPage() {
         onEdit={handleEditActivity}
         onDelete={handleDeleteActivity}
       />
+
+      <ActivityCategoryDetailModal
+        isOpen={showActivityDetailModal}
+        onClose={handleCloseActivityDetailModal}
+        activity={selectedActivity}
+        user={user}
+        onEdit={handleEditActivity}
+        onDelete={handleDeleteActivity}
+      />
+
+      {showCategoryModal && (
+        <AjoutActivitesModalCategorie
+          isOpen={showCategoryModal}
+          onClose={() => setShowCategoryModal(false)}
+          editingActivity={editingCategory}
+          onSubmit={(categoryData) => {
+            toast.success(
+              editingActivity
+                ? "categorie modifiée avec succès"
+                : "categorie ajoutée avec succès",
+            );
+            setShowActivitiesModal(false);
+            setEditingActivity(null);
+            loadActivities();
+          }}
+        />
+      )}
 
       {showFlightModal && (
         <AjoutVolModal

@@ -36,10 +36,12 @@ interface AdminInterfaceProps {
   activities: any[];
   naturePatrimoine: any[];
   listings: any[];
+  categories: any[];
   filteredListings: any[];
   loading: boolean;
   flightsLoading: boolean;
   activitiesLoading: boolean;
+  activitiesCategoriesLoading: boolean;
   naturePatrimoineLoading: boolean;
   user?: { role: string };
   onContentTypeChange: (type: string) => void;
@@ -49,6 +51,7 @@ interface AdminInterfaceProps {
   renderFlightCards: () => React.ReactNode;
   renderActivityCards: () => React.ReactNode;
   renderNaturePatrimoineCards: () => React.ReactNode;
+  renderCategoryCards: () => React.ReactNode;
 }
 
 const AdminInterface: React.FC<AdminInterfaceProps> = ({
@@ -65,6 +68,8 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
   activitiesLoading,
   naturePatrimoineLoading,
   user,
+  categories,
+  activitiesCategoriesLoading,
   onContentTypeChange,
   onAddClick,
   onRefreshActivities,
@@ -72,6 +77,7 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
   renderFlightCards,
   renderActivityCards,
   renderNaturePatrimoineCards,
+  renderCategoryCards,
 }) => {
   const [showContentTypeDropdown, setShowContentTypeDropdown] = useState(false);
   const currentContentType = contentTypeOptions.find(
@@ -88,6 +94,8 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
         return "Ajouter un vol";
       case "activities":
         return "Ajouter une activité";
+      case "categories":
+        return "Ajouter une categorie d'activites";
       case "nature_patrimoine":
         return "Ajouter un site";
       default:
@@ -526,6 +534,106 @@ const AdminInterface: React.FC<AdminInterfaceProps> = ({
           )}
 
           {contentType === "activities" && <ActivitiesListAdmin user={user} />}
+          {contentType === "categories" && (
+            <div className="space-y-8">
+              {/* Categories Header */}
+              <div className="rounded-2xl p-6 border bg-[#6B8E23] bg-opacity-10 border-[#D3D3D3]">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#8B4513]">
+                      Gestion des Catégories
+                    </h2>
+                    <p className="mt-1 text-[#556B2F]">
+                      Gérez vos catégories d'activités
+                    </p>
+                  </div>
+
+                  {user?.role === "professional" && (
+                    <button
+                      onClick={onAddClick}
+                      className="text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl bg-[#6B8E23] hover:bg-[#556B2F]"
+                    >
+                      <PlusCircle className="w-5 h-5" />
+                      <span>Nouvelle catégorie</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Categories Content */}
+              {activitiesCategoriesLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-pulse">
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-white rounded-2xl shadow-sm border overflow-hidden border-[#D3D3D3]"
+                    >
+                      <div className="h-48 bg-gray-200"></div>
+                      <div className="p-6 space-y-4">
+                        <div className="h-6 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="flex space-x-2">
+                          <div className="h-8 bg-gray-200 rounded w-20"></div>
+                          <div className="h-8 bg-gray-200 rounded w-20"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : categories.length > 0 ? (
+                <>
+                  {/* Categories Grid */}
+                  {renderCategoryCards()}
+
+                  {/* Pagination */}
+                  <div className="flex items-center justify-between pt-8 border-t border-[#D3D3D3]">
+                    <div className="text-[#556B2F]">
+                      Affichage de{" "}
+                      <span className="font-semibold text-black">
+                        {categories.length}
+                      </span>{" "}
+                      catégorie{categories.length > 1 ? "s" : ""}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 border-[#D3D3D3] text-black">
+                        ← Précédent
+                      </button>
+                      <span className="px-4 py-2 rounded-lg font-medium text-white bg-[#6B8E23]">
+                        1
+                      </span>
+                      <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors border-[#D3D3D3] text-black">
+                        Suivant →
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* Empty State */
+                <div className="rounded-2xl border-2 border-dashed p-12 text-center bg-[#D3D3D3] bg-opacity-20 border-[#D3D3D3]">
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-gradient-to-br from-[#556B2F] from-opacity-20 to-[#6B8E23] to-opacity-20">
+                    <div className="text-4xl">📂</div>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 text-[#8B4513]">
+                    Aucune catégorie trouvée
+                  </h3>
+                  <p className="max-w-md mx-auto mb-8 text-[#556B2F]">
+                    {user?.role === "professional"
+                      ? "Commencez par créer votre première catégorie d'activités."
+                      : "Revenez plus tard pour découvrir nos catégories."}
+                  </p>
+                  {user?.role === "professional" && (
+                    <button
+                      onClick={onAddClick}
+                      className="text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg hover:shadow-xl mx-auto bg-[#6B8E23] hover:bg-[#556B2F]"
+                    >
+                      <PlusCircle className="w-6 h-6" />
+                      <span>Créer une catégorie</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Nature & Patrimoine Content */}
           {contentType === "nature_patrimoine" && (

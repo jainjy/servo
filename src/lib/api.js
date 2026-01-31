@@ -154,6 +154,29 @@ export const financementAPI = {
     api.put(`/financement/services/${id}`, data),
   deleteServiceFinancier: (id) => api.delete(`/financement/services/${id}`),
 };
+
+export const activitiesAPI = {
+  // Récupérer les réservations d'activités pour le professionnel
+  getActivityBookings: (params) => 
+    api.get('/activity-bookings/my-activity-bookings', { params }),
+  
+  // Mettre à jour le statut d'une réservation d'activité
+  updateActivityBookingStatus: (bookingId, status) =>
+    api.put(`/activity-bookings/${bookingId}/confirm`, { status }),
+  
+  // Mettre à jour le statut de paiement
+  updateActivityPaymentStatus: (bookingId, paymentStatus) =>
+    api.put(`/activity-bookings/${bookingId}/update-payment`, { paymentStatus }),
+  
+  // Annuler une réservation
+  cancelActivityBooking: (bookingId, reason) =>
+    api.put(`/activity-bookings/${bookingId}/cancel`, { reason }),
+  
+  // Marquer comme complété
+  completeActivityBooking: (bookingId) =>
+    api.put(`/activity-bookings/${bookingId}/complete`),
+};
+
 // Services pour le tourisme
 export const tourismeAPI = {
   // Routes admin
