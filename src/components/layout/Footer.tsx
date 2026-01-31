@@ -21,6 +21,51 @@ const Footer: React.FC = () => {
       url: "/professional/f716640c-04e6-4eb0-9cd7-690208f011cb",
       logo: "/Reunion.png",
     },
+    {
+      name: "Sekoia Entretien & Aménagement",
+      url: "/professional/ebcd6f0c-a949-4a57-9051-53badfc81573",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769599947673-6uoigp0lcvw.jpg",
+    },
+    {
+      name: "REUNIREM DIAGNOSTIC",
+      url: "/professional/3d5de8dd-24c0-4f94-98ff-22a308c5de2d",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769515428367-ifzbh3rk92c.png",
+    },
+    {
+      name: "IBR Ingénierie",
+      url: "/professional/3a4d22b0-6041-47e1-b945-eb4ac087e55e",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987856807-5aze4kvdkyd.png",
+    },
+    {
+      name: "TARA Thérapeute Holistique",
+      url: "/professional/3adda67f-a851-403c-a78b-56fac60bdbe3",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987792594-y2xzfeeb35e.jpg",
+    },
+    {
+      name: "FD2L Formalités",
+      url: "/professional/a35d1237-45eb-4254-8ac0-30188cac7f57",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987729304-3i63o0deunq.png",
+    },
+    {
+      name: "Air Lagon Parapente",
+      url: "/professional/bf88e335-ef90-4a39-898d-561d237aaff3",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836430476-9b69z2jvyil.png",
+    },
+    {
+      name: "L'Immobilier Enchanté",
+      url: "/professional/919cc5f8-2b9d-4e46-ad69-37128d24b581",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836629052-zn3mvhzd7lg.webp",
+    },
+    {
+      name: "Crédit Réunion",
+      url: "/professional/9347adc4-d6f6-4635-95f9-e4134d7cb77b",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836948448-54bqjn3oh5a.png",
+    },
+    {
+      name: "RM CONSTRUCTION",
+      url: "/professional/0d812425-8a4a-4dda-a65e-c0e56eb704b1",
+      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769515594088-g834n4v5m57.png",
+    },
     // {
     //   name: "Expert Immobilier",
     //   url: "#",
@@ -47,7 +92,7 @@ const Footer: React.FC = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Contenu principal - Ultra compact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3">
+        <div className="flex flex-col md:flex-row justify-around gap-3">
           {/* Colonne Logo et description */}
           <div className="md:col-span-2 lg:col-span-4">
             <div className="mb-2">
@@ -72,7 +117,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Colonne Partenaires */}
-          <div className="lg:col-span-3">
+          {/* <div className="lg:col-span-3">
             <h3 className="text-xs font-semibold text-white mb-2">
               Partenaires
             </h3>
@@ -94,7 +139,7 @@ const Footer: React.FC = () => {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Colonne Contact */}
           <div className="lg:col-span-3">
@@ -193,35 +238,89 @@ const Footer: React.FC = () => {
           <h3 className="text-sm font-semibold text-white/90 mb-3 text-center">
             Partenaires officiels
           </h3>
-          <div className="flex justify-center items-center gap-6 max-w-4xl mx-auto">
+          {/* Version Mobile (Liste Compacte) */}
+          <div className="lg:hidden flex flex-col gap-3 max-w-2xl mx-auto px-4">
             {partners.map((partner, index) => (
               <button
                 key={index}
                 onClick={() => handlePartnerClick(partner.url)}
-                className="group p-2 bg-black/10 backdrop-blur-sm rounded-xl border border-white/20 hover:border-[#fff]/50 hover:bg-black/20 transition-all duration-300 flex flex-col items-center gap-2 min-w-[120px]"
+                className="group p-4 bg-gradient-to-br from-black/10 to-black/5 backdrop-blur-sm rounded-xl border border-white/20 hover:border-white/40 hover:bg-gradient-to-br hover:from-black/20 hover:to-black/10 transition-all duration-300 flex items-center gap-4 w-full"
               >
-                <div className="w-32 h-20 flex items-center justify-center bg-white/10 rounded-lg border border-white/15 overflow-hidden group-hover:bg-white/15 transition-all">
+                <div className="w-16 h-12 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-white/5 to-white/10 rounded-lg border border-white/10 overflow-hidden group-hover:border-white/20 group-hover:bg-gradient-to-br group-hover:from-white/10 group-hover:to-white/15 transition-all duration-300">
                   <img
                     src={partner.logo}
                     alt={partner.name}
-                    className="w-full h-full object-cover shadow-lg opacity-90 group-hover:opacity-100 transition-all duration-200"
+                    className="w-full h-full object-contain p-1 opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
                       const parent = target.parentElement;
                       if (parent) {
                         parent.innerHTML = `
-                  <div class="text-base font-bold text-[#8B4513] flex items-center justify-center h-full">
+                <div class="w-full h-full flex items-center justify-center">
+                  <div class="text-lg font-bold bg-gradient-to-r from-[#8B4513] to-[#D2691E] bg-clip-text text-transparent">
                     ${partner.name.split(" ")[0].charAt(0)}
                   </div>
-                `;
+                </div>
+              `;
                       }
                     }}
                   />
                 </div>
-                <span className="text-white/80 text-sm text-center font-medium max-w-[100px] leading-relaxed">
-                  {partner.name.split(" ")[0]}
-                </span>
+
+                <div className="flex flex-col items-start flex-grow min-w-0">
+                  <span className="text-white/90 text-base text-left font-semibold truncate w-full">
+                    {partner.name}
+                  </span>
+                  <span className="text-white/60 text-sm text-left">
+                    Cliquez pour visiter
+                  </span>
+                </div>
+
+                {/* Flèche indicateur sur mobile */}
+                <div className="flex-shrink-0 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">
+                  <svg className="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Version Desktop (Grid Original) */}
+          <div className="hidden lg:grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-6 gap-4 md:gap-6  mx-auto">
+            {partners.map((partner, index) => (
+              <button
+                key={index}
+                onClick={() => handlePartnerClick(partner.url)}
+                className="group p-3 md:p-4 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/20 hover:border-white/40 hover:bg-black/30 transition-all duration-300 flex flex-col items-center gap-3 md:gap-2  transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-white/5"
+              >
+                <div className="w-24 h-16 md:w-44 md:h-20 flex items-center justify-center bg-gradient-to-br from-white/5 to-white/10 rounded-xl border border-white/10 overflow-hidden group-hover:border-white/20 group-hover:bg-gradient-to-br group-hover:from-white/10 group-hover:to-white/15 transition-all duration-300">
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                <div class="w-full h-full flex items-center justify-center">
+                  <div class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#8B4513] to-[#D2691E] bg-clip-text text-transparent">
+                    ${partner.name.split(" ")[0].charAt(0)}
+                  </div>
+                </div>
+              `;
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-white/90 text-xs text-center font-semibold tracking-tight max-w-[120px]">
+                    {partner.name}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
