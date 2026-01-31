@@ -189,57 +189,57 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Partenaires logos - Ultra compact */}
-        <div className="mt-3 pt-2 border-t border-white/10">
-          <h3 className="text-xs font-semibold text-white/90 mb-1.5 text-center">
+        <div className="mt-6 pt-4 border-t border-white/10">
+          <h3 className="text-sm font-semibold text-white/90 mb-3 text-center">
             Partenaires officiels
           </h3>
-          <div className="flex justify-center items-center gap-3 max-w-2xl mx-auto">
+          <div className="flex justify-center items-center gap-6 max-w-4xl mx-auto">
             {partners.map((partner, index) => (
               <button
                 key={index}
                 onClick={() => handlePartnerClick(partner.url)}
-                className="group p-2 bg-black/10 backdrop-blur-sm rounded border border-white/20 hover:border-[#8B4513]/50 hover:bg-black/20 transition-all duration-200 flex flex-col items-center gap-1"
+                className="group p-2 bg-black/10 backdrop-blur-sm rounded-xl border border-white/20 hover:border-[#fff]/50 hover:bg-black/20 transition-all duration-300 flex flex-col items-center gap-2 min-w-[120px]"
               >
-                <div className="w-40 h-40 flex items-center justify-center bg-white/10 rounded border border-white/15 overflow-hidden group-hover:bg-white/15 transition-all">
+                <div className="w-32 h-20 flex items-center justify-center bg-white/10 rounded-lg border border-white/15 overflow-hidden group-hover:bg-white/15 transition-all">
                   <img
                     src={partner.logo}
                     alt={partner.name}
-                    className="w-full h-full object-cover p-1 opacity-90 group-hover:opacity-100 transition-opacity"
+                    className="w-full h-full object-cover shadow-lg opacity-90 group-hover:opacity-100 transition-all duration-200"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
                       const parent = target.parentElement;
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="text-sm font-bold text-[#8B4513]">
-                            ${partner.name.split(" ")[0].charAt(0)}
-                          </div>
-                        `;
+                  <div class="text-base font-bold text-[#8B4513] flex items-center justify-center h-full">
+                    ${partner.name.split(" ")[0].charAt(0)}
+                  </div>
+                `;
                       }
                     }}
                   />
                 </div>
-                <span className="text-white/80 text-xs text-center font-medium max-w-[80px]">
+                <span className="text-white/80 text-sm text-center font-medium max-w-[100px] leading-relaxed">
                   {partner.name.split(" ")[0]}
                 </span>
               </button>
             ))}
           </div>
 
-          {/* Section inférieure - Minimaliste */}
-          <div className="mt-2 pt-2 border-t border-white/10">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-1">
-              <div className="text-white/60 text-[10px] order-2 md:order-1">
+          {/* Section inférieure - Plus aérée */}
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+              <div className="text-white/60 text-sm order-2 lg:order-1">
                 &copy; {currentYear} - Tous droits réservés
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-1 order-1 md:order-2 mb-1 md:mb-0">
+              <div className="flex flex-wrap items-center justify-center gap-3 order-1 lg:order-2">
                 {["Cookies", "Confidentialité", "Mentions-legales", "CGU", "RGPD"].map(
                   (label) => (
                     <Link
                       key={label}
                       to={`/${label.toLowerCase().replace("é", "e")}`}
-                      className="text-white/60 hover:text-[#8B4513] text-[10px] transition-colors px-0.5"
+                      className="text-white/60 hover:text-white text-sm font-medium transition-colors px-2 py-1 hover:bg-white/5 rounded-md"
                     >
                       {label}
                     </Link>
@@ -247,15 +247,16 @@ const Footer: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-white/5 rounded-full border border-white/10 order-3">
-                <div className="w-1 h-1 bg-green-400 rounded-full"></div>
-                <span className="text-white/70 text-[10px]">
+              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-full border border-white/10 order-3">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-white/70 text-sm font-medium">
                   Agréée.Certification
                 </span>
               </div>
             </div>
           </div>
         </div>
+
 
         {/* Modale */}
         <ApkDownloadModal

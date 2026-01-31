@@ -64,7 +64,7 @@ const TourismNavigation: React.FC<TourismNavigationProps> = ({
     // { id: 25, title: "Vidéos", path: "/videos-inspirer-eveiller" },
     { id: 26, title: "Portraits locaux", path: "/portraits-locaux" },
     { id: 27, title: "Bons plans & conseils", path: "/bon-plan-conseil" },
-    { id: 28, title: "entrepreneuriat", path: "/entrepreneuriat" },
+    { id: 28, title: "Entrepreneuriat", path: "/entrepreneuriat" },
   ];
 
   // Déterminer quelles sections afficher basé sur 'page'

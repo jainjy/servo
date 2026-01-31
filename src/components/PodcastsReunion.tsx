@@ -42,6 +42,7 @@ const PodcastsReunion: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
@@ -206,6 +207,26 @@ const PodcastsReunion: React.FC = () => {
   };
 
   const isFavorite = (episodeId: string) => favorites.includes(episodeId);
+
+  // Mapping entre les thèmes et les catégories de vidéos
+  const themeToCategories: { [key: string]: string[] } = {
+    "Plages & Côtes": ["Réunion", "Tourisme", "Nature"],
+    "Volcans & Randonnées": ["Nature", "Activités", "Réunion"],
+    "Gastronomie": ["Gastronomie"],
+    "Culture & Traditions": ["Culture", "Patrimoine"],
+  };
+
+  // Fonction pour filtrer les vidéos par thème
+  const getFilteredVideos = () => {
+    if (!selectedTheme) {
+      return videoEpisodes;
+    }
+
+    const categories = themeToCategories[selectedTheme] || [];
+    return videoEpisodes.filter((episode) =>
+      categories.includes(episode.category)
+    );
+  };
 
   // Mise à jour de la fonction getCategoryColor avec la nouvelle palette
   const getCategoryColor = (category: string) => {
@@ -462,24 +483,94 @@ const PodcastsReunion: React.FC = () => {
             Explorez par thème
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+            <div
+              onClick={() => setSelectedTheme("Plages & Côtes")}
+              className={`rounded-2xl p-6 text-white text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl ${
+                selectedTheme === "Plages & Côtes"
+                  ? "bg-gradient-to-r from-[#556B2F] to-[#6B8E23] ring-2 ring-[#6B8E23]"
+                  : "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B]"
+              }`}
+            >
               <div className="text-3xl mb-2">🏝️</div>
               <h4 className="font-bold">Plages & Côtes</h4>
             </div>
-            <div className="bg-gradient-to-r from-[#2E8B57] to-[#3CB371] rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+            <div
+              onClick={() => setSelectedTheme("Volcans & Randonnées")}
+              className={`rounded-2xl p-6 text-white text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl ${
+                selectedTheme === "Volcans & Randonnées"
+                  ? "bg-gradient-to-r from-[#1a5c3a] to-[#2E8B57] ring-2 ring-[#2E8B57]"
+                  : "bg-gradient-to-r from-[#2E8B57] to-[#3CB371]"
+              }`}
+            >
               <div className="text-3xl mb-2">🌋</div>
               <h4 className="font-bold">Volcans & Randonnées</h4>
             </div>
-            <div className="bg-gradient-to-r from-[#8B4513] to-[#D2691E] rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+            <div
+              onClick={() => setSelectedTheme("Gastronomie")}
+              className={`rounded-2xl p-6 text-white text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl ${
+                selectedTheme === "Gastronomie"
+                  ? "bg-gradient-to-r from-[#6B3410] to-[#8B4513] ring-2 ring-[#8B4513]"
+                  : "bg-gradient-to-r from-[#8B4513] to-[#D2691E]"
+              }`}
+            >
               <div className="text-3xl mb-2">🍽️</div>
               <h4 className="font-bold">Gastronomie</h4>
             </div>
-            <div className="bg-gradient-to-r from-[#556B2F] to-[#8FBC8F] rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+            <div
+              onClick={() => setSelectedTheme("Culture & Traditions")}
+              className={`rounded-2xl p-6 text-white text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl ${
+                selectedTheme === "Culture & Traditions"
+                  ? "bg-gradient-to-r from-[#3d5a27] to-[#556B2F] ring-2 ring-[#556B2F]"
+                  : "bg-gradient-to-r from-[#556B2F] to-[#8FBC8F]"
+              }`}
+            >
               <div className="text-3xl mb-2">🎭</div>
               <h4 className="font-bold">Culture & Traditions</h4>
             </div>
           </div>
         </section>
+
+        {/* Section Résultats du Filtrage */}
+        {selectedTheme && (
+          <section className="mb-16 pt-8 border-t-2 border-[#D3D3D3]">
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-2xl font-bold text-[#8B4513]">
+                    Résultats : {selectedTheme}
+                  </h3>
+                  <p className="text-gray-600 mt-2">
+                    {getFilteredVideos().length} vidéo(s) disponible(s)
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedTheme(null)}
+                  className="px-6 py-2 bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-700 font-semibold rounded-lg transition-all duration-300"
+                >
+                  ✕ Annuler le filtre
+                </button>
+              </div>
+            </div>
+
+            {getFilteredVideos().length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {getFilteredVideos().map((episode) => (
+                  <VideoCard key={episode.id} episode={episode} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border border-[#D3D3D3]">
+                <Map className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+                <h3 className="text-2xl font-bold text-gray-600 mb-2">
+                  Aucune découverte trouvée
+                </h3>
+                <p className="text-gray-500">
+                  Aucune vidéo disponible pour le thème "{selectedTheme}"
+                </p>
+              </div>
+            )}
+          </section>
+        )}
       </div>
 
       {/* Modal Vidéo */}
