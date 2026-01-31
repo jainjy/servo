@@ -144,7 +144,7 @@ const BienEtreShowcase = () => {
   };
 
   return (
-    <section className="py-16 bg-[#81794d36] relative">
+    <section className="py-16 bg-[#22ee303a] relative">
       {/* Publicité - seulement sur desktop */}
       {false && (
         <motion.article

@@ -462,7 +462,7 @@ const AnnoncesImmobilieres = () => {
 
   return (
     <div
-      className="w-full py-12 px-4 sm:px-2 lg:px-4 bg-[#81794d36]"
+      className="w-full py-12 px-4 sm:px-2 lg:px-4 bg-[#22ee303a]"
     >
       <div className="max-w-7xl mx-auto">
         {/* En-tête */}
