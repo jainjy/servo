@@ -15,6 +15,8 @@ import {
   Search,
   X,
   ArrowLeft,
+  Menu,
+  ChevronLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -146,6 +148,20 @@ const ProRegisterPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Détection de la taille d'écran
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     // Charger les métiers depuis l'API
     const loadMetiers = async () => {
@@ -435,23 +451,25 @@ const ProRegisterPage = () => {
     },
   ];
   const handleBack = () => {
-    navigate(-1);
+    if (step === 2) {
+      setStep(1);
+    } else {
+      navigate(-1);
+    }
   };
   const [redirecting, setRedirecting] = useState(false);
   return (
     <div className="min-h-screen flex">
-      {/* Background reste identique */}
+      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <video
           className="absolute inset-0 w-full h-full object-cover -z-20"
-          src="/wave.mp4" // ou une URL externe
+          src="/wave.mp4"
           autoPlay
           loop
           muted
           playsInline
         />
-
-        {/* Overlay (ton div existant) */}
         <div className="absolute inset-0 backdrop-blur-md z-0" />
       </div>
 
@@ -462,18 +480,32 @@ const ProRegisterPage = () => {
           className="w-full h-full object-cover"
         />
       </div>
-      <div className="w-[80vw] lg:w-[80vw] flex h-[90vh] m-auto rounded-3xl shadow-xl overflow-hidden">
-        {/* Sidebar reste identique */}
-        <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden">
+
+      {/* Bouton Retour Mobile - Sticky en haut */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full w-10 h-10 border-white/30 bg-black/40 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:border-white/50 transition-all duration-300 shadow-2xl"
+          onClick={handleBack}
+          disabled={redirecting}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+      </div>
+
+      <div className="w-full lg:w-[80vw] flex h-[90vh] m-auto rounded-3xl shadow-xl overflow-hidden">
+        {/* Sidebar - Cachée sur mobile */}
+        <div className={`hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden ${isMobile ? 'hidden' : ''}`}>
           <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
           <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-            {/* Bouton Retour stylé en haut à gauche */}
+            {/* Bouton Retour desktop */}
             <div className="absolute top-6 left-6 z-30">
               <Button
                 variant="outline"
                 className="px-6 py-3 border-white/30 bg-black/40 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:border-white/50 transition-all duration-300 rounded-2xl shadow-2xl group"
-                onClick={handleBack}
+                onClick={() => navigate(-1)}
                 disabled={redirecting}
               >
                 <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
@@ -482,7 +514,6 @@ const ProRegisterPage = () => {
             </div>
             <div className="mb-8">
               <div className="flex justify-center items-center gap-3">
-
                 <Link to={"/home"} onClick={() => {
                   setTimeout(() => {
                     const heroElement = document.getElementById('hero');
@@ -493,18 +524,17 @@ const ProRegisterPage = () => {
                 }}>
                   <ServoLogo />
                 </Link>
-
               </div>
               <p className="text-md font-semibold">
                 REJOIGNEZ LA SUPER APP DE L'HABITAT
               </p>
               <p className="text-[#8B4513] text-sm mt-2">
                 Des biens immobiliers, ses services additionnels, produits
-                adaptés à vos besoins et vos locations au sein d’une seule
+                adaptés à vos besoins et vos locations au sein d'une seule
                 plateforme
               </p>
             </div>
-            <div className="space-y-6 ">
+            <div className="space-y-6">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
@@ -533,23 +563,25 @@ const ProRegisterPage = () => {
             </div>
           </div>
         </div>
+        
+        {/* Contenu principal */}
         <div className="relative flex-1 flex flex-col bg-[#FFFFFF]">
-          <div className="w-full max-w-2xl flex flex-col h-full">
+          <div className="w-full max-w-2xl flex flex-col h-full mx-auto">
             <Card className="border-0 p-0 m-0 rounded-none flex flex-col h-full">
               {/* En-tête sticky */}
-              <CardHeader className="sticky top-0 z-10 bg-[#FFFFFF] border-b border-gray-100">
+              <CardHeader className="sticky top-0 z-10 bg-[#FFFFFF] border-b border-gray-100 pt-6 lg:pt-0">
                 <div className="flex justify-between items-center">
                   <div className="flex flex-col items-start justify-center">
-                    <CardTitle className="text-2xl font-bold text-gray-900">
+                    <CardTitle className="text-xl lg:text-2xl font-bold text-gray-900">
                       Créer un compte
                     </CardTitle>
-                    <CardDescription className="text-gray-600">
+                    <CardDescription className="text-gray-600 text-sm lg:text-base">
                       {step === 1
                         ? "Informations de base"
                         : "Finalisez votre inscription"}
                     </CardDescription>
                   </div>
-                  <div className="absolute right-4 top-4 flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div
                       className={`w-3 h-3 rounded-full ${step === 1 ? "bg-[#556B2F]" : "bg-[#6B8E23]"
                         }`}
@@ -561,13 +593,14 @@ const ProRegisterPage = () => {
                   </div>
                 </div>
               </CardHeader>
+              
               {/* Contenu scrollable */}
-              <CardContent className="flex-1 overflow-y-auto">
-                <form onSubmit={handleSubmit} className="space-y-2">
+              <CardContent className="flex-1 overflow-y-auto px-4 lg:px-6 py-4 lg:py-6">
+                <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
                   {step === 1 ? (
                     <>
                       {/* Informations personnelles */}
-                      <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Prénom *
@@ -576,7 +609,7 @@ const ProRegisterPage = () => {
                             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
                               placeholder="Votre prénom"
-                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                               value={formData.firstName}
                               onChange={(e) =>
                                 handleInputChange("firstName", e.target.value)
@@ -591,7 +624,7 @@ const ProRegisterPage = () => {
                           </label>
                           <Input
                             placeholder="Votre nom"
-                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                             value={formData.lastName}
                             onChange={(e) =>
                               handleInputChange("lastName", e.target.value)
@@ -600,8 +633,8 @@ const ProRegisterPage = () => {
                           />
                         </div>
                       </div>
-                      <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
-
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Email *
@@ -611,7 +644,7 @@ const ProRegisterPage = () => {
                             <Input
                               type="email"
                               placeholder="votre@email.mg"
-                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                               value={formData.email}
                               onChange={(e) =>
                                 handleInputChange("email", e.target.value)
@@ -629,7 +662,7 @@ const ProRegisterPage = () => {
                               value={phonePrefix}
                               onValueChange={setPhonePrefix}
                             >
-                              <SelectTrigger className="w-[110px] h-11 bg-[#FFFFFF] border-[#D3D3D3]">
+                              <SelectTrigger className="w-[100px] lg:w-[110px] h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm">
                                 <SelectValue placeholder="+262" />
                               </SelectTrigger>
                               <SelectContent>
@@ -637,7 +670,7 @@ const ProRegisterPage = () => {
                                   <SelectItem key={country.code} value={country.code}>
                                     <span className="flex items-center gap-2">
                                       <span>{country.flag}</span>
-                                      <span>{country.code}</span>
+                                      <span className="text-xs lg:text-sm">{country.code}</span>
                                     </span>
                                   </SelectItem>
                                 ))}
@@ -646,12 +679,10 @@ const ProRegisterPage = () => {
                             <div className="relative flex-1">
                               <Input
                                 placeholder="692 12 34 56"
-                                className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                className="h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                                 value={formData.phone}
                                 onChange={(e) => {
-                                  // Nettoyer l'entrée : garder uniquement les chiffres
                                   const cleanedValue = e.target.value.replace(/\D/g, '');
-                                  // Limiter à 9 chiffres (format Réunion : 692 12 34 56)
                                   const limitedValue = cleanedValue.slice(0, 9);
                                   handleInputChange("phone", limitedValue);
                                 }}
@@ -664,11 +695,11 @@ const ProRegisterPage = () => {
                           </p>
                         </div>
                       </div>
+                      
                       {/* Informations entreprise (si professionnel) */}
                       {formData.role === "professional" && (
                         <>
-                          <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
-
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-700">
                                 Nom de l'entreprise *
@@ -677,7 +708,7 @@ const ProRegisterPage = () => {
                                 <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <Input
                                   placeholder="Nom de votre société"
-                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                                   value={formData.companyName}
                                   onChange={(e) =>
                                     handleInputChange(
@@ -695,7 +726,7 @@ const ProRegisterPage = () => {
                               </label>
                               <Input
                                 placeholder="Nom commercial"
-                                className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                className="h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                                 value={formData.commercialName}
                                 onChange={(e) =>
                                   handleInputChange(
@@ -706,25 +737,8 @@ const ProRegisterPage = () => {
                               />
                             </div>
                           </div>
-                          {/* <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">
-                              Numéro SIRET
-                            </label>
-                            <div className="relative">
-                              <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                              <Input
-                                placeholder="123 456 789 00012"
-                                className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                                value={formData.siret}
-                                onChange={(e) =>
-                                  handleInputChange("siret", e.target.value)
-                                }
-                              />
-                            </div>
-                          </div> */}
-                          {/* Numéros SIREN et SIRET */}
-                          <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
-                            {/* SIREN */}
+                          
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-700">
                                 Numéro SIREN *
@@ -733,23 +747,17 @@ const ProRegisterPage = () => {
                                 <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <Input
                                   placeholder="123 456 789"
-                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                                   value={formData.siren}
                                   onChange={(e) => {
-                                    // Nettoyer et limiter à 9 chiffres
                                     const cleaned = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
                                     const limited = cleaned.slice(0, 9);
-
-                                    // Formater avec espaces : 123 456 789
                                     let formatted = '';
                                     for (let i = 0; i < limited.length; i++) {
                                       if (i === 3 || i === 6) formatted += ' ';
                                       formatted += limited[i];
                                     }
-
                                     handleInputChange("siren", formatted);
-
-                                    // Si SIRET commence par ce SIREN, le mettre à jour automatiquement
                                     if (formData.siret && formData.siret.startsWith(limited)) {
                                       const newSiret = limited + formData.siret.slice(9);
                                       handleInputChange("siret", newSiret);
@@ -761,7 +769,6 @@ const ProRegisterPage = () => {
                               <p className="text-xs text-gray-500">9 chiffres</p>
                             </div>
 
-                            {/* SIRET */}
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-700">
                                 Numéro SIRET *
@@ -770,23 +777,17 @@ const ProRegisterPage = () => {
                                 <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <Input
                                   placeholder="123 456 789 00012"
-                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                                   value={formData.siret}
                                   onChange={(e) => {
-                                    // Nettoyer et limiter à 14 chiffres
                                     const cleaned = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
                                     const limited = cleaned.slice(0, 14);
-
-                                    // Formater avec espaces : 123 456 789 00012
                                     let formatted = '';
                                     for (let i = 0; i < limited.length; i++) {
                                       if (i === 3 || i === 6 || i === 9) formatted += ' ';
                                       formatted += limited[i];
                                     }
-
                                     handleInputChange("siret", formatted);
-
-                                    // Extraire automatiquement le SIREN (9 premiers chiffres)
                                     if (limited.length >= 9) {
                                       const siren = limited.slice(0, 9);
                                       let sirenFormatted = '';
@@ -805,7 +806,8 @@ const ProRegisterPage = () => {
                           </div>
                         </>
                       )}
-                      {/* Étape 2 - Métiers avec recherche améliorée */}
+                      
+                      {/* Métiers */}
                       <div className="space-y-4">
                         <div>
                           <label className="text-sm font-medium text-gray-700 block mb-3">
@@ -820,13 +822,13 @@ const ProRegisterPage = () => {
                           
                           {/* Barre de recherche et bouton métier personnalisé */}
                           {!hasCustomMetier && (
-                          <div className="flex items-center gap-4 mb-4">
+                          <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
                             <div className="relative flex-grow">
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                               <Input
                                 type="text"
                                 placeholder="Rechercher un métier..."
-                                className="pl-10 pr-8 h-10 bg-gray-50 border-[#D3D3D3] rounded-lg text-sm"
+                                className="pl-10 pr-8 h-10 bg-gray-50 border-[#D3D3D3] rounded-lg text-sm w-full"
                                 value={metiersSearchQuery}
                                 onChange={(e) =>
                                   setMetiersSearchQuery(e.target.value)
@@ -845,13 +847,14 @@ const ProRegisterPage = () => {
                             <Button
                               type="button"
                               variant="link"
-                              className="text-[#556B2F] hover:text-[#6B8E23] text-sm shrink-0 whitespace-nowrap"
+                              className="text-[#556B2F] hover:text-[#6B8E23] text-sm shrink-0 whitespace-nowrap justify-start lg:justify-center"
                               onClick={() => setCustomMetierModalOpen(true)}
                             >
                               Votre métier n'est pas là ?
                             </Button>
                           </div>
                           )}
+                          
                           {/* Liste des métiers */}
                           <div className="space-y-2">
                             {metiersLoading ? (
@@ -860,10 +863,10 @@ const ProRegisterPage = () => {
                                 Chargement des métiers...
                               </div>
                             ) : hasCustomMetier ? (
-                              <div className="p-4 bg-[#556B2F]/10 border border-[#556B2F]/20 rounded-xl flex justify-between items-center animate-in fade-in slide-in-from-top-2">
-                                <div>
-                                  <p className="font-medium text-[#556B2F]">Métier personnalisé défini</p>
-                                  <p className="text-sm text-gray-600">{formData.descriptionMetierUser}</p>
+                              <div className="p-4 bg-[#556B2F]/10 border border-[#556B2F]/20 rounded-xl flex justify-between items-center">
+                                <div className="flex-1">
+                                  <p className="font-medium text-[#556B2F] text-sm lg:text-base">Métier personnalisé défini</p>
+                                  <p className="text-xs lg:text-sm text-gray-600 truncate">{formData.descriptionMetierUser}</p>
                                 </div>
                                 <Button
                                   variant="ghost"
@@ -872,39 +875,36 @@ const ProRegisterPage = () => {
                                     setHasCustomMetier(false);
                                     setFormData((prev) => ({ ...prev, metiers: [], descriptionMetierUser: "" }));
                                   }}
-                                  className="text-gray-500 hover:text-red-500 hover:bg-red-50"
+                                  className="text-gray-500 hover:text-red-500 hover:bg-red-50 ml-2"
                                 >
                                   <X className="h-4 w-4" />
                                 </Button>
                               </div>
                             ) : getSearchFilteredMetiers().length > 0 ? (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-2">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:gap-3 max-h-64 overflow-y-auto pr-2">
                                 {getSearchFilteredMetiers().map((metier) => (
                                   <div
                                     key={metier.id}
                                     onClick={() =>
                                       handleMetierToggle(metier.id)
                                     }
-                                    className={`group relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${formData.metiers.includes(metier.id)
+                                    className={`group relative flex items-center gap-3 p-3 lg:p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${formData.metiers.includes(metier.id)
                                       ? "border-[#556B2F] bg-gradient-to-r from-[#556B2F]/10 to-[#556B2F]/20 shadow-md"
                                       : "border-[#D3D3D3] bg-[#FFFFFF] hover:border-[#556B2F]/50 hover:shadow-sm"
                                       }`}
                                   >
-                                    {/* Checkbox personnalisé */}
                                     <div
-                                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.metiers.includes(metier.id)
+                                      className={`flex-shrink-0 w-5 h-5 lg:w-6 lg:h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.metiers.includes(metier.id)
                                         ? "border-[#556B2F] bg-[#556B2F]"
                                         : "border-[#D3D3D3] group-hover:border-[#556B2F]/50"
                                         }`}
                                     >
                                       {formData.metiers.includes(metier.id) && (
-                                        <CheckCircle className="h-4 w-4 text-white fill-current" />
+                                        <CheckCircle className="h-3 w-3 lg:h-4 lg:w-4 text-white fill-current" />
                                       )}
                                     </div>
-
-                                    {/* Texte du métier */}
                                     <span
-                                      className={`text-sm font-medium transition-all ${formData.metiers.includes(metier.id)
+                                      className={`text-xs lg:text-sm font-medium transition-all ${formData.metiers.includes(metier.id)
                                         ? "text-[#556B2F]"
                                         : "text-gray-700 group-hover:text-gray-900"
                                         }`}
@@ -937,12 +937,9 @@ const ProRegisterPage = () => {
                     </>
                   ) : (
                     <>
-
-
                       {/* Adresse */}
-                      <div className="space-y-2">
-                        <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
-
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Adresse *
@@ -951,7 +948,7 @@ const ProRegisterPage = () => {
                               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                               <Input
                                 placeholder="Votre adresse complète"
-                                className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                                 value={formData.address}
                                 onChange={(e) =>
                                   handleInputChange("address", e.target.value)
@@ -966,7 +963,7 @@ const ProRegisterPage = () => {
                             </label>
                             <Input
                               placeholder="Appartement, étage, etc."
-                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                               value={formData.addressComplement}
                               onChange={(e) =>
                                 handleInputChange(
@@ -977,14 +974,14 @@ const ProRegisterPage = () => {
                             />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Code postal *
                             </label>
                             <Input
                               placeholder="75001"
-                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                               value={formData.zipCode}
                               onChange={(e) =>
                                 handleInputChange("zipCode", e.target.value)
@@ -998,7 +995,7 @@ const ProRegisterPage = () => {
                             </label>
                             <Input
                               placeholder="Réunion"
-                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                               value={formData.city}
                               onChange={(e) =>
                                 handleInputChange("city", e.target.value)
@@ -1007,56 +1004,56 @@ const ProRegisterPage = () => {
                             />
                           </div>
                         </div>
-                        {/* Coordonnées GPS (optionnelles) */}
-                        <div className="grid gap-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">
-                              Position géographique *
-                            </label>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setLocationModalOpen(true)}
-                              className="w-full justify-start h-11 border-[#D3D3D3]"
-                            >
-                              <MapPin className="h-4 w-4 mr-2" />
-                              {formData.latitude && formData.longitude
-                                ? `Position définie: ${parseFloat(
-                                  formData.latitude
-                                ).toFixed(4)}, ${parseFloat(
-                                  formData.longitude
-                                ).toFixed(4)}`
-                                : "Cliquez pour sélectionner sur la carte"}
-                            </Button>
-                            <p className="text-xs text-gray-500">
-                              Sélectionnez votre position précise sur la carte
-                              pour être localisé par les clients
-                            </p>
-                          </div>
-                          {/* Modal de sélection de position */}
-                          <LocationPickerModal
-                            open={locationModalOpen}
-                            onOpenChange={setLocationModalOpen}
-                            latitude={
-                              formData.latitude
-                                ? parseFloat(formData.latitude)
-                                : null
-                            }
-                            longitude={
-                              formData.longitude
-                                ? parseFloat(formData.longitude)
-                                : null
-                            }
-                            onLocationChange={(lat, lng) => {
-                              handleInputChange("latitude", lat.toString());
-                              handleInputChange("longitude", lng.toString());
-                            }}
-                          />
+                        
+                        {/* Coordonnées GPS */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700">
+                            Position géographique *
+                          </label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setLocationModalOpen(true)}
+                            className="w-full justify-start h-11 border-[#D3D3D3] text-sm lg:text-base"
+                          >
+                            <MapPin className="h-4 w-4 mr-2" />
+                            {formData.latitude && formData.longitude
+                              ? `Position définie: ${parseFloat(
+                                formData.latitude
+                              ).toFixed(4)}, ${parseFloat(
+                                formData.longitude
+                              ).toFixed(4)}`
+                              : "Cliquez pour sélectionner sur la carte"}
+                          </Button>
+                          <p className="text-xs text-gray-500">
+                            Sélectionnez votre position précise sur la carte
+                            pour être localisé par les clients
+                          </p>
                         </div>
                       </div>
+                      
+                      <LocationPickerModal
+                        open={locationModalOpen}
+                        onOpenChange={setLocationModalOpen}
+                        latitude={
+                          formData.latitude
+                            ? parseFloat(formData.latitude)
+                            : null
+                        }
+                        longitude={
+                          formData.longitude
+                            ? parseFloat(formData.longitude)
+                            : null
+                        }
+                        onLocationChange={(lat, lng) => {
+                          handleInputChange("latitude", lat.toString());
+                          handleInputChange("longitude", lng.toString());
+                        }}
+                      />
+                      
                       {/* Mot de passe */}
                       <div className="space-y-4">
-                        <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Mot de passe *
@@ -1066,7 +1063,7 @@ const ProRegisterPage = () => {
                               <Input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Créez un mot de passe sécurisé"
-                                className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                                 value={formData.password}
                                 onChange={(e) =>
                                   handleInputChange("password", e.target.value)
@@ -1091,30 +1088,32 @@ const ProRegisterPage = () => {
                               <p className="text-xs font-medium text-gray-700">
                                 Critères du mot de passe :
                               </p>
-                              <PasswordRequirement
-                                met={passwordValidation.minLength}
-                                text="Au moins 8 caractères"
-                              />
-                              <PasswordRequirement
-                                met={passwordValidation.maxLength}
-                                text="Maximum 12 caractères"
-                              />
-                              <PasswordRequirement
-                                met={passwordValidation.hasUpperCase}
-                                text="Au moins une majuscule (A-Z)"
-                              />
-                              <PasswordRequirement
-                                met={passwordValidation.hasLowerCase}
-                                text="Au moins une minuscule (a-z)"
-                              />
-                              <PasswordRequirement
-                                met={passwordValidation.hasNumber}
-                                text="Au moins un chiffre (0-9)"
-                              />
-                              <PasswordRequirement
-                                met={passwordValidation.hasSpecialChar}
-                                text="Au moins un caractère spécial (!@#$%^&*...)"
-                              />
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <PasswordRequirement
+                                  met={passwordValidation.minLength}
+                                  text="Au moins 8 caractères"
+                                />
+                                <PasswordRequirement
+                                  met={passwordValidation.maxLength}
+                                  text="Maximum 12 caractères"
+                                />
+                                <PasswordRequirement
+                                  met={passwordValidation.hasUpperCase}
+                                  text="Au moins une majuscule"
+                                />
+                                <PasswordRequirement
+                                  met={passwordValidation.hasLowerCase}
+                                  text="Au moins une minuscule"
+                                />
+                                <PasswordRequirement
+                                  met={passwordValidation.hasNumber}
+                                  text="Au moins un chiffre"
+                                />
+                                <PasswordRequirement
+                                  met={passwordValidation.hasSpecialChar}
+                                  text="Au moins un caractère spécial"
+                                />
+                              </div>
                             </div>
                           </div>
                           <div className="space-y-2">
@@ -1126,7 +1125,7 @@ const ProRegisterPage = () => {
                               <Input
                                 type={showConfirmPassword ? "text" : "password"}
                                 placeholder="Confirmez votre mot de passe"
-                                className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] text-sm lg:text-base"
                                 value={formData.confirmPassword}
                                 onChange={(e) =>
                                   handleInputChange(
@@ -1155,10 +1154,10 @@ const ProRegisterPage = () => {
                           </div>
                         </div>
                       </div>
+                      
                       {/* Conditions et importation de données */}
                       <div className="space-y-3">
-                        {/* Conditions d'utilisation */}
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-start space-x-2">
                           <Checkbox
                             id="acceptTerms"
                             checked={formData.acceptTerms}
@@ -1172,7 +1171,7 @@ const ProRegisterPage = () => {
                           />
                           <label
                             htmlFor="acceptTerms"
-                            className="text-xs text-gray-600 cursor-pointer leading-snug"
+                            className="text-xs text-gray-600 cursor-pointer leading-snug flex-1"
                           >
                             J'accepte les{" "}
                             <a
@@ -1191,7 +1190,6 @@ const ProRegisterPage = () => {
                             .
                           </label>
                         </div>
-                        {/* Importation de données */}
                         <div className="flex items-start space-x-2">
                           <Checkbox
                             id="dataImported"
@@ -1205,7 +1203,7 @@ const ProRegisterPage = () => {
                           />
                           <label
                             htmlFor="dataImported"
-                            className="text-xs text-gray-600 cursor-pointer leading-snug"
+                            className="text-xs text-gray-600 cursor-pointer leading-snug flex-1"
                           >
                             Les personnes qui utilisent notre service ont pu
                             importer vos coordonnées sur OLIPLUS.{" "}
@@ -1223,14 +1221,15 @@ const ProRegisterPage = () => {
                       </div>
                     </>
                   )}
-                  {/* Boutons de navigation - sticky en bas */}
-                  <div className="sticky bottom-0 z-10 bg-[#FFFFFF] border-t border-gray-300 px-6 pb-0 pt-5 space-y-3">
-                    <div className="flex gap-4">
+                  
+                  {/* Boutons de navigation */}
+                  <div className="sticky bottom-0 z-10 bg-[#FFFFFF] border-t border-gray-300 px-4 lg:px-6 py-4 lg:py-5 space-y-3">
+                    <div className="flex gap-3 lg:gap-4">
                       {step === 2 && (
                         <Button
                           type="button"
                           variant="outline"
-                          className="flex-1 h-11 border-[#D3D3D3]"
+                          className="flex-1 h-11 border-[#D3D3D3] text-sm lg:text-base"
                           onClick={() => setStep(1)}
                         >
                           Retour
@@ -1239,7 +1238,7 @@ const ProRegisterPage = () => {
                       <Button
                         type="submit"
                         className={`${step === 2 ? "flex-1" : "w-full"
-                          } h-11 bg-gradient-to-r from-[#6B8E23] to-[#556B2F] hover:from-[#6B8E23]/90 hover:to-[#556B2F]/90 text-white font-semibold`}
+                          } h-11 bg-gradient-to-r from-[#6B8E23] to-[#556B2F] hover:from-[#6B8E23]/90 hover:to-[#556B2F]/90 text-white font-semibold text-sm lg:text-base`}
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -1256,11 +1255,11 @@ const ProRegisterPage = () => {
                         )}
                       </Button>
                     </div>
-                    <div className="text-center text-sm text-gray-600">
+                    <div className="text-center text-xs lg:text-sm text-gray-600">
                       Déjà un compte ?{" "}
                       <a
                         href="/login"
-                        className="text-[#556B2F] ml-2 hover:text-[#556B2F]/90 font-medium"
+                        className="text-[#556B2F] ml-1 lg:ml-2 hover:text-[#556B2F]/90 font-medium"
                       >
                         Se connecter
                       </a>
@@ -1278,7 +1277,7 @@ const ProRegisterPage = () => {
         open={customMetierModalOpen}
         onOpenChange={setCustomMetierModalOpen}
       >
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] max-w-[95vw] mx-4">
           <DialogHeader>
             <DialogTitle>Décrivez votre métier</DialogTitle>
             <DialogDescription>
@@ -1296,12 +1295,24 @@ const ProRegisterPage = () => {
                 value={customMetierDescription}
                 onChange={(e) => setCustomMetierDescription(e.target.value)}
                 placeholder="Ex: Je suis spécialisé dans la restauration de meubles anciens..."
-                className="col-span-3"
+                className="col-span-3 min-h-[100px]"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={handleCustomMetierSubmit} className="bg-[#556B2F] hover:bg-[#6B8E23] text-white">Enregistrer</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setCustomMetierModalOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleCustomMetierSubmit} 
+              className="bg-[#556B2F] hover:bg-[#6B8E23] text-white w-full sm:w-auto"
+            >
+              Enregistrer
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
