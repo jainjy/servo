@@ -704,3 +704,60 @@ body:has(.radix-dialog[data-state="open"]) {
 
 .bg-red-100 { background-color: #fee2e2; }
 .text-red-800 { color: #991b1b; }
+
+/* Ajoutez dans votre fichier CSS existant */
+.activity-status-badge {
+  @apply px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.activity-status-active {
+  @apply bg-green-100 text-green-800;
+}
+
+.activity-status-draft {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.activity-status-inactive {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.activity-status-archived {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Animation pour les cartes */
+.activity-card-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.activity-card-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Scrollbar personnalisée pour les modals */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}

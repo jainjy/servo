@@ -57,6 +57,7 @@ import ActivityCard from "./ActivityCard";
 import ActivityDetailModal from "./ActivityDetailModal";
 import AdminInterface from "./AdminInterface";
 import NaturePatrimoineCard from "./NaturePatrimoineCard"; // Nouveau
+import ActivityCardAdmin from "./ActivityCardAdmin";
 
 // Constantes de couleur basées sur votre palette
 const COLORS = {
@@ -217,7 +218,9 @@ export default function TourismPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [naturePatrimoine, setNaturePatrimoine] = useState<NaturePatrimoine[]>([]);
+  const [naturePatrimoine, setNaturePatrimoine] = useState<NaturePatrimoine[]>(
+    [],
+  );
   const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [flightsLoading, setFlightsLoading] = useState(false);
@@ -242,12 +245,17 @@ export default function TourismPage() {
     amenities: [],
     instantBook: false,
   });
-  const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
+  const [currentImageIndex, setCurrentImageIndex] = useState<
+    Record<string, number>
+  >({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
-  const [selectedNaturePatrimoine, setSelectedNaturePatrimoine] = useState<NaturePatrimoine | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null,
+  );
+  const [selectedNaturePatrimoine, setSelectedNaturePatrimoine] =
+    useState<NaturePatrimoine | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -255,7 +263,8 @@ export default function TourismPage() {
   const [showNatureDetailModal, setShowNatureDetailModal] = useState(false);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
-  const [editingNaturePatrimoine, setEditingNaturePatrimoine] = useState<NaturePatrimoine | null>(null);
+  const [editingNaturePatrimoine, setEditingNaturePatrimoine] =
+    useState<NaturePatrimoine | null>(null);
   const [bookingForm, setBookingForm] = useState({
     listingId: "",
     checkIn: "",
@@ -273,7 +282,8 @@ export default function TourismPage() {
   const [showContentTypeDropdown, setShowContentTypeDropdown] = useState(false);
   const [showFlightModal, setShowFlightModal] = useState(false);
   const [showActivitiesModal, setShowActivitiesModal] = useState(false);
-  const [showNaturePatrimoineModal, setShowNaturePatrimoineModal] = useState(false);
+  const [showNaturePatrimoineModal, setShowNaturePatrimoineModal] =
+    useState(false);
   const [showAirlineModal, setShowAirlineModal] = useState(false);
 
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -320,7 +330,7 @@ export default function TourismPage() {
     try {
       setLoading(true);
       const response = await tourismeAPI.getAccommodations();
-      
+
       if (response.data.success) {
         const listingsData = response.data.data;
         setListings(listingsData);
@@ -381,142 +391,159 @@ export default function TourismPage() {
     }
   };
 
+  // Fonction pour charger les activités
   const loadActivities = async () => {
+    setActivitiesLoading(true);
     try {
-      setActivitiesLoading(true);
-      const response = await api.get('/ActivityCategory');
-
+      const response = await api.get("/activities/my/activities"); // Ou votre endpoint
       if (response.data.success) {
         setActivities(response.data.data);
       }
     } catch (error) {
-      console.error("Erreur lors du chargement des activités:", error);
-      if (error.response) {
-        console.error("Détails de l'erreur:", {
-          status: error.response.status,
-          data: error.response.data,
-          headers: error.response.headers
-        });
-      }
-      toast.error("Erreur lors du chargement des activités");
+      console.error("Erreur chargement activités:", error);
     } finally {
       setActivitiesLoading(false);
     }
   };
 
-// Dans TourismPage.jsx, remplacez la fonction loadNaturePatrimoine par :
- 
-const loadNaturePatrimoine = async () => {
-  try {
-    setNaturePatrimoineLoading(true);
-    
- 
-    const response = await tourismeAPI.getNaturePatrimoine();
-    
-  
-    // Vérifier la structure de la réponse
-    if (!response.data) {
-      console.error("Aucune donnée dans la réponse");
-      toast.error("Aucune donnée reçue du serveur");
-      setNaturePatrimoine([]);
-      return;
-    }
-    
-    if (response.data.success) {
-      const data = response.data.data;
-    
-      // Vérifier si c'est un tableau
-      if (Array.isArray(data)) {
-        // Transformer les données
-        const patrimoineData = data.map(item => ({
-          id: item.id || item._id || Date.now().toString(),
-          title: item.title || item.name || item.nom || "Sans titre",
-          type: item.type || "nature",
-          category: item.category || "site_naturel",
-          location: item.location || item.city || item.ville || item.adresse || "Localisation inconnue",
-          description: item.description || item.desc || "Aucune description",
-          images: item.images || (item.image ? [item.image] : []),
-          altitude: item.altitude,
-          year: item.year,
-          rating: item.rating || 0,
-          reviewCount: item.reviewCount || 0,
-          featured: item.featured || false,
-          available: item.available !== false,
-          userId: item.userId,
-          user: item.user,
-          // Ajouter d'autres champs si nécessaire
-          ...item
-        }));
-     
-        setNaturePatrimoine(patrimoineData);
-      } else {
-        // Si ce n'est pas un tableau, créer un tableau avec l'objet unique
-      
-        const item = data;
-        const patrimoineData = [{
-          id: item.id || item._id || Date.now().toString(),
-          title: item.title || item.name || item.nom || "Sans titre",
-          type: item.type || "nature",
-          category: item.category || "site_naturel",
-          location: item.location || item.city || item.ville || item.adresse || "Localisation inconnue",
-          description: item.description || item.desc || "Aucune description",
-          images: item.images || (item.image ? [item.image] : []),
-          altitude: item.altitude,
-          year: item.year,
-          rating: item.rating || 0,
-          reviewCount: item.reviewCount || 0,
-          featured: item.featured || false,
-          available: item.available !== false,
-          userId: item.userId,
-          user: item.user,
-          ...item
-        }];
-        
-        setNaturePatrimoine(patrimoineData);
+  // Dans TourismPage.jsx, remplacez la fonction loadNaturePatrimoine par :
+
+  const loadNaturePatrimoine = async () => {
+    try {
+      setNaturePatrimoineLoading(true);
+
+      const response = await tourismeAPI.getNaturePatrimoine();
+
+      // Vérifier la structure de la réponse
+      if (!response.data) {
+        console.error("Aucune donnée dans la réponse");
+        toast.error("Aucune donnée reçue du serveur");
+        setNaturePatrimoine([]);
+        return;
       }
-    } else {
-      console.error("API a retourné success: false", response.data);
-      toast.error(response.data.message || "Erreur lors du chargement des données");
-      setNaturePatrimoine([]);
-    }
-  } catch (error) {
-    console.error("Erreur complète lors du chargement des sites naturels:", error);
-    
-    // Afficher plus de détails
-    if (error.response) {
-      console.error("Status de l'erreur:", error.response.status);
-      console.error("Données de l'erreur:", error.response.data);
-      console.error("URL de la requête:", error.response.config?.url);
-      
-      if (error.response.status === 404) {
-        toast.error("Route API non trouvée. Vérifiez l'URL.");
-      } else if (error.response.status === 401) {
-        toast.error("Session expirée. Veuillez vous reconnecter.");
-      } else if (error.response.status === 403) {
-        toast.error("Accès refusé. Vous n'avez pas les permissions nécessaires.");
+
+      if (response.data.success) {
+        const data = response.data.data;
+
+        // Vérifier si c'est un tableau
+        if (Array.isArray(data)) {
+          // Transformer les données
+          const patrimoineData = data.map((item) => ({
+            id: item.id || item._id || Date.now().toString(),
+            title: item.title || item.name || item.nom || "Sans titre",
+            type: item.type || "nature",
+            category: item.category || "site_naturel",
+            location:
+              item.location ||
+              item.city ||
+              item.ville ||
+              item.adresse ||
+              "Localisation inconnue",
+            description: item.description || item.desc || "Aucune description",
+            images: item.images || (item.image ? [item.image] : []),
+            altitude: item.altitude,
+            year: item.year,
+            rating: item.rating || 0,
+            reviewCount: item.reviewCount || 0,
+            featured: item.featured || false,
+            available: item.available !== false,
+            userId: item.userId,
+            user: item.user,
+            // Ajouter d'autres champs si nécessaire
+            ...item,
+          }));
+
+          setNaturePatrimoine(patrimoineData);
+        } else {
+          // Si ce n'est pas un tableau, créer un tableau avec l'objet unique
+
+          const item = data;
+          const patrimoineData = [
+            {
+              id: item.id || item._id || Date.now().toString(),
+              title: item.title || item.name || item.nom || "Sans titre",
+              type: item.type || "nature",
+              category: item.category || "site_naturel",
+              location:
+                item.location ||
+                item.city ||
+                item.ville ||
+                item.adresse ||
+                "Localisation inconnue",
+              description:
+                item.description || item.desc || "Aucune description",
+              images: item.images || (item.image ? [item.image] : []),
+              altitude: item.altitude,
+              year: item.year,
+              rating: item.rating || 0,
+              reviewCount: item.reviewCount || 0,
+              featured: item.featured || false,
+              available: item.available !== false,
+              userId: item.userId,
+              user: item.user,
+              ...item,
+            },
+          ];
+
+          setNaturePatrimoine(patrimoineData);
+        }
       } else {
-        toast.error(`Erreur serveur (${error.response.status}): ${error.response.data?.message || 'Erreur inconnue'}`);
+        console.error("API a retourné success: false", response.data);
+        toast.error(
+          response.data.message || "Erreur lors du chargement des données",
+        );
+        setNaturePatrimoine([]);
       }
-    } else if (error.request) {
-      console.error("Pas de réponse du serveur:", error.request);
-      toast.error("Serveur inaccessible. Vérifiez votre connexion internet.");
-    } else {
-      console.error("Erreur de configuration:", error.message);
-      toast.error(`Erreur: ${error.message}`);
+    } catch (error) {
+      console.error(
+        "Erreur complète lors du chargement des sites naturels:",
+        error,
+      );
+
+      // Afficher plus de détails
+      if (error.response) {
+        console.error("Status de l'erreur:", error.response.status);
+        console.error("Données de l'erreur:", error.response.data);
+        console.error("URL de la requête:", error.response.config?.url);
+
+        if (error.response.status === 404) {
+          toast.error("Route API non trouvée. Vérifiez l'URL.");
+        } else if (error.response.status === 401) {
+          toast.error("Session expirée. Veuillez vous reconnecter.");
+        } else if (error.response.status === 403) {
+          toast.error(
+            "Accès refusé. Vous n'avez pas les permissions nécessaires.",
+          );
+        } else {
+          toast.error(
+            `Erreur serveur (${error.response.status}): ${error.response.data?.message || "Erreur inconnue"}`,
+          );
+        }
+      } else if (error.request) {
+        console.error("Pas de réponse du serveur:", error.request);
+        toast.error("Serveur inaccessible. Vérifiez votre connexion internet.");
+      } else {
+        console.error("Erreur de configuration:", error.message);
+        toast.error(`Erreur: ${error.message}`);
+      }
+
+      // Initialiser avec un tableau vide pour éviter les erreurs
+      setNaturePatrimoine([]);
+    } finally {
+      setNaturePatrimoineLoading(false);
     }
-    
-    // Initialiser avec un tableau vide pour éviter les erreurs
-    setNaturePatrimoine([]);
-  } finally {
-    setNaturePatrimoineLoading(false);
-  }
-};
+  };
 
   const loadStats = async () => {
     try {
       setStatsLoading(true);
       const response = await tourismeAPI.getStats({
-        contentType: contentType === "flights" || contentType === "activities" || contentType === "nature_patrimoine" ? null : contentType,
+        contentType:
+          contentType === "flights" ||
+          contentType === "activities" ||
+          contentType === "nature_patrimoine"
+            ? null
+            : contentType,
       });
 
       if (response.data.success) {
@@ -531,7 +558,12 @@ const loadNaturePatrimoine = async () => {
 
   // Filtrer les résultats (pour hébergements et lieux touristiques)
   useEffect(() => {
-    if (contentType === "flights" || contentType === "activities" || contentType === "nature_patrimoine") return;
+    if (
+      contentType === "flights" ||
+      contentType === "activities" ||
+      contentType === "nature_patrimoine"
+    )
+      return;
 
     let results = listings;
 
@@ -543,19 +575,19 @@ const loadNaturePatrimoine = async () => {
             .includes(filters.destination.toLowerCase()) ||
           listing.title
             .toLowerCase()
-            .includes(filters.destination.toLowerCase())
+            .includes(filters.destination.toLowerCase()),
       );
     }
 
     if (contentType === "accommodations" && filters.type.length > 0) {
       results = results.filter((listing) =>
-        filters.type.includes(listing.type)
+        filters.type.includes(listing.type),
       );
     }
 
     if (contentType === "touristic_places" && filters.category.length > 0) {
       results = results.filter((listing) =>
-        filters.category.includes(listing.category)
+        filters.category.includes(listing.category),
       );
     }
 
@@ -566,8 +598,8 @@ const loadNaturePatrimoine = async () => {
     if (filters.amenities.length > 0) {
       results = results.filter((listing) =>
         filters.amenities.every((amenity) =>
-          listing.amenities.includes(amenity)
-        )
+          listing.amenities.includes(amenity),
+        ),
       );
     }
 
@@ -577,17 +609,21 @@ const loadNaturePatrimoine = async () => {
 
     results = results.filter(
       (listing) =>
-        listing.price >= filters.minPrice && listing.price <= filters.maxPrice
+        listing.price >= filters.minPrice && listing.price <= filters.maxPrice,
     );
 
     setFilteredListings(results);
   }, [filters, listings, contentType]);
 
   // Fonction pour obtenir l'icône du type
-  const getTypeIcon = (type: string, isTouristicPlace: boolean, category?: string) => {
+  const getTypeIcon = (
+    type: string,
+    isTouristicPlace: boolean,
+    category?: string,
+  ) => {
     if (isTouristicPlace) {
       const categoryObj = touristicCategories.find(
-        (cat) => cat.id === category
+        (cat) => cat.id === category,
       );
       return categoryObj?.icon || Landmark;
     }
@@ -614,12 +650,12 @@ const loadNaturePatrimoine = async () => {
 
     try {
       const response = await api.delete(`/ActivityCategory/${id}`);
-      
+
       if (response.data.success) {
         toast.success("Activité supprimée avec succès");
-        
-        setActivities(prev => prev.filter(activity => activity.id !== id));
-        
+
+        setActivities((prev) => prev.filter((activity) => activity.id !== id));
+
         if (selectedActivity?.id === id) {
           setSelectedActivity(null);
           setShowActivityDetailModal(false);
@@ -627,7 +663,9 @@ const loadNaturePatrimoine = async () => {
       }
     } catch (error: any) {
       console.error("❌ Erreur suppression activité:", error);
-      toast.error(error.response?.data?.error || "Erreur lors de la suppression");
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la suppression",
+      );
     }
   };
 
@@ -651,11 +689,11 @@ const loadNaturePatrimoine = async () => {
 
     try {
       const response = await tourismeAPI.deleteNaturePatrimoine(id);
-      
+
       if (response.data.success) {
         toast.success("Site supprimé avec succès");
-        setNaturePatrimoine(prev => prev.filter(item => item.id !== id));
-        
+        setNaturePatrimoine((prev) => prev.filter((item) => item.id !== id));
+
         if (selectedNaturePatrimoine?.id === id) {
           setSelectedNaturePatrimoine(null);
           setShowNatureDetailModal(false);
@@ -663,7 +701,9 @@ const loadNaturePatrimoine = async () => {
       }
     } catch (error: any) {
       console.error("❌ Erreur suppression site:", error);
-      toast.error(error.response?.data?.error || "Erreur lors de la suppression");
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la suppression",
+      );
     }
   };
 
@@ -689,7 +729,7 @@ const loadNaturePatrimoine = async () => {
       toast.success(
         contentType === "touristic_places"
           ? "Lieu touristique supprimé avec succès"
-          : "Hébergement supprimé avec succès"
+          : "Hébergement supprimé avec succès",
       );
 
       setListings((prev) => {
@@ -713,14 +753,14 @@ const loadNaturePatrimoine = async () => {
       if (response.data.success) {
         setListings((prev) =>
           prev.map((listing) =>
-            listing.id === id ? response.data.data : listing
-          )
+            listing.id === id ? response.data.data : listing,
+          ),
         );
 
         setFilteredListings((prev) =>
           prev.map((listing) =>
-            listing.id === id ? response.data.data : listing
-          )
+            listing.id === id ? response.data.data : listing,
+          ),
         );
 
         toast.success(response.data.message);
@@ -730,7 +770,7 @@ const loadNaturePatrimoine = async () => {
       console.error("❌ Erreur bascule disponibilité:", error);
       toast.error(
         error.response?.data?.error ||
-        "Erreur lors du changement de disponibilité"
+          "Erreur lors du changement de disponibilité",
       );
     }
   };
@@ -742,14 +782,14 @@ const loadNaturePatrimoine = async () => {
       if (response.data.success) {
         setListings((prev) =>
           prev.map((listing) =>
-            listing.id === id ? response.data.data : listing
-          )
+            listing.id === id ? response.data.data : listing,
+          ),
         );
 
         setFilteredListings((prev) =>
           prev.map((listing) =>
-            listing.id === id ? response.data.data : listing
-          )
+            listing.id === id ? response.data.data : listing,
+          ),
         );
 
         toast.success(response.data.message);
@@ -759,7 +799,7 @@ const loadNaturePatrimoine = async () => {
       console.error("❌ Erreur bascule vedette:", error);
       toast.error(
         error.response?.data?.error ||
-        "Erreur lors du changement de statut vedette"
+          "Erreur lors du changement de statut vedette",
       );
     }
   };
@@ -848,29 +888,27 @@ const loadNaturePatrimoine = async () => {
 
   const renderFlightCards = () => {
     return flights.map((flight) => (
-      <FlightCard
-        key={flight.id}
-        flight={flight}
-        user={user}
-      />
+      <FlightCard key={flight.id} flight={flight} user={user} />
     ));
   };
 
   const renderActivityCards = () => {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {activities.map((activity) => (
-          <ActivityCard
-            key={activity.id}
-            activity={activity}
-            user={user}
-            onViewDetails={handleViewActivityDetails}
-            onEdit={handleEditActivity}
-            onDelete={handleDeleteActivity}
-          />
-        ))}
-      </div>
-    );
+    return activities.map((activity) => (
+      <ActivityCardAdmin
+        key={activity.id}
+        activity={activity}
+        user={user}
+        onViewDetails={(act) => {
+          setSelectedActivity(act);
+          setShowDetailModal(true);
+        }}
+        onEdit={(act) => {
+          setEditingActivity(act);
+          setShowAddModal(true);
+        }}
+        onDelete={handleDeleteActivity}
+      />
+    ));
   };
 
   const renderNaturePatrimoineCards = () => {
@@ -980,7 +1018,11 @@ const loadNaturePatrimoine = async () => {
           onClose={() => setShowActivitiesModal(false)}
           editingActivity={editingActivity}
           onSubmit={(activitesData) => {
-            toast.success(editingActivity ? "Activité modifiée avec succès" : "Activité ajoutée avec succès");
+            toast.success(
+              editingActivity
+                ? "Activité modifiée avec succès"
+                : "Activité ajoutée avec succès",
+            );
             setShowActivitiesModal(false);
             setEditingActivity(null);
             loadActivities();
@@ -994,7 +1036,11 @@ const loadNaturePatrimoine = async () => {
           onClose={() => setShowNaturePatrimoineModal(false)}
           editingItem={editingNaturePatrimoine}
           onSubmit={(data) => {
-            toast.success(editingNaturePatrimoine ? "Site modifié avec succès" : "Site ajouté avec succès");
+            toast.success(
+              editingNaturePatrimoine
+                ? "Site modifié avec succès"
+                : "Site ajouté avec succès",
+            );
             setShowNaturePatrimoineModal(false);
             setEditingNaturePatrimoine(null);
             loadNaturePatrimoine();
