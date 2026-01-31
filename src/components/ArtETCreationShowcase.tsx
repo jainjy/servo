@@ -162,8 +162,16 @@ const ArtETCreationShowcase = () => {
             </span>
 
             <div className="flex items-center bg-black/35 px-2.5 py-1 rounded-full text-white backdrop-blur-sm">
-              <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+              <svg
+                className="w-3.5 h-3.5 mr-1.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
@@ -197,20 +205,30 @@ const ArtETCreationShowcase = () => {
               </h2>
 
               <p className="text-sm text-black/80 leading-relaxed mb-3">
-                Accédez à des œuvres uniques et rencontrez des créateurs talentueux.
+                Accédez à des œuvres uniques et rencontrez des créateurs
+                talentueux.
               </p>
 
               <div className="flex items-center justify-between pt-3 border-t border-white/15">
                 <div className="flex items-center text-xs text-black/65">
-                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  <svg
+                    className="w-3.5 h-3.5 mr-1.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span>Visible : <span className="font-medium text-black">2 minutes</span></span>
+                  <span>
+                    Visible :{" "}
+                    <span className="font-medium text-black">2 minutes</span>
+                  </span>
                 </div>
-
-
               </div>
             </div>
           </div>
@@ -218,7 +236,11 @@ const ArtETCreationShowcase = () => {
       )}
 
       {/* Publicité section Travevaux */}
-      <AdvertisementPopup position="section-accueil-art-creation" size="medium" showOnMobile={true}/>
+      <AdvertisementPopup
+        position="section-accueil-art-creation"
+        size="medium"
+        showOnMobile={true}
+      />
 
       <div className="max-w-7xl mx-auto text-center mb-4 flex lg:flex-row flex-col items-center justify-between">
         <h2 className="text-3xl font-serif lg:text-5xl font-medium text-gray-800 mb-3 tracking-tight">
@@ -237,7 +259,7 @@ const ArtETCreationShowcase = () => {
           </button>
           <Button
             className="px-4 py-2 flex items-center gap-2 text-sm rounded-lg bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
-            onClick={() => navigate('/art-et-creation')}
+            onClick={() => navigate("/art-et-creation")}
           >
             Toutes les catégories
             <ArrowRight size={16} />
@@ -261,12 +283,14 @@ const ArtETCreationShowcase = () => {
                   <div className="w-14 h-14 flex items-center justify-center">
                     {React.cloneElement(card.icon as React.ReactElement, {
                       size: 32,
-                      strokeWidth: 1.5
+                      strokeWidth: 1.5,
                     })}
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-2xl font-serif text-gray-900 leading-tight">{card.title}</h3>
+                  <h3 className="font-bold text-2xl font-serif text-gray-900 leading-tight">
+                    {card.title}
+                  </h3>
                 </div>
               </div>
 
@@ -279,13 +303,15 @@ const ArtETCreationShowcase = () => {
                     </p>
                   </div>
 
-                 
                   {/* Bouton d'exploration */}
-                  <div className="flex bg-white shadow-lg p-2 lg:p-4 rounded-full justify-center items-center gap-3 text-sm lg:text-base font-semibold text-[#556B2F] group">
+                  <div className="flex bg-[#556B2F]/10 shadow-lg p-2 lg:p-4 rounded-full justify-center items-center gap-3 text-sm lg:text-base font-semibold text-[#556B2F] group">
                     <span className="group-hover:translate-x-1 text-center transition-transform duration-300">
                       Explorer cette catégorie
                     </span>
-                    <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform duration-300" />
+                    <ArrowRight
+                      size={20}
+                      className="group-hover:translate-x-2 transition-transform duration-300"
+                    />
                   </div>
                 </div>
               </div>
@@ -302,7 +328,9 @@ const ArtETCreationShowcase = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Connexion requise</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Connexion requise
+              </h2>
               <button
                 onClick={() => setShowAuthModal(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -311,7 +339,8 @@ const ArtETCreationShowcase = () => {
               </button>
             </div>
             <p className="text-gray-600 mb-6">
-              Veuillez vous connecter pour explorer les catégories d'art et de création.
+              Veuillez vous connecter pour explorer les catégories d'art et de
+              création.
             </p>
             <div className="flex gap-3">
               <button
@@ -323,7 +352,7 @@ const ArtETCreationShowcase = () => {
               <Button
                 className="flex-1 px-4 py-2 text-sm rounded-lg bg-[#556B2F] text-white hover:bg-[#6B8E23] transition-all"
                 onClick={() => {
-                  navigate('/login');
+                  navigate("/login");
                   setShowAuthModal(false);
                 }}
               >
