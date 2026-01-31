@@ -14,15 +14,15 @@ import {
   MapPin,
   Calendar,
   Heart,
-  Share2,
+  Trophy,
+  Zap,
+  TreePine,
 } from "lucide-react";
 import { api } from "@/lib/axios";
 import TourismNavigation from "../TourismNavigation";
 import AdvertisementPopup from "../AdvertisementPopup";
-import Allpub from "../Allpub";
-import ParapentePage from "../pro/ParapentePage";
 import UserParapentePage from "@/pages/UserParapentePage";
-import ActivityBookingModal from "./ActivityBookingModal.tsx";
+import ActivityBookingModal from "./ActivityBookingModal";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -30,25 +30,40 @@ interface Activity {
   id: string;
   title: string;
   description: string;
+  shortDescription?: string;
   categoryId: string;
   category?: {
     id: string;
     name: string;
-    icon: string;
-    color: string;
+    description?: string;
+    icon?: string;
+    color?: string;
+    isActive: boolean;
   };
-  icon?: string;
-  image: string;
+  userId: string;
+  creator?: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+    professionalCategory?: string;
+    companyName?: string;
+  };
+  mainImage?: string;
+  images: string[];
   price?: number;
-  duration: string;
-  level: string;
-  maxParticipants: number;
+  priceType?: string;
+  duration?: number;
+  durationType?: string;
+  level?: string;
+  maxParticipants?: number;
   minParticipants: number;
   location?: string;
+  address?: string;
   latitude?: number;
   longitude?: number;
   meetingPoint?: string;
-  included: string[];
+  includedItems: string[];
   requirements: string[];
   highlights: string[];
   status: string;
@@ -56,38 +71,13 @@ interface Activity {
   rating: number;
   reviewCount: number;
   viewCount: number;
-  guideId: string;
-  guide?: {
-    id: string;
-    user?: {
-      firstName: string;
-      lastName: string;
-      avatar?: string;
-    };
+  bookingCount: number;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+  // REMOVED: availabilities relation
+  reviews?: Array<{
     rating: number;
-    experience: number;
-    languages: string[];
-  };
-  availability?: Array<{
-    id: string;
-    date: string;
-    startTime: string;
-    endTime: string;
-    slots: number;
-    bookedSlots: number;
-    price?: number;
-    status: string;
-  }>;
-  media?: Array<{
-    id: string;
-    url: string;
-    type: string;
-    caption?: string;
-  }>;
-  faqs?: Array<{
-    id: string;
-    question: string;
-    answer: string;
   }>;
   _count?: {
     favorites: number;
@@ -98,30 +88,18 @@ interface Activity {
 }
 
 interface ActivityCategory {
-  id: number;
+  id: string;
   name: string;
-  description: string;
-  icon: string;
-  color: string;
-  image: string;
-  stats?: {
-    participants: string;
-    duration: string;
-    level: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  image?: string;
+  isActive: boolean;
+  sortOrder: number;
+  _count?: {
+    activities: number;
   };
-  features?: string[];
-  highlight?: string;
 }
-
-// Couleurs du Thème
-const THEME_COLORS = {
-  logo: "#556B2F" /* logo / accent - Olive green */,
-  "primary-dark": "#6B8E23" /* Sruvol / fonds légers - Yellow-green */,
-  "light-bg": "#FFFFFF" /* fond de page / bloc texte - White */,
-  separator: "#D3D3D3" /* séparateurs / bordures, UI - Light gray */,
-  "secondary-text":
-    "#8B4513" /* touche premium / titres secondaires - Saddle brown */,
-};
 
 const iconMap: Record<string, JSX.Element> = {
   Mountain: <Mountain className="w-5 h-5" />,
@@ -129,6 +107,9 @@ const iconMap: Record<string, JSX.Element> = {
   Moon: <Moon className="w-5 h-5" />,
   Waves: <Waves className="w-5 h-5" />,
   Tent: <Tent className="w-5 h-5" />,
+  Trophy: <Trophy className="w-5 h-5" />,
+  Zap: <Zap className="w-5 h-5" />,
+  TreePine: <TreePine className="w-5 h-5" />,
 };
 
 const ActivitesLoisirsFAQ: React.FC = () => {
@@ -139,8 +120,12 @@ const ActivitesLoisirsFAQ: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [openFAQ, setOpenFAQ] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"activites" | "parapente">("activites");
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [activeTab, setActiveTab] = useState<"activites" | "parapente">(
+    "activites",
+  );
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null,
+  );
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -157,24 +142,48 @@ const ActivitesLoisirsFAQ: React.FC = () => {
     loadCategories();
   }, []);
 
+  const loadActivities = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("/activities");
+      console.log("📊 Activités chargées:", res.data.data);
+
+      // Charger les favoris de l'utilisateur connecté
+      let activitiesWithFavorites = res.data.data;
+      if (user) {
+        try {
+          const favoritesRes = await api.get(
+            "/activity-actions/favorites/my-favorites", // Changé d'URL
+          );
+          const favoriteActivityIds = favoritesRes.data.data.map(
+            (fav: Activity) => fav.id,
+          );
+
+          activitiesWithFavorites = activitiesWithFavorites.map(
+            (activity: Activity) => ({
+              ...activity,
+              isFavorite: favoriteActivityIds.includes(activity.id),
+            }),
+          );
+        } catch (favoriteError) {
+          console.error("Erreur chargement favoris:", favoriteError);
+        }
+      }
+
+      setActivities(activitiesWithFavorites);
+      setFilteredActivities(activitiesWithFavorites);
+    } catch (err) {
+      console.error("❌ Erreur chargement activités:", err);
+      toast.error("Erreur lors du chargement des activités");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Charger les activités
   useEffect(() => {
-    const loadActivities = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get("/activities");
-        console.log("📊 Activités chargées:", res.data.data);
-        setActivities(res.data.data);
-        setFilteredActivities(res.data.data);
-      } catch (err) {
-        console.error("❌ Erreur chargement activités:", err);
-        toast.error("Erreur lors du chargement des activités");
-      } finally {
-        setLoading(false);
-      }
-    };
     loadActivities();
-  }, []);
+  }, [user]);
 
   // Filtrer les activités
   useEffect(() => {
@@ -183,18 +192,20 @@ const ActivitesLoisirsFAQ: React.FC = () => {
     // Filtre par recherche
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      results = results.filter((activity) =>
-        activity.title.toLowerCase().includes(term) ||
-        activity.description.toLowerCase().includes(term) ||
-        activity.location?.toLowerCase().includes(term) ||
-        activity.category?.name.toLowerCase().includes(term)
+      results = results.filter(
+        (activity) =>
+          activity.title.toLowerCase().includes(term) ||
+          activity.description.toLowerCase().includes(term) ||
+          activity.location?.toLowerCase().includes(term) ||
+          activity.category?.name.toLowerCase().includes(term) ||
+          activity.shortDescription?.toLowerCase().includes(term),
       );
     }
 
     // Filtre par catégorie
     if (activeCategory !== "all") {
-      results = results.filter((activity) =>
-        activity.category?.name === activeCategory
+      results = results.filter(
+        (activity) => activity.category?.name === activeCategory,
       );
     }
 
@@ -227,22 +238,26 @@ const ActivitesLoisirsFAQ: React.FC = () => {
 
     try {
       // Toggle favorite
-      const isCurrentlyFavorite = activities.find(a => a.id === activityId)?.isFavorite;
-      
+      const isCurrentlyFavorite = activities.find(
+        (a) => a.id === activityId,
+      )?.isFavorite;
+
       if (isCurrentlyFavorite) {
-        await api.delete(`/activities/${activityId}/favorite`);
+        await api.delete(`/activity-actions/${activityId}/favorite`); // Changé d'URL
         toast.success("Retiré des favoris");
       } else {
-        await api.post(`/activities/${activityId}/favorite`);
+        await api.post(`/activity-actions/${activityId}/favorite`); // Changé d'URL
         toast.success("Ajouté aux favoris");
       }
 
       // Mettre à jour l'état local
-      setActivities(prev => prev.map(activity => 
-        activity.id === activityId 
-          ? { ...activity, isFavorite: !isCurrentlyFavorite }
-          : activity
-      ));
+      setActivities((prev) =>
+        prev.map((activity) =>
+          activity.id === activityId
+            ? { ...activity, isFavorite: !isCurrentlyFavorite }
+            : activity,
+        ),
+      );
     } catch (error) {
       console.error("Erreur favorite:", error);
       toast.error("Erreur lors de la mise à jour des favoris");
@@ -254,38 +269,39 @@ const ActivitesLoisirsFAQ: React.FC = () => {
     return `${price.toFixed(2)}€`;
   };
 
-  const getNextAvailableDate = (activity: Activity) => {
-    if (!activity.availability || activity.availability.length === 0) {
-      return "Pas de disponibilité";
+  const formatDuration = (duration?: number, durationType?: string) => {
+    if (!duration) return "Durée variable";
+
+    if (durationType === "minutes") {
+      if (duration < 60) return `${duration}min`;
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+      if (minutes === 0) return `${hours}h`;
+      return `${hours}h${minutes}`;
+    } else if (durationType === "hours") {
+      return `${duration}h`;
+    } else if (durationType === "days") {
+      return `${duration} jour${duration > 1 ? "s" : ""}`;
     }
-    
-    const nextDate = activity.availability
-      .filter(avail => avail.status === "available" && avail.slots > avail.bookedSlots)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
-    
-    if (!nextDate) return "Complet";
-    
-    const date = new Date(nextDate.date);
-    return date.toLocaleDateString("fr-FR", {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short'
-    });
+
+    return `${duration} min`;
   };
 
-  // Couleurs de dégradé par défaut (si cat.color n'est pas défini)
-  const defaultGradient = `from-[${THEME_COLORS["primary-dark"]}] to-[${THEME_COLORS.logo}]`;
-  // Couleur d'accent principale
-  const accentColor = THEME_COLORS.logo;
-  // Couleur d'accent secondaire (texte premium/titre)
-  const secondaryAccentColor = THEME_COLORS["secondary-text"];
-  // Couleur d'arrière-plan clair
-  const lightBg = THEME_COLORS["light-bg"];
-  // Couleur de bordure/séparateur
-  const separatorColor = THEME_COLORS.separator;
+  // Fonction pour vérifier la disponibilité
+  const checkAvailability = (activity: Activity) => {
+    // Dans le nouveau schéma, la disponibilité est gérée directement via les réservations
+    // Vous pouvez implémenter une logique basée sur le bookingCount vs maxParticipants
+    if (
+      activity.maxParticipants &&
+      activity.bookingCount >= activity.maxParticipants
+    ) {
+      return "Complet";
+    }
+    return "Disponible";
+  };
 
   return (
-    <div className={`min-h-screen bg-[${lightBg}] text-gray-900`}>
+    <div className="min-h-screen bg-white text-gray-900">
       {/* Hero */}
       <div className="relative overflow-hidden mb-8">
         <div
@@ -312,16 +328,12 @@ const ActivitesLoisirsFAQ: React.FC = () => {
 
       {/* SEARCH BAR */}
       <div className="max-w-3xl mx-auto px-4 -mt-10 mb-14 relative z-20">
-        <div
-          className={`relative bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl p-1 border-2 border-[${separatorColor}] transition-all hover:shadow-2xl`}
-        >
-          <Search
-            className={`absolute left-5 top-5 w-6 h-6 text-[${accentColor}]`}
-          />
+        <div className="relative bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl p-1 border-2 border-gray-300 transition-all hover:shadow-2xl">
+          <Search className="absolute left-5 top-5 w-6 h-6 text-green-600" />
           <input
             type="text"
             placeholder="Rechercher une activité, une randonnée, une aventure..."
-            className={`w-full pl-14 pr-4 py-4 text-lg rounded-2xl outline-none focus:ring-3 focus:ring-[${accentColor}]/50 transition bg-white/90`}
+            className="w-full pl-14 pr-4 py-4 text-lg rounded-2xl outline-none focus:ring-3 focus:ring-green-500/50 transition bg-white/90"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -340,8 +352,8 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           className={`px-6 py-3 rounded-lg font-semibold transition-all border-2
             ${
               activeTab === "activites"
-                ? `bg-gradient-to-r ${defaultGradient} text-white border-transparent`
-                : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+                ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent"
+                : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
             }`}
         >
           Activités & Loisirs
@@ -351,8 +363,8 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           className={`px-6 py-3 rounded-lg font-semibold transition-all border-2 flex items-center gap-2
             ${
               activeTab === "parapente"
-                ? `bg-gradient-to-r ${defaultGradient} text-white border-transparent`
-                : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+                ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent"
+                : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
             }`}
         >
           <Mountain className="w-5 h-5" />
@@ -370,8 +382,8 @@ const ActivitesLoisirsFAQ: React.FC = () => {
               className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all shadow-md border-2
                 ${
                   activeCategory === "all"
-                    ? `bg-gradient-to-r ${defaultGradient} text-white border-transparent shadow-lg`
-                    : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+                    ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
+                    : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
                 } hover:scale-105 hover:shadow-lg`}
             >
               <Compass className="w-5 h-5" />
@@ -388,11 +400,15 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                 className={`flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm transition-all shadow-md border-2
                   ${
                     activeCategory === cat.name
-                      ? `bg-gradient-to-r ${cat.color || defaultGradient} text-white border-transparent shadow-lg`
-                      : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+                      ? `bg-gradient-to-r ${cat.color ? `from-[${cat.color}] to-[${cat.color}]/80` : "from-green-600 to-emerald-600"} text-white border-transparent shadow-lg`
+                      : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
                   } hover:scale-105 hover:shadow-lg`}
               >
-                {iconMap[cat.icon] ?? <Star className="w-5 h-5" />}
+                {cat.icon && iconMap[cat.icon] ? (
+                  iconMap[cat.icon]
+                ) : (
+                  <Star className="w-5 h-5" />
+                )}
                 {cat.name}
                 <span className="px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
                   {getCategoryCount(cat.name)}
@@ -405,16 +421,14 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 pb-20">
             {loading ? (
               <div className="text-center py-20">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[${accentColor}]"></div>
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
                 <p className="mt-4 text-gray-600">
                   Chargement des activités...
                 </p>
               </div>
             ) : filteredActivities.length === 0 ? (
               <div className="text-center py-24">
-                <Search
-                  className={`mx-auto w-16 h-16 text-[${accentColor}] mb-4`}
-                />
+                <Search className="mx-auto w-16 h-16 text-green-600 mb-4" />
                 <p className="text-xl font-bold text-gray-700">
                   Aucune activité trouvée
                 </p>
@@ -425,33 +439,36 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                 {filteredActivities.map((activity) => (
                   <div
                     key={activity.id}
-                    className={`bg-white rounded-2xl shadow-lg border border-[${separatorColor}] overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl group`}
+                    className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl group"
                   >
                     {/* Image avec badges */}
                     <div className="relative overflow-hidden">
                       <img
-                        src={activity.image}
+                        src={
+                          activity.mainImage ||
+                          activity.images[0] ||
+                          "/placeholder-activity.jpg"
+                        }
                         className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
                         alt={activity.title}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                       {/* Badge catégorie */}
                       <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md text-white rounded-lg text-xs flex items-center gap-2 font-medium">
-                        {(activity.category?.icon &&
-                          iconMap[activity.category.icon]) ?? (
+                        {activity.category?.icon &&
+                        iconMap[activity.category.icon] ? (
+                          iconMap[activity.category.icon]
+                        ) : (
                           <Star className="w-3 h-3" />
                         )}
                         {activity.category?.name || "Activité"}
                       </div>
                       {/* Badge niveau */}
                       <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg text-xs font-semibold">
-                        {activity.level}
+                        {activity.level || "Tous niveaux"}
                       </div>
                       {/* Badge prix */}
-                      
-                      <div
-                        className={`absolute bottom-4 left-4 px-3 py-2 bg-gradient-to-r from-[${accentColor}]/90 to-[${THEME_COLORS["primary-dark"]}]/90 backdrop-blur-md text-white rounded-lg text-sm font-bold`}
-                      >
+                      <div className="absolute bottom-4 left-4 px-3 py-2 bg-gradient-to-r from-green-600/90 to-emerald-600/90 backdrop-blur-md text-white rounded-lg text-sm font-bold">
                         {formatPrice(activity.price)}
                         {activity.price && (
                           <span className="text-xs font-normal ml-1">
@@ -464,7 +481,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                     {/* Contenu de la carte */}
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-[${accentColor}] transition-colors">
+                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
                           {activity.title}
                         </h3>
                         <button
@@ -489,22 +506,25 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                       <div className="flex flex-wrap gap-4 text-sm text-gray-700 mb-4 bg-gray-50 p-3 rounded-lg">
                         <span className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
-                          {activity.duration}
+                          {formatDuration(
+                            activity.duration,
+                            activity.durationType,
+                          )}
                         </span>
                         <span className="flex items-center gap-1">
                           <Users className="w-4 h-4" />
-                          {activity.minParticipants}-{activity.maxParticipants}{" "}
-                          pers.
+                          {activity.minParticipants}-
+                          {activity.maxParticipants || 10} pers.
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          {getNextAvailableDate(activity)}
+                          {checkAvailability(activity)}
                         </span>
                       </div>
 
                       {/* Description */}
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {activity.description}
+                        {activity.shortDescription || activity.description}
                       </p>
 
                       {/* Highlights */}
@@ -522,9 +542,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                                     key={i}
                                     className="flex items-start gap-2"
                                   >
-                                    <Star
-                                      className={`w-4 h-4 text-[${accentColor}] mt-0.5 flex-shrink-0`}
-                                    />
+                                    <Star className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                                     <span className="text-xs text-gray-600">
                                       {highlight}
                                     </span>
@@ -534,26 +552,46 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                           </div>
                         )}
 
+                      {/* Note moyenne */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < Math.floor(activity.rating || 0)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">
+                          {activity.rating?.toFixed(1) || "Nouveau"}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          ({activity.reviewCount || 0} avis)
+                        </span>
+                      </div>
+
                       {/* Section détaillée (FAQ) */}
                       {openFAQ === activity.id && (
                         <div className="mb-4 transition-all duration-300 animate-fadeIn">
                           <div className="space-y-4">
                             {/* Inclus */}
-                            {activity.included &&
-                              activity.included.length > 0 && (
+                            {activity.includedItems &&
+                              activity.includedItems.length > 0 && (
                                 <div>
                                   <h4 className="text-sm font-semibold text-gray-800 mb-2">
                                     Inclus :
                                   </h4>
                                   <ul className="grid grid-cols-2 gap-2">
-                                    {activity.included.map((item, i) => (
+                                    {activity.includedItems.map((item, i) => (
                                       <li
                                         key={i}
                                         className="flex items-center gap-2"
                                       >
-                                        <div
-                                          className={`w-1.5 h-1.5 rounded-full bg-[${accentColor}]`}
-                                        ></div>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-600"></div>
                                         <span className="text-xs text-gray-600">
                                           {item}
                                         </span>
@@ -563,50 +601,37 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                                 </div>
                               )}
 
-                            {/* Guide */}
-                            {activity.guide && (
+                            {/* Professionnel */}
+                            {activity.creator && (
                               <div className="bg-gray-50 p-3 rounded-lg">
                                 <h4 className="text-sm font-semibold text-gray-800 mb-2">
-                                  Votre guide :
+                                  Votre professionnel :
                                 </h4>
                                 <div className="flex items-center gap-3">
-                                  {activity.guide.user?.avatar ? (
+                                  {activity.creator.avatar ? (
                                     <img
-                                      src={activity.guide.user.avatar}
-                                      alt="Guide"
+                                      src={activity.creator.avatar}
+                                      alt="Professionnel"
                                       className="w-10 h-10 rounded-full"
                                     />
                                   ) : (
                                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-gray-600 font-semibold">
-                                        {activity.guide.user?.firstName?.charAt(
-                                          0,
-                                        )}
-                                        {activity.guide.user?.lastName?.charAt(
-                                          0,
-                                        )}
+                                        {activity.creator.firstName?.charAt(0)}
+                                        {activity.creator.lastName?.charAt(0)}
                                       </span>
                                     </div>
                                   )}
                                   <div>
                                     <p className="text-sm font-medium text-gray-900">
-                                      {activity.guide.user?.firstName}{" "}
-                                      {activity.guide.user?.lastName}
+                                      {activity.creator.firstName}{" "}
+                                      {activity.creator.lastName}
                                     </p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <div className="flex items-center">
-                                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                        <span className="text-xs text-gray-600 ml-1">
-                                          {activity.guide.rating.toFixed(1)}
-                                        </span>
-                                      </div>
-                                      {activity.guide.experience && (
-                                        <span className="text-xs text-gray-500">
-                                          • {activity.guide.experience} ans
-                                          d'expérience
-                                        </span>
-                                      )}
-                                    </div>
+                                    {activity.creator.companyName && (
+                                      <p className="text-xs text-gray-600 mt-1">
+                                        {activity.creator.companyName}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -619,7 +644,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                         <button
                           onClick={() => toggleFAQ(activity.id)}
-                          className={`flex items-center gap-2 text-[${accentColor}] font-semibold text-sm transition hover:text-[${THEME_COLORS["primary-dark"]}] hover:gap-3`}
+                          className="flex items-center gap-2 text-green-600 font-semibold text-sm transition hover:text-emerald-700 hover:gap-3"
                         >
                           {openFAQ === activity.id ? (
                             <>
@@ -635,7 +660,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
 
                         <button
                           onClick={() => handleBookActivity(activity)}
-                          className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all bg-gradient-to-r ${defaultGradient} text-white hover:opacity-90 hover:shadow-lg`}
+                          className="px-4 py-2 rounded-lg font-semibold text-sm transition-all bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:opacity-90 hover:shadow-lg"
                         >
                           Réserver
                         </button>
@@ -661,6 +686,8 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           onBookingSuccess={() => {
             toast.success("Réservation effectuée avec succès !");
             setIsBookingModalOpen(false);
+            // Recharger les activités pour mettre à jour les disponibilités
+            loadActivities();
           }}
         />
       )}

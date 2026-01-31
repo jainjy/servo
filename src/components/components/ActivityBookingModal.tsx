@@ -11,34 +11,14 @@ interface ActivityBookingModalProps {
     id: string;
     title: string;
     price?: number;
-    duration: string;
+    duration?: number;
+    durationType?: string;
     location?: string;
     meetingPoint?: string;
-    maxParticipants: number;
+    maxParticipants?: number;
     minParticipants: number;
-    availability?: Array<{
-      id: string;
-      date: string;
-      startTime: string;
-      endTime: string;
-      slots: number;
-      bookedSlots: number;
-      price?: number;
-      status: string;
-    }>;
   };
   onBookingSuccess: () => void;
-}
-
-interface Availability {
-  id: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  slots: number;
-  bookedSlots: number;
-  price?: number;
-  status: string;
 }
 
 const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
@@ -49,26 +29,44 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [availabilities, setAvailabilities] = useState<Availability[]>([]);
-  const [selectedAvailability, setSelectedAvailability] = useState<string>("");
-  const [participants, setParticipants] = useState(1);
+  const [bookingDate, setBookingDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [participants, setParticipants] = useState(activity.minParticipants);
   const [specialRequests, setSpecialRequests] = useState("");
+  const [participantNames, setParticipantNames] = useState<string[]>([""]);
+  const [participantEmails, setParticipantEmails] = useState<string[]>([""]);
 
   useEffect(() => {
-    if (isOpen && activity.id) {
-      loadAvailabilities();
-    }
-  }, [isOpen, activity.id]);
+    if (isOpen) {
+      setParticipants(activity.minParticipants);
+      setParticipantNames(Array(activity.minParticipants).fill(""));
+      setParticipantEmails(Array(activity.minParticipants).fill(""));
 
-  const loadAvailabilities = async () => {
-    try {
-      const res = await api.get(
-        `/activity-availability/activity/${activity.id}`,
-      );
-      setAvailabilities(res.data.data);
-    } catch (error) {
-      console.error("Error loading availabilities:", error);
-      toast.error("Erreur lors du chargement des disponibilités");
+      // Initialiser la date à aujourd'hui
+      const today = new Date();
+      const formattedDate = today.toISOString().split("T")[0];
+      setBookingDate(formattedDate);
+
+      // Heures par défaut
+      setStartTime("09:00");
+      setEndTime("12:00");
+    }
+  }, [isOpen, activity.minParticipants]);
+
+  const handleParticipantChange = (
+    index: number,
+    value: string,
+    type: "name" | "email",
+  ) => {
+    if (type === "name") {
+      const newNames = [...participantNames];
+      newNames[index] = value;
+      setParticipantNames(newNames);
+    } else {
+      const newEmails = [...participantEmails];
+      newEmails[index] = value;
+      setParticipantEmails(newEmails);
     }
   };
 
@@ -80,24 +78,32 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
       return;
     }
 
-    if (!selectedAvailability) {
+    if (!bookingDate) {
       toast.error("Veuillez sélectionner une date");
+      return;
+    }
+
+    if (!startTime || !endTime) {
+      toast.error("Veuillez indiquer les heures de début et de fin");
       return;
     }
 
     if (
       participants < activity.minParticipants ||
-      participants > activity.maxParticipants
+      (activity.maxParticipants && participants > activity.maxParticipants)
     ) {
       toast.error(
-        `Nombre de participants doit être entre ${activity.minParticipants} et ${activity.maxParticipants}`,
+        `Nombre de participants doit être entre ${activity.minParticipants} et ${activity.maxParticipants || 10}`,
       );
       return;
     }
 
-    const selected = availabilities.find((a) => a.id === selectedAvailability);
-    if (selected && participants > selected.slots - selected.bookedSlots) {
-      toast.error("Plus assez de places disponibles pour cette date");
+    // Vérifier que tous les noms sont remplis
+    const allNamesFilled = participantNames
+      .slice(0, participants)
+      .every((name) => name.trim() !== "");
+    if (!allNamesFilled) {
+      toast.error("Veuillez remplir le nom de tous les participants");
       return;
     }
 
@@ -105,15 +111,26 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
     try {
       const bookingData = {
         activityId: activity.id,
-        availabilityId: selectedAvailability,
+        bookingDate,
+        startTime,
+        endTime,
         participants,
-        specialRequests: specialRequests || undefined,
+        specialRequests: specialRequests.trim() || undefined,
+        participantNames: participantNames
+          .slice(0, participants)
+          .filter((name) => name.trim() !== ""),
+        participantEmails: participantEmails
+          .slice(0, participants)
+          .filter((email) => email.trim() !== ""),
       };
 
-      const res = await api.post("/bookings", bookingData);
+      const res = await api.post("/activity-bookings", bookingData);
 
-      toast.success("Réservation effectuée avec succès !");
-      onBookingSuccess();
+      if (res.data.success) {
+        toast.success("Réservation effectuée avec succès !");
+        onBookingSuccess();
+        onClose();
+      }
     } catch (error: any) {
       console.error("Booking error:", error);
       toast.error(
@@ -124,29 +141,26 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("fr-FR", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+  const formatDuration = (duration?: number, durationType?: string) => {
+    if (!duration) return "Durée variable";
 
-  const getAvailableSlots = (availability: Availability) => {
-    return availability.slots - availability.bookedSlots;
-  };
+    if (durationType === "minutes") {
+      if (duration < 60) return `${duration}min`;
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+      if (minutes === 0) return `${hours}h`;
+      return `${hours}h${minutes}`;
+    } else if (durationType === "hours") {
+      return `${duration}h`;
+    } else if (durationType === "days") {
+      return `${duration} jour${duration > 1 ? "s" : ""}`;
+    }
 
-  const getPriceForAvailability = (availability: Availability) => {
-    return availability.price || activity.price || 0;
+    return `${duration} min`;
   };
 
   const calculateTotal = () => {
-    if (!selectedAvailability) return 0;
-    const selected = availabilities.find((a) => a.id === selectedAvailability);
-    if (!selected) return 0;
-    return getPriceForAvailability(selected) * participants;
+    return (activity.price || 0) * participants;
   };
 
   if (!isOpen) return null;
@@ -158,9 +172,9 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
 
       {/* Modal */}
       <div className="flex items-center justify-center min-h-screen p-4">
-        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl">
+        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b">
+          <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-6 border-b">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
                 Réserver : {activity.title}
@@ -189,13 +203,36 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
                   <Users className="w-5 h-5 text-gray-400 mr-2" />
                   <select
                     value={participants}
-                    onChange={(e) => setParticipants(Number(e.target.value))}
+                    onChange={(e) => {
+                      const newCount = Number(e.target.value);
+                      setParticipants(newCount);
+                      // Ajuster les tableaux de noms et emails
+                      if (newCount > participantNames.length) {
+                        setParticipantNames([
+                          ...participantNames,
+                          ...Array(newCount - participantNames.length).fill(""),
+                        ]);
+                        setParticipantEmails([
+                          ...participantEmails,
+                          ...Array(newCount - participantEmails.length).fill(
+                            "",
+                          ),
+                        ]);
+                      } else {
+                        setParticipantNames(
+                          participantNames.slice(0, newCount),
+                        );
+                        setParticipantEmails(
+                          participantEmails.slice(0, newCount),
+                        );
+                      }
+                    }}
                     className="bg-transparent border-none outline-none"
                   >
                     {Array.from(
                       {
                         length:
-                          activity.maxParticipants -
+                          (activity.maxParticipants || 10) -
                           activity.minParticipants +
                           1,
                       },
@@ -209,77 +246,136 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
                 </div>
                 <div className="text-sm text-gray-500">
                   Min: {activity.minParticipants} - Max:{" "}
-                  {activity.maxParticipants}
+                  {activity.maxParticipants || 10}
                 </div>
               </div>
             </div>
 
-            {/* Disponibilités */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Sélectionnez une date
-              </label>
-              {availabilities.length === 0 ? (
-                <div className="text-center py-4 bg-gray-50 rounded-lg">
-                  <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500">
-                    Aucune disponibilité pour le moment
+            {/* Date et heures */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Date
+                </label>
+                <div className="flex items-center border rounded-lg p-2">
+                  <Calendar className="w-5 h-5 text-gray-400 mr-2" />
+                  <input
+                    type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    className="bg-transparent border-none outline-none w-full"
+                    min={new Date().toISOString().split("T")[0]}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Heure de début
+                </label>
+                <div className="flex items-center border rounded-lg p-2">
+                  <Clock className="w-5 h-5 text-gray-400 mr-2" />
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="bg-transparent border-none outline-none w-full"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Heure de fin
+                </label>
+                <div className="flex items-center border rounded-lg p-2">
+                  <Clock className="w-5 h-5 text-gray-400 mr-2" />
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="bg-transparent border-none outline-none w-full"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Informations des participants */}
+            {participants > 0 && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Informations des participants
+                </label>
+                <div className="space-y-3">
+                  {Array.from({ length: participants }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                    >
+                      <div>
+                        <input
+                          type="text"
+                          placeholder={`Nom du participant ${index + 1}`}
+                          value={participantNames[index] || ""}
+                          onChange={(e) =>
+                            handleParticipantChange(
+                              index,
+                              e.target.value,
+                              "name",
+                            )
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="email"
+                          placeholder={`Email (optionnel)`}
+                          value={participantEmails[index] || ""}
+                          onChange={(e) =>
+                            handleParticipantChange(
+                              index,
+                              e.target.value,
+                              "email",
+                            )
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Durée et point de rencontre */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {activity.duration && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-gray-700 mb-2">
+                    <Clock className="w-5 h-5" />
+                    <span className="font-semibold">Durée estimée :</span>
+                  </div>
+                  <p className="text-gray-600">
+                    {formatDuration(activity.duration, activity.durationType)}
                   </p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {availabilities
-                    .filter((avail) => getAvailableSlots(avail) > 0)
-                    .map((availability) => (
-                      <button
-                        key={availability.id}
-                        type="button"
-                        onClick={() => setSelectedAvailability(availability.id)}
-                        className={`p-4 border rounded-lg text-left transition-all ${
-                          selectedAvailability === availability.id
-                            ? "border-green-500 bg-green-50"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-semibold text-gray-900">
-                              {formatDate(availability.date)}
-                            </p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              <Clock className="w-4 h-4 inline mr-1" />
-                              {availability.startTime} - {availability.endTime}
-                            </p>
-                          </div>
-                          {selectedAvailability === availability.id && (
-                            <CheckCircle className="w-5 h-5 text-green-500" />
-                          )}
-                        </div>
-                        <div className="flex justify-between items-center mt-3">
-                          <span className="text-sm text-gray-500">
-                            {getAvailableSlots(availability)} places disponibles
-                          </span>
-                          <span className="font-semibold text-gray-900">
-                            {getPriceForAvailability(availability).toFixed(2)}
-                            €/pers
-                          </span>
-                        </div>
-                      </button>
-                    ))}
+              )}
+
+              {activity.meetingPoint && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-gray-700 mb-2">
+                    <MapPin className="w-5 h-5" />
+                    <span className="font-semibold">Point de rencontre :</span>
+                  </div>
+                  <p className="text-gray-600">{activity.meetingPoint}</p>
                 </div>
               )}
             </div>
-
-            {/* Point de rencontre */}
-            {activity.meetingPoint && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center gap-2 text-gray-700 mb-2">
-                  <MapPin className="w-5 h-5" />
-                  <span className="font-semibold">Point de rencontre :</span>
-                </div>
-                <p className="text-gray-600">{activity.meetingPoint}</p>
-              </div>
-            )}
 
             {/* Demandes spéciales */}
             <div>
@@ -302,9 +398,7 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
                   <p className="text-gray-600">Total estimé</p>
                   <p className="text-sm text-gray-500">
                     {participants} personne{participants > 1 ? "s" : ""} ×{" "}
-                    {selectedAvailability
-                      ? `${getPriceForAvailability(availabilities.find((a) => a.id === selectedAvailability)!).toFixed(2)}€`
-                      : "0€"}
+                    {activity.price?.toFixed(2) || "0"}€
                   </p>
                 </div>
                 <div className="text-right">
@@ -327,7 +421,7 @@ const ActivityBookingModal: React.FC<ActivityBookingModalProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={loading || !selectedAvailability}
+                disabled={loading || !bookingDate}
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
               >
                 {loading
