@@ -44,7 +44,7 @@ const CarteBoutton: React.FC<CarteBouttonProps> = ({
     if (category === "agences") return "/pro/agences";
     if (category === "plombiers") return "/pro/plombiers";
     if (category === "constructeurs") return "/pro/constructeurs";
-    return "/pro/all";
+    return "/pro";
   };
 
   // Déterminer le titre basé sur la catégorie
@@ -182,71 +182,60 @@ const CarteBoutton: React.FC<CarteBouttonProps> = ({
   }, [category]);
 
   // Charger toutes les données de la carte
-  const loadMapData = useCallback(async () => {
-    try {
-      setMapLoading(true);
+// Charger toutes les données de la carte
+const loadMapData = useCallback(async () => {
+  try {
+    setMapLoading(true);
 
-      if (category === "all") {
-        const allPoints = await MapService.getAllMapPoints();
-        setMapPoints(allPoints);
-        setFilteredPoints(filterPointsByCategory(allPoints));
-      } else {
-        const endpoint = getEndpoint();
-        const res = await api.get(endpoint);
+    // MODIFIÉ: Toujours utiliser l'API, même pour "all"
+    const endpoint = getEndpoint();
+    const res = await api.get(endpoint);
 
-        if (!res.data.success) {
-          throw new Error("Erreur lors de la récupération des données");
-        }
-
-        const categoryPoints: MapPoint[] = res.data.data.map((item: any) => {
-          const safeName =
-            [item.firstName, item.lastName].filter(Boolean).join(" ").trim() ||
-            item.commercialName ||
-            item.companyName ||
-            item.firstName ||
-            "Professionnel";
-
-          return {
-            id: item.id,
-            latitude: item.latitude ?? null,
-            longitude: item.longitude ?? null,
-            title: safeName,
-            description: item.description || item.specialty || "",
-            type: item.type || "user",
-            category: category,
-            address: item.address || item.city || "Réunion",
-            phone: item.phone || "",
-            email: item.email || "",
-            website: item.website || ""
-          };
-        });
-
-        setMapPoints(categoryPoints);
-        setFilteredPoints(categoryPoints);
-      }
-
-      // console.log("📊 Données carte chargées:", {
-      //   category,
-      //   total: mapPoints.length,
-      //   filtered: filteredPoints.length
-      // });
-
-      setMapError(null);
-
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
-
-      setMapError(errorMessage);
-      console.error("❌ Erreur chargement carte:", err);
-
-      setMapPoints([]);
-      setFilteredPoints([]);
-    } finally {
-      setMapLoading(false);
+    if (!res.data.success) {
+      throw new Error("Erreur lors de la récupération des données");
     }
-  }, [category, filterPointsByCategory]);
 
+    const categoryPoints: MapPoint[] = res.data.data.map((item: any) => {
+      const safeName =
+        [item.firstName, item.lastName].filter(Boolean).join(" ").trim() ||
+        item.commercialName ||
+        item.companyName ||
+        item.firstName ||
+        "Professionnel";
+
+      return {
+        id: item.id,
+        latitude: item.latitude ?? null,
+        longitude: item.longitude ?? null,
+        title: safeName,
+        description: item.description || item.specialty || "",
+        type: item.type || "user",
+        category: category,
+        address: item.address || item.city || "Réunion",
+        phone: item.phone || "",
+        email: item.email || "",
+        website: item.website || ""
+      };
+    });
+
+    setMapPoints(categoryPoints);
+    setFilteredPoints(categoryPoints);
+
+    setMapError(null);
+
+  } catch (err) {
+    const errorMessage =
+      err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
+
+    setMapError(errorMessage);
+    console.error("❌ Erreur chargement carte:", err);
+
+    setMapPoints([]);
+    setFilteredPoints([]);
+  } finally {
+    setMapLoading(false);
+  }
+}, [category]);
   // Obtenir la géolocalisation utilisateur
   const handleGetUserLocation = () => {
     if (!navigator.geolocation) {

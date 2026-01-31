@@ -70,12 +70,13 @@ const TousLesPartenaires = () => {
     loadMetiers();
   }, []);
 
-  // Charger les professionnels avec filtres et tri
+  // Charger les professionnels avec filtres et tri - MODIFIÉ pour utiliser /api/professionnels
   useEffect(() => {
     const loadProfessionals = async () => {
       try {
         setLoading(true);
-        let endpoint = "/pro";
+        // let endpoint = "/api/professionnels"; // MODIFIÉ: de "/pro" à "/api/professionnels"
+let endpoint = "/pro"; // MODIFIÉ: de "/pro" à "/api/professionnels"
 
         const params = new URLSearchParams();
         if (selectedMetier) params.append("metierId", selectedMetier);

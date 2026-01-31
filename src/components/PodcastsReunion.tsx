@@ -483,6 +483,7 @@ const PodcastsReunion: React.FC = () => {
             Explorez par thème
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Plages & Côtes */}
             <div
               onClick={() => setSelectedTheme("Plages & Côtes")}
               className={`rounded-2xl p-6 text-white text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl ${
@@ -491,9 +492,28 @@ const PodcastsReunion: React.FC = () => {
                   : "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B]"
               }`}
             >
-              <div className="text-3xl mb-2">🏝️</div>
+              <div className="text-3xl mb-2 flex justify-center">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="40" 
+                  height="40" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="lucide lucide-umbrella"
+                >
+                  <path d="M22 12a10.06 10.06 1 0 0-20 0Z" />
+                  <path d="M12 12v8a2 2 0 0 0 4 0" />
+                  <path d="M12 2v1" />
+                </svg>
+              </div>
               <h4 className="font-bold">Plages & Côtes</h4>
             </div>
+
+            {/* Volcans & Randonnées */}
             <div
               onClick={() => setSelectedTheme("Volcans & Randonnées")}
               className={`rounded-2xl p-6 text-white text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl ${
@@ -502,9 +522,26 @@ const PodcastsReunion: React.FC = () => {
                   : "bg-gradient-to-r from-[#2E8B57] to-[#3CB371]"
               }`}
             >
-              <div className="text-3xl mb-2">🌋</div>
+              <div className="text-3xl mb-2 flex justify-center">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="40" 
+                  height="40" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="lucide lucide-mountain"
+                >
+                  <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
+                </svg>
+              </div>
               <h4 className="font-bold">Volcans & Randonnées</h4>
             </div>
+
+            {/* Gastronomie */}
             <div
               onClick={() => setSelectedTheme("Gastronomie")}
               className={`rounded-2xl p-6 text-white text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl ${
@@ -513,9 +550,28 @@ const PodcastsReunion: React.FC = () => {
                   : "bg-gradient-to-r from-[#8B4513] to-[#D2691E]"
               }`}
             >
-              <div className="text-3xl mb-2">🍽️</div>
+              <div className="text-3xl mb-2 flex justify-center">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="40" 
+                  height="40" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="lucide lucide-utensils"
+                >
+                  <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                  <path d="M7 2v20" />
+                  <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                </svg>
+              </div>
               <h4 className="font-bold">Gastronomie</h4>
             </div>
+
+            {/* Culture & Traditions */}
             <div
               onClick={() => setSelectedTheme("Culture & Traditions")}
               className={`rounded-2xl p-6 text-white text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl ${
@@ -524,12 +580,28 @@ const PodcastsReunion: React.FC = () => {
                   : "bg-gradient-to-r from-[#556B2F] to-[#8FBC8F]"
               }`}
             >
-              <div className="text-3xl mb-2">🎭</div>
+              <div className="text-3xl mb-2 flex justify-center">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="40" 
+                  height="40" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="lucide lucide-mask"
+                >
+                  <path d="M19 12V9a7 7 0 1 0-14 0v3" />
+                  <path d="M12 12a4 4 0 0 0-4 4v2h8v-2a4 4 0 0 0-4-4Z" />
+                  <path d="M12 12v5" />
+                </svg>
+              </div>
               <h4 className="font-bold">Culture & Traditions</h4>
             </div>
           </div>
         </section>
-
         {/* Section Résultats du Filtrage */}
         {selectedTheme && (
           <section className="mb-16 pt-8 border-t-2 border-[#D3D3D3]">
