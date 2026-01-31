@@ -159,9 +159,8 @@ export const AdvertisementProvider: React.FC<AdvertisementProviderProps> = ({
         });
         
         setAdvertisements(adsByPosition);
-        console.log(`Publicités chargées: ${data.advertisements.length} pubs pour ${adsByPosition.size} positions`);
       } else {
-        console.warn('Format de réponse API inattendu:', data);
+        //console.warn('Format de réponse API inattendu:', data);
         setError('Format de données invalide');
       }
     } catch (error) {

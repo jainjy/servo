@@ -125,7 +125,6 @@ const AdvertisementPopup: React.FC<Props> = ({
             onAdShow(currentAd.id);
           }
 
-          console.log(`Pub affichée: ${currentAd.title} (${position})`);
         }, 1000); // Délai de 1 seconde avant affichage
 
         return () => clearTimeout(timer);
@@ -178,7 +177,6 @@ const AdvertisementPopup: React.FC<Props> = ({
   // Trouver la prochaine pub
   const rotateToNextAd = useCallback(() => {
     if (sessionAdCount >= maxAdsPerSession) {
-      console.log('Limite de pubs atteinte pour cette session');
       setVisible(false);
       return;
     }
@@ -191,7 +189,6 @@ const AdvertisementPopup: React.FC<Props> = ({
         (prev.priority < current.priority) ? prev : current
       );
 
-      console.log(`Rotation vers: ${nextAd.title}`);
       setCurrentAd(nextAd);
       setVisible(false); // Fermer avant d'afficher la suivante
 
@@ -204,7 +201,6 @@ const AdvertisementPopup: React.FC<Props> = ({
       }, 1000);
     } else {
       // Toutes les pubs ont été affichées dans cette session
-      console.log('Toutes les pubs affichées pour cette session');
       setVisible(false);
       setCurrentAd(null);
 
