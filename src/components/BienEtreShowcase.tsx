@@ -144,7 +144,11 @@ const BienEtreShowcase = () => {
   };
 
   return (
+<<<<<<< HEAD
     <section className="py-16 bg-gradient-to-b from-gray-50 via-white to-gray-100 relative">
+=======
+    <section className="py-16 bg-[#22ee303a] relative">
+>>>>>>> 4cedaf0 (ok)
       {/* Publicité - seulement sur desktop */}
       {false && (
         <motion.article
