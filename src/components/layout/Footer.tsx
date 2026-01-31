@@ -200,11 +200,11 @@ const Footer: React.FC = () => {
                 onClick={() => handlePartnerClick(partner.url)}
                 className="group p-2 bg-black/10 backdrop-blur-sm rounded border border-white/20 hover:border-[#8B4513]/50 hover:bg-black/20 transition-all duration-200 flex flex-col items-center gap-1"
               >
-                <div className="w-12 h-12 flex items-center justify-center bg-white/10 rounded border border-white/15 overflow-hidden group-hover:bg-white/15 transition-all">
+                <div className="w-40 h-40 flex items-center justify-center bg-white/10 rounded border border-white/15 overflow-hidden group-hover:bg-white/15 transition-all">
                   <img
                     src={partner.logo}
                     alt={partner.name}
-                    className="w-full h-full object-contain p-1 opacity-90 group-hover:opacity-100 transition-opacity"
+                    className="w-full h-full object-cover p-1 opacity-90 group-hover:opacity-100 transition-opacity"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
