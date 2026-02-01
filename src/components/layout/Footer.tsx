@@ -21,11 +21,11 @@ const Footer: React.FC = () => {
       url: "/professional/f716640c-04e6-4eb0-9cd7-690208f011cb",
       logo: "/Reunion.png",
     },
-    {
-      name: "Sekoia Entretien & Aménagement",
-      url: "/professional/ebcd6f0c-a949-4a57-9051-53badfc81573",
-      logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769599947673-6uoigp0lcvw.jpg",
-    },
+    // {
+    //   name: "Sekoia Entretien & Aménagement",
+    //   url: "/professional/ebcd6f0c-a949-4a57-9051-53badfc81573",
+    //   logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769599947673-6uoigp0lcvw.jpg",
+    // },
     {
       name: "REUNIREM DIAGNOSTIC",
       url: "/professional/3d5de8dd-24c0-4f94-98ff-22a308c5de2d",

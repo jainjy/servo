@@ -12,28 +12,40 @@ export default function Test() {
       alt: "Image",
       link: "https://www.guyhoquet-reunion.fr/"
     },
+    // {
+    //   src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769599947673-6uoigp0lcvw.jpg",
+    //   alt: "Image",
+    // },
     {
-      src: "https://i.pinimg.com/1200x/9d/1b/af/9d1baf24622b6c568ed6f41f826c7105.jpg",
+      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769515428367-ifzbh3rk92c.png",
       alt: "Image",
     },
     {
-      src: "https://i.pinimg.com/1200x/4d/7a/ec/4d7aecb5e539968fec979b35f5618527.jpg",
+      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987856807-5aze4kvdkyd.png",
       alt: "Image",
     },
     {
-      src: "https://i.pinimg.com/736x/f0/64/d7/f064d7192801ed944991351e99efdbf2.jpg",
+      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987792594-y2xzfeeb35e.jpg",
       alt: "Image",
     },
     {
-      src: "https://i.pinimg.com/736x/bb/d6/2a/bbd62ab19fe388ef4dac11d2f21be3f7.jpg",
+      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987729304-3i63o0deunq.png",
       alt: "Image",
     },
     {
-      src: "https://i.pinimg.com/1200x/83/5d/9d/835d9d7c0f06a49b079418cd59914762.jpg",
+      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836430476-9b69z2jvyil.png",
       alt: "Image",
     },
     {
-      src: "https://i.pinimg.com/736x/52/52/5c/52525c7b87e0600a27bf66a9ec1e04f2.jpg",
+      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836629052-zn3mvhzd7lg.webp",
+      alt: "Image",
+    },
+    {
+      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836948448-54bqjn3oh5a.png",
+      alt: "Image",
+    },
+    {
+      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769515594088-g834n4v5m57.png",
       alt: "Image",
     }
   ];
@@ -74,7 +86,7 @@ export default function Test() {
           <div
             className="
             flex w-max gap-2 lg:gap-10 pr-2 lg:pr-10
-            animate-[move_20s_linear_infinite] animation-pausable
+            animate-[move_30s_linear_infinite] animation-pausable
           "
           >
             {imageSrc.map((image, i) => (
@@ -105,7 +117,7 @@ export default function Test() {
             aria-hidden
             className="
             flex w-max gap-2 lg:gap-10 pr-2 lg:pr-10
-            animate-[move_20s_linear_infinite] animation-pausable
+            animate-[move_30s_linear_infinite] animation-pausable
           "
           >
             {imageSrc.map((image, i) => (

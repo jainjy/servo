@@ -120,9 +120,6 @@ const ActivitesLoisirsFAQ: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [openFAQ, setOpenFAQ] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"activites" | "parapente">(
-    "activites",
-  );
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
     null,
   );
@@ -345,81 +342,65 @@ const ActivitesLoisirsFAQ: React.FC = () => {
         showOnMobile={true}
       />
 
-      {/* TABS */}
-      <div className="flex justify-center gap-4 px-4 mb-8">
+      {/* CATEGORY FILTERS */}
+      <div className="flex flex-wrap justify-center gap-3 px-4 mb-16">
         <button
-          onClick={() => setActiveTab("activites")}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all border-2
+          onClick={() => setActiveCategory("all")}
+          className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all shadow-md border-2
             ${
-              activeTab === "activites"
-                ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent"
+              activeCategory === "all"
+                ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
                 : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
-            }`}
+            } hover:scale-105 hover:shadow-lg`}
         >
-          Activités & Loisirs
+          <Compass className="w-5 h-5" />
+          Toutes
+          <span className="px-2.5 py-1 rounded-full text-xs bg-white/20 text-white">
+            {activities.length}
+          </span>
         </button>
+
         <button
-          onClick={() => setActiveTab("parapente")}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all border-2 flex items-center gap-2
+          onClick={() => setActiveCategory("parapente")}
+          className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all shadow-md border-2
             ${
-              activeTab === "parapente"
-                ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent"
+              activeCategory === "parapente"
+                ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
                 : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
-            }`}
+            } hover:scale-105 hover:shadow-lg`}
         >
           <Mountain className="w-5 h-5" />
           Parapente
         </button>
+
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.name)}
+            className={`flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm transition-all shadow-md border-2
+              ${
+                activeCategory === cat.name
+                  ? `bg-gradient-to-r ${cat.color ? `from-[${cat.color}] to-[${cat.color}]/80` : "from-green-600 to-emerald-600"} text-white border-transparent shadow-lg`
+                  : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
+              } hover:scale-105 hover:shadow-lg`}
+          >
+            {cat.icon && iconMap[cat.icon] ? (
+              iconMap[cat.icon]
+            ) : (
+              <Star className="w-5 h-5" />
+            )}
+            {cat.name}
+            <span className="px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
+              {getCategoryCount(cat.name)}
+            </span>
+          </button>
+        ))}
       </div>
 
-      {/* CONTENT */}
-      {activeTab === "activites" && (
-        <>
-          {/* CATEGORY FILTERS */}
-          <div className="flex flex-wrap justify-center gap-3 px-4 mb-16">
-            <button
-              onClick={() => setActiveCategory("all")}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all shadow-md border-2
-                ${
-                  activeCategory === "all"
-                    ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
-                    : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
-                } hover:scale-105 hover:shadow-lg`}
-            >
-              <Compass className="w-5 h-5" />
-              Toutes
-              <span className="px-2.5 py-1 rounded-full text-xs bg-white/20 text-white">
-                {activities.length}
-              </span>
-            </button>
-
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.name)}
-                className={`flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm transition-all shadow-md border-2
-                  ${
-                    activeCategory === cat.name
-                      ? `bg-gradient-to-r ${cat.color ? `from-[${cat.color}] to-[${cat.color}]/80` : "from-green-600 to-emerald-600"} text-white border-transparent shadow-lg`
-                      : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
-                  } hover:scale-105 hover:shadow-lg`}
-              >
-                {cat.icon && iconMap[cat.icon] ? (
-                  iconMap[cat.icon]
-                ) : (
-                  <Star className="w-5 h-5" />
-                )}
-                {cat.name}
-                <span className="px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
-                  {getCategoryCount(cat.name)}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* ACTIVITIES LIST */}
-          <div className="max-w-7xl mx-auto px-4 pb-20">
-            {loading ? (
+      {/* ACTIVITIES LIST */}
+      {activeCategory !== "parapente" && (
+        <div className="max-w-7xl mx-auto px-4 pb-20">
+          {loading ? (
               <div className="text-center py-20">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
                 <p className="mt-4 text-gray-600">
@@ -670,12 +651,11 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                 ))}
               </div>
             )}
-          </div>
-        </>
+        </div>
       )}
 
-      {/* PARAPENTE TAB */}
-      {activeTab === "parapente" && <UserParapentePage />}
+      {/* PARAPENTE PAGE */}
+      {activeCategory === "parapente" && <UserParapentePage />}
 
       {/* Modal de réservation */}
       {selectedActivity && (
