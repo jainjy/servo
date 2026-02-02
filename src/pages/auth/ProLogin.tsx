@@ -212,6 +212,14 @@ const LoginPage = () => {
         </motion.article>
       )}
 
+      <div className="absolute left-0 h-full flex flex-row items-center ">
+        <AdvertisementPopup position="login-pro-left" />
+      </div>
+
+      <div className="absolute right-0 h-full flex flex-row items-center">
+        <AdvertisementPopup position="login-pro-right" />
+      </div>
+
       <div className="w-[80vw] lg:w-[60vw] h-[80vh] m-auto rounded-3xl shadow-xl flex flex-col lg:flex-row overflow-hidden bg-white/0">
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
           <button

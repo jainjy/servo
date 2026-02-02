@@ -108,7 +108,13 @@ const AdvertisementManager = () => {
     { value: 'page-explorer-art', label: 'page-explorer-art' },
     { value: 'page-partenaires-nos-partenaires', label: 'page-partenaires-nos-partenaires' },
     { value: 'page-partenaires-nos-agences', label: 'page-partenaires-nos-agences' },
-    { value: 'page-blog', label: 'page-blog' }
+    { value: 'page-blog', label: 'page-blog' },
+    { value: 'login-pro-right', label: 'page-login-pro-droit' },
+    { value: 'login-pro-left', label: 'page-login-pro-gauche' },
+    { value: 'login-pariticulier-right', label: 'page-login-pro-droit' },
+    { value: 'login-pariticulier-left', label: 'page-login-pro-gauche' },
+    { value: 'login-right', label: 'page-login-droit' },
+    { value: 'login-left', label: 'page-login-gauche' },
   ]
 
   // Références pour les éléments vidéo

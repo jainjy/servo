@@ -88,6 +88,13 @@ const LoginRoleSelectionPage = () => {
 
   return (
     <div className="relative min-h-screen flex overflow-hidden pt-10">
+       <div className="absolute left-0 h-full flex flex-row items-center ">
+        <AdvertisementPopup position="login-left" />
+      </div>
+
+      <div className="absolute right-0 h-full flex flex-row items-center">
+        <AdvertisementPopup position="login-right" />
+      </div>
       <div className="absolute inset-0 -z-10">
         <video
           className="absolute inset-0 w-full h-full object-cover -z-20"
