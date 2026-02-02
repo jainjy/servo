@@ -40,6 +40,7 @@ const itemVariants = {
   },
 };
 
+
 const Entreprise: React.FC = () => {
   const { trackBusinessInteraction } = useInteractionTracking();
 
@@ -155,46 +156,6 @@ const Entreprise: React.FC = () => {
         {/* Message si aucun service (maintenant géré dans ServicesGrid) */}
       </motion.section>
 
-      {/* Section Partenaires */}
-      <PartnersSection
-        handleContact={handleContact}
-        handleOpenMap={handleOpenMap}
-        handlePartnerLocation={handlePartnerLocation}
-        trackBusinessInteraction={trackBusinessInteraction}
-        colors={colors}
-        partenaires={partenaires}
-      />
-
-      {/* Modals */}
-      {showMapModal && (
-        <MapModal
-          selectedLocation={selectedLocation}
-          partenaires={partenaires}
-          handlePartnerLocation={handlePartnerLocation}
-          onClose={() => {
-            setShowMapModal(false);
-            setSelectedLocation(null);
-          }}
-          colors={colors}
-        />
-      )}
-
-      {showMessageModal && (
-        <ContactModal
-          selectedPartenaire={selectedPartenaire}
-          selectedService={selectedService}
-          formData={formData}
-          isLoading={isLoading}
-          onClose={() => {
-            setShowMessageModal(false);
-            setSelectedPartenaire(null);
-            setSelectedService(null);
-          }}
-          onSubmit={handleSubmitMessage}
-          onInputChange={handleInputChange}
-          colors={colors}
-        />
-      )}
     </div>
   );
 };

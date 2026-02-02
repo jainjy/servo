@@ -111,15 +111,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               </Button>
             </motion.div>
 
-            <motion.div>
-              <Button
-                className="bg-logo hover:bg-logo/80 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-logo hover:border-logo/80 transition-all duration-300"
-                onClick={handlePartnersClick} // Utilise la nouvelle fonction
-              >
-                <MapPin className="h-5 w-5 mr-3" />
-                Voir nos partenaires
-              </Button>
-            </motion.div>
           </div>
         </motion.div>
       </div>

@@ -1098,6 +1098,13 @@ const Header = () => {
             "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
         {
+          title: "Devenir partenaires",
+          description: "Écrivons le prochain chapitre ensemble",
+          href: "/devenir-partenaire",
+          image:
+            "https://i.pinimg.com/736x/28/42/f2/2842f2dfe1ffa1cbbee9b4401ed3b07c.jpg",
+        },
+        {
           title: "Nos agences",
           description: "Decouvrir notre partenariat agences",
           href: "/agences",
