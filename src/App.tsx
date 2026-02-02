@@ -257,6 +257,7 @@ import Load2 from "./Loading/Load2";
 import ParapentePage from "./components/pro/ParapentePage";
 import UserParapentePage from "./pages/UserParapentePage";
 import { AdvertisementProvider } from "./components/AdvertisementProvider";
+import DevenirPartenaire from "./pages/DevenirPartenaire";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -508,6 +509,10 @@ const App = () => {
                     <Route
                       path="/tous-les-partenaires"
                       element={<TousLesPartenaires />}
+                    />
+                    <Route
+                      path="/devenir-partenaire"
+                      element={<DevenirPartenaire />}
                     />
                     <Route
                       path="/podcast_service"

@@ -327,8 +327,9 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
             className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6"
             style={{ color: colors.primaryDark }}
           >
-            Devenir{" "}
-            <span className="text-slate-900">Partenaire</span>
+            
+            Collaborez{" "}
+            <span className="text-slate-900"> avec nous</span>
           </h1>
           <p
             className="text-sm lg:text-sm max-w-2xl mx-auto mb-4 lg:mb-8"
@@ -378,28 +379,7 @@ const PartnersSection: React.FC<PartnersSectionProps> = ({
               </motion.div>
             ))}
 
-            <motion.div>
-              <Button
-                variant="outline"
-                className="gap-2 border-2 font-semibold rounded-xl bg-white transition-all duration-300 px-6 py-3"
-                style={{
-                  borderColor: colors.primaryDark,
-                  color: colors.primaryDark,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.primaryDark;
-                  e.currentTarget.style.color = colors.lightBg;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.cardBg;
-                  e.currentTarget.style.color = colors.primaryDark;
-                }}
-                onClick={handleOpenMap}
-              >
-                Localisation
-                <MapPin className="h-4 w-4" />
-              </Button>
-            </motion.div>
+            
           </div>
         </motion.div>
 
