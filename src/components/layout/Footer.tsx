@@ -293,33 +293,59 @@ const Footer: React.FC = () => {
               <button
                 key={index}
                 onClick={() => handlePartnerClick(partner.url)}
-                className="group p-3 md:p-4 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/20 hover:border-white/40 hover:bg-black/30 transition-all duration-300 flex flex-col items-center gap-3 md:gap-2  transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-white/5"
+                className="group relative p-3 md:p-4 bg-black/20 backdrop-blur-sm rounded-2xl border border-white/20 hover:border-white/40 hover:bg-black/30 transition-all duration-300 flex flex-col items-center gap-3 md:gap-2 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-white/5 overflow-hidden"
               >
-                <div className="w-24 h-16 md:w-44 md:h-20 flex items-center justify-center bg-gradient-to-br from-white/5 to-white/10 rounded-xl border border-white/10 overflow-hidden group-hover:border-white/20 group-hover:bg-gradient-to-br group-hover:from-white/10 group-hover:to-white/15 transition-all duration-300">
+                {/* Background Image Layer (Hidden by Default, Shown on Hover) */}
+                <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-in-out">
                   <img
                     src={partner.logo}
                     alt={partner.name}
-                    className="w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                    className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700 ease-out"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
                       const parent = target.parentElement;
                       if (parent) {
                         parent.innerHTML = `
+              <div class="w-full h-full flex items-center justify-center">
+                <div class="text-8xl font-bold bg-gradient-to-r from-[#8B4513] via-[#D2691E] to-[#F4A460] bg-clip-text text-transparent opacity-80">
+                  ${partner.name.split(" ")[0].charAt(0)}
+                </div>
+              </div>
+            `;
+                      }
+                    }}
+                  />
+                </div>
+
+                {/* Original Content (Fades Out on Hover) */}
+                <div className="relative z-10 transition-all duration-500 group-hover:opacity-0 group-hover:translate-y-2">
+                  <div className="w-24 h-16 md:w-44 md:h-20 flex items-center justify-center overflow-hidden group-hover:border-white/20 group-hover:bg-gradient-to-br group-hover:from-white/10 group-hover:to-white/15 transition-all duration-300">
+                    <img
+                      src={partner.logo}
+                      alt={partner.name}
+                      className="w-full h-full object-contain p-2 opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = "none";
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
                 <div class="w-full h-full flex items-center justify-center">
                   <div class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#8B4513] to-[#D2691E] bg-clip-text text-transparent">
                     ${partner.name.split(" ")[0].charAt(0)}
                   </div>
                 </div>
               `;
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-white/90 text-xs text-center font-semibold tracking-tight max-w-[120px]">
-                    {partner.name}
-                  </span>
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-white/90 text-xs text-center font-semibold tracking-tight max-w-[120px]">
+                      {partner.name}
+                    </span>
+                  </div>
                 </div>
               </button>
             ))}
