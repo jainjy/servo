@@ -286,8 +286,7 @@ const Footer: React.FC = () => {
               </button>
             ))}
           </div>
-
-          {/* Version Desktop (Grid Original) */}
+          {/* Version Desktop (Grid Original)  */}
           <div className="hidden lg:grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-6 gap-4 md:gap-6  mx-auto">
             {partners.map((partner, index) => (
               <button
@@ -317,7 +316,6 @@ const Footer: React.FC = () => {
                     }}
                   />
                 </div>
-
                 {/* Original Content (Fades Out on Hover) */}
                 <div className="relative z-10 transition-all duration-500 group-hover:opacity-0 group-hover:translate-y-2">
                   <div className="w-24 h-16 md:w-44 md:h-20 flex items-center justify-center overflow-hidden group-hover:border-white/20 group-hover:bg-gradient-to-br group-hover:from-white/10 group-hover:to-white/15 transition-all duration-300">
