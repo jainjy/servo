@@ -325,10 +325,10 @@ const ProfessionalProfilePage = () => {
                   <div className=" text-center">
                     {/* Avatar */}
                     <div className="mt-24 relative inline-block mb-4">
-                      <Avatar className="w-28 h-28 border-2 bg-white p-4 border-[#6B8E23] shadow-md">
+                      <Avatar className="w-28 h-28 border-2 bg-white border-[#6B8E23] shadow-md bg-[#6B8E23]">
                         <AvatarImage
                           src={profile.avatar || ""}
-                          className="object-cover"
+                          className="object-cover rounded-full"
                         />
                         <AvatarFallback className="bg-[#556B2F] text-white text-2xl font-bold">
                           {getInitials(
