@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
     {
       name: "REUNIREM DIAGNOSTIC",
       url: "/professional/3d5de8dd-24c0-4f94-98ff-22a308c5de2d",
-      logo: "log_REUNIREM_DIAGNOSTIC.png",
+      logo: "/logo_REUNIREM_DIAGNOSTIC.png",
     },
     {
       name: "IBR Ingénierie",
@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
     {
       name: "RM CONSTRUCTION",
       url: "/professional/0d812425-8a4a-4dda-a65e-c0e56eb704b1",
-      logo: "log_RM_CONSTRUCTION.png",
+      logo: "/logo_RM_CONSTRUCTION.png",
     },
     // {
     //   name: "Expert Immobilier",
