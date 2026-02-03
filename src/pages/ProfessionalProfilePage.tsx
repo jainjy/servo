@@ -349,13 +349,13 @@ const ProfessionalProfilePage = () => {
                         "Professionnel"}
                     </p>
 
-                    {/* Badge niveau d'expérience */}
+                    {/* Badge niveau d'expérience 
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#6B8E23]/10 border border-[#6B8E23]/20 mb-4">
                       <Rocket className="w-3 h-3 text-[#556B2F]" />
                       <span className="text-[#556B2F] text-sm font-medium">
                         {experienceLevel}
                       </span>
-                    </div>
+                    </div>*/}
 
                     {/* Note moyenne */}
                     {stats && (
