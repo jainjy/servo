@@ -226,7 +226,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
       }
 
       // Filtrer seulement les propriétés à vendre (type !== "location" ou type === "vente")
-      const propertiesForSale = (data || []).filter((property: OlimmoProperty) => 
+      const propertiesForSale = (data || []).filter((property: OlimmoProperty) =>
         property.type !== "location" || property.type === "vente"
       );
 
@@ -251,8 +251,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const propertyId = entry.target.getAttribute("data-property-id");
-            const property = buyProperties.find((p) => p.id === propertyId) || 
-                            olimmoProperties.find((p) => p.id === propertyId);
+            const property = buyProperties.find((p) => p.id === propertyId) ||
+              olimmoProperties.find((p) => p.id === propertyId);
 
             if (property) {
               trackPropertyView(property.id, property.type, property.price);
@@ -354,7 +354,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   const handlePropertyClick = (property: any) => {
     trackPropertyClick(property.id, property.title, property.price);
     if (onPropertyClick) onPropertyClick(property);
-    
+
     // Si c'est une propriété Olimmo, ouvrir dans un nouvel onglet
     if (olimmoProperties.some(p => p.id === property.id)) {
       window.open(`https://www.olimmoreunion.re/biens/${property.id}`, '_blank');
@@ -400,8 +400,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   // Combiner toutes les propriétés (API + Olimmo)
   const allProperties = useMemo(() => {
     const apiProperties = buyProperties.map(p => ({ ...p, source: 'api' }));
-    const olimmoPropertiesFormatted = olimmoProperties.map(p => ({ 
-      ...p, 
+    const olimmoPropertiesFormatted = olimmoProperties.map(p => ({
+      ...p,
       source: 'olimmo',
       city: p.location,
       surface: parseInt(p.surface) || 0,
@@ -410,7 +410,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
       latitude: p.latitude || -20.882057,
       longitude: p.longitude || 55.450675
     }));
-    
+
     return [...apiProperties, ...olimmoPropertiesFormatted];
   }, [buyProperties, olimmoProperties]);
 
@@ -467,20 +467,19 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
       if (surfaceMin !== undefined && (p.surface === undefined || p.surface < surfaceMin)) return false;
       if (surfaceMax !== undefined && (p.surface === undefined || p.surface > surfaceMax)) return false;
 
-      // Type filter
+      // Type filter with multiple types separated by "/"
       if (typeBienAchat) {
         const propertyType = p.type?.toLowerCase() || '';
-        const filterType = typeBienAchat.toLowerCase();
-        
-        // Mapping pour Olimmo properties
-        if (p.source === 'olimmo') {
-          if (filterType === 'maison' && propertyType.includes('maison')) return true;
-          if (filterType === 'appartement' && propertyType.includes('appartement')) return true;
-          if (filterType === 'terrain' && propertyType.includes('terrain')) return true;
-          return false;
-        }
-        
-        if (!propertyType.includes(filterType)) return false;
+
+        // Split typeBienAchat by "/" and check if any type matches
+        const filterTypes = typeBienAchat.toLowerCase().split('/').map(t => t.trim());
+
+        // Check if propertyType includes ANY of the filter types
+        const hasMatchingType = filterTypes.some(filterType =>
+          propertyType.includes(filterType)
+        );
+
+        if (!hasMatchingType) return false;
       }
 
       // Bedrooms filter
@@ -1197,7 +1196,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                               <SelectValue placeholder="Tous les types" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="maison">Maison / Villa</SelectItem>
+                              <SelectItem value="maison/villa">Maison / Villa</SelectItem>
                               <SelectItem value="appartement">Appartement</SelectItem>
                               <SelectItem value="terrain">Terrain</SelectItem>
                             </SelectContent>
@@ -1340,14 +1339,14 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
             }))}
           /> */}
 
-<LocationPickerModal
-  open={isLocationModalOpen}
-  onClose={() => setIsLocationModalOpen(false)}
-  value={localisation}
-  onChange={setLocalisation}
-  onLocationSelect={handleLocationSelect}
-  // SUPPRIMER la prop properties={...}
-/>
+          <LocationPickerModal
+            open={isLocationModalOpen}
+            onClose={() => setIsLocationModalOpen(false)}
+            value={localisation}
+            onChange={setLocalisation}
+            onLocationSelect={handleLocationSelect}
+          // SUPPRIMER la prop properties={...}
+          />
         </Suspense>
       </div>
     );
@@ -1421,7 +1420,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       <SelectValue placeholder="Tous les types" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="maison">Maison / Villa</SelectItem>
+                      <SelectItem value="maison/villa">Maison / Villa</SelectItem>
                       <SelectItem value="appartement">Appartement</SelectItem>
                       <SelectItem value="terrain">Terrain</SelectItem>
                       <SelectItem value="commercial">
@@ -1506,8 +1505,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     >
                       <span
                         className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${radiusFilterEnabled
-                            ? "translate-x-8"
-                            : "translate-x-1"
+                          ? "translate-x-8"
+                          : "translate-x-1"
                           }`}
                       />
                     </button>
@@ -1648,7 +1647,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
               )}
             </div>
             <AdvertisementPopup position="page-achat" />
-            
+
             {/* Résultats */}
             <div className="mt-4 bg-white rounded-xl shadow-lg p-6 ">
               <div className="flex justify-between items-center mb-6">
@@ -1761,16 +1760,16 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                               <div className="absolute top-3 left-3">
                                 <span className="bg-[#6B8E23] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                                   {property.type && (
-                                  (
-                                    {
-                                      house: "Maison",
-                                      apartment: "Appartement",
-                                      villa: "Villa",
-                                      land: "Terrain",
-                                      studio: "Studio",
-                                    }[property.type.toLowerCase()] || property.type
-                                  )
-                                )}
+                                    (
+                                      {
+                                        house: "Maison",
+                                        apartment: "Appartement",
+                                        villa: "Villa",
+                                        land: "Terrain",
+                                        studio: "Studio",
+                                      }[property.type.toLowerCase()] || property.type
+                                    )
+                                  )}
                                 </span>
                               </div>
 
@@ -1988,8 +1987,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         >
                           <span
                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${radiusFilterEnabled
-                                ? "translate-x-6"
-                                : "translate-x-1"
+                              ? "translate-x-6"
+                              : "translate-x-1"
                               }`}
                           />
                         </button>
@@ -2048,7 +2047,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                           <SelectValue placeholder="Tous les types" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="maison">Maison / Villa</SelectItem>
+                          <SelectItem value="maison/villa">Maison / Villa</SelectItem>
                           <SelectItem value="appartement">
                             Appartement
                           </SelectItem>
@@ -2231,14 +2230,14 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         }))}
       /> */}
 
-<LocationPickerModal
-  open={isLocationModalOpen}
-  onClose={() => setIsLocationModalOpen(false)}
-  value={localisation}
-  onChange={setLocalisation}
-  onLocationSelect={handleLocationSelect}
-  // SUPPRIMER la prop properties={...}
-/>
+      <LocationPickerModal
+        open={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        value={localisation}
+        onChange={setLocalisation}
+        onLocationSelect={handleLocationSelect}
+      // SUPPRIMER la prop properties={...}
+      />
     </div>
   );
 };
