@@ -1760,7 +1760,17 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                               {/* Badges */}
                               <div className="absolute top-3 left-3">
                                 <span className="bg-[#6B8E23] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                                  {property.type}
+                                  {property.type && (
+                                  (
+                                    {
+                                      house: "Maison",
+                                      apartment: "Appartement",
+                                      villa: "Villa",
+                                      land: "Terrain",
+                                      studio: "Studio",
+                                    }[property.type.toLowerCase()] || property.type
+                                  )
+                                )}
                                 </span>
                               </div>
 
