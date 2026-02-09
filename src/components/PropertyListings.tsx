@@ -1103,7 +1103,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
                                 {/* Contenu */}
                                 <span className="relative z-10 font-semibold transition-all duration-500 ease-out group-hover:translate-x-1 group-hover:text-white">
-                                  Voir details
+                                  voir détails
                                 </span>
                                 <Eye className="w-4 h-4 relative z-10 transition-all duration-500 ease-out group-hover:scale-110 group-hover:translate-x-0.5 group-hover:text-white" />
                               </button>
