@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Mail,
@@ -18,6 +18,10 @@ import {
   Lock,
   Check,
   Trash2,
+  CheckCircle,
+  AlertCircle,
+  Sparkles,
+  TrendingUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,11 +44,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import UserService from "@/services/userService";
 import { toast } from "sonner";
-import {LocationPickerModal} from "@/components/location-picker-modal";
-import { useNavigate } from "react-router-dom";
+import { LocationPickerModal } from "@/components/location-picker-modal";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
+import { MiniProfileCompletion } from "@/components/MiniProfileCompletion";
 
 interface UserProfile {
   id: string;
@@ -93,6 +99,7 @@ const ProfilePage = () => {
     preview: string;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // États pour la modale de changement de mot de passe
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -131,6 +138,9 @@ const ProfilePage = () => {
     longitude: null as number | null,
   });
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+
+  // Utiliser le hook de complétion
+  const { completion, refresh: refreshCompletion } = useProfileCompletion(user);
 
   useEffect(() => {
     fetchUserProfile();
@@ -185,6 +195,10 @@ const ProfilePage = () => {
       await UserService.updateProfile(updateData);
       await fetchUserProfile(); // Recharger les données
       setIsEditing(false);
+      
+      // Rafraîchir la complétion
+      refreshCompletion();
+      
       toast.success("Profil mis à jour avec succès");
     } catch (error: any) {
       console.error("Erreur lors de la mise à jour:", error);
@@ -250,6 +264,9 @@ const ProfilePage = () => {
       URL.revokeObjectURL(pendingAvatar.preview);
       setPendingAvatar(null);
 
+      // Rafraîchir la complétion
+      refreshCompletion();
+      
       toast.success("Avatar mis à jour avec succès");
     } catch (error: any) {
       console.error("Erreur lors de l'upload:", error);
@@ -411,22 +428,45 @@ const ProfilePage = () => {
     }
   };
 
+  // Fonction pour vérifier si un champ est complété
+  const isFieldComplete = (value: any, minLength = 1): boolean => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string') return value.trim().length >= minLength;
+    return true;
+  };
+
+  // Fonction pour obtenir le badge d'état d'un champ
+  const getFieldStatusBadge = (value: any, minLength = 1) => {
+    const isComplete = isFieldComplete(value, minLength);
+    return isComplete ? (
+      <Badge variant="outline" className="text-xs text-green-600 border-green-300">
+        <CheckCircle className="w-3 h-3 mr-1" />
+        Complété
+      </Badge>
+    ) : (
+      <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+        <AlertCircle className="w-3 h-3 mr-1" />
+        À compléter
+      </Badge>
+    );
+  };
+
   if (!user) {
     return (
-     
       <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
         <img src="/loading.gif" alt="" className='w-24 h-24'/>
-           <p className="mt-4 text-xl font-semibold text-gray-700">
-             Chargement du profil...
-           </p>
-       </div>
+        <p className="mt-4 text-xl font-semibold text-gray-700">
+          Chargement du profil...
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between flex-col md:flex-row items-center">
-        <div>
+      {/* En-tête avec barre de progression */}
+      <div className="flex justify-between flex-col md:flex-row items-start md:items-center gap-4">
+        <div className="flex-1">
           <h1 className="text-3xl font-bold tracking-tight">
             Profil Utilisateur
           </h1>
@@ -434,13 +474,24 @@ const ProfilePage = () => {
             Gérez vos informations personnelles et paramètres de compte
           </p>
         </div>
+        
+        {/* Barre de progression mini */}
+        <div className="w-full md:w-auto">
+          {completion && (
+            <MiniProfileCompletion 
+              percentage={completion.percentage} 
+              showLabel={true}
+            />
+          )}
+        </div>
+        
         {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)} className="gap-2">
+          <Button onClick={() => setIsEditing(true)} className="gap-2 mt-4 md:mt-0">
             <Edit2 className="h-4 w-4" />
             Modifier le profil
           </Button>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-4 md:mt-0">
             <Button variant="outline" onClick={handleCancel} className="gap-2">
               <X className="h-4 w-4" />
               Annuler
@@ -452,6 +503,60 @@ const ProfilePage = () => {
           </div>
         )}
       </div>
+
+      {/* Section de progression détaillée */}
+      {completion && (
+        <Card className="border-blue-100 bg-blue-50">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="font-semibold text-blue-900 mb-2">
+                  Progression de votre profil
+                </h3>
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl font-bold text-blue-700">
+                    {completion.percentage}%
+                  </div>
+                  <Badge className={
+                    completion.percentage >= 80 ? "bg-green-100 text-green-800" :
+                    completion.percentage >= 60 ? "bg-yellow-100 text-yellow-800" :
+                    "bg-red-100 text-red-800"
+                  }>
+                    {completion.label}
+                  </Badge>
+                </div>
+                <div className="mt-2">
+                  <Progress 
+                    value={completion.percentage} 
+                    className="h-2"
+                  />
+                </div>
+                <p className="text-sm text-blue-700 mt-2">
+                  {completion.completed}/{completion.total} points complétés
+                </p>
+              </div>
+              
+              {/* Recommandations rapides */}
+              {completion.recommendations.length > 0 && completion.percentage < 100 && (
+                <div className="md:w-1/2">
+                  <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    Recommandations
+                  </h4>
+                  <ul className="space-y-1">
+                    {completion.recommendations.slice(0, 3).map((rec, index) => (
+                      <li key={index} className="flex items-start gap-2 text-sm text-blue-800">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="personal" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 h-auto lg:grid-cols-3">
@@ -471,12 +576,15 @@ const ProfilePage = () => {
                   <Camera className="h-5 w-5" />
                   Photo de profil
                 </CardTitle>
+                <CardDescription>
+                  {getFieldStatusBadge(user.avatar)}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
                     <Avatar
-                      className="h-32 w-32 cursor-pointer"
+                      className="h-32 w-32 cursor-pointer border-2 border-gray-200"
                       onClick={() => fileInputRef.current?.click()}
                     >
                       {pendingAvatar ? (
@@ -564,7 +672,10 @@ const ProfilePage = () => {
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Prénom</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Prénom</label>
+                      {!isEditing && getFieldStatusBadge(formData.firstName)}
+                    </div>
                     <Input
                       value={formData.firstName}
                       onChange={(e) =>
@@ -572,10 +683,14 @@ const ProfilePage = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Votre prénom"
+                      className={isFieldComplete(formData.firstName) ? "border-green-300" : "border-amber-300"}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Nom</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Nom</label>
+                      {!isEditing && getFieldStatusBadge(formData.lastName)}
+                    </div>
                     <Input
                       value={formData.lastName}
                       onChange={(e) =>
@@ -583,41 +698,52 @@ const ProfilePage = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Votre nom"
+                      className={isFieldComplete(formData.lastName) ? "border-green-300" : "border-amber-300"}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    Email
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Email
+                    </label>
+                    {!isEditing && getFieldStatusBadge(formData.email)}
+                  </div>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     disabled={true} // Email non modifiable
                     placeholder="votre@email.com"
-                    className="bg-muted"
+                    className="bg-muted border-green-300"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    Téléphone
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      Téléphone
+                    </label>
+                    {!isEditing && getFieldStatusBadge(formData.phone, 5)}
+                  </div>
                   <Input
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
                     disabled={!isEditing}
                     placeholder="+261 34 12 345 67"
+                    className={isFieldComplete(formData.phone, 5) ? "border-green-300" : "border-amber-300"}
                   />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Code postal</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Code postal</label>
+                      {!isEditing && getFieldStatusBadge(formData.zipCode)}
+                    </div>
                     <Input
                       value={formData.zipCode}
                       onChange={(e) =>
@@ -625,10 +751,14 @@ const ProfilePage = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Code postal"
+                      className={isFieldComplete(formData.zipCode) ? "border-green-300" : "border-amber-300"}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Ville</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Ville</label>
+                      {!isEditing && getFieldStatusBadge(formData.city)}
+                    </div>
                     <Input
                       value={formData.city}
                       onChange={(e) =>
@@ -636,15 +766,19 @@ const ProfilePage = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Ville"
+                      className={isFieldComplete(formData.city) ? "border-green-300" : "border-amber-300"}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Adresse
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Adresse
+                    </label>
+                    {!isEditing && getFieldStatusBadge(formData.address)}
+                  </div>
                   <Input
                     value={formData.address}
                     onChange={(e) =>
@@ -652,13 +786,17 @@ const ProfilePage = () => {
                     }
                     disabled={!isEditing}
                     placeholder="Votre adresse complète"
+                    className={isFieldComplete(formData.address) ? "border-green-300" : "border-amber-300"}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Complément d'adresse
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">
+                      Complément d'adresse
+                    </label>
+                    {!isEditing && getFieldStatusBadge(formData.addressComplement)}
+                  </div>
                   <Input
                     value={formData.addressComplement}
                     onChange={(e) =>
@@ -666,6 +804,7 @@ const ProfilePage = () => {
                     }
                     disabled={!isEditing}
                     placeholder="Appartement, étage, etc."
+                    className={isFieldComplete(formData.addressComplement) ? "border-green-300" : "border-gray-300"}
                   />
                 </div>
 
@@ -676,16 +815,21 @@ const ProfilePage = () => {
                       <MapPin className="h-4 w-4" />
                       Coordonnées GPS
                     </h4>
-                    {isEditing && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsLocationModalOpen(true)}
-                        className="gap-2"
-                      >
-                        <MapPin className="h-3 w-3" />
-                        Sur la carte
-                      </Button>
+                    {!isEditing ? (
+                      getFieldStatusBadge(formData.latitude)
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {getFieldStatusBadge(formData.latitude)}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsLocationModalOpen(true)}
+                          className="gap-2"
+                        >
+                          <MapPin className="h-3 w-3" />
+                          Sur la carte
+                        </Button>
+                      </div>
                     )}
                   </div>
 
@@ -704,6 +848,7 @@ const ProfilePage = () => {
                         }
                         disabled={!isEditing}
                         placeholder="Ex: -20.8789"
+                        className={isFieldComplete(formData.latitude) ? "border-green-300" : "border-amber-300"}
                       />
                     </div>
                     <div className="space-y-2">
@@ -720,13 +865,17 @@ const ProfilePage = () => {
                         }
                         disabled={!isEditing}
                         placeholder="Ex: 55.4481"
+                        className={isFieldComplete(formData.longitude) ? "border-green-300" : "border-amber-300"}
                       />
                     </div>
                   </div>
 
                   {formData.latitude && formData.longitude && (
-                    <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700 border border-blue-200">
-                      Position : {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                    <div className="mt-2 p-2 bg-green-50 rounded text-xs text-green-700 border border-green-200">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3" />
+                        Position définie : {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -738,15 +887,34 @@ const ProfilePage = () => {
         <TabsContent value="professional" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
-                Informations professionnelles
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Informations professionnelles
+                </CardTitle>
+                {completion && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={
+                      completion.percentage >= 80 ? "text-green-600 border-green-300" :
+                      completion.percentage >= 60 ? "text-yellow-600 border-yellow-300" :
+                      "text-red-600 border-red-300"
+                    }>
+                      <TrendingUp className="w-3 h-3 mr-1" />
+                      {completion.percentage}%
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              <CardDescription>
+                {user.role === "professional" 
+                  ? "Informations pour votre activité professionnelle" 
+                  : "Informations sur votre rôle"}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 border rounded-lg">
+                  <div className="flex items-center gap-3 p-4 border rounded-lg bg-gray-50">
                     {getRoleIcon(user.role)}
                     <div>
                       <p className="font-medium">Rôle</p>
@@ -760,9 +928,12 @@ const ProfilePage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Nom de l'entreprise
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">
+                        Nom de l'entreprise
+                      </label>
+                      {!isEditing && getFieldStatusBadge(formData.companyName || formData.commercialName)}
+                    </div>
                     <Input
                       value={formData.companyName}
                       onChange={(e) =>
@@ -770,13 +941,17 @@ const ProfilePage = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Nom de votre société"
+                      className={isFieldComplete(formData.companyName) ? "border-green-300" : "border-amber-300"}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Nom commercial
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">
+                        Nom commercial
+                      </label>
+                      {!isEditing && getFieldStatusBadge(formData.commercialName)}
+                    </div>
                     <Input
                       value={formData.commercialName}
                       onChange={(e) =>
@@ -784,12 +959,13 @@ const ProfilePage = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Nom commercial"
+                      className={isFieldComplete(formData.commercialName) ? "border-green-300" : "border-gray-300"}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 border rounded-lg">
+                  <div className="flex items-center gap-3 p-4 border rounded-lg bg-gray-50">
                     <Calendar className="h-4 w-4" />
                     <div>
                       <p className="font-medium">Membre depuis</p>
@@ -804,7 +980,10 @@ const ProfilePage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">SIRET</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">SIRET</label>
+                      {!isEditing && getFieldStatusBadge(formData.siret)}
+                    </div>
                     <Input
                       value={formData.siret}
                       onChange={(e) =>
@@ -812,6 +991,7 @@ const ProfilePage = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Numéro SIRET"
+                      className={isFieldComplete(formData.siret) ? "border-green-300" : "border-amber-300"}
                     />
                   </div>
 
@@ -835,43 +1015,68 @@ const ProfilePage = () => {
                 <div className="space-y-4">
                   <div className="grid gap-6 md:grid-cols-2">
                     <div>
-                      <h4 className="font-medium mb-2">Métiers</h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Briefcase className="h-4 w-4" />
+                          Métiers
+                        </h4>
+                        {!isEditing && getFieldStatusBadge(user.metiers && user.metiers.length > 0 ? true : false)}
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         {user.metiers.length > 0 ? (
                           user.metiers.map(({ metier }) => (
-                            <Badge key={metier.id} variant="secondary">
+                            <Badge key={metier.id} variant="secondary" className="bg-blue-100 text-blue-800">
                               {metier.libelle}
                             </Badge>
                           ))
                         ) : (
-                          <p className="text-sm text-muted-foreground">
-                            Aucun métier associé
-                          </p>
+                          <div className="p-3 border border-amber-200 rounded bg-amber-50">
+                            <p className="text-sm text-amber-700">
+                              Aucun métier associé. Ajoutez votre métier principal.
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2">Services</h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" />
+                          Services
+                        </h4>
+                        {!isEditing && getFieldStatusBadge(user.services && user.services.length >= 3 ? true : false)}
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         {user.services.length > 0 ? (
                           user.services.map(({ service }) => (
-                            <Badge key={service.id} variant="outline">
+                            <Badge key={service.id} variant="outline" className="border-green-300 text-green-700">
                               {service.libelle}
                             </Badge>
                           ))
                         ) : (
-                          <p className="text-sm text-muted-foreground">
-                            Aucun service associé
-                          </p>
+                          <div className="p-3 border border-amber-200 rounded bg-amber-50">
+                            <p className="text-sm text-amber-700">
+                              Aucun service associé. Ajoutez au moins 3 services.
+                            </p>
+                          </div>
                         )}
                       </div>
+                      {user.services.length > 0 && user.services.length < 3 && (
+                        <div className="mt-2 p-2 bg-amber-50 rounded text-xs text-amber-700 border border-amber-200">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="w-3 h-3" />
+                            Ajoutez {3 - user.services.length} service(s) pour optimiser votre profil
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {user.status === "inactive" && (
                     <div className="p-4 border rounded-lg bg-blue-50">
-                      <h4 className="font-medium text-blue-900 mb-2">
+                      <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
                         Statut professionnel
                       </h4>
                       <p className="text-sm text-blue-700">
@@ -917,35 +1122,37 @@ const ProfilePage = () => {
             </Card>
 
             {/* Nouvelle section - Suppression de compte */}
-            {user.role=="professional"&&<Card className="border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-600">
-                  <Trash2 className="h-5 w-5" />
-                  Zone de danger
-                </CardTitle>
-                <CardDescription>
-                  Actions irréversibles concernant votre compte
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 border border-red-200 rounded-lg bg-white">
-                  <h4 className="font-medium text-red-900 mb-2">
-                    Supprimer votre compte
-                  </h4>
-                  <p className="text-sm text-red-700 mb-4">
-                    La suppression de votre compte est permanente et irréversible. Toutes vos données, annonces et informations seront supprimées.
-                  </p>
-                  <Button
-                    variant="destructive"
-                    onClick={() => navigate("/pro/delete-account")}
-                    className="gap-2"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Supprimer mon compte
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>}
+            {user.role === "professional" && (
+              <Card className="border-red-200 bg-red-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-red-600">
+                    <Trash2 className="h-5 w-5" />
+                    Zone de danger
+                  </CardTitle>
+                  <CardDescription>
+                    Actions irréversibles concernant votre compte
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 border border-red-200 rounded-lg bg-white">
+                    <h4 className="font-medium text-red-900 mb-2">
+                      Supprimer votre compte
+                    </h4>
+                    <p className="text-sm text-red-700 mb-4">
+                      La suppression de votre compte est permanente et irréversible. Toutes vos données, annonces et informations seront supprimées.
+                    </p>
+                    <Button
+                      variant="destructive"
+                      onClick={() => navigate("/pro/delete-account")}
+                      className="gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Supprimer mon compte
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
       </Tabs>
