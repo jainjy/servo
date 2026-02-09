@@ -561,120 +561,120 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
   // Normalisation des résultats - AMÉLIORÉE pour inclure plus de données
   const normalizeApiResults = (apiResults: any[]): SearchItem[] => {
-  return apiResults.map((item) => {
-    let title = "";
-    let image = "";
-    let price: number | undefined;
-    let location = "";
-    let route = "/";
-    
-    // Normalisation améliorée de source_table
-    const rawSource = (item.source || item.source_table || "").toLowerCase();
-    let type = "UNKNOWN";
-    let normalizedSource = "unknown";
+    return apiResults.map((item) => {
+      let title = "";
+      let image = "";
+      let price: number | undefined;
+      let location = "";
+      let route = "/";
 
-    if (rawSource.includes("professional") || rawSource.includes("user")) {
-      normalizedSource = "Professional";
-      type = "PROFESSIONNEL";
-    } else if (rawSource.includes("property")) {
-      normalizedSource = "Property";
-      type = "PROPRIÉTÉ";
-    } else if (rawSource.includes("product")) {
-      normalizedSource = "Product";
-      type = "PRODUIT";
-    } else if (rawSource.includes("service")) {
-      normalizedSource = "Service";
-      type = "SERVICE";
-    } else if (rawSource.includes("metier")) {
-      normalizedSource = "Metier";
-      type = "MÉTIER";
-    } else if (rawSource.includes("blog")) {
-      normalizedSource = "BlogArticle";
-      type = "ARTICLE";
-    }
+      // Normalisation améliorée de source_table
+      const rawSource = (item.source || item.source_table || "").toLowerCase();
+      let type = "UNKNOWN";
+      let normalizedSource = "unknown";
 
-    switch (normalizedSource) {
-      case "Property":
-        title = item.title || "Propriété";
-        image = extractFirstValidImage(item.images);
-        price = item.price;
-        location = item.city || "";
-        route = `/immobilier/${item.id}`;
-        break;
+      if (rawSource.includes("professional") || rawSource.includes("user")) {
+        normalizedSource = "Professional";
+        type = "PROFESSIONNEL";
+      } else if (rawSource.includes("property")) {
+        normalizedSource = "Property";
+        type = "PROPRIÉTÉ";
+      } else if (rawSource.includes("product")) {
+        normalizedSource = "Product";
+        type = "PRODUIT";
+      } else if (rawSource.includes("service")) {
+        normalizedSource = "Service";
+        type = "SERVICE";
+      } else if (rawSource.includes("metier")) {
+        normalizedSource = "Metier";
+        type = "MÉTIER";
+      } else if (rawSource.includes("blog")) {
+        normalizedSource = "BlogArticle";
+        type = "ARTICLE";
+      }
 
-      case "Product":
-        title = item.name || "Produit";
-        image = extractFirstValidImage(item.images);
-        price = item.price;
-        route = `/produits/${item.id}`;
-        break;
+      switch (normalizedSource) {
+        case "Property":
+          title = item.title || "Propriété";
+          image = extractFirstValidImage(item.images);
+          price = item.price;
+          location = item.city || "";
+          route = `/immobilier/${item.id}`;
+          break;
 
-      case "Service":
-        title = item.libelle || "Service";
-        image = extractFirstValidImage(item.images);
-        price = item.price;
-        route = `/services`;
-        break;
+        case "Product":
+          title = item.name || "Produit";
+          image = extractFirstValidImage(item.images);
+          price = item.price;
+          route = `/produits/${item.id}`;
+          break;
 
-      case "Metier":
-        title = item.libelle || "Métier";
-        image = extractFirstValidImage(item.images);
-        route = `/professionnels`;
-        break;
+        case "Service":
+          title = item.libelle || "Service";
+          image = extractFirstValidImage(item.images);
+          price = item.price;
+          route = `/services`;
+          break;
 
-      case "Professional":
-        // Utiliser companyName ou firstName/lastName pour le titre
-        title = item.companyName || item.commercialName || `${item.firstName || ''} ${item.lastName || ''}`.trim() || "Professionnel";
-        image = ""; // Les professionnels n'ont pas d'images dans les résultats API
-        location = item.city || "";
-        route = `/professional/${item.id}`; // Route vers la page de profil professionnel
-        break;
+        case "Metier":
+          title = item.libelle || "Métier";
+          image = extractFirstValidImage(item.images);
+          route = `/professionnels`;
+          break;
 
-      case "BlogArticle":
-        title = item.title || item.name || "Article";
-        image = extractFirstValidImage(item.images);
-        route = `/blog/${item.id}`;
-        break;
+        case "Professional":
+          // Utiliser companyName ou firstName/lastName pour le titre
+          title = item.companyName || item.commercialName || `${item.firstName || ''} ${item.lastName || ''}`.trim() || "Professionnel";
+          image = ""; // Les professionnels n'ont pas d'images dans les résultats API
+          location = item.city || "";
+          route = `/professional/${item.id}`; // Route vers la page de profil professionnel
+          break;
 
-      default:
-        title = item.title || item.name || item.libelle || "Élément";
-        image = extractFirstValidImage(item.images);
-        route = "/";
-    }
+        case "BlogArticle":
+          title = item.title || item.name || "Article";
+          image = extractFirstValidImage(item.images);
+          route = `/blog/${item.id}`;
+          break;
 
-    return {
-      id: item.id,
-      title,
-      image,
-      price,
-      location,
-      route,
-      type: type,
-      source_table: normalizedSource, // Utiliser la source normalisée
-      similarity: item.similarity,
-      libelle: item.libelle || title,
-      description: item.description,
-      name: item.name || title,
-      images: Array.isArray(item.images) ? item.images : [image].filter(Boolean),
-      city: item.city,
-      address: item.address,
-      // Champs spécifiques aux professionnels
-      firstName: item.firstName,
-      lastName: item.lastName,
-      companyName: item.companyName,
-      commercialName: item.commercialName,
-      userType: item.userType,
-      professionalCategory: item.professionalCategory,
-      services: item.services || item.associatedServices || [],
-      metiers: item.metiers || item.associatedMetiers || [],
-      matchType: item.matchType,
-      professionalType: item.professionalType,
-      associatedServices: item.associatedServices,
-      associatedMetiers: item.associatedMetiers,
-      creatorInfo: item.creatorInfo
-    };
-  });
-};
+        default:
+          title = item.title || item.name || item.libelle || "Élément";
+          image = extractFirstValidImage(item.images);
+          route = "/";
+      }
+
+      return {
+        id: item.id,
+        title,
+        image,
+        price,
+        location,
+        route,
+        type: type,
+        source_table: normalizedSource, // Utiliser la source normalisée
+        similarity: item.similarity,
+        libelle: item.libelle || title,
+        description: item.description,
+        name: item.name || title,
+        images: Array.isArray(item.images) ? item.images : [image].filter(Boolean),
+        city: item.city,
+        address: item.address,
+        // Champs spécifiques aux professionnels
+        firstName: item.firstName,
+        lastName: item.lastName,
+        companyName: item.companyName,
+        commercialName: item.commercialName,
+        userType: item.userType,
+        professionalCategory: item.professionalCategory,
+        services: item.services || item.associatedServices || [],
+        metiers: item.metiers || item.associatedMetiers || [],
+        matchType: item.matchType,
+        professionalType: item.professionalType,
+        associatedServices: item.associatedServices,
+        associatedMetiers: item.associatedMetiers,
+        creatorInfo: item.creatorInfo
+      };
+    });
+  };
   // Fonctions de recherche existantes
   const removeDuplicates = (results: SearchItem[]): SearchItem[] => {
     const seen = new Set();
@@ -969,85 +969,86 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     }).format(price);
   };
 
-// Fonction pour rendre le bouton approprié selon le type - CORRIGÉE
-const renderActionButton = (item: SearchItem) => {
-  console.log("🔍 renderActionButton - source_table:", item.source_table, "title:", item.title); // Debug
-  
-  switch (item.source_table) {
-    case "Service":
-    case "Metier":
-      return (
-        <Button
-          size="sm"
-          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-          onClick={(e) => handleDevis(item, e)}
-        >
-          <FileText className="h-4 w-4 mr-2" />
-          Faire un devis
-        </Button>
-      );
+  // Fonction pour rendre le bouton approprié selon le type - CORRIGÉE
+  const renderActionButton = (item: SearchItem) => {
+    console.log("🔍 renderActionButton - source_table:", item.source_table, "title:", item.title); // Debug
 
-    case "Property":
-      return (
-        <Button
-          size="sm"
-          className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white"
-          onClick={(e) => handleVisite(item, e)}
-        >
-          <Calendar className="h-4 w-4 mr-2" />
-          Demande visite
-        </Button>
-      );
+    switch (item.source_table) {
+      case "Service":
+      case "Metier":
+        return (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={(e) => handleDevis(item, e)}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Faire un devis
+          </Button>
+        );
 
-    case "Product":
-      return (
-        <Button
-          size="sm"
-          className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white"
-          onClick={(e) => handleAddToCart(item, e)}
-        >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Ajouter au panier
-        </Button>
-      );
+      case "Property":
+        return (
+          <Link
+            to={`/immobilier/${item.id}`} // or appropriate property ID
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center w-full mt-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors"
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            Voir plus de détails
+          </Link>
+        );
 
-    case "BlogArticle":
-      return (
-        <Button
-          size="sm"
-          className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(item.route);
-          }}
-        >
-          <Play className="h-4 w-4 mr-2" />
-          Lire l'article
-        </Button>
-      );
+      case "Product":
+        return (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white"
+            onClick={(e) => handleAddToCart(item, e)}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Ajouter au panier
+          </Button>
+        );
 
-    case "Professional":
-      return (
-        <Button
-          size="sm"
-          className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log("Navigating to professional profile:", item.id); // Debug
-            navigate(`/professional/${item.id}`);
-          }}
-        >
-          <User className="h-4 w-4 mr-2" />
-          Voir profil
-        </Button>
-      );
+      case "BlogArticle":
+        return (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(item.route);
+            }}
+          >
+            <Play className="h-4 w-4 mr-2" />
+            Lire l'article
+          </Button>
+        );
 
-    default:
-      console.warn("⚠️ Type inconnu pour le bouton d'action:", item.source_table, "ID:", item.id);
-      // Retourner null pour ne pas afficher de bouton pour les types inconnus
-      return null;
-  }
-};
+      case "Professional":
+        return (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log("Navigating to professional profile:", item.id);
+              navigate(`/professional/${item.id}`);
+            }}
+          >
+            <User className="h-4 w-4 mr-2" />
+            Voir profil
+          </Button>
+        );
+
+      default:
+        console.warn("⚠️ Type inconnu pour le bouton d'action:", item.source_table, "ID:", item.id);
+        // Retourner null pour ne pas afficher de bouton pour les types inconnus
+        return null;
+    }
+  };
 
 
 
@@ -1059,9 +1060,9 @@ const renderActionButton = (item: SearchItem) => {
 
     // Pour les professionnels, afficher le nom complet
     if (item.source_table === "Professional") {
-      const displayName = item.companyName || item.commercialName || 
-                         `${item.firstName || ''} ${item.lastName || ''}`.trim();
-      
+      const displayName = item.companyName || item.commercialName ||
+        `${item.firstName || ''} ${item.lastName || ''}`.trim();
+
       return (
         <div className="relative h-48 overflow-hidden rounded-t-xl">
           <div className={`w-full h-full ${bgColor} flex items-center justify-center text-white`}>
@@ -1168,8 +1169,8 @@ const renderActionButton = (item: SearchItem) => {
   const renderProfessionalDetails = (item: SearchItem) => {
     if (item.source_table !== "Professional") return null;
 
-    const displayName = item.companyName || item.commercialName || 
-                       `${item.firstName || ''} ${item.lastName || ''}`.trim();
+    const displayName = item.companyName || item.commercialName ||
+      `${item.firstName || ''} ${item.lastName || ''}`.trim();
 
     return (
       <div className="mt-2 text-sm text-gray-600">
@@ -1182,7 +1183,7 @@ const renderActionButton = (item: SearchItem) => {
             </div>
           )}
         </div>
-        
+
         {item.matchType && (
           <div className="flex items-center gap-1 mb-2">
             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -1190,7 +1191,7 @@ const renderActionButton = (item: SearchItem) => {
             </span>
           </div>
         )}
-        
+
         {(item.services?.length > 0 || item.metiers?.length > 0) && (
           <div className="mt-2">
             <div className="font-medium mb-1">Spécialisations:</div>
@@ -1231,7 +1232,7 @@ const renderActionButton = (item: SearchItem) => {
                   <div className="absolute inset-0"></div>
                   <ServoLogo />
                 </Link>
-                
+
               </div>
 
               <div className="relative bg-white rounded-lg flex-1" onClick={() => setShowMapModal(false)}>
@@ -1453,13 +1454,13 @@ const renderActionButton = (item: SearchItem) => {
                                 </div>
                               )}
 
-                              {isExpanded && renderActionButton(item)}
+                              {renderActionButton(item)}
 
-                              <div className="mt-2 text-center">
+                              {/* <div className="mt-2 text-center">
                                 <div className="text-xs text-blue-600 font-medium">
                                   {isExpanded ? 'Cliquer pour réduire' : 'Cliquer pour voir les actions'}
                                 </div>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         );
