@@ -1,70 +1,33 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { prestationsData, prestationTypesByCategory } from "./travauxData";
 import {
   ChevronLeft,
   ChevronRight,
-  Camera,
-  FileText,
   ArrowRight,
+  Heart,
+  Star,
+  MapPin,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import AdvertisementPopup from '@/components/AdvertisementPopup';
 
 const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
-  const navigate = useNavigate();
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
+  const [favorites, setFavorites] = useState({});
   const sliderRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
-  // État pour la publicité
-  const [isAdVisible, setIsAdVisible] = useState(true);
-  const [adTimeRemaining, setAdTimeRemaining] = useState(120); // 2 minutes en secondes
-  const [isMobile, setIsMobile] = useState(false);
+  // COULEURS OLIplus
+  const OLI_GREEN = "#556B2F";
+  const OLI_GREEN_LIGHT = "#6B8E23";
 
-  // Détection mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Timer pour la publicité
-  useEffect(() => {
-    if (!isAdVisible || isMobile) return;
-
-    const timer = setInterval(() => {
-      setAdTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setIsAdVisible(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isAdVisible, isMobile]);
-
-  // Formater le temps en minutes:secondes
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Prendre les 4 premiers travaux toutes catégories confondues
+  // Prendre les 8 premiers travaux
   const allPrestations = Object.values(prestationsData).flat();
-  const displayedPrestations = allPrestations.slice(0, 4);
+  const displayedPrestations = allPrestations.slice(0, 8);
 
   useEffect(() => {
     const indexes = {};
@@ -74,20 +37,18 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
     setCurrentImageIndexes(indexes);
   }, []);
 
-  const handleCardClick = (prestation) => {
-    if (homeCards) {
-      const category = Object.entries(prestationsData).find(([_, prestations]) =>
-        (prestations as any[]).some((p) => p.id === prestation.id)
-      )?.[0];
-
-      if (category) {
-        navigate(`/travaux?categorie=${category}&search=${encodeURIComponent(prestation.title)}`);
-      }
-    }
+  const toggleFavorite = (prestationId, e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setFavorites((prev) => ({
+      ...prev,
+      [prestationId]: !prev[prestationId],
+    }));
   };
 
   const nextImage = (prestationId, totalImages, e) => {
     e?.stopPropagation();
+    e?.preventDefault();
     setCurrentImageIndexes((prev) => ({
       ...prev,
       [prestationId]: (prev[prestationId] + 1) % totalImages,
@@ -96,6 +57,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
 
   const prevImage = (prestationId, totalImages, e) => {
     e?.stopPropagation();
+    e?.preventDefault();
     setCurrentImageIndexes((prev) => ({
       ...prev,
       [prestationId]: (prev[prestationId] - 1 + totalImages) % totalImages,
@@ -104,19 +66,18 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
 
   const scrollSlider = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
-      const scrollAmount = window.innerWidth < 768 ? sliderRef.current.clientWidth : 540;
+      const scrollAmount = window.innerWidth < 768 ? sliderRef.current.clientWidth - 32 : 540;
       const newScrollPosition = sliderRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       sliderRef.current.scrollTo({ left: newScrollPosition, behavior: 'smooth' });
-
       setTimeout(() => checkScroll(), 300);
     }
   };
 
   const checkScroll = () => {
     if (sliderRef.current) {
-      setCanScrollLeft(sliderRef.current.scrollLeft > 0);
+      setCanScrollLeft(sliderRef.current.scrollLeft > 10);
       setCanScrollRight(
-        sliderRef.current.scrollLeft < sliderRef.current.scrollWidth - sliderRef.current.clientWidth - 10
+        sliderRef.current.scrollLeft < sliderRef.current.scrollWidth - sliderRef.current.clientWidth - 20
       );
     }
   };
@@ -134,262 +95,269 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
     }
   }, []);
 
-  // Auto-scroll tous les 5 secondes
-  useEffect(() => {
-    const autoScroll = setInterval(() => {
-      if (sliderRef.current) {
-        const scrollAmount = window.innerWidth < 768 ? sliderRef.current.clientWidth : 540;
-        const currentScroll = sliderRef.current.scrollLeft;
-        const maxScroll = sliderRef.current.scrollWidth - sliderRef.current.clientWidth;
-
-        if (currentScroll >= maxScroll - 10) {
-          // Retour au début
-          sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          // Continuer le scroll
-          const newPosition = currentScroll + scrollAmount;
-          sliderRef.current.scrollTo({ left: newPosition, behavior: 'smooth' });
-        }
-
-        setTimeout(() => checkScroll(), 300);
-      }
-    }, 5000);
-
-    return () => clearInterval(autoScroll);
-  }, []);
+  // Construction de l'URL pour chaque prestation
+  const getPrestationUrl = (prestation) => {
+    if (!homeCards) return "#";
+    const category = Object.entries(prestationsData).find(([_, prestations]) =>
+      (prestations as any[]).some((p) => p.id === prestation.id)
+    )?.[0];
+    return category ? `/travaux?categorie=${category}&search=${encodeURIComponent(prestation.title)}` : "#";
+  };
 
   return (
-    <section className="container mx-auto -mt-6 py-8 relative">
-      {/* Publicité - Version taille intermédiaire */}
-      {false && (
-        <motion.article
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.25 }}
-          className="
-              
-              relative w-full max-w-2xl mx-auto
-              rounded-xl border border-white/20
-              bg-gradient-to-br from-white/12 to-white/6
-              backdrop-blur-lg shadow-lg overflow-hidden z-40 mb-4
-            "
+    <section className="w-full py-8 sm:py-12 lg:py-16 bg-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        {/* HEADER - Style Airbnb minimaliste */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="flex items-center justify-between mb-6 lg:mb-8"
         >
-          {/* Header */}
-          <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5 text-xs">
-            <span className="px-2.5 py-1 rounded-full bg-white/25 text-white font-semibold backdrop-blur-sm">
-              Pub
-            </span>
-
-            <div className="flex items-center bg-black/35 px-2.5 py-1 rounded-full text-white backdrop-blur-sm">
-              <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {formatTime(adTimeRemaining)}
-            </div>
-
-            <button
-              onClick={() => setIsAdVisible(false)}
-              className="p-1.5 rounded-full bg-black/35 hover:bg-black/50 text-white/75 hover:text-white transition-colors"
-              aria-label="Fermer la publicité"
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-medium text-[#222222] tracking-tight">
+            Inspirations pour vos travaux
+          </h2>
+          
+          {/* Lien vers la page travaux - Ouvre dans un nouvel onglet */}
+          {homeCards && (
+            <a 
+              href="/travaux" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-sm font-medium text-[#222222] hover:bg-[#F7F7F7] px-4 py-2 rounded-full transition-colors no-underline"
             >
-              ✕
-            </button>
-          </div>
+              Afficher tout
+              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </a>
+          )}
+        </motion.div>
 
-          {/* Contenu */}
-          <div className="flex p-4 gap-4">
-            {/* Image */}
-            <div className="w-36 h-28 rounded-lg overflow-hidden border border-white/20 flex-shrink-0">
-              <img
-                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80"
-                alt="Offre spéciale"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Texte */}
-            <div className="flex-1">
-              <h2 className="text-base font-semibold text-black mb-1.5">
-                Offres spéciales
-              </h2>
-
-              <p className="text-sm text-black/80 leading-relaxed mb-3">
-                Bénéficiez de réductions exclusives sur nos meilleurs services.
-              </p>
-
-              <div className="flex items-center justify-between pt-3 border-t border-white/15">
-                <div className="flex items-center text-xs text-white/65">
-                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-black/70">Visible : <span className="font-medium text-black/70">2 minutes</span></span>
-                </div>
-
-
-              </div>
-            </div>
-          </div>
-        </motion.article>
-      )}
-
-      {/* Publicité section Travevaux */}
-      <AdvertisementPopup position="section-accueil-travaux" size="medium" showOnMobile={true}/>
-
-      {/* SECTION NOS TRAVAUX – COTE A COTE PORTFOLIO */}
-      <section className="bg-[#81794d36] py-8 sm:py-10 md:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 rounded-md">
-        <div className="max-w-[1400px] mx-auto">
-
-          <div className="flex flex-col lg:grid lg:grid-cols-5 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-start">
-
-            {/* ===== COLONNE GAUCHE (CONTENU) ===== */}
-            <div className="lg:col-span-2 lg:sticky lg:top-32">
-              {/* Titre responsive */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-serif text-slate-900 mb-4 sm:mb-5 md:mb-6">
-                Nos Travaux
-              </h2>
-
-              {/* Texte descriptif */}
-              <p className="text-[#5c5047] text-sm sm:text-base max-w-full lg:max-w-md leading-relaxed mb-6 sm:mb-8 md:mb-10">
-                Découvrez un aperçu de nos travaux les plus récents
-              </p>
-
-              {/* Bouton responsive */}
-              <Button
-                variant="outline"
-                className="rounded-full border border-[#3a2f27] bg-transparent px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 text-slate-900 hover:bg-logo hover:text-white transition-all duration-300 group w-full sm:w-auto"
-                onClick={() => navigate("/travaux?categorie=interieurs")}
-              >
-                <span className="font-mono text-xs sm:text-sm">
-                  VOIR TOUS NOS TRAVAUX
-                </span>
-                <ArrowRight className="ml-2 sm:ml-3 h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </div>
-
-            {/* ===== COLONNE DROITE (PROJETS) ===== */}
-            <div className="lg:col-span-3 w-full">
-              <div className="relative">
-                {/* Conteneur du slider */}
-                <div
-                  ref={sliderRef}
-                  className="flex gap-4 sm:gap-6 md:gap-8 lg:gap-12 pb-6 sm:pb-8 md:pb-10 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
-                  style={{
-                    scrollbarWidth: 'none', // Firefox
-                    msOverflowStyle: 'none', // IE/Edge
-                  }}
-                >
-                  {displayedPrestations.map((prestation) => {
-                    const currentImageIndex = currentImageIndexes[prestation.id] || 0;
-                    const totalImages = prestation.images.length;
-
-                    const category = Object.entries(prestationsData).find(([_, prestations]) =>
-                      prestations.some((p) => p.id === prestation.id)
-                    )?.[0];
-
-                    const prestationType = prestationTypesByCategory[category]?.find(
-                      (t) => t.value === prestation.type
-                    );
-
-                    return (
-                      <Card
-                        key={prestation.id}
-                        onClick={() => handleCardClick(prestation)}
-                        className="group relative w-full md:min-w-[250px] lg:max-w-[450px] h-[200px] sm:h-[240px] md:h-[280px] lg:h-[320px] rounded-xl md:rounded-2xl overflow-hidden border-0 cursor-pointer bg-transparent snap-start flex-shrink-0"
-                      >
-                        <div className="relative w-full h-full">
-                          {/* Image */}
-                          <img
-                            src={prestation.images[currentImageIndex]}
-                            alt={prestation.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            loading="lazy"
-                          />
-
-                          {/* Overlay gradient */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-                          {/* Badge catégorie */}
-                          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold text-[#3a2f27]">
-                            {prestationType?.label}
-                          </div>
-
-                          {/* Boutons de navigation d'image (seulement sur desktop) */}
-                          {totalImages > 1 && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/80 backdrop-blur-sm opacity-0 lg:group-hover:opacity-100 transition hidden lg:flex"
-                                onClick={(e) => prevImage(prestation.id, totalImages, e)}
-                              >
-                                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-[#3a2f27]" />
-                              </Button>
-
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-white/80 backdrop-blur-sm opacity-0 lg:group-hover:opacity-100 transition hidden lg:flex"
-                                onClick={(e) => nextImage(prestation.id, totalImages, e)}
-                              >
-                                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-[#3a2f27]" />
-                              </Button>
-                            </>
-                          )}
-
-                          {/* Titre du projet */}
-                          <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 text-white">
-                            <h3 className="text-lg sm:text-xl md:text-2xl font-serif tracking-wide">
-                              {prestation.title}
-                            </h3>
-                          </div>
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-
-                {/* Boutons de navigation du slider (visible sur desktop seulement) */}
-                <Button
-                  variant="ghost"
-                  size="icon"
+        {/* SLIDER - Cartes style Airbnb */}
+        <div className="relative group/slider">
+          {/* Boutons navigation - Discrets */}
+          <div className="hidden lg:block">
+            <AnimatePresence>
+              {canScrollLeft && (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   onClick={() => scrollSlider('left')}
-                  disabled={!canScrollLeft}
-                  className="absolute -left-4 lg:-left-8 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full bg-[#3a2f27] hover:bg-[#3a2f27]/80 text-white disabled:opacity-30 disabled:cursor-not-allowed z-10 hidden lg:flex"
+                  className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 h-8 w-8 rounded-full bg-white shadow-md border border-[#DDDDDD] hover:shadow-lg transition-all opacity-0 group-hover/slider:opacity-100"
                 >
-                  <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
+                  <ChevronLeft className="h-4 w-4 text-[#222222] mx-auto" />
+                </motion.button>
+              )}
+            </AnimatePresence>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
+            <AnimatePresence>
+              {canScrollRight && (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   onClick={() => scrollSlider('right')}
-                  disabled={!canScrollRight}
-                  className="absolute -right-4 lg:-right-8 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full bg-[#3a2f27] hover:bg-[#3a2f27]/80 text-white disabled:opacity-30 disabled:cursor-not-allowed z-10 hidden lg:flex"
+                  className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 h-8 w-8 rounded-full bg-white shadow-md border border-[#DDDDDD] hover:shadow-lg transition-all opacity-0 group-hover/slider:opacity-100"
                 >
-                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
-              </div>
+                  <ChevronRight className="h-4 w-4 text-[#222222] mx-auto" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
 
-              {/* Indicateurs de défilement pour mobile (optionnel) */}
-              <div className="flex justify-center gap-2 mt-4 lg:hidden">
-                {displayedPrestations.map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-1.5 w-1.5 rounded-full bg-[#3a2f27]/30"
-                  />
-                ))}
-              </div>
-            </div>
+          {/* GRILLE DES CARTES - Style Airbnb exact */}
+          <div
+            ref={sliderRef}
+            className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            {displayedPrestations.map((prestation) => {
+              const currentImageIndex = currentImageIndexes[prestation.id] || 0;
+              const totalImages = prestation.images.length;
+              const isHovered = hoveredCard === prestation.id;
+              const isFavorite = favorites[prestation.id];
+              const prestationUrl = getPrestationUrl(prestation);
+
+              const category = Object.entries(prestationsData).find(([_, prestations]) =>
+                prestations.some((p) => p.id === prestation.id)
+              )?.[0];
+
+              const prestationType = prestationTypesByCategory[category]?.find(
+                (t) => t.value === prestation.type
+              );
+
+              return (
+                <motion.div
+                  key={prestation.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  onMouseEnter={() => setHoveredCard(prestation.id)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                  className="flex-shrink-0 w-[260px] sm:w-[280px] lg:w-[300px] xl:w-[320px]"
+                >
+                  {/* Utilisation d'une balise <a> avec target="_blank" */}
+                  <a 
+                    href={prestationUrl}
+                    target={homeCards ? "_blank" : undefined}
+                    rel={homeCards ? "noopener noreferrer" : undefined}
+                    className="block no-underline group relative cursor-pointer"
+                    onClick={(e) => {
+                      if (!homeCards || prestationUrl === "#") {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    {/* CONTENEUR IMAGE - Ratio 4/3 exact comme Airbnb */}
+                    <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#F7F7F7] mb-2">
+                      {/* Image */}
+                      <img
+                        src={prestation.images[currentImageIndex]}
+                        alt={prestation.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+
+                      {/* Bouton Favoris - Position Airbnb */}
+                      <button
+                        onClick={(e) => toggleFavorite(prestation.id, e)}
+                        className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:bg-white transition-all"
+                      >
+                        <Heart
+                          className={`h-4 w-4 transition-all ${
+                            isFavorite 
+                              ? 'fill-[#FF385C] text-[#FF385C]' 
+                              : 'text-[#222222]'
+                          }`}
+                        />
+                      </button>
+
+                      {/* Badge "Coup de cœur" - Style Airbnb */}
+                      {prestation.featured && (
+                        <div className="absolute top-3 left-3 z-10">
+                          <span className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded text-xs font-medium text-[#222222] shadow-sm">
+                            ⭐ Coup de cœur
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Navigation images - Apparaît au hover */}
+                      {totalImages > 1 && (
+                        <>
+                          <button
+                            onClick={(e) => prevImage(prestation.id, totalImages, e)}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-white/90 backdrop-blur-sm shadow-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <ChevronLeft className="h-3.5 w-3.5 text-[#222222]" />
+                          </button>
+                          <button
+                            onClick={(e) => nextImage(prestation.id, totalImages, e)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-white/90 backdrop-blur-sm shadow-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <ChevronRight className="h-3.5 w-3.5 text-[#222222]" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Indicateur d'images - Points minimalistes */}
+                      {totalImages > 1 && (
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                          {Array.from({ length: Math.min(3, totalImages) }).map((_, idx) => (
+                            <div
+                              key={idx}
+                              className={`h-1 w-1 rounded-full transition-all ${
+                                idx === (currentImageIndex % 3) 
+                                  ? 'bg-white w-2' 
+                                  : 'bg-white/60'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Indicateur nouvel onglet (visible au survol) */}
+                      {homeCards && (
+                        <div className="absolute top-3 right-12 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-xs bg-black/50 text-white px-2 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
+                            <span>Nouvel onglet</span>
+                            <span>↗</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* INFORMATIONS - Style Airbnb ultra réduit */}
+                    <div className="space-y-0.5 px-0.5">
+                      {/* Ligne 1 : Type et note */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-[#222222] uppercase tracking-tight">
+                          {prestationType?.label || prestation.category || 'Travaux'}
+                        </span>
+                        {prestation.rating && (
+                          <div className="flex items-center gap-0.5">
+                            <Star className="h-3 w-3 fill-current text-[#222222]" />
+                            <span className="text-xs font-medium text-[#222222]">
+                              {prestation.rating}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Ligne 2 : Titre (une ligne) */}
+                      <h3 className="text-sm font-normal text-[#222222] line-clamp-1">
+                        {prestation.title}
+                      </h3>
+
+                      {/* Ligne 3 : Localisation */}
+                      <div className="flex items-center gap-0.5 text-xs text-[#717171]">
+                        <MapPin className="h-2.5 w-2.5" />
+                        <span className="line-clamp-1">
+                          {prestation.location || 'France'}
+                        </span>
+                      </div>
+
+                      {/* Ligne 4 : Dates fictives (comme Airbnb) */}
+                      <div className="text-xs text-[#717171]">
+                        15–20 mars · pour 5 nuits
+                      </div>
+
+                      {/* Ligne 5 : Prix */}
+                      {prestation.price && (
+                        <div className="pt-1">
+                          <span className="text-sm font-semibold text-[#222222]">
+                            {prestation.price}€
+                          </span>
+                          <span className="text-xs text-[#717171] ml-1">
+                            par intervention
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </a>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
-      </section>
 
-
+        {/* INDICATEURS MOBILE - Style Airbnb */}
+        <div className="flex justify-center gap-1.5 mt-4 lg:hidden">
+          {displayedPrestations.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                if (sliderRef.current) {
+                  const scrollAmount = sliderRef.current.clientWidth - 32;
+                  sliderRef.current.scrollTo({ left: scrollAmount * index, behavior: 'smooth' });
+                }
+              }}
+              className="h-1 w-6 rounded-full bg-[#DDDDDD] transition-all hover:bg-[#556B2F]/50"
+            />
+          ))}
+        </div>
+      </div>
     </section>
   );
 };

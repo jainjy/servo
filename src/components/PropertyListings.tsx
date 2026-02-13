@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   UserPlus,
   LogIn,
@@ -79,124 +79,8 @@ const colors = {
   "card-bg": "#FFFFFF" /* fond des cartes */,
 };
 
-// Données locales de fallback (garde les images existantes)
-// const localBuyProperties = [
-//   {
-//     id: "1",
-//     localImage: property1,
-//     price: 350000,
-//     title: "Villa avec piscine",
-//     city: "Saint-Denis",
-//     surface: 180,
-//     type: "MAISON / VILLA",
-//     status: "for_sale",
-//     rooms: 4,
-//     features: "4 ch • 3 sdb • Piscine",
-//   },
-//   {
-//     id: "2",
-//     localImage: property2,
-//     price: 245000,
-//     title: "Appartement moderne",
-//     city: "Saint-Paul",
-//     surface: 95,
-//     type: "APPARTEMENT",
-//     status: "for_sale",
-//     rooms: 3,
-//     features: "3 ch • 2 sdb • Balcon",
-//   },
-//   {
-//     id: "3",
-//     localImage: property3,
-//     price: 285000,
-//     title: "Maison contemporaine",
-//     city: "Saint-Pierre",
-//     surface: 125,
-//     type: "MAISON",
-//     status: "for_sale",
-//     rooms: 3,
-//     features: "3 ch • 2 sdb • Jardin",
-//   },
-// ];
-
-// const localRentProperties = [
-//   {
-//     id: "4",
-//     localImage: rentProperties1,
-//     price: 1250,
-//     title: "Appartement meublé",
-//     city: "Saint-Denis",
-//     surface: 75,
-//     type: "APPARTEMENT",
-//     status: "for_rent",
-//     rooms: 2,
-//     features: "2 ch • Meublé • Parking",
-//   },
-//   {
-//     id: "5",
-//     localImage: rentProperties2,
-//     price: 580,
-//     title: "Duplex T1 bis 55m² à Saint Gilles les Bains",
-//     city: "Saint-Gilles-les-Bains",
-//     surface: 55,
-//     type: "APPARTEMENT",
-//     status: "for_rent",
-//     rooms: 1,
-//     features: "Location courte durée",
-//   },
-//   {
-//     id: "6",
-//     localImage: rentProperties3,
-//     price: 2100,
-//     title: "Villa de standing",
-//     city: "Saint-Paul",
-//     surface: 200,
-//     type: "VILLA",
-//     status: "for_rent",
-//     rooms: 4,
-//     features: "4 ch • Piscine • Jardin",
-//   },
-// ];
-
-// const localSellServices = [
-//   {
-//     id: "7",
-//     localImage: sellServices1,
-//     price: 0,
-//     title: "Évaluez votre bien",
-//     city: "Toute l'île",
-//     surface: 0,
-//     type: "SERVICE",
-//     status: "service",
-//     rooms: 0,
-//     features: "Rapport détaillé • Expert",
-//   },
-//   {
-//     id: "8",
-//     localImage: sellServices2,
-//     price: 0,
-//     title: "Vendez avec OLIPLUS",
-//     city: "Île de la Réunion",
-//     surface: 0,
-//     type: "SERVICE",
-//     status: "service",
-//     rooms: 0,
-//     features: "Accompagnement complet",
-//   },
-//   {
-//     id: "9",
-//     localImage: sellServices3,
-//     price: 0,
-//     title: "Investissement",
-//     city: "Zones prisées",
-//     surface: 0,
-//     type: "SERVICE",
-//     status: "service",
-//     rooms: 0,
-//     features: "Rentabilité garantie",
-//   },
-// ];
-const localBuyProperties=[]
+// Données locales de fallback
+const localBuyProperties = [];
 const localRentProperties = [];
 const localSellServices = [];
 
@@ -310,6 +194,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
   onFilter,
 }) => {
   const navigate = useNavigate();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
   //Fonction pour calculer la distance (Haversine)
   const getDistanceKm = (
     lat1: number,
@@ -396,6 +284,40 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
   // Auth (to load user's demandes and mark sent requests)
   const { user, isAuthenticated } = useAuth();
+
+  // Fonction pour vérifier l'affichage des flèches de défilement
+  const checkScrollArrows = useCallback(() => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  }, []);
+
+  // Effet pour surveiller le défilement
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollArrows);
+      // Vérification initiale après un court délai
+      setTimeout(checkScrollArrows, 100);
+      
+      return () => container.removeEventListener('scroll', checkScrollArrows);
+    }
+  }, [checkScrollArrows]);
+
+  // Fonctions de défilement
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
 
   // Intersection Observer pour le tracking des vues
   useEffect(() => {
@@ -919,207 +841,280 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
     setModalOpen(true);
   };
 
-  // Mode cartes seules (utilisé sur la Home)
+// Mode cartes seules (utilisé sur la Home) - DESIGN AMÉLIORÉ
   if (cardsOnly) {
     return (
-      <section className="w-full">
-        <div className="container mx-auto px-4 py-6">
+      <section className="w-full bg-gradient-to-b from-gray-50 to-white py-12">
+        <div className="container mx-auto px-4">
+          {/* En-tête avec titre et chevrons */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl lg:text-4xl font-serif font-medium text-gray-900 mb-2">
+                Biens immobiliers
+              </h2>
+              <p className="text-gray-500 text-sm lg:text-base">
+                Découvrez notre sélection de propriétés d'exception
+              </p>
+            </div>
+            
+            {/* Boutons de navigation */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={scrollLeft}
+                className={`p-3 rounded-full bg-white shadow-md hover:shadow-lg border border-gray-100 transition-all duration-200 ${
+                  showLeftArrow ? 'opacity-100 hover:bg-[#556B2F] hover:text-white hover:border-[#556B2F]' : 'opacity-50 cursor-not-allowed'
+                }`}
+                disabled={!showLeftArrow}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={scrollRight}
+                className={`p-3 rounded-full bg-white shadow-md hover:shadow-lg border border-gray-100 transition-all duration-200 ${
+                  showRightArrow ? 'opacity-100 hover:bg-[#556B2F] hover:text-white hover:border-[#556B2F]' : 'opacity-50 cursor-not-allowed'
+                }`}
+                disabled={!showRightArrow}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
           {loading.buy && loading.rent ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="bg-muted h-64 rounded-2xl mb-4" />
-                  <div className="bg-muted h-6 rounded mb-2" />
-                  <div className="bg-muted h-4 rounded w-1/2" />
+                  <div className="bg-gray-200 h-64 rounded-2xl mb-4" />
+                  <div className="bg-gray-200 h-5 rounded w-3/4 mb-2" />
+                  <div className="bg-gray-200 h-4 rounded w-1/2" />
                 </div>
               ))}
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {(maxItems ? displayed.slice(0, maxItems) : displayed).map(
-                  (property: any) => {
-                    const images = getPropertyImages(property);
-                    const totalImages = images.length;
-                    const idx = currentImageIndexes[property.id] || 0;
-                    const featuresArr = normalizeFeatures(property.features);
-                    const priceLabel = formatPrice(
-                      property.price || 0,
-                      property.type,
-                      property.status
-                    );
+              {/* Carousel avec défilement horizontal */}
+              <div className="relative">
+                {/* Conteneur défilant sans barre de scroll */}
+                <div
+                  ref={scrollContainerRef}
+                  className="overflow-x-auto scroll-smooth hide-scrollbar"
+                  onScroll={checkScrollArrows}
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  <div className="flex gap-6 pb-6">
+                    {/* Cartes des propriétés - DESIGN AMÉLIORÉ */}
+                    {(maxItems ? displayed.slice(0, maxItems) : displayed).map(
+                      (property: any) => {
+                        const images = getPropertyImages(property);
+                        const totalImages = images.length;
+                        const idx = currentImageIndexes[property.id] || 0;
 
-                    return (
-                      <Card
-                        key={property.id}
-                        data-property-id={property.id}
-                        className="home-card group cursor-pointer h-full"
-                        style={{
-                          backgroundColor: colors["card-bg"],
-                          borderColor: colors["separator"],
-                        }}
-                        onClick={() => handlePropertyClick(property)}
-                      >
-                        <div className="relative">
-                          <div className="relative rounded-lg h-52 overflow-hidden">
-                            <img
-                              src={images[idx % totalImages]}
-                              alt={property.title}
-                              className="home-card-image h-full w-full group-hover:scale-110"
-                            />
-
-                            <div
-                              className="absolute rounded-full py-1 px-2 text-white font-semibold text-sm top-3 left-3 home-card-badge"
-                              style={{
-                                backgroundColor: colors["primary-dark"],
-                              }}
+                        return (
+                          <motion.div
+                            key={property.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4 }}
+                            whileHover={{ y: -8 }}
+                            className="flex-shrink-0 w-[340px] sm:w-[360px] md:w-[400px]"
+                          >
+                            <Card
+                              data-property-id={property.id}
+                              className="group overflow-hidden border-0 bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer h-full relative"
+                              onClick={() => handlePropertyClick(property)}
                             >
-                              {property.type}
-                            </div>
-                            <div
-                              className="absolute p-1 text-white font-semibold text-sm rounded-full bottom-3 right-3 home-card-price"
-                              style={{
-                                backgroundColor: colors["secondary-text"],
-                              }}
-                            >
-                              {priceLabel}
-                            </div>
-                            {totalImages > 1 && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white"
-                                  onClick={(e) =>
-                                    prevImage(property.id, totalImages, e)
-                                  }
-                                >
-                                  <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white"
-                                  onClick={(e) =>
-                                    nextImage(property.id, totalImages, e)
-                                  }
-                                >
-                                  <ChevronRight className="h-4 w-4" />
-                                </Button>
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
-                                  {idx + 1}/{totalImages}
-                                </div>
-                              </>
-                            )}
-                          </div>
-                          <div className="p-4">
-                            <div className="flex items-start justify-between mb-2">
-                              <h3
-                                className="font-semibold text-sm flex-1 line-clamp-2 leading-tight"
-                                style={{ color: colors["neutral-dark"] }}
-                              >
-                                {property.title}
-                              </h3>
-                            </div>
-                            <div className="flex items-center justify-between mb-3">
-                              <span
-                                className="text-xs flex items-center gap-1"
-                                style={{ color: colors["secondary-text"] }}
-                              >
-                                <MapPin className="h-3 w-3" />
-                                {property.city}
-                              </span>
-                            </div>
-                            <div
-                              className="flex items-center gap-3 text-xs mb-3"
-                              style={{ color: colors["neutral-dark"] }}
-                            >
-                              {property.surface && (
-                                <div className="flex items-center gap-1">
-                                  <Ruler
-                                    className="h-3 w-3"
-                                    style={{ color: colors["primary-dark"] }}
-                                  />
-                                  <span>{property.surface} m²</span>
-                                </div>
-                              )}
-                              {(property.bedrooms || property.rooms) && (
-                                <div className="flex items-center gap-1">
-                                  <Bed
-                                    className="h-3 w-3"
-                                    style={{ color: colors["primary-dark"] }}
-                                  />
-                                  <span>
-                                    {property.bedrooms || property.rooms} ch.
-                                  </span>
-                                </div>
-                              )}
-                              {property.bathrooms && (
-                                <div className="flex items-center gap-1">
-                                  <Bath
-                                    className="h-3 w-3"
-                                    style={{ color: colors["primary-dark"] }}
-                                  />
-                                  <span>{property.bathrooms} sdb</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {featuresArr.slice(0, 2).map((feature, index) => (
-                                <span
-                                  key={index}
-                                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                                  style={{
-                                    backgroundColor: colors["accent-light"],
-                                    color: colors["neutral-dark"],
-                                  }}
-                                >
-                                  <div
-                                    className="w-1 h-1 rounded-full"
-                                    style={{
-                                      backgroundColor: colors["primary-dark"],
-                                    }}
-                                  />
-                                  {feature}
+                              {/* Badge "Nouveau" ou "Exclusif" (optionnel) */}
+                              <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-[#556B2F] text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
+                                  Exclusif
                                 </span>
-                              ))}
-                            </div>
-                            {/* Boutons d'action */}
-                            <div className="flex gap-1">
+                              </div>
+
+                              {/* Bouton favoris */}
                               <button
-                                className="relative border-2 p-2 mx-auto flex items-center gap-2 overflow-hidden rounded-md group transition-all duration-500 hover:shadow-lg"
-                                style={{
-                                  borderColor: colors["primary-dark"],
-                                }}
-                                onClick={() => handlePropertyClick(property)}
+                                onClick={(e) => toggleFavorite(property.id, e)}
+                                className="absolute top-4 right-4 z-10 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-all duration-200"
                               >
-                                {/* Background animé avec effet smooth */}
-                                <span
-                                  className="absolute inset-0 -left-2 top-10 w-36 h-32 group-hover:-top-12 transition-all duration-700 ease-out origin-bottom rounded-full transform scale-95 group-hover:scale-100"
-                                  style={{
-                                    backgroundColor: colors["primary-dark"],
-                                  }}
-                                ></span>
-
-                                {/* Contenu */}
-                                <span className="relative z-10 font-semibold transition-all duration-500 ease-out group-hover:translate-x-1 group-hover:text-white">
-                                  voir détails
-                                </span>
-                                <Eye className="w-4 h-4 relative z-10 transition-all duration-500 ease-out group-hover:scale-110 group-hover:translate-x-0.5 group-hover:text-white" />
+                                <Heart 
+                                  className={`w-5 h-5 transition-colors ${
+                                    favorites[property.id] 
+                                      ? 'fill-red-500 text-red-500' 
+                                      : 'text-gray-600'
+                                  }`}
+                                />
                               </button>
-                            </div>
+
+                              {/* Image avec overlay gradient */}
+                              <div className="relative h-56 w-full overflow-hidden">
+                                <img
+                                  src={images[idx % totalImages]}
+                                  alt={property.title}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                />
+                                
+                                {/* Overlay gradient pour meilleure lisibilité des badges */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                                
+                                {/* Navigation images si plusieurs */}
+                                {totalImages > 1 && (
+                                  <>
+                                    <button
+                                      className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        prevImage(property.id, totalImages, e);
+                                      }}
+                                    >
+                                      <ChevronLeft className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                      className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        nextImage(property.id, totalImages, e);
+                                      }}
+                                    >
+                                      <ChevronRight className="h-5 w-5" />
+                                    </button>
+
+                                    {/* Indicateur de nombre d'images */}
+                                    <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
+                                      {idx + 1}/{totalImages}
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Contenu de la carte */}
+                              <div className="p-5">
+                                {/* En-tête avec type et localisation */}
+                                <div className="flex items-start justify-between mb-3">
+                                  <div>
+                                    <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">
+                                      {property.title || `${property.type} à ${property.city}`}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                      <MapPin className="w-4 h-4" />
+                                      <span className="line-clamp-1">{property.city}, {property.address?.split(',')[0]}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Caractéristiques */}
+                                <div className="flex items-center gap-4 mb-4">
+                                  {property.bedrooms && (
+                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                      <Bed className="w-4 h-4" />
+                                      <span>{property.bedrooms} ch</span>
+                                    </div>
+                                  )}
+                                  {property.bathrooms && (
+                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                      <Bath className="w-4 h-4" />
+                                      <span>{property.bathrooms} sdb</span>
+                                    </div>
+                                  )}
+                                  {property.surface && (
+                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                      <Ruler className="w-4 h-4" />
+                                      <span>{property.surface} m²</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Prix et note */}
+                                <div className="flex items-end justify-between border-t border-gray-100 pt-4">
+                                  <div>
+                                    <p className="text-xs text-gray-500 mb-1">Prix total</p>
+                                    <div className="flex items-baseline gap-1">
+                                      <span className="text-2xl font-bold text-gray-900">
+                                        {property.price?.toLocaleString('fr-FR')}
+                                      </span>
+                                      <span className="text-sm font-medium text-gray-600">€</span>
+                                    </div>
+                                    {property.status === 'for_rent' && (
+                                      <p className="text-xs text-gray-500">par mois</p>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Note avec étoiles */}
+                                  <div className="flex flex-col items-end">
+                                    <div className="flex items-center gap-1 mb-1">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                          key={star}
+                                          className={`w-4 h-4 ${
+                                            star <= Math.round(property.note || 4.85)
+                                              ? 'fill-yellow-400 text-yellow-400'
+                                              : 'text-gray-300'
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700">
+                                      {property.note || "4,85"} · {property.reviewsCount || 128} avis
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Type d'hôte */}
+                                <div className="mt-3 flex items-center">
+                                  <div className={`text-xs font-medium px-3 py-1.5 rounded-full ${
+                                    property.rentType === "professionnel" || property.status === "professionnel"
+                                      ? 'bg-[#556B2F]/10 text-[#556B2F]'
+                                      : 'bg-[#8B4513]/10 text-[#8B4513]'
+                                  }`}>
+                                    Hôte {property.rentType === "professionnel" || property.status === "professionnel" 
+                                      ? "professionnel" 
+                                      : "particulier"}
+                                  </div>
+                                </div>
+                              </div>
+                            </Card>
+                          </motion.div>
+                        );
+                      }
+                    )}
+
+                    {/* Card "Voir plus" améliorée */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4 }}
+                      whileHover={{ y: -8 }}
+                      className="flex-shrink-0 w-[340px] sm:w-[360px] md:w-[400px]"
+                    >
+                      <Card
+                        className="group overflow-hidden border-2 border-dashed border-[#556B2F]/30 hover:border-solid hover:border-[#556B2F] transition-all duration-300 rounded-2xl cursor-pointer bg-gradient-to-br from-[#556B2F]/5 via-white to-[#8B4513]/5 h-full flex flex-col items-center justify-center p-8"
+                        onClick={() => navigate("/immobilier")}
+                      >
+                        <div className="grid grid-cols-2 gap-2 mb-6 w-full">
+                          <img src={property1} className="w-full h-24 object-cover rounded-l-xl shadow-md" alt="" />
+                          <img src={property2} className="w-full h-24 object-cover rounded-r-xl shadow-md" alt="" />
+                          <img src={property3} className="w-full h-24 object-cover rounded-bl-xl shadow-md" alt="" />
+                          <img src={rentProperties1} className="w-full h-24 object-cover rounded-br-xl shadow-md" alt="" />
+                        </div>
+                        
+                        <div className="text-center">
+                          <h3 className="font-bold text-[#556B2F] text-2xl mb-3">Voir plus</h3>
+                          <p className="text-gray-600 text-sm mb-4">
+                            Découvrez tous nos biens immobiliers d'exception
+                          </p>
+                          <div className="inline-flex items-center gap-2 text-[#556B2F] font-medium group-hover:gap-3 transition-all">
+                            <span>Explorer</span>
+                            <ArrowRight className="w-5 h-5" />
                           </div>
                         </div>
                       </Card>
-                    );
-                  }
-                )}
+                    </motion.div>
+                  </div>
+                </div>
               </div>
             </>
           )}
         </div>
 
-        {/* MODAL AJOUTÉ ICI POUR LE MODE CARDS ONLY */}
+        {/* MODAL */}
         <ModalDemandeVisite
           open={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -1132,6 +1127,23 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
           }
           onPropertyContact={handlePropertyContact}
         />
+
+        {/* Style pour cacher la barre de scroll */}
+        <style jsx>{`
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+        `}</style>
       </section>
     );
   }
@@ -1944,226 +1956,96 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {displayed.map((property: any) => {
                 const images = getPropertyImages(property);
                 const totalImages = images.length;
                 const idx = currentImageIndexes[property.id] || 0;
-                const isFav = !!favorites[property.id];
-                const featuresArr = normalizeFeatures(property.features);
-                const priceLabel = formatPrice(
-                  property.price || 0,
-                  property.type,
-                  property.status
-                );
 
                 return (
-                  <Card
+                  <motion.div
                     key={property.id}
-                    data-property-id={property.id}
-                    className="overflow-hidden border-0 hover:shadow-2xl transition-all duration-300 rounded-2xl group cursor-pointer"
-                    style={{
-                      backgroundColor: colors["card-bg"],
-                      borderColor: colors["separator"],
-                    }}
-                    onClick={() => handlePropertyClick(property)}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="group"
                   >
-                    <div className="relative">
-                      {/* Zone image avec navigation */}
-                      <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
-                        <img
-                          src={images[idx % totalImages]}
-                          alt={property.title}
-                          className="w-full h-full object-cover transition-transform duration-500"
-                        />
+                    <Card
+                      data-property-id={property.id}
+                      className="overflow-hidden border border-gray-200 hover:shadow-md transition-all duration-200 rounded-lg cursor-pointer bg-white"
+                      onClick={() => handlePropertyClick(property)}
+                    >
+                      <div className="p-3">
+                        {/* En-tête - Type et ville */}
+                        <h3 className="font-medium text-gray-900 text-sm mb-1">
+                          {property.type} • {property.city}
+                        </h3>
 
-                        {/* Badge type */}
-                        <div
-                          className="absolute top-3 left-3 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
-                          style={{
-                            backgroundColor: colors["primary-dark"],
-                            color: colors["light-bg"],
-                          }}
-                        >
-                          {property.type}
-                        </div>
-                        <div
-                          className="absolute bottom-3 right-3 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold"
-                          style={{
-                            backgroundColor: colors["secondary-text"],
-                            color: colors["light-bg"],
-                          }}
-                        >
-                          {priceLabel}
-                        </div>
-
-                        {/* Badge + Actions */}
-                        <div className="absolute top-3 right-3 flex items-center gap-2">
-                          {(() => {
-                            const badgeLabel =
-                              property.status === "for_sale"
-                                ? "ACHAT"
-                                : property.status === "for_rent"
-                                ? "LOCATION"
-                                : "SAISONNIÈRE";
-                            const badgeColor =
-                              property.status === "for_sale"
-                                ? colors["primary-dark"]
-                                : property.status === "for_rent"
-                                ? colors["secondary-text"]
-                                : colors["accent-warm"];
-                            return (
-                              <div
-                                className={`px-3 py-1 rounded-full text-xs font-semibold text-white`}
-                                style={{ backgroundColor: badgeColor }}
-                              >
-                                {badgeLabel}
-                              </div>
-                            );
-                          })()}
-                        </div>
-
-                        {/* Navigation images */}
-                        {totalImages > 1 && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white"
-                              onClick={(e) =>
-                                prevImage(property.id, totalImages, e)
-                              }
-                            >
-                              <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white"
-                              onClick={(e) =>
-                                nextImage(property.id, totalImages, e)
-                              }
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-
-                            {/* Compteur */}
-                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
-                              {idx + 1}/{totalImages}
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Contenu */}
-                      <div className="p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3
-                            className="font-semibold text-sm flex-1 line-clamp-2 leading-tight"
-                            style={{ color: colors["neutral-dark"] }}
-                          >
-                            {property.title}
-                          </h3>
-                        </div>
-
-                        {/* Prix et localisation */}
-                        <div className="flex items-center justify-between mb-3">
-                          <span
-                            className="text-xs flex items-center gap-1"
-                            style={{ color: colors["secondary-text"] }}
-                          >
-                            <MapPin className="h-3 w-3" />
-                            {property.city}
+                        {/* Dates et type d'hôte */}
+                        <div className="flex items-center text-xs text-gray-500 mb-2">
+                          <span>{property.dates || "24–26 juil."}</span>
+                          <span className="mx-1">-</span>
+                          <span className={property.rentType === "professionnel" || property.status === "professionnel" 
+                            ? "text-[#556B2F]" 
+                            : "text-[#8B4513]"}>
+                            Hôte {property.rentType === "professionnel" || property.status === "professionnel" 
+                              ? "professionnel" 
+                              : "particulier"}
                           </span>
                         </div>
 
-                        {/* Caractéristiques */}
-                        <div
-                          className="flex items-center gap-3 text-xs mb-3"
-                          style={{ color: colors["neutral-dark"] }}
-                        >
-                          {property.surface && (
-                            <div className="flex items-center gap-1">
-                              <Ruler
-                                className="h-3 w-3"
-                                style={{ color: colors["primary-dark"] }}
-                              />
-                              <span>{property.surface} m²</span>
-                            </div>
-                          )}
-                          {(property.bedrooms || property.rooms) && (
-                            <div className="flex items-center gap-1">
-                              <Bed
-                                className="h-3 w-3"
-                                style={{ color: colors["primary-dark"] }}
-                              />
-                              <span>
-                                {property.bedrooms || property.rooms} ch.
-                              </span>
-                            </div>
-                          )}
-                          {property.bathrooms && (
-                            <div className="flex items-center gap-1">
-                              <Bath
-                                className="h-3 w-3"
-                                style={{ color: colors["primary-dark"] }}
-                              />
-                              <span>{property.bathrooms} sdb</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Features */}
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {featuresArr.slice(0, 2).map((feature, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                              style={{
-                                backgroundColor: colors["accent-light"],
-                                color: colors["neutral-dark"],
-                              }}
-                            >
-                              <div
-                                className="w-1 h-1 rounded-full"
-                                style={{
-                                  backgroundColor: colors["primary-dark"],
+                        {/* Image */}
+                        <div className="relative rounded-md overflow-hidden mb-2 h-32 w-full">
+                          <img
+                            src={images[idx % totalImages]}
+                            alt={property.title}
+                            className="w-full h-full object-cover"
+                          />
+                          
+                          {/* Navigation images si plusieurs */}
+                          {totalImages > 1 && (
+                            <>
+                              <button
+                                className="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-white/80 hover:bg-white shadow-sm flex items-center justify-center"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  prevImage(property.id, totalImages, e);
                                 }}
-                              />
-                              {feature}
-                            </span>
-                          ))}
+                              >
+                                <ChevronLeft className="h-3 w-3" />
+                              </button>
+                              <button
+                                className="absolute right-1 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-white/80 hover:bg-white shadow-sm flex items-center justify-center"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  nextImage(property.id, totalImages, e);
+                                }}
+                              >
+                                <ChevronRight className="h-3 w-3" />
+                              </button>
+                            </>
+                          )}
                         </div>
 
-                        {/* Boutons d'action */}
-                        <div className="flex gap-1">
-                          <button
-                            className="w-full px-4 py-2 rounded-lg font-semibold hover:bg-slate-900/90 transition disabled:opacity-60"
-                            style={{
-                              backgroundColor: colors["primary-dark"],
-                              color: colors["light-bg"],
-                            }}
-                            onClick={(e) => handleDemanderVisite(property, e)}
-                            disabled={!!sentRequests?.[property?.id]}
-                          >
-                            {sentRequests?.[property?.id]
-                              ? "Demande déjà envoyée"
-                              : "Demander visite"}
-                          </button>
-                          <button
-                            className="border-2 p-2 rounded-md"
-                            style={{
-                              borderColor: colors["separator"],
-                              color: colors["neutral-dark"],
-                            }}
-                            onClick={() => handlePropertyClick(property)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                        {/* Prix total et note */}
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="text-base font-bold text-gray-900">
+                              {property.price}€
+                            </span>
+                            <span className="text-xs text-gray-500 ml-1">
+                              au total
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-gray-700">
+                              ★ {property.note || "4,85"}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </motion.div>
                 );
               })}
             </div>

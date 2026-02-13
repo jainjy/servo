@@ -1765,7 +1765,7 @@ const Header = () => {
     <>
       <header
         id="head"
-        className={`fixed w-screen lg:rounded-br-full lg:px-10 lg:rounded-bl-full lg:max-w-[1300px] 2xl:[1540px] xl:w-[1420px] translate-x-0 lg:translate-x-8 top-0 z-50 transition-colors duration-300
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
           ${scrolled ? "bg-white border-neutral-200 shadow-lg" : "backdrop-blur-md border-transparent"}`}
       >
         <div className="container flex h-16 items-center justify-between px-6">
