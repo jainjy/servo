@@ -29,7 +29,8 @@ import {
   Plane,
   BookOpen,
   Plus,
- Bird
+ Bird,
+ Store
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import ServoLogo from "../components/ServoLogo";
@@ -87,6 +88,19 @@ const allNavigationItems: NavigationItem[] = [
     name: "Tableau de Bord",
     href: "/pro",
     icon: LayoutDashboard,
+    userTypes: [
+      "AGENCE",
+      "VENDEUR",
+      "PRESTATAIRE",
+      "ARTISAN",
+      "TOURISME",
+      "BIEN_ETRE",
+    ],
+  },
+  {
+    name: "Marketplace",
+    href: "/pro/marketplace",
+    icon: Store,
     userTypes: [
       "AGENCE",
       "VENDEUR",
@@ -381,6 +395,10 @@ const categoryConfig: {
     tableauDeBord: {
       title: "Tableau de bord",
       matcher: (item) => item.name === "Tableau de Bord",
+    },
+    Marketplace: {
+      title: "Marketplace",
+      matcher: (item) => item.name === "Marketplace",
     },
     evenementsDecouvertes: {
       title: "Événements & Découvertes",

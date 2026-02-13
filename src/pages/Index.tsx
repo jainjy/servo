@@ -2,13 +2,13 @@ import React, { useEffect, useState, Suspense, lazy } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Load from "../components/Load";
-import Ads from '/Home.mp4'
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, RefreshCw } from "lucide-react";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
 import CardCarte from "@/components/components/CardCarte";
 import AnnoncesImmobilieres from "@/components/components/CardsOlimmo";
+import { motion } from "framer-motion";
 
 const Hero = lazy(() => import("@/components/Hero"));
 const ServiceCards = lazy(() => import("@/components/ServiceCards"));
@@ -27,18 +27,16 @@ const BienEtreShowcase = lazy(
 
 // Thème de couleurs
 const colors = {
-  logo: "#556B2F" /* logo / accent - Olive green */,
-  "primary-dark": "#6B8E23" /* Sruvol / fonds légers - Yellow-green */,
-  "light-bg": "#FFFFFF" /* fond de page / bloc texte - White */,
-  separator: "#D3D3D3" /* séparateurs / bordures, UI - Light gray */,
-  "secondary-text":
-    "#8B4513" /* touche premium / titres secondaires - Saddle brown */,
-  // Couleurs complémentaires ajoutées
-  "accent-light": "#98FB98" /* accent clair - Pale green */,
-  "accent-warm": "#DEB887" /* accent chaud - Burlywood */,
-  "neutral-dark": "#2F4F4F" /* texte foncé / titres - Dark slate gray */,
-  "hover-primary": "#7BA05B" /* état hover primary - Medium olive green */,
-  "hover-secondary": "#A0522D" /* état hover secondary - Sienna */,
+  logo: "#556B2F",
+  "primary-dark": "#6B8E23",
+  "light-bg": "#FFFFFF",
+  separator: "#D3D3D3",
+  "secondary-text": "#8B4513",
+  "accent-light": "#98FB98",
+  "accent-warm": "#DEB887",
+  "neutral-dark": "#2F4F4F",
+  "hover-primary": "#7BA05B",
+  "hover-secondary": "#A0522D",
 };
 
 const LoadingFallback = () => (
@@ -64,21 +62,17 @@ const Index = () => {
   useEffect(() => {
     setIsClient(true);
 
-    // Vérifier si l'utilisateur est connecté pour afficher les recommandations
     const token = localStorage.getItem("auth-token");
     const isValidToken =
       token && token !== "null" && token !== "undefined" && token.trim() !== "";
 
     if (isValidToken) {
       setShowRecommendations(true);
-      // Vous pouvez ajouter ici une vérification pour savoir si des recommandations existent
-      // Par exemple, en faisant un appel API ou en vérifiant dans le localStorage
     } else {
       setShowRecommendations(false);
     }
   }, []);
 
-  // Fonction pour gérer l'état des recommandations (à passer au composant RecommendationsSection)
   const handleRecommendationsData = (data) => {
     setHasRecommendations(data && data.length > 0);
   };
@@ -96,12 +90,12 @@ const Index = () => {
 
   return (
     <>
-      {/* <Load /> */}
       <div
-        className="min-h-screen bg-background [scrollbar-width:none]"
+        className="min-h-screen bg-background"
         style={{ backgroundColor: colors["light-bg"] }}
       >
         <Suspense fallback={<LoadingFallback />}>
+          {/* Popup publicitaire fixe */}
           <div className="fixed w-1/2 bottom-0 right-4 z-50">
             <AdvertisementPopup
               size="small"
@@ -109,65 +103,69 @@ const Index = () => {
               showOnMobile={true}
             />
           </div>
-          <Hero />
-          <ServiceCards />
-          <TravauxPreview homeCards />
 
-          {/* Section de recommandations intelligentes - affichée seulement si token valide ET données disponibles */}
+          {/* Hero Section - Pleine largeur */}
+          <Hero />
+
+          {/* Section Services */}
+          <section className="w-full">
+            <ServiceCards />
+          </section>
+
+          {/* Section Travaux Preview */}
+          <section className="w-full">
+            <TravauxPreview homeCards />
+          </section>
+
+          {/* Section Recommandations (conditionnelle) */}
           {showRecommendations && (
-            <RecommendationsSection
-              title="Nos meilleures suggestions pour vous"
-              limit={4}
-              showOnlyIfAuthenticated={true}
-              onDataLoaded={handleRecommendationsData}
-              // Si votre composant RecommendationsSection a une prop pour gérer les données vides
-              hideIfEmpty={true}
-            />
+            <section className="w-full">
+              <RecommendationsSection
+                title="Nos meilleures suggestions pour vous"
+                limit={4}
+                showOnlyIfAuthenticated={true}
+                onDataLoaded={handleRecommendationsData}
+                hideIfEmpty={true}
+              />
+            </section>
           )}
 
-          {/* <EmplacementPub /> */}
-
           {/* Section Art & Création */}
-          <ArtETCreationShowcase />
+          <section className="w-full">
+            <ArtETCreationShowcase />
+          </section>
 
-          {/* Section biens immobiliers */}
-          <CardCarte />
+          
 
-          <>
-            <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
-              <h2
-                className="text-3xl lg:text-5xl font-serif font-medium ml-8 my-6 text-slate-900"
-              >
-                Nos biens immobiliers
-              </h2>
-              {/* Voir plus button */}
+          {/* Section Carte */}
+          <section className="w-full">
+            <CardCarte />
+          </section>
 
-              <Button
-                className="relative px-8 py-3 bg-logo hover:bg-logo/90 mr-0 lg:mr-10 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 "
-                onClick={() => navigate("/immobilier")}
-              >
-
-                {/* Contenu */}
-                <span
-                  className="relative z-10 font-semibold group-hover:text-slate-900 transition-all duration-400 ease-out"
-                  style={{ color: "white" }}
-                >
-                  Voir plus de nos b<span style={{ color: "white" }}>iens</span>
-                </span>
-                <ArrowRight
-                  className="w-4 h-4 relative z-10 group-hover:text-slate-900 transition-all duration-400 ease-out group-hover:translate-x-1"
-                  style={{ color: "white" }}
-                />
-              </Button>
-            </div>
+          {/* Section Immobilier avec en-tête */}
+          <section className="w-full">
             <PropertyListings cardsOnly maxItems={4} />
+          </section>
 
-            {/* Section Bien-Être */}
+          {/* Section Bien-Être */}
+          <section className="w-full">
             <BienEtreShowcase />
+          </section>
+
+          {/* Section Slider */}
+          <section className="w-full">
             <Slider />
+          </section>
+
+          {/* Section Publicitaire */}
+          <section className="w-full">
             <AdvertisementPopup position={"section3"} />
+          </section>
+
+          {/* Section Annonces Immobilières */}
+          <section className="w-full">
             <AnnoncesImmobilieres />
-          </>
+          </section>
         </Suspense>
       </div>
     </>

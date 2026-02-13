@@ -258,6 +258,8 @@ import ParapentePage from "./components/pro/ParapentePage";
 import UserParapentePage from "./pages/UserParapentePage";
 import { AdvertisementProvider } from "./components/AdvertisementProvider";
 import DevenirPartenaire from "./pages/DevenirPartenaire";
+import Marcketplace from "./pages/pro/Marcketplace";
+import B2BMarketplace from "./pages/pro/Marcketplace";
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -837,6 +839,7 @@ const App = () => {
                       }
                     >
                       <Route index element={<Dashboard />} />
+                      <Route path="marketplace" element={<B2BMarketplace />} />
                       <Route path="listings" element={<ListingsPage />} />
                       <Route path="calendar" element={<CalendarPage />} />
                       <Route path="projet" element={<ProjetsPage />} />
