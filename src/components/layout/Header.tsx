@@ -1677,7 +1677,7 @@ const Header = () => {
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <List className="h-4 w-4" />
+                  <List className="h-4 w-4 text-white" />
                   <span>Mes réservations de cours</span>
                 </button>
                 <button
@@ -1766,7 +1766,7 @@ const Header = () => {
       <header
         id="head"
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-          ${scrolled ? "bg-white border-neutral-200 shadow-lg" : "backdrop-blur-md border-transparent"}`}
+          ${scrolled ? "bg-white border-neutral-200 shadow-lg" : "bg-none border-transparent"}`}
       >
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/home"} onClick={() => {
@@ -1780,7 +1780,8 @@ const Header = () => {
             <ServoLogo />
           </Link>
           {/* Menu desktop */}
-          <nav className="hidden md:hidden lg:flex items-center gap-2">
+          {/* <nav className="hidden md:hidden lg:flex items-center gap-2"></nav> */}
+          <nav className="hidden hidden items-center gap-2">
             <ul className="flex items-center">
               {/* CHANGEMENT ICI : slice(0, 5) au lieu de slice(0, 4) */}
               {menuSections.slice(0, 5).map((section, index) => (
@@ -2465,7 +2466,7 @@ const Header = () => {
               </DropdownMenu>
             )}
             {/* Mobile Menu */}
-            <div className="lg:hidden">
+            <div className="">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button

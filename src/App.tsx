@@ -319,12 +319,12 @@ const App = () => {
       <TooltipProvider>
         <SocketProvider userId={user?.id}>
           <CartProvider>
-            {isLoading && (
+            {/* {isLoading && (
               <LoadingScreen
                 onLoadingComplete={() => setIsLoading(false)}
                 minimumLoadingTime={1500}
               />
-            )}
+            )} */}
             <AdvertisementProvider
               refreshInterval={5}
               apiBaseUrl={import.meta.env.VITE_API_URL}

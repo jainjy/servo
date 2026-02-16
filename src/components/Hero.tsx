@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Home, TrendingUp, Package, User2, Search } from "lucide-react"; // Ajout des icônes
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-house.jpg";
+import heroImage from "/hero1-1.png";
 import "../styles/font.css";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
@@ -22,7 +22,39 @@ const colors = {
 };
 
 // URL de l'image en dessin
-const sketchImageUrl = "/2em.png";
+const sketchImageUrl = "/hero1.jpg";
+
+// Services à afficher
+const services = [
+  {
+    icon: Home,
+    title: "Annonces Immobilières",
+    description: "Trouver votre futur logement",
+    color: "text-[#556B2F]",
+    href: "/immobilier"
+  },
+  {
+    icon: TrendingUp,
+    title: "Services professionnels",
+    description: "Trouver un professionnel",
+    color: "text-[#6B8E23]",
+    href: "/service"
+  },
+  {
+    icon: Package,
+    title: "Décoration & Mobilier",
+    description: "Tous les produits pour la maison",
+    color: "text-[#8B4513]",
+    href: "/produits"
+  },
+  {
+    icon: User2,
+    title: "Explorer et vivre",
+    description: "Une douceur de vie tropicale",
+    color: "text-[#2F4F4F]",
+    href: "/tourisme"
+  },
+];
 
 const Hero = () => {
   const [heroQuery, setHeroQuery] = useState("");
@@ -160,7 +192,7 @@ const Hero = () => {
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-[320px] md:min-h-[380px] lg:min-h-[420px] flex items-center justify-center overflow-hidden bg-black"
+        className="relative min-h-[320px] md:min-h-[380px] lg:min-h-[440px] flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -250,20 +282,19 @@ const Hero = () => {
         <div className="container relative z-30 mx-auto px-4">
           {/* Publicités */}
           <AdvertisementPopup position="hero-top" />
-          
+
           <div className="max-w-3xl mx-auto text-center">
-            {/* Titre compact - SANS SERIF */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="mb-3 font-sans"
+              className="mb-3"
             >
-              <span className="block text-3xl md:text-4xl lg:text-5xl font-serif font-medium text-white mb-1">
+              <span className="block text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-white mb-2 tracking-tight">
                 La super-application
               </span>
               <span
-                className="block text-2xl md:text-3xl lg:text-4xl font-serif"
+                className="block text-3xl md:text-4xl lg:text-5xl font-serif font-light"
                 style={{
                   color: "#6B8E23",
                   textShadow: "0 2px 10px rgba(0,0,0,0.4)",
@@ -298,6 +329,32 @@ const Hero = () => {
                   Rechercher
                 </Button>
               </div>
+            </motion.div>
+
+            {/* Services section - ajoutée ici */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex flex-wrap justify-center gap-3 md:gap-4 mt-6 px-2 font-sans"
+            >
+              {services.map((service, index) => {
+                const Icon = service.icon;
+                return (
+                  <div
+                    key={index}
+                    onClick={() => navigate(service.href)}
+                   className="group flex flex-col items-center w-24 md:w-28 p-2 cursor-pointer"
+                  >
+                    <div className="group flex flex-col items-center w-24 md:w-28 p-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-all duration-300">
+                       <Icon className={`w-6 h-6 md:w-7 md:h-7 mb-1 text-white`} />
+                    </div>
+                    <span className="text-[10px] md:text-xs text-white/70 text-center hidden md:block">
+                      {service.description}
+                    </span>
+                  </div>
+                );
+              })}
             </motion.div>
 
             <AdvertisementPopup position="hero-bottom" showOnMobile={true} />

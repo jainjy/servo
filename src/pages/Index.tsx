@@ -109,7 +109,7 @@ const Index = () => {
 
           {/* Section Services */}
           <section className="w-full">
-            <ServiceCards />
+            {/* <ServiceCards /> */}
           </section>
 
           {/* Section Travaux Preview */}
