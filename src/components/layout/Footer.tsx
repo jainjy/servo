@@ -66,6 +66,16 @@ const Footer: React.FC = () => {
       url: "/professional/0d812425-8a4a-4dda-a65e-c0e56eb704b1",
       logo: "/logo_RM_CONSTRUCTION.png",
     },
+    {
+      name: "HABITAT-SUR",
+      url: "/professional/0441ac01-3518-42f3-953d-8a6dd92e4012",
+      logo: "/logo-habitat-sur.jpg",
+    },
+    {
+      name: "KAYAK TRANSPARENT",
+      url: "/professional/2f448e35-d2d8-453c-8918-1e5aa92915dd",
+      logo: "/logo-kayak-transparent.png",
+    },
     // {
     //   name: "Expert Immobilier",
     //   url: "#",
