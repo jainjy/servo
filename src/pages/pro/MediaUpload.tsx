@@ -29,16 +29,18 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: '', // ← Changé de categoryId à category (string)
-    isActive: 'true'
+    category: '',
+    isActive: 'true',
+    // Ajout du champ videoUrl pour les vidéos
+    videoUrl: ''
   });
 
   const [files, setFiles] = useState<{
-    media?: File;
+    media?: File;      // Pour les podcasts uniquement (fichier audio)
     thumbnail?: File;
   }>({});
 
@@ -80,7 +82,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       // Validation de la taille du fichier
-      const maxSize = fileType === 'media' 
+      const maxSize = fileType === 'media'
         ? (type === 'podcast' ? 100 * 1024 * 1024 : 500 * 1024 * 1024)
         : 10 * 1024 * 1024;
 
@@ -103,7 +105,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
       ...prev,
       [fileType]: undefined
     }));
-    
+
     if (fileType === 'media' && mediaInputRef.current) {
       mediaInputRef.current.value = '';
     }
@@ -114,15 +116,31 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim()) {
       setError('Le titre est requis');
       return;
     }
 
-    if (!files.media) {
-      setError(`Le fichier ${type === 'podcast' ? 'audio' : 'vidéo'} est requis`);
+    // Validation spécifique selon le type
+    if (type === 'podcast' && !files.media) {
+      setError('Le fichier audio est requis');
       return;
+    }
+
+    if (type === 'video' && !formData.videoUrl.trim()) {
+      setError('L\'URL de la vidéo est requise');
+      return;
+    }
+
+    // Validation basique de l'URL pour les vidéos
+    if (type === 'video' && formData.videoUrl.trim()) {
+      try {
+        new URL(formData.videoUrl);
+      } catch {
+        setError('Veuillez entrer une URL valide');
+        return;
+      }
     }
 
     try {
@@ -130,68 +148,90 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
       setError('');
       setProgress(0);
 
-      const uploadFormData = new FormData();
-      
-      // Ajouter les données du formulaire
-      uploadFormData.append('title', formData.title);
-      uploadFormData.append('description', formData.description);
-      uploadFormData.append('isActive', formData.isActive);
-      
-      // CORRECTION : Envoyer category (string) au lieu de categoryId
-      if (formData.category && formData.category.trim() !== '') {
-        uploadFormData.append('category', formData.category.trim());
-      }
-
-      // Ajouter les fichiers
+      // Pour les podcasts, on garde FormData avec les fichiers
       if (type === 'podcast') {
-        uploadFormData.append('audio', files.media);
-      } else {
-        uploadFormData.append('video', files.media);
+        const uploadFormData = new FormData();
+
+        // Ajouter les données du formulaire
+        uploadFormData.append('title', formData.title);
+        uploadFormData.append('description', formData.description);
+        uploadFormData.append('isActive', formData.isActive);
+
+        if (formData.category && formData.category.trim() !== '') {
+          uploadFormData.append('category', formData.category.trim());
+        }
+
+        // Ajouter les fichiers
+        uploadFormData.append('audio', files.media!);
+
+        if (files.thumbnail) {
+          uploadFormData.append('thumbnail', files.thumbnail);
+        }
+
+        const response = await api.post('/admin/media/podcasts', uploadFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              setProgress(percentCompleted);
+            }
+          },
+          timeout: 300000,
+        });
+
+        if (response.data.success) {
+          onUploadSuccess(response.data.data);
+        } else {
+          throw new Error(response.data.message || 'Erreur lors de l\'upload');
+        }
       }
-      
-      if (files.thumbnail) {
-        uploadFormData.append('thumbnail', files.thumbnail);
-      }
+      // Pour les vidéos, on envoie simplement les données JSON avec l'URL
+      else {
+        // Pour les vidéos, on utilise FormData pour pouvoir envoyer l'image
+        const uploadFormData = new FormData();
 
-      // console.log('📤 Données envoyées:');
-      // console.log('Titre:', formData.title);
-      // console.log('Description:', formData.description);
-      // console.log('Catégorie:', formData.category || 'Aucune');
-      // console.log('Statut:', formData.isActive);
-      // console.log('Fichier média:', files.media?.name);
-      // console.log('Fichier thumbnail:', files.thumbnail?.name);
+        // Ajouter les données du formulaire
+        uploadFormData.append('title', formData.title);
+        uploadFormData.append('description', formData.description);
+        uploadFormData.append('category', formData.category || '');
+        uploadFormData.append('isActive', formData.isActive);
+        uploadFormData.append('videoUrl', formData.videoUrl);
 
-      const endpoint = type === 'podcast' 
-        ? '/admin/media/podcasts' 
-        : '/admin/media/videos';
+        // Ajouter la thumbnail si elle existe
+        if (files.thumbnail) {
+          uploadFormData.append('thumbnail', files.thumbnail);
+        }
 
-      const response = await api.post(endpoint, uploadFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            setProgress(percentCompleted);
+        console.log('📤 Envoi des données vidéo avec thumbnail:', {
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          isActive: formData.isActive,
+          videoUrl: formData.videoUrl,
+          hasThumbnail: !!files.thumbnail
+        });
+
+        const response = await api.post('/admin/media/videos', uploadFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data', // Important pour l'upload de fichier
           }
-        },
-        timeout: 300000,
-      });
+        });
 
-      // console.log('✅ Réponse du serveur:', response.data);
-
-      if (response.data.success) {
-        onUploadSuccess(response.data.data);
-      } else {
-        throw new Error(response.data.message || 'Erreur lors de l\'upload');
+        if (response.data.success) {
+          onUploadSuccess(response.data.data);
+        } else {
+          throw new Error(response.data.message || 'Erreur lors de la création');
+        }
       }
     } catch (err: any) {
-      console.error('❌ Upload error détaillé:', err);
-      
-      let errorMessage = 'Erreur lors de l\'upload';
-      
+      console.error('❌ Erreur détaillée:', err);
+
+      let errorMessage = 'Erreur lors de l\'opération';
+
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err.response?.data?.error) {
@@ -199,7 +239,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
     } finally {
       setUploading(false);
@@ -210,19 +250,18 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
   const getFileAccept = () => {
     if (type === 'podcast') {
       return 'audio/*,.mp3,.wav,.ogg,.aac,.m4a';
-    } else {
-      return 'video/*,.mp4,.mov,.avi,.webm,.mkv';
     }
+    return ''; // Pour les vidéos, on n'utilise plus de fichier
   };
 
   const getFileSizeLimit = () => {
-    return type === 'podcast' ? '100MB' : '500MB';
+    return type === 'podcast' ? '100MB' : ''; // Plus de limite pour les vidéos
   };
 
   const getSupportedFormats = () => {
-    return type === 'podcast' 
-      ? 'MP3, WAV, OGG, AAC, M4A' 
-      : 'MP4, MOV, AVI, WebM, MKV';
+    return type === 'podcast'
+      ? 'MP3, WAV, OGG, AAC, M4A'
+      : 'YouTube, Vimeo, Dailymotion, etc.'; // Message pour les vidéos
   };
 
   return (
@@ -235,7 +274,9 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
               Ajouter un {type === 'podcast' ? 'Podcast' : 'Vidéo'}
             </h2>
             <p className="mt-1" style={{ color: theme.secondaryText }}>
-              Téléchargez votre média et remplissez les informations
+              {type === 'podcast'
+                ? 'Téléchargez votre podcast et remplissez les informations'
+                : 'Ajoutez l\'URL de votre vidéo et remplissez les informations'}
             </p>
           </div>
           <button
@@ -251,107 +292,124 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
         {/* Formulaire */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
-            <div className="border rounded-lg p-4" style={{ 
+            <div className="border rounded-lg p-4" style={{
               backgroundColor: `${theme.separator}20`,
-              borderColor: theme.separator 
+              borderColor: theme.separator
             }}>
               <p className="text-sm font-medium" style={{ color: theme.secondaryText }}>{error}</p>
-              <p className="text-xs mt-1" style={{ color: theme.secondaryText }}>
-                Vérifiez les informations et réessayez.
-              </p>
             </div>
           )}
 
-          {/* Fichier média principal */}
-          <div>
-            <label className="block text-sm font-medium mb-3" style={{ color: theme.secondaryText }}>
-              Fichier {type === 'podcast' ? 'Audio' : 'Vidéo'} *
-            </label>
-            <div className="border-2 border-dashed rounded-xl p-6 text-center transition-colors" 
-              style={{ 
-                borderColor: theme.separator,
-                backgroundColor: `${theme.separator}10`
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = theme.primaryDark;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = theme.separator;
-              }}
-            >
-              {files.media ? (
-                <div className="flex items-center justify-between rounded-lg p-4" style={{ backgroundColor: `${theme.separator}20` }}>
-                  <div className="flex items-center space-x-3">
-                    {type === 'podcast' ? (
+          {/* SECTION SPÉCIFIQUE AU TYPE */}
+          {type === 'podcast' ? (
+            /* Section Podcast - Upload de fichier audio */
+            <div>
+              <label className="block text-sm font-medium mb-3" style={{ color: theme.secondaryText }}>
+                Fichier Audio *
+              </label>
+              <div className="border-2 border-dashed rounded-xl p-6 text-center transition-colors"
+                style={{
+                  borderColor: theme.separator,
+                  backgroundColor: `${theme.separator}10`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = theme.primaryDark;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = theme.separator;
+                }}
+              >
+                {files.media ? (
+                  <div className="flex items-center justify-between rounded-lg p-4" style={{ backgroundColor: `${theme.separator}20` }}>
+                    <div className="flex items-center space-x-3">
                       <FileAudio className="h-8 w-8" style={{ color: theme.primaryDark }} />
-                    ) : (
-                      <FileVideo className="h-8 w-8" style={{ color: theme.primaryDark }} />
-                    )}
-                    <div className="text-left">
-                      <p className="font-medium" style={{ color: theme.logo }}>{files.media.name}</p>
-                      <p className="text-sm" style={{ color: theme.secondaryText }}>
-                        {(files.media.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
+                      <div className="text-left">
+                        <p className="font-medium" style={{ color: theme.logo }}>{files.media.name}</p>
+                        <p className="text-sm" style={{ color: theme.secondaryText }}>
+                          {(files.media.size / (1024 * 1024)).toFixed(2)} MB
+                        </p>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFile('media')}
+                      className="p-1"
+                      disabled={uploading}
+                      style={{ color: '#DC2626' }}
+                    >
+                      <X size={20} />
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeFile('media')}
-                    className="p-1"
-                    disabled={uploading}
-                    style={{ color: '#DC2626' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#B91C1C';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = '#DC2626';
-                    }}
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <input
-                    ref={mediaInputRef}
-                    type="file"
-                    accept={getFileAccept()}
-                    onChange={(e) => handleFileChange(e, 'media')}
-                    className="hidden"
-                    disabled={uploading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => mediaInputRef.current?.click()}
-                    className="flex flex-col items-center space-y-3 w-full"
-                    disabled={uploading}
-                  >
-                    {type === 'podcast' ? (
+                ) : (
+                  <>
+                    <input
+                      ref={mediaInputRef}
+                      type="file"
+                      accept={getFileAccept()}
+                      onChange={(e) => handleFileChange(e, 'media')}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => mediaInputRef.current?.click()}
+                      className="flex flex-col items-center space-y-3 w-full"
+                      disabled={uploading}
+                    >
                       <FileAudio className="h-12 w-12" style={{ color: theme.primaryDark }} />
-                    ) : (
-                      <FileVideo className="h-12 w-12" style={{ color: theme.primaryDark }} />
-                    )}
-                    <div>
-                      <p className="text-lg font-medium" style={{ color: theme.logo }}>
-                        Cliquez pour sélectionner un fichier
-                      </p>
-                      <p className="text-sm mt-1" style={{ color: theme.secondaryText }}>
-                        {getSupportedFormats()} • Max {getFileSizeLimit()}
-                      </p>
-                    </div>
-                  </button>
-                </>
-              )}
+                      <div>
+                        <p className="text-lg font-medium" style={{ color: theme.logo }}>
+                          Cliquez pour sélectionner un fichier
+                        </p>
+                        <p className="text-sm mt-1" style={{ color: theme.secondaryText }}>
+                          {getSupportedFormats()} • Max {getFileSizeLimit()}
+                        </p>
+                      </div>
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Section Vidéo - Input URL */
+            <div>
+              <label htmlFor="videoUrl" className="block text-sm font-medium mb-3" style={{ color: theme.secondaryText }}>
+                URL de la vidéo *
+              </label>
+              <div className="space-y-2">
+                <input
+                  type="url"
+                  id="videoUrl"
+                  name="videoUrl"
+                  value={formData.videoUrl}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
+                  style={{
+                    borderColor: theme.separator,
+                    backgroundColor: theme.lightBg,
+                    color: theme.logo
+                  }}
+                  placeholder="https://www.youtube.com/watch?v=... ou https://vimeo.com/..."
+                  disabled={uploading}
+                  required
+                />
+                <p className="text-sm" style={{ color: theme.secondaryText }}>
+                  {getSupportedFormats()}
+                </p>
+                <p className="text-xs" style={{ color: theme.secondaryText }}>
+                  💡 Collez l'URL complète de votre vidéo (YouTube, Vimeo, Dailymotion, etc.)
+                </p>
+              </div>
+            </div>
+          )}
 
-          {/* Miniature */}
+          {/* Miniature - Commun aux deux types */}
           <div>
             <label className="block text-sm font-medium mb-3" style={{ color: theme.secondaryText }}>
               Image de couverture
             </label>
             <div className="border-2 border-dashed rounded-xl p-6 text-center transition-colors"
-              style={{ 
+              style={{
                 borderColor: theme.separator,
                 backgroundColor: `${theme.separator}10`
               }}
@@ -379,12 +437,6 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                     className="p-1"
                     disabled={uploading}
                     style={{ color: '#DC2626' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#B91C1C';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = '#DC2626';
-                    }}
                   >
                     <X size={20} />
                   </button>
@@ -433,10 +485,10 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                 value={formData.title}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
-                style={{ 
+                style={{
                   borderColor: theme.separator,
                   backgroundColor: theme.lightBg,
-                  color: theme.logo 
+                  color: theme.logo
                 }}
                 placeholder={`Titre du ${type === 'podcast' ? 'podcast' : 'vidéo'}`}
                 disabled={uploading}
@@ -455,10 +507,10 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                 onChange={handleInputChange}
                 rows={3}
                 className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
-                style={{ 
+                style={{
                   borderColor: theme.separator,
                   backgroundColor: theme.lightBg,
-                  color: theme.logo 
+                  color: theme.logo
                 }}
                 placeholder={`Description du ${type === 'podcast' ? 'podcast' : 'vidéo'}...`}
                 disabled={uploading}
@@ -478,16 +530,15 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                     value={formData.category}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
-                    style={{ 
+                    style={{
                       borderColor: theme.separator,
                       backgroundColor: theme.lightBg,
-                      color: theme.logo 
+                      color: theme.logo
                     }}
                     placeholder="Ex: Technologie, Musique, Éducation..."
                     disabled={uploading}
                     list="categories-list"
                   />
-                  {/* Suggestions de catégories existantes */}
                   <datalist id="categories-list">
                     {availableCategories.map((category, index) => (
                       <option key={index} value={category} />
@@ -509,10 +560,10 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                   value={formData.isActive}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
-                  style={{ 
+                  style={{
                     borderColor: theme.separator,
                     backgroundColor: theme.lightBg,
-                    color: theme.logo 
+                    color: theme.logo
                   }}
                   disabled={uploading}
                 >
@@ -523,8 +574,8 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
             </div>
           </div>
 
-          {/* Barre de progression */}
-          {uploading && (
+          {/* Barre de progression - Uniquement pour les podcasts */}
+          {uploading && type === 'podcast' && (
             <div className="rounded-xl p-4" style={{ backgroundColor: `${theme.separator}20` }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium" style={{ color: theme.logo }}>Upload en cours...</span>
@@ -533,15 +584,19 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
               <div className="w-full rounded-full h-2" style={{ backgroundColor: `${theme.separator}40` }}>
                 <div
                   className="h-2 rounded-full transition-all duration-300"
-                  style={{ 
+                  style={{
                     width: `${progress}%`,
                     backgroundColor: theme.primaryDark
                   }}
                 ></div>
               </div>
-              <p className="text-xs mt-2" style={{ color: theme.secondaryText }}>
-                Ne fermez pas cette fenêtre pendant l'upload...
-              </p>
+            </div>
+          )}
+
+          {/* Loading pour les vidéos */}
+          {uploading && type === 'video' && (
+            <div className="rounded-xl p-4 text-center" style={{ backgroundColor: `${theme.separator}20` }}>
+              <p className="text-sm" style={{ color: theme.secondaryText }}>Création en cours...</p>
             </div>
           )}
 
@@ -551,43 +606,28 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
               type="button"
               onClick={onClose}
               className="px-6 py-3 border rounded-xl transition-colors font-medium"
-              style={{ 
+              style={{
                 borderColor: theme.separator,
                 color: theme.secondaryText,
                 backgroundColor: 'transparent'
               }}
               disabled={uploading}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = `${theme.separator}20`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
             >
               Annuler
             </button>
             <button
               type="submit"
-              disabled={uploading || !formData.title.trim() || !files.media}
+              disabled={uploading || !formData.title.trim() ||
+                (type === 'podcast' ? !files.media : !formData.videoUrl.trim())}
               className="px-6 py-3 text-white rounded-xl transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              style={{ 
+              style={{
                 backgroundColor: uploading ? `${theme.primaryDark}80` : theme.primaryDark
-              }}
-              onMouseEnter={(e) => {
-                if (!uploading && formData.title.trim() && files.media) {
-                  e.currentTarget.style.backgroundColor = "#556B2F";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!uploading && formData.title.trim() && files.media) {
-                  e.currentTarget.style.backgroundColor = theme.primaryDark;
-                }
               }}
             >
               {uploading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Upload... ({progress}%)
+                  {type === 'podcast' ? `Upload... (${progress}%)` : 'Création...'}
                 </>
               ) : (
                 <>
