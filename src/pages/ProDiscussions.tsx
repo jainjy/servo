@@ -794,15 +794,7 @@ export default function ProDiscussions() {
             ) : (
               <div className="space-y-4">
                 {messages.map((message, index) => {
-                  if (
-                    message.type !== "SYSTEM" &&
-                    message.expediteurId !== currentUserId &&
-                    conversation?.creatorId !== currentUserId &&
-                    notAssignedMe
-                  ) {
-                    return null;
-                  }
-
+                  
                   return (
                     <div
                       key={message.id}
