@@ -56,7 +56,7 @@ const BienEtreShowcase = () => {
   const categoryImages = {
     nutrition: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&auto=format&fit=crop",
     soin: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&auto=format&fit=crop",
-    therapeute: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&auto=format&fit=crop",
+    therapeute: "https://images.unsplash.com/photo-1556760544-74068565f05c?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     huile: "https://images.unsplash.com/photo-1608571423853-2c158115a7f0?w=800&auto=format&fit=crop",
     medecine: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop"
   };
