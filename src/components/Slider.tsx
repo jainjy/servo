@@ -12,6 +12,21 @@ export default function Test() {
       alt: "Image",
       link: "https://www.guyhoquet-reunion.fr/"
     },
+    {
+      src: "/logo-habitat-sur.jpg",
+      alt: "Image",
+      link: "https://www.facebook.com/share/1L35wnjwrp/?mibextid=wwXIfr"
+    },
+    {
+      src: "/logo-kayak-transparent.png",
+      alt: "Image",
+      link: "https://share.google/2uYXjkFjIDncmxSsu"
+    },
+    {
+      src: "/logo-cabinet-beguin-geometres-experts.png",
+      alt: "Image",
+      link: "https://www.geometre-expert.fr/cabinet/cabinet-beguin-geometres-experts/"
+    },
     // {
     //   src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769599947673-6uoigp0lcvw.jpg",
     //   alt: "Image",
