@@ -23,7 +23,7 @@ export default function Test() {
       link: "https://share.google/2uYXjkFjIDncmxSsu"
     },
     {
-      src: "/logo-cabinet-beguin-geometres-experts.png",
+      src: "/logo-geometre-cabinet-beguin.png",
       alt: "Image",
       link: "https://www.geometre-expert.fr/cabinet/cabinet-beguin-geometres-experts/"
     },

@@ -481,7 +481,7 @@ const Header = () => {
         // "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
         // },
         // {
-        // title: "Blogs et conseils",
+        // title: "s et conseils",
         // description: "Actualités et astuces immobilières",
         // href: "/blog",
         // image:
@@ -1766,7 +1766,7 @@ const Header = () => {
       <header
         id="head"
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-          ${scrolled ? "bg-white border-neutral-200 shadow-lg" : "bg-none border-transparent"}`}
+          ${scrolled ? "bg-white border-neutral-200 shadow-lg" : "backdrop-blur-md border-transparent"}`}
       >
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/home"} onClick={() => {
@@ -1780,8 +1780,7 @@ const Header = () => {
             <ServoLogo />
           </Link>
           {/* Menu desktop */}
-          {/* <nav className="hidden md:hidden lg:flex items-center gap-2"></nav> */}
-          <nav className="hidden hidden items-center gap-2">
+          <nav className="hidden md:hidden lg:flex items-center gap-2">
             <ul className="flex items-center">
               {/* CHANGEMENT ICI : slice(0, 5) au lieu de slice(0, 4) */}
               {menuSections.slice(0, 5).map((section, index) => (
@@ -1790,7 +1789,7 @@ const Header = () => {
                     <>
                       <Button
                         variant="ghost"
-                        className={`flex items-center hover:bg-transparent gap-1 text-[11px] font-bold ${scrolled ? "text-gray-700 hover:text-gray-900" : "text-white text-sm font-normal hover:text-white"} transition-all duration-200 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]`}
+                        className={`flex items-center hover:bg-transparent gap-1 font-bold ${scrolled ? "text-gray-700 hover:text-gray-900 text-xs font-normal" : "text-white/50 text-xs font-thin "} transition-all duration-300 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3] group`}
                       >
                         {section.title}
                         <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
@@ -1857,7 +1856,7 @@ const Header = () => {
                   ) : (
                     <Link
                       to={section.href}
-                      className={`flex items-center gap-1 text-[11px] font-bold bg-transparent hover:border-gray-50 ${scrolled ? "text-gray-700 hover:text-gray-900" : "text-white text-sm font-normal hover:text-white"} transition-all duration-200 px-4 py-2 rounded-lg border border-transparent hover:border-[#D3D3D3] group`}
+                      className={`flex items-center gap-1 text-[11px] font-bold bg-transparent hover:border-gray-50 ${scrolled ? "text-gray-700 hover:text-gray-900 text-xs font-normal" : "text-white/50 text-xs font-thin "} transition-all duration-300 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]`}
                     >
                       {section.title}
                     </Link>
@@ -2466,7 +2465,7 @@ const Header = () => {
               </DropdownMenu>
             )}
             {/* Mobile Menu */}
-            <div className="">
+            <div className="lg:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
