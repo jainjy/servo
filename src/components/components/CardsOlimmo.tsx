@@ -462,16 +462,19 @@ const AnnoncesImmobilieres = () => {
 
   return (
     <div
-      className="w-full py-12 px-4 sm:px-2 lg:px-4 bg-[#22ee303a]"
+     className="w-full py-10 lg:py-12 bg-white"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* En-tête */}
         <div className="mb-12 grid place-items-center lg:flex justify-between items-center">
-          <h2
-            className="text-3xl sm:text-5xl font-serif font-medium mb-3 text-center lg:text-left text-slate-900"
-          >
-            Propriétés de nos partenaires
-          </h2>
+           <div className="space-y-1">
+            <h2 className="text-2xl sm:text-3xl font-medium text-[#222222] tracking-tight">
+              Propriétés de nos partenaires
+            </h2>
+            <p className="text-sm text-[#717171]">
+              Une collection exclusive de nos partenaires
+            </p>
+          </div>
           <div className="text-center grid lg:flex items-center justify-between">
             <Button
               className="relative bg-logo hover:bg-logo/90 px-8 mx-auto py-3 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
@@ -562,7 +565,7 @@ const AnnoncesImmobilieres = () => {
         ) : null}
 
         {/* Résultats */}
-        {!loading && filteredProperties.length > 0 && (
+        {/* {!loading && filteredProperties.length > 0 && (
           <div className="mt-8 grid place-items-center">
             <p
               className="w-auto lg:w-1/4 text-center text-xs font-bold rounded-full p-2"
@@ -579,7 +582,7 @@ const AnnoncesImmobilieres = () => {
               sur <span className="font-semibold">{properties.length}</span>
             </p>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
