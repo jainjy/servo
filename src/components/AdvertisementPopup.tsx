@@ -361,7 +361,7 @@ const AdvertisementPopup: React.FC<Props> = ({
 
   if (shouldMirror) {
     return (
-      <div className={`w-[250px] h-auto rounded-sm bg-white`}>
+      <div className={`w-[250px] h-auto rounded-sm overflow-hidden bg-white`}>
         <div className="relative">
           <div className='absolute flex gap-2 right-5'>
             <span className="rounded-full bg-secondary-text px-2 py-0.5 text-[6px] sm:px-3 sm:py-1 sm:text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
@@ -372,7 +372,7 @@ const AdvertisementPopup: React.FC<Props> = ({
             </button>
           </div>
 
-          <div className='w-full h-full px-5 py-6'>
+          <div className='w-full h-full '>
             {renderMedia()}
           </div>
 
