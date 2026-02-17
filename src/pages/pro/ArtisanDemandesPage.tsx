@@ -347,11 +347,19 @@ const ProDemandesPage = () => {
         limit: pagination.limit,
       };
 
+      console.log("📤 Frontend - Envoi requête avec params:", params);
+
       const response = await proAPI.getDemandes(params);
+
+      console.log("📥 Frontend - Réponse reçue:", response);
+      console.log("📥 Frontend - Données:", response.data);
+      console.log("📥 Frontend - Demandes:", response.data.demandes);
+      console.log("📥 Frontend - Pagination:", response.data.pagination);
+
       setDemandes(response.data.demandes);
       setPagination(response.data.pagination);
     } catch (error) {
-      console.error("Erreur lors du chargement des demandes:", error);
+      console.error("❌ Frontend - Erreur lors du chargement des demandes:", error);
       alert("Erreur lors du chargement des demandes");
     } finally {
       setLoading(false);
@@ -402,39 +410,39 @@ const ProDemandesPage = () => {
 
   const realTimeStats = stats
     ? [
-        {
-          number: stats.total,
-          label: "Total",
-          color: "purple",
-          icon: Package,
-          badge:
-            stats.nouvelles > 0
-              ? {
-                  color: "bg-[#6B8E23]",
-                  text: `${stats.nouvelles} nouv.`,
-                  icon: Bell,
-                }
-              : null,
-        },
-        {
-          number: stats.disponibles,
-          label: "Disponibles",
-          color: "green",
-          icon: Briefcase,
-        },
-        {
-          number: stats.assignees,
-          label: "En attente",
-          color: "orange",
-          icon: Clock,
-        },
-        {
-          number: stats.validees,
-          label: "Validées",
-          color: "blue",
-          icon: CheckCircle,
-        },
-      ]
+      {
+        number: stats.total,
+        label: "Total",
+        color: "purple",
+        icon: Package,
+        badge:
+          stats.nouvelles > 0
+            ? {
+              color: "bg-[#6B8E23]",
+              text: `${stats.nouvelles} nouv.`,
+              icon: Bell,
+            }
+            : null,
+      },
+      {
+        number: stats.disponibles,
+        label: "Disponibles",
+        color: "green",
+        icon: Briefcase,
+      },
+      {
+        number: stats.assignees,
+        label: "En attente",
+        color: "orange",
+        icon: Clock,
+      },
+      {
+        number: stats.validees,
+        label: "Validées",
+        color: "blue",
+        icon: CheckCircle,
+      },
+    ]
     : [];
 
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
@@ -657,8 +665,8 @@ const ProDemandesPage = () => {
             {sortBy === "date"
               ? "Plus récent"
               : sortBy === "urgence"
-              ? "Urgence"
-              : "Statut"}
+                ? "Urgence"
+                : "Statut"}
           </p>
         </div>
         <div className="text-[#8B4513]/50 text-sm hidden sm:flex items-center gap-1">
@@ -667,8 +675,8 @@ const ProDemandesPage = () => {
             {sortBy === "date"
               ? "Plus récent"
               : sortBy === "urgence"
-              ? "Urgence"
-              : "Statut"}
+                ? "Urgence"
+                : "Statut"}
           </span>
         </div>
       </div>
