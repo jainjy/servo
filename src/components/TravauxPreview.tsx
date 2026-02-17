@@ -358,6 +358,8 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           ))}
         </div>
       </div>
+      
+      <AdvertisementPopup position="section-accueil-travaux" />
     </section>
   );
 };
