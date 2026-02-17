@@ -309,7 +309,7 @@ const Hero = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mx-auto max-w-xl mt-4 font-sans"
+              className="mx-auto max-w-xl mt-6 font-sans px-7"
               onClick={openModal}
             >
               <div className="flex flex-col sm:flex-row gap-2 bg-white/15 backdrop-blur-md rounded-xl sm:rounded-full p-1.5 border border-white/40 shadow-xl cursor-text hover:bg-white/20 transition-all duration-300">
@@ -336,7 +336,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-wrap justify-center gap-3 md:gap-4 mt-6 px-2 font-sans"
+              className="flex flex-wrap justify-center gap-3 md:gap-4 mt-6 font-sans"
             >
               {services.map((service, index) => {
                 const Icon = service.icon;
