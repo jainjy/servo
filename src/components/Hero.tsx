@@ -280,8 +280,15 @@ const Hero = () => {
 
         {/* Contenu Hero MINI - POLICE LATO/SANS */}
         <div className="container relative z-30 mx-auto px-4">
+
           {/* Publicités */}
-          <AdvertisementPopup position="hero-top" />
+          <div className="absolute left-0 h-full flex flex-row items-center ">
+            <AdvertisementPopup position="hero-left" />
+          </div>
+
+          <div className="absolute right-0 h-full flex flex-row items-center ">
+            <AdvertisementPopup position="hero-right" />
+          </div>
 
           <div className="max-w-3xl mx-auto text-center">
             <motion.h1
@@ -344,10 +351,10 @@ const Hero = () => {
                   <div
                     key={index}
                     onClick={() => navigate(service.href)}
-                   className="group flex flex-col items-center w-24 md:w-28 p-2 cursor-pointer"
+                    className="group flex flex-col items-center w-24 md:w-28 p-2 cursor-pointer"
                   >
                     <div className="group flex flex-col items-center w-24 md:w-28 p-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-all duration-300">
-                       <Icon className={`w-6 h-6 md:w-7 md:h-7 mb-1 text-white`} />
+                      <Icon className={`w-6 h-6 md:w-7 md:h-7 mb-1 text-white`} />
                     </div>
                     <span className="text-[10px] md:text-xs text-white/70 text-center hidden md:block">
                       {service.description}

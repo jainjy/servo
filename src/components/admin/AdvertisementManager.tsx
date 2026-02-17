@@ -77,7 +77,6 @@ const AdvertisementManager = () => {
   });
 
   const positionList = [
-    { value: 'hero-top', label: 'Hero - Haut' },
     { value: 'hero-bottom', label: 'Hero - Bas' },
     { value: 'hero-left', label: 'Hero - Gauche' },
     { value: 'hero-right', label: 'Hero - Droit' },
