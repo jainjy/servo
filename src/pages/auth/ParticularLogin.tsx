@@ -148,70 +148,7 @@ const LoginPage = () => {
         <span className="text-sm font-medium">Retour</span>
       </button>
 
-      {/* Publicité personnalisée pour la page de login - Desktop seulement */}
-      {!isMobile && isAdVisible && (
-        <motion.article
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.25 }}
-          className="
-            absolute top-20 right-4 z-40
-            w-full max-w-xs
-            rounded-xl border border-white/20
-            bg-gradient-to-br from-white/12 to-white/6
-            backdrop-blur-lg shadow-lg overflow-hidden
-          "
-        >
-          {/* Header */}
-          <div className="absolute right-2 top-2 flex items-center gap-1 text-xs">
-            <span className="px-2 py-0.5 rounded-full bg-white/25 text-white font-semibold backdrop-blur-sm">
-              Pub
-            </span>
-
-            <div className="flex items-center bg-black/35 px-2 py-0.5 rounded-full text-white backdrop-blur-sm">
-              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {formatTime(adTimeRemaining)}
-            </div>
-
-            <button
-              onClick={() => setIsAdVisible(false)}
-              className="p-1 rounded-full bg-black/35 hover:bg-black/50 text-white/75 hover:text-white transition-colors"
-              aria-label="Fermer la publicité"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Contenu */}
-          <div className="pt-10 pb-4 px-4">
-            <h2 className="text-sm font-semibold text-white mb-1.5">
-              Devenez Professionnel OLIPLUS
-            </h2>
-
-            <p className="text-xs text-white/80 leading-relaxed mb-3">
-              Rejoignez notre réseau de professionnels et développez votre activité.
-            </p>
-
-            <div className="flex items-center justify-between pt-3 border-t border-white/15">
-              <div className="flex items-center text-[10px] text-white/65">
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>Visible : <span className="font-medium text-white">2 min</span></span>
-              </div>
-
-
-            </div>
-          </div>
-        </motion.article>
-      )}
+      
       
       <div className="absolute left-0 h-full flex flex-row items-center ">
         <AdvertisementPopup position="login-pariticulier-left" />
