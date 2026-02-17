@@ -79,7 +79,7 @@ const Footer: React.FC = () => {
     {
       name: "CABINET BEGUIN GEOMETRES-EXPERTS",
       url: "/professional/453e04f7-de42-4e9f-980c-bfb4e0586db7",
-      logo: "/logo-cabinet-beguin-geometres-experts.png",
+      logo: "/logo-geometre-cabinet-beguin.png",
     },
     // {
     //   name: "Expert Immobilier",
