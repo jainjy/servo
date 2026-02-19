@@ -62,9 +62,9 @@ const Footer: React.FC = () => {
       logo: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836948448-54bqjn3oh5a.png",
     },
     {
-      name: "RM CONSTRUCTION",
+      name: "STPM construction",
       url: "/professional/0d812425-8a4a-4dda-a65e-c0e56eb704b1",
-      logo: "/logo_RM_CONSTRUCTION.png",
+      logo: "/STPM-CONTRUCTION-logo.jpeg",
     },
     {
       name: "HABITAT-SUR",

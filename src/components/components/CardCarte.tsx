@@ -118,21 +118,20 @@ const CardCarte: React.FC = () => {
   }
 
   return (
-    <section className="w-full py-12 lg:py-16 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section className="w-full pt-8 bg-white">
+      <div className="pl-6 pr-5 ">
         {/* HEADER - Compact et professionnel */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex items-center justify-between mb-8 lg:mb-10"
+          className="flex items-center justify-between mb-3"
         >
-          <div className="space-y-1">
-          
-            <h2 className="text-2xl sm:text-3xl font-medium text-[#222222] tracking-tight">
+          <div>
+            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
               Explorez notre réseau
             </h2>
-            <p className="text-sm text-[#717171]">
+            <p className="text-xs text-[#717171]">
               {points.length} professionnels et biens à travers l'île
             </p>
           </div>

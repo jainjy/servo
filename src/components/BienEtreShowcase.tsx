@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Apple, Heart, Users, Leaf, Sprout, ArrowRight, RefreshCw, Sparkles, Star, MapPin, Clock, Shield, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import AuthService from '@/services/authService';
 
 interface BienEtreCard {
   id: string;
@@ -141,7 +140,7 @@ const BienEtreShowcase = () => {
 
   const getRandomCards = () => {
     const shuffled = [...allCards].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 3);
+    return shuffled.slice(0, 4);
   };
 
   useEffect(() => {
@@ -162,21 +161,20 @@ const BienEtreShowcase = () => {
   };
 
   return (
-    <section className="w-full py-10 lg:py-12 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        
+     <section className="w-full pt-8 bg-white">
+      <div className="pl-6 pr-5 ">
         {/* HEADER - Compact et professionnel */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-8"
+          className="flex items-center justify-between mb-3"
         >
-          <div className="space-y-1">
-            <h2 className="text-2xl sm:text-3xl font-medium text-[#222222] tracking-tight">
+          <div>
+            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
               Santé & Bien-Être
             </h2>
-            <p className="text-sm text-[#717171]">
+            <p className="text-xs text-[#717171]">
               Praticiens et thérapeutes d'exception
             </p>
           </div>
@@ -205,7 +203,7 @@ const BienEtreShowcase = () => {
         </motion.div>
 
         {/* GRILLE DES CARTES - Format compact */}
-        <div className="grid md:grid-cols-3 gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
           <AnimatePresence mode="wait">
             {displayedCards.map((card, index) => {
               const colors = colorConfig[card.color];
@@ -327,15 +325,6 @@ const BienEtreShowcase = () => {
           </AnimatePresence>
         </div>
 
-        {/* SECTION CATÉGORIES - Compacte */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-8 pt-6 border-t border-[#DDDDDD]"
-        >
-          {/* Section vide ou à compléter */}
-        </motion.div>
       </div>
 
       {/* MODAL DE CONNEXION (optionnelle) */}

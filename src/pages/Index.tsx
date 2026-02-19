@@ -106,11 +106,16 @@ const Index = () => {
 
           {/* Hero Section - Pleine largeur */}
           <Hero />
+          
+          {/* Section Slider */}
+          <section className="w-full mt-5">
+            <Slider />
+          </section>
 
           {/* Section Services */}
-          <section className="w-full">
+          {/* <section className="w-full"> */}
             {/* <ServiceCards /> */}
-          </section>
+          {/* </section> */}
 
           {/* Section Travaux Preview */}
           <section className="w-full">
@@ -135,37 +140,26 @@ const Index = () => {
             <ArtETCreationShowcase />
           </section>
 
-          
-
-          {/* Section Carte */}
-          <section className="w-full">
-            <CardCarte />
-          </section>
-
           {/* Section Immobilier avec en-tête */}
-          <section className="w-full">
-            <PropertyListings cardsOnly maxItems={4} />
-          </section>
+          {/* <section className="w-full">
+            <PropertyListings cardsOnly maxItems={4} /> /// Commenter pour le moment, à réintégrer plus tard
+          </section> */}
 
           {/* Section Bien-Être */}
           <section className="w-full">
             <BienEtreShowcase />
           </section>
 
-          {/* Section Slider */}
-          <section className="w-full">
-            <Slider />
-          </section>
-
-          {/* Section Publicitaire */}
-          <section className="w-full">
-            <AdvertisementPopup position={"section3"} />
-          </section>
-
           {/* Section Annonces Immobilières */}
           <section className="w-full">
             <AnnoncesImmobilieres />
           </section>
+
+          {/* Section Carte */}
+          <section className="w-full">
+            <CardCarte />
+          </section>
+
         </Suspense>
       </div>
     </>

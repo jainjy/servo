@@ -22,6 +22,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Interface pour les propriétés depuis Supabase
 interface Property {
@@ -371,8 +372,8 @@ const AnnonceCard = ({ property }: { property: Property }) => {
             onClick={handleShowDetails}
             disabled={!isAvailable}
             className={`w-full py-2.5 px-4 rounded-lg transition-all duration-200 font-medium text-sm flex items-center justify-center ${isAvailable
-                ? "bg-[#6B8E23] text-white hover:bg-[#5A7D1C] cursor-pointer"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              ? "bg-[#6B8E23] text-white hover:bg-[#5A7D1C] cursor-pointer"
+              : "bg-gray-100 text-gray-400 cursor-not-allowed"
               }`}
           >
             <Eye className="w-3.5 h-3.5 mr-2" />
@@ -461,42 +462,35 @@ const AnnoncesImmobilieres = () => {
   }, [properties, selectedType, searchQuery]);
 
   return (
-    <div
-     className="w-full py-10 lg:py-12 bg-white"
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <div className="w-full pt-8 bg-white">
+      <div className="pl-6 pr-5 ">
         {/* En-tête */}
-        <div className="mb-12 grid place-items-center lg:flex justify-between items-center">
-           <div className="space-y-1">
-            <h2 className="text-2xl sm:text-3xl font-medium text-[#222222] tracking-tight">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="flex items-center justify-between mb-3"
+        >
+          <div>
+            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
               Propriétés de nos partenaires
             </h2>
-            <p className="text-sm text-[#717171]">
+            <p className="text-xs text-[#717171]">
               Une collection exclusive de nos partenaires
             </p>
           </div>
-          <div className="text-center grid lg:flex items-center justify-between">
-            <Button
-              className="relative bg-logo hover:bg-logo/90 px-8 mx-auto py-3 flex items-center gap-3 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
-              onClick={() =>
-                window.open("https://www.olimmoreunion.re/biens", "_blank")
-              }
+          <div className="flex items-center gap-2 mt-3 sm:mt-0">
+            <a
+              href="https://www.olimmoreunion.re/biens"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-1.5 bg-[#222222] text-white rounded-full text-xs font-medium hover:bg-[#333333] transition-all flex items-center gap-1.5 no-underline"
             >
-
-              {/* Contenu */}
-              <span
-                className="relative z-10 font-semibold group-hover:text-slate-900 transition-all duration-400 ease-out"
-                style={{ color: "white" }}
-              >
-                Voir plus
-              </span>
-              <ArrowRight
-                className="w-4 h-4 relative z-10 group-hover:text-slate-900 transition-all duration-400 ease-out group-hover:translate-x-1"
-                style={{ color: "white" }}
-              />
-            </Button>
+              <span>Voir plus</span>
+              <ArrowRight size={12} />
+            </a>
           </div>
-        </div>
+        </motion.div>
 
         {/* État de chargement */}
         {loading && (

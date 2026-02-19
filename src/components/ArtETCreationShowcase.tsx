@@ -138,14 +138,14 @@ const ArtETCreationShowcase = () => {
 
   const handleCardClick = (e: React.MouseEvent, link: string) => {
     e.preventDefault();
-    
+
     // Vérification de l'authentification (optionnel)
     // Si vous voulez garder la logique d'auth, décommentez ces lignes
     // if (!AuthService.isAuthenticated()) {
     //   setShowAuthModal(true);
     //   return;
     // }
-    
+
     // Ouvre dans un nouvel onglet
     window.open(`/art-et-creation?activeTab=${link}`, '_blank');
   };
@@ -160,46 +160,43 @@ const ArtETCreationShowcase = () => {
   };
 
   return (
-    <section className="w-full py-12 sm:py-16 lg:py-20 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        
+    <section className="w-full pt-9 bg-white">
+      <div className="pl-6 pr-5 ">
         {/* HEADER - Style Airbnb épuré */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 lg:mb-12"
+          className="flex items-center justify-between mb-3"
         >
-          <div className="space-y-3 max-w-2xl">
-        
-            
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-medium text-[#222222] tracking-tight">
+          <div>
+            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
               Art & Création
             </h2>
-            
-        
+            <p className="text-xs text-[#717171]">
+              De l'esquisse à l'œuvre finale
+            </p>
           </div>
-          
-          <div className="flex items-center gap-3 mt-4 sm:mt-0">
+
+          <div className="flex items-center gap-2 mt-3 sm:mt-0">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleRefresh}
-              className="px-4 py-2 text-sm font-medium text-[#717171] hover:text-[#222222] border border-[#DDDDDD] rounded-full hover:border-[#222222] transition-all flex items-center gap-2"
+              className="px-3 py-1.5 text-xs font-medium text-[#717171] hover:text-[#222222] border border-[#DDDDDD] rounded-full hover:border-[#222222] transition-all flex items-center gap-1.5"
             >
-              <RefreshCw size={14} />
-              <span>Nouveautés</span>
+              <RefreshCw size={12} />
+              <span>Actualiser</span>
             </motion.button>
-            
-            {/* Bouton "Tout voir" en lien avec nouvel onglet */}
+
             <a
               href="/art-et-creation"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2 bg-[#222222] text-white rounded-full text-sm font-medium hover:bg-[#333333] transition-all flex items-center gap-2 no-underline"
+              className="px-4 py-1.5 bg-[#222222] text-white rounded-full text-xs font-medium hover:bg-[#333333] transition-all flex items-center gap-1.5 no-underline"
             >
-              <span>Tout voir</span>
-              <ArrowRight size={14} />
+              <span>Tous voir</span>
+              <ArrowRight size={12} />
             </a>
           </div>
         </motion.div>
@@ -210,7 +207,7 @@ const ArtETCreationShowcase = () => {
             {displayedCards.map((card, index) => {
               const colors = colorConfig[card.color];
               const isFavorited = favorites[card.id];
-              
+
               return (
                 <motion.div
                   key={`${card.id}-${index}`}
@@ -246,10 +243,10 @@ const ArtETCreationShowcase = () => {
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
-                      
+
                       {/* Overlay gradient subtil */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
+
                       {/* Badge "Coup de cœur" - Style Airbnb */}
                       {card.rating && card.rating > 4.9 && (
                         <div className="absolute top-3 left-3 z-10">
@@ -259,21 +256,20 @@ const ArtETCreationShowcase = () => {
                           </span>
                         </div>
                       )}
-                      
+
                       {/* Bouton Favoris - Style Airbnb */}
                       <button
                         onClick={(e) => toggleFavorite(card.id, e)}
                         className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:bg-white transition-all"
                       >
                         <Heart
-                          className={`h-4 w-4 transition-all ${
-                            isFavorited 
-                              ? 'fill-[#FF385C] text-[#FF385C]' 
+                          className={`h-4 w-4 transition-all ${isFavorited
+                              ? 'fill-[#FF385C] text-[#FF385C]'
                               : 'text-[#222222]'
-                          }`}
+                            }`}
                         />
                       </button>
-                      
+
                       {/* Indicateur de catégorie - Mini badge */}
                       <div className="absolute bottom-3 left-3 z-10">
                         <span className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded text-xs font-medium text-[#222222] shadow-sm flex items-center gap-1">
@@ -305,12 +301,12 @@ const ArtETCreationShowcase = () => {
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Ligne 2 : Titre */}
                       <h3 className="text-sm font-normal text-[#222222] line-clamp-1">
                         {card.title}
                       </h3>
-                      
+
                       {/* Ligne 3 : Localisation */}
                       <div className="flex items-center gap-0.5 text-xs text-[#717171]">
                         <MapPin className="h-2.5 w-2.5" />
@@ -318,7 +314,7 @@ const ArtETCreationShowcase = () => {
                           {card.location}
                         </span>
                       </div>
-                      
+
                       {/* Ligne 4 : Prix */}
                       <div className="pt-1">
                         <span className="text-sm font-semibold text-[#222222]">
@@ -336,19 +332,6 @@ const ArtETCreationShowcase = () => {
           </AnimatePresence>
         </div>
 
-        {/* SECTION "EXPLOREZ PAR CATÉGORIE" - Style Airbnb */}
-  
-
-        {/* SECTION "ARTISTES EN VEDETTE" - Style Airbnb */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="mt-12 pt-8"
-        >
-          {/* Cette section peut être développée plus tard */}
-        </motion.div>
       </div>
 
       {/* MODAL DE CONNEXION - Style Airbnb */}
@@ -380,7 +363,7 @@ const ArtETCreationShowcase = () => {
                     ✕
                   </button>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="bg-[#F7F7F7] rounded-xl p-4 flex items-start gap-3">
                     <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
@@ -395,7 +378,7 @@ const ArtETCreationShowcase = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <a
                     href="/login"
                     target="_blank"
@@ -405,20 +388,20 @@ const ArtETCreationShowcase = () => {
                     Se connecter
                     <span className="ml-1 text-white/70">↗</span>
                   </a>
-                  
+
                   <button
                     onClick={() => setShowAuthModal(false)}
                     className="w-full py-3 border border-[#DDDDDD] text-[#222222] hover:bg-[#F7F7F7] rounded-xl text-sm font-medium"
                   >
                     Continuer sans compte
                   </button>
-                  
+
                   <div className="pt-4 text-center">
                     <span className="text-xs text-[#717171]">
                       Pas encore de compte ?{' '}
-                      <a 
-                        href="/register" 
-                        target="_blank" 
+                      <a
+                        href="/register"
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-[#222222] hover:underline font-medium inline-flex items-center gap-0.5"
                       >

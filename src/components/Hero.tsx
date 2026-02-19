@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Home, TrendingUp, Package, User2, Search } from "lucide-react"; // Ajout des icônes
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import heroImage from "/hero1-1.png";
+import heroImage from "/hero2-1.jpg";
 import "../styles/font.css";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
@@ -22,7 +22,7 @@ const colors = {
 };
 
 // URL de l'image en dessin
-const sketchImageUrl = "/hero1.jpg";
+const sketchImageUrl = "/hero2-2.jpg";
 
 // Services à afficher
 const services = [
@@ -71,6 +71,9 @@ const Hero = () => {
   const [revealRadius, setRevealRadius] = useState(0);
   const animationRef = useRef<number | null>(null);
   const [alwaysRevealing, setAlwaysRevealing] = useState(false);
+  
+  // Nouvel état pour le switch
+  const [showSketch, setShowSketch] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -187,15 +190,154 @@ const Hero = () => {
           opacity: var(--reveal-opacity, 0);
           transition: opacity 0.3s ease-out;
         }
+
+        /* Styles pour le switch - Position bas droite */
+        .switch-container {
+          position: absolute;
+          bottom: 20px;
+          right: 20px;
+          z-index: 40;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(0, 0, 0, 0.3);
+          backdrop-filter: blur(8px);
+          padding: 8px 16px;
+          border-radius: 40px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+          transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .switch-container:hover {
+          transform: scale(1.05);
+          background: rgba(0, 0, 0, 0.4);
+        }
+
+        .switch-label {
+          color: white;
+          font-size: 14px;
+          font-weight: 500;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 52px;
+          height: 28px;
+        }
+
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(255, 255, 255, 0.3);
+          transition: 0.3s;
+          border-radius: 34px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 22px;
+          width: 22px;
+          left: 3px;
+          bottom: 2px;
+          background-color: white;
+          transition: 0.3s;
+          border-radius: 50%;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .slider {
+          background-color: #6B8E23;
+        }
+
+        input:checked + .slider:before {
+          transform: translateX(24px);
+        }
+
+        .switch-icon {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 12px;
+          color: white;
+          pointer-events: none;
+        }
+
+        .switch-icon.real {
+          left: 6px;
+          opacity: ${!showSketch ? 1 : 0.5};
+        }
+
+        .switch-icon.sketch {
+          right: 6px;
+          opacity: ${showSketch ? 1 : 0.5};
+        }
+
+        /* Media query pour mobile */
+        @media (max-width: 768px) {
+          .switch-container {
+            bottom: 10px;
+            right: 10px;
+            padding: 6px 12px;
+          }
+          
+          .switch-label {
+            font-size: 12px;
+          }
+          
+          .switch {
+            width: 46px;
+            height: 24px;
+          }
+          
+          .slider:before {
+            height: 18px;
+            width: 18px;
+          }
+          
+          input:checked + .slider:before {
+            transform: translateX(20px);
+          }
+        }
       `}</style>
 
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-[320px] md:min-h-[380px] lg:min-h-[440px] flex items-center justify-center overflow-hidden bg-black"
+        className="relative min-h-[460px] flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
+        {/* Bouton Switch - Positionné en bas à droite */}
+        {/* <div className="switch-container">
+          <span className="switch-label">Mode</span>
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={showSketch}
+              onChange={(e) => setShowSketch(e.target.checked)}
+            />
+            <span className="slider">
+              <span className="switch-icon real">📷</span>
+              <span className="switch-icon sketch">✏️</span>
+            </span>
+          </label>
+        </div> */}
+
         {/* Filtre SVG pour l'effet d'onde */}
         <svg style={{ display: "none" }}>
           <defs>
@@ -228,10 +370,13 @@ const Hero = () => {
           }}
         >
           <motion.img
-            src={heroImage}
+            src={showSketch ? sketchImageUrl : heroImage}
             alt="Background"
             className="absolute top-0 left-0 w-full h-full object-cover"
-            style={{ filter: "brightness(0.7) contrast(1.1)" }}
+            style={{ 
+              filter: showSketch ? "brightness(0.9) contrast(1.1)" : "brightness(0.7) contrast(1.1)",
+              transition: "filter 0.4s ease-out"
+            }}
             animate={{
               x: (mousePosition.x - window.innerWidth / 2) * 0.003,
               y: (mousePosition.y - window.innerHeight / 2) * 0.003,
@@ -239,41 +384,43 @@ const Hero = () => {
             transition={{ type: "spring", stiffness: 250, damping: 40 }}
           />
 
-          {/* Calque de révélation avec l'image de dessin */}
-          <div
-            className="absolute top-0 left-0 w-full h-full wave-distortion reveal-mask"
-            style={{
-              opacity: isRevealing || alwaysRevealing ? 1 : 0,
-              pointerEvents: "none",
-              transition: "opacity 0.4s ease-out",
-              "--mouse-x": `${mousePosition.x}px`,
-              "--mouse-y": `${mousePosition.y}px`,
-              "--reveal-radius": `${revealRadius}px`,
-            } as React.CSSProperties}
-          >
-            <img
-              src={sketchImageUrl}
-              alt="Dessin architectural"
-              className="absolute top-0 left-0 w-full h-full object-cover"
-              style={{
-                mixBlendMode: "multiply",
-                opacity: 1,
-                transform: `
-                  translateX(${getWaveDistortion(mousePosition.x, mousePosition.y, waveOffset)}px)
-                  translateY(${getWaveDistortion(mousePosition.y, mousePosition.x, waveOffset + 1)}px)
-                `,
-                transition: "transform 0.1s linear",
-              }}
-            />
+          {/* Calque de révélation avec l'image de dessin (conditionnel) */}
+          {!showSketch && (
             <div
-              className="reveal-overlay"
+              className="absolute top-0 left-0 w-full h-full wave-distortion reveal-mask"
               style={{
+                opacity: isRevealing || alwaysRevealing ? 1 : 0,
+                pointerEvents: "none",
+                transition: "opacity 0.4s ease-out",
                 "--mouse-x": `${mousePosition.x}px`,
                 "--mouse-y": `${mousePosition.y}px`,
-                "--reveal-opacity": isRevealing || alwaysRevealing ? 1 : 0,
+                "--reveal-radius": `${revealRadius}px`,
               } as React.CSSProperties}
-            />
-          </div>
+            >
+              <img
+                src={sketchImageUrl}
+                alt="Dessin architectural"
+                className="absolute top-0 left-0 w-full h-full object-cover"
+                style={{
+                  mixBlendMode: "multiply",
+                  opacity: 1,
+                  transform: `
+                    translateX(${getWaveDistortion(mousePosition.x, mousePosition.y, waveOffset)}px)
+                    translateY(${getWaveDistortion(mousePosition.y, mousePosition.x, waveOffset + 1)}px)
+                  `,
+                  transition: "transform 0.1s linear",
+                }}
+              />
+              <div
+                className="reveal-overlay"
+                style={{
+                  "--mouse-x": `${mousePosition.x}px`,
+                  "--mouse-y": `${mousePosition.y}px`,
+                  "--reveal-opacity": isRevealing || alwaysRevealing ? 1 : 0,
+                } as React.CSSProperties}
+              />
+            </div>
+          )}
 
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/60" />
         </div>
@@ -356,7 +503,7 @@ const Hero = () => {
                     <div className="group flex flex-col items-center w-24 md:w-28 p-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-all duration-300">
                       <Icon className={`w-6 h-6 md:w-7 md:h-7 mb-1 text-white`} />
                     </div>
-                    <span className="text-[10px] md:text-xs text-white/70 text-center hidden md:block">
+                    <span className="text-[10px] md:text-xs text-white/70 text-center">
                       {service.description}
                     </span>
                   </div>

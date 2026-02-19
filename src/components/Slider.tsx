@@ -1,180 +1,275 @@
-import AdvertisementPopup from '@/components/AdvertisementPopup';
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-export default function Test() {
-  const imageSrc = [
-    {
-      src: "/olimmo.png",
-      alt: "Image",
-      link: "https://www.olimmoreunion.re/"
-    },
-    {
-      src: "/Reunion.png",
-      alt: "Image",
-      link: "https://www.guyhoquet-reunion.fr/"
-    },
-    {
-      src: "/logo-habitat-sur.jpg",
-      alt: "Image",
-      link: "https://www.facebook.com/share/1L35wnjwrp/?mibextid=wwXIfr"
-    },
-    {
-      src: "/logo-kayak-transparent.png",
-      alt: "Image",
-      link: "https://share.google/2uYXjkFjIDncmxSsu"
-    },
-    {
-      src: "/logo-geometre-cabinet-beguin.png",
-      alt: "Image",
-      link: "https://www.geometre-expert.fr/cabinet/cabinet-beguin-geometres-experts/"
-    },
-    // {
-    //   src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769599947673-6uoigp0lcvw.jpg",
-    //   alt: "Image",
-    // },
-    {
-      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769515428367-ifzbh3rk92c.png",
-      alt: "Image",
-    },
-    {
-      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987856807-5aze4kvdkyd.png",
-      alt: "Image",
-    },
-    {
-      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987792594-y2xzfeeb35e.jpg",
-      alt: "Image",
-    },
-    {
-      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987729304-3i63o0deunq.png",
-      alt: "Image",
-    },
-    {
-      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836430476-9b69z2jvyil.png",
-      alt: "Image",
-    },
-    {
-      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836629052-zn3mvhzd7lg.webp",
-      alt: "Image",
-    },
-    {
-      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836948448-54bqjn3oh5a.png",
-      alt: "Image",
-    },
-    {
-      src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769515594088-g834n4v5m57.png",
-      alt: "Image",
+// Enregistrement du plugin ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
+
+const imageSrc = [
+  {
+    src: "/olimmo.png",
+    alt: "Image",
+    link: "https://www.olimmoreunion.re/",
+    hasBackground: false
+  },
+  {
+    src: "/Reunion.png",
+    alt: "Image",
+    link: "https://www.guyhoquet-reunion.fr/",
+    hasBackground: true
+  },
+  {
+    src: "/logo-habitat-sur.jpg",
+    alt: "Image",
+    link: "https://www.facebook.com/share/1L35wnjwrp/?mibextid=wwXIfr",
+    hasBackground: false
+  },
+  {
+    src: "/logo-kayak-transparent.png",
+    alt: "Image",
+    link: "https://share.google/2uYXjkFjIDncmxSsu",
+    hasBackground: false 
+  },
+  {
+    src: "/logo-geometre-cabinet-beguin.png",
+    alt: "Image",
+    link: "https://www.geometre-expert.fr/cabinet/cabinet-beguin-geometres-experts/",
+    hasBackground: false
+  },
+  {
+    src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1769515428367-ifzbh3rk92c.png",
+    alt: "Image",
+    hasBackground: false
+  },
+  {
+    src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987856807-5aze4kvdkyd.png",
+    alt: "Image",
+    hasBackground: true
+  },
+  {
+    src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987792594-y2xzfeeb35e.jpg",
+    alt: "Image",
+    hasBackground: false
+  },
+  {
+    src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768987729304-3i63o0deunq.png",
+    alt: "Image",
+    hasBackground: false
+  },
+  {
+    src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836430476-9b69z2jvyil.png",
+    alt: "Image",
+    hasBackground: true
+  },
+  {
+    src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836629052-zn3mvhzd7lg.webp",
+    alt: "Image",
+    hasBackground: false
+  },
+  {
+    src: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836948448-54bqjn3oh5a.png",
+    alt: "Image",
+    hasBackground: false
+  },
+  {
+    src: "RM-CONTRUCTION-logo.jpeg",
+    alt: "RM-CONTRUCTION",
+    hasBackground: false
+  }
+];
+
+const LogoSlider = ({ bgVariant = 'dark' }) => {
+  const duplicatedImages = [...imageSrc, ...imageSrc];
+  const trackRef = useRef(null);
+  const animationRef = useRef(null);
+  const containerRef = useRef(null);
+
+  const getBackgroundColor = () => {
+    switch(bgVariant) {
+      case 'darker':
+        return '#1a1a1a';
+      case 'dark':
+        return '#2d2d2d';
+      case 'medium':
+        return '#404040';
+      case 'light':
+        return '#f5f5f5';
+      default:
+        return '#2d2d2d';
     }
-  ];
+  };
+
+  const getHoverColor = () => {
+    switch(bgVariant) {
+      case 'darker':
+        return '#2d2d2d';
+      case 'dark':
+        return '#3d3d3d';
+      case 'medium':
+        return '#525252';
+      case 'light':
+        return '#ffffff';
+      default:
+        return '#3d3d3d';
+    }
+  };
+
+  useEffect(() => {
+    if (!trackRef.current || !containerRef.current) return;
+
+    const track = trackRef.current;
+    const container = containerRef.current;
+    
+    // Calculer la largeur d'un seul set d'images
+    const imageWidth = 150 + 20; // largeur image + gap
+    const totalWidth = imageSrc.length * imageWidth;
+    
+    // Animation de base (infinie)
+    animationRef.current = gsap.to(track, {
+      x: -totalWidth,
+      duration: 30,
+      ease: "none",
+      repeat: -1,
+      modifiers: {
+        x: function(x) {
+          return (parseFloat(x) % totalWidth) + 'px';
+        }
+      }
+    });
+
+    // ScrollTrigger pour contrôler la vitesse
+    ScrollTrigger.create({
+      trigger: container,
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: (self) => {
+        if (!animationRef.current) return;
+        
+        const velocity = self.getVelocity();
+        const direction = self.direction;
+        
+        // Facteurs de vitesse
+        let speedFactor = 1;
+        
+        if (direction === 1) { // Scroll vers le bas
+          // Accélération proportionnelle à la vitesse de scroll (max 4x)
+          speedFactor = 1 + Math.min(Math.abs(velocity) / 300, 3);
+        } else if (direction === -1) { // Scroll vers le haut
+          // Inversion légère (max -0.8x)
+          speedFactor = -0.3 - Math.min(Math.abs(velocity) / 500, 0.5);
+        }
+        
+        // Appliquer le facteur de vitesse
+        gsap.to(animationRef.current, {
+          timeScale: speedFactor,
+          duration: 0.3,
+          overwrite: true
+        });
+      }
+    });
+
+    // Nettoyage
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+  const styles = `
+    .logo-slider-container {
+      width: 100%;
+      overflow: hidden;
+      background: transparent;
+      padding: 20px 0;
+    }
+
+    .logo-track {
+      display: flex;
+      gap: 20px;
+      width: fit-content;
+      will-change: transform;
+    }
+
+    .logo-track:hover {
+      animation-play-state: paused;
+    }
+
+    .logo-item {
+      flex-shrink: 0;
+      width: 150px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .logo-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-content.with-background {
+      background-color: ${getBackgroundColor()};
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+
+    .logo-content.with-background:hover {
+      background-color: ${getHoverColor()};
+      transform: scale(1.02);
+    }
+
+    .logo-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: filter 0.3s ease;
+    }
+
+    .logo-image.with-background {
+      filter: brightness(1.1) contrast(1.1);
+    }
+
+    .logo-image.with-background:hover {
+      filter: brightness(1.2) contrast(1.1);
+    }
+  `;
 
   return (
-    <div >
-      {/* Publicité section Travevaux */}
-      < AdvertisementPopup position="section-accueil-partenaire-officiel" size="medium" />
-
-      <div className="relative my-4">
-        <span className="absolute bg-white px-2 right-20 -top-5 text-sm lg:text-xl tracking-widest font-serif font-bold z-40 text-black/80 ">LES PARTENAIRES OFFICIELS</span>
-        {/* Lignes horizontales décoratives */}
-        <div className="absolute -top-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/70 to-transparent opacity-80 z-10"></div>
-        <div className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/70 to-transparent opacity-80 z-10"></div>
-        <div className="absolute -top-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/60 to-transparent opacity-80 z-10"></div>
-        <div className="absolute -bottom-2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/60 to-transparent opacity-80 z-10"></div>
-
-        {/* Effet de surbrillance blanc */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/10 pointer-events-none z-0"></div>
-
-        <div
-          className="
-          relative
-          w-11/12 flex h-32 lg:h-56 mx-auto overflow-auto 
-          [scrollbar-width:none]
-          [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]
-          group
-          
-          rounded-2xl
-          backdrop-blur-xl
-          bg-gradient-to-br from-white/10 to-white/5
-          border border-white/20
-          
-          shadow-white/10
-        "
-        >
-
-          <div
-            className="
-            flex w-max gap-2 lg:gap-10 pr-2 lg:pr-10
-            animate-[move_30s_linear_infinite] animation-pausable
-          "
-          >
-            {imageSrc.map((image, i) => (
-              <a href={image.link} target="_blank" rel="noopener noreferrer">
-                <div
-                  key={i}
-                  className="
-                flex-none py-7 flex justify-center items-center  h-full w-28 lg:w-52
-                transition-all duration-500 ease-in-out
-              "
-                >
-
-                  <img
-                    className="object-cover w-full h-full filter border-gray-500/10 border rounded-lg bg-gradient-to-r from-black/80 to-slate-900/90  hover:grayscale hover:scale-105 transition-all duration-500 brightness-110 contrast-110"
-                    src={image.src}
-                    alt={image.alt}
-                    width={130}
-                    height={130}
-                  />
-
-                </div>
-              </a>
-
-            ))}
-          </div>
-
-          <div
-            aria-hidden
-            className="
-            flex w-max gap-2 lg:gap-10 pr-2 lg:pr-10
-            animate-[move_30s_linear_infinite] animation-pausable
-          "
-          >
-            {imageSrc.map((image, i) => (
-              <a href={image.link} >
-                <div
-                  key={i}
-                  className="
-                flex-none py-7 flex justify-center items-center h-full w-28 lg:w-52
-                transition-all duration-500 ease-in-out
-               
-              "
-                >
-
-                  <img
-                    className="object-cover rounded-lg w-full h-full border-gray-500/10 border bg-gradient-to-r from-black/80 to-slate-900/90 filter hover:scale-105 hover:grayscale brightness-110 contrast-110"
-                    src={image.src}
-                    alt={image.alt}
-                    width={130}
-                    height={130}
-                  />
-
-                </div>
-              </a>
-
-            ))}
-          </div>
-
-          <style>{`
-          @keyframes move {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-100%);
-            }
-          }
-          .group:hover .animation-pausable {
-            animation-play-state: paused !important;
-          }
-        `}</style>
+    <>
+      <style>{styles}</style>
+      <div className="logo-slider-container" ref={containerRef}>
+        <div className="logo-track" ref={trackRef}>
+          {duplicatedImages.map((image, index) => (
+            <a
+              key={index}
+              href={image.link || '#'}
+              target={image.link ? "_blank" : "_self"}
+              rel="noopener noreferrer"
+              className="logo-item"
+            >
+              <div className={`logo-content ${image.hasBackground ? 'with-background' : ''}`}>
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  className={`logo-image ${image.hasBackground ? 'with-background' : ''}`}
+                  loading="lazy"
+                />
+              </div>
+            </a>
+          ))}
         </div>
       </div>
-    </div>
+    </>
   );
-}
+};
+
+export default LogoSlider;

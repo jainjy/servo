@@ -105,31 +105,38 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
   };
 
   return (
-    <section className="w-full py-8 sm:py-12 lg:py-16 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section className="w-full pt-8 bg-white">
+      <div className="pl-6 pr-5 ">
         {/* HEADER - Style Airbnb minimaliste */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex items-center justify-between mb-6 lg:mb-8"
+          className="flex items-center justify-between mb-3"
         >
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-medium text-[#222222] tracking-tight">
-            Inspirations pour vos travaux
-          </h2>
-          
+          <div>
+            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
+              Inspirations pour vos travaux
+            </h2>
+            <p className="text-xs text-[#717171]">
+              Concepts et modèles à explorer
+            </p>
+          </div>
+
           {/* Lien vers la page travaux - Ouvre dans un nouvel onglet */}
-          {homeCards && (
-            <a 
-              href="/travaux" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center text-sm font-medium text-[#222222] hover:bg-[#F7F7F7] px-4 py-2 rounded-full transition-colors no-underline"
-            >
-              Afficher tout
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </a>
-          )}
+          {/* {homeCards && (
+            <div className="flex items-center gap-2 mt-3 sm:mt-0">
+              <a
+                href="/travaux"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-1.5 bg-[#222222] text-white rounded-full text-xs font-medium hover:bg-[#333333] transition-all flex items-center gap-1.5 no-underline"
+              >
+                <span>Tous voir</span>
+                <ArrowRight size={12} />
+              </a>
+            </div>
+          )} */}
         </motion.div>
 
         {/* SLIDER - Cartes style Airbnb */}
@@ -168,7 +175,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           {/* GRILLE DES CARTES - Style Airbnb exact */}
           <div
             ref={sliderRef}
-            className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+            className="flex gap-4 overflow-x-auto scrollbar-hide"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -199,7 +206,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
                   className="flex-shrink-0 w-[260px] sm:w-[280px] lg:w-[300px] xl:w-[320px]"
                 >
                   {/* Utilisation d'une balise <a> avec target="_blank" */}
-                  <a 
+                  <a
                     href={prestationUrl}
                     target={homeCards ? "_blank" : undefined}
                     rel={homeCards ? "noopener noreferrer" : undefined}
@@ -226,11 +233,10 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
                         className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:bg-white transition-all"
                       >
                         <Heart
-                          className={`h-4 w-4 transition-all ${
-                            isFavorite 
-                              ? 'fill-[#FF385C] text-[#FF385C]' 
-                              : 'text-[#222222]'
-                          }`}
+                          className={`h-4 w-4 transition-all ${isFavorite
+                            ? 'fill-[#FF385C] text-[#FF385C]'
+                            : 'text-[#222222]'
+                            }`}
                         />
                       </button>
 
@@ -267,11 +273,10 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
                           {Array.from({ length: Math.min(3, totalImages) }).map((_, idx) => (
                             <div
                               key={idx}
-                              className={`h-1 w-1 rounded-full transition-all ${
-                                idx === (currentImageIndex % 3) 
-                                  ? 'bg-white w-2' 
-                                  : 'bg-white/60'
-                              }`}
+                              className={`h-1 w-1 rounded-full transition-all ${idx === (currentImageIndex % 3)
+                                ? 'bg-white w-2'
+                                : 'bg-white/60'
+                                }`}
                             />
                           ))}
                         </div>
@@ -358,7 +363,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           ))}
         </div>
       </div>
-      
+
       <AdvertisementPopup position="section-accueil-travaux" />
     </section>
   );
