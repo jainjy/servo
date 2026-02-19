@@ -844,18 +844,18 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 // Mode cartes seules (utilisé sur la Home) - DESIGN AMÉLIORÉ
   if (cardsOnly) {
     return (
-    <section className="w-full py-12 lg:py-16 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section className="w-full pt-9 bg-white">
+      <div className="pl-6 pr-5 ">
           {/* En-tête avec titre et chevrons */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl lg:text-4xl font-serif font-medium text-gray-900 mb-2">
-                Biens immobiliers
-              </h2>
-              <p className="text-gray-500 text-sm lg:text-base">
-                Découvrez notre sélection de propriétés d'exception
-              </p>
-            </div>
+            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
+              Biens immobiliers
+            </h2>
+            <p className="text-xs text-[#717171]">
+              Découvrez notre sélection de propriétés d'exception
+            </p>
+          </div>
             
             {/* Boutons de navigation */}
             <div className="flex items-center gap-3">

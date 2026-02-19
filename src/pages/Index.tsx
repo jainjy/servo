@@ -123,7 +123,7 @@ const Index = () => {
           </section>
 
           {/* Section Recommandations (conditionnelle) */}
-          {showRecommendations && (
+          {/* {showRecommendations && (
             <section className="w-full">
               <RecommendationsSection
                 title="Nos meilleures suggestions pour vous"
@@ -133,7 +133,7 @@ const Index = () => {
                 hideIfEmpty={true}
               />
             </section>
-          )}
+          )} */}
 
           {/* Section Art & Création */}
           <section className="w-full">
@@ -141,9 +141,9 @@ const Index = () => {
           </section>
 
           {/* Section Immobilier avec en-tête */}
-          {/* <section className="w-full">
-            <PropertyListings cardsOnly maxItems={4} /> /// Commenter pour le moment, à réintégrer plus tard
-          </section> */}
+          <section className="w-full">
+            <PropertyListings cardsOnly maxItems={4} />
+          </section>
 
           {/* Section Bien-Être */}
           <section className="w-full">
