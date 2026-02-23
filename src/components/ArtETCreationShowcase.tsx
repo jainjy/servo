@@ -56,7 +56,7 @@ const ArtETCreationShowcase = () => {
       title: 'Photographie',
       description: 'Portraits, paysages et moments uniques capturés par des artistes locaux.',
       icon: <Camera size={20} />,
-      category: 'photographie',
+      category: 'Photographie',
       link: 'photographie',
       color: 'blue',
       image: categoryImages.photographie,
@@ -70,7 +70,7 @@ const ArtETCreationShowcase = () => {
       title: 'Sculpture',
       description: 'Œuvres uniques en bois, métal et pierre, entre tradition et modernité.',
       icon: <Hammer size={20} />,
-      category: 'sculpture',
+      category: 'Sculpture',
       link: 'sculpture',
       color: 'amber',
       image: categoryImages.sculpture,
@@ -84,7 +84,7 @@ const ArtETCreationShowcase = () => {
       title: 'Peinture',
       description: 'Toiles abstraites et figuratives qui racontent des histoires.',
       icon: <Palette size={20} />,
-      category: 'peinture',
+      category: 'Peinture',
       link: 'peinture',
       color: 'violet',
       image: categoryImages.peinture,
@@ -98,7 +98,7 @@ const ArtETCreationShowcase = () => {
       title: 'Artisanat',
       description: 'Objets uniques façonnés à la main par des artisans d\'exception.',
       icon: <Brush size={20} />,
-      category: 'artisanat',
+      category: 'Artisanat',
       link: 'artisanat',
       color: 'emerald',
       image: categoryImages.artisanat,
@@ -112,7 +112,7 @@ const ArtETCreationShowcase = () => {
       title: 'Marketplace',
       description: 'Découvrez et achetez des créations originales en direct des ateliers.',
       icon: <ShoppingBag size={20} />,
-      category: 'marketplace',
+      category: 'Marketplace',
       link: 'marketplace',
       color: 'rose',
       image: categoryImages.marketplace,
@@ -160,7 +160,7 @@ const ArtETCreationShowcase = () => {
   };
 
   return (
-    <section className="w-full pt-9 bg-white">
+    <section className="w-full pt-9">
       <div className="pl-6 pr-5 ">
         {/* HEADER - Style Airbnb épuré */}
         <motion.div
@@ -195,7 +195,7 @@ const ArtETCreationShowcase = () => {
               rel="noopener noreferrer"
               className="px-4 py-1.5 bg-[#222222] text-white rounded-full text-xs font-medium hover:bg-[#333333] transition-all flex items-center gap-1.5 no-underline"
             >
-              <span>Tous voir</span>
+              <span>Voir plus</span>
               <ArrowRight size={12} />
             </a>
           </div>

@@ -462,7 +462,7 @@ const AnnoncesImmobilieres = () => {
   }, [properties, selectedType, searchQuery]);
 
   return (
-    <div className="w-full pt-8 bg-white">
+    <div className="w-full pt-8">
       <div className="pl-6 pr-5 ">
         {/* En-tête */}
         <motion.div

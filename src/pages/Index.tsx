@@ -108,7 +108,7 @@ const Index = () => {
           <Hero />
           
           {/* Section Slider */}
-          <section className="w-full mt-5">
+          <section className="w-full">
             <Slider />
           </section>
 
@@ -118,12 +118,12 @@ const Index = () => {
           {/* </section> */}
 
           {/* Section Travaux Preview */}
-          <section className="w-full">
+          <section className="w-full bg-gray-100">
             <TravauxPreview homeCards />
           </section>
 
           {/* Section Recommandations (conditionnelle) */}
-          {/* {showRecommendations && (
+          {showRecommendations && (
             <section className="w-full">
               <RecommendationsSection
                 title="Nos meilleures suggestions pour vous"
@@ -133,25 +133,25 @@ const Index = () => {
                 hideIfEmpty={true}
               />
             </section>
-          )} */}
+          )}
 
           {/* Section Art & Création */}
-          <section className="w-full">
+          <section className="w-full bg-white">
             <ArtETCreationShowcase />
           </section>
 
           {/* Section Immobilier avec en-tête */}
-          <section className="w-full">
+          <section className="w-full bg-gray-100">
             <PropertyListings cardsOnly maxItems={4} />
           </section>
 
           {/* Section Bien-Être */}
-          <section className="w-full">
+          <section className="w-full bg-white">
             <BienEtreShowcase />
           </section>
 
           {/* Section Annonces Immobilières */}
-          <section className="w-full">
+          <section className="w-full bg-gray-100">
             <AnnoncesImmobilieres />
           </section>
 

@@ -161,7 +161,7 @@ const BienEtreShowcase = () => {
   };
 
   return (
-     <section className="w-full pt-8 bg-white">
+     <section className="w-full pt-8">
       <div className="pl-6 pr-5 ">
         {/* HEADER - Compact et professionnel */}
         <motion.div
@@ -196,7 +196,7 @@ const BienEtreShowcase = () => {
               rel="noopener noreferrer"
               className="px-4 py-1.5 bg-[#222222] text-white rounded-full text-xs font-medium hover:bg-[#333333] transition-all flex items-center gap-1.5 no-underline"
             >
-              <span>Tous les services</span>
+              <span>Voir plus</span>
               <ArrowRight size={12} />
             </a>
           </div>

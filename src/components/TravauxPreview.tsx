@@ -105,7 +105,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
   };
 
   return (
-    <section className="w-full pt-8 bg-white">
+    <section className="w-full pt-8">
       <div className="pl-6 pr-5 ">
         {/* HEADER - Style Airbnb minimaliste */}
         <motion.div
@@ -332,7 +332,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
                       {prestation.price && (
                         <div className="pt-1">
                           <span className="text-sm font-semibold text-[#222222]">
-                            {prestation.price}€
+                            {prestation.price}
                           </span>
                           <span className="text-xs text-[#717171] ml-1">
                             par intervention

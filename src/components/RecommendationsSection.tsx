@@ -319,7 +319,14 @@ const RecommendationsSection: React.FC<{
       return (
         <section className="w-full pt-9 bg-white">
           <div className="pl-6 pr-5 ">
-            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">{title}</h2>
+            <div className="mb-3">
+              <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
+                {title}
+              </h2>
+              <p className="text-xs text-[#717171]">
+                Notre sélection rien que pour vous
+              </p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="animate-pulse">
@@ -363,10 +370,15 @@ const RecommendationsSection: React.FC<{
     return (
       <section className="w-full pt-9 bg-white">
         <div className="pl-6 pr-5 ">
-          <div className="text-start mb-12">
-            <h2 className="text-xl font-medium text-red-500 tracking-tight">
-              {title}
-            </h2>
+          <div className="text-start mb-3">
+            <div>
+              <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
+                {title}
+              </h2>
+              <p className="text-xs text-[#717171]">
+                Notre sélection rien que pour vous
+              </p>
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {recommendations.map((rec, index) => {

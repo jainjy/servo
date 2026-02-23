@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Home, TrendingUp, Package, User2, Search } from "lucide-react"; // Ajout des icônes
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import heroImage from "/hero2-1.jpg";
+import heroImage from "/hero3-1.jpg";
 import "../styles/font.css";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
@@ -22,7 +22,7 @@ const colors = {
 };
 
 // URL de l'image en dessin
-const sketchImageUrl = "/hero2-2.jpg";
+const sketchImageUrl = "/hero3-2.jpg";
 
 // Services à afficher
 const services = [
@@ -71,7 +71,7 @@ const Hero = () => {
   const [revealRadius, setRevealRadius] = useState(0);
   const animationRef = useRef<number | null>(null);
   const [alwaysRevealing, setAlwaysRevealing] = useState(false);
-  
+
   // Nouvel état pour le switch
   const [showSketch, setShowSketch] = useState(false);
 
@@ -318,10 +318,19 @@ const Hero = () => {
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-[460px] flex items-center justify-center overflow-hidden bg-black"
+        className="relative min-h-[460px] w-full flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
+
+        {/* Publicités */}
+        <div className="absolute left-0 flex flex-row items-center z-30">
+          <AdvertisementPopup position="hero-left" />
+        </div>
+
+        <div className="absolute right-0 flex flex-row items-center z-30">
+          <AdvertisementPopup position="hero-right" />
+        </div>
         {/* Bouton Switch - Positionné en bas à droite */}
         {/* <div className="switch-container">
           <span className="switch-label">Mode</span>
@@ -373,7 +382,7 @@ const Hero = () => {
             src={showSketch ? sketchImageUrl : heroImage}
             alt="Background"
             className="absolute top-0 left-0 w-full h-full object-cover"
-            style={{ 
+            style={{
               filter: showSketch ? "brightness(0.9) contrast(1.1)" : "brightness(0.7) contrast(1.1)",
               transition: "filter 0.4s ease-out"
             }}
@@ -427,15 +436,6 @@ const Hero = () => {
 
         {/* Contenu Hero MINI - POLICE LATO/SANS */}
         <div className="container relative z-30 mx-auto px-4">
-
-          {/* Publicités */}
-          <div className="absolute left-0 h-full flex flex-row items-center ">
-            <AdvertisementPopup position="hero-left" />
-          </div>
-
-          <div className="absolute right-0 h-full flex flex-row items-center ">
-            <AdvertisementPopup position="hero-right" />
-          </div>
 
           <div className="max-w-3xl mx-auto text-center">
             <motion.h1

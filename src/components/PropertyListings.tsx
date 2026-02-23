@@ -844,7 +844,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 // Mode cartes seules (utilisé sur la Home) - DESIGN AMÉLIORÉ
   if (cardsOnly) {
     return (
-    <section className="w-full pt-9 bg-white">
+    <section className="w-full pt-9">
       <div className="pl-6 pr-5 ">
           {/* En-tête avec titre et chevrons */}
           <div className="flex items-center justify-between mb-8">

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { divIcon } from "leaflet";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { divIcon, LatLng } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapService } from "../../services/mapService";
 import { MapPoint } from "../../types/map";
@@ -20,8 +20,82 @@ import {
   ExternalLink,
   Briefcase,
   Award,
-  CheckCircle
+  CheckCircle,
+  X,
+  ZoomIn,
+  ZoomOut,
+  Compass,
+  Layers,
+  Search,
+  Filter
 } from "lucide-react";
+
+// Composant pour contrôler la caméra
+const MapController: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  return null;
+};
+
+// Composant pour les marqueurs animés
+const AnimatedMarker: React.FC<{
+  point: MapPoint;
+  isHovered: boolean;
+  isSelected: boolean;
+  onClick: () => void;
+  onHover: (id: string | null) => void;
+}> = ({ point, isHovered, isSelected, onClick, onHover }) => {
+  const COLORS = {
+    primary: "#0A2F1F",
+    primaryLight: "#1E4C2F",
+  };
+
+  const createMapPinIcon = (type: string, isHovered: boolean, isSelected: boolean) => {
+    const color = type === 'user' ? COLORS.primary : COLORS.primaryLight;
+    const size = isSelected ? 40 : isHovered ? 32 : 24;
+    
+    return divIcon({
+      html: `
+        <div class="relative transition-all duration-300 ease-out" style="transform: ${isSelected ? 'scale(1.1)' : 'scale(1)'}; filter: drop-shadow(0 ${isSelected ? '8px' : '4px'} 12px rgba(0,0,0,0.2));">
+          <svg width="${size}" height="${size * 1.25}" viewBox="0 0 24 30" fill="${color}" stroke="white" stroke-width="1.5" style="transition: all 0.3s;">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          </svg>
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/3 w-2 h-2 bg-white rounded-full ${isSelected ? 'animate-ping' : ''}"></div>
+          ${isSelected ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white animate-pulse"></div>' : ''}
+        </div>
+      `,
+      iconSize: [size, size * 1.25],
+      iconAnchor: [size / 2, size * 1.25],
+      popupAnchor: [0, -size * 1.25],
+      className: `map-marker-icon transition-all duration-300 ${isHovered ? 'z-50' : 'z-40'}`,
+    });
+  };
+
+  return (
+    <Marker
+      key={`${point.type}-${point.id}`}
+      position={[point.latitude, point.longitude]}
+      icon={createMapPinIcon(point.type, isHovered, isSelected)}
+      eventHandlers={{
+        click: onClick,
+        mouseover: () => onHover(point.id),
+        mouseout: () => onHover(null),
+      }}
+    >
+      {isSelected && (
+        <Popup closeButton={false} className="custom-popup">
+          <div className="p-2 min-w-[200px]">
+            <h3 className="font-medium text-sm">{point.name}</h3>
+            <p className="text-xs text-gray-500">{point.city}</p>
+            <p className="text-xs mt-1">{point.description}</p>
+          </div>
+        </Popup>
+      )}
+    </Marker>
+  );
+};
 
 const CardCarte: React.FC = () => {
   const [points, setPoints] = useState<MapPoint[]>([]);
@@ -29,26 +103,13 @@ const CardCarte: React.FC = () => {
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
   const [filterType, setFilterType] = useState<'all' | 'partner' | 'property'>('all');
   const [center] = useState<[number, number]>([-21.1351, 55.2471]);
-  const [zoom] = useState<number>(10);
+  const [zoom, setZoom] = useState<number>(10);
   const [isMapReady, setIsMapReady] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
-
-  // COULEURS OLIplus - Palette premium
-  const COLORS = {
-    primary: "#0A2F1F",
-    primaryLight: "#1E4C2F",
-    primarySoft: "#556B2F",
-    accent: "#C6A43F",
-    dark: "#1A1E24",
-    medium: "#4B5565",
-    light: "#9CA3AF",
-    background: "#F9FAFB",
-    white: "#FFFFFF",
-    border: "#E5E7EB",
-    hover: "#F3F4F6",
-    success: "#10B981",
-    warning: "#F59E0B"
-  };
+  const [mapStyle, setMapStyle] = useState<'light' | 'dark'>('light');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [map, setMap] = useState<any>(null);
 
   useEffect(() => {
     setIsMapReady(true);
@@ -70,34 +131,53 @@ const CardCarte: React.FC = () => {
     loadMapData();
   }, []);
 
-  const partnerPoints = points.filter(p => p.type === "user");
-  const propertyPoints = points.filter(p => p.type === "property");
+  const partnerPoints = useMemo(() => points.filter(p => p.type === "user"), [points]);
+  const propertyPoints = useMemo(() => points.filter(p => p.type === "property"), [points]);
   
-  const filteredPoints = filterType === 'all' 
-    ? points 
-    : filterType === 'partner' 
-      ? partnerPoints 
-      : propertyPoints;
-
-  const createMapPinIcon = (type: string, isHovered: boolean = false, isSelected: boolean = false) => {
-    let color = type === 'user' ? COLORS.primary : COLORS.primaryLight;
-    const size = isSelected ? 32 : isHovered ? 28 : 24;
+  const filteredPoints = useMemo(() => {
+    let filtered = filterType === 'all' ? points : filterType === 'partner' ? partnerPoints : propertyPoints;
     
-    return divIcon({
-      html: `
-        <div class="relative transition-all duration-300" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));">
-          <svg width="${size}" height="${size * 1.25}" viewBox="0 0 24 30" fill="${color}" stroke="white" stroke-width="1.5">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-          </svg>
-          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/3 w-2 h-2 bg-white rounded-full"></div>
-        </div>
-      `,
-      iconSize: [size, size * 1.25],
-      iconAnchor: [size / 2, size * 1.25],
-      popupAnchor: [0, -size * 1.25],
-      className: 'map-marker-icon transition-all duration-300'
-    });
-  };
+    if (searchTerm) {
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.city.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return filtered;
+  }, [points, partnerPoints, propertyPoints, filterType, searchTerm]);
+
+  const handlePointClick = useCallback((point: MapPoint) => {
+    setSelectedPoint(point);
+    setCenter([point.latitude, point.longitude]);
+    setZoom(14);
+  }, []);
+
+  const handleZoomIn = useCallback(() => {
+    setZoom(prev => Math.min(prev + 1, 18));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoom(prev => Math.max(prev - 1, 6));
+  }, []);
+
+  const handleResetView = useCallback(() => {
+    setCenter([-21.1351, 55.2471]);
+    setZoom(10);
+    setSelectedPoint(null);
+  }, []);
+
+  const handleFlyToLocation = useCallback(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCenter([position.coords.latitude, position.coords.longitude]);
+          setZoom(15);
+        },
+        (error) => console.error("Erreur de géolocalisation:", error)
+      );
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -106,11 +186,11 @@ const CardCarte: React.FC = () => {
           <div className="relative">
             <div className="w-12 h-12 border-2 border-gray-100 border-t-[#0A2F1F] rounded-full animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-[#0A2F1F]/60" />
+              <MapPin className="w-5 h-5 text-[#0A2F1F]/60 animate-pulse" />
             </div>
           </div>
           <p className="mt-4 text-xs text-gray-500 font-light">
-            Chargement de la carte...
+            Chargement de la carte interactive...
           </p>
         </div>
       </div>
@@ -119,266 +199,370 @@ const CardCarte: React.FC = () => {
 
   return (
     <section className="w-full pt-8 bg-white">
-      <div className="pl-6 pr-5 ">
-        {/* HEADER - Compact et professionnel */}
+      <div className="pl-6 pr-5">
+        {/* HEADER avec recherche interactive */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-center justify-between mb-3"
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4"
         >
           <div>
-            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
-              Explorez notre réseau
+            <h2 className="text-xl font-medium text-[#222222] tracking-tight">
+              Explorez notre réseau interactif
             </h2>
             <p className="text-xs text-[#717171]">
-              {points.length} professionnels et biens à travers l'île
+              {filteredPoints.length} points d'intérêt affichés sur {points.length} au total
             </p>
           </div>
           
-          <motion.a
-            href="/carte"
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#DDDDDD] rounded-full text-xs font-medium text-[#222222] hover:border-[#0A2F1F] transition-all shadow-sm"
-          >
-            <span>Voir complet</span>
-            <ExternalLink className="h-3 w-3" />
-          </motion.a>
-        </motion.div>
-
-        {/* GRILLE PRINCIPALE - Format compact */}
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-          
-          {/* COLONNE CARTE - Largeur 2/3 */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="lg:col-span-2 relative"
-          >
-            <div className="relative h-[350px] lg:h-[400px] rounded-xl overflow-hidden shadow-md border border-[#DDDDDD] bg-[#F7F7F7]">
-              {isMapReady && points.length > 0 ? (
-                <>
-                  <MapContainer
-                    center={center}
-                    zoom={zoom}
-                    className="h-full w-full"
-                    scrollWheelZoom={false}
-                    zoomControl={false}
-                  >
-                    <TileLayer
-                      attribution=''
-                      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                    />
-
-                    {filteredPoints.map((point) => (
-                      <Marker
-                        key={`${point.type}-${point.id}`}
-                        position={[point.latitude, point.longitude]}
-                        icon={createMapPinIcon(
-                          point.type, 
-                          hoveredPoint === point.id,
-                          selectedPoint?.id === point.id
-                        )}
-                        eventHandlers={{
-                          click: () => setSelectedPoint(point),
-                          mouseover: () => setHoveredPoint(point.id),
-                          mouseout: () => setHoveredPoint(null),
-                        }}
-                      />
-                    ))}
-                  </MapContainer>
-
-                  {/* Filtres - Compacts */}
-                  <div className="absolute top-3 left-3 z-40 flex gap-1.5">
-                    {[
-                      { key: 'all', label: 'Tous', count: points.length },
-                      { key: 'partner', label: 'Pros', count: partnerPoints.length },
-                      { key: 'property', label: 'Biens', count: propertyPoints.length }
-                    ].map((filter) => (
-                      <button
-                        key={filter.key}
-                        onClick={() => setFilterType(filter.key as any)}
-                        className={`
-                          px-3 py-1.5 rounded-full text-xs font-medium transition-all
-                          ${filterType === filter.key 
-                            ? 'bg-[#222222] text-white shadow-sm' 
-                            : 'bg-white/90 backdrop-blur-sm text-[#222222] hover:bg-white border border-[#DDDDDD]'
-                          }
-                        `}
-                      >
-                        <span>{filter.label}</span>
-                        <span className={`ml-1 ${filterType === filter.key ? 'text-white/70' : 'text-[#717171]'}`}>
-                          {filter.count}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Mini carte info */}
-                  <AnimatePresence>
-                    {selectedPoint && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute bottom-3 left-3 right-3 z-40 bg-white rounded-lg shadow-lg border border-[#DDDDDD] p-3"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                            selectedPoint.type === 'user' ? 'bg-[#F0F3E8]' : 'bg-[#E8F0E8]'
-                          }`}>
-                            {selectedPoint.type === 'user' ? (
-                              <Briefcase className="h-4 w-4 text-[#0A2F1F]" />
-                            ) : (
-                              <Home className="h-4 w-4 text-[#1E4C2F]" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-medium text-[#222222] truncate">
-                                {selectedPoint.name}
-                              </h4>
-                              <button
-                                onClick={() => setSelectedPoint(null)}
-                                className="text-[#717171] hover:text-[#222222] ml-2"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                            <p className="text-[10px] text-[#717171]">
-                              {selectedPoint.city}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </>
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center p-6">
-                  <MapPin className="w-8 h-8 text-[#DDDDDD] mb-2" />
-                  <p className="text-xs text-[#717171]">Aucune donnée disponible</p>
-                </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Barre de recherche */}
+            <div className="relative flex-1 sm:flex-initial">
+              <input
+                type="text"
+                placeholder="Rechercher..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full sm:w-48 px-3 py-2 pl-8 text-xs border border-[#DDDDDD] rounded-lg focus:outline-none focus:border-[#0A2F1F] transition-colors"
+              />
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[#717171]" />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2 top-2.5"
+                >
+                  <X className="h-3.5 w-3.5 text-[#717171] hover:text-[#222222]" />
+                </button>
               )}
             </div>
-          </motion.div>
 
-          {/* COLONNE STATS - Compacte */}
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-4"
-          >
-            {/* Stats principales */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#F7F7F7] rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-xs">
-                    <Users className="w-4 h-4 text-[#0A2F1F]" />
-                  </div>
-                  <div>
-                    <div className="text-lg font-medium text-[#222222]">
-                      {partnerPoints.length}
-                    </div>
-                    <div className="text-[9px] text-[#717171] uppercase tracking-wider">
-                      Pros
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-[9px] text-[#1E4C2F]">
-                  <TrendingUp className="h-2.5 w-2.5" />
-                  <span>+12%</span>
-                </div>
-              </div>
+            {/* Bouton filtre */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="p-2 border border-[#DDDDDD] rounded-lg hover:border-[#0A2F1F] transition-colors relative"
+            >
+              <Filter className="h-4 w-4 text-[#222222]" />
+              {filterType !== 'all' && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#0A2F1F] rounded-full"></span>
+              )}
+            </button>
 
-              <div className="bg-[#F7F7F7] rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-xs">
-                    <Home className="w-4 h-4 text-[#1E4C2F]" />
-                  </div>
-                  <div>
-                    <div className="text-lg font-medium text-[#222222]">
-                      {propertyPoints.length}
-                    </div>
-                    <div className="text-[9px] text-[#717171] uppercase tracking-wider">
-                      Biens
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-[9px] text-[#1E4C2F]">
-                  <Star className="h-2.5 w-2.5 fill-current" />
-                  <span>4.89</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Points forts - Version compacte */}
-            <div className="bg-white rounded-xl p-4 border border-[#DDDDDD]">
-              <h3 className="text-xs font-medium text-[#222222] mb-3 flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5 text-[#0A2F1F]" />
-                Pourquoi nous choisir
-              </h3>
-              
-              <div className="space-y-2.5">
-                {[
-                  { icon: Star, text: "Expertise locale", sub: "Marché réunionnais" },
-                  { icon: Building2, text: "Diversité", sub: "Biens adaptés" },
-                  { icon: Navigation, text: "Accessibilité", sub: "Partout sur l'île" }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-[#F7F7F7] rounded-md flex items-center justify-center">
-                      <item.icon className="h-3 w-3 text-[#0A2F1F]" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-[#222222]">{item.text}</p>
-                      <p className="text-[9px] text-[#717171]">{item.sub}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* CTA Partenaire */}
-            <a
-              href="/devenir-partenaire"
+            {/* Bouton vue complète */}
+            <motion.a
+              href="/carte"
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-gradient-to-r from-[#0A2F1F] to-[#1E4C2F] rounded-xl p-4 text-white hover:shadow-lg transition-all"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#DDDDDD] rounded-lg text-xs font-medium text-[#222222] hover:border-[#0A2F1F] transition-all"
             >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <Heart className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium">Devenir partenaire</h4>
-                  <p className="text-[9px] text-white/80">Rejoignez {points.length} pros</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-end gap-1 text-[9px] text-white/80">
-                <span>En savoir plus</span>
-                <ChevronRight className="h-3 w-3" />
-              </div>
-            </a>
-          </motion.div>
-        </div>
+              <span>Plein écran</span>
+              <ExternalLink className="h-3 w-3" />
+            </motion.a>
+          </div>
+        </motion.div>
 
-        {/* Villes populaires - Compact */}
+        {/* Filtres déroulants */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden mb-4"
+            >
+              <div className="bg-[#F7F7F7] rounded-lg p-3 flex flex-wrap items-center gap-3">
+                <span className="text-xs font-medium text-[#222222]">Filtres rapides:</span>
+                {[
+                  { key: 'all', label: 'Tous', icon: MapPin, count: points.length },
+                  { key: 'partner', label: 'Professionnels', icon: Briefcase, count: partnerPoints.length },
+                  { key: 'property', label: 'Biens', icon: Home, count: propertyPoints.length }
+                ].map((filter) => (
+                  <button
+                    key={filter.key}
+                    onClick={() => setFilterType(filter.key as any)}
+                    className={`
+                      flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all
+                      ${filterType === filter.key 
+                        ? 'bg-[#0A2F1F] text-white' 
+                        : 'bg-white text-[#222222] hover:bg-gray-100 border border-[#DDDDDD]'
+                      }
+                    `}
+                  >
+                    <filter.icon className="h-3 w-3" />
+                    <span>{filter.label}</span>
+                    <span className={`text-[10px] ${filterType === filter.key ? 'text-white/70' : 'text-[#717171]'}`}>
+                      ({filter.count})
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* CARTE PRINCIPALE - Pleine largeur */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative w-full"
+        >
+          <div className="relative h-[500px] lg:h-[600px] rounded-xl overflow-hidden shadow-lg border border-[#DDDDDD] bg-[#F7F7F7]">
+            {isMapReady && points.length > 0 ? (
+              <>
+                <MapContainer
+                  center={center}
+                  zoom={zoom}
+                  className="h-full w-full"
+                  scrollWheelZoom={true}
+                  zoomControl={false}
+                  ref={setMap}
+                  preferCanvas={true}
+                >
+                  <MapController center={center} zoom={zoom} />
+                  
+                  <TileLayer
+                    attribution=''
+                    url={mapStyle === 'light' 
+                      ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                      : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    }
+                  />
+
+                  {filteredPoints.map((point) => (
+                    <AnimatedMarker
+                      key={`${point.type}-${point.id}`}
+                      point={point}
+                      isHovered={hoveredPoint === point.id}
+                      isSelected={selectedPoint?.id === point.id}
+                      onClick={() => handlePointClick(point)}
+                      onHover={setHoveredPoint}
+                    />
+                  ))}
+                </MapContainer>
+
+                {/* Contrôles interactifs */}
+                <div className="absolute top-3 left-3 z-40 flex flex-col gap-2">
+                  {/* Style de carte */}
+                  <button
+                    onClick={() => setMapStyle(prev => prev === 'light' ? 'dark' : 'light')}
+                    className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors border border-[#DDDDDD]"
+                    title="Changer le style"
+                  >
+                    <Layers className="h-4 w-4 text-[#222222]" />
+                  </button>
+                </div>
+
+                {/* Contrôles de zoom */}
+                <div className="absolute top-3 right-3 z-40 flex flex-col gap-1">
+                  <button
+                    onClick={handleZoomIn}
+                    className="p-2 bg-white rounded-t-lg hover:bg-gray-50 transition-colors border border-[#DDDDDD]"
+                    title="Zoom avant"
+                  >
+                    <ZoomIn className="h-4 w-4 text-[#222222]" />
+                  </button>
+                  <button
+                    onClick={handleZoomOut}
+                    className="p-2 bg-white hover:bg-gray-50 transition-colors border-x border-[#DDDDDD]"
+                    title="Zoom arrière"
+                  >
+                    <ZoomOut className="h-4 w-4 text-[#222222]" />
+                  </button>
+                  <button
+                    onClick={handleResetView}
+                    className="p-2 bg-white rounded-b-lg hover:bg-gray-50 transition-colors border border-[#DDDDDD]"
+                    title="Réinitialiser la vue"
+                  >
+                    <Compass className="h-4 w-4 text-[#222222]" />
+                  </button>
+                </div>
+
+                {/* Géolocalisation */}
+                <button
+                  onClick={handleFlyToLocation}
+                  className="absolute bottom-3 right-3 z-40 p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors border border-[#DDDDDD]"
+                  title="Me localiser"
+                >
+                  <Navigation className="h-4 w-4 text-[#222222]" />
+                </button>
+
+                {/* Légende interactive */}
+                <div className="absolute bottom-3 left-3 z-40 bg-white/90 backdrop-blur-sm rounded-lg shadow-md p-2 border border-[#DDDDDD]">
+                  <div className="flex items-center gap-3 text-xs">
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 bg-[#0A2F1F] rounded-full"></div>
+                      <span>Pros ({partnerPoints.length})</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 bg-[#1E4C2F] rounded-full"></div>
+                      <span>Biens ({propertyPoints.length})</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Infobulle au survol */}
+                <AnimatePresence>
+                  {hoveredPoint && !selectedPoint && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-3 left-1/2 -translate-x-1/2 z-50 bg-white rounded-lg shadow-lg border border-[#DDDDDD] p-2"
+                    >
+                      <p className="text-xs font-medium">
+                        {points.find(p => p.id === hoveredPoint)?.name}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Panneau d'information sélectionné */}
+                <AnimatePresence>
+                  {selectedPoint && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 300 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 300 }}
+                      className="absolute top-3 right-16 z-40 w-72 bg-white rounded-lg shadow-xl border border-[#DDDDDD] overflow-hidden"
+                    >
+                      <div className={`p-3 ${
+                        selectedPoint.type === 'user' ? 'bg-[#F0F3E8]' : 'bg-[#E8F0E8]'
+                      }`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                              {selectedPoint.type === 'user' ? (
+                                <Briefcase className="h-5 w-5 text-[#0A2F1F]" />
+                              ) : (
+                                <Home className="h-5 w-5 text-[#1E4C2F]" />
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-medium text-[#222222]">
+                                {selectedPoint.name}
+                              </h3>
+                              <p className="text-xs text-[#717171]">
+                                {selectedPoint.city}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setSelectedPoint(null)}
+                            className="text-[#717171] hover:text-[#222222]"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 space-y-2">
+                        <p className="text-xs text-[#222222]">
+                          {selectedPoint.description}
+                        </p>
+                        
+                        <div className="flex items-center gap-2 text-[10px] text-[#717171]">
+                          <MapPin className="h-3 w-3" />
+                          <span>{selectedPoint.address}</span>
+                        </div>
+                        
+                        {selectedPoint.type === 'user' && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] bg-[#0A2F1F]/10 text-[#0A2F1F] px-2 py-1 rounded-full">
+                              Partenaire certifié
+                            </span>
+                            <span className="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full flex items-center gap-0.5">
+                              <Star className="h-2.5 w-2.5 fill-current" />
+                              4.9
+                            </span>
+                          </div>
+                        )}
+                        
+                        {selectedPoint.type === 'property' && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] bg-[#1E4C2F]/10 text-[#1E4C2F] px-2 py-1 rounded-full">
+                              Disponible
+                            </span>
+                            <span className="text-[10px] font-medium">
+                              {selectedPoint.price} €
+                            </span>
+                          </div>
+                        )}
+                        
+                        <button className="w-full mt-2 px-3 py-2 bg-[#0A2F1F] text-white text-xs rounded-lg hover:bg-[#1E4C2F] transition-colors flex items-center justify-center gap-1">
+                          <span>Voir les détails</span>
+                          <ChevronRight className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center p-6">
+                <MapPin className="w-8 h-8 text-[#DDDDDD] mb-2" />
+                <p className="text-xs text-[#717171]">Aucune donnée disponible</p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Barre d'information interactive */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-8 pt-6 border-t border-[#DDDDDD]"
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 flex items-center justify-between bg-[#F7F7F7] rounded-lg p-3"
         >
-      
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-[#C6A43F]" />
+              <span className="text-xs text-[#222222]">
+                {filteredPoints.length} points sur la carte
+              </span>
+            </div>
+            
+            <div className="h-4 w-px bg-[#DDDDDD]"></div>
+            
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-[#0A2F1F] rounded-full animate-pulse"></div>
+                <span className="text-[10px] text-[#717171]">{partnerPoints.length} pros</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-[#1E4C2F] rounded-full animate-pulse"></div>
+                <span className="text-[10px] text-[#717171]">{propertyPoints.length} biens</span>
+              </div>
+            </div>
+          </div>
           
-        
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-[#717171]">
+              Zoom: {zoom}x
+            </span>
+            <button
+              onClick={() => setSelectedPoint(null)}
+              className="text-[10px] text-[#0A2F1F] hover:underline"
+            >
+              Réinitialiser
+            </button>
+          </div>
         </motion.div>
       </div>
+
+      <style jsx>{`
+        .custom-popup .leaflet-popup-content-wrapper {
+          border-radius: 12px;
+          padding: 0;
+          overflow: hidden;
+        }
+        .custom-popup .leaflet-popup-content {
+          margin: 0;
+          min-width: 200px;
+        }
+        .custom-popup .leaflet-popup-tip {
+          background: white;
+        }
+      `}</style>
     </section>
   );
 };
