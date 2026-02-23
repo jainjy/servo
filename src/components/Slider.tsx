@@ -72,8 +72,8 @@ const imageSrc = [
     hasBackground: false
   },
   {
-    src: "RM-CONTRUCTION-logo.jpeg",
-    alt: "RM-CONTRUCTION",
+    src: "STPM-CONTRUCTION-logo.jpeg",
+    alt: "STPM-CONTRUCTION",
     hasBackground: false
   }
 ];
