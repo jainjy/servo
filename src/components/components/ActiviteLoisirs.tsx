@@ -21,10 +21,10 @@ import {
 import { api } from "@/lib/axios";
 import TourismNavigation from "../TourismNavigation";
 import AdvertisementPopup from "../AdvertisementPopup";
-import UserParapentePage from "@/pages/UserParapentePage";
 import ActivityBookingModal from "./ActivityBookingModal";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Activity {
   id: string;
@@ -75,7 +75,6 @@ interface Activity {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
-  // REMOVED: availabilities relation
   reviews?: Array<{
     rating: number;
   }>;
@@ -112,8 +111,85 @@ const iconMap: Record<string, JSX.Element> = {
   TreePine: <TreePine className="w-5 h-5" />,
 };
 
+// Données dynamiques pour parapente et kayak avec les IDs fournis
+const staticActivities: Activity[] = [
+  {
+    id: "static-parapente-1",
+    title: "Air Lagon Parapente",
+    description: "Découvrez la Réunion vue du ciel. Des vols inoubliables au-dessus du lagon de Saint-Leu avec des moniteurs passionnés.",
+    shortDescription: "Vols en parapente au-dessus du lagon",
+    categoryId: "parapente-category",
+    category: {
+      id: "parapente-category",
+      name: "parapente",
+      icon: "Mountain",
+      isActive: true
+    },
+    userId: "bf88e335-ef90-4a39-898d-561d237aaff3", // ID parapente
+    creator: {
+      id: "bf88e335-ef90-4a39-898d-561d237aaff3",
+      firstName: "Parapente",
+      lastName: "Réunion",
+      companyName: "Air Lagon Parapente"
+    },
+    mainImage: "https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836430476-9b69z2jvyil.png",
+    images: [],
+    level: "Tous niveaux",
+    location: "Saint-Leu",
+    rating: 5.0,
+    reviewCount: 0,
+    viewCount: 0,
+    bookingCount: 0,
+    minParticipants: 1,
+    includedItems: [],
+    requirements: [],
+    highlights: [],
+    status: "active",
+    featured: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "static-kayak-1",
+    title: "Kayak Transparent",
+    description: "Voyage au rythme du lagon. Explorez les fonds marins en kayak transparent pour une expérience unique.",
+    shortDescription: "Voyage au rythme du lagon",
+    categoryId: "kayak-category",
+    category: {
+      id: "kayak-category",
+      name: "kayak",
+      icon: "Waves",
+      isActive: true
+    },
+    userId: "2f448e35-d2d8-453c-8918-1e5aa92915dd", // ID kayak
+    creator: {
+      id: "2f448e35-d2d8-453c-8918-1e5aa92915dd",
+      firstName: "Kayak",
+      lastName: "Réunion",
+      companyName: "Kayak Transparent"
+    },
+    mainImage: "/logo-kayak-transparent.png",
+    images: [],
+    level: "Tous niveaux",
+    location: "Kayak Transparent Reunion",
+    rating: 5.0,
+    reviewCount: 0,
+    viewCount: 0,
+    bookingCount: 0,
+    minParticipants: 1,
+    includedItems: [],
+    requirements: [],
+    highlights: [],
+    status: "active",
+    featured: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+];
+
 const ActivitesLoisirsFAQ: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<ActivityCategory[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [filteredActivities, setFilteredActivities] = useState<Activity[]>([]);
@@ -150,7 +226,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       if (user) {
         try {
           const favoritesRes = await api.get(
-            "/activity-actions/favorites/my-favorites", // Changé d'URL
+            "/activity-actions/favorites/my-favorites",
           );
           const favoriteActivityIds = favoritesRes.data.data.map(
             (fav: Activity) => fav.id,
@@ -167,11 +243,16 @@ const ActivitesLoisirsFAQ: React.FC = () => {
         }
       }
 
-      setActivities(activitiesWithFavorites);
-      setFilteredActivities(activitiesWithFavorites);
+      // Combiner avec les activités statiques
+      const allActivities = [...activitiesWithFavorites, ...staticActivities];
+      setActivities(allActivities);
+      setFilteredActivities(allActivities);
     } catch (err) {
       console.error("❌ Erreur chargement activités:", err);
       toast.error("Erreur lors du chargement des activités");
+      // En cas d'erreur, afficher au moins les activités statiques
+      setActivities(staticActivities);
+      setFilteredActivities(staticActivities);
     } finally {
       setLoading(false);
     }
@@ -193,16 +274,16 @@ const ActivitesLoisirsFAQ: React.FC = () => {
         (activity) =>
           activity.title.toLowerCase().includes(term) ||
           activity.description.toLowerCase().includes(term) ||
-          activity.location?.toLowerCase().includes(term) ||
-          activity.category?.name.toLowerCase().includes(term) ||
-          activity.shortDescription?.toLowerCase().includes(term),
+          (activity.location && activity.location.toLowerCase().includes(term)) ||
+          (activity.category?.name && activity.category.name.toLowerCase().includes(term)) ||
+          (activity.shortDescription && activity.shortDescription.toLowerCase().includes(term)),
       );
     }
 
     // Filtre par catégorie
     if (activeCategory !== "all") {
       results = results.filter(
-        (activity) => activity.category?.name === activeCategory,
+        (activity) => activity.category?.name?.toLowerCase() === activeCategory.toLowerCase(),
       );
     }
 
@@ -214,8 +295,18 @@ const ActivitesLoisirsFAQ: React.FC = () => {
   };
 
   const getCategoryCount = (name: string) => {
-    if (name === "all") return activities.length;
-    return activities.filter((a) => a.category?.name === name).length;
+    if (name === "all") {
+      return activities.length;
+    }
+    
+    return activities.filter(
+      (a) => a.category?.name?.toLowerCase() === name.toLowerCase()
+    ).length;
+  };
+
+  const handleActivityClick = (activity: Activity) => {
+    // Redirection vers la page du professionnel avec son ID
+    navigate(`/professional/${activity.userId}`);
   };
 
   const handleBookActivity = (activity: Activity) => {
@@ -223,6 +314,12 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       toast.error("Veuillez vous connecter pour réserver");
       return;
     }
+    
+    if (activity.id.startsWith('static-')) {
+      toast.info("Cette activité sera bientôt disponible à la réservation en ligne");
+      return;
+    }
+    
     setSelectedActivity(activity);
     setIsBookingModalOpen(true);
   };
@@ -233,21 +330,24 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       return;
     }
 
+    // Vérifier si c'est une activité statique
+    if (activityId.startsWith('static-')) {
+      toast.info("Les activités statiques ne peuvent pas être ajoutées aux favoris pour le moment");
+      return;
+    }
+
     try {
-      // Toggle favorite
-      const isCurrentlyFavorite = activities.find(
-        (a) => a.id === activityId,
-      )?.isFavorite;
+      const activity = activities.find(a => a.id === activityId);
+      const isCurrentlyFavorite = activity?.isFavorite;
 
       if (isCurrentlyFavorite) {
-        await api.delete(`/activity-actions/${activityId}/favorite`); // Changé d'URL
+        await api.delete(`/activity-actions/${activityId}/favorite`);
         toast.success("Retiré des favoris");
       } else {
-        await api.post(`/activity-actions/${activityId}/favorite`); // Changé d'URL
+        await api.post(`/activity-actions/${activityId}/favorite`);
         toast.success("Ajouté aux favoris");
       }
 
-      // Mettre à jour l'état local
       setActivities((prev) =>
         prev.map((activity) =>
           activity.id === activityId
@@ -268,7 +368,6 @@ const ActivitesLoisirsFAQ: React.FC = () => {
 
   const formatDuration = (duration?: number, durationType?: string) => {
     if (!duration) return "Durée variable";
-
     if (durationType === "minutes") {
       if (duration < 60) return `${duration}min`;
       const hours = Math.floor(duration / 60);
@@ -280,14 +379,10 @@ const ActivitesLoisirsFAQ: React.FC = () => {
     } else if (durationType === "days") {
       return `${duration} jour${duration > 1 ? "s" : ""}`;
     }
-
     return `${duration} min`;
   };
 
-  // Fonction pour vérifier la disponibilité
   const checkAvailability = (activity: Activity) => {
-    // Dans le nouveau schéma, la disponibilité est gérée directement via les réservations
-    // Vous pouvez implémenter une logique basée sur le bookingCount vs maxParticipants
     if (
       activity.maxParticipants &&
       activity.bookingCount >= activity.maxParticipants
@@ -295,6 +390,94 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       return "Complet";
     }
     return "Disponible";
+  };
+
+  // Rendu d'une carte d'activité
+  const renderActivityCard = (activity: Activity) => {
+    const isStatic = activity.id.startsWith('static-');
+    
+    return (
+      <div
+        key={activity.id}
+        onClick={() => handleActivityClick(activity)}
+        className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl group cursor-pointer flex flex-col"
+      >
+        {/* Image */}
+        <div className="relative h-56 overflow-hidden">
+          <img
+            src={activity.mainImage || "/placeholder-activity.jpg"}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            alt={activity.title}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+
+          <div className="absolute top-4 left-4 px-3 py-1 bg-blue-600/90 backdrop-blur-md text-white rounded-lg text-xs flex items-center gap-2 font-medium">
+            {activity.category?.icon && iconMap[activity.category.icon] ? (
+              iconMap[activity.category.icon]
+            ) : (
+              <Mountain className="w-3 h-3" />
+            )}
+            {activity.category?.name || "Activité"}
+          </div>
+
+          <div className="absolute bottom-4 left-4 text-white">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/50">
+                <span className="text-[10px] font-bold">
+                  {activity.creator?.firstName?.charAt(0) || ''}
+                  {activity.creator?.lastName?.charAt(0) || ''}
+                </span>
+              </div>
+              <span className="text-xs font-medium text-white/90">
+                {activity.creator?.companyName || 'Professionnel'}
+              </span>
+            </div>
+            <h3 className="text-lg font-bold leading-tight">
+              {activity.title}
+            </h3>
+          </div>
+        </div>
+
+        {/* Contenu */}
+        <div className="p-6 flex-1 flex flex-col">
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex items-center gap-1 text-yellow-500">
+              <Star className="w-4 h-4 fill-current" />
+              <span className="text-sm font-bold text-gray-900">
+                {activity.rating?.toFixed(1) || "5.0"}
+              </span>
+              <span className="text-xs text-gray-500">(Expert)</span>
+            </div>
+            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
+              Recommandé
+            </span>
+          </div>
+
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">
+            {activity.description}
+          </p>
+
+          <div className="flex items-center gap-4 text-xs text-gray-500 mb-5 border-t border-gray-100 pt-4">
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" /> {activity.location || "À définir"}
+            </span>
+            <span className="flex items-center gap-1">
+              <Users className="w-3.5 h-3.5" /> {activity.level || "Tous niveaux"}
+            </span>
+          </div>
+
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleActivityClick(activity);
+            }}
+            className="w-full py-2.5 rounded-xl font-semibold text-sm transition-all bg-gray-900 text-white group-hover:bg-blue-600 shadow-md flex items-center justify-center gap-2"
+          >
+            Voir les profils <Trophy className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -356,10 +539,11 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           <Compass className="w-5 h-5" />
           Toutes
           <span className="px-2.5 py-1 rounded-full text-xs bg-white/20 text-white">
-            {activities.length}
+            {getCategoryCount("all")}
           </span>
         </button>
 
+        {/* Catégorie Parapente */}
         <button
           onClick={() => setActiveCategory("parapente")}
           className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all shadow-md border-2
@@ -371,8 +555,29 @@ const ActivitesLoisirsFAQ: React.FC = () => {
         >
           <Mountain className="w-5 h-5" />
           Parapente
+          <span className="px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
+            {getCategoryCount("parapente")}
+          </span>
         </button>
 
+        {/* Catégorie Kayak */}
+        <button
+          onClick={() => setActiveCategory("kayak")}
+          className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all shadow-md border-2
+            ${
+              activeCategory === "kayak"
+                ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
+                : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
+            } hover:scale-105 hover:shadow-lg`}
+        >
+          <Waves className="w-5 h-5" />
+          Kayak
+          <span className="px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
+            {getCategoryCount("kayak")}
+          </span>
+        </button>
+
+        {/* Autres catégories de l'API */}
         {categories.map((cat) => (
           <button
             key={cat.id}
@@ -398,331 +603,26 @@ const ActivitesLoisirsFAQ: React.FC = () => {
       </div>
 
       {/* ACTIVITIES LIST */}
-      {activeCategory !== "parapente" && (
-        <div className="max-w-7xl mx-auto px-4 pb-20">
-          {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-              <p className="mt-4 text-gray-600">Chargement des activités...</p>
-            </div>
-          ) : filteredActivities.length === 0 &&
-            !(activeCategory === "all" && !searchTerm) ? (
-            <div className="text-center py-24">
-              <Search className="mx-auto w-16 h-16 text-green-600 mb-4" />
-              <p className="text-xl font-bold text-gray-700">
-                Aucune activité trouvée
-              </p>
-              <p className="text-gray-500">Essayez un autre mot-clé.</p>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* CARTE PARAPENTE SPÉCIALE */}
-              {activeCategory === "all" && !searchTerm && (
-                <div
-                  onClick={() => setActiveCategory("parapente")}
-                  className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl group cursor-pointer flex flex-col"
-                >
-                  {/* Image */}
-                  <div className="relative h-56 overflow-hidden">
-                    <img
-                      src="https://wvrxayklhpbquxsluzve.supabase.co/storage/v1/object/public/blog-images/blog-images/1768836430476-9b69z2jvyil.png"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      alt="Parapente Réunion"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-
-                    <div className="absolute top-4 left-4 px-3 py-1 bg-blue-600/90 backdrop-blur-md text-white rounded-lg text-xs flex items-center gap-2 font-medium">
-                      <Mountain className="w-3 h-3" />
-                      Parapente
-                    </div>
-
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/50">
-                          <span className="text-[10px] font-bold">PR</span>
-                        </div>
-                        <span className="text-xs font-medium text-white/90">
-                          Parapente Réunion
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold leading-tight">
-                        Air Lagon Parapente
-                      </h3>
-                    </div>
-                  </div>
-
-                  {/* Contenu */}
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-1 text-yellow-500">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span className="text-sm font-bold text-gray-900">
-                          5.0
-                        </span>
-                        <span className="text-xs text-gray-500">(Expert)</span>
-                      </div>
-                      <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
-                        Recommandé
-                      </span>
-                    </div>
-
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">
-                      Découvrez la Réunion vue du ciel. Des vols inoubliables
-                      au-dessus du lagon de Saint-Leu avec des moniteurs
-                      passionnés.
-                    </p>
-
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-5 border-t border-gray-100 pt-4">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5" /> Saint-Leu
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" /> Tous niveaux
-                      </span>
-                    </div>
-
-                    <button className="w-full py-2.5 rounded-xl font-semibold text-sm transition-all bg-gray-900 text-white group-hover:bg-blue-600 shadow-md flex items-center justify-center gap-2">
-                      Voir les profils <Trophy className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {filteredActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl group"
-                >
-                  {/* Image avec badges */}
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={
-                        activity.mainImage ||
-                        activity.images[0] ||
-                        "/placeholder-activity.jpg"
-                      }
-                      className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
-                      alt={activity.title}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                    {/* Badge catégorie */}
-                    <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md text-white rounded-lg text-xs flex items-center gap-2 font-medium">
-                      {activity.category?.icon &&
-                      iconMap[activity.category.icon] ? (
-                        iconMap[activity.category.icon]
-                      ) : (
-                        <Star className="w-3 h-3" />
-                      )}
-                      {activity.category?.name || "Activité"}
-                    </div>
-                    {/* Badge niveau */}
-                    <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg text-xs font-semibold">
-                      {activity.level || "Tous niveaux"}
-                    </div>
-                    {/* Badge prix */}
-                    <div className="absolute bottom-4 left-4 px-3 py-2 bg-gradient-to-r from-green-600/90 to-emerald-600/90 backdrop-blur-md text-white rounded-lg text-sm font-bold">
-                      {formatPrice(activity.price)}
-                      {activity.price && (
-                        <span className="text-xs font-normal ml-1">
-                          /personne
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Contenu de la carte */}
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
-                        {activity.title}
-                      </h3>
-                      <button
-                        onClick={() => handleFavorite(activity.id)}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                      >
-                        <Heart
-                          className={`w-5 h-5 ${activity.isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"}`}
-                        />
-                      </button>
-                    </div>
-
-                    {/* Localisation */}
-                    {activity.location && (
-                      <div className="flex items-center gap-2 text-gray-600 mb-3">
-                        <MapPin className="w-4 h-4" />
-                        <span className="text-sm">{activity.location}</span>
-                      </div>
-                    )}
-
-                    {/* Stats rapides */}
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-700 mb-4 bg-gray-50 p-3 rounded-lg">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {formatDuration(
-                          activity.duration,
-                          activity.durationType,
-                        )}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        {activity.minParticipants}-
-                        {activity.maxParticipants || 10} pers.
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {checkAvailability(activity)}
-                      </span>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {activity.shortDescription || activity.description}
-                    </p>
-
-                    {/* Highlights */}
-                    {activity.highlights && activity.highlights.length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-semibold text-gray-800 mb-2">
-                          Points forts :
-                        </h4>
-                        <ul className="grid grid-cols-1 gap-2">
-                          {activity.highlights
-                            .slice(0, 3)
-                            .map((highlight, i) => (
-                              <li key={i} className="flex items-start gap-2">
-                                <Star className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                <span className="text-xs text-gray-600">
-                                  {highlight}
-                                </span>
-                              </li>
-                            ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Note moyenne */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < Math.floor(activity.rating || 0)
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm font-medium text-gray-700">
-                        {activity.rating?.toFixed(1) || "Nouveau"}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        ({activity.reviewCount || 0} avis)
-                      </span>
-                    </div>
-
-                    {/* Section détaillée (FAQ) */}
-                    {openFAQ === activity.id && (
-                      <div className="mb-4 transition-all duration-300 animate-fadeIn">
-                        <div className="space-y-4">
-                          {/* Inclus */}
-                          {activity.includedItems &&
-                            activity.includedItems.length > 0 && (
-                              <div>
-                                <h4 className="text-sm font-semibold text-gray-800 mb-2">
-                                  Inclus :
-                                </h4>
-                                <ul className="grid grid-cols-2 gap-2">
-                                  {activity.includedItems.map((item, i) => (
-                                    <li
-                                      key={i}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <div className="w-1.5 h-1.5 rounded-full bg-green-600"></div>
-                                      <span className="text-xs text-gray-600">
-                                        {item}
-                                      </span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-
-                          {/* Professionnel */}
-                          {activity.creator && (
-                            <div className="bg-gray-50 p-3 rounded-lg">
-                              <h4 className="text-sm font-semibold text-gray-800 mb-2">
-                                Votre professionnel :
-                              </h4>
-                              <div className="flex items-center gap-3">
-                                {activity.creator.avatar ? (
-                                  <img
-                                    src={activity.creator.avatar}
-                                    alt="Professionnel"
-                                    className="w-10 h-10 rounded-full"
-                                  />
-                                ) : (
-                                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                    <span className="text-gray-600 font-semibold">
-                                      {activity.creator.firstName?.charAt(0)}
-                                      {activity.creator.lastName?.charAt(0)}
-                                    </span>
-                                  </div>
-                                )}
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {activity.creator.firstName}{" "}
-                                    {activity.creator.lastName}
-                                  </p>
-                                  {activity.creator.companyName && (
-                                    <p className="text-xs text-gray-600 mt-1">
-                                      {activity.creator.companyName}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Boutons d'action */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <button
-                        onClick={() => toggleFAQ(activity.id)}
-                        className="flex items-center gap-2 text-green-600 font-semibold text-sm transition hover:text-emerald-700 hover:gap-3"
-                      >
-                        {openFAQ === activity.id ? (
-                          <>
-                            Réduire <ChevronUp className="w-4 h-4" />
-                          </>
-                        ) : (
-                          <>
-                            Voir plus de détails{" "}
-                            <ChevronDown className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => handleBookActivity(activity)}
-                        className="px-4 py-2 rounded-lg font-semibold text-sm transition-all bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:opacity-90 hover:shadow-lg"
-                      >
-                        Réserver
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* PARAPENTE PAGE */}
-      {activeCategory === "parapente" && <UserParapentePage />}
+      <div className="max-w-7xl mx-auto px-4 pb-20">
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+            <p className="mt-4 text-gray-600">Chargement des activités...</p>
+          </div>
+        ) : filteredActivities.length === 0 ? (
+          <div className="text-center py-24">
+            <Search className="mx-auto w-16 h-16 text-green-600 mb-4" />
+            <p className="text-xl font-bold text-gray-700">
+              Aucune activité trouvée
+            </p>
+            <p className="text-gray-500">Essayez un autre mot-clé.</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredActivities.map((activity) => renderActivityCard(activity))}
+          </div>
+        )}
+      </div>
 
       {/* Modal de réservation */}
       {selectedActivity && (
@@ -733,7 +633,6 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           onBookingSuccess={() => {
             toast.success("Réservation effectuée avec succès !");
             setIsBookingModalOpen(false);
-            // Recharger les activités pour mettre à jour les disponibilités
             loadActivities();
           }}
         />
