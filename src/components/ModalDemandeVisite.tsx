@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Mail, Phone, Calendar, Clock } from 'lucide-react';
+import { X, User, Mail, Phone, Calendar, Clock, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -30,20 +30,20 @@ export const ModalDemandeVisite = ({
     heureSouhaitee: "",
   });
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingQualification, setLoadingQualification] = useState(false);
   const [formErrors, setFormErrors] = useState({
     dateSouhaitee: false,
     heureSouhaitee: false
   });
+  const [demandeId, setDemandeId] = useState<number | null>(null);
 
   const { user, isAuthenticated } = useAuth();
 
   // Pré-remplir automatiquement avec les données de l'utilisateur connecté
   useEffect(() => {
     if (open && user && isAuthenticated) {
-      // Construire le nom complet
       const nomComplet = `${user.firstName || ''} ${user.lastName || ''}`.trim();
       
-      // Mettre à jour le formulaire avec les données de l'utilisateur
       setFormData(prev => ({
         ...prev,
         nomPrenom: nomComplet,
@@ -51,7 +51,6 @@ export const ModalDemandeVisite = ({
         telephone: user.phone || user.telephone || user.mobile || '',
       }));
     } else if (open) {
-      // Réinitialiser si l'utilisateur n'est pas connecté ou modal fermé
       setFormData({
         nomPrenom: "",
         email: "",
@@ -63,87 +62,120 @@ export const ModalDemandeVisite = ({
     }
   }, [open, user, isAuthenticated]);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!property) return;
-  
-  // VÉRIFICATION CRITIQUE - Empêcher l'envoi si date ou heure ne sont pas sélectionnées
-  if (!formData.dateSouhaitee || !formData.heureSouhaitee) {
-    setFormErrors({
-      dateSouhaitee: !formData.dateSouhaitee,
-      heureSouhaitee: !formData.heureSouhaitee
-    });
-    toast.error("Veuillez sélectionner une date et un créneau horaire.");
-    return;
-  }
+  // Fonction pour lancer la qualification après création
+  const lancerQualification = async (id: number) => {
+    try {
+      console.log(`🤖 Lancement qualification pour demande #${id}`);
+      setLoadingQualification(true);
+      
+      // Appel explicite à l'API de qualification
+      const response = await api.post(`/ai/qualifier/${id}`);
+      
+      if (response.data.success) {
+        console.log(`✅ Demande #${id} qualifiée avec succès:`, response.data.qualification);
+        toast.success("Demande analysée par l'IA");
+      }
+    } catch (error) {
+      console.error("❌ Erreur qualification:", error);
+      // Ne pas afficher d'erreur à l'utilisateur car la demande est déjà créée
+    } finally {
+      setLoadingQualification(false);
+    }
+  };
 
-  // Réinitialiser les erreurs si tout est valide
-  setFormErrors({ dateSouhaitee: false, heureSouhaitee: false });
-  
-  // Track contact action
-  if (onPropertyContact) {
-    onPropertyContact(property);
-  }
-  
-  if (isAlreadySent) {
-    toast.error("Vous avez déjà envoyé une demande pour ce bien.");
-    return;
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!property) return;
+    
+    // VÉRIFICATION CRITIQUE - Empêcher l'envoi si date ou heure ne sont pas sélectionnées
+    if (!formData.dateSouhaitee || !formData.heureSouhaitee) {
+      setFormErrors({
+        dateSouhaitee: !formData.dateSouhaitee,
+        heureSouhaitee: !formData.heureSouhaitee
+      });
+      toast.error("Veuillez sélectionner une date et un créneau horaire.");
+      return;
+    }
 
-  if (!isAuthenticated || !user) {
-    toast.error('Veuillez vous connecter pour demander une visite.');
-    return;
-  }
+    // Réinitialiser les erreurs si tout est valide
+    setFormErrors({ dateSouhaitee: false, heureSouhaitee: false });
+    
+    // Track contact action
+    if (onPropertyContact) {
+      onPropertyContact(property);
+    }
+    
+    if (isAlreadySent) {
+      toast.error("Vous avez déjà envoyé une demande pour ce bien.");
+      return;
+    }
 
-  setLoadingSubmit(true);
-  try {
-    // Récupérer l'ID du propriétaire du bien
-    const propertyOwnerId = property?.ownerId || property?.createdById || user.id;
+    if (!isAuthenticated || !user) {
+      toast.error('Veuillez vous connecter pour demander une visite.');
+      return;
+    }
 
-    // Ensure backend-required contactPrenom and contactNom are provided
-    const nameParts = String(formData.nomPrenom || '').trim().split(/\s+/).filter(Boolean);
-    const contactPrenom = nameParts.length > 0 ? nameParts[0] : '';
-    const contactNom = nameParts.length > 1 ? nameParts.slice(1).join(' ') : (nameParts[0] || '');
+    setLoadingSubmit(true);
+    try {
+      // Récupérer l'ID du propriétaire du bien
+      const propertyOwnerId = property?.ownerId || property?.createdById || user.id;
 
-    const payload = {
-      // NE PAS envoyer de serviceId - le backend utilisera l'ID du propriétaire
-      // serviceId: null, // Optionnel, laissé vide
-      createdById: user.id, // ID de la personne qui envoie la demande
-      propertyId: property?.id,
-      contactNom,
-      contactPrenom,
-      contactEmail: formData.email,
-      contactTel: formData.telephone,
-      description: `Demande visite pour le bien: ${property?.title || property?.id} (${property?.id}). ${formData.message || ''}`,
-      lieuAdresse: property?.address || property?.city || '',
-      dateSouhaitee: formData.dateSouhaitee,
-      heureSouhaitee: formData.heureSouhaitee,
-    };
+      // Ensure backend-required contactPrenom and contactNom are provided
+      const nameParts = String(formData.nomPrenom || '').trim().split(/\s+/).filter(Boolean);
+      const contactPrenom = nameParts.length > 0 ? nameParts[0] : '';
+      const contactNom = nameParts.length > 1 ? nameParts.slice(1).join(' ') : (nameParts[0] || '');
 
-    await api.post('/demandes/immobilier', payload);
+      const payload = {
+        createdById: user.id,
+        propertyId: property?.id,
+        contactNom,
+        contactPrenom,
+        contactEmail: formData.email,
+        contactTel: formData.telephone,
+        description: `Demande visite pour le bien: ${property?.title || property?.id} (${property?.id}). ${formData.message || ''}`,
+        lieuAdresse: property?.address || property?.city || '',
+        dateSouhaitee: formData.dateSouhaitee,
+        heureSouhaitee: formData.heureSouhaitee,
+      };
 
-    // Notify parent that a request was sent
-    onSuccess?.(String(property.id));
+      // Envoyer la demande
+      const response = await api.post('/demandes/immobilier', payload);
+      
+      // Récupérer l'ID de la demande créée
+      const nouvelleDemandeId = response.data?.demande?.id;
+      
+      if (nouvelleDemandeId) {
+        console.log(`✅ Demande créée avec succès, ID: ${nouvelleDemandeId}`);
+        setDemandeId(nouvelleDemandeId);
+        
+        // LANCER LA QUALIFICATION IMMÉDIATEMENT
+        await lancerQualification(nouvelleDemandeId);
+      }
 
-    toast.success("Votre demande de visite a bien été envoyée.");
+      // Notify parent that a request was sent
+      onSuccess?.(String(property.id));
 
-    // Réinitialiser le formulaire et fermer le modal
-    setFormData({
-      nomPrenom: "",
-      email: "",
-      telephone: "",
-      message: "",
-      dateSouhaitee: "",
-      heureSouhaitee: "",
-    });
-    onClose();
-  } catch (err: any) {
-    console.error('Erreur en envoyant la demande de visite', err);
-    toast.error(err?.response?.data?.error || err?.message || 'Impossible d\'envoyer la demande. Réessayez.');
-  } finally {
-    setLoadingSubmit(false);
-  }
-};
+      toast.success("Votre demande de visite a bien été envoyée et est en cours d'analyse.");
+
+      // Réinitialiser le formulaire et fermer le modal
+      setFormData({
+        nomPrenom: "",
+        email: "",
+        telephone: "",
+        message: "",
+        dateSouhaitee: "",
+        heureSouhaitee: "",
+      });
+      onClose();
+      
+    } catch (err: any) {
+      console.error('Erreur en envoyant la demande de visite', err);
+      toast.error(err?.response?.data?.error || err?.message || 'Impossible d\'envoyer la demande. Réessayez.');
+    } finally {
+      setLoadingSubmit(false);
+      setLoadingQualification(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -305,7 +337,8 @@ const handleSubmit = async (e: React.FormEvent) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-white text-gray-700 border border-[#D3D3D3] px-6 py-3 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center gap-2"
+              disabled={loadingSubmit || loadingQualification}
+              className="flex-1 bg-white text-gray-700 border border-[#D3D3D3] px-6 py-3 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <X className="w-4 h-4" />
               Annuler
@@ -313,13 +346,31 @@ const handleSubmit = async (e: React.FormEvent) => {
             <button
               type="submit"
               onClick={handleSubmit}
-              disabled={loadingSubmit || !!isAlreadySent}
+              disabled={loadingSubmit || !!isAlreadySent || loadingQualification}
               className="flex-1 bg-[#6B8E23] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#556B2F] transition-all duration-200 shadow-lg shadow-[#6B8E23]/25 flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              <Calendar className="w-4 h-4" />
-              {loadingSubmit ? 'Envoi...' : isAlreadySent ? 'Demande déjà envoyée' : 'Demander la visite'}
+              {loadingQualification ? (
+                <>
+                  <Brain className="w-4 h-4 animate-pulse" />
+                  Analyse IA...
+                </>
+              ) : loadingSubmit ? (
+                'Envoi...'
+              ) : isAlreadySent ? (
+                'Demande déjà envoyée'
+              ) : (
+                <>
+                  <Calendar className="w-4 h-4" />
+                  Demander la visite
+                </>
+              )}
             </button>
           </div>
+          {loadingQualification && (
+            <p className="text-xs text-center mt-2 text-[#6B8E23]">
+              ✨ Analyse IA en cours après l'envoi...
+            </p>
+          )}
         </div>
       </div>
     </div>

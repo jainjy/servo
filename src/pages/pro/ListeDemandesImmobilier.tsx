@@ -21,23 +21,22 @@ import {
   Building,
   RefreshCw,
   MoreVertical,
-  Edit,
-  Send,
-  Ban,
   CheckSquare,
   AlertTriangle,
   Info,
   Building2,
-  Users,
   ChevronDown,
   ChevronUp,
   Check,
   X,
-  FileText
+  FileText,
+  Euro,
+  Brain
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import { demandeImmobilierAPI } from "@/lib/api";
+import { api } from "@/lib/axios";
 
 // Définition du thème
 const theme = {
@@ -53,27 +52,98 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
   const [showStatusSelector, setShowStatusSelector] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [qualification, setQualification] = useState<any>(null);
+  const [loadingQualification, setLoadingQualification] = useState(true);
+  const [showQualification, setShowQualification] = useState(true);
 
   // Détecter si on est en mode mobile
   useEffect(() => {
     const checkMobile = () => {
       setIsMobileView(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Charger automatiquement la qualification au montage
+  useEffect(() => {
+    if (demande?.id) {
+      chargerQualification();
+    }
+  }, [demande?.id]);
+
+  const chargerQualification = async () => {
+    setLoadingQualification(true);
+    try {
+      const response = await api.get(`/ai/qualification/${demande.id}`);
+      if (response.data) {
+        setQualification(response.data);
+      }
+    } catch (error: any) {
+      // Si 404, c'est que la demande n'est pas encore qualifiée
+      if (error.response?.status === 404) {
+        console.log('⏳ Qualification en cours...');
+      } else {
+        console.error('Erreur chargement qualification:', error);
+      }
+    } finally {
+      setLoadingQualification(false);
+    }
+  };
 
   const formatMessage = (message: string) => {
     if (!message) return "—";
     const parts = message.split(".");
     const userMessage = parts.find(
-      (part) => !part.includes("Demande visite pour le bien") && 
-                !part.includes("Postulation pour logement intermédiaire")
+      (part) => !part.includes("Demande visite pour le bien") &&
+        !part.includes("Postulation pour logement intermédiaire")
     );
     return userMessage ? userMessage.trim() : "—";
+  };
+
+  // Fonction pour obtenir l'icône du type
+  const getTypeIcon = (type) => {
+    switch (type?.toUpperCase()) {
+      case 'URGENT':
+        return <AlertTriangle className="w-4 h-4 text-red-600" />;
+      case 'DEVIS':
+        return <Euro className="w-4 h-4 text-green-600" />;
+      case 'INFO':
+        return <Info className="w-4 h-4 text-blue-600" />;
+      default:
+        return <FileText className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  // Fonction pour obtenir la couleur du type
+  const getTypeColor = (type) => {
+    switch (type?.toUpperCase()) {
+      case 'URGENT':
+        return 'bg-red-50 text-red-700 border-red-200';
+      case 'DEVIS':
+        return 'bg-green-50 text-green-700 border-green-200';
+      case 'INFO':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  // Fonction pour obtenir la couleur du lead score
+  const getLeadScoreColor = (score) => {
+    switch (score?.toUpperCase()) {
+      case 'CHAUD':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'TIEDE':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'FROID':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -115,9 +185,9 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
   };
 
   const renderDesktopView = () => (
-    <div className="rounded-2xl border p-6 hover:shadow-lg transition-all duration-500 group relative overflow-hidden" style={{ 
+    <div className="rounded-2xl border p-6 hover:shadow-lg transition-all duration-500 group relative overflow-hidden" style={{
       backgroundColor: theme.lightBg,
-      borderColor: theme.separator 
+      borderColor: theme.separator
     }}>
       <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-6">
         {/* Section gauche - Image et informations de base */}
@@ -132,7 +202,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
               />
             </div>
           ) : (
-            <div className="min-w-[150px] h-32 md:h-36 rounded-xl flex items-center justify-center shadow-lg" style={{ 
+            <div className="min-w-[150px] h-32 md:h-36 rounded-xl flex items-center justify-center shadow-lg" style={{
               backgroundColor: `${theme.primaryDark}20`,
               border: `1px solid ${theme.separator}`
             }}>
@@ -146,9 +216,9 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
                 {demande.property?.title || "Demande de visite"}
               </h3>
               <p className="text-sm flex items-center gap-2 mt-2">
-                <span className="flex items-center gap-2 px-3 py-1 rounded-full" style={{ 
+                <span className="flex items-center gap-2 px-3 py-1 rounded-full" style={{
                   backgroundColor: `${theme.separator}20`,
-                  color: theme.secondaryText 
+                  color: theme.secondaryText
                 }}>
                   <MapPin className="w-4 h-4" />
                   {formatAddress(demande)}
@@ -195,9 +265,9 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
               </button>
 
               {showStatusSelector && (
-                <div className="absolute top-full mt-2 w-full rounded-lg shadow-2xl border py-2 z-50" style={{ 
+                <div className="absolute top-full mt-2 w-full rounded-lg shadow-2xl border py-2 z-50" style={{
                   backgroundColor: theme.lightBg,
-                  borderColor: theme.separator 
+                  borderColor: theme.separator
                 }}>
                   {statusOptions.map((option) => (
                     <button
@@ -240,7 +310,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
           <Link
             to={`/immobilier/${demande.propertyId || demande.property?.id}`}
             className="text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl"
-            style={{ 
+            style={{
               backgroundColor: theme.primaryDark,
             }}
             onMouseEnter={(e) => {
@@ -257,7 +327,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
           <button
             onClick={() => setShowDetails(!showDetails)}
             className="px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
-            style={{ 
+            style={{
               backgroundColor: `${theme.separator}20`,
               color: theme.secondaryText
             }}
@@ -279,7 +349,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
               <button
                 onClick={() => setShowActions(!showActions)}
                 className="p-2.5 rounded-lg transition-all duration-300 hover:scale-105"
-                style={{ 
+                style={{
                   backgroundColor: `${theme.separator}20`,
                   color: theme.secondaryText
                 }}
@@ -294,9 +364,9 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
               </button>
 
               {showActions && (
-                <div className="absolute right-0 top-full mt-2 w-48 rounded-lg shadow-2xl border py-2 z-50" style={{ 
+                <div className="absolute right-0 top-full mt-2 w-48 rounded-lg shadow-2xl border py-2 z-50" style={{
                   backgroundColor: theme.lightBg,
-                  borderColor: theme.separator 
+                  borderColor: theme.separator
                 }}>
                   <button
                     onClick={() => {
@@ -321,6 +391,92 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
           )}
         </div>
       </div>
+
+      {/* Badge de qualification IA - S'affiche automatiquement */}
+      {showQualification && (
+        <>
+          {loadingQualification ? (
+            <div className="mt-4 p-4 rounded-lg border flex items-center justify-center gap-2" style={{
+              backgroundColor: '#F9FAFB',
+              borderColor: theme.separator
+            }}>
+              <Brain className="w-5 h-5 animate-pulse" style={{ color: theme.primaryDark }} />
+              <span style={{ color: theme.secondaryText }}>Analyse IA en cours...</span>
+            </div>
+          ) : qualification ? (
+            <div className="mt-4 p-4 rounded-lg border" style={{
+              backgroundColor: '#F9FAFB',
+              borderColor: theme.separator
+            }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-5 h-5" style={{ color: theme.primaryDark }} />
+                  <span className="font-semibold text-sm" style={{ color: theme.logo }}>
+                    Analyse IA {qualification.confiance && `(${Math.round(qualification.confiance * 100)}%)`}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowQualification(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {/* Résumé */}
+                <p className="text-sm italic" style={{ color: theme.secondaryText }}>
+                  "{qualification.resume}"
+                </p>
+
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 border ${getTypeColor(qualification.type)}`}>
+                    {getTypeIcon(qualification.type)}
+                    {qualification.type}
+                  </span>
+
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getLeadScoreColor(qualification.leadScore)}`}>
+                    Lead {qualification.leadScore}
+                  </span>
+
+                  {qualification.budgetEstime && (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200 flex items-center gap-1">
+                      <Euro className="w-3 h-3" />
+                      {qualification.budgetEstime} €
+                    </span>
+                  )}
+
+                  {qualification.delai && (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Délai: {qualification.delai}
+                    </span>
+                  )}
+                </div>
+
+                {/* Suggestion */}
+                {qualification.suggestion && (
+                  <div className="text-sm p-3 rounded-lg" style={{
+                    backgroundColor: `${theme.primaryDark}10`,
+                    borderLeft: `3px solid ${theme.primaryDark}`
+                  }}>
+                    <span className="font-medium" style={{ color: theme.logo }}>💡 Suggestion: </span>
+                    <span style={{ color: theme.secondaryText }}>{qualification.suggestion}</span>
+                  </div>
+                )}
+
+                {/* Date de traitement */}
+                {qualification.dateTraitement && (
+                  <div className="text-xs text-right" style={{ color: theme.secondaryText }}>
+                    Analysé le {new Date(qualification.dateTraitement).toLocaleDateString('fr-FR')} à {new Date(qualification.dateTraitement).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
 
       {/* Détails supplémentaires */}
       {showDetails && (
@@ -356,9 +512,9 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
                 <div className="w-1 h-4 rounded-full" style={{ backgroundColor: theme.logo }}></div>
                 Message du client
               </h4>
-              <div className="leading-relaxed text-sm p-4 rounded-lg" style={{ 
+              <div className="leading-relaxed text-sm p-4 rounded-lg" style={{
                 backgroundColor: `${theme.separator}10`,
-                color: theme.secondaryText 
+                color: theme.secondaryText
               }}>
                 <div className="flex items-start gap-3">
                   <MessageCircle className="w-4 h-4 mt-1 flex-shrink-0" style={{ color: theme.secondaryText }} />
@@ -372,8 +528,8 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
 
       {/* Fermer les menus en cliquant ailleurs */}
       {(showActions || showStatusSelector) && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => {
             setShowActions(false);
             setShowStatusSelector(false);
@@ -384,9 +540,9 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
   );
 
   const renderMobileView = () => (
-    <div className="rounded-xl border p-4 hover:shadow-lg transition-all duration-500" style={{ 
+    <div className="rounded-xl border p-4 hover:shadow-lg transition-all duration-500" style={{
       backgroundColor: theme.lightBg,
-      borderColor: theme.separator 
+      borderColor: theme.separator
     }}>
       {/* En-tête mobile */}
       <div className="flex justify-between items-start mb-4">
@@ -399,7 +555,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
             <span className="truncate">{formatAddress(demande)}</span>
           </div>
         </div>
-        
+
         {/* Bouton pour voir détails */}
         <button
           onClick={() => setShowDetails(!showDetails)}
@@ -426,9 +582,9 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
           </button>
 
           {showStatusSelector && (
-            <div className="absolute top-full mt-1 w-full rounded-lg shadow-lg border py-1 z-50" style={{ 
+            <div className="absolute top-full mt-1 w-full rounded-lg shadow-lg border py-1 z-50" style={{
               backgroundColor: theme.lightBg,
-              borderColor: theme.separator 
+              borderColor: theme.separator
             }}>
               {statusOptions.map((option) => (
                 <button
@@ -457,7 +613,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
         <Link
           to={`/immobilier/${demande.propertyId || demande.property?.id}`}
           className="flex-1 text-white px-3 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2"
-          style={{ 
+          style={{
             backgroundColor: theme.primaryDark,
           }}
           onMouseEnter={(e) => {
@@ -475,7 +631,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
           <button
             onClick={() => onRemove(demande.id)}
             className="px-3 py-2 rounded-lg font-medium text-sm flex items-center gap-2"
-            style={{ 
+            style={{
               border: `1px solid ${theme.separator}`,
               color: '#DC2626'
             }}
@@ -490,6 +646,45 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
           </button>
         )}
       </div>
+
+      {/* Version mobile du badge IA */}
+      {showQualification && (
+        <>
+          {loadingQualification ? (
+            <div className="mt-2 p-2 rounded-lg border flex items-center justify-center gap-1" style={{
+              backgroundColor: '#F9FAFB',
+              borderColor: theme.separator
+            }}>
+              <Brain className="w-3 h-3 animate-pulse" style={{ color: theme.primaryDark }} />
+              <span className="text-xs" style={{ color: theme.secondaryText }}>Analyse IA...</span>
+            </div>
+          ) : qualification ? (
+            <div className="mt-2 p-2 rounded-lg border" style={{
+              backgroundColor: '#F9FAFB',
+              borderColor: theme.separator
+            }}>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1">
+                  <Brain className="w-3 h-3" style={{ color: theme.primaryDark }} />
+                  <span className="font-semibold text-xs" style={{ color: theme.logo }}>IA</span>
+                </div>
+                <button onClick={() => setShowQualification(false)}>
+                  <X className="w-3 h-3 text-gray-400" />
+                </button>
+              </div>
+              <p className="text-xs italic mb-1">"{qualification.resume}"</p>
+              <div className="flex flex-wrap gap-1">
+                <span className={`px-2 py-0.5 rounded-full text-xs ${getTypeColor(qualification.type)}`}>
+                  {qualification.type}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-xs ${getLeadScoreColor(qualification.leadScore)}`}>
+                  Lead {qualification.leadScore}
+                </span>
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
 
       {/* Détails dépliables */}
       {showDetails && (
@@ -594,22 +789,22 @@ const getStatusTextColor = (status: string) => {
   switch ((status || "").toLowerCase()) {
     case "en attente":
     case "en cours":
-      return '#CA8A04'; // Jaune
+      return '#CA8A04';
     case "validée":
     case "validee":
     case "valide":
-      return '#16A34A'; // Vert
+      return '#16A34A';
     case "refusée":
     case "refusee":
     case "refus":
-      return '#DC2626'; // Rouge
+      return '#DC2626';
     case "archivée":
     case "archivee":
     case "archive":
-      return theme.secondaryText; // Marron du thème
+      return theme.secondaryText;
     case "terminée":
     case "terminee":
-      return '#2563EB'; // Bleu
+      return '#2563EB';
     default:
       return theme.secondaryText;
   }
@@ -629,10 +824,10 @@ const ListeDemandesImmobilier = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -642,27 +837,18 @@ const ListeDemandesImmobilier = () => {
   // Fonction pour charger les demandes depuis l'API
   const loadDemandes = async () => {
     if (!isAuthenticated || !user?.id) {
-      // console.log('❌ Utilisateur non authentifié ou ID manquant');
       setLoading(false);
       return;
     }
-    
+
     setLoading(true);
     try {
-      // console.log('🔄 Chargement des demandes depuis l\'API...', { 
-      //   isArtisan, 
-      //   userId: user.id,
-      //   userRole: user.role
-      // });
-      
       let response;
-      
+
       if (isArtisan) {
         response = await demandeImmobilierAPI.getArtisanDemandes(user.id);
-        // console.log('🏗️ Mode ARTISAN - Demandes pour ses propriétés:', response.data);
       } else {
         response = await demandeImmobilierAPI.getUserDemandes(user.id);
-        // console.log('👤 Mode CLIENT - Demandes envoyées:', response.data);
       }
 
       if (response.data && Array.isArray(response.data)) {
@@ -677,23 +863,19 @@ const ListeDemandesImmobilier = () => {
           contactEmail: demande.contactEmail || demande.createdBy?.email || "",
           contactTel: demande.contactTel || demande.createdBy?.phone || ""
         }));
-        
+
         setDemandes(formattedDemandes);
-        // console.log(`✅ ${formattedDemandes.length} demandes chargées`);
       } else {
-        console.error('❌ Format de données invalide:', response.data);
         setDemandes([]);
       }
 
     } catch (err: any) {
       console.error("❌ Erreur chargement demandes:", err);
-      console.error("Détails erreur:", err.response?.data);
-      
       setDemandes([]);
-      
+
       toast({
         title: "Erreur",
-        description: err.response?.data?.error || "Impossible de charger les demandes depuis le serveur",
+        description: err.response?.data?.error || "Impossible de charger les demandes",
         variant: "destructive"
       });
     } finally {
@@ -709,7 +891,6 @@ const ListeDemandesImmobilier = () => {
   // Écouter les événements de nouvelle demande
   useEffect(() => {
     const handleNewDemande = () => {
-      // console.log('🔄 Événement: Nouvelle demande détectée, rechargement...');
       loadDemandes();
     };
 
@@ -722,7 +903,7 @@ const ListeDemandesImmobilier = () => {
     };
   }, []);
 
-  // Filter demandes based on active tab and search
+  // Filtrer les demandes
   const filteredDemandes = React.useMemo(() => {
     let filtered = demandes;
 
@@ -758,33 +939,31 @@ const ListeDemandesImmobilier = () => {
     return filtered;
   }, [demandes, activeTab, searchTerm]);
 
-  // Statistiques pour chaque onglet
+  // Statistiques
   const stats = React.useMemo(() => {
     const total = demandes.length;
-    const enAttente = demandes.filter(d => 
+    const enAttente = demandes.filter(d =>
       ["en attente", "en cours"].includes((d.statut || "").toLowerCase())
     ).length;
-    const validees = demandes.filter(d => 
+    const validees = demandes.filter(d =>
       ["validée", "validee", "valide"].includes((d.statut || "").toLowerCase())
     ).length;
-    const refusees = demandes.filter(d => 
+    const refusees = demandes.filter(d =>
       ["refusée", "refusee", "refus"].includes((d.statut || "").toLowerCase())
     ).length;
-    const archivees = demandes.filter(d => 
+    const archivees = demandes.filter(d =>
       ["archivée", "archivee", "archive"].includes((d.statut || "").toLowerCase())
     ).length;
 
     return { total, enAttente, validees, refusees, archivees };
   }, [demandes]);
 
-  // Changer le statut d'une demande
+  // Changer le statut
   const handleStatusChange = async (id: number, statut: string) => {
     setUpdatingIds((s) => [...s, id]);
     try {
-      // console.log(`🔄 Changement statut demande ${id} -> ${statut}`);
-      
       const response = await demandeImmobilierAPI.updateStatut(id, statut);
-      
+
       if (response.data) {
         setDemandes((prev) =>
           prev.map((d) => (d.id === id ? { ...d, statut, updatedAt: new Date().toISOString() } : d))
@@ -796,18 +975,15 @@ const ListeDemandesImmobilier = () => {
           })
         );
 
-        toast({ 
-          title: "Succès", 
+        toast({
+          title: "Succès",
           description: `Statut changé en "${statut}"`,
           variant: "default"
         });
-      } else {
-        throw new Error('Erreur lors de la mise à jour');
       }
     } catch (err: any) {
-      console.error("❌ Erreur changement statut:", err);
-      toast({ 
-        title: "Erreur", 
+      toast({
+        title: "Erreur",
         description: err.response?.data?.error || "Impossible de changer le statut",
         variant: "destructive"
       });
@@ -816,82 +992,31 @@ const ListeDemandesImmobilier = () => {
     }
   };
 
+  // Supprimer
   const handleRemove = async (id: number) => {
     setUpdatingIds((s) => [...s, id]);
     try {
       const hardDelete = !isArtisan;
-      
       const response = await demandeImmobilierAPI.deleteDemande(id, hardDelete);
-      
+
       if (response.data) {
         setDemandes((prev) => prev.filter((d) => d.id !== id));
-        
+
         toast({
           title: isArtisan ? "Archivée" : "Supprimée",
-          description: response.data.message || "La demande a été traitée avec succès.",
+          description: response.data.message || "Demande traitée",
           variant: "default"
         });
-      } else {
-        throw new Error('Erreur lors de la suppression');
       }
     } catch (err: any) {
-      console.error("Erreur suppression demande", err);
       toast({
         title: "Erreur",
-        description: err.response?.data?.error || "Impossible de supprimer la demande",
+        description: err.response?.data?.error || "Impossible de supprimer",
         variant: "destructive"
       });
     } finally {
       setUpdatingIds((s) => s.filter((x) => x !== id));
     }
-  };
-
-  // Export des données
-  const handleExport = () => {
-    if (filteredDemandes.length === 0) {
-      toast({
-        title: "Aucune donnée",
-        description: "Aucune demande à exporter",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const csvData = filteredDemandes.map(d => ({
-      ID: d.id,
-      Statut: d.statut,
-      'Prénom client': d.contactPrenom,
-      'Nom client': d.contactNom,
-      'Email client': d.contactEmail,
-      'Téléphone client': d.contactTel,
-      'Bien': d.property?.title,
-      'Adresse': formatAddress(d),
-      'Date souhaitée': d.dateSouhaitee ? new Date(d.dateSouhaitee).toLocaleDateString("fr-FR") : '',
-      'Heure': d.heureSouhaitee,
-      'Message': d.description,
-      'Date création': d.createdAt ? new Date(d.createdAt).toLocaleDateString("fr-FR") : '',
-      'Client ID': d.createdBy?.id || 'N/A'
-    }));
-
-    const headers = Object.keys(csvData[0] || {});
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => headers.map(header => `"${row[header] || ''}"`).join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reservations-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Export réussi",
-      description: `${filteredDemandes.length} demandes exportées`,
-      variant: "default"
-    });
   };
 
   if (!isAuthenticated)
@@ -904,12 +1029,12 @@ const ListeDemandesImmobilier = () => {
     );
 
   if (loading)
-    return <LoadingSpinner text="Chargement des demandes immobilières" />;
+    return <LoadingSpinner text="Chargement des demandes" />;
 
   return (
     <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: `${theme.separator}20` }}>
       <div className="max-w-7xl mx-auto">
-        {/* En-tête responsive */}
+        {/* En-tête */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -923,62 +1048,28 @@ const ListeDemandesImmobilier = () => {
               </h1>
             </div>
             <p style={{ color: theme.secondaryText }} className="text-sm md:text-base">
-              {isArtisan 
-                ? "Gérez les réservations de vos propriétés" 
+              {isArtisan
+                ? "Gérez les réservations de vos propriétés"
                 : "Gérez vos demandes de visite"}
-            </p>
-            <p className="text-xs md:text-sm mt-1" style={{ color: theme.secondaryText }}>
-              <span className="font-semibold" style={{ color: theme.logo }}>
-                {demandes.length} demande(s)
-              </span>
             </p>
           </div>
 
-          {/* Boutons d'action responsive */}
+          {/* Boutons */}
           <div className="flex flex-wrap gap-2 md:gap-3">
-            <button
-              onClick={handleExport}
-              disabled={filteredDemandes.length === 0}
-              className="flex-1 md:flex-none text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ 
-                backgroundColor: theme.primaryDark,
-              }}
-              onMouseEnter={(e) => {
-                if (!e.currentTarget.disabled) {
-                  e.currentTarget.style.backgroundColor = theme.logo;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!e.currentTarget.disabled) {
-                  e.currentTarget.style.backgroundColor = theme.primaryDark;
-                }
-              }}
-            >
-              <Download className="w-4 h-4" />
-              <span className="hidden md:inline">Exporter</span>
-              <span className="md:hidden">CSV</span>
-            </button>
             <button
               onClick={loadDemandes}
               className="flex-1 md:flex-none text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
-              style={{ 
+              style={{
                 backgroundColor: theme.secondaryText,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#6B240B';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = theme.secondaryText;
               }}
             >
               <RefreshCw className="w-4 h-4" />
               <span className="hidden md:inline">Actualiser</span>
-              <span className="md:hidden">Rafraîchir</span>
             </button>
           </div>
         </div>
 
-        {/* Statistiques responsive */}
+        {/* Statistiques */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 mb-6">
           {[
             { label: "Total", value: stats.total, color: "bg-white" },
@@ -987,8 +1078,8 @@ const ListeDemandesImmobilier = () => {
             { label: "Refusées", value: stats.refusees, color: "bg-red-50" },
             { label: "Archivées", value: stats.archivees, color: "bg-gray-50" },
           ].map((stat, index) => (
-            <div key={index} className={`${stat.color} rounded-lg md:rounded-xl p-3 md:p-4 border text-center shadow-sm`} style={{ 
-              borderColor: theme.separator 
+            <div key={index} className={`${stat.color} rounded-lg md:rounded-xl p-3 md:p-4 border text-center shadow-sm`} style={{
+              borderColor: theme.separator
             }}>
               <div className="text-lg md:text-2xl font-bold" style={{ color: theme.logo }}>{stat.value}</div>
               <div className="text-xs md:text-sm" style={{ color: theme.secondaryText }}>{stat.label}</div>
@@ -996,10 +1087,10 @@ const ListeDemandesImmobilier = () => {
           ))}
         </div>
 
-        {/* Barre de recherche responsive */}
-        <div className="rounded-lg md:rounded-xl p-3 md:p-4 border mb-4 md:mb-6 shadow-sm" style={{ 
+        {/* Barre de recherche */}
+        <div className="rounded-lg md:rounded-xl p-3 md:p-4 border mb-4 md:mb-6 shadow-sm" style={{
           backgroundColor: theme.lightBg,
-          borderColor: theme.separator 
+          borderColor: theme.separator
         }}>
           <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4">
             <div className="flex-1 w-full relative">
@@ -1009,25 +1100,21 @@ const ListeDemandesImmobilier = () => {
                 placeholder={isArtisan ? "Rechercher client, bien..." : "Rechercher bien, date..."}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:border-blue-500 text-sm md:text-base"
-                style={{ 
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 text-sm md:text-base"
+                style={{
                   borderColor: theme.separator,
                   backgroundColor: theme.lightBg,
-                  color: theme.logo 
+                  color: theme.logo
                 }}
               />
-            </div>
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <Filter className="w-4 h-4" style={{ color: theme.secondaryText }} />
-              <span className="text-sm" style={{ color: theme.secondaryText }}>Filtrer:</span>
             </div>
           </div>
         </div>
 
-        {/* Tabs de filtrage responsive */}
-        <div className="flex items-center space-x-1 rounded-lg md:rounded-xl p-1 md:p-2 border mb-4 md:mb-8 shadow-sm overflow-x-auto" style={{ 
+        {/* Tabs */}
+        <div className="flex items-center space-x-1 rounded-lg md:rounded-xl p-1 md:p-2 border mb-4 md:mb-8 shadow-sm overflow-x-auto" style={{
           backgroundColor: theme.lightBg,
-          borderColor: theme.separator 
+          borderColor: theme.separator
         }}>
           {[
             { id: "all", label: "Toutes", count: stats.total },
@@ -1044,20 +1131,10 @@ const ListeDemandesImmobilier = () => {
                   ? "text-white shadow-md"
                   : "hover:bg-gray-100"
               }`}
-              style={activeTab === tab.id ? { 
-                backgroundColor: theme.primaryDark 
-              } : { 
-                color: theme.secondaryText 
-              }}
-              onMouseEnter={(e) => {
-                if (activeTab !== tab.id) {
-                  e.currentTarget.style.backgroundColor = `${theme.separator}20`;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeTab !== tab.id) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
+              style={activeTab === tab.id ? {
+                backgroundColor: theme.primaryDark
+              } : {
+                color: theme.secondaryText
               }}
             >
               {tab.label}
@@ -1065,14 +1142,14 @@ const ListeDemandesImmobilier = () => {
                 activeTab === tab.id
                   ? "bg-white/20 text-white"
                   : "bg-gray-200"
-              }`} style={activeTab !== tab.id ? { color: theme.secondaryText } : {}}>
+              }`}>
                 {tab.count}
               </span>
             </button>
           ))}
         </div>
 
-        {/* Liste des demandes responsive */}
+        {/* Liste des demandes */}
         <div className="space-y-4 md:space-y-6">
           {filteredDemandes.length > 0 ? (
             filteredDemandes.map((d) => (
@@ -1085,11 +1162,11 @@ const ListeDemandesImmobilier = () => {
               />
             ))
           ) : (
-            <div className="rounded-lg md:rounded-2xl border p-6 md:p-12 text-center shadow-sm" style={{ 
+            <div className="rounded-lg md:rounded-2xl border p-6 md:p-12 text-center shadow-sm" style={{
               backgroundColor: theme.lightBg,
-              borderColor: theme.separator 
+              borderColor: theme.separator
             }}>
-              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ 
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{
                 backgroundColor: `${theme.separator}20`
               }}>
                 {isArtisan ? (
@@ -1099,26 +1176,14 @@ const ListeDemandesImmobilier = () => {
                 )}
               </div>
               <h4 className="text-base md:text-lg font-medium mb-2" style={{ color: theme.logo }}>
-                Aucune demande{" "}
-                {activeTab !== "all" ? "dans cette catégorie" : isArtisan ? "pour vos biens" : "de visite"}
+                Aucune demande
               </h4>
-              <p className="mb-4 md:mb-6 text-sm md:text-base" style={{ color: theme.secondaryText }}>
-                {isArtisan 
-                  ? "Aucun client n'a encore réservé de visite pour vos propriétés."
-                  : "Vous n'avez pas encore demandé de visite pour un bien immobilier."}
-              </p>
               {!isArtisan && (
                 <Link
                   to="/immobilier"
                   className="text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base inline-flex items-center gap-2"
-                  style={{ 
+                  style={{
                     backgroundColor: theme.primaryDark,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.logo;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.primaryDark;
                   }}
                 >
                   <Home className="w-4 h-4" />
