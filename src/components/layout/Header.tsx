@@ -2366,7 +2366,7 @@ const Header = () => {
                       {user?.email}
                     </span>
                   </DropdownMenuLabel>
-                  {role != "user" ? (
+                  
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate(profilePath)}>
@@ -2375,7 +2375,6 @@ const Header = () => {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
-                  ) : (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate(profilePath)}>
@@ -2456,7 +2455,6 @@ const Header = () => {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
-                  )}
                   <DropdownMenuItem onClick={() => setIsLogoutDialogOpen(true)}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Déconnexion

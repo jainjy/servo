@@ -261,7 +261,7 @@ const allNavigationItems: NavigationItem[] = [
     userTypes: ["PRESTATAIRE", "ARTISAN"],
   },
   {
-    name: "Mes Demandes de services",
+    name: "Liste demande de service",
     href: "/pro/demandes",
     icon: FileText,
     userTypes: ["AGENCE", "VENDEUR"],
