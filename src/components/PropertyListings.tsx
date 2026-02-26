@@ -1064,9 +1064,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                                       ? 'bg-[#556B2F]/10 text-[#556B2F]'
                                       : 'bg-[#8B4513]/10 text-[#8B4513]'
                                   }`}>
-                                    Hôte {property.rentType === "professionnel" || property.status === "professionnel" 
-                                      ? "professionnel" 
-                                      : "particulier"}
+                                    Hôte {property.externalSource ? property.externalSource : "professionnel"}
                                   </div>
                                 </div>
                               </div>
@@ -1988,9 +1986,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                           <span className={property.rentType === "professionnel" || property.status === "professionnel" 
                             ? "text-[#556B2F]" 
                             : "text-[#8B4513]"}>
-                            Hôte {property.rentType === "professionnel" || property.status === "professionnel" 
-                              ? "professionnel" 
-                              : "particulier"}
+                            Hôte {property.externalSource ? property.externalSource : "professionnel"}
                           </span>
                         </div>
 
