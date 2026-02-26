@@ -5,14 +5,14 @@ import "leaflet/dist/leaflet.css";
 import { MapService } from "../../services/mapService";
 import { MapPoint } from "../../types/map";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  MapPin, 
-  Users, 
-  Home, 
-  Star, 
-  Building2, 
-  Navigation, 
-  ChevronRight, 
+import {
+  MapPin,
+  Users,
+  Home,
+  Star,
+  Building2,
+  Navigation,
+  ChevronRight,
   Sparkles,
   TrendingUp,
   Shield,
@@ -29,6 +29,7 @@ import {
   Search,
   Filter
 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 // Composant pour contrôler la caméra
 const MapController: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
@@ -55,7 +56,7 @@ const AnimatedMarker: React.FC<{
   const createMapPinIcon = (type: string, isHovered: boolean, isSelected: boolean) => {
     const color = type === 'user' ? COLORS.primary : COLORS.primaryLight;
     const size = isSelected ? 40 : isHovered ? 32 : 24;
-    
+
     return divIcon({
       html: `
         <div class="relative transition-all duration-300 ease-out" style="transform: ${isSelected ? 'scale(1.1)' : 'scale(1)'}; filter: drop-shadow(0 ${isSelected ? '8px' : '4px'} 12px rgba(0,0,0,0.2));">
@@ -110,6 +111,7 @@ const CardCarte: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [map, setMap] = useState<any>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsMapReady(true);
@@ -133,17 +135,17 @@ const CardCarte: React.FC = () => {
 
   const partnerPoints = useMemo(() => points.filter(p => p.type === "user"), [points]);
   const propertyPoints = useMemo(() => points.filter(p => p.type === "property"), [points]);
-  
+
   const filteredPoints = useMemo(() => {
     let filtered = filterType === 'all' ? points : filterType === 'partner' ? partnerPoints : propertyPoints;
-    
+
     if (searchTerm) {
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.city.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     return filtered;
   }, [points, partnerPoints, propertyPoints, filterType, searchTerm]);
 
@@ -214,7 +216,7 @@ const CardCarte: React.FC = () => {
               {filteredPoints.length} points d'intérêt affichés sur {points.length} au total
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2 w-full sm:w-auto">
             {/* Barre de recherche */}
             <div className="relative flex-1 sm:flex-initial">
@@ -283,8 +285,8 @@ const CardCarte: React.FC = () => {
                     onClick={() => setFilterType(filter.key as any)}
                     className={`
                       flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all
-                      ${filterType === filter.key 
-                        ? 'bg-[#0A2F1F] text-white' 
+                      ${filterType === filter.key
+                        ? 'bg-[#0A2F1F] text-white'
                         : 'bg-white text-[#222222] hover:bg-gray-100 border border-[#DDDDDD]'
                       }
                     `}
@@ -320,10 +322,10 @@ const CardCarte: React.FC = () => {
                   preferCanvas={true}
                 >
                   <MapController center={center} zoom={zoom} />
-                  
+
                   <TileLayer
                     attribution=''
-                    url={mapStyle === 'light' 
+                    url={mapStyle === 'light'
                       ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                       : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     }
@@ -426,9 +428,8 @@ const CardCarte: React.FC = () => {
                       exit={{ opacity: 0, x: 300 }}
                       className="absolute top-3 right-16 z-40 w-72 bg-white rounded-lg shadow-xl border border-[#DDDDDD] overflow-hidden"
                     >
-                      <div className={`p-3 ${
-                        selectedPoint.type === 'user' ? 'bg-[#F0F3E8]' : 'bg-[#E8F0E8]'
-                      }`}>
+                      <div className={`p-3 ${selectedPoint.type === 'user' ? 'bg-[#F0F3E8]' : 'bg-[#E8F0E8]'
+                        }`}>
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2">
                             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
@@ -455,17 +456,17 @@ const CardCarte: React.FC = () => {
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="p-3 space-y-2">
                         <p className="text-xs text-[#222222]">
                           {selectedPoint.description}
                         </p>
-                        
+
                         <div className="flex items-center gap-2 text-[10px] text-[#717171]">
                           <MapPin className="h-3 w-3" />
                           <span>{selectedPoint.address}</span>
                         </div>
-                        
+
                         {selectedPoint.type === 'user' && (
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] bg-[#0A2F1F]/10 text-[#0A2F1F] px-2 py-1 rounded-full">
@@ -477,7 +478,7 @@ const CardCarte: React.FC = () => {
                             </span>
                           </div>
                         )}
-                        
+
                         {selectedPoint.type === 'property' && (
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] bg-[#1E4C2F]/10 text-[#1E4C2F] px-2 py-1 rounded-full">
@@ -488,8 +489,8 @@ const CardCarte: React.FC = () => {
                             </span>
                           </div>
                         )}
-                        
-                        <button className="w-full mt-2 px-3 py-2 bg-[#0A2F1F] text-white text-xs rounded-lg hover:bg-[#1E4C2F] transition-colors flex items-center justify-center gap-1">
+
+                        <button onClick={() => window.open(`/achat/${selectedPoint.id}`, '_blank')} className="w-full mt-2 px-3 py-2 bg-[#0A2F1F] text-white text-xs rounded-lg hover:bg-[#1E4C2F] transition-colors flex items-center justify-center gap-1">
                           <span>Voir les détails</span>
                           <ChevronRight className="h-3 w-3" />
                         </button>
@@ -520,9 +521,9 @@ const CardCarte: React.FC = () => {
                 {filteredPoints.length} points sur la carte
               </span>
             </div>
-            
+
             <div className="h-4 w-px bg-[#DDDDDD]"></div>
-            
+
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-[#0A2F1F] rounded-full animate-pulse"></div>
@@ -534,7 +535,7 @@ const CardCarte: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-[#717171]">
               Zoom: {zoom}x
