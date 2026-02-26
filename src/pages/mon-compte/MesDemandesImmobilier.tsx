@@ -505,6 +505,15 @@ const MesDemandesImmobilier = () => {
   const [activeDemande, setActiveDemande] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<string>("all");
 
+
+  // 🟢 LOG 1: Vérifier l'utilisateur connecté
+  console.log("👤 Utilisateur connecté:", {
+    id: user?.id,
+    email: user?.email,
+    isAuthenticated
+  });
+
+
   const filteredDemandes = React.useMemo(() => {
     if (activeTab === "all") return demandes;
     return demandes.filter((demande) => {
@@ -533,22 +542,44 @@ const MesDemandesImmobilier = () => {
   useEffect(() => {
     if (!isAuthenticated || !user?.id) return;
 
+
     const load = async () => {
       setLoading(true);
       try {
-        const resp = await api.get(`/demandes/immobilier/user/${user.id}`);
-        const all = resp.data || [];
-        // console.log("Données reçues de l'API:", all);
-        setDemandes(all); // Émettre un événement pour recharger les notifications
+        // ✅ Utiliser la nouvelle route dédiée aux demandes du demandeur
+        console.log(`📡 Chargement des demandes du client connecté (email: ${user?.email})...`);
+
+        // OPTION RECOMMANDÉE : Nouvelle route dédiée
+        const resp = await api.get(`/demandes/immobilier/as-demandeur/${user.id}`);
+
+        // OPTION ALTERNATIVE : Avec paramètre type (si vous préférez)
+        // const resp = await api.get(`/demandes/immobilier/user/${user.id}?type=asDemandeur`);
+
+        console.log("✅ Demandes du client reçues:", resp.data);
+
+        // Pas besoin de filtrer côté frontend car le backend fait déjà le travail
+        setDemandes(resp.data || []);
+
+        console.log(`📊 ${resp.data?.length || 0} demandes trouvées`);
+
+        // Émettre un événement pour recharger les notifications
         window.dispatchEvent(new CustomEvent("notifications:reload"));
       } catch (err) {
         console.error("Erreur en chargeant demandes immobilières", err);
+        if (err.response) {
+          console.error("📡 Réponse d'erreur du serveur:", {
+            status: err.response.status,
+            statusText: err.response.statusText,
+            data: err.response.data
+          });
+        }
       } finally {
         setLoading(false);
       }
     };
 
     load();
+    
     const handler = (e: any) => {
       const detail = e?.detail || {};
       // support both shapes: { id, statut } and { demandeId, status }
@@ -565,17 +596,27 @@ const MesDemandesImmobilier = () => {
         "demande:statusChanged",
         handler as EventListener
       );
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, user?.email]);
+
+  // 🟢 LOG 7: Surveiller les changements de demandes
+  useEffect(() => {
+    console.log("🔄 Demandes mises à jour:", {
+      nombre: demandes.length,
+      emails: demandes.map(d => d.contactEmail),
+      statuts: demandes.map(d => d.statut)
+    });
+  }, [demandes]);
 
   const handleDeleted = (id: string) => {
+    console.log("🗑️ Suppression de la demande:", id);
     setDemandes((prev) => prev.filter((d) => d.id !== id));
   };
 
   const handleAddHistory = (entry: any) => {
-    // prepend to historyItems so modal shows recent entries immediately (optimistic)
+    console.log("📝 Ajout d'une entrée d'historique:", entry);
     const tmp = { ...entry, _optimistic: true };
     setHistoryItems((prev) => [tmp, ...(prev || [])]);
-    // also attach to the demande in the list if present
+
     if (entry?.demandeId) {
       setDemandes((prev) =>
         prev.map((d) =>
@@ -584,37 +625,32 @@ const MesDemandesImmobilier = () => {
             : d
         )
       );
-      // try to persist on server
+
       (async () => {
         try {
           const resp = await api.post(`/demandes/${entry.demandeId}/history`, {
             entry,
           });
+          console.log("✅ Historique sauvegardé sur le serveur:", resp.data);
           const serverHistory = resp.data?.history || [];
-          // replace optimistic entries for that demande with server data
+
           setDemandes((prev) =>
             prev.map((d) =>
               d.id === entry.demandeId ? { ...d, history: serverHistory } : d
             )
           );
-          // replace the global historyItems with server entries merged with local
+
           setHistoryItems((prev) => {
-            // remove optimistic entries for this demande
             const cleaned = (prev || []).filter(
               (it: any) => !(it._optimistic && it.demandeId === entry.demandeId)
             );
-            // prepend server entries
             return [...(serverHistory || []), ...cleaned];
           });
         } catch (err) {
-          console.error(
-            "Impossible de sauvegarder l'historique sur le serveur",
-            err
-          );
+          console.error("❌ Impossible de sauvegarder l'historique:", err);
           toast({
             title: "Erreur",
-            description:
-              "Impossible de sauvegarder l'historique sur le serveur.",
+            description: "Impossible de sauvegarder l'historique sur le serveur.",
           });
         }
       })();
@@ -622,43 +658,47 @@ const MesDemandesImmobilier = () => {
   };
 
   const handleStatusChange = (id: string, statut: string) => {
+    console.log("🔄 Changement de statut:", { id, statut });
     setDemandes((prev) =>
       prev.map((d) => (d.id === id ? { ...d, statut } : d))
     );
   };
 
   const openHistory = async (demande: any) => {
+    console.log("📜 Ouverture de l'historique pour la demande:", demande.id);
     setActiveDemande(demande);
     setHistoryOpen(true);
     setHistoryLoading(true);
+
     try {
       if (demande.history || demande.histories || demande.events) {
-        setHistoryItems(
-          demande.history || demande.histories || demande.events || []
-        );
+        const items = demande.history || demande.histories || demande.events || [];
+        console.log("📜 Historique local trouvé:", items);
+        setHistoryItems(items);
         return;
       }
 
-      // try backend
       try {
-        const resp = await api.get(
-          `/demandes/immobilier/${demande.id}/history`
-        );
+        const resp = await api.get(`/demandes/immobilier/${demande.id}/history`);
+        console.log("📜 Historique du backend:", resp.data);
         setHistoryItems(resp.data || []);
         return;
       } catch (err) {
-        // fallback to fetching demande and inspect
+        console.log("⚠️ Pas d'historique dédié, fallback...");
       }
 
       try {
         const r2 = await api.get(`/demandes/immobilier/${demande.id}`);
         const dd = r2.data || {};
-        setHistoryItems(dd.history || dd.histories || dd.events || []);
+        const items = dd.history || dd.histories || dd.events || [];
+        console.log("📜 Historique via demande:", items);
+        setHistoryItems(items);
       } catch (err2) {
+        console.log("❌ Aucun historique trouvé");
         setHistoryItems([]);
       }
     } catch (e) {
-      console.error("Erreur openHistory", e);
+      console.error("❌ Erreur openHistory:", e);
       setHistoryItems([]);
     } finally {
       setHistoryLoading(false);
@@ -731,51 +771,46 @@ const MesDemandesImmobilier = () => {
           <div className="flex items-center space-x-2 bg-[#FFFFFF] rounded-lg p-1 border border-[#D3D3D3] self-stretch md:self-start overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveTab("all")}
-              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
-                activeTab === "all"
-                  ? "bg-[#556B2F] text-[#FFFFFF]"
-                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
-              }`}
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${activeTab === "all"
+                ? "bg-[#556B2F] text-[#FFFFFF]"
+                : "text-[#8B4513] hover:bg-[#6B8E23]/10"
+                }`}
             >
               Toutes
             </button>
             <button
               onClick={() => setActiveTab("en_attente")}
-              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
-                activeTab === "en_attente"
-                  ? "bg-[#556B2F] text-[#FFFFFF]"
-                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
-              }`}
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${activeTab === "en_attente"
+                ? "bg-[#556B2F] text-[#FFFFFF]"
+                : "text-[#8B4513] hover:bg-[#6B8E23]/10"
+                }`}
             >
               En attente
             </button>
             <button
               onClick={() => setActiveTab("validees")}
-              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
-                activeTab === "validees"
-                  ? "bg-[#556B2F] text-[#FFFFFF]"
-                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
-              }`}
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${activeTab === "validees"
+                ? "bg-[#556B2F] text-[#FFFFFF]"
+                : "text-[#8B4513] hover:bg-[#6B8E23]/10"
+                }`}
             >
               Validées
             </button>
             <button
               onClick={() => setActiveTab("refusees")}
-              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
-                activeTab === "refusees"
-                  ? "bg-[#556B2F] text-[#FFFFFF]"
-                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
-              }`}
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${activeTab === "refusees"
+                ? "bg-[#556B2F] text-[#FFFFFF]"
+                : "text-[#8B4513] hover:bg-[#6B8E23]/10"
+                }`}
             >
               Refusées
             </button>
             <button
               onClick={() => setActiveTab("archivees")}
-              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
-                activeTab === "archivees"
-                  ? "bg-[#556B2F] text-[#FFFFFF]"
-                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
-              }`}
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${activeTab === "archivees"
+                ? "bg-[#556B2F] text-[#FFFFFF]"
+                : "text-[#8B4513] hover:bg-[#6B8E23]/10"
+                }`}
             >
               Archivées
             </button>
@@ -814,26 +849,54 @@ const MesDemandesImmobilier = () => {
         <Sheet
           open={historyOpen}
           onOpenChange={async (open) => {
+            console.log("🔄 Sheet Historique:", { open, user: user?.id });
             setHistoryOpen(open);
+
             if (!open) {
               setActiveDemande(null);
               setHistoryItems([]);
             } else if (user?.id) {
-              // Charger automatiquement l'historique à l'ouverture
               setHistoryLoading(true);
               try {
-                const resp = await api.get(
-                  `/demandes/immobilier/user/${user.id}/history`
-                );
-                const items = resp.data || [];
-                items.sort((a: any, b: any) => {
-                  const da = new Date(a.date || a.createdAt || 0).getTime();
-                  const db = new Date(b.date || b.createdAt || 0).getTime();
-                  return db - da;
+                // 🟢 LOG 8: Appel pour l'historique global
+                console.log(`📡 Chargement de l'historique pour user/${user.id}/history...`);
+                const resp = await api.get(`/demandes/immobilier/user/${user.id}/history`);
+
+                // 🟢 LOG 9: Réponse de l'historique
+                console.log("✅ Réponse historique reçue:", resp);
+                console.log("📦 Données historiques:", resp.data);
+                console.log("🔍 Structure:", {
+                  aDesSuccess: resp.data?.success,
+                  aDesStats: resp.data?.stats,
+                  aDesHistorique: resp.data?.historique,
+                  aDesDemandes: resp.data?.demandes,
+                  nombreHistorique: resp.data?.historique?.length
                 });
-                setHistoryItems(items.map((it: any) => ({ ...it })));
+
+                const items = resp.data?.historique || resp.data?.data || resp.data || [];
+
+                // 🟢 LOG 10: Vérifier les items d'historique
+                console.log("📜 Items d'historique à afficher:", items);
+
+                if (Array.isArray(items)) {
+                  items.sort((a: any, b: any) => {
+                    const da = new Date(a.date || a.createdAt || 0).getTime();
+                    const db = new Date(b.date || b.createdAt || 0).getTime();
+                    return db - da;
+                  });
+                  setHistoryItems(items);
+                } else {
+                  console.warn("⚠️ Les données d'historique ne sont pas un tableau:", items);
+                  setHistoryItems([]);
+                }
               } catch (e) {
-                console.error("Erreur chargement historique", e);
+                console.error("❌ Erreur chargement historique:", e);
+                if (e.response) {
+                  console.error("📡 Réponse d'erreur:", {
+                    status: e.response.status,
+                    data: e.response.data
+                  });
+                }
                 setHistoryItems([]);
               } finally {
                 setHistoryLoading(false);
@@ -886,8 +949,8 @@ const MesDemandesImmobilier = () => {
                         {h.date
                           ? new Date(h.date).toLocaleString("fr-FR")
                           : h.createdAt
-                          ? new Date(h.createdAt).toLocaleString("fr-FR")
-                          : ""}
+                            ? new Date(h.createdAt).toLocaleString("fr-FR")
+                            : ""}
                       </div>
                     </div>
                   </div>
