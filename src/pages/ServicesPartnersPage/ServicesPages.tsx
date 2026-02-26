@@ -315,43 +315,56 @@ const ServicesPage = ({
       const formData = new FormData(e.currentTarget);
       const data = Object.fromEntries(formData);
 
+      // Récupérer les valeurs du formulaire
+      const budget = data.budget as string;
+      const dateSouhaitee = data.dateSouhaitee as string;
+      const codePostal = data.codePostal as string;
+      const ville = data.ville as string;
+
+      // Construire le champ devis avec les informations spécifiques
+      const devisInfos = `Budget: ${budget}${dateSouhaitee ? `, Date souhaitée: ${dateSouhaitee}` : ""
+        }`;
+
       const demandeData = {
         contactNom: data.nom as string,
         contactPrenom: data.prenom as string,
         contactEmail: data.email as string,
         contactTel: data.telephone as string,
         lieuAdresse: data.adresse as string,
-        lieuAdresseCp: (data.codePostal as string) || "75000",
-        lieuAdresseVille: (data.ville as string) || "Paris",
-        optionAssurance: false,
-        description:
-          (data.message as string) ||
-          `Demande de devis pour: ${currentService?.name}`,
-        devis: `Budget: ${data.budget}, Date souhaitée: ${data.dateSouhaitee}`,
+        lieuAdresseCp: codePostal || "",
+        lieuAdresseVille: ville || "",
+        description: (data.message as string) || `Demande de devis pour: ${currentService?.name}`,
+        devis: devisInfos,
         serviceId: currentService?.id,
         serviceName: currentService?.name,
         nombreArtisans: "UNIQUE",
-        createdById: user?.id || "user-anonymous",
-        status: "pending",
-        type: "devis",
-        source: "services-page",
+        createdById: user?.id,
+        dateSouhaitee: dateSouhaitee || undefined,
       };
 
-      const response = await api.post("/demandes/immobilier", demandeData);
+      console.log("📤 Envoi de la demande de devis:", demandeData);
+
+      // Utiliser la route correcte
+      const response = await api.post("/demandes/devis", demandeData);
 
       if (response.status === 201 || response.status === 200) {
-        toast.success("Votre demande a été créée avec succès !");
+        toast.success("Votre demande de devis a été créée avec succès !");
         setIsDevisModalOpen(false);
         setCurrentService(null);
       } else {
         throw new Error(`Statut inattendu: ${response.status}`);
       }
     } catch (error: any) {
-      console.error("Erreur détaillée:", error);
-      toast.error(
+      console.error("❌ Erreur détaillée:", error);
+
+      // Afficher un message d'erreur plus détaillé
+      const errorMessage =
+        error.response?.data?.error ||
         error.response?.data?.message ||
-          "Erreur lors de la création de la demande"
-      );
+        error.message ||
+        "Erreur lors de la création de la demande de devis";
+
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -414,11 +427,10 @@ const ServicesPage = ({
                   <button
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
-                    className={`w-8 h-8 rounded-lg text-sm font-medium ${
-                      pagination.page === pageNum
-                        ? "bg-[#556B2F] text-white"
-                        : "border border-gray-300 hover:bg-gray-50"
-                    }`}
+                    className={`w-8 h-8 rounded-lg text-sm font-medium ${pagination.page === pageNum
+                      ? "bg-[#556B2F] text-white"
+                      : "border border-gray-300 hover:bg-gray-50"
+                      }`}
                   >
                     {pageNum}
                   </button>
@@ -640,9 +652,8 @@ const ServicesPage = ({
                 <span>Type de bien</span>
               )}
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  showPropertyDropdown ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform ${showPropertyDropdown ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -657,11 +668,10 @@ const ServicesPage = ({
                       );
                       setShowPropertyDropdown(false);
                     }}
-                    className={`flex items-center gap-2 w-full px-4 py-3 text-left hover:bg-gray-50 ${
-                      propertyType === type.value
-                        ? "bg-[#556B2F]/10 text-[#556B2F]"
-                        : ""
-                    }`}
+                    className={`flex items-center gap-2 w-full px-4 py-3 text-left hover:bg-gray-50 ${propertyType === type.value
+                      ? "bg-[#556B2F]/10 text-[#556B2F]"
+                      : ""
+                      }`}
                   >
                     <type.icon className="w-4 h-4" />
                     {type.label}
@@ -689,9 +699,8 @@ const ServicesPage = ({
                 <span>Catégorie</span>
               )}
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  showCategoryDropdown ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform ${showCategoryDropdown ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -706,11 +715,10 @@ const ServicesPage = ({
                       );
                       setShowCategoryDropdown(false);
                     }}
-                    className={`flex items-center gap-2 w-full px-4 py-3 text-left hover:bg-gray-50 ${
-                      serviceCategory === category.value
-                        ? "bg-[#556B2F]/10 text-[#556B2F]"
-                        : ""
-                    }`}
+                    className={`flex items-center gap-2 w-full px-4 py-3 text-left hover:bg-gray-50 ${serviceCategory === category.value
+                      ? "bg-[#556B2F]/10 text-[#556B2F]"
+                      : ""
+                      }`}
                   >
                     {category.label}
                   </button>
