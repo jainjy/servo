@@ -149,7 +149,19 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   const [showNearbyModal, setShowNearbyModal] = useState(false); // Modal pour les points proches
   const [nearbyLoading, setNearbyLoading] = useState(false); // Loading pour la recherche 5km
   const [hasPositionBeenFetched, setHasPositionBeenFetched] = useState(false); // Nouvel état pour suivre si la position a été récupérée
-  // ===================================================
+
+  // =============== ÉTATS POUR LA RECHERCHE D'ADRESSE ===============
+  const [addressSearch, setAddressSearch] = useState('');
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  const [mapZoom, setMapZoom] = useState<number | null>(null);
+  const [customLocation, setCustomLocation] = useState<{
+    address: string;
+    lat?: number;
+    lon?: number;
+  } | null>(null);
+  // ===============================================================
 
   // Contexte panier
   const { addToCart } = useCart();
@@ -286,6 +298,8 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
   // Fonction pour centrer sur la Réunion
   const handleCenterToReunion = () => {
+    setMapCenter(null);
+    setMapZoom(null);
     window.dispatchEvent(new CustomEvent('centerMap', {
       detail: {
         location: [-21.1351, 55.2471],
@@ -388,6 +402,77 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       handleCenterToReunion();
     }, 100);
   };
+
+  // =============== FONCTIONS POUR LA RECHERCHE D'ADRESSE ===============
+  const handleAddressSearch = async () => {
+    if (!addressSearch.trim()) return;
+    
+    setAddressLoading(true);
+    try {
+      // Version avec API Nominatim (OpenStreetMap)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressSearch + ', La Réunion')}&limit=5&addressdetails=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        setAddressSuggestions(data);
+        
+        // Si un seul résultat, on peut directement l'afficher
+        if (data.length === 1) {
+          selectAddressSuggestion(data[0]);
+        }
+      } else {
+        setAddressSuggestions([]);
+        toast.info("Aucune adresse trouvée");
+      }
+    } catch (error) {
+      console.error('Erreur lors de la recherche d\'adresse:', error);
+      setAddressSuggestions([]);
+      toast.error("Erreur lors de la recherche d'adresse");
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+const selectAddressSuggestion = (suggestion: any) => {
+  console.log('Adresse sélectionnée:', suggestion);
+  
+  // Récupérer les coordonnées
+  const lat = parseFloat(suggestion.lat);
+  const lon = parseFloat(suggestion.lon);
+  
+  // Mettre à jour les états
+  setAddressSearch(suggestion.display_name);
+  setAddressSuggestions([]);
+  
+  // Créer un objet pour la position personnalisée
+  const locationData = {
+    address: suggestion.display_name,
+    lat: lat,
+    lon: lon
+  };
+  
+  setCustomLocation(locationData);
+  
+  // Centrer la carte sur l'adresse trouvée
+  setMapCenter([lat, lon]);
+  setMapZoom(16); // Zoom plus rapproché pour bien voir
+  
+  // Émettre un événement pour centrer la carte
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('centerMap', {
+      detail: {
+        location: [lat, lon],
+        zoom: 16,
+        smooth: true
+      }
+    }));
+  }, 100);
+  
+  toast.success(`Position trouvée: ${suggestion.display_name.split(',').slice(0, 2).join(',')}`);
+};
+  // ===============================================================
 
   // Ajoutez après l'effet de chargement des données de carte
   useEffect(() => {
@@ -1604,46 +1689,249 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
             </div>
           </div>
 
-          {/* Contenu de la carte */}
-          <div className="h-[calc(100%-220px)] overflow-hidden md:h-[calc(100%-130px)] bg-gray-100 relative">
-            {mapLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <Loader className="h-8 w-8 md:h-10 md:w-10 animate-spin mx-auto text-blue-600" />
-                  <p className="mt-2 md:mt-3 text-sm md:text-base text-gray-600">
-                    Chargement de la carte...
-                  </p>
-                </div>
+          {/* Barre de recherche d'adresse */}
+          <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-[60] w-full max-w-md px-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={addressSearch}
+                onChange={(e) => setAddressSearch(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddressSearch()}
+                placeholder="Rechercher une adresse..."
+                className="w-full px-4 py-2 pl-10 pr-24 text-sm border border-gray-300 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              
+              {/* Bouton pour effacer la recherche */}
+              {addressSearch && (
+                <button
+                  onClick={() => {
+                    setAddressSearch('');
+                    setCustomLocation(null);
+                    setMapCenter(null);
+                    setMapZoom(null);
+                    handleCenterToReunion();
+                  }}
+                  className="absolute right-16 top-1.5 p-1 text-gray-400 hover:text-gray-600"
+                  type="button"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+              
+              {addressLoading ? (
+                <Loader className="absolute right-3 top-2.5 h-4 w-4 text-blue-600 animate-spin" />
+              ) : (
+                <button
+                  onClick={handleAddressSearch}
+                  className="absolute right-2 top-1.5 px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  type="button"
+                >
+                  Aller
+                </button>
+              )}
+            </div>
+            
+            {/* Suggestions d'adresses */}
+       {/* Suggestions d'adresses - Version améliorée */}
+{addressSuggestions && addressSuggestions.length > 0 && (
+  <div className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto z-[70] left-0">
+    {addressSuggestions.map((suggestion, index) => (
+      <button
+        key={index}
+        onClick={() => selectAddressSuggestion(suggestion)}
+        className="w-full px-4 py-3 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b last:border-b-0 transition-colors group"
+        type="button"
+      >
+        <div className="flex items-start gap-2">
+          <MapPin className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <div className="font-medium text-sm text-gray-900 group-hover:text-blue-700">
+              {suggestion.display_name}
+            </div>
+            {suggestion.lat && suggestion.lon && (
+              <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
+                <span className="bg-gray-100 px-1.5 py-0.5 rounded">
+                  {parseFloat(suggestion.lat).toFixed(4)}, {parseFloat(suggestion.lon).toFixed(4)}
+                </span>
               </div>
-            ) : mapError ? (
-              <div className="h-full flex items-center justify-center p-4 md:p-6">
-                <div className="text-center">
-                  <p className="text-sm md:text-base text-red-600">{mapError}</p>
-                  <button
-                    onClick={loadMapData}
-                    className="mt-2 md:mt-3 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Réessayer
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <GenericMap
-                  points={filteredMapPoints}
-                  userLocation={userLocation}
-                  center={defaultCenter}
-                  zoom={10}
-                  onPointClick={handleMapPointClick}
-                />
-
-                {/* Overlay de debug */}
-                <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-black/70 text-white text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5 rounded pointer-events-none">
-                  {filteredMapPoints.length} points
-                </div>
-              </>
             )}
           </div>
+          <ChevronDown className="h-4 w-4 text-gray-400 rotate-[-90deg] group-hover:text-blue-500" />
+        </div>
+      </button>
+    ))}
+  </div>
+)}
+          </div>
+
+          {/* Indicateur de position recherchée - AMÉLIORÉ */}
+          {customLocation && (
+            <div className="absolute top-4 right-4 bg-white px-4 py-3 rounded-lg shadow-lg text-sm z-[65] border border-blue-200 max-w-xs">
+              <div className="flex items-start gap-2">
+                <MapPin className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-blue-700">Position sélectionnée</p>
+                  <p className="text-xs text-gray-700 mt-1 line-clamp-2">
+                    {customLocation.address}
+                  </p>
+                  {customLocation.lat && customLocation.lon && (
+                    <p className="text-xs text-gray-500 mt-1 font-mono">
+                      {customLocation.lat.toFixed(4)}, {customLocation.lon.toFixed(4)}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  if (customLocation.lat && customLocation.lon) {
+                    window.dispatchEvent(new CustomEvent('centerMap', {
+                      detail: {
+                        location: [customLocation.lat, customLocation.lon],
+                        zoom: 15,
+                        smooth: true
+                      }
+                    }));
+                  }
+                }}
+                className="mt-2 w-full text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 py-1.5 px-2 rounded-md transition-colors flex items-center justify-center gap-1"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Recentrer sur cette position
+              </button>
+            </div>
+          )}
+
+          {/* Contenu de la carte */}
+    {/* Contenu de la carte */}
+<div className="h-[calc(100%-220px)] overflow-hidden md:h-[calc(100%-130px)] bg-gray-100 relative">
+  {mapLoading ? (
+    <div className="h-full flex items-center justify-center">
+      <div className="text-center">
+        <Loader className="h-8 w-8 md:h-10 md:w-10 animate-spin mx-auto text-blue-600" />
+        <p className="mt-2 md:mt-3 text-sm md:text-base text-gray-600">
+          Chargement de la carte...
+        </p>
+      </div>
+    </div>
+  ) : mapError ? (
+    <div className="h-full flex items-center justify-center p-4 md:p-6">
+      <div className="text-center">
+        <p className="text-sm md:text-base text-red-600">{mapError}</p>
+        <button
+          onClick={loadMapData}
+          className="mt-2 md:mt-3 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Réessayer
+        </button>
+      </div>
+    </div>
+  ) : (
+    <>
+      <GenericMap
+        points={filteredMapPoints}
+        userLocation={userLocation}
+        center={mapCenter || defaultCenter}
+        zoom={mapZoom || 10}
+        onPointClick={handleMapPointClick}
+      />
+
+      {/* MARQUEUR PERSONNALISÉ POUR LA POSITION RECHERCHÉE */}
+      {customLocation && customLocation.lat && customLocation.lon && (
+        <div 
+          className="absolute z-[70] pointer-events-none"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -100%)',
+          }}
+        >
+          {/* Groupe de marqueurs pour la position recherchée */}
+          <div className="relative">
+            {/* Pulsation d'arrière-plan */}
+            <div className="absolute -left-6 -top-6 w-12 h-12 bg-blue-500 rounded-full opacity-20 animate-ping"></div>
+            
+            {/* Cercle extérieur */}
+            <div className="absolute -left-4 -top-4 w-8 h-8 bg-blue-500 rounded-full opacity-40"></div>
+            
+            {/* Cœur du marqueur */}
+            <div className="relative w-8 h-8 bg-blue-600 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+              <MapPin className="h-4 w-4 text-white" />
+            </div>
+            
+            {/* Tige du marqueur */}
+            <div className="absolute top-7 left-3 w-0.5 h-6 bg-gradient-to-b from-blue-600 to-transparent"></div>
+          </div>
+          
+          {/* Étiquette avec le nom de l'adresse */}
+          <div className="absolute top-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-white px-3 py-1.5 rounded-full shadow-lg border border-blue-200 text-xs font-medium text-blue-700">
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3 text-blue-600" />
+              {customLocation.address.split(',').slice(0, 2).join(',')}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay de debug */}
+      <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-black/70 text-white text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5 rounded pointer-events-none">
+        {filteredMapPoints.length} points
+      </div>
+
+      {/* Indicateur de position recherchée - Version améliorée */}
+      {customLocation && (
+        <div className="absolute top-4 right-4 bg-white px-4 py-3 rounded-lg shadow-lg text-sm z-[65] border border-blue-200 max-w-xs">
+          <div className="flex items-start gap-2">
+            <div className="bg-blue-100 p-1.5 rounded-full">
+              <MapPin className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-blue-700">Position trouvée</p>
+              <p className="text-xs text-gray-700 mt-1 line-clamp-2">
+                {customLocation.address}
+              </p>
+              {customLocation.lat && customLocation.lon && (
+                <p className="text-xs text-gray-500 mt-1 font-mono bg-gray-50 p-1 rounded">
+                  {customLocation.lat.toFixed(6)}, {customLocation.lon.toFixed(6)}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <button 
+              onClick={() => {
+                if (customLocation.lat && customLocation.lon) {
+                  window.dispatchEvent(new CustomEvent('centerMap', {
+                    detail: {
+                      location: [customLocation.lat, customLocation.lon],
+                      zoom: 18,
+                      smooth: true
+                    }
+                  }));
+                }
+              }}
+              className="flex-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 py-1.5 px-2 rounded-md transition-colors flex items-center justify-center gap-1"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Recentrer
+            </button>
+            <button 
+              onClick={() => {
+                setCustomLocation(null);
+                setAddressSearch('');
+                handleCenterToReunion();
+              }}
+              className="flex-1 text-xs bg-gray-50 hover:bg-gray-100 text-gray-700 py-1.5 px-2 rounded-md transition-colors flex items-center justify-center gap-1"
+            >
+              <X className="h-3 w-3" />
+              Effacer
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  )}
+</div>
 
           {/* Footer avec statistiques */}
           <div className="bg-white p-2 md:p-3 border-t flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
