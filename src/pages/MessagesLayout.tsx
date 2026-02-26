@@ -26,12 +26,12 @@ export default function MessagesLayout() {
     }
   };
   return (
-    <UserRoute>
+    
       <div className="flex h-full bg-background p-0">
         <div className="flex flex-1 flex-col overflow-hidden p-0">
           <main className={"flex-1 p-0"}>{content()}</main>
         </div>
       </div>
-    </UserRoute>
+    
   );
 }

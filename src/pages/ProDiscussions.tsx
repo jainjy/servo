@@ -213,14 +213,12 @@ export default function ProDiscussions() {
         {[1, 2, 3, 4, 5].map((star) => (
           <div
             key={star}
-            className={`p-1 rounded ${
-              star <= rating ? "bg-yellow-400" : "bg-gray-300"
-            }`}
+            className={`p-1 rounded ${star <= rating ? "bg-yellow-400" : "bg-gray-300"
+              }`}
           >
             <Star
-              className={`w-5 h-5 ${
-                star <= rating ? "text-yellow-600" : "text-gray-500"
-              }`}
+              className={`w-5 h-5 ${star <= rating ? "text-yellow-600" : "text-gray-500"
+                }`}
               fill="currentColor"
             />
           </div>
@@ -378,10 +376,28 @@ export default function ProDiscussions() {
         if (id) {
           const response = await api.get(`/demandes/${id}`);
           setDemande(response.data);
-          setNotAssignedMe(
-            response.data.artisanId != user.id &&
-              response.data.artisanId != null
-          );
+
+          console.log("📦 Données de la demande:", {
+            id: response.data.id,
+            createdById: response.data.createdById,
+            artisanId: response.data.artisanId,
+            userId: user?.id,
+          });
+
+          // ✅ NOUVELLE CONDITION : Bloquer seulement si l'utilisateur n'est NI le créateur NI l'artisan
+          const isNotCreator = response.data.createdById !== user?.id;
+          const isNotArtisan = response.data.artisanId !== user?.id;
+
+          // Si l'utilisateur n'est ni le créateur ni l'artisan, alors il n'a pas accès
+          setNotAssignedMe(isNotCreator && isNotArtisan);
+
+          // Log pour déboguer
+          console.log("🔍 Vérification d'accès:", {
+            isCreator: response.data.createdById === user?.id,
+            isArtisan: response.data.artisanId === user?.id,
+            hasAccess: !(isNotCreator && isNotArtisan),
+            notAssignedMe: isNotCreator && isNotArtisan
+          });
         }
       } catch (error) {
         console.error("Erreur chargement demande:", error);
@@ -391,8 +407,10 @@ export default function ProDiscussions() {
       }
     };
 
-    fetchDemande();
-  }, [id]);
+    if (user?.id) {
+      fetchDemande();
+    }
+  }, [id, user?.id]);
 
   const handleSend = async () => {
     if (input.trim().length === 0) return;
@@ -605,14 +623,13 @@ export default function ProDiscussions() {
 
               <div className="lg:relative absolute right-0 top-0 flex flex-col items-start sm:items-end gap-2">
                 <span
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
-                    demande.statut === "validée" ||
-                    demande.statut === "acceptée"
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border ${demande.statut === "validée" ||
+                      demande.statut === "acceptée"
                       ? "bg-green-50 text-green-700 border-green-200"
                       : demande.statut === "refusée"
-                      ? "bg-red-50 text-red-700 border-red-200"
-                      : "bg-yellow-50 text-yellow-700 border-yellow-200"
-                  }`}
+                        ? "bg-red-50 text-red-700 border-red-200"
+                        : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                    }`}
                 >
                   {demande.statut || "En attente"}
                 </span>
@@ -761,9 +778,8 @@ export default function ProDiscussions() {
               </div>
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${
-                    isConnected ? "bg-green-500" : "bg-red-500"
-                  }`}
+                  className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"
+                    }`}
                 ></div>
                 <span className="text-sm text-gray-500">
                   {isConnected ? "En ligne" : "Hors ligne"}
@@ -794,13 +810,12 @@ export default function ProDiscussions() {
             ) : (
               <div className="space-y-4">
                 {messages.map((message, index) => {
-                  
+
                   return (
                     <div
                       key={message.id}
-                      className={`flex gap-4 ${
-                        isCurrentUser(message) ? "justify-end" : ""
-                      }`}
+                      className={`flex gap-4 ${isCurrentUser(message) ? "justify-end" : ""
+                        }`}
                     >
                       {!isCurrentUser(message) && (
                         <div className="flex flex-col items-center">
@@ -812,9 +827,8 @@ export default function ProDiscussions() {
                       )}
 
                       <div
-                        className={`max-w-[70%] ${
-                          isCurrentUser(message) ? "order-first" : ""
-                        }`}
+                        className={`max-w-[70%] ${isCurrentUser(message) ? "order-first" : ""
+                          }`}
                       >
                         {!isCurrentUser(message) && (
                           <div className="text-xs font-medium text-[#8B4513] mb-1">
@@ -823,11 +837,10 @@ export default function ProDiscussions() {
                         )}
 
                         <div
-                          className={`rounded-2xl p-4 ${
-                            isCurrentUser(message)
+                          className={`rounded-2xl p-4 ${isCurrentUser(message)
                               ? "bg-[#6B8E23] text-white rounded-br-none"
                               : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
-                          }`}
+                            }`}
                         >
                           {message.urlFichier && (
                             <div className="mb-2">
@@ -835,11 +848,10 @@ export default function ProDiscussions() {
                                 href={message.urlFichier}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`flex items-center gap-2 text-sm underline ${
-                                  isCurrentUser(message)
+                                className={`flex items-center gap-2 text-sm underline ${isCurrentUser(message)
                                     ? "text-blue-200"
                                     : "text-[#556B2F]"
-                                }`}
+                                  }`}
                               >
                                 <FileText className="w-4 h-4" />
                                 {message.nomFichier}
@@ -854,33 +866,33 @@ export default function ProDiscussions() {
                           {/* NOUVEAU: Messages pour paiement direct */}
                           {message.evenementType ===
                             "PAIEMENT_CONFIRME_CLIENT" && (
-                            <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                              <p className="text-sm font-medium mb-2">
-                                Le client a confirmé le paiement
-                              </p>
-                              {artisanDetails &&
-                                !artisanDetails.artisanConfirmeReception && (
-                                  <button
-                                    onClick={handleConfirmerReceptionPaiement}
-                                    className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-                                  >
-                                    Confirmer réception
-                                  </button>
-                                )}
-                            </div>
-                          )}
+                              <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                                <p className="text-sm font-medium mb-2">
+                                  Le client a confirmé le paiement
+                                </p>
+                                {artisanDetails &&
+                                  !artisanDetails.artisanConfirmeReception && (
+                                    <button
+                                      onClick={handleConfirmerReceptionPaiement}
+                                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                    >
+                                      Confirmer réception
+                                    </button>
+                                  )}
+                              </div>
+                            )}
 
                           {message.evenementType ===
                             "PAIEMENT_RECU_ARTISAN" && (
-                            <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                              <p className="text-sm font-medium mb-2 text-green-600">
-                                ✅ Paiement confirmé par les deux parties
-                              </p>
-                              <p className="text-sm">
-                                Vous pouvez maintenant procéder aux travaux
-                              </p>
-                            </div>
-                          )}
+                              <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                                <p className="text-sm font-medium mb-2 text-green-600">
+                                  ✅ Paiement confirmé par les deux parties
+                                </p>
+                                <p className="text-sm">
+                                  Vous pouvez maintenant procéder aux travaux
+                                </p>
+                              </div>
+                            )}
 
                           {message.evenementType === "AVIS_LAISSE" && (
                             <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
@@ -893,11 +905,10 @@ export default function ProDiscussions() {
                           )}
                         </div>
                         <div
-                          className={`text-xs mt-1 flex items-center gap-1 ${
-                            isCurrentUser(message)
+                          className={`text-xs mt-1 flex items-center gap-1 ${isCurrentUser(message)
                               ? "text-gray-500 text-right"
                               : "text-gray-400"
-                          }`}
+                            }`}
                         >
                           {formatMessageTime(message.createdAt)}
                           {message.lu && " • Lu"}
@@ -1072,11 +1083,10 @@ export default function ProDiscussions() {
 
               {/* Bouton d'upload de fichier */}
               <label
-                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-[#D3D3D3] cursor-pointer bg-white shadow-sm ${
-                  uploadingFile
+                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-[#D3D3D3] cursor-pointer bg-white shadow-sm ${uploadingFile
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-[#F0F8FF]"
-                }`}
+                  }`}
               >
                 <Paperclip className="w-4 h-4 text-[#556B2F]" />
                 <input
@@ -1322,9 +1332,8 @@ export default function ProDiscussions() {
                       return (
                         <div
                           key={message.id}
-                          className={`flex gap-4 ${
-                            isCurrentUser(message) ? "justify-end" : ""
-                          }`}
+                          className={`flex gap-4 ${isCurrentUser(message) ? "justify-end" : ""
+                            }`}
                         >
                           {!isCurrentUser(message) && (
                             <div className="text-xs font-medium text-[#8B4513] mb-1">
@@ -1333,11 +1342,10 @@ export default function ProDiscussions() {
                           )}
 
                           <div
-                            className={`rounded-2xl p-4 ${
-                              isCurrentUser(message)
+                            className={`rounded-2xl p-4 ${isCurrentUser(message)
                                 ? "bg-[#6B8E23] text-white rounded-br-none"
                                 : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
-                            }`}
+                              }`}
                           >
                             {message.urlFichier && (
                               <div className="mb-2">
@@ -1345,11 +1353,10 @@ export default function ProDiscussions() {
                                   href={message.urlFichier}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={`flex items-center gap-2 text-sm underline ${
-                                    isCurrentUser(message)
+                                  className={`flex items-center gap-2 text-sm underline ${isCurrentUser(message)
                                       ? "text-blue-200"
                                       : "text-[#556B2F]"
-                                  }`}
+                                    }`}
                                 >
                                   <FileText className="w-4 h-4" />
                                   {message.nomFichier}
@@ -1364,28 +1371,27 @@ export default function ProDiscussions() {
                             {/* Messages système pour mobile */}
                             {message.evenementType ===
                               "PAIEMENT_CONFIRME_CLIENT" && (
-                              <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                                <p className="text-sm font-medium mb-2">
-                                  Le client a confirmé le paiement
-                                </p>
-                                {artisanDetails &&
-                                  !artisanDetails.artisanConfirmeReception && (
-                                    <button
-                                      onClick={handleConfirmerReceptionPaiement}
-                                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-                                    >
-                                      Confirmer réception
-                                    </button>
-                                  )}
-                              </div>
-                            )}
+                                <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                                  <p className="text-sm font-medium mb-2">
+                                    Le client a confirmé le paiement
+                                  </p>
+                                  {artisanDetails &&
+                                    !artisanDetails.artisanConfirmeReception && (
+                                      <button
+                                        onClick={handleConfirmerReceptionPaiement}
+                                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                      >
+                                        Confirmer réception
+                                      </button>
+                                    )}
+                                </div>
+                              )}
                           </div>
                           <div
-                            className={`text-xs mt-1 flex items-center gap-1 ${
-                              isCurrentUser(message)
+                            className={`text-xs mt-1 flex items-center gap-1 ${isCurrentUser(message)
                                 ? "text-gray-500 text-right"
                                 : "text-gray-400"
-                            }`}
+                              }`}
                           >
                             {formatMessageTime(message.createdAt)}
                             {message.lu && " • Lu"}
@@ -1415,11 +1421,10 @@ export default function ProDiscussions() {
                 <div className="flex gap-3 items-center">
                   {/* Bouton d'upload de fichier */}
                   <label
-                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
-                      uploadingFile
+                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${uploadingFile
                         ? "opacity-50 cursor-not-allowed"
                         : "hover:bg-[#F0F8FF]"
-                    }`}
+                      }`}
                   >
                     <Paperclip className="w-4 h-4 text-[#556B2F]" />
                     <input
@@ -1645,11 +1650,10 @@ export default function ProDiscussions() {
                         Client a confirmé le paiement:
                       </span>
                       <span
-                        className={`text-sm font-medium ${
-                          artisanDetails.clientConfirmePaiement
+                        className={`text-sm font-medium ${artisanDetails.clientConfirmePaiement
                             ? "text-green-600"
                             : "text-yellow-600"
-                        }`}
+                          }`}
                       >
                         {artisanDetails.clientConfirmePaiement
                           ? "✅ Oui"
@@ -1663,11 +1667,10 @@ export default function ProDiscussions() {
                         Vous avez confirmé la réception:
                       </span>
                       <span
-                        className={`text-sm font-medium ${
-                          artisanDetails.artisanConfirmeReception
+                        className={`text-sm font-medium ${artisanDetails.artisanConfirmeReception
                             ? "text-green-600"
                             : "text-yellow-600"
-                        }`}
+                          }`}
                       >
                         {artisanDetails.artisanConfirmeReception
                           ? "✅ Oui"
