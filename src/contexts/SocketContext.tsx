@@ -1,4 +1,4 @@
-// Contexts/SocketContext.tsx
+// Contexts/SocketContext.tsx - VERSION AVEC DEBUG
 import React, {
   createContext,
   useContext,
@@ -7,7 +7,7 @@ import React, {
   ReactNode,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import AuthService from "../services/authService"; // Importez votre service de token
+import AuthService from "../services/authService";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL2 || "http://localhost:3001";
 
@@ -37,28 +37,52 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const token = AuthService.getToken(); // Récupérer le JWT
-    if (!token) return;
+    const token = AuthService.getToken();
+    
+    console.log("🔌 Tentative de connexion Socket...");
+    console.log("🌐 URL:", VITE_API_URL);
+    console.log("🔑 Token présent:", !!token);
+    
+    if (!token) {
+      console.error("❌ Pas de token - impossible de connecter le socket");
+      return;
+    }
 
-    // 🔥 CORRECTION: On envoie le token dans 'auth', pas l'ID dans 'query'
+    console.log("🔑 Token (début):", token.substring(0, 20) + "...");
+
     const newSocket = io(VITE_API_URL, {
       auth: { token },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     setSocket(newSocket);
 
-    newSocket.on("connect", () => setIsConnected(true));
-    newSocket.on("disconnect", () => setIsConnected(false));
+    newSocket.on("connect", () => {
+      console.log("✅ Socket connecté avec succès! ID:", newSocket.id);
+      setIsConnected(true);
+    });
 
-    // Gérer l'erreur d'authentification envoyée par le serveur
+    newSocket.on("disconnect", (reason) => {
+      console.log("❌ Socket déconnecté. Raison:", reason);
+      setIsConnected(false);
+    });
+
     newSocket.on("connect_error", (err) => {
       console.error("❌ Erreur connexion Socket:", err.message);
     });
 
+    newSocket.on("ai-suggestion", (data) => {
+      console.log("💡 Suggestion IA reçue:", data);
+    });
+
     return () => {
+      console.log("👋 Fermeture du socket");
       newSocket.close();
     };
-  }, []); // Se reconnecte si le token change
+  }, []);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
