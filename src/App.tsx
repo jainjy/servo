@@ -260,6 +260,9 @@ import { AdvertisementProvider } from "./components/AdvertisementProvider";
 import DevenirPartenaire from "./pages/DevenirPartenaire";
 import Marcketplace from "./pages/pro/Marcketplace";
 import B2BMarketplace from "./pages/pro/Marcketplace";
+import Automobile from "./pages/automobilePage";
+
+
 
 const queryClient = new QueryClient();
 const ScrollToHash = () => {
@@ -726,6 +729,8 @@ const App = () => {
                     <Route path="/entreprise" element={<Entreprise />} />
                     <Route path="/financement" element={<Financement />} />
                     <Route path="/assurance" element={<Assurance />} />
+                    <Route path="/automobile" element={<Automobile />} />
+
                     <Route
                       path="/financement/:id"
                       element={<FinancementPartenaireDetail />}
