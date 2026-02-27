@@ -117,10 +117,10 @@ const Index = () => {
             {/* <ServiceCards /> */}
           {/* </section> */}
 
-          {/* Section Travaux Preview */}
+          {/* Section Travaux Preview 
           <section className="w-full bg-gray-100">
             <TravauxPreview homeCards />
-          </section>
+          </section>*/}
 
           {/* Section Recommandations (conditionnelle) */}
           {showRecommendations && (
@@ -135,20 +135,21 @@ const Index = () => {
             </section>
           )}
 
-          {/* Section Art & Création */}
+          {/* Section Art & Création 
           <section className="w-full bg-white">
             <ArtETCreationShowcase />
           </section>
+          */}
 
           {/* Section Immobilier avec en-tête */}
           <section className="w-full bg-gray-100">
             <PropertyListings cardsOnly maxItems={4} />
           </section>
 
-          {/* Section Bien-Être */}
+          {/* Section Bien-Être 
           <section className="w-full bg-white">
             <BienEtreShowcase />
-          </section>
+          </section>*/}
 
           {/* Section Annonces Immobilières */}
           <section className="w-full bg-gray-100">

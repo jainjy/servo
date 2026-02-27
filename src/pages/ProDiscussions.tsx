@@ -1,4 +1,4 @@
-// pages/ProDiscussions.jsx
+// pages/ProDiscussions.jsx - VERSION COMPLÈTE AVEC TESTS IA
 import { useState, useEffect, useRef } from "react";
 import {
   Send,
@@ -25,6 +25,8 @@ import {
   User,
   ArrowLeft,
   Euro,
+  Sparkles, // IMPORTANT: Ajoute Sparkles ici
+  Bug, // Pour le debug
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -33,6 +35,7 @@ import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import { useAuth } from "@/hooks/useAuth";
+import AIConversationSuggestion from '@/components/AIConversationSuggestion';
 
 export default function ProDiscussions() {
   const { id } = useParams();
@@ -72,9 +75,15 @@ export default function ProDiscussions() {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [showMobileActionsMenu, setShowMobileActionsMenu] = useState(false);
+
+  // États pour les tests IA
+  const [showIATestPanel, setShowIATestPanel] = useState(false);
+  const [iaTestResults, setIaTestResults] = useState(null);
+  const [isTesting, setIsTesting] = useState(false);
+
   const messagesContainerRef = useRef(null);
   const actionsMenuRef = useRef(null);
-  const { isConnected } = useSocket();
+  const { isConnected, socket } = useSocket(); // Assure-toi que socket est exporté
   const {
     messages,
     conversation,
@@ -164,7 +173,6 @@ export default function ProDiscussions() {
     }
   };
 
-  // NOUVEAU: Fonction pour confirmer la réception du paiement
   const handleConfirmerReceptionPaiement = async () => {
     try {
       const response = await api.post(
@@ -183,7 +191,6 @@ export default function ProDiscussions() {
     }
   };
 
-  // NOUVEAU: Fonction pour terminer les travaux
   const handleTerminerTravaux = async () => {
     try {
       const response = await api.post(
@@ -368,6 +375,46 @@ export default function ProDiscussions() {
     };
   }, []);
 
+  // Écouter les suggestions IA en temps réel
+  useEffect(() => {
+    if (!socket) {
+      console.log('⚠️ Socket non disponible');
+      return;
+    }
+
+    console.log('🎧 Écoute des suggestions IA activée');
+
+    const handleAISuggestion = (data) => {
+      console.log('💡 SUGGESTION IA REÇUE:', data);
+
+      toast.success('💡 Nouvelle suggestion IA disponible', {
+        description: `Intention: ${data.analyse.intention.replace(/_/g, ' ')}`,
+        duration: 10000,
+        action: {
+          label: 'Voir le message',
+          onClick: () => {
+            const messageElement = document.getElementById(`message-${data.messageId}`);
+            if (messageElement) {
+              messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              // Ajoute un highlight temporaire
+              messageElement.classList.add('bg-yellow-50', 'transition-colors', 'duration-1000');
+              setTimeout(() => {
+                messageElement.classList.remove('bg-yellow-50');
+              }, 2000);
+            }
+          }
+        }
+      });
+    };
+
+    socket.on('ai-suggestion', handleAISuggestion);
+
+    return () => {
+      console.log('👋 Arrêt de l\'écoute des suggestions IA');
+      socket.off('ai-suggestion', handleAISuggestion);
+    };
+  }, [socket]);
+
   // Charger la demande
   useEffect(() => {
     const fetchDemande = async () => {
@@ -384,14 +431,10 @@ export default function ProDiscussions() {
             userId: user?.id,
           });
 
-          // ✅ NOUVELLE CONDITION : Bloquer seulement si l'utilisateur n'est NI le créateur NI l'artisan
           const isNotCreator = response.data.createdById !== user?.id;
           const isNotArtisan = response.data.artisanId !== user?.id;
-
-          // Si l'utilisateur n'est ni le créateur ni l'artisan, alors il n'a pas accès
           setNotAssignedMe(isNotCreator && isNotArtisan);
 
-          // Log pour déboguer
           console.log("🔍 Vérification d'accès:", {
             isCreator: response.data.createdById === user?.id,
             isArtisan: response.data.artisanId === user?.id,
@@ -411,6 +454,192 @@ export default function ProDiscussions() {
       fetchDemande();
     }
   }, [id, user?.id]);
+
+  // Ajoute ce useEffect pour diagnostiquer les messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      console.log('📨 Tous les messages:', messages.map(m => ({
+        id: m.id,
+        type: m.type,
+        expediteurType: m.expediteur?.userType,
+        contenu: m.contenu.substring(0, 30)
+      })));
+
+      // Vérifie spécifiquement les messages clients
+      // Remplace la ligne 470-473 par :
+      const clientsMessages = messages.filter(m => {
+        console.log('📝 Message:', {
+          id: m.id,
+          type: m.type,
+          expediteurType: m.expediteur?.userType,
+          contenu: m.contenu?.substring(0, 30)
+        });
+        return m.expediteur?.userType === 'CLIENT';
+      });
+      console.log('👤 Messages clients trouvés:', clientsMessages.length);
+
+      if (clientsMessages.length === 0) {
+        console.log('⚠️ Aucun message client trouvé - Vérifie que userType est bien "CLIENT"');
+      }
+    }
+  }, [messages]);
+
+  // ✅ FONCTION DE TEST IA COMPLÈTE
+  const testIA = async () => {
+    setIsTesting(true);
+    setIaTestResults(null);
+
+    try {
+      const results = {
+        etapes: [],
+        success: true
+      };
+
+      // ÉTAPE 1: Vérifier la santé du service
+      toast.info('🔍 Test 1/5: Vérification du service IA...');
+      const healthCheck = await api.get('/ai-commercial/health');
+      results.etapes.push({
+        nom: 'Santé du service',
+        success: true,
+        data: healthCheck.data
+      });
+      console.log('✅ Santé IA:', healthCheck.data);
+
+      // ÉTAPE 2: Vérifier la connexion socket
+      results.etapes.push({
+        nom: 'Connexion Socket',
+        success: !!socket,
+        data: { connecte: !!socket, id: socket?.id }
+      });
+
+      if (!socket) {
+        toast.warning('⚠️ Socket non connecté - les notifications temps réel ne fonctionneront pas');
+      }
+
+      // ÉTAPE 3: Tester sur un message client
+      const messageClient = messages.find(m => m.expediteur?.userType === 'CLIENT');
+
+      if (messageClient) {
+        toast.info(`🔍 Test 2/5: Analyse du message #${messageClient.id}...`);
+
+        const suggestion = await api.get(`/ai-commercial/suggestion/${messageClient.id}`);
+        results.etapes.push({
+          nom: 'Récupération suggestion',
+          success: true,
+          data: suggestion.data
+        });
+
+        if (suggestion.data.intention !== 'ANALYSE_EN_COURS') {
+          toast.success(`✅ Intention détectée: ${suggestion.data.intention}`);
+        }
+      } else {
+        results.etapes.push({
+          nom: 'Récupération suggestion',
+          success: false,
+          error: 'Aucun message client trouvé'
+        });
+        toast.warning('⚠️ Aucun message client dans cette conversation');
+      }
+
+      // ÉTAPE 4: Tester génération devis
+      if (conversation) {
+        toast.info('🔍 Test 3/5: Génération devis pré-rempli...');
+
+        const devis = await api.get(`/ai-commercial/devis-pre-rempli/${conversation.id}`);
+        results.etapes.push({
+          nom: 'Génération devis',
+          success: true,
+          data: devis.data
+        });
+
+        if (devis.data.montantEstime) {
+          toast.success(`💰 Devis estimé à ${devis.data.montantEstime}€`);
+        }
+      }
+
+      // ÉTAPE 5: Tester génération relance
+      if (conversation) {
+        toast.info('🔍 Test 4/5: Génération relance...');
+
+        const relance = await api.post(`/ai-commercial/generer-relance/${conversation.id}`, {
+          type: 'J+2'
+        });
+        results.etapes.push({
+          nom: 'Génération relance',
+          success: true,
+          data: relance.data
+        });
+
+        toast.success(`📧 Relance générée (${relance.data.type})`);
+      }
+
+      // ÉTAPE 6: Vérifier les événements socket
+      results.etapes.push({
+        nom: 'Test écoute événements',
+        success: true,
+        data: {
+          enEcoute: !!socket?._events?.['ai-suggestion'],
+          message: 'Place un message client pour voir apparaître les suggestions'
+        }
+      });
+
+      setIaTestResults(results);
+      toast.success('✅ Tests IA terminés!', {
+        description: `${results.etapes.filter(e => e.success).length}/${results.etapes.length} étapes réussies`,
+        action: {
+          label: 'Voir détails',
+          onClick: () => setShowIATestPanel(true)
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ Erreur test IA:', error);
+
+      const errorResults = {
+        etapes: [{
+          nom: 'Erreur',
+          success: false,
+          error: error.message
+        }],
+        success: false
+      };
+
+      setIaTestResults(errorResults);
+
+      toast.error('❌ Erreur lors des tests IA', {
+        description: error.response?.data?.error || error.message,
+        duration: 10000
+      });
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  // Fonction pour envoyer un message de test en tant que client simulé
+  const simulerMessageClient = async () => {
+    const messagesTest = [
+      "Bonjour, j'aimerais un devis pour la rénovation de ma salle de bain. C'est pour une surface de 8m2.",
+      "J'ai une fuite d'eau urgente ! Pouvez-vous venir aujourd'hui ?",
+      "Je suis disponible jeudi après-midi pour une visite, vous pouvez ?",
+      "Quel type de carrelage recommandez-vous pour une terrasse ?",
+      "Le devis me semble un peu élevé, pouvez-vous me faire une offre ?",
+    ];
+
+    const randomMessage = messagesTest[Math.floor(Math.random() * messagesTest.length)];
+
+    try {
+      toast.info('📝 Envoi d\'un message test...');
+
+      // Simule l'envoi d'un message (à adapter selon ton API)
+      await sendMessage(randomMessage);
+
+      toast.success('✅ Message test envoyé!', {
+        description: 'L\'IA va analyser ce message dans quelques secondes'
+      });
+    } catch (error) {
+      toast.error('Erreur envoi message test');
+    }
+  };
 
   const handleSend = async () => {
     if (input.trim().length === 0) return;
@@ -624,11 +853,11 @@ export default function ProDiscussions() {
               <div className="lg:relative absolute right-0 top-0 flex flex-col items-start sm:items-end gap-2">
                 <span
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border ${demande.statut === "validée" ||
-                      demande.statut === "acceptée"
-                      ? "bg-green-50 text-green-700 border-green-200"
-                      : demande.statut === "refusée"
-                        ? "bg-red-50 text-red-700 border-red-200"
-                        : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                    demande.statut === "acceptée"
+                    ? "bg-green-50 text-green-700 border-green-200"
+                    : demande.statut === "refusée"
+                      ? "bg-red-50 text-red-700 border-red-200"
+                      : "bg-yellow-50 text-yellow-700 border-yellow-200"
                     }`}
                 >
                   {demande.statut || "En attente"}
@@ -766,7 +995,7 @@ export default function ProDiscussions() {
 
         {/* Côté droit - Discussion (Desktop uniquement) */}
         <div className="hidden lg:flex w-1/2 flex-col bg-white">
-          {/* Header discussion */}
+          {/* Header discussion avec boutons de test */}
           <div className="border-b border-[#D3D3D3] px-6 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -776,14 +1005,51 @@ export default function ProDiscussions() {
                   {conversation && `(#${conversation.id.slice(0, 8)})`}
                 </h2>
               </div>
+
+              {/* ZONE DE TEST IA */}
               <div className="flex items-center gap-2">
-                <div
-                  className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"
+                {/* Bouton Simuler Message Client */}
+                <button
+                  onClick={simulerMessageClient}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                  title="Simuler un message client"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="hidden md:inline">Test Message</span>
+                </button>
+
+                {/* Bouton Test IA */}
+                <button
+                  onClick={testIA}
+                  disabled={isTesting}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors ${isTesting
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
                     }`}
-                ></div>
-                <span className="text-sm text-gray-500">
-                  {isConnected ? "En ligne" : "Hors ligne"}
-                </span>
+                  title="Tester l'assistant IA"
+                >
+                  {isTesting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span className="hidden md:inline">Test en cours...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span className="hidden md:inline">Test IA</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Indicateur de connexion */}
+                <div className="flex items-center gap-2 ml-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
+                  ></div>
+                  <span className="text-sm text-gray-500 hidden md:inline">
+                    {isConnected ? "En ligne" : "Hors ligne"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -810,9 +1076,9 @@ export default function ProDiscussions() {
             ) : (
               <div className="space-y-4">
                 {messages.map((message, index) => {
-
                   return (
                     <div
+                      id={`message-${message.id}`}
                       key={message.id}
                       className={`flex gap-4 ${isCurrentUser(message) ? "justify-end" : ""
                         }`}
@@ -838,8 +1104,8 @@ export default function ProDiscussions() {
 
                         <div
                           className={`rounded-2xl p-4 ${isCurrentUser(message)
-                              ? "bg-[#6B8E23] text-white rounded-br-none"
-                              : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
+                            ? "bg-[#6B8E23] text-white rounded-br-none"
+                            : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                             }`}
                         >
                           {message.urlFichier && (
@@ -849,8 +1115,8 @@ export default function ProDiscussions() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={`flex items-center gap-2 text-sm underline ${isCurrentUser(message)
-                                    ? "text-blue-200"
-                                    : "text-[#556B2F]"
+                                  ? "text-blue-200"
+                                  : "text-[#556B2F]"
                                   }`}
                               >
                                 <FileText className="w-4 h-4" />
@@ -863,51 +1129,53 @@ export default function ProDiscussions() {
                             {message.contenu}
                           </p>
 
-                          {/* NOUVEAU: Messages pour paiement direct */}
-                          {message.evenementType ===
-                            "PAIEMENT_CONFIRME_CLIENT" && (
-                              <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                                <p className="text-sm font-medium mb-2">
-                                  Le client a confirmé le paiement
-                                </p>
-                                {artisanDetails &&
-                                  !artisanDetails.artisanConfirmeReception && (
-                                    <button
-                                      onClick={handleConfirmerReceptionPaiement}
-                                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-                                    >
-                                      Confirmer réception
-                                    </button>
-                                  )}
-                              </div>
-                            )}
+                          {/* Badge de debug pour voir le type d'utilisateur */}
+                          {process.env.NODE_ENV === 'development' && (
+                            <div className="mt-1 text-xs opacity-50">
+                              {message.expediteur?.userType === 'CLIENT' ? '👤 Client' : '🔨 Artisan'}
+                            </div>
+                          )}
 
-                          {message.evenementType ===
-                            "PAIEMENT_RECU_ARTISAN" && (
-                              <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                                <p className="text-sm font-medium mb-2 text-green-600">
-                                  ✅ Paiement confirmé par les deux parties
-                                </p>
-                                <p className="text-sm">
-                                  Vous pouvez maintenant procéder aux travaux
-                                </p>
-                              </div>
-                            )}
+                          {/* Messages pour paiement direct */}
+                          {message.evenementType === "PAIEMENT_CONFIRME_CLIENT" && (
+                            <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                              <p className="text-sm font-medium mb-2">
+                                Le client a confirmé le paiement
+                              </p>
+                              {artisanDetails && !artisanDetails.artisanConfirmeReception && (
+                                <button
+                                  onClick={handleConfirmerReceptionPaiement}
+                                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                >
+                                  Confirmer réception
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          {message.evenementType === "PAIEMENT_RECU_ARTISAN" && (
+                            <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                              <p className="text-sm font-medium mb-2 text-green-600">
+                                ✅ Paiement confirmé par les deux parties
+                              </p>
+                              <p className="text-sm">
+                                Vous pouvez maintenant procéder aux travaux
+                              </p>
+                            </div>
+                          )}
 
                           {message.evenementType === "AVIS_LAISSE" && (
                             <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                               <RatingStars
-                                rating={extractRatingFromMessage(
-                                  message.contenu
-                                )}
+                                rating={extractRatingFromMessage(message.contenu)}
                               />
                             </div>
                           )}
                         </div>
                         <div
                           className={`text-xs mt-1 flex items-center gap-1 ${isCurrentUser(message)
-                              ? "text-gray-500 text-right"
-                              : "text-gray-400"
+                            ? "text-gray-500 text-right"
+                            : "text-gray-400"
                             }`}
                         >
                           {formatMessageTime(message.createdAt)}
@@ -970,10 +1238,21 @@ export default function ProDiscussions() {
             )}
           </div>
 
-          {/* Zone d'envoi de message avec bouton d'actions */}
+          {/* Zone de suggestion IA (au-dessus de l'input) */}
+          {conversation && (
+            <AIConversationSuggestion
+              conversationId={conversation.id}
+              messageCount={messages.length}
+              onUseSuggestion={(suggestion) => {
+                setInput(suggestion);
+                // Optionnel : faire défiler vers le champ de saisie
+                document.querySelector('input[type="text"]')?.focus();
+              }}
+            />
+          )}
+          {/* Zone d'envoi de message */}
           <div className="border-t border-[#D3D3D3] px-6 py-3 bg-[#F8F8FF]">
             <div className="flex gap-3 items-center">
-              {/* Bouton d'actions */}
               <div className="relative" ref={actionsMenuRef}>
                 <button
                   onClick={() => setShowActionsMenu(!showActionsMenu)}
@@ -982,7 +1261,6 @@ export default function ProDiscussions() {
                   <MoreVertical className="w-4 h-4 text-[#556B2F]" />
                 </button>
 
-                {/* Menu déroulant des actions */}
                 {showActionsMenu && (
                   <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-[#D3D3D3] z-10 overflow-hidden">
                     <div className="p-2">
@@ -1021,9 +1299,7 @@ export default function ProDiscussions() {
                       <button
                         onClick={handleEnvoyerFacture}
                         className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F8F8FF] hover:text-[#556B2F] rounded-lg transition-colors duration-200"
-                        disabled={
-                          artisanDetails && artisanDetails.factureFileUrl
-                        }
+                        disabled={artisanDetails && artisanDetails.factureFileUrl}
                       >
                         <DollarSign className="w-4 h-4" />
                         {artisanDetails && artisanDetails.factureFileUrl ? (
@@ -1036,37 +1312,33 @@ export default function ProDiscussions() {
                         )}
                       </button>
 
-                      {/* NOUVEAU: Bouton pour confirmer la réception du paiement */}
-                      {artisanDetails?.clientConfirmePaiement &&
-                        !artisanDetails?.artisanConfirmeReception && (
-                          <button
-                            onClick={handleConfirmerReceptionPaiement}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                          >
-                            <Euro className="w-4 h-4" />
-                            <span>Confirmer réception paiement</span>
-                          </button>
-                        )}
+                      {artisanDetails?.clientConfirmePaiement && !artisanDetails?.artisanConfirmeReception && (
+                        <button
+                          onClick={handleConfirmerReceptionPaiement}
+                          className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                        >
+                          <Euro className="w-4 h-4" />
+                          <span>Confirmer réception paiement</span>
+                        </button>
+                      )}
 
-                      {/* NOUVEAU: Bouton pour terminer les travaux */}
-                      {artisanDetails?.artisanConfirmeReception &&
-                        !artisanDetails?.travauxTermines && (
-                          <button
-                            onClick={handleTerminerTravaux}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors duration-200"
-                            disabled={artisanDetails?.travauxTermines}
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                            {artisanDetails?.travauxTermines ? (
-                              <>
-                                <span>Travaux terminés</span>
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                              </>
-                            ) : (
-                              <span>Marquer travaux terminés</span>
-                            )}
-                          </button>
-                        )}
+                      {artisanDetails?.artisanConfirmeReception && !artisanDetails?.travauxTermines && (
+                        <button
+                          onClick={handleTerminerTravaux}
+                          className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors duration-200"
+                          disabled={artisanDetails?.travauxTermines}
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          {artisanDetails?.travauxTermines ? (
+                            <>
+                              <span>Travaux terminés</span>
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            </>
+                          ) : (
+                            <span>Marquer travaux terminés</span>
+                          )}
+                        </button>
+                      )}
 
                       <div className="border-t border-[#D3D3D3] my-2"></div>
                       <button
@@ -1081,11 +1353,8 @@ export default function ProDiscussions() {
                 )}
               </div>
 
-              {/* Bouton d'upload de fichier */}
               <label
-                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-[#D3D3D3] cursor-pointer bg-white shadow-sm ${uploadingFile
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#F0F8FF]"
+                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-[#D3D3D3] cursor-pointer bg-white shadow-sm ${uploadingFile ? "opacity-50 cursor-not-allowed" : "hover:bg-[#F0F8FF]"
                   }`}
               >
                 <Paperclip className="w-4 h-4 text-[#556B2F]" />
@@ -1093,12 +1362,7 @@ export default function ProDiscussions() {
                   type="file"
                   className="hidden"
                   onChange={handleFileUpload}
-                  disabled={
-                    uploadingFile ||
-                    sending ||
-                    demande?.statut == "terminée" ||
-                    notAssignedMe
-                  }
+                  disabled={uploadingFile || sending || demande?.statut == "terminée" || notAssignedMe}
                 />
               </label>
 
@@ -1114,25 +1378,13 @@ export default function ProDiscussions() {
                     handleSend();
                   }
                 }}
-                disabled={
-                  sending ||
-                  uploadingFile ||
-                  artisanDetails?.recruited === false ||
-                  demande?.statut == "terminée" ||
-                  notAssignedMe
-                }
+                disabled={sending || uploadingFile || artisanDetails?.recruited === false || demande?.statut == "terminée" || notAssignedMe}
               />
 
               <button
                 className="bg-[#6B8E23] hover:bg-[#556B2F] text-white px-5 py-3 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
-                disabled={
-                  sending ||
-                  uploadingFile ||
-                  !input.trim() ||
-                  demande?.statut == "terminée" ||
-                  notAssignedMe
-                }
+                disabled={sending || uploadingFile || !input.trim() || demande?.statut == "terminée" || notAssignedMe}
               >
                 {sending ? (
                   <LoadingSpinner size="sm" />
@@ -1147,331 +1399,68 @@ export default function ProDiscussions() {
           </div>
         </div>
 
-        {/* Bouton pour ouvrir la discussion sur mobile */}
-        <div className="lg:hidden fixed bottom-6 right-6 z-40">
-          <button
-            onClick={() => setShowChatModal(true)}
-            className="bg-[#6B8E23] hover:bg-[#556B2F] text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
-            title="Ouvrir la discussion"
-          >
-            <MessageCircle className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Modale de chat pour mobile */}
-        {showChatModal && (
-          <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
-            <div className="fixed inset-0 flex flex-col bg-white">
-              {/* Header modale */}
-              <div className="border-b border-[#D3D3D3] px-4 py-3 flex items-center justify-between bg-white">
-                <div className="flex items-center gap-3">
-                  <MessageCircle className="w-5 h-5 text-[#556B2F]" />
-                  <h2 className="text-xl font-bold text-[#8B4513]">
-                    Discussion{" "}
-                    {conversation && `(#${conversation.id.slice(0, 8)})`}
-                  </h2>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* Menu actions */}
-                  <div className="relative">
-                    <button
-                      onClick={() =>
-                        setShowMobileActionsMenu(!showMobileActionsMenu)
-                      }
-                      className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#F0F8FF]"
-                    >
-                      <MoreVertical className="w-5 h-5 text-[#556B2F]" />
-                    </button>
-                    {showMobileActionsMenu && (
-                      <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-lg border border-[#D3D3D3] z-10 overflow-hidden">
-                        <div className="p-2">
-                          <button
-                            onClick={() => {
-                              handleProposerRendezVous();
-                              setShowMobileActionsMenu(false);
-                            }}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F0F8FF] hover:text-[#6B8E23] rounded-lg transition-colors duration-200"
-                            disabled={artisanDetails && artisanDetails.rdv}
-                          >
-                            <Calendar className="w-4 h-4" />
-                            {artisanDetails && artisanDetails.rdv ? (
-                              <>
-                                <span>rendez-vous deja proposé </span>
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                              </>
-                            ) : (
-                              <span>Proposer un rendez-vous</span>
-                            )}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              handleEnvoyerDevis();
-                              setShowMobileActionsMenu(false);
-                            }}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F0FFF0] hover:text-[#6B8E23] rounded-lg transition-colors duration-200"
-                            disabled={
-                              artisanDetails && artisanDetails.devisFileUrl
-                            }
-                          >
-                            <FileDigit className="w-4 h-4" />
-                            {artisanDetails && artisanDetails.devisFileUrl ? (
-                              <>
-                                <span>Devis déjà envoyé</span>
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                              </>
-                            ) : (
-                              <span>Envoyer un devis</span>
-                            )}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              handleEnvoyerFacture();
-                              setShowMobileActionsMenu(false);
-                            }}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F8F8FF] hover:text-[#556B2F] rounded-lg transition-colors duration-200"
-                            disabled={
-                              artisanDetails && artisanDetails.factureFileUrl
-                            }
-                          >
-                            <DollarSign className="w-4 h-4" />
-                            {artisanDetails && artisanDetails.factureFileUrl ? (
-                              <>
-                                <span>Facture déjà envoyée</span>
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                              </>
-                            ) : (
-                              <span>Envoyer une facture</span>
-                            )}
-                          </button>
-
-                          {artisanDetails?.clientConfirmePaiement &&
-                            !artisanDetails?.artisanConfirmeReception && (
-                              <button
-                                onClick={() => {
-                                  handleConfirmerReceptionPaiement();
-                                  setShowMobileActionsMenu(false);
-                                }}
-                                className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                              >
-                                <Euro className="w-4 h-4" />
-                                <span>Confirmer réception paiement</span>
-                              </button>
-                            )}
-
-                          {artisanDetails?.artisanConfirmeReception &&
-                            !artisanDetails?.travauxTermines && (
-                              <button
-                                onClick={() => {
-                                  handleTerminerTravaux();
-                                  setShowMobileActionsMenu(false);
-                                }}
-                                className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors duration-200"
-                                disabled={artisanDetails?.travauxTermines}
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                                {artisanDetails?.travauxTermines ? (
-                                  <>
-                                    <span>Travaux terminés</span>
-                                    <CheckCircle className="w-4 h-4 text-green-600" />
-                                  </>
-                                ) : (
-                                  <span>Marquer travaux terminés</span>
-                                )}
-                              </button>
-                            )}
-
-                          <div className="border-t border-[#D3D3D3] my-2"></div>
-                          <button
-                            onClick={() => {
-                              handleAfficherActions();
-                              setShowMobileActionsMenu(false);
-                            }}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
-                          >
-                            <Eye className="w-4 h-4" />
-                            <span>Afficher mes actions</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  {/* Bouton fermeture */}
-                  <button
-                    onClick={() => setShowChatModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+        {/* Panneau des résultats de test IA */}
+        {showIATestPanel && iaTestResults && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto border border-[#D3D3D3]">
+              <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3] sticky top-0 bg-white rounded-t-xl">
+                <h3 className="text-xl font-bold text-[#8B4513] flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  Résultats des tests IA
+                </h3>
+                <button
+                  onClick={() => setShowIATestPanel(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
 
-              {/* Messages */}
-              <div
-                className="flex-1 overflow-y-auto p-4 scroll-smooth"
-                ref={messagesContainerRef}
-                onScroll={handleScroll}
-              >
-                {messagesLoading ? (
-                  <div className="flex justify-center items-center h-32">
-                    <LoadingSpinner text="Chargement des messages..." />
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {messages.map((message, index) => {
-                      if (
-                        message.type !== "SYSTEM" &&
-                        message.expediteurId !== currentUserId &&
-                        conversation?.creatorId !== currentUserId &&
-                        notAssignedMe
-                      ) {
-                        return null;
-                      }
+              <div className="p-6 space-y-4">
+                {iaTestResults.etapes.map((etape, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-gray-900">{etape.nom}</h4>
+                      {etape.success ? (
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                          ✓ Succès
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                          ✗ Échec
+                        </span>
+                      )}
+                    </div>
 
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex gap-4 ${isCurrentUser(message) ? "justify-end" : ""
-                            }`}
-                        >
-                          {!isCurrentUser(message) && (
-                            <div className="text-xs font-medium text-[#8B4513] mb-1">
-                              {getSenderName(message)}
-                            </div>
-                          )}
-
-                          <div
-                            className={`rounded-2xl p-4 ${isCurrentUser(message)
-                                ? "bg-[#6B8E23] text-white rounded-br-none"
-                                : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
-                              }`}
-                          >
-                            {message.urlFichier && (
-                              <div className="mb-2">
-                                <a
-                                  href={message.urlFichier}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`flex items-center gap-2 text-sm underline ${isCurrentUser(message)
-                                      ? "text-blue-200"
-                                      : "text-[#556B2F]"
-                                    }`}
-                                >
-                                  <FileText className="w-4 h-4" />
-                                  {message.nomFichier}
-                                </a>
-                              </div>
-                            )}
-
-                            <p className="text-sm whitespace-pre-wrap">
-                              {message.contenu}
-                            </p>
-
-                            {/* Messages système pour mobile */}
-                            {message.evenementType ===
-                              "PAIEMENT_CONFIRME_CLIENT" && (
-                                <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                                  <p className="text-sm font-medium mb-2">
-                                    Le client a confirmé le paiement
-                                  </p>
-                                  {artisanDetails &&
-                                    !artisanDetails.artisanConfirmeReception && (
-                                      <button
-                                        onClick={handleConfirmerReceptionPaiement}
-                                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-                                      >
-                                        Confirmer réception
-                                      </button>
-                                    )}
-                                </div>
-                              )}
-                          </div>
-                          <div
-                            className={`text-xs mt-1 flex items-center gap-1 ${isCurrentUser(message)
-                                ? "text-gray-500 text-right"
-                                : "text-gray-400"
-                              }`}
-                          >
-                            {formatMessageTime(message.createdAt)}
-                            {message.lu && " • Lu"}
-                            {message.type === "SYSTEM" && " • Système"}
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {messages.length === 0 && !messagesLoading && (
-                      <div className="text-center text-gray-500 py-8">
-                        <MessageCircle className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                        <p>Aucun message dans cette conversation</p>
-                        <p className="text-sm">
-                          Soyez le premier à envoyer un message !
-                        </p>
-                      </div>
+                    {etape.data && (
+                      <pre className="bg-gray-50 p-3 rounded text-xs overflow-x-auto">
+                        {JSON.stringify(etape.data, null, 2)}
+                      </pre>
                     )}
 
-                    <div ref={messagesEndRef} />
+                    {etape.error && (
+                      <p className="text-sm text-red-600 mt-2">{etape.error}</p>
+                    )}
                   </div>
-                )}
-              </div>
+                ))}
 
-              {/* Zone d'envoi de message pour mobile */}
-              <div className="border-t border-[#D3D3D3] px-4 py-3 bg-[#F8F8FF]">
-                <div className="flex gap-3 items-center">
-                  {/* Bouton d'upload de fichier */}
-                  <label
-                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${uploadingFile
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-[#F0F8FF]"
-                      }`}
-                  >
-                    <Paperclip className="w-4 h-4 text-[#556B2F]" />
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileUpload}
-                      disabled={uploadingFile || sending}
-                    />
-                  </label>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">📋 Comment tester l'IA :</h4>
+                  <ul className="text-sm text-blue-800 space-y-2">
+                    <li>1️⃣ Utilise le bouton "Test Message" pour simuler un message client</li>
+                    <li>2️⃣ Attends 2-3 secondes après l'envoi</li>
+                    <li>3️⃣ Une notification devrait apparaître</li>
+                    <li>4️⃣ Un bandeau "Suggestion IA" apparaîtra sous le message</li>
+                    <li>5️⃣ Clique sur "Utiliser cette réponse" pour pré-remplir le champ</li>
+                  </ul>
+                </div>
 
-                  <input
-                    type="text"
-                    placeholder="Tapez votre message ici..."
-                    className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-[#D3D3D3] text-sm focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent transition-all duration-200"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSend();
-                      }
-                    }}
-                    disabled={
-                      sending ||
-                      uploadingFile ||
-                      artisanDetails?.recruited === false ||
-                      demande?.statut == "terminée"
-                    }
-                  />
-
+                <div className="flex justify-end">
                   <button
-                    className="bg-[#6B8E23] hover:bg-[#556B2F] text-white px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleSend}
-                    disabled={
-                      sending ||
-                      uploadingFile ||
-                      !input.trim() ||
-                      demande?.statut == "terminée"
-                    }
+                    onClick={() => setShowIATestPanel(false)}
+                    className="px-4 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] transition-colors"
                   >
-                    {sending ? (
-                      <LoadingSpinner size="sm" />
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                      </>
-                    )}
+                    Fermer
                   </button>
                 </div>
               </div>
@@ -1479,810 +1468,6 @@ export default function ProDiscussions() {
           </div>
         )}
       </div>
-
-      {/* Panneau des actions de l'artisan */}
-      {showActionsPanel && artisanDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto border border-[#D3D3D3]">
-            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3] sticky top-0 bg-white rounded-t-xl">
-              <h3 className="text-xl font-bold text-[#8B4513]">
-                Mes actions sur cette demande
-              </h3>
-              <button
-                onClick={() => setShowActionsPanel(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {/* Rendez-vous */}
-              <div className="bg-[#F0F8FF] rounded-xl border border-[#D3D3D3] p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-[#556B2F] text-lg flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    Rendez-vous
-                  </h4>
-                  {artisanDetails.rdv && (
-                    <button
-                      onClick={() => {
-                        setShowActionsPanel(false);
-                        setShowEditRendezVousModal(true);
-                      }}
-                      className="flex items-center gap-2 text-sm text-[#6B8E23] hover:text-[#556B2F] transition-colors bg-white px-3 py-1 rounded-lg border border-[#D3D3D3]"
-                    >
-                      <Edit className="w-3 h-3" />
-                      Modifier
-                    </button>
-                  )}
-                </div>
-                {artisanDetails.rdv ? (
-                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
-                    <p className="text-sm text-gray-700">
-                      <strong className="text-[#556B2F]">Date:</strong>{" "}
-                      {new Date(artisanDetails.rdv).toLocaleDateString(
-                        "fr-FR",
-                        {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}{" "}
-                      à{" "}
-                      {new Date(artisanDetails.rdv).toLocaleTimeString(
-                        "fr-FR",
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </p>
-                    {artisanDetails.rdvNotes && (
-                      <p className="text-sm mt-2 text-gray-700">
-                        <strong className="text-[#556B2F]">Notes:</strong>{" "}
-                        {artisanDetails.rdvNotes}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-[#D3D3D3]">
-                    Aucun rendez-vous proposé
-                  </p>
-                )}
-              </div>
-
-              {/* Devis */}
-              <div className="bg-[#F0FFF0] rounded-xl border border-[#D3D3D3] p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-[#6B8E23] text-lg flex items-center gap-2">
-                    <FileDigit className="w-5 h-5" />
-                    Devis
-                  </h4>
-                  {artisanDetails.devisFileUrl && (
-                    <button
-                      onClick={() => {
-                        setShowActionsPanel(false);
-                        setShowEditDevisModal(true);
-                      }}
-                      className="flex items-center gap-2 text-sm text-[#6B8E23] hover:text-[#556B2F] transition-colors bg-white px-3 py-1 rounded-lg border border-[#D3D3D3]"
-                    >
-                      <Edit className="w-3 h-3" />
-                      Modifier
-                    </button>
-                  )}
-                </div>
-                {artisanDetails.devisFileUrl ? (
-                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
-                    <p className="text-sm text-gray-700">
-                      <strong className="text-[#6B8E23]">Montant:</strong>{" "}
-                      {artisanDetails.factureMontant}€
-                    </p>
-                    <p className="text-sm text-gray-700 mt-1">
-                      <strong className="text-[#6B8E23]">Description:</strong>{" "}
-                      {artisanDetails.devis}
-                    </p>
-                    <a
-                      href={artisanDetails.devisFileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-[#6B8E23] hover:text-[#556B2F] mt-2 transition-colors"
-                    >
-                      <Download className="w-4 h-4" />
-                      Télécharger le devis
-                    </a>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-[#D3D3D3]">
-                    Aucun devis envoyé
-                  </p>
-                )}
-              </div>
-
-              {/* Facture */}
-              <div className="bg-[#F8F8FF] rounded-xl border border-[#D3D3D3] p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-[#556B2F] text-lg flex items-center gap-2">
-                    <DollarSign className="w-5 h-5" />
-                    Facture
-                  </h4>
-                </div>
-                {artisanDetails.factureFileUrl ? (
-                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-gray-700">
-                        <strong className="text-[#556B2F]">Montant:</strong>{" "}
-                        {artisanDetails.factureMontant}€
-                      </p>
-                    </div>
-                    <a
-                      href={artisanDetails.factureFileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-[#556B2F] hover:text-[#6B8E23] mt-2 transition-colors"
-                    >
-                      <Download className="w-4 h-4" />
-                      Télécharger la facture
-                    </a>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-[#D3D3D3]">
-                    Aucune facture envoyée
-                  </p>
-                )}
-              </div>
-
-              {/* NOUVEAU: Section Paiement Direct */}
-              {artisanDetails.factureMontant && (
-                <div className="bg-blue-50 rounded-xl border border-[#D3D3D3] p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-blue-900 text-lg flex items-center gap-2">
-                      <Euro className="w-5 h-5" />
-                      État du Paiement
-                    </h4>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3] space-y-3">
-                    {/* Statut client */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">
-                        Client a confirmé le paiement:
-                      </span>
-                      <span
-                        className={`text-sm font-medium ${artisanDetails.clientConfirmePaiement
-                            ? "text-green-600"
-                            : "text-yellow-600"
-                          }`}
-                      >
-                        {artisanDetails.clientConfirmePaiement
-                          ? "✅ Oui"
-                          : "⏳ En attente"}
-                      </span>
-                    </div>
-
-                    {/* Statut artisan */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">
-                        Vous avez confirmé la réception:
-                      </span>
-                      <span
-                        className={`text-sm font-medium ${artisanDetails.artisanConfirmeReception
-                            ? "text-green-600"
-                            : "text-yellow-600"
-                          }`}
-                      >
-                        {artisanDetails.artisanConfirmeReception
-                          ? "✅ Oui"
-                          : "⏳ En attente"}
-                      </span>
-                    </div>
-
-                    {/* Actions */}
-                    {artisanDetails.clientConfirmePaiement &&
-                      !artisanDetails.artisanConfirmeReception && (
-                        <div className="mt-4">
-                          <p className="text-sm text-gray-600 mb-2">
-                            Le client a confirmé avoir payé{" "}
-                            {artisanDetails.factureMontant}€. Veuillez confirmer
-                            la réception.
-                          </p>
-                          <button
-                            onClick={() => {
-                              setShowActionsPanel(false);
-                              handleConfirmerReceptionPaiement();
-                            }}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                          >
-                            Confirmer réception du paiement
-                          </button>
-                        </div>
-                      )}
-
-                    {artisanDetails.artisanConfirmeReception && (
-                      <div className="mt-4 p-3 bg-green-50 rounded-lg">
-                        <p className="text-sm text-green-700 font-medium">
-                          ✅ Paiement confirmé par les deux parties
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* NOUVEAU: Section Travaux */}
-              {artisanDetails.artisanConfirmeReception && (
-                <div className="bg-orange-50 rounded-xl border border-[#D3D3D3] p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-orange-900 text-lg flex items-center gap-2">
-                      <Wrench className="w-5 h-5" />
-                      État des Travaux
-                    </h4>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
-                    {artisanDetails.travauxTermines ? (
-                      <div>
-                        <p className="text-sm text-green-600 font-medium mb-2">
-                          ✅ Travaux marqués comme terminés
-                        </p>
-                        {artisanDetails.clientConfirmeTravaux ? (
-                          <p className="text-sm text-green-600">
-                            ✅ Travaux validés par le client
-                          </p>
-                        ) : (
-                          <p className="text-sm text-gray-600">
-                            ⏳ En attente de validation du client
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-gray-700 mb-3">
-                          Une fois les travaux terminés, vous pouvez les marquer
-                          comme terminés.
-                        </p>
-                        <button
-                          onClick={() => {
-                            setShowActionsPanel(false);
-                            handleTerminerTravaux();
-                          }}
-                          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-                        >
-                          Marquer travaux terminés
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end p-6 border-t border-[#D3D3D3] sticky bottom-0 bg-white rounded-b-xl">
-              <button
-                onClick={() => setShowActionsPanel(false)}
-                className="px-6 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] transition-colors"
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modales existantes restent inchangées */}
-      {/* Modale Édition Rendez-vous */}
-      {showEditRendezVousModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
-            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
-              <h3 className="text-lg font-bold text-[#8B4513]">
-                Modifier le rendez-vous
-              </h3>
-              <button
-                onClick={() => setShowEditRendezVousModal(false)}
-                disabled={loadingEditRendezVous}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Date du rendez-vous
-                  </label>
-                  <input
-                    type="date"
-                    value={currentRendezVous?.date || ""}
-                    onChange={(e) =>
-                      setCurrentRendezVous((prev) => ({
-                        ...prev,
-                        date: e.target.value,
-                      }))
-                    }
-                    disabled={loadingEditRendezVous}
-                    min={new Date().toISOString().split("T")[0]}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Heure du rendez-vous
-                  </label>
-                  <input
-                    type="time"
-                    value={currentRendezVous?.heure || ""}
-                    onChange={(e) =>
-                      setCurrentRendezVous((prev) => ({
-                        ...prev,
-                        heure: e.target.value,
-                      }))
-                    }
-                    disabled={loadingEditRendezVous}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Notes supplémentaires
-                  </label>
-                  <textarea
-                    value={currentRendezVous?.notes || ""}
-                    onChange={(e) =>
-                      setCurrentRendezVous((prev) => ({
-                        ...prev,
-                        notes: e.target.value,
-                      }))
-                    }
-                    disabled={loadingEditRendezVous}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                    placeholder="Informations complémentaires..."
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end mt-6">
-                <button
-                  onClick={() => setShowEditRendezVousModal(false)}
-                  disabled={loadingEditRendezVous}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={() =>
-                    handleModifierRendezVous(
-                      currentRendezVous.date,
-                      currentRendezVous.heure,
-                      currentRendezVous.notes
-                    )
-                  }
-                  disabled={
-                    !currentRendezVous?.date ||
-                    !currentRendezVous?.heure ||
-                    loadingEditRendezVous
-                  }
-                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 flex items-center gap-2"
-                >
-                  {loadingEditRendezVous ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Modification...
-                    </>
-                  ) : (
-                    "Modifier le rendez-vous"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modale Édition Devis */}
-      {showEditDevisModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
-            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
-              <h3 className="text-lg font-bold text-[#8B4513]">
-                Modifier le devis
-              </h3>
-              <button
-                onClick={() => setShowEditDevisModal(false)}
-                disabled={loadingEditDevis}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Montant du devis (€)
-                  </label>
-                  <input
-                    type="number"
-                    value={currentDevis?.montant || ""}
-                    onChange={(e) =>
-                      setCurrentDevis((prev) => ({
-                        ...prev,
-                        montant: e.target.value,
-                      }))
-                    }
-                    disabled={loadingEditDevis}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Description du devis
-                  </label>
-                  <textarea
-                    value={currentDevis?.description || ""}
-                    onChange={(e) =>
-                      setCurrentDevis((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    disabled={loadingEditDevis}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                    placeholder="Détail des prestations..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Nouveau fichier de devis (PDF) - Optionnel
-                  </label>
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange((file) =>
-                      setCurrentDevis((prev) => ({ ...prev, file }))
-                    )}
-                    disabled={loadingEditDevis}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                  />
-                  {currentDevis?.file && (
-                    <p className="text-sm text-green-600 mt-2">
-                      ✓ {currentDevis.file.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end mt-6">
-                <button
-                  onClick={() => setShowEditDevisModal(false)}
-                  disabled={loadingEditDevis}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={() =>
-                    handleModifierDevis(
-                      currentDevis.montant,
-                      currentDevis.description,
-                      currentDevis.file
-                    )
-                  }
-                  disabled={
-                    !currentDevis?.montant ||
-                    !currentDevis?.description ||
-                    loadingEditDevis
-                  }
-                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 flex items-center gap-2"
-                >
-                  {loadingEditDevis ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Modification...
-                    </>
-                  ) : (
-                    "Modifier le devis"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modale Rendez-vous */}
-      {showRendezVousModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
-            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
-              <h3 className="text-lg font-bold text-[#8B4513]">
-                Proposer un rendez-vous
-              </h3>
-              <button
-                onClick={() => setShowRendezVousModal(false)}
-                disabled={loadingRendezVous}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Date du rendez-vous
-                  </label>
-                  <input
-                    type="date"
-                    min={new Date().toISOString().split("T")[0]}
-                    value={rendezVousDate}
-                    onChange={(e) => setRendezVousDate(e.target.value)}
-                    disabled={loadingRendezVous}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Heure du rendez-vous
-                  </label>
-                  <input
-                    type="time"
-                    value={rendezVousHeure}
-                    onChange={(e) => setRendezVousHeure(e.target.value)}
-                    disabled={loadingRendezVous}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Notes supplémentaires (optionnel)
-                  </label>
-                  <textarea
-                    value={rendezVousNotes}
-                    onChange={(e) => setRendezVousNotes(e.target.value)}
-                    disabled={loadingRendezVous}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                    placeholder="Informations complémentaires sur le rendez-vous..."
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end mt-6">
-                <button
-                  onClick={() => setShowRendezVousModal(false)}
-                  disabled={loadingRendezVous}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={() =>
-                    handleSubmitRendezVous(
-                      rendezVousDate,
-                      rendezVousHeure,
-                      rendezVousNotes
-                    )
-                  }
-                  disabled={
-                    !rendezVousDate || !rendezVousHeure || loadingRendezVous
-                  }
-                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                >
-                  {loadingRendezVous ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Proposing...
-                    </>
-                  ) : (
-                    "Proposer le rendez-vous"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modale Facture */}
-      {showFactureModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
-            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
-              <h3 className="text-lg font-bold text-[#8B4513]">
-                Envoyer une facture
-              </h3>
-              <button
-                onClick={() => setShowFactureModal(false)}
-                disabled={loadingFacture}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Montant de la facture (€)
-                  </label>
-                  <input
-                    type="number"
-                    value={factureMontant}
-                    onChange={(e) => setFactureMontant(e.target.value)}
-                    disabled={loadingFacture}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Fichier de facture (PDF)
-                  </label>
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange(setFactureFile)}
-                    disabled={loadingFacture}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                  />
-                  {factureFile && (
-                    <p className="text-sm text-green-600 mt-2">
-                      ✓ {factureFile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end mt-6">
-                <button
-                  onClick={() => setShowFactureModal(false)}
-                  disabled={loadingFacture}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={() =>
-                    handleSubmitFacture(factureMontant, factureFile)
-                  }
-                  disabled={!factureMontant || !factureFile || loadingFacture}
-                  className="px-4 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                >
-                  {loadingFacture ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Envoi...
-                    </>
-                  ) : (
-                    "Envoyer la facture"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modale Devis */}
-      {showDevisModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
-            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
-              <h3 className="text-lg font-bold text-[#8B4513]">
-                Envoyer un devis
-              </h3>
-              <button
-                onClick={() => setShowDevisModal(false)}
-                disabled={loadingDevis}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Montant du devis (€)
-                  </label>
-                  <input
-                    type="number"
-                    value={devisMontant}
-                    onChange={(e) => setDevisMontant(e.target.value)}
-                    disabled={loadingDevis}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Description du devis
-                  </label>
-                  <textarea
-                    value={devisDescription}
-                    onChange={(e) => setDevisDescription(e.target.value)}
-                    disabled={loadingDevis}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                    placeholder="Détail des prestations et conditions..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
-                    Fichier du devis (PDF)
-                  </label>
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange(setDevisFile)}
-                    disabled={loadingDevis}
-                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
-                  />
-                  {devisFile && (
-                    <p className="text-sm text-green-600 mt-2">
-                      ✓ {devisFile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end mt-6">
-                <button
-                  onClick={() => setShowDevisModal(false)}
-                  disabled={loadingDevis}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={() =>
-                    handleSubmitDevis(devisMontant, devisDescription, devisFile)
-                  }
-                  disabled={
-                    !devisMontant ||
-                    !devisDescription ||
-                    !devisFile ||
-                    loadingDevis
-                  }
-                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                >
-                  {loadingDevis ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Envoi...
-                    </>
-                  ) : (
-                    "Envoyer le devis"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
