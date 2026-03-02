@@ -211,8 +211,8 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) ** 2;
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
@@ -301,7 +301,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
       container.addEventListener('scroll', checkScrollArrows);
       // Vérification initiale après un court délai
       setTimeout(checkScrollArrows, 100);
-      
+
       return () => container.removeEventListener('scroll', checkScrollArrows);
     }
   }, [checkScrollArrows]);
@@ -590,10 +590,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
         activeTab === "achat"
           ? typeBienAchat
           : activeTab === "location"
-          ? typeBienLocation
-          : activeTab === "saisonniere"
-          ? typeBienSaison
-          : undefined,
+            ? typeBienLocation
+            : activeTab === "saisonniere"
+              ? typeBienSaison
+              : undefined,
       priceMin,
       priceMax,
       location: localisation,
@@ -841,38 +841,36 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
     setModalOpen(true);
   };
 
-// Mode cartes seules (utilisé sur la Home) - DESIGN AMÉLIORÉ
+  // Mode cartes seules (utilisé sur la Home) - DESIGN AMÉLIORÉ
   if (cardsOnly) {
     return (
-    <section className="w-full pt-9">
-      <div className="pl-6 pr-5 ">
+      <section className="w-full pt-9">
+        <div className="pl-6 pr-5 ">
           {/* En-tête avec titre et chevrons */}
           <div className="flex items-center justify-between mb-8">
             <div>
-            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
-              Biens immobiliers
-            </h2>
-            <p className="text-xs text-[#717171]">
-              Découvrez notre sélection de propriétés d'exception
-            </p>
-          </div>
-            
+              <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
+                Biens immobiliers
+              </h2>
+              <p className="text-xs text-[#717171]">
+                Découvrez notre sélection de propriétés d'exception
+              </p>
+            </div>
+
             {/* Boutons de navigation */}
             <div className="flex items-center gap-3">
               <button
                 onClick={scrollLeft}
-                className={`p-3 rounded-full bg-white shadow-md hover:shadow-lg border border-gray-100 transition-all duration-200 ${
-                  showLeftArrow ? 'opacity-100 hover:bg-[#556B2F] hover:text-white hover:border-[#556B2F]' : 'opacity-50 cursor-not-allowed'
-                }`}
+                className={`p-3 rounded-full bg-white shadow-md hover:shadow-lg border border-gray-100 transition-all duration-200 ${showLeftArrow ? 'opacity-100 hover:bg-[#556B2F] hover:text-white hover:border-[#556B2F]' : 'opacity-50 cursor-not-allowed'
+                  }`}
                 disabled={!showLeftArrow}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={scrollRight}
-                className={`p-3 rounded-full bg-white shadow-md hover:shadow-lg border border-gray-100 transition-all duration-200 ${
-                  showRightArrow ? 'opacity-100 hover:bg-[#556B2F] hover:text-white hover:border-[#556B2F]' : 'opacity-50 cursor-not-allowed'
-                }`}
+                className={`p-3 rounded-full bg-white shadow-md hover:shadow-lg border border-gray-100 transition-all duration-200 ${showRightArrow ? 'opacity-100 hover:bg-[#556B2F] hover:text-white hover:border-[#556B2F]' : 'opacity-50 cursor-not-allowed'
+                  }`}
                 disabled={!showRightArrow}
               >
                 <ChevronRight className="w-5 h-5" />
@@ -915,160 +913,141 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.4 }}
-                            whileHover={{ y: -8 }}
+                            whileHover={{ y: -4 }}
                             className="flex-shrink-0 w-[340px] sm:w-[360px] md:w-[400px]"
                           >
-                            <Card
-                              data-property-id={property.id}
-                              className="group overflow-hidden border-0 bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer h-full relative"
-                              onClick={() => handlePropertyClick(property)}
-                            >
-                              {/* Badge "Nouveau" ou "Exclusif" (optionnel) */}
-                              <div className="absolute top-4 left-4 z-10">
-                                <span className="bg-[#556B2F] text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
-                                  Exclusif
-                                </span>
-                              </div>
-
-                              {/* Bouton favoris */}
-                              <button
-                                onClick={(e) => toggleFavorite(property.id, e)}
-                                className="absolute top-4 right-4 z-10 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-all duration-200"
-                              >
-                                <Heart 
-                                  className={`w-5 h-5 transition-colors ${
-                                    favorites[property.id] 
-                                      ? 'fill-red-500 text-red-500' 
-                                      : 'text-gray-600'
-                                  }`}
-                                />
-                              </button>
-
-                              {/* Image avec overlay gradient */}
-                              <div className="relative h-56 w-full overflow-hidden">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group h-full">
+                              {/* Image avec badges */}
+                              <div className="relative h-48 overflow-hidden">
                                 <img
                                   src={images[idx % totalImages]}
                                   alt={property.title}
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
-                                
-                                {/* Overlay gradient pour meilleure lisibilité des badges */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                                
+
+                                {/* Overlay gradient subtil */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+
+                                {/* Badges groupés */}
+                                <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+                                  {/* Badge type */}
+                                  <div
+                                    className={`px-3 py-1.5 rounded-full text-xs font-semibold ${property.status === "for_rent"
+                                        ? property.rentType === "saisonniere"
+                                          ? "bg-[#DEB887] text-gray-800"
+                                          : "bg-[#6B8E23] text-white"
+                                        : "bg-[#556B2F] text-slate-100"
+                                      }`}
+                                  >
+                                    {property.status === "for_rent"
+                                      ? property.rentType === "saisonniere"
+                                        ? "Location saisonnière"
+                                        : "Location longue durée"
+                                      : "À vendre"}
+                                  </div>
+
+                                  {/* Badge prix */}
+                                  <div className="backdrop-blur-sm px-3 py-2 rounded-lg bg-white/90 shadow-sm">
+                                    <span className="font-bold text-sm text-gray-800">
+                                      {property.status === "for_rent"
+                                        ? `${property.price?.toLocaleString("fr-FR")} €/mois`
+                                        : `${property.price?.toLocaleString("fr-FR")} €`
+                                      }
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Badge disponibilité (toujours disponible pour l'instant) */}
+                                <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full text-xs font-semibold bg-green-600/90 text-white backdrop-blur-sm">
+                                  Disponible
+                                </div>
+
                                 {/* Navigation images si plusieurs */}
                                 {totalImages > 1 && (
                                   <>
                                     <button
-                                      className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                      className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         prevImage(property.id, totalImages, e);
                                       }}
                                     >
-                                      <ChevronLeft className="h-5 w-5" />
+                                      <ChevronLeft className="h-4 w-4" />
                                     </button>
                                     <button
-                                      className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         nextImage(property.id, totalImages, e);
                                       }}
                                     >
-                                      <ChevronRight className="h-5 w-5" />
+                                      <ChevronRight className="h-4 w-4" />
                                     </button>
-
-                                    {/* Indicateur de nombre d'images */}
-                                    <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
-                                      {idx + 1}/{totalImages}
-                                    </div>
                                   </>
                                 )}
                               </div>
 
-                              {/* Contenu de la carte */}
-                              <div className="p-5">
-                                {/* En-tête avec type et localisation */}
-                                <div className="flex items-start justify-between mb-3">
-                                  <div>
-                                    <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">
-                                      {property.title || `${property.type} à ${property.city}`}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                                      <MapPin className="w-4 h-4" />
-                                      <span className="line-clamp-1">{property.city}, {property.address?.split(',')[0]}</span>
-                                    </div>
+                              {/* Contenu compact */}
+                              <div className="p-4">
+                                {/* Titre et localisation */}
+                                <div className="mb-3">
+                                  <h3 className="text-lg font-semibold text-gray-800 line-clamp-1 mb-1 group-hover:text-[#6B8E23] transition-colors">
+                                    {property.title || `${property.type} à ${property.city}`}
+                                  </h3>
+                                  <div className="flex items-center text-sm text-gray-500">
+                                    <MapPin className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+                                    <span className="line-clamp-1">{property.city}, {property.address?.split(',')[0]}</span>
                                   </div>
                                 </div>
 
-                                {/* Caractéristiques */}
-                                <div className="flex items-center gap-4 mb-4">
-                                  {property.bedrooms && (
-                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                      <Bed className="w-4 h-4" />
-                                      <span>{property.bedrooms} ch</span>
-                                    </div>
-                                  )}
-                                  {property.bathrooms && (
-                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                      <Bath className="w-4 h-4" />
-                                      <span>{property.bathrooms} sdb</span>
-                                    </div>
-                                  )}
-                                  {property.surface && (
-                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                      <Ruler className="w-4 h-4" />
-                                      <span>{property.surface} m²</span>
-                                    </div>
-                                  )}
-                                </div>
+                                {/* Description ultra courte */}
+                                <p className="text-gray-600 text-xs mb-3 line-clamp-2 leading-relaxed">
+                                  {property.description || "Description non disponible"}
+                                </p>
 
-                                {/* Prix et note */}
-                                <div className="flex items-end justify-between border-t border-gray-100 pt-4">
-                                  <div>
-                                    <p className="text-xs text-gray-500 mb-1">Prix total</p>
-                                    <div className="flex items-baseline gap-1">
-                                      <span className="text-2xl font-bold text-gray-900">
-                                        {property.price?.toLocaleString('fr-FR')}
-                                      </span>
-                                      <span className="text-sm font-medium text-gray-600">€</span>
-                                    </div>
-                                    {property.status === 'for_rent' && (
-                                      <p className="text-xs text-gray-500">par mois</p>
+                                {/* Caractéristiques en ligne */}
+                                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                                  <div className="flex items-center space-x-4">
+                                    {property.bedrooms && (
+                                      <div className="flex items-center space-x-1.5">
+                                        <Bed className="w-4 h-4 text-[#6B8E23]" />
+                                        <span className="text-sm font-medium text-gray-700">
+                                          {property.bedrooms}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {property.bathrooms && (
+                                      <div className="flex items-center space-x-1.5">
+                                        <Bath className="w-4 h-4 text-[#6B8E23]" />
+                                        <span className="text-sm font-medium text-gray-700">
+                                          {property.bathrooms}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {property.surface && (
+                                      <div className="flex items-center space-x-1.5">
+                                        <Ruler className="w-4 h-4 text-[#6B8E23]" />
+                                        <span className="text-sm font-medium text-gray-700">
+                                          {property.surface} m²
+                                        </span>
+                                      </div>
                                     )}
                                   </div>
-                                  
-                                  {/* Note avec étoiles */}
-                                  <div className="flex flex-col items-end">
-                                    <div className="flex items-center gap-1 mb-1">
-                                      {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star
-                                          key={star}
-                                          className={`w-4 h-4 ${
-                                            star <= Math.round(property.note || 4.85)
-                                              ? 'fill-yellow-400 text-yellow-400'
-                                              : 'text-gray-300'
-                                          }`}
-                                        />
-                                      ))}
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">
-                                      {property.note || "4,85"} · {property.reviewsCount || 128} avis
-                                    </span>
-                                  </div>
                                 </div>
 
-                                {/* Type d'hôte */}
-                                <div className="mt-3 flex items-center">
-                                  <div className={`text-xs font-medium px-3 py-1.5 rounded-full ${
-                                    property.rentType === "professionnel" || property.status === "professionnel"
-                                      ? 'bg-[#556B2F]/10 text-[#556B2F]'
-                                      : 'bg-[#8B4513]/10 text-[#8B4513]'
-                                  }`}>
-                                    Hôte {property.externalSource ? property.externalSource : "professionnel"}
-                                  </div>
-                                </div>
+                                {/* Bouton compact */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePropertyClick(property);
+                                  }}
+                                  className="w-full py-2.5 px-4 rounded-lg transition-all duration-200 font-medium text-sm flex items-center justify-center bg-[#6B8E23] text-white hover:bg-[#5A7D1C] cursor-pointer"
+                                >
+                                  <Eye className="w-3.5 h-3.5 mr-2" />
+                                  Voir détails
+                                </button>
                               </div>
-                            </Card>
+                            </div>
                           </motion.div>
                         );
                       }
@@ -1092,7 +1071,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                           <img src={property3} className="w-full h-24 object-cover rounded-bl-xl shadow-md" alt="" />
                           <img src={rentProperties1} className="w-full h-24 object-cover rounded-br-xl shadow-md" alt="" />
                         </div>
-                        
+
                         <div className="text-center">
                           <h3 className="font-bold text-[#556B2F] text-2xl mb-3">Voir plus</h3>
                           <p className="text-gray-600 text-sm mb-4">
@@ -1128,20 +1107,26 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
         {/* Style pour cacher la barre de scroll */}
         <style jsx>{`
-          .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-          }
-          .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-          .line-clamp-1 {
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-        `}</style>
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .line-clamp-1 {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
       </section>
     );
   }
@@ -1163,21 +1148,20 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
           <div className="grid grid-cols-2 lg:flex flex-wrap items-center gap-2">
             <Button
               variant={activeTab === "tous" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "tous"
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "tous"
                   ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
                   : "border-2"
-              }`}
+                }`}
               style={
                 activeTab === "tous"
                   ? {
-                      backgroundColor: colors["primary-dark"],
-                      color: colors["light-bg"],
-                    }
+                    backgroundColor: colors["primary-dark"],
+                    color: colors["light-bg"],
+                  }
                   : {
-                      borderColor: colors["separator"],
-                      color: colors["neutral-dark"],
-                    }
+                    borderColor: colors["separator"],
+                    color: colors["neutral-dark"],
+                  }
               }
               onClick={() => setActiveTab("tous")}
             >
@@ -1186,21 +1170,20 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
             <Button
               variant={activeTab === "achat" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "achat"
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "achat"
                   ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
                   : "border-2"
-              }`}
+                }`}
               style={
                 activeTab === "achat"
                   ? {
-                      backgroundColor: colors["primary-dark"],
-                      color: colors["light-bg"],
-                    }
+                    backgroundColor: colors["primary-dark"],
+                    color: colors["light-bg"],
+                  }
                   : {
-                      borderColor: colors["separator"],
-                      color: colors["neutral-dark"],
-                    }
+                    borderColor: colors["separator"],
+                    color: colors["neutral-dark"],
+                  }
               }
               onClick={() => setActiveTab("achat")}
             >
@@ -1208,21 +1191,20 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
             </Button>
             <Button
               variant={activeTab === "location" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "location"
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "location"
                   ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
                   : "border-2"
-              }`}
+                }`}
               style={
                 activeTab === "location"
                   ? {
-                      backgroundColor: colors["primary-dark"],
-                      color: colors["light-bg"],
-                    }
+                    backgroundColor: colors["primary-dark"],
+                    color: colors["light-bg"],
+                  }
                   : {
-                      borderColor: colors["separator"],
-                      color: colors["neutral-dark"],
-                    }
+                    borderColor: colors["separator"],
+                    color: colors["neutral-dark"],
+                  }
               }
               onClick={() => setActiveTab("location")}
             >
@@ -1230,21 +1212,20 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
             </Button>
             <Button
               variant={activeTab === "saisonniere" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "saisonniere"
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "saisonniere"
                   ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
                   : "border-2"
-              }`}
+                }`}
               style={
                 activeTab === "saisonniere"
                   ? {
-                      backgroundColor: colors["primary-dark"],
-                      color: colors["light-bg"],
-                    }
+                    backgroundColor: colors["primary-dark"],
+                    color: colors["light-bg"],
+                  }
                   : {
-                      borderColor: colors["separator"],
-                      color: colors["neutral-dark"],
-                    }
+                    borderColor: colors["separator"],
+                    color: colors["neutral-dark"],
+                  }
               }
               onClick={() => setActiveTab("saisonniere")}
             >
@@ -1253,21 +1234,20 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
             {/* NOUVEL ONGLET HORS DU PAYS */}
             <Button
               variant={activeTab === "hors_pays" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "hors_pays"
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "hors_pays"
                   ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
                   : "border-2"
-              }`}
+                }`}
               style={
                 activeTab === "hors_pays"
                   ? {
-                      backgroundColor: colors["primary-dark"],
-                      color: colors["light-bg"],
-                    }
+                    backgroundColor: colors["primary-dark"],
+                    color: colors["light-bg"],
+                  }
                   : {
-                      borderColor: colors["separator"],
-                      color: colors["neutral-dark"],
-                    }
+                    borderColor: colors["separator"],
+                    color: colors["neutral-dark"],
+                  }
               }
               onClick={() => setActiveTab("hors_pays")}
             >
@@ -1504,10 +1484,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                     activeTab === "achat"
                       ? typeBienAchat
                       : activeTab === "location"
-                      ? typeBienLocation
-                      : activeTab === "saisonniere"
-                      ? typeBienSaison
-                      : undefined
+                        ? typeBienLocation
+                        : activeTab === "saisonniere"
+                          ? typeBienSaison
+                          : undefined
                   }
                 >
                   <SelectTrigger
@@ -1646,20 +1626,19 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                   variant={radiusFilterEnabled ? "default" : "outline"}
                   size="sm"
                   onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                  className={`flex-1 h-10 rounded-xl transition-all ${
-                    radiusFilterEnabled
+                  className={`flex-1 h-10 rounded-xl transition-all ${radiusFilterEnabled
                       ? "text-white hover:shadow-lg"
                       : "border-2 hover:border-slate-900"
-                  }`}
+                    }`}
                   style={
                     radiusFilterEnabled
                       ? {
-                          background: `linear-gradient(to right, ${colors["primary-dark"]}, ${colors["secondary-text"]})`,
-                        }
+                        background: `linear-gradient(to right, ${colors["primary-dark"]}, ${colors["secondary-text"]})`,
+                      }
                       : {
-                          borderColor: colors["separator"],
-                          color: colors["neutral-dark"],
-                        }
+                        borderColor: colors["separator"],
+                        color: colors["neutral-dark"],
+                      }
                   }
                 >
                   {radiusFilterEnabled ? "✓ Actif" : "Inactif"}
@@ -1672,11 +1651,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                     value={radiusKm}
                     onChange={handleRadiusInputChange}
                     onBlur={handleRadiusInputBlur}
-                    className={`h-10 text-center rounded-xl transition-all ${
-                      !radiusFilterEnabled
+                    className={`h-10 text-center rounded-xl transition-all ${!radiusFilterEnabled
                         ? "opacity-50 cursor-not-allowed"
                         : ""
-                    }`}
+                      }`}
                     style={{
                       backgroundColor: colors["light-bg"],
                       borderColor: colors["separator"],
@@ -1697,9 +1675,8 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                 max={30}
                 step={1}
                 onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
-                className={`mt-2 ${
-                  !radiusFilterEnabled ? "opacity-40 cursor-not-allowed" : ""
-                }`}
+                className={`mt-2 ${!radiusFilterEnabled ? "opacity-40 cursor-not-allowed" : ""
+                  }`}
                 disabled={!radiusFilterEnabled}
               />
             </div>
@@ -1983,8 +1960,8 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                         <div className="flex items-center text-xs text-gray-500 mb-2">
                           <span>{property.dates || "24–26 juil."}</span>
                           <span className="mx-1">-</span>
-                          <span className={property.rentType === "professionnel" || property.status === "professionnel" 
-                            ? "text-[#556B2F]" 
+                          <span className={property.rentType === "professionnel" || property.status === "professionnel"
+                            ? "text-[#556B2F]"
                             : "text-[#8B4513]"}>
                             Hôte {property.externalSource ? property.externalSource : "professionnel"}
                           </span>
@@ -1997,7 +1974,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                             alt={property.title}
                             className="w-full h-full object-cover"
                           />
-                          
+
                           {/* Navigation images si plusieurs */}
                           {totalImages > 1 && (
                             <>
