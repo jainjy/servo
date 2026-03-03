@@ -75,6 +75,11 @@ const imageSrc = [
     src: "STPM-CONTRUCTION-logo.jpeg",
     alt: "STPM-CONTRUCTION",
     hasBackground: false
+  },
+  {
+    src: "altecprod.png",
+    alt: "ALTEC-PROD",
+    hasBackground: false
   }
 ];
 
