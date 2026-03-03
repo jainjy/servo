@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Home, TrendingUp, Package, User2, Search } from "lucide-react"; // Ajout des icônes
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import heroImage from "/hero3-1.jpg";
+import heroImage from "/home.png";
 import "../styles/font.css";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
@@ -22,7 +22,7 @@ const colors = {
 };
 
 // URL de l'image en dessin
-const sketchImageUrl = "/hero3-2.jpg";
+const sketchImageUrl = "/home.png";
 
 // Services à afficher
 const services = [
@@ -384,7 +384,9 @@ const Hero = () => {
             className="absolute top-0 left-0 w-full h-full object-cover"
             style={{
               filter: showSketch ? "brightness(0.9) contrast(1.1)" : "brightness(0.7) contrast(1.1)",
-              transition: "filter 0.4s ease-out"
+              transition: "filter 0.4s ease-out",
+              objectPosition: "center center",
+              transform: "scale(0.4)", // Réduit à 80% pour voir plus de l'image
             }}
             animate={{
               x: (mousePosition.x - window.innerWidth / 2) * 0.003,
