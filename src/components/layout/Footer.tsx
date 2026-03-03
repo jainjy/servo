@@ -81,6 +81,11 @@ const Footer: React.FC = () => {
       url: "/professional/453e04f7-de42-4e9f-980c-bfb4e0586db7",
       logo: "/logo-geometre-cabinet-beguin.png",
     },
+    {
+      name: "ALTEC-PROD",
+      url: "/professional/136ab9ad-b1eb-493c-8238-9e0f2716de13",
+      logo: "/logo-bottom.png",
+    },
     // {
     //   name: "Expert Immobilier",
     //   url: "#",
