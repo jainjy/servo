@@ -1773,7 +1773,7 @@ const Header = () => {
       <header
         id="head"
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-          ${scrolled ? "bg-white border-neutral-200 shadow-lg" : "backdrop-blur-md border-transparent"}`}
+          ${scrolled ? "bg-white border-neutral-200 shadow-lg" : "lg:backdrop-blur-md bg-none border-transparent"}`}
       >
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/home"} onClick={() => {
@@ -1796,7 +1796,7 @@ const Header = () => {
                     <>
                       <Button
                         variant="ghost"
-                        className={`flex items-center hover:bg-transparent gap-1 font-bold ${scrolled ? "text-gray-700 hover:text-gray-900 text-xs font-normal" : "text-white/50 text-xs font-thin "} transition-all duration-300 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3] group`}
+                        className={`flex items-center hover:bg-transparent gap-1 font-medium ${scrolled ? "text-gray-700 hover:text-gray-900 text-xs" : "text-white text-xs"} transition-all duration-300 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3] group`}
                       >
                         {section.title}
                         <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
@@ -1863,7 +1863,7 @@ const Header = () => {
                   ) : (
                     <Link
                       to={section.href}
-                      className={`flex items-center gap-1 text-[11px] font-bold bg-transparent hover:border-gray-50 ${scrolled ? "text-gray-700 hover:text-gray-900 text-xs font-normal" : "text-white/50 text-xs font-thin "} transition-all duration-300 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]`}
+                      className={`flex items-center gap-1 text-[11px] font-bold bg-transparent hover:border-gray-50 font-medium ${scrolled ? "text-gray-700 hover:text-gray-900 text-xs" : "text-white text-xs "} transition-all duration-300 px-3 py-1 rounded-lg border border-transparent hover:border-[#D3D3D3]`}
                     >
                       {section.title}
                     </Link>
@@ -2116,10 +2116,10 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`relative hidden lg:flex ${scrolled ? "text-gray-600" : "text-white"}`}
+                className={`relative hidden lg:flex`}
                 onClick={() => setIsCartOpen(true)}
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className={`h-5 w-5 ${scrolled ? "text-gray-600" : "text-white"}`}/>
                 {getCartItemsCount() > 0 && (
                   <Badge className={`absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-[#FFFFFF]`}>
                     {getCartItemsCount()}
@@ -2142,7 +2142,7 @@ const Header = () => {
                     size="icon"
                     className="relative hidden lg:flex"
                   >
-                    <Bell className="h-5 w-5" />
+                    <Bell className={`h-5 w-5 ${scrolled ? "text-gray-600" : "text-white"}`} />
                     {notificationCount > 0 && (
                       <Badge className="absolute bottom-1 right-1 h-3 w-3 flex items-center justify-center p-1 text-[10px] bg-[#556B2F] text-[#FFFFFF]">
                         {notificationCount}
@@ -2477,7 +2477,7 @@ const Header = () => {
                     variant="ghost"
                     className="h-10 w-10 rounded-lg border border-[#D3D3D3] hover:bg-gray-50 transition-all duration-200"
                   >
-                    <Menu className="h-5 w-5" />
+                    <Menu className="h-5 w-5  text-white hover:text-gray-900" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent
