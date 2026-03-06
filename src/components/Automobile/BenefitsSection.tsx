@@ -79,13 +79,13 @@ export default function BenefitsSection({ onBook }: Props) {
         </div>
 
         <div className="text-center">
-          <button
+          {/*<button
             onClick={onBook}
             className="bg-white px-8 py-4 rounded-xl font-semibold text-lg transition duration-300 hover:shadow-xl hover:scale-105"
             style={{ color: '#6B8E23' }}
           >
             Prendre rendez-vous
-          </button>
+          </button>*/}
           <p className="text-white/80 text-sm mt-4">
             ✓ Sans engagement • ✓ Devis gratuit • ✓ Accès facilité
           </p>
