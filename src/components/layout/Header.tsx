@@ -445,13 +445,6 @@ const Header = () => {
           image:
             "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg",
         },
-            {
-          title: "Automobile",
-          description: "Protection complète pour votre logement",
-          href: "/automobile",
-          image:
-            "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
-        },
         {
           title: "Assurance",
           description: "Protection complète pour votre logement",
@@ -1092,7 +1085,7 @@ const Header = () => {
         },
       ],
     },
-        
+
     /*** Nos partenaire*/
     {
       title: "NOS PARTENAIRES",
@@ -1150,8 +1143,12 @@ const Header = () => {
     },
     {
       title: "BLOG",
-          href: "/blog",
- 
+      href: "/blog",
+
+    },
+    {
+      title: "AUTOMOBILE",
+      href: "/automobile",
     },
     // {
     //   title: "TRAVAUX & MATÉRIAUX",
@@ -1544,6 +1541,7 @@ const Header = () => {
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
+        
         <nav className="p-4 space-y-4">
           {menuSections.map((section, index) => (
             <div key={index} className="border-b border-[#D3D3D3] pb-4">
@@ -1790,7 +1788,7 @@ const Header = () => {
           <nav className="hidden md:hidden lg:flex items-center gap-2">
             <ul className="flex items-center">
               {/* CHANGEMENT ICI : slice(0, 5) au lieu de slice(0, 4) */}
-              {menuSections.slice(0, 5).map((section, index) => (
+              {menuSections.slice(0, 7).map((section, index) => (
                 <li key={index} className="group relative">
                   {section.items ? (
                     <>
@@ -1918,8 +1916,8 @@ const Header = () => {
                                   hasItems && setHoveredSection(section.title)
                                 }
                                 className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive
-                                    ? "bg-[#FFFFFF]/10"
-                                    : "hover:bg-[#FFFFFF]/5"
+                                  ? "bg-[#FFFFFF]/10"
+                                  : "hover:bg-[#FFFFFF]/5"
                                   }`}
                               >
                                 {hasItems ? (
@@ -2119,7 +2117,7 @@ const Header = () => {
                 className={`relative hidden lg:flex`}
                 onClick={() => setIsCartOpen(true)}
               >
-                <ShoppingCart className={`h-5 w-5 ${scrolled ? "text-gray-600" : "text-white"}`}/>
+                <ShoppingCart className={`h-5 w-5 ${scrolled ? "text-gray-600" : "text-white"}`} />
                 {getCartItemsCount() > 0 && (
                   <Badge className={`absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-[#FFFFFF]`}>
                     {getCartItemsCount()}
@@ -2210,8 +2208,8 @@ const Header = () => {
                             <div
                               key={notification.id}
                               className={`p-3 rounded-lg border transition-colors ${notification.isRead
-                                  ? "bg-gray-50"
-                                  : "bg-[#FFFFFF] border-[#556B2F] shadow-sm"
+                                ? "bg-gray-50"
+                                : "bg-[#FFFFFF] border-[#556B2F] shadow-sm"
                                 }`}
                             >
                               <div className="flex items-start justify-between">
@@ -2234,11 +2232,11 @@ const Header = () => {
                                     {notification.statut && (
                                       <span
                                         className={`px-2 py-1 rounded-full text-xs ${notification.statut === "validée" ||
-                                            notification.statut === "validee"
-                                            ? "bg-green-100 text-green-800"
-                                            : notification.statut === "refusée"
-                                              ? "bg-red-100 text-red-800"
-                                              : "bg-gray-100 text-gray-800"
+                                          notification.statut === "validee"
+                                          ? "bg-green-100 text-green-800"
+                                          : notification.statut === "refusée"
+                                            ? "bg-red-100 text-red-800"
+                                            : "bg-gray-100 text-gray-800"
                                           }`}
                                       >
                                         {notification.statut}
@@ -2246,8 +2244,8 @@ const Header = () => {
                                     )}
                                     <span
                                       className={`px-2 py-1 rounded-full text-xs ${notification.source === "demande"
-                                          ? "bg-[#556B2F] text-[#FFFFFF]"
-                                          : "bg-[#8B4513] text-[#FFFFFF]"
+                                        ? "bg-[#556B2F] text-[#FFFFFF]"
+                                        : "bg-[#8B4513] text-[#FFFFFF]"
                                         }`}
                                     >
                                       {notification.source === "demande"
@@ -2373,95 +2371,95 @@ const Header = () => {
                       {user?.email}
                     </span>
                   </DropdownMenuLabel>
-                  
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate(profilePath)}>
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Tableau de bord
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate(profilePath)}>
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Profil
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/mes-commandes")}
-                      >
-                        <Package className="mr-2 h-4 w-4" />
-                        Mes Commandes
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/conseil")}
-                      >
-                        <Briefcase className="mr-2 h-4 w-4" />
-                        Mes demandes Conseils
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/demandes")}
-                      >
-                        <ListCheck className="mr-2 h-4 w-4" />
-                        Mes demandes de services
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          navigate("/mon-compte/demandes-immobilier")
-                        }
-                      >
-                        <BookDashed className="mr-2 h-4 w-4" />
-                        Mes demandes immobilieres
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          navigate("/mon-compte/locationSaisonniere")
-                        }
-                      >
-                        <BookDashed className="mr-2 h-4 w-4" />
-                        Gestion des locations saisonnières
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          navigate("/mon-compte/mes-reservations-cours")
-                        }
-                      >
-                        <List className="mr-2 h-4 w-4" />
-                        Mes réservations de cours
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/location-voiture")}
-                      >
-                        <Car className="mr-2 h-4 w-4" />
-                        Mes Locations de voitures
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/reservation")}
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        Réservations tourisme et bien etre
-                      </DropdownMenuItem>
-                      {/* <DropdownMenuItem
+
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate(profilePath)}>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      Tableau de bord
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate(profilePath)}>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      Profil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/mon-compte/mes-commandes")}
+                    >
+                      <Package className="mr-2 h-4 w-4" />
+                      Mes Commandes
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/mon-compte/conseil")}
+                    >
+                      <Briefcase className="mr-2 h-4 w-4" />
+                      Mes demandes Conseils
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/mon-compte/demandes")}
+                    >
+                      <ListCheck className="mr-2 h-4 w-4" />
+                      Mes demandes de services
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        navigate("/mon-compte/demandes-immobilier")
+                      }
+                    >
+                      <BookDashed className="mr-2 h-4 w-4" />
+                      Mes demandes immobilieres
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        navigate("/mon-compte/locationSaisonniere")
+                      }
+                    >
+                      <BookDashed className="mr-2 h-4 w-4" />
+                      Gestion des locations saisonnières
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        navigate("/mon-compte/mes-reservations-cours")
+                      }
+                    >
+                      <List className="mr-2 h-4 w-4" />
+                      Mes réservations de cours
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/mon-compte/location-voiture")}
+                    >
+                      <Car className="mr-2 h-4 w-4" />
+                      Mes Locations de voitures
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/mon-compte/reservation")}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Réservations tourisme et bien etre
+                    </DropdownMenuItem>
+                    {/* <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/payement")}
                       >
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
                       </DropdownMenuItem> */}
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/documents")}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        Mes documents
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/agenda")}
-                      >
-                        <Calendar1 className="mr-2 h-4 w-4" />
-                        Mon agenda
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/mon-compte/documents")}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Mes documents
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/mon-compte/agenda")}
+                    >
+                      <Calendar1 className="mr-2 h-4 w-4" />
+                      Mon agenda
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
                   <DropdownMenuItem onClick={() => setIsLogoutDialogOpen(true)}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Déconnexion

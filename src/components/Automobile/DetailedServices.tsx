@@ -1,5 +1,3 @@
-// components/automobile/DetailedServices.tsx
-
 import { Car, Gauge, Wrench, Shield, Droplet, Thermometer } from "lucide-react";
 
 const detailedServices = [
@@ -62,9 +60,9 @@ export default function DetailedServices() {
               >
                 <div 
                   className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition duration-300"
-                  style={{ backgroundColor: '#6B8E23', opacity: 0.1 }}
+                  style={{ backgroundColor: '#6B8E23' }}
                 >
-                  <Icon className="w-6 h-6" style={{ color: '#6B8E23' }} />
+                  <Icon className="w-6 h-6" style={{ color: '#556B2F3' }} />
                 </div>
                 
                 <h3 className="text-xl font-semibold mb-3">
@@ -84,7 +82,7 @@ export default function DetailedServices() {
                   ))}
                 </ul>
                 
-                <div className="mt-6 pt-4 border-t border-gray-100">
+                {/*<div className="mt-6 pt-4 border-t border-gray-100">
                   <button 
                     className="text-sm font-medium hover:gap-2 transition-all flex items-center"
                     style={{ color: '#6B8E23' }}
@@ -92,7 +90,7 @@ export default function DetailedServices() {
                     Plus de détails
                     <span className="ml-1">→</span>
                   </button>
-                </div>
+                </div>*/}
               </div>
             );
           })}

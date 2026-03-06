@@ -29,18 +29,18 @@ export default function HeroSection({ onBook }: Props) {
           </h1>
 
           <div className="flex gap-4">
-            <button
+            {/*<button
               onClick={onBook}
               className="px-6 py-3 text-white rounded-xl flex items-center gap-2"
               style={{ backgroundColor: '#6B8E23' }}
             >
-              <Calendar className="w-5 h-5" />
-              Prendre rendez-vous
-            </button>
+              <Phone className="w-5 h-5" />
+              +262 692 66 77 55
+            </button>*/}
 
             <button className="px-6 py-3 border border-white text-white rounded-xl flex items-center gap-2">
               <Phone className="w-5 h-5" />
-              01 23 45 67 89
+              +262 692 66 77 55
             </button>
           </div>
         </motion.div>

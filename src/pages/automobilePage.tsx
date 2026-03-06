@@ -21,9 +21,9 @@ const AutomobilePage = () => {
       <HeroSection onBook={() => setShowBookingForm(true)} />
       <StatsSection />
       <MainServices />
-      <ServicePromoBanner onBook={() => setShowBookingForm(true)} />
+      {/* <ServicePromoBanner onBook={() => setShowBookingForm(true)} /> */}
       <DetailedServices />
-      <PackagesSection onBook={() => setShowBookingForm(true)} />
+      {/* <PackagesSection onBook={() => setShowBookingForm(true)} /> */} 
       <BenefitsSection onBook={() => setShowBookingForm(true)} />
 
 
