@@ -665,6 +665,13 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
+        {
+          title: "Automobile",
+          description: "Protection complète pour votre logement",
+          href: "/automobile",
+          image:
+            "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
+        },
         // {
         // title: "Création & reprise",
         // description: "Accompagnement pour entrepreneurs",
@@ -1141,15 +1148,15 @@ const Header = () => {
         },
       ],
     },
-    {
-      title: "BLOG",
-      href: "/blog",
-
-    },
-    {
-      title: "AUTOMOBILE",
-      href: "/automobile",
-    },
+    //{
+    //  title: "BLOG",
+    //  href: "/blog",
+    //
+    //},
+    //{
+    //  title: "AUTOMOBILE",
+    //  href: "/automobile",
+    //},
     // {
     //   title: "TRAVAUX & MATÉRIAUX",
     //   items: [
