@@ -261,6 +261,7 @@ import DevenirPartenaire from "./pages/DevenirPartenaire";
 import Marcketplace from "./pages/pro/Marcketplace";
 import B2BMarketplace from "./pages/pro/Marcketplace";
 import Automobile from "./pages/automobilePage";
+import PersonnelGestion from "./components/pro/PersonnelGestion";
 
 
 
@@ -844,6 +845,7 @@ const App = () => {
                       }
                     >
                       <Route index element={<Dashboard />} />
+                      <Route path="personnels" element={<PersonnelGestion />} />
                       <Route path="marketplace" element={<B2BMarketplace />} />
                       <Route path="listings" element={<ListingsPage />} />
                       <Route path="calendar" element={<CalendarPage />} />

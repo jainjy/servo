@@ -8,6 +8,7 @@ import {
   Car,
   Home,
   ArrowLeft,
+  UserCircle, // Nouvelle icône pour le personnel
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,8 @@ import { useRedirectPath } from "@/hooks/useRedirectPath";
 import { toast } from "sonner";
 import ServoLogo from "@/components/components/ServoLogo";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"; // Pour les onglets
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const redirectPath = useRedirectPath();
@@ -35,13 +38,32 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
-  const handleSubmit = async (e) => {
+  const [loginType, setLoginType] = useState<"user" | "personel">("user"); // Type de login
+  
+  const { login, loginPersonel } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      const { user } = await login(email, password);
-      //console.log("Login successful:", user);
+      let result;
+      
+      if (loginType === "personel") {
+        // Connexion du personnel
+        result = await loginPersonel(email, password);
+        console.log("✅ Connexion personnel réussie:", result);
+        
+        // Afficher un toast de bienvenue
+        if (result.personel) {
+          toast.success(`Bienvenue ${result.personel.name} (${result.personel.role})`);
+        }
+      } else {
+        // Connexion utilisateur normal
+        result = await login(email, password);
+        console.log("✅ Connexion utilisateur réussie:", result);
+      }
+
       // Redirection intelligente
       if (redirectPath) {
         navigate(redirectPath);
@@ -49,52 +71,62 @@ const LoginPage = () => {
         const defaultPath = AuthService.getRoleBasedRedirect();
         navigate(defaultPath);
       }
-    } catch (error) {
-      console.error("Login failed:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Une erreur est survenue lors de la connexion."
-      );
+    } catch (error: any) {
+      console.error("❌ Login failed:", error);
+      
+      // Message d'erreur personnalisé selon le type de login
+      let errorMessage = error.message || "Une erreur est survenue lors de la connexion.";
+      
+      if (loginType === "personel") {
+        if (errorMessage.includes("Email ou mot de passe incorrect")) {
+          errorMessage = "Email ou mot de passe incorrect. Utilisez votre email professionnel.";
+        } else if (errorMessage.includes("Compte utilisateur inactif")) {
+          errorMessage = "Le compte utilisateur associé est inactif. Contactez l'administrateur.";
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen flex overflow-hidden relative">
       <div className="absolute inset-0 -z-10">
         <video
           className="absolute inset-0 w-full h-full object-cover -z-20"
-          src="/wave.mp4" // ou une URL externe
+          src="/wave.mp4"
           autoPlay
           loop
           muted
           playsInline
         />
-
-        {/* Overlay (ton div existant) */}
         <div className="absolute inset-0 backdrop-blur-md z-0" />
       </div>
+      
       <div className="absolute inset-0 -z-20">
-        {/* Remplace cette image par un élément img classique */}
         <img
           src="/nature.jpeg"
           alt="Login Illustration"
           className="w-full h-full object-cover"
         />
       </div>
+      
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 -z-10 bg-white/5 rounded-full"></div>
 
       <div className="w-[80vw] lg:w-[60vw] h-[80vh] m-auto rounded-3xl shadow-xl flex flex-col lg:flex-row overflow-hidden bg-white/0">
+        {/* Partie gauche - Information */}
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/")}
             className="flex items-center gap-2 bg-gray-700 w-28 py-3 px-4 rounded-full text-gray-100 hover:text-gray-100 mb-4 mx-2 transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>Accueil</span>
           </button>
+          
           <div className="relative z-10 flex flex-col justify-center h-full">
             <div className="mb-8">
               <Link to="/">
@@ -108,6 +140,7 @@ const LoginPage = () => {
                 plateforme
               </p>
             </div>
+            
             <div className="space-y-6 mt-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
@@ -120,6 +153,7 @@ const LoginPage = () => {
                   </p>
                 </div>
               </div>
+              
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
                   <Car className="h-6 w-6" />
@@ -131,6 +165,7 @@ const LoginPage = () => {
                   </p>
                 </div>
               </div>
+              
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
                   <Trees className="h-6 w-6" />
@@ -145,7 +180,9 @@ const LoginPage = () => {
             </div>
           </div>
         </div>
-        <div className=" flex items-center justify-center bg-[#FFFFFF] overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
+
+        {/* Partie droite - Formulaire */}
+        <div className="flex items-center justify-center bg-[#FFFFFF] overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
           <div className="w-full max-w-md">
             <Card className="border-0 shadow-none px-0 lg:px-5 py-4 lg:py-0 bg-[#FFFFFF]">
               <CardHeader className="space-y-0">
@@ -154,28 +191,68 @@ const LoginPage = () => {
                     <img src="/logo.png" className="h-10 w-10" alt="Logo" />
                   </div>
                 </div>
+                
                 <CardTitle className="text-2xl font-bold text-center text-gray-900">
                   Connexion OLIPLUS
                 </CardTitle>
+                
                 <CardDescription className="text-center text-gray-600">
-                  Accédez à votre espace personnel
+                  {loginType === "personel" 
+                    ? "Espace réservé au personnel" 
+                    : "Accédez à votre espace personnel"}
                 </CardDescription>
               </CardHeader>
+
               <CardContent>
+                {/* Onglets de sélection du type de login */}
+                <div className="mb-6">
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-lg">
+                    <button
+                      onClick={() => setLoginType("user")}
+                      className={`py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                        loginType === "user"
+                          ? "bg-white text-[#556B2F] shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Home className="w-4 h-4" />
+                        <span>Client</span>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => setLoginType("personel")}
+                      className={`py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                        loginType === "personel"
+                          ? "bg-white text-[#556B2F] shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <UserCircle className="w-4 h-4" />
+                        <span>Personnel</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-2">
                   <div className="space-y-4">
                     <label
                       htmlFor="email"
                       className="text-sm font-medium text-gray-700 block"
                     >
-                      Email
+                      {loginType === "personel" ? "Email professionnel" : "Email"}
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <Input
                         id="email"
                         type="email"
-                        placeholder="votre@email.mg"
+                        placeholder={loginType === "personel" 
+                          ? "votre@email.pro" 
+                          : "votre@email.mg"}
                         className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] focus:border-[#556B2F] rounded-md"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -183,6 +260,7 @@ const LoginPage = () => {
                       />
                     </div>
                   </div>
+
                   <div className="space-y-4">
                     <label
                       htmlFor="password"
@@ -216,6 +294,7 @@ const LoginPage = () => {
                       </Button>
                     </div>
                   </div>
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -232,7 +311,7 @@ const LoginPage = () => {
                         Se souvenir de moi
                       </label>
                     </div>
-                    {/* Remplace Link par un a classique */}
+
                     <a
                       href="/forgot-password"
                       className="text-xs text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
@@ -240,6 +319,7 @@ const LoginPage = () => {
                       Mot de passe oublié ?
                     </a>
                   </div>
+
                   <Button
                     type="submit"
                     className="w-full h-11 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#556B2F]/90 hover:to-[#6B8E23]/90 text-white font-semibold rounded-md"
@@ -251,28 +331,46 @@ const LoginPage = () => {
                         Connexion...
                       </div>
                     ) : (
-                      "Se connecter"
+                      loginType === "personel" ? "Se connecter (Personnel)" : "Se connecter"
                     )}
                   </Button>
-                  <div className="text-center text-sm text-gray-600">
-                    Pas encore de compte ?{" "}
-                    <a
-                      href="/register/professional/subscription"
-                      className="text-[#556B2F] w-full cursor-pointer hover:text-[#556B2F]/90 font-medium"
-                    >
-                      Créer un compte
-                    </a>
-                  </div>
-                  <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-[#D3D3D3]"></div>
+
+                  {/* Lien d'inscription - Caché pour le personnel */}
+                  {loginType !== "personel" && (
+                    <>
+                      <div className="text-center text-sm text-gray-600">
+                        Pas encore de compte ?{" "}
+                        <a
+                          href="/register/professional/subscription"
+                          className="text-[#556B2F] w-full cursor-pointer hover:text-[#556B2F]/90 font-medium"
+                        >
+                          Créer un compte
+                        </a>
+                      </div>
+                      
+                      <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-[#D3D3D3]"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                          <span className="px-2 bg-[#FFFFFF] text-gray-500">
+                            Accès rapide
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Message d'information pour le personnel */}
+                  {loginType === "personel" && (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+                      <p className="font-medium">🔐 Espace réservé au personnel</p>
+                      <p className="mt-1">
+                        Utilisez votre email professionnel et le mot de passe qui vous a été communiqué.
+                        Si vous n'avez pas de compte, contactez l'administrateur.
+                      </p>
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-[#FFFFFF] text-gray-500">
-                        Accès rapide
-                      </span>
-                    </div>
-                  </div>
+                  )}
                 </form>
               </CardContent>
             </Card>
@@ -282,4 +380,5 @@ const LoginPage = () => {
     </div>
   );
 };
+
 export default LoginPage;
