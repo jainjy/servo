@@ -377,7 +377,7 @@ const AnnonceCard = ({ property }: { property: Property }) => {
               }`}
           >
             <Eye className="w-3.5 h-3.5 mr-2" />
-            {isAvailable ? "Voir détails" : "Indisponible"}
+            {isAvailable ? "En savoir plus" : "Indisponible"}
           </button>
         </div>
       </div>
@@ -471,14 +471,14 @@ const AnnoncesImmobilieres = () => {
           viewport={{ once: true }}
           className="flex items-center justify-between mb-3"
         >
-          <div>
-            <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
-              Propriétés de nos partenaires
-            </h2>
-            <p className="text-xs text-[#717171]">
-              Une collection exclusive de nos partenaires
-            </p>
-          </div>
+<div>
+  <h2 className="text-2xl md:text-3xl font-medium text-[#222222] tracking-tight">
+    Propriétés de nos partenaires
+  </h2>
+  <p className="text-sm md:text-base text-[#717171]">
+    Une collection exclusive de nos partenaires
+  </p>
+</div>
           <div className="flex items-center gap-2 mt-3 sm:mt-0">
             <a
               href="https://www.olimmoreunion.re/biens"

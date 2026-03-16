@@ -450,7 +450,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                     disabled={!isAvailable}
                   >
                     <Calendar className="h-5 w-5 mr-2" />
-                    {isAvailable ? "Visiter ce bien" : "Non disponible"}
+                    {isAvailable ? "Prendre rendez-vous" : "Non disponible"}
                   </Button>
 
                   {property.owner.phone && (

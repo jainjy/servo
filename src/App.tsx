@@ -1093,7 +1093,7 @@ const App = () => {
                       path="/art-et-creation/photographie/:categorySlug"
                       element={<ArtETCreation />}
                     />
-                  </Routes>
+                  </Routes> 
 
                   {/* Pop-up Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité. Nous allions expertise, innovation et passion pour vous offrir un service d'exception.globale */}
                   {user && user.role !== "admin" && (

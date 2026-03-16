@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, TrendingUp, Package, User2, Search } from "lucide-react"; // Ajout des icônes
+import { Home, TrendingUp, Package, User2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import heroImage from "/home.png";
@@ -24,34 +24,42 @@ const colors = {
 // URL de l'image en dessin
 const sketchImageUrl = "/home.png";
 
-// Services à afficher
+// Services à afficher - version améliorée
 const services = [
   {
     icon: Home,
-    title: "Annonces Immobilières",
+
     description: "Trouver votre futur logement",
-    color: "text-[#556B2F]",
+    color: "#556B2F",
+    bgColor: "bg-[#556B2F]/10",
+    hoverBg: "hover:bg-[#556B2F]/20",
     href: "/immobilier"
   },
   {
     icon: TrendingUp,
-    title: "Services professionnels",
+
     description: "Trouver un professionnel",
-    color: "text-[#6B8E23]",
+    color: "#6B8E23",
+    bgColor: "bg-[#6B8E23]/10",
+    hoverBg: "hover:bg-[#6B8E23]/20",
     href: "/service"
   },
   {
     icon: Package,
-    title: "Décoration & Mobilier",
+
     description: "Tous les produits pour la maison",
-    color: "text-[#8B4513]",
+    color: "#8B4513",
+    bgColor: "bg-[#8B4513]/10",
+    hoverBg: "hover:bg-[#8B4513]/20",
     href: "/produits"
   },
   {
     icon: User2,
-    title: "Explorer et vivre",
+
     description: "Une douceur de vie tropicale",
-    color: "text-[#2F4F4F]",
+    color: "#2F4F4F",
+    bgColor: "bg-[#2F4F4F]/10",
+    hoverBg: "hover:bg-[#2F4F4F]/20",
     href: "/tourisme"
   },
 ];
@@ -318,7 +326,7 @@ const Hero = () => {
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-[460px] w-full flex items-center justify-center overflow-hidden bg-black"
+        className="relative min-h-[560px] w-full flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -331,21 +339,6 @@ const Hero = () => {
         <div className="absolute right-0 flex flex-row items-center z-30">
           <AdvertisementPopup position="hero-right" />
         </div>
-        {/* Bouton Switch - Positionné en bas à droite */}
-        {/* <div className="switch-container">
-          <span className="switch-label">Mode</span>
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={showSketch}
-              onChange={(e) => setShowSketch(e.target.checked)}
-            />
-            <span className="slider">
-              <span className="switch-icon real">📷</span>
-              <span className="switch-icon sketch">✏️</span>
-            </span>
-          </label>
-        </div> */}
 
         {/* Filtre SVG pour l'effet d'onde */}
         <svg style={{ display: "none" }}>
@@ -386,7 +379,7 @@ const Hero = () => {
               filter: showSketch ? "brightness(0.9) contrast(1.1)" : "brightness(0.7) contrast(1.1)",
               transition: "filter 0.4s ease-out",
               objectPosition: "center center",
-              transform: "scale(0.4)", // Réduit à 80% pour voir plus de l'image
+              transform: "scale(0.4)",
             }}
             animate={{
               x: (mousePosition.x - window.innerWidth / 2) * 0.003,
@@ -436,7 +429,7 @@ const Hero = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/60" />
         </div>
 
-        {/* Contenu Hero MINI - POLICE LATO/SANS */}
+        {/* Contenu Hero - POLICE POPPINS */}
         <div className="container relative z-30 mx-auto px-4">
 
           <div className="max-w-3xl mx-auto text-center">
@@ -446,14 +439,14 @@ const Hero = () => {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="mb-3"
             >
-              <span className="block text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-white mb-2 tracking-tight">
+              <span className="block text-4xl md:text-5xl lg:text-6xl font-sans font-medium text-white mb-2 tracking-tight">
                 La super-application
               </span>
               <span
-                className="block text-3xl md:text-4xl lg:text-5xl font-serif font-light"
+                className="block text-3xl md:text-4xl lg:text-5xl font-sans font-bold"
                 style={{
                   color: "#6B8E23",
-                  textShadow: "0 2px 10px rgba(0,0,0,0.4)",
+                 
                 }}
               >
                 du quotidien
@@ -487,28 +480,68 @@ const Hero = () => {
               </div>
             </motion.div>
 
-            {/* Services section - ajoutée ici */}
+            {/* Services section - version améliorée avec plus d'espace et police agrandie */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-wrap justify-center gap-3 md:gap-4 mt-6 font-sans"
+              className="flex flex-wrap justify-center gap-5 md:gap-8 mt-10 font-sans"
             >
               {services.map((service, index) => {
                 const Icon = service.icon;
                 return (
-                  <div
+                  <motion.div
                     key={index}
+                    whileHover={{ y: -8 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     onClick={() => navigate(service.href)}
-                    className="group flex flex-col items-center w-24 md:w-28 p-2 cursor-pointer"
+                    className="group flex flex-col items-center w-28 md:w-36 lg:w-40 cursor-pointer"
                   >
-                    <div className="group flex flex-col items-center w-24 md:w-28 p-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-all duration-300">
-                      <Icon className={`w-6 h-6 md:w-7 md:h-7 mb-1 text-white`} />
+                    {/* Conteneur de l'icône avec fond coloré */}
+                    <div className={`
+                      flex items-center justify-center
+                      w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24
+                      rounded-2xl md:rounded-3xl
+                      ${service.bgColor} ${service.hoverBg}
+                      backdrop-blur-sm border border-white/30
+                      mb-3 md:mb-4
+                      transition-all duration-300
+                      group-hover:shadow-xl group-hover:scale-110
+                      group-hover:border-white/50
+                      group-hover:shadow-lg group-hover:shadow-${service.color}/20
+                    `}>
+                      <Icon className={`
+                        w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12
+                        text-white
+                        transition-transform duration-300
+                        group-hover:scale-110
+                      `} />
                     </div>
-                    <span className="text-[10px] md:text-xs text-white/70 text-center">
+
+                    {/* Titre du service */}
+                    <h3 className={`
+                      text-sm md:text-base lg:text-lg
+                      font-semibold text-white
+                      text-center mb-1
+                      tracking-tight
+                      transition-colors duration-300
+                    `}
+                      style={{ color: 'white' }}>
+                      {service.title}
+                    </h3>
+
+                    {/* Description du service */}
+                    <p className={`
+                      text-xs md:text-sm lg:text-base
+                      text-white/80
+                      text-center
+                      leading-tight
+                      max-w-[140px] md:max-w-[160px] lg:max-w-[180px]
+                      font-light
+                    `}>
                       {service.description}
-                    </span>
-                  </div>
+                    </p>
+                  </motion.div>
                 );
               })}
             </motion.div>
