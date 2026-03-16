@@ -848,14 +848,14 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
         <div className="pl-6 pr-5 ">
           {/* En-tête avec titre et chevrons */}
           <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="ext-xl font-medium text-[#222222] tracking-tight">
-                Biens immobiliers
-              </h2>
-              <p className="text-xs text-[#717171]">
-                Découvrez notre sélection de propriétés d'exception
-              </p>
-            </div>
+       <div>
+  <h2 className="text-2xl md:text-3xl font-medium text-[#222222] tracking-tight">
+    Biens immobiliers
+  </h2>
+  <p className="text-sm md:text-base text-[#717171]">
+    Découvrez notre sélection de propriétés d'exception
+  </p>
+</div>  
 
             {/* Boutons de navigation */}
             <div className="flex items-center gap-3">
@@ -1044,7 +1044,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                                   className="w-full py-2.5 px-4 rounded-lg transition-all duration-200 font-medium text-sm flex items-center justify-center bg-[#6B8E23] text-white hover:bg-[#5A7D1C] cursor-pointer"
                                 >
                                   <Eye className="w-3.5 h-3.5 mr-2" />
-                                  Voir détails
+                                 En savoir plus
                                 </button>
                               </div>
                             </div>

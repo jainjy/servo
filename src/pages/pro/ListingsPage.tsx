@@ -68,7 +68,7 @@ const COLORS = {
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
   pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-  for_sale: { label: "À vendre", color: "bg-green-100 text-green-800" },
+  For_sale: { label: "À vendre", color: "bg-green-100 text-green-800" },
   for_rent: { label: "À louer", color: "bg-purple-100 text-purple-800" },
   sold: { label: "Vendu", color: "bg-gray-100 text-gray-800" },
   rented: { label: "Loué", color: "bg-gray-100 text-gray-800" },

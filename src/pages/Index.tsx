@@ -124,15 +124,16 @@ const Index = () => {
 
           {/* Section Recommandations (conditionnelle) */}
           {showRecommendations && (
-            <section className="w-full">
-              <RecommendationsSection
-                title="Nos meilleures suggestions pour vous"
-                limit={4}
-                showOnlyIfAuthenticated={true}
-                onDataLoaded={handleRecommendationsData}
-                hideIfEmpty={true}
-              />
-            </section>
+      <section className="w-full">
+  <RecommendationsSection
+    title="Nos meilleures suggestions pour vous"
+    limit={4}
+    showOnlyIfAuthenticated={true}
+    onDataLoaded={handleRecommendationsData}
+    hideIfEmpty={true}
+    titleClassName="text-2xl md:text-3xl font-medium" // Ajout de cette prop si le composant l'accepte
+  />
+</section>
           )}
 
           {/* Section Art & Création 

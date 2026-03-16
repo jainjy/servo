@@ -120,10 +120,10 @@ const Footer: React.FC = () => {
               <span className="font-bold text-xl azonix font-bold tracking-tight">oliplus</span>
             </div>
 
-            <p className="text-white/80 text-xs leading-relaxed mb-2">
-              Votre partenaire de confiance pour transformer vos rêves
-              immobiliers en réalité.
-            </p>
+       <p className="text-white/80 text-sm md:text-base leading-relaxed mb-3 md:mb-4">
+  Votre partenaire de confiance pour transformer vos rêves
+  immobiliers en réalité.
+</p>
 
             {/* Bouton Télécharger */}
             <button
@@ -162,35 +162,35 @@ const Footer: React.FC = () => {
 
           {/* Colonne Contact */}
           <div className="lg:col-span-3">
-            <h3 className="text-xs font-semibold text-white mb-2">Contacts</h3>
+            <h3 className="text-sm md:text-base font-semibold text-white mb-4 md:mb-5">Contacts</h3>
 
-            <div className="space-y-1.5">
-              <div className="flex items-start gap-1.5">
-                <MapPin className="w-3 h-3 text-white/70 mt-0.5 flex-shrink-0" />
+            <div className="space-y-3 md:space-y-4">
+              <div className="flex items-start gap-2.5 md:gap-3">
+                <MapPin className="w-4 h-4 md:w-5 md:h-5 text-white/70 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-white text-xs">
+                  <p className="text-white text-sm md:text-base">
                     45 rue monseigneur de Beaumont
                   </p>
-                  <p className="text-white/60 text-xs">Saint Denis</p>
+                  <p className="text-white/60 text-xs md:text-sm">Saint Denis</p>
                 </div>
               </div>
 
               <a
-                href="tel:+262 692 66 77 55"
-                className="flex items-center gap-1.5 group"
+                href="tel:+262692667755"
+                className="flex items-center gap-2.5 md:gap-3 group"
               >
-                <Phone className="w-3 h-3 text-white/70 flex-shrink-0" />
-                <span className="text-white/80 text-xs group-hover:text-white transition-colors">
+                <Phone className="w-4 h-4 md:w-5 md:h-5 text-white/70 flex-shrink-0" />
+                <span className="text-white/80 text-sm md:text-base group-hover:text-white transition-colors">
                   +262 692 66 77 55
                 </span>
               </a>
 
               <a
-                href="mailto:contact@oliplus.fr"
-                className="flex items-center gap-1.5 group"
+                href="mailto:contact@oliplus.re"
+                className="flex items-center gap-2.5 md:gap-3 group"
               >
-                <Mail className="w-3 h-3 text-white/70 flex-shrink-0" />
-                <span className="text-white/80 text-xs group-hover:text-white transition-colors">
+                <Mail className="w-4 h-4 md:w-5 md:h-5 text-white/70 flex-shrink-0" />
+                <span className="text-white/80 text-sm md:text-base group-hover:text-white transition-colors">
                   contact@oliplus.re
                 </span>
               </a>
@@ -199,11 +199,11 @@ const Footer: React.FC = () => {
 
           {/* Colonne Réseaux sociaux */}
           <div className="md:col-span-2 lg:col-span-2">
-            <h3 className="text-xs font-semibold text-white mb-2">
+            <h3 className="text-base md:text-lg font-semibold text-white mb-5 md:mb-6">
               Suivez-nous
             </h3>
 
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-5 md:gap-6">
               {[
                 {
                   name: "Facebook",
@@ -235,11 +235,11 @@ const Footer: React.FC = () => {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`w-10 h-10 rounded ${social.color} flex items-center justify-center transition-all duration-150 hover:opacity-90 hover:scale-110`}
+                  className={`w-14 h-14 md:w-16 md:h-16 rounded-xl ${social.color} flex items-center justify-center transition-all duration-300 hover:opacity-90 hover:scale-110 hover:shadow-xl`}
                   aria-label={social.name}
                 >
                   <svg
-                    className="w-5 h-5 text-white"
+                    className="w-7 h-7 md:w-8 md:h-8 text-white"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -253,7 +253,7 @@ const Footer: React.FC = () => {
 
         {/* Partenaires logos - Ultra compact */}
         <div className="mt-6 pt-4 border-t border-white/10">
-          <h3 className="text-sm font-semibold text-white/90 mb-3 text-center">
+          <h3 className="text-xl md:text-2xl font-semibold text-white/90 mb-6 md:mb-7 text-center">
             Partenaires officiels
           </h3>
           {/* Version Mobile (Liste Compacte) */}
