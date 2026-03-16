@@ -12,7 +12,8 @@ const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_VALIDATION_ERRORS = {
   EMPTY: "Le mot de passe ne peut pas être vide",
   TOO_SHORT: `Le mot de passe doit contenir au moins ${PASSWORD_MIN_LENGTH} caractères`,
-  WHITESPACE_ONLY: "Le mot de passe ne peut pas contenir uniquement des espaces",
+  WHITESPACE_ONLY:
+    "Le mot de passe ne peut pas contenir uniquement des espaces",
 };
 
 // Fonction de validation des mots de passe
@@ -54,7 +55,7 @@ class SecureStorage {
     } catch (error) {
       console.warn(
         "LocalStorage non disponible, utilisation de sessionStorage:",
-        error
+        error,
       );
       sessionStorage.setItem(key, value);
     }
@@ -83,12 +84,33 @@ class AuthService {
   static async login(email, password) {
     try {
       const response = await api.post("/auth/login", { email, password });
-      const { user, token, refreshToken } = response.data;
-      // On stocke les deux tokens
+      const { user, personel, token, refreshToken, redirectPath, authType, isPersonel, actingAs } = response.data;
+
+      // Stocker les données d'authentification
       this.setAuthData(user, token, refreshToken);
-      return { user, token };
+
+      // Stocker les données personnel si présentes
+      if (personel) {
+        SecureStorage.setItem("personel-data", JSON.stringify(personel));
+      }
+
+      if (actingAs) {
+        SecureStorage.setItem("acting-as-message", actingAs);
+      }
+
+      // Stocker le type d'authentification
+      SecureStorage.setItem("auth-type", authType || 'user');
+
+      return {
+        user,
+        personel,
+        token,
+        redirectPath,
+        isPersonel: isPersonel || false,
+        actingAs,
+        authType
+      };
     } catch (error) {
-      // Juste extraire le message d'erreur
       if (error.response?.data?.error) {
         throw new Error(error.response.data.error);
       } else if (error.response?.data?.message) {
@@ -100,6 +122,7 @@ class AuthService {
       }
     }
   }
+
   // register
   static async register(userData) {
     try {
@@ -153,7 +176,7 @@ class AuthService {
           metiers: userData.metiers || [], // AJOUT: Inclure les métiers
         },
         planId,
-        visibilityOption
+        visibilityOption,
       });
       const { user, token, refreshToken } = response.data;
       if (user && token) {
@@ -163,7 +186,7 @@ class AuthService {
     } catch (error) {
       throw this.handleError(
         error,
-        "Erreur lors de l'inscription professionnelle"
+        "Erreur lors de l'inscription professionnelle",
       );
     }
   }
@@ -181,7 +204,7 @@ class AuthService {
     } catch (error) {
       throw this.handleError(
         error,
-        "Erreur lors de la confirmation du paiement"
+        "Erreur lors de la confirmation du paiement",
       );
     }
   }
@@ -304,7 +327,7 @@ class AuthService {
       // Pour les autres erreurs, utiliser le gestionnaire existant
       throw this.handleError(
         error,
-        "Erreur lors de la demande de réinitialisation"
+        "Erreur lors de la demande de réinitialisation",
       );
     }
   }
@@ -325,7 +348,7 @@ class AuthService {
     } catch (error) {
       throw this.handleError(
         error,
-        "Erreur lors de la réinitialisation du mot de passe"
+        "Erreur lors de la réinitialisation du mot de passe",
       );
     }
   }
@@ -422,7 +445,7 @@ class AuthService {
     } catch (error) {
       throw this.handleError(
         error,
-        "Erreur lors du changement de mot de passe"
+        "Erreur lors du changement de mot de passe",
       );
     }
   }
@@ -439,6 +462,67 @@ class AuthService {
       return response.data;
     } catch (error) {
       throw this.handleError(error, "Erreur lors de l'upload de l'avatar");
+    }
+  }
+
+  // Dans AuthService, ajoutez cette méthode :
+
+  // Connexion du personnel
+  static async loginPersonel(email, password) {
+    return this.login(email, password);
+  }
+
+  // Obtenir les données du personnel connecté
+  static getCurrentPersonel() {
+    try {
+      const personelData = SecureStorage.getItem("personel-data");
+      return personelData ? JSON.parse(personelData) : null;
+    } catch (error) {
+      console.error("Erreur lors du parsing des données personnel:", error);
+      return null;
+    }
+  }
+
+  // Vérifier si l'authentification est de type personnel
+  static isPersonelAuth() {
+    return SecureStorage.getItem("auth-type") === "personel";
+  }
+
+  // Déconnexion améliorée
+  static logout() {
+    const refreshToken = SecureStorage.getItem("refresh-token");
+
+    if (refreshToken) {
+      api.post("/auth/logout", { refreshToken }).catch(() => {});
+    }
+
+    SecureStorage.removeItem("auth-token");
+    SecureStorage.removeItem("refresh-token");
+    SecureStorage.removeItem("user-data");
+    SecureStorage.removeItem("personel-data"); // Nouveau
+    SecureStorage.removeItem("auth-type"); // Nouveau
+
+    window.dispatchEvent(new Event("auth-change"));
+    window.location.href = "/login/particular";
+  }
+
+  // Récupérer le chemin de redirection basé sur le rôle
+  static getRoleBasedRedirect() {
+    const user = this.getCurrentUser();
+    const isPersonel = this.isPersonelAuth();
+
+    if (!user) return "/login/particular";
+
+    // Même logique de redirection pour les personnels que pour les users
+    switch (user.role) {
+      case "admin":
+        return "/admin";
+      case "professional":
+        return "/pro";
+      case "user":
+        return "/mon-compte";
+      default:
+        return "/";
     }
   }
 }

@@ -372,6 +372,19 @@ const allNavigationItems: NavigationItem[] = [
     ],
   },
   {
+    name: "Personnel",
+    href: "/pro/personnels",
+    icon: Settings,
+    userTypes: [
+      "AGENCE",
+      "VENDEUR",
+      "PRESTATAIRE",
+      "ARTISAN",
+      "TOURISME",
+      "BIEN_ETRE",
+    ],
+  },
+  {
     name: "Paramètres",
     href: "/pro/settings",
     icon: Settings,
