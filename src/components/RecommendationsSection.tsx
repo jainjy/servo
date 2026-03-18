@@ -532,7 +532,7 @@ const RecommendationsSection: React.FC<{
                             disabled={isAlreadySent}
                           >
                             <Calendar className="h-4 w-4 mr-2" />
-                            {isAlreadySent ? 'Demande envoyée' : 'Demander visite'}
+                            {isAlreadySent ? 'Demande envoyée' : 'Demander une viste'}
                           </Button>
                         ) : entityType === 'service' || entityType === 'metier' || sourceType === 'Service' || sourceType === 'Métier' ? (
                           <Button

@@ -1889,7 +1889,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                                 >
                                   {sentRequests?.[property?.id]
                                     ? "Demande envoyée"
-                                    : "Demander visite"}
+                                    : "Demander une viste"}
                                 </Button>
                                 <Button
                                   variant="outline"

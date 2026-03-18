@@ -1886,7 +1886,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                   >
                                     {sentRequests?.[property?.id]
                                       ? "Demande envoyée"
-                                      : "Demander visite"}
+                                      : "Demander une viste"}
                                   </Button>
                                   <Button
                                     variant="outline"

@@ -480,7 +480,7 @@ const CartesBiensImmobiliers = () => {
                     <Calendar className="w-4 h-4" />
                     {sentRequests?.[bien?.id]
                       ? "Demande envoyée"
-                      : "Demander visite"}
+                      : "Demander une viste"}
                   </button>
 
                   <button
