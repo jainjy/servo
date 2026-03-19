@@ -1063,7 +1063,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                     >
                       <Card
                         className="group overflow-hidden border-2 border-dashed border-[#556B2F]/30 hover:border-solid hover:border-[#556B2F] transition-all duration-300 rounded-2xl cursor-pointer bg-gradient-to-br from-[#556B2F]/5 via-white to-[#8B4513]/5 h-full flex flex-col items-center justify-center p-8"
-                        onClick={() => navigate("/immobilier")}
+                        onClick={() => navigate("/achat")}
                       >
                         <div className="grid grid-cols-2 gap-2 mb-6 w-full">
                           <img src={property1} className="w-full h-24 object-cover rounded-l-xl shadow-md" alt="" />
