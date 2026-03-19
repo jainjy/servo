@@ -111,7 +111,7 @@ export const ModalDemandeVisite = ({
     }
 
     if (!isAuthenticated || !user) {
-      toast.error('Veuillez vous connecter pour demander une visite.');
+      toast.error('Veuillez vous connecter pour En savoir plus.');
       return;
     }
 

@@ -378,7 +378,7 @@ const LocationSaisonniere: React.FC = () => {
     if (!isAuthenticated || !user) {
       toast({
         title: "Connexion requise",
-        description: "Veuillez vous connecter pour demander une visite",
+        description: "Veuillez vous connecter pour En savoir plus",
         variant: "destructive",
       });
       navigate("/login");
