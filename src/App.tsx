@@ -264,6 +264,7 @@ import Automobile from "./pages/automobilePage";
 import PersonnelGestion from "./components/pro/PersonnelGestion";
 import FacebookConditionsService from "./pages/FacebookConditionsService";
 import FacebookPrivacyPolicy from "./pages/FacebookPrivacyPolicy";
+import FacebookDataDeletionRequest from "./pages/FacebookDataDeletionRequest";
 
 
 
@@ -351,6 +352,7 @@ const App = () => {
                     {/* Route de confidentialité et privacy policy facebook */}
                     <Route path="/conditions-service" element={<FacebookConditionsService />} />
                     <Route path="/privacy-policy" element={<FacebookPrivacyPolicy />} />
+                    <Route path="/data-deletion" element={<FacebookDataDeletionRequest />} />
                     <Route path="/formations" element={<FormationsPage />} />
                     <Route
                       path="/emploi-formations"
