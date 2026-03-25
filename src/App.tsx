@@ -262,6 +262,8 @@ import Marcketplace from "./pages/pro/Marcketplace";
 import B2BMarketplace from "./pages/pro/Marcketplace";
 import Automobile from "./pages/automobilePage";
 import PersonnelGestion from "./components/pro/PersonnelGestion";
+import FacebookConditionsService from "./pages/FacebookConditionsService";
+import FacebookPrivacyPolicy from "./pages/FacebookPrivacyPolicy";
 
 
 
@@ -346,6 +348,9 @@ const App = () => {
 
                 <Layout>
                   <Routes>
+                    {/* Route de confidentialité et privacy policy facebook */}
+                    <Route path="/conditions-service" element={<FacebookConditionsService />} />
+                    <Route path="/privacy-policy" element={<FacebookPrivacyPolicy />} />
                     <Route path="/formations" element={<FormationsPage />} />
                     <Route
                       path="/emploi-formations"
@@ -975,6 +980,8 @@ const App = () => {
                       {/* AJOUTEZ CETTE ROUTE */}
                       <Route path="candidatures" element={<MesCandidatures />} />
 
+                      
+                      
                       <Route
                         path="locationSaisonniere"
                         element={<GestionLocationSaisonniere />}
