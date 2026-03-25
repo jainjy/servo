@@ -141,7 +141,7 @@ const FacebookDataDeletionRequest: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mt-10 mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center text-white text-2xl">
               🗑️
