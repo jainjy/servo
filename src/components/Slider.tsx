@@ -19,12 +19,6 @@ const imageSrc = [
     hasBackground: true
   },
   {
-    src: "/logo-habitat-sur.jpg",
-    alt: "Image",
-    link: "https://www.facebook.com/share/1L35wnjwrp/?mibextid=wwXIfr",
-    hasBackground: false
-  },
-  {
     src: "/logo-kayak-transparent.png",
     alt: "Image",
     link: "https://share.google/2uYXjkFjIDncmxSsu",
