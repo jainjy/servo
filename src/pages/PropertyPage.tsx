@@ -53,6 +53,7 @@ interface Property {
     phone: string | null;
     companyName: string | null;
     commercialName: string | null;
+    avatar: string | null;
   };
 }
 

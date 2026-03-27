@@ -100,6 +100,7 @@ let endpoint = "/pro"; // MODIFIÉ: de "/pro" à "/api/professionnels"
               reviewCount: pro.reviewCount || Math.floor(Math.random() * 50),
             })
           );
+          console.log("Professionnels après ajout de la note:", professionalsWithRating);
           setProfessionals(professionalsWithRating);
         }
       } catch (error) {

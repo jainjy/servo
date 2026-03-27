@@ -87,6 +87,7 @@ interface Property {
     phone: string | null;
     companyName: string | null;
     commercialName: string | null;
+    avatar: string | null;
   };
 }
 
@@ -328,9 +329,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
-                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedImage === index ? "" : "border-transparent"
-                        }`}
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index ? "" : "border-transparent"
+                          }`}
                       >
                         <img
                           src={image}
@@ -352,7 +352,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 )}
 
                 {/* BOUTON TÉLÉCHARGER TOUTES LES PHOTOS */}
-                {property.images && property.images.length > 0 && (
+                {/* {property.images && property.images.length > 0 && (
                   <div className="col-span-2 mt-[-160px]">
                     <Button
                       onClick={() =>
@@ -366,7 +366,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       Télécharger toutes les photos ({property.images.length})
                     </Button>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </div>
@@ -379,23 +379,24 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
             {/* Carte Agent */}
             <Card className="border border-[#D3D3D3]">
               <CardContent className="p-6">
-                <div className="text-center mb-6">
-                  <div className="flex justify-between gap-1 mt-1">
-                    <div className="flex gap-3 items-center">
-                      <div className="w-8 h-8 bg-[#6B8E23]/10 rounded-full flex items-center justify-center">
-                        <Users className="h-4 w-4 text-[#6B8E23]" />
-                      </div>
-                      <div className="text-left">
-                        <h3 className="font-semibold text-lg text-[#8B4513]">
-                          {property.owner.firstName} {property.owner.lastName}
-                        </h3>
-                        {property.owner.companyName && (
-                          <p className="text-sm text-gray-600">
-                            {property.owner.companyName}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                <div className="flex items-center gap-4 mb-5">
+                  {/* Image à gauche */}
+                  <img
+                    src={property.owner.avatar}
+                    alt="Avatar"
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+
+                  {/* Informations à droite */}
+                  <div>
+                    <h3 className="font-semibold text-lg text-[#8B4513]">
+                      {property.owner.firstName} {property.owner.lastName}
+                    </h3>
+                    {property.owner.companyName && (
+                      <p className="text-sm text-gray-600">
+                        {property.owner.companyName}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -440,11 +441,10 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                   </div>
 
                   <Button
-                    className={`w-full ${
-                      !isAvailable
+                    className={`w-full ${!isAvailable
                         ? "bg-gray-400 cursor-not-allowed"
                         : "bg-[#556B2F] hover:bg-[#6B8E23]"
-                    }`}
+                      }`}
                     size="lg"
                     onClick={handleScheduleVisit}
                     disabled={!isAvailable}
