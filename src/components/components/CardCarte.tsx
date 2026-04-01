@@ -542,7 +542,7 @@ const CardCarte: React.FC = () => {
                         )}
 
                         <button
-                          onClick={() => window.open(`/decouvrir/${selectedPoint.id}`, '_blank')}
+                          onClick={() => window.open(`/immobilier/${selectedPoint.id}`, '_blank')}
                           className="w-full mt-2 px-4 py-3 bg-[#2E7D32] text-white text-sm rounded-xl hover:bg-[#1B5E20] transition-colors flex items-center justify-center gap-2"
                         >
                           <span>Voir les détails</span>

@@ -592,6 +592,13 @@ export default function MonComptePage() {
                     <Button
                       variant="outline"
                       className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
+                      onClick={() => handleNavigation("/mon-compte/subscription/user/payment")}
+                    >
+                      <Settings2 /> Paiement et nouvelle annonce immobilier
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
                       onClick={() =>
                         handleNavigation("/mon-compte/demandes-immobilier")
                       }

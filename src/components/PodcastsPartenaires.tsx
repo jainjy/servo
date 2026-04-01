@@ -121,6 +121,8 @@ const PodcastsPartenaires: React.FC = () => {
           limit: 50,
         });
 
+        console.log("Réponse API vidéos partenaires:", response);
+
         const apiData = response.data;
 
         if (apiData.success && Array.isArray(apiData.data)) {

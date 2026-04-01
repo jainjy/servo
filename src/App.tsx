@@ -265,6 +265,9 @@ import PersonnelGestion from "./components/pro/PersonnelGestion";
 import FacebookConditionsService from "./pages/FacebookConditionsService";
 import FacebookPrivacyPolicy from "./pages/FacebookPrivacyPolicy";
 import FacebookDataDeletionRequest from "./pages/FacebookDataDeletionRequest";
+import SubscriptionImmobilierPage from "./pages/Subscriptionimmobilierpage";
+import NouvelleAnnonceImmobilierPage from "./pages/Nouvelleannonceimmobilierpage";
+import MesAnnoncesPage from "./pages/Mesannoncespage";
 
 
 
@@ -983,7 +986,20 @@ const App = () => {
                       <Route path="candidatures" element={<MesCandidatures />} />
 
                       
-                      
+                       <Route
+                        path="subscription/user/payment"
+                        element={<SubscriptionImmobilierPage />}
+                      />
+                       <Route
+                        path="immobilier/nouvelle-annonce"
+                        element={<NouvelleAnnonceImmobilierPage />}
+                      />
+                     
+                       <Route
+                        path="immobilier/mes-annonces"
+                        element={<MesAnnoncesPage />}
+                      />
+
                       <Route
                         path="locationSaisonniere"
                         element={<GestionLocationSaisonniere />}
