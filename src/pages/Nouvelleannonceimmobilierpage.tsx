@@ -1,6 +1,6 @@
 // NouvelleAnnonceImmobilierPage.tsx
 // Page de création d'annonce immobilière avec :
-//   - Vérification abonnement actif (35 € HT / 42 € TTC)
+//   - Vérification abonnement actif (35 € / mois)
 //   - Toutes les données du listing-modal.jsx (types bien, types sociaux, rentType…)
 //   - LocationPickerModal pour lat/lng
 //   - Gestion images temporaires + upload
@@ -76,35 +76,35 @@ const TYPE_LOCATION: Record<string, string> = {
 };
 
 const STATUT_ANNONCE: Record<string, { label: string; color: string }> = {
-  pending:  { label: "Brouillon",            color: "bg-yellow-100 text-yellow-800" },
-  for_sale: { label: "À vendre",             color: "bg-green-100 text-green-800"  },
-  for_rent: { label: "À louer",              color: "bg-purple-100 text-purple-800"},
-  both:     { label: "Vente et Location",    color: "bg-blue-100 text-blue-800"    },
+  pending: { label: "Brouillon", color: "bg-yellow-100 text-yellow-800" },
+  for_sale: { label: "À vendre", color: "bg-green-100 text-green-800" },
+  for_rent: { label: "À louer", color: "bg-purple-100 text-purple-800" },
+  both: { label: "Vente et Location", color: "bg-blue-100 text-blue-800" },
 };
 
 // Types sociaux stockés dans features[]
 const SOCIAL_TYPE_FEATURES = ["SHUR", "SIDR", "SODIAC", "SEDRE", "SEMAC"];
 
 const EQUIPEMENTS = [
-  { key: "pool",            label: "Piscine"        },
-  { key: "garden",          label: "Jardin"         },
-  { key: "parking",         label: "Parking"        },
-  { key: "terrace",         label: "Terrasse"       },
-  { key: "balcony",         label: "Balcon"         },
-  { key: "elevator",        label: "Ascenseur"      },
-  { key: "fireplace",       label: "Cheminée"       },
-  { key: "air_conditioning",label: "Climatisation"  },
-  { key: "fiber_optic",     label: "Fibre optique"  },
+  { key: "pool", label: "Piscine" },
+  { key: "garden", label: "Jardin" },
+  { key: "parking", label: "Parking" },
+  { key: "terrace", label: "Terrasse" },
+  { key: "balcony", label: "Balcon" },
+  { key: "elevator", label: "Ascenseur" },
+  { key: "fireplace", label: "Cheminée" },
+  { key: "air_conditioning", label: "Climatisation" },
+  { key: "fiber_optic", label: "Fibre optique" },
 ];
 
 const STEPS = [
-  { n: 1, label: "Type & Prix"       },
-  { n: 2, label: "Caractéristiques"  },
-  { n: 3, label: "Équipements"       },
-  { n: 4, label: "Photos"            },
-  { n: 5, label: "Publication"       },
+  { n: 1, label: "Type & Prix" },
+  { n: 2, label: "Caractéristiques" },
+  { n: 3, label: "Équipements" },
+  { n: 4, label: "Photos" },
+  { n: 5, label: "Publication" },
 ];
-
+const SUBSCRIPTION_PRICE = 35;
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
@@ -209,7 +209,7 @@ const SubscriptionGate: React.FC<{ children: React.ReactNode }> = ({ children })
           <h1 className="text-3xl font-bold text-[#6B8E23] mb-3">Abonnement requis</h1>
           <p className="sans text-[#6B8E23] text-base leading-relaxed mb-8">
             Pour publier une annonce immobilière, vous devez disposer d'un abonnement actif à{" "}
-            <strong className="text-[#6B8E23]">35 € HT / mois</strong> (42 € TTC).
+            <strong className="text-[#6B8E23]">{SUBSCRIPTION_PRICE} € / mois</strong>.
           </p>
 
           <div className="bg-white border border-stone-100 rounded-2xl p-6 mb-8 text-left">
@@ -233,10 +233,11 @@ const SubscriptionGate: React.FC<{ children: React.ReactNode }> = ({ children })
 
           <button
             onClick={() => navigate("/abonnement-immobilier")}
+            aria-label={`S'abonner pour ${SUBSCRIPTION_PRICE} euros par mois`}
             className="sans w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-amber-200 transition-all flex items-center justify-center gap-2"
           >
             <Sparkles className="h-5 w-5" />
-            S'abonner pour 42 € TTC / mois
+            S'abonner pour {SUBSCRIPTION_PRICE} € / mois
             <ArrowRight className="h-4 w-4" />
           </button>
           <button
@@ -263,29 +264,26 @@ const StepBar: React.FC<{ current: number }> = ({ current }) => (
       <React.Fragment key={s.n}>
         <div className="flex flex-col items-center gap-1 flex-shrink-0">
           <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-              current > s.n
-                ? "bg-amber-500 text-white"
-                : current === s.n
+            className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${current > s.n
+              ? "bg-amber-500 text-white"
+              : current === s.n
                 ? "bg-stone-900 text-white ring-4 ring-amber-200"
                 : "bg-stone-100 text-[#8B4513]"
-            }`}
+              }`}
           >
             {current > s.n ? <CheckCircle className="h-4 w-4" /> : s.n}
           </div>
           <span
-            className={`sans text-xs hidden sm:block whitespace-nowrap ${
-              current === s.n ? "text-[#6B8E23] font-semibold" : "text-[#8B4513]"
-            }`}
+            className={`sans text-xs hidden sm:block whitespace-nowrap ${current === s.n ? "text-[#6B8E23] font-semibold" : "text-[#8B4513]"
+              }`}
           >
             {s.label}
           </span>
         </div>
         {i < STEPS.length - 1 && (
           <div
-            className={`flex-1 h-0.5 mx-2 transition-colors duration-300 ${
-              current > s.n ? "bg-amber-400" : "bg-stone-200"
-            }`}
+            className={`flex-1 h-0.5 mx-2 transition-colors duration-300 ${current > s.n ? "bg-amber-400" : "bg-stone-200"
+              }`}
           />
         )}
       </React.Fragment>
@@ -299,8 +297,8 @@ const StepBar: React.FC<{ current: number }> = ({ current }) => (
 
 const AnnonceForm: React.FC = () => {
   const navigate = useNavigate();
-  const [step, setStep]             = useState(1);
-  const [loading, setLoading]       = useState(false);
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [temporaryImages, setTemporaryImages] = useState<TemporaryImage[]>([]);
@@ -322,7 +320,7 @@ const AnnonceForm: React.FC = () => {
       const ns = map[form.listingType] || "for_sale";
       if (form.status !== ns) setForm((p) => ({ ...p, status: ns }));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.listingType]);
 
   // Libérer les blob URLs
@@ -342,9 +340,9 @@ const AnnonceForm: React.FC = () => {
   const handleDedicatedSocial = (type: "PSLA" | "SHLMR" | "none") => {
     const cleaned = form.features.filter((f) => !SOCIAL_TYPE_FEATURES.includes(f.toUpperCase()));
     if (type === "PSLA")
-      setForm((p) => ({ ...p, socialLoan: true,  isSHLMR: false, features: cleaned }));
+      setForm((p) => ({ ...p, socialLoan: true, isSHLMR: false, features: cleaned }));
     else if (type === "SHLMR")
-      setForm((p) => ({ ...p, socialLoan: false, isSHLMR: true,  features: cleaned }));
+      setForm((p) => ({ ...p, socialLoan: false, isSHLMR: true, features: cleaned }));
     else
       setForm((p) => ({ ...p, socialLoan: false, isSHLMR: false, features: cleaned }));
   };
@@ -420,15 +418,15 @@ const AnnonceForm: React.FC = () => {
   // ── Validation ───────────────────────────────────────────────
   const validate = (): boolean => {
     if (step === 1) {
-      if (!form.title.trim())       { toast.error("Titre requis");        return false; }
+      if (!form.title.trim()) { toast.error("Titre requis"); return false; }
       if (!form.description.trim()) { toast.error("Description requise"); return false; }
-      if (!form.price)              { toast.error("Prix requis");          return false; }
+      if (!form.price) { toast.error("Prix requis"); return false; }
     }
     if (step === 2) {
-      if (!form.surface)            { toast.error("Surface requise");           return false; }
-      if (!form.rooms)              { toast.error("Nombre de pièces requis");   return false; }
-      if (!form.address.trim())     { toast.error("Adresse requise");           return false; }
-      if (!form.city.trim())        { toast.error("Ville requise");             return false; }
+      if (!form.surface) { toast.error("Surface requise"); return false; }
+      if (!form.rooms) { toast.error("Nombre de pièces requis"); return false; }
+      if (!form.address.trim()) { toast.error("Adresse requise"); return false; }
+      if (!form.city.trim()) { toast.error("Ville requise"); return false; }
     }
     if (step === 4 && temporaryImages.length === 0) {
       toast.error("Ajoutez au moins 1 photo"); return false;
@@ -446,25 +444,25 @@ const AnnonceForm: React.FC = () => {
     try {
       const uploadedUrls = await uploadAllImages();
       const payload = {
-        title:       form.title,
-        type:        form.type,
+        title: form.title,
+        type: form.type,
         description: form.description,
-        price:       parseFloat(form.price)  || null,
-        surface:     parseInt(form.surface)  || null,
-        rooms:       parseInt(form.rooms)    || null,
-        bedrooms:    form.bedrooms  ? parseInt(form.bedrooms)  : null,
-        bathrooms:   form.bathrooms ? parseInt(form.bathrooms) : null,
-        address:     form.address,
-        city:        form.city,
-        latitude:    form.latitude,
-        longitude:   form.longitude,
+        price: parseFloat(form.price) || null,
+        surface: parseInt(form.surface) || null,
+        rooms: parseInt(form.rooms) || null,
+        bedrooms: form.bedrooms ? parseInt(form.bedrooms) : null,
+        bathrooms: form.bathrooms ? parseInt(form.bathrooms) : null,
+        address: form.address,
+        city: form.city,
+        latitude: form.latitude,
+        longitude: form.longitude,
         listingType: form.listingType,
-        rentType:    form.rentType,
-        features:    form.features,
-        images:      uploadedUrls,
-        status:      form.status,
-        socialLoan:  form.socialLoan,
-        isSHLMR:     form.isSHLMR,
+        rentType: form.rentType,
+        features: form.features,
+        images: uploadedUrls,
+        status: form.status,
+        socialLoan: form.socialLoan,
+        isSHLMR: form.isSHLMR,
       };
       await api.post("/properties", payload);
       toast.success("Annonce publiée avec succès !");
@@ -791,17 +789,16 @@ const AnnonceForm: React.FC = () => {
               {/* Radio PSLA / SHLMR / Aucun */}
               <div className="space-y-2 mb-4">
                 {[
-                  { val: "none",  label: "Aucun type social" },
-                  { val: "PSLA",  label: "Prêt Social Location Accession (PSLA)" },
+                  { val: "none", label: "Aucun type social" },
+                  { val: "PSLA", label: "Prêt Social Location Accession (PSLA)" },
                   { val: "SHLMR", label: "SHLMR (Société Immobilière de La Réunion)" },
                 ].map((opt) => (
                   <label
                     key={opt.val}
-                    className={`sans flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all text-sm ${
-                      currentDedicated === opt.val
-                        ? "border-amber-400 bg-amber-50 text-amber-800 font-medium"
-                        : "border-stone-200 bg-white text-[#8B4513] hover:border-stone-300"
-                    }`}
+                    className={`sans flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all text-sm ${currentDedicated === opt.val
+                      ? "border-amber-400 bg-amber-50 text-amber-800 font-medium"
+                      : "border-stone-200 bg-white text-[#8B4513] hover:border-stone-300"
+                      }`}
                   >
                     <input
                       type="radio"
@@ -825,11 +822,10 @@ const AnnonceForm: React.FC = () => {
                   return (
                     <label
                       key={type}
-                      className={`sans flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition-all text-sm ${
-                        selected
-                          ? "border-amber-400 bg-amber-50 text-amber-800 font-medium"
-                          : "border-stone-200 bg-white text-[#8B4513] hover:border-stone-300"
-                      }`}
+                      className={`sans flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition-all text-sm ${selected
+                        ? "border-amber-400 bg-amber-50 text-amber-800 font-medium"
+                        : "border-stone-200 bg-white text-[#8B4513] hover:border-stone-300"
+                        }`}
                     >
                       <input
                         type="checkbox"
@@ -864,16 +860,14 @@ const AnnonceForm: React.FC = () => {
                     key={key}
                     type="button"
                     onClick={() => toggleEquipement(key)}
-                    className={`sans flex items-center gap-2.5 p-4 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${
-                      active
-                        ? "border-amber-400 bg-amber-50 text-amber-800"
-                        : "border-stone-200 bg-white text-[#8B4513] hover:border-stone-300"
-                    }`}
+                    className={`sans flex items-center gap-2.5 p-4 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${active
+                      ? "border-amber-400 bg-amber-50 text-amber-800"
+                      : "border-stone-200 bg-white text-[#8B4513] hover:border-stone-300"
+                      }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                        active ? "border-amber-500 bg-amber-500" : "border-stone-300"
-                      }`}
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${active ? "border-amber-500 bg-amber-500" : "border-stone-300"
+                        }`}
                     >
                       {active && <CheckCircle className="h-3 w-3 text-white" />}
                     </div>
@@ -903,11 +897,10 @@ const AnnonceForm: React.FC = () => {
             {/* Zone de dépôt */}
             <div
               onClick={() => !uploadingImages && fileRef.current?.click()}
-              className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-200 mb-6 ${
-                uploadingImages
-                  ? "opacity-50 cursor-not-allowed border-stone-200"
-                  : "border-amber-200 hover:border-amber-400 hover:bg-amber-50/40 cursor-pointer"
-              }`}
+              className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-200 mb-6 ${uploadingImages
+                ? "opacity-50 cursor-not-allowed border-stone-200"
+                : "border-amber-200 hover:border-amber-400 hover:bg-amber-50/40 cursor-pointer"
+                }`}
             >
               {uploadingImages ? (
                 <Loader2 className="h-10 w-10 text-amber-400 animate-spin mx-auto mb-3" />
@@ -998,31 +991,31 @@ const AnnonceForm: React.FC = () => {
               <div className="space-y-3">
                 {(
                   [
-                    ["Type d'annonce",  LISTING_TYPE[form.listingType]],
+                    ["Type d'annonce", LISTING_TYPE[form.listingType]],
                     ...(form.listingType !== "sale"
                       ? [["Type de location", TYPE_LOCATION[form.rentType]]]
                       : []),
-                    ["Type de bien",   TYPE_BIEN[form.type]],
-                    ["Titre",          form.title],
-                    ["Prix",           `${Number(form.price).toLocaleString("fr-FR")} €`],
-                    ["Surface",        `${form.surface} m²`],
-                    ["Pièces",         form.rooms],
-                    ...(form.bedrooms  ? [["Chambres",     form.bedrooms]]  : []),
+                    ["Type de bien", TYPE_BIEN[form.type]],
+                    ["Titre", form.title],
+                    ["Prix", `${Number(form.price).toLocaleString("fr-FR")} €`],
+                    ["Surface", `${form.surface} m²`],
+                    ["Pièces", form.rooms],
+                    ...(form.bedrooms ? [["Chambres", form.bedrooms]] : []),
                     ...(form.bathrooms ? [["Salles de bain", form.bathrooms]] : []),
-                    ["Adresse",        `${form.address}, ${form.city}`],
+                    ["Adresse", `${form.address}, ${form.city}`],
                     ...(form.latitude && form.longitude
                       ? [[
-                          "Position GPS",
-                          `${form.latitude.toFixed(5)}, ${form.longitude.toFixed(5)}`,
-                        ]]
+                        "Position GPS",
+                        `${form.latitude.toFixed(5)}, ${form.longitude.toFixed(5)}`,
+                      ]]
                       : []),
                     [
                       "Type social",
                       form.socialLoan
                         ? "PSLA"
                         : form.isSHLMR
-                        ? "SHLMR"
-                        : form.features
+                          ? "SHLMR"
+                          : form.features
                             .filter((f) => SOCIAL_TYPE_FEATURES.includes(f.toUpperCase()))
                             .join(", ") || "Aucun",
                     ],
@@ -1058,15 +1051,15 @@ const AnnonceForm: React.FC = () => {
                       form.listingType === "rent"
                         ? "for_rent"
                         : form.listingType === "both"
-                        ? "both"
-                        : "for_sale",
+                          ? "both"
+                          : "for_sale",
                     label: "Publier maintenant",
                     desc:
                       form.listingType === "rent"
                         ? "Visible immédiatement en tant qu'annonce de location"
                         : form.listingType === "both"
-                        ? "Visible en vente et location"
-                        : "Visible immédiatement en tant qu'annonce de vente",
+                          ? "Visible en vente et location"
+                          : "Visible immédiatement en tant qu'annonce de vente",
                   },
                   {
                     val: "pending",
@@ -1076,11 +1069,10 @@ const AnnonceForm: React.FC = () => {
                 ].map((opt) => (
                   <label
                     key={opt.val}
-                    className={`sans flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      form.status === opt.val
-                        ? "border-amber-400 bg-amber-50"
-                        : "border-stone-200 bg-white hover:border-stone-300"
-                    }`}
+                    className={`sans flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${form.status === opt.val
+                      ? "border-amber-400 bg-amber-50"
+                      : "border-stone-200 bg-white hover:border-stone-300"
+                      }`}
                   >
                     <input
                       type="radio"

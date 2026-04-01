@@ -522,32 +522,24 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                 <label htmlFor="category" className="block text-sm font-medium mb-2" style={{ color: theme.secondaryText }}>
                   Catégorie
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
-                    style={{
-                      borderColor: theme.separator,
-                      backgroundColor: theme.lightBg,
-                      color: theme.logo
-                    }}
-                    placeholder="Ex: Technologie, Musique, Éducation..."
-                    disabled={uploading}
-                    list="categories-list"
-                  />
-                  <datalist id="categories-list">
-                    {availableCategories.map((category, index) => (
-                      <option key={index} value={category} />
-                    ))}
-                  </datalist>
-                </div>
-                <p className="text-xs mt-1" style={{ color: theme.secondaryText }}>
-                  Tapez une catégorie ou sélectionnez-en une existante
-                </p>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
+                  style={{
+                    borderColor: theme.separator,
+                    backgroundColor: theme.lightBg,
+                    color: theme.logo
+                  }}
+                  disabled={uploading}
+                >
+                  <option value="">Sélectionnez une catégorie...</option>
+                  <option value="immobiliers">Immobiliers</option>
+                  <option value="services">Services</option>
+                  <option value="partenaires">Partenaires</option>
+                </select>
               </div>
 
               <div>

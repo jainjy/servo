@@ -635,6 +635,13 @@ const AdminMedia: React.FC = () => {
         MediaService.getStats()
       ]);
 
+      console.log('✅ Réponses API reçues:', {
+        videos: videosResponse,
+        categories: categoriesResponse,
+        stats: statsResponse
+      });
+
+
       // Traiter les données
       const videosData = extractData(videosResponse);
       const categoriesData = extractData(categoriesResponse);
