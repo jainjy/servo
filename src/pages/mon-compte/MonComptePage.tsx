@@ -514,6 +514,16 @@ export default function MonComptePage() {
                       </Badge>
                     </div>
                     <Separator className="my-4 bg-[#D3D3D3]" />
+                    
+                    {/* Bouton Créer une annonce immobilier */}
+                    <button
+                      onClick={() => handleNavigation("/mon-compte/subscription/user/payment")}
+                      className="w-full flex items-center justify-center gap-2 bg-[#556B2F] hover:bg-[#3d4920] text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 mb-4"
+                    >
+                      <Edit3 className="w-6 h-6" />
+                      Créer une annonce immobilier
+                    </button>
+                    
                     {/* Infos principales */}
                     <div className="space-y-4 text-sm">
                       <div>
@@ -592,9 +602,9 @@ export default function MonComptePage() {
                     <Button
                       variant="outline"
                       className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
-                      onClick={() => handleNavigation("/mon-compte/subscription/user/payment")}
+                      onClick={() => handleNavigation("/mon-compte/immobilier/mes-annonces") }
                     >
-                      <Settings2 /> Paiement et nouvelle annonce immobilier
+                      <Settings2 />Mes annoces immobilières
                     </Button>
                     <Button
                       variant="outline"
