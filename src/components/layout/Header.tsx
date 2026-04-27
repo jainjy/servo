@@ -94,7 +94,21 @@ const Header = () => {
   const scrolledRaw = useScrolled(50);
   const { pathname } = useLocation();
   // Utiliser le style scroll sur les routes spécifiées
-  const scrolled = pathname.startsWith("/professional") ? true : scrolledRaw;
+  // Liste des routes qui ont un fond clair (sans hero sombre)
+  const lightBackgroundRoutes = [
+    "/mon-compte",
+    "/login",
+    "/register",
+    "/pro",
+    "/admin",
+    "/mon-compte/",      // pour toutes les sous-routes
+    "/recherche",
+    "/panier",
+    // Ajoute ici toutes les pages où le fond n'est pas sombre
+  ];
+
+  const isLightBackgroundPage = lightBackgroundRoutes.some(route => pathname.startsWith(route));
+  const scrolled = isLightBackgroundPage ? true : (pathname.startsWith("/professional") ? true : scrolledRaw);
 
   const openRecherchePage = () => {
     navigate("/recherche");
@@ -414,6 +428,13 @@ const Header = () => {
           title: "Location",
           description: "Trouvez des arcticle à louer",
           href: "/location",
+          image:
+            "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
+        },
+        {
+          title: "Vendre",
+          description: "Vendre votre bien, à votre façon",
+          href: "/vendre",
           image:
             "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
         },
@@ -1548,7 +1569,7 @@ const Header = () => {
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
-        
+
         <nav className="p-4 space-y-4">
           {menuSections.map((section, index) => (
             <div key={index} className="border-b border-[#D3D3D3] pb-4">

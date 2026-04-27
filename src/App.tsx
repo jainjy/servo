@@ -268,6 +268,7 @@ import FacebookDataDeletionRequest from "./pages/FacebookDataDeletionRequest";
 import SubscriptionImmobilierPage from "./pages/Subscriptionimmobilierpage";
 import NouvelleAnnonceImmobilierPage from "./pages/Nouvelleannonceimmobilierpage";
 import MesAnnoncesPage from "./pages/Mesannoncespage";
+import PropertySell from "./pages/PropertySell";
 
 
 
@@ -415,6 +416,7 @@ const App = () => {
                     <Route path="/immobilier" element={<Immobilier />} />
                     <Route path="/achat" element={<PropertyBuy />} />
                     <Route path="/location" element={<PropertyRent />} />
+                    <Route path="/vendre" element={<PropertySell />} />
                     <Route path="/rachat" element={<RachatServiceCard />} />
                     {/* 🔥 ROUTES DES EXPÉRIENCES - CORRIGÉES 🔥 */}
                     <Route
