@@ -273,6 +273,12 @@ const allNavigationItems: NavigationItem[] = [
     userTypes: ["AGENCE", "VENDEUR"],
   },
   {
+    name: "Liste demande estimation",
+    href: "/pro/demandes-estimation",
+    icon: Building2,
+    userTypes: ["AGENCE", "VENDEUR"],
+  },
+  {
     name: "Les demandes de devis",
     href: "/pro/demandes-devis",
     icon: FileText,

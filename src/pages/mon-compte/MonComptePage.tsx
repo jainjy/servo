@@ -34,7 +34,8 @@ import {
   FileText,
   Calendar1,
   Home,
-  Trash2
+  Trash2,
+  Building2
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
@@ -112,6 +113,7 @@ export default function MonComptePage() {
     city: "",
     addressComplement: "",
   });
+  
   useEffect(() => {
     const u = AuthService.getCurrentUser();
     setUser(u);
@@ -187,16 +189,16 @@ export default function MonComptePage() {
 
 
   const handleSend = async (e: React.FormEvent) => {
-    if(!user) return;
-    
-      try {
-        const response = await api.post("/oliplus-email/send-rgpd-confirmation", {
-          email: user.email
-        });
-        console.log("Email de bienvenue envoyé avec succès");
-      } catch (emailError: any) {
-        console.error("ÉCHEC COMPLET de l'envoi de l'email de bienvenue:");
-      }
+    if (!user) return;
+
+    try {
+      const response = await api.post("/oliplus-email/send-rgpd-confirmation", {
+        email: user.email
+      });
+      console.log("Email de bienvenue envoyé avec succès");
+    } catch (emailError: any) {
+      console.error("ÉCHEC COMPLET de l'envoi de l'email de bienvenue:");
+    }
 
   };
 
@@ -514,7 +516,7 @@ export default function MonComptePage() {
                       </Badge>
                     </div>
                     <Separator className="my-4 bg-[#D3D3D3]" />
-                    
+
                     {/* Bouton Créer une annonce immobilier */}
                     <button
                       onClick={() => handleNavigation("/mon-compte/subscription/user/payment")}
@@ -523,7 +525,7 @@ export default function MonComptePage() {
                       <Edit3 className="w-6 h-6" />
                       Créer une annonce immobilier
                     </button>
-                    
+
                     {/* Infos principales */}
                     <div className="space-y-4 text-sm">
                       <div>
@@ -583,6 +585,17 @@ export default function MonComptePage() {
                     >
                       <Box /> Mes commandes
                     </Button>
+
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
+                      onClick={() =>
+                        handleNavigation("/mon-compte/estimations")
+                      }
+                    >
+                      <Building2 /> Mes estimations
+                    </Button>
+
                     <Button
                       variant="outline"
                       className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
@@ -602,7 +615,7 @@ export default function MonComptePage() {
                     <Button
                       variant="outline"
                       className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
-                      onClick={() => handleNavigation("/mon-compte/immobilier/mes-annonces") }
+                      onClick={() => handleNavigation("/mon-compte/immobilier/mes-annonces")}
                     >
                       <Settings2 />Mes annoces immobilières
                     </Button>

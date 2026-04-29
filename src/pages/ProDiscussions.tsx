@@ -431,9 +431,19 @@ export default function ProDiscussions() {
             userId: user?.id,
           });
 
+          //const isNotCreator = response.data.createdById !== user?.id;
+          //const isNotArtisan = response.data.artisanId !== user?.id;
+          //setNotAssignedMe(isNotCreator && isNotArtisan);
+
           const isNotCreator = response.data.createdById !== user?.id;
           const isNotArtisan = response.data.artisanId !== user?.id;
-          setNotAssignedMe(isNotCreator && isNotArtisan);
+
+          // Vérifier aussi dans la liste DemandeArtisan (pour les estimations)
+          const isInArtisansList = response.data.artisans?.some(
+            (a) => a.userId === user?.id
+          );
+
+          setNotAssignedMe(isNotCreator && isNotArtisan && !isInArtisansList);
 
           console.log("🔍 Vérification d'accès:", {
             isCreator: response.data.createdById === user?.id,

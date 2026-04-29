@@ -269,6 +269,8 @@ import SubscriptionImmobilierPage from "./pages/Subscriptionimmobilierpage";
 import NouvelleAnnonceImmobilierPage from "./pages/Nouvelleannonceimmobilierpage";
 import MesAnnoncesPage from "./pages/Mesannoncespage";
 import PropertySell from "./pages/PropertySell";
+import MesEstimationsPage from "./pages/mon-compte/Mesestimationspage";
+import ListeDemandesEstimation from "./pages/pro/ListeDemandesEstimation";
 
 
 
@@ -919,9 +921,16 @@ const App = () => {
                         path="demandes-immobilier"
                         element={<ListeDemandesImmobilier />}
                       />
+
+                      <Route
+                        path="demandes-estimation"
+                        element={<ListeDemandesEstimation />}
+                      />
+
                       <Route path="products" element={<Products />} />
                       <Route path="demandes" element={<ArtisanDemandesPage />} />
                       <Route path="messages/:id" element={<MessagesLayout />} />
+                      <Route path="estimations/messages/:id" element={<MessagesLayout />} />
                       <Route path="profile" element={<Profile />} />
                       <Route path="settings" element={<Settings />} />
                       <Route path="harmonie" element={<HarmoniePage />} />
@@ -979,6 +988,7 @@ const App = () => {
                       <Route index element={<MonComptePage />} />
                       <Route path="payement" element={<PaiementPage />} />
                       <Route path="profil" element={<MonComptePage />} />
+
                       <Route path="reservation" element={<ReservationPage />} />
                       <Route path="demandes" element={<MesDemande />} />
                       <Route path="agenda" element={<AgendaPage />} />
@@ -987,17 +997,17 @@ const App = () => {
                       {/* AJOUTEZ CETTE ROUTE */}
                       <Route path="candidatures" element={<MesCandidatures />} />
 
-                      
-                       <Route
+
+                      <Route
                         path="subscription/user/payment"
                         element={<SubscriptionImmobilierPage />}
                       />
-                       <Route
+                      <Route
                         path="immobilier/nouvelle-annonce"
                         element={<NouvelleAnnonceImmobilierPage />}
                       />
-                     
-                       <Route
+
+                      <Route
                         path="immobilier/mes-annonces"
                         element={<MesAnnoncesPage />}
                       />
@@ -1023,6 +1033,7 @@ const App = () => {
                         element={<MesDemandesImmobilier />}
                       />
                       <Route path="mes-commandes" element={<UserOrders />} />
+                      <Route path="estimations" element={<MesEstimationsPage />} />
                       <Route
                         path="location-voiture"
                         element={<MesReservationsVehiculePage />}
@@ -1122,7 +1133,7 @@ const App = () => {
                       path="/art-et-creation/photographie/:categorySlug"
                       element={<ArtETCreation />}
                     />
-                  </Routes> 
+                  </Routes>
 
                   {/* Pop-up Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité. Nous allions expertise, innovation et passion pour vous offrir un service d'exception.globale */}
                   {user && user.role !== "admin" && (
